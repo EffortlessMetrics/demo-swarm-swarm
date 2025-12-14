@@ -1,0 +1,484 @@
+# CONTRACT_INVENTORY_V1
+# VALIDATION_RULE: flow_command_boundary
+# VALIDATION_RULE: agent_skill_declaration
+# VALIDATION_RULE: agent_enum_consistency
+# SCHEMA: FlowCommandBoundaryViolation
+# SCHEMA: AgentSkillDeclaration
+# SCHEMA: AgentEnumConsistency
+# SCHEMA: ClaudeMdSkillsTable
+
+# ==============================================================================
+# Documentation Ownership Contracts
+# ==============================================================================
+#
+# This run (align-doc-ownership) produces NO HTTP endpoints or database schemas.
+# Instead, we define "contracts" as structural validation patterns between
+# documentation layers:
+#
+#   Flow Commands  ->  Agent Docs  ->  Skill Docs
+#   (orchestration)    (behavior)      (CLI truth)
+#
+# These contracts are enforced by pack-check rules added in ST-004.
+#
+# Decision: OPT-002 (Pragmatic Enforcement) per ADR
+# ==============================================================================
+
+contract_version: 1.0.0
+contract_type: documentation-boundary-enforcement
+decision_ref: OPT-002
+
+# ------------------------------------------------------------------------------
+# Section 1: Flow Command Boundary Contract
+# ------------------------------------------------------------------------------
+# REQ-001: Flow commands MUST NOT contain skill plumbing.
+# Violation patterns detected by pack-check.
+
+flow_command_boundary:
+  description: |
+    Flow command files (.claude/commands/flow-*.md) must contain only
+    orchestration and routing content. They MUST NOT contain skill plumbing,
+    CLI invocation details, or implementation specifics.
+
+  applies_to:
+    glob: ".claude/commands/flow-*.md"
+    count: 6  # flows 1-6
+
+  violation_patterns:
+    # Pattern group 1: Direct demoswarm.sh invocation
+    - id: FLOW_VIO_001
+      name: demoswarm_invocation
+      pattern: "demoswarm\\.sh"
+      type: regex
+      severity: error
+      message: "Flow command must not invoke demoswarm.sh directly"
+      rationale: "Skill plumbing belongs in agent or skill docs, not flow commands"
+
+    # Pattern group 2: Skill-name invocations (as CLI arguments or tool names)
+    - id: FLOW_VIO_002
+      name: skill_name_invocation
+      pattern: "(runs-derive|runs-index|openq-tools|secrets-tools|test-runner|auto-linter|policy-runner)"
+      type: regex
+      context: code_block  # Only in code blocks, not prose references
+      severity: error
+      message: "Flow command must not invoke skill by name in code blocks"
+      rationale: "Skill invocation is agent responsibility, not flow orchestration"
+
+    # Pattern group 3: CLI flag syntax (strong indicator of implementation detail)
+    - id: FLOW_VIO_003
+      name: cli_flag_syntax
+      pattern: "--(file|prefix|run-id|run-dir|output|regex|type|status|format)"
+      type: regex
+      context: code_block  # Only in code blocks
+      severity: error
+      message: "Flow command must not contain CLI flag syntax"
+      rationale: "CLI flags indicate implementation detail; flows route, not invoke"
+
+  traceability:
+    requirements:
+      - REQ-001
+    acceptance_criteria:
+      - REQ-001-AC-1
+      - REQ-001-AC-2
+      - REQ-001-AC-3
+    nfrs:
+      - NFR-TEST-001-MET-3
+
+# ------------------------------------------------------------------------------
+# Section 2: Agent Skill Declaration Contract
+# ------------------------------------------------------------------------------
+# REQ-002: Agents using skills MUST have a Skills section.
+
+agent_skill_declaration:
+  description: |
+    Agent documentation files (.claude/agents/*.md) that invoke demoswarm.sh
+    or reference skill-specific CLI commands MUST include a "## Skills" section
+    declaring which skills they use.
+
+  applies_to:
+    glob: ".claude/agents/*.md"
+    count: 55  # per problem statement
+
+  detection_rule:
+    trigger_patterns:
+      # If agent contains any of these, Skills section is required
+      - "bash \\.claude/scripts/demoswarm\\.sh"
+      - "demoswarm\\.sh"
+      - "(runs-derive|runs-index|openq-tools|secrets-tools|test-runner|auto-linter|policy-runner)"
+
+    required_section:
+      heading: "## Skills"
+      heading_variations:
+        - "## Skills"
+        - "## Skills Used"
+        - "## Skill Dependencies"
+
+  skills_section_schema:
+    format: table_or_list
+
+    # Table format (preferred)
+    table_format:
+      columns:
+        - name: Skill
+          required: true
+          values: [runs-derive, runs-index, openq-tools, secrets-tools, test-runner, auto-linter, policy-runner]
+        - name: Purpose
+          required: true
+          max_length: 100  # brief, not CLI reference
+      example: |
+        | Skill | Purpose |
+        |-------|---------|
+        | runs-derive | Count markers and extract receipt data |
+        | runs-index | Update .runs/index.json status |
+
+    # Bullet format (acceptable)
+    list_format:
+      example: |
+        ## Skills
+        - **runs-derive**: Count markers and extract receipt data
+        - **runs-index**: Update .runs/index.json status
+
+  violation:
+    id: AGENT_VIO_001
+    name: missing_skills_section
+    severity: error
+    message: "Agent uses skills but lacks ## Skills section"
+
+  traceability:
+    requirements:
+      - REQ-002
+    acceptance_criteria:
+      - REQ-002-AC-3
+    nfrs:
+      - NFR-TEST-001-MET-3
+
+# ------------------------------------------------------------------------------
+# Section 3: Agent Enum Consistency Contract
+# ------------------------------------------------------------------------------
+# REQ-002: Agents MUST use canonical status/action enum values.
+
+agent_enum_consistency:
+  description: |
+    Agent documentation MUST use only the canonical Machine Summary enum values.
+    This ensures consistency across all 55 agents and enables automated validation.
+
+  applies_to:
+    glob: ".claude/agents/*.md"
+    count: 55
+
+  canonical_enums:
+    status:
+      values: [VERIFIED, UNVERIFIED, CANNOT_PROCEED]
+      description: "Machine Summary status field"
+      contract_ref: "CLAUDE.md ## Machine Summary Contract"
+
+    recommended_action:
+      values: [PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV]
+      description: "Machine Summary recommended_action field"
+      contract_ref: "CLAUDE.md ## Machine Summary Contract"
+
+  detection_rule:
+    context: "## Machine Summary"
+    fields_to_check:
+      - field: status
+        allowed: [VERIFIED, UNVERIFIED, CANNOT_PROCEED]
+      - field: recommended_action
+        allowed: [PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV]
+
+  violations:
+    - id: AGENT_VIO_002
+      name: invalid_status_enum
+      severity: error
+      message: "Agent uses non-canonical status value"
+      example_invalid: ["SUCCESS", "FAILED", "PASS", "COMPLETE"]
+
+    - id: AGENT_VIO_003
+      name: invalid_action_enum
+      severity: error
+      message: "Agent uses non-canonical recommended_action value"
+      example_invalid: ["CONTINUE", "STOP", "RETRY", "FAIL"]
+
+  traceability:
+    requirements:
+      - REQ-002
+    acceptance_criteria:
+      - REQ-002-AC-1
+      - REQ-002-AC-2
+    nfrs:
+      - NFR-TEST-001-MET-1
+
+# ------------------------------------------------------------------------------
+# Section 4: CLAUDE.md Skills Table Contract
+# ------------------------------------------------------------------------------
+# REQ-004: CLAUDE.md Skills table MUST be summary-level only.
+
+claudemd_skills_table:
+  description: |
+    The Skills table in CLAUDE.md serves as entry point and summary only.
+    It MUST NOT contain CLI flag details, command syntax, or implementation specifics.
+    Detailed CLI reference lives exclusively in skill docs.
+
+  applies_to:
+    file: "CLAUDE.md"
+    section: "## Skills"
+
+  format_constraints:
+    max_lines_per_skill: 2
+    columns:
+      - name: Skill
+        required: true
+        format: skill_name
+      - name: Purpose
+        required: true
+        max_length: 120  # very brief
+        forbidden_patterns:
+          - "--"  # CLI flags
+          - "demoswarm.sh"  # invocation detail
+          - ".claude/scripts/"  # path detail
+
+    example_valid: |
+      | Skill | Purpose |
+      |-------|---------|
+      | runs-derive | Read-only .runs derivations (counts, Machine Summary extraction, receipt reading) |
+      | runs-index | Write .runs/index.json updates (status, last_flow, updated_at) |
+
+    example_invalid: |
+      | Skill | Purpose |
+      |-------|---------|
+      | runs-derive | bash .claude/scripts/demoswarm.sh count pattern --file X --regex Y |
+
+  reference_requirement:
+    description: "CLAUDE.md should reference skill docs for detailed usage"
+    pattern: "See \\.\\.\\./SKILL\\.md"
+    recommendation: true  # not strictly required
+
+  traceability:
+    requirements:
+      - REQ-004
+    acceptance_criteria:
+      - REQ-004-AC-1
+      - REQ-004-AC-2
+      - REQ-004-AC-3
+
+# ------------------------------------------------------------------------------
+# Section 5: Agent-to-Skill Reference Contract
+# ------------------------------------------------------------------------------
+# REQ-002-AC-5, REQ-003: Agents reference skill docs, not duplicate CLI examples.
+
+agent_skill_reference:
+  description: |
+    Agents that invoke CLI commands SHOULD reference the skill doc
+    (e.g., "per runs-derive SKILL.md") rather than duplicating full CLI examples.
+    Under OPT-002 (Pragmatic Enforcement), minimal inline examples are allowed
+    when skill doc lacks coverage for the specific pattern.
+
+  pragmatic_exception:
+    description: |
+      Inline CLI examples in agent docs are permitted ONLY when:
+      1. The skill doc does not cover the specific invocation pattern, OR
+      2. The example is critical for understanding the agent's core operation
+         (e.g., cleanup agents that derive counts)
+
+    guidance: |
+      - Cleanup agents may retain brief examples for core operations
+      - Examples must not duplicate content that exists in skill docs
+      - When in doubt, reference skill doc
+
+  recommended_pattern:
+    description: "Agent references skill doc for CLI details"
+    example: |
+      Use the `runs-derive` skill per `.claude/skills/runs-derive/SKILL.md`
+      for all count operations.
+
+  traceability:
+    requirements:
+      - REQ-002
+      - REQ-003
+    acceptance_criteria:
+      - REQ-002-AC-5
+      - REQ-003-AC-3
+
+# ------------------------------------------------------------------------------
+# Section 6: Error Model
+# ------------------------------------------------------------------------------
+# Defines the consistent error shape for pack-check violations.
+
+error_model:
+  description: |
+    pack-check boundary enforcement produces consistent error output.
+    All violations follow this schema for machine parseability.
+
+  violation_schema:
+    type: object
+    required: [id, file, line, rule, severity, message]
+    properties:
+      id:
+        type: string
+        pattern: "^(FLOW|AGENT|CLAUDE)_VIO_\\d{3}$"
+        description: "Unique violation identifier"
+      file:
+        type: string
+        description: "Repo-root-relative path to violating file"
+      line:
+        type: integer
+        description: "Line number of violation (0 if file-level)"
+      rule:
+        type: string
+        enum: [flow_command_boundary, agent_skill_declaration, agent_enum_consistency, claudemd_skills_table]
+        description: "Rule that was violated"
+      severity:
+        type: string
+        enum: [error, warning]
+        description: "Violation severity"
+      message:
+        type: string
+        description: "Human-readable violation message"
+      context:
+        type: string
+        description: "Snippet of violating content (optional)"
+
+  example_output:
+    format: json
+    example: |
+      {
+        "violations": [
+          {
+            "id": "FLOW_VIO_001",
+            "file": ".claude/commands/flow-3-build.md",
+            "line": 42,
+            "rule": "flow_command_boundary",
+            "severity": "error",
+            "message": "Flow command must not invoke demoswarm.sh directly",
+            "context": "bash .claude/scripts/demoswarm.sh count pattern"
+          }
+        ],
+        "summary": {
+          "errors": 1,
+          "warnings": 0,
+          "files_checked": 6
+        }
+      }
+
+# ------------------------------------------------------------------------------
+# Section 7: Pack-Check Integration
+# ------------------------------------------------------------------------------
+# How these contracts integrate with pack-check tooling.
+
+pack_check_integration:
+  description: |
+    Boundary enforcement rules are added to pack-check (tools/demoswarm-pack-check/).
+    Per ASM-004, pack-check can be extended without major refactoring.
+
+  new_check_modules:
+    - name: flow_boundary
+      file: "src/checks/flow_boundary.rs"
+      description: "Scans flow commands for skill plumbing violations"
+
+    - name: agent_skills
+      file: "src/checks/agent_skills.rs"
+      description: "Verifies agents using skills have Skills section"
+
+    - name: agent_enums
+      file: "src/checks/agent_enums.rs"
+      description: "Validates Machine Summary enum values"
+
+  invocation:
+    command: "bash .claude/scripts/pack-check.sh"
+    new_flags:
+      - flag: "--check-boundaries"
+        description: "Run boundary enforcement checks"
+        default: true  # enabled by default after implementation
+
+  exit_codes:
+    0: "All checks pass"
+    1: "Violations found"
+    2: "Internal error"
+
+# ------------------------------------------------------------------------------
+# Traceability Matrix
+# ------------------------------------------------------------------------------
+
+traceability_matrix:
+  REQ-001:
+    contracts: [flow_command_boundary]
+    violations: [FLOW_VIO_001, FLOW_VIO_002, FLOW_VIO_003]
+
+  REQ-002:
+    contracts: [agent_skill_declaration, agent_enum_consistency, agent_skill_reference]
+    violations: [AGENT_VIO_001, AGENT_VIO_002, AGENT_VIO_003]
+
+  REQ-003:
+    contracts: [agent_skill_reference]
+    violations: []  # advisory, not blocking
+
+  REQ-004:
+    contracts: [claudemd_skills_table]
+    violations: []  # advisory initially, may become blocking
+
+  NFR-TEST-001:
+    mets:
+      MET-1: "pack-check exits 0 with all rules passing"
+      MET-3: "Negative tests verify violations are detected"
+
+# ------------------------------------------------------------------------------
+# Risk-to-Contract Mapping
+# ------------------------------------------------------------------------------
+
+risk_mitigation:
+  RSK-004:
+    description: "False positives in pack-check boundary rules"
+    mitigation_in_contracts:
+      - "FLOW_VIO_002 scoped to code_block context only"
+      - "FLOW_VIO_003 scoped to code_block context only"
+      - "Prose mentions of skill names do NOT trigger violations"
+      - "Negative test requirement in NFR-TEST-001-MET-3"
+
+# ------------------------------------------------------------------------------
+# Assumptions
+# ------------------------------------------------------------------------------
+
+assumptions:
+  - id: ASM-004
+    statement: "pack-check can be extended with boundary-enforcement checks without major refactoring"
+    impact_if_wrong: "May need to fall back to shell scripts for enforcement"
+    validated_by: "ST-004 implementation"
+
+  - id: ASM-005
+    statement: "Pack maintainers can exercise judgment on minimal examples consistently"
+    impact_if_wrong: "Inconsistent application of rules; may need to tighten to strict enforcement"
+    relevant_to: "agent_skill_reference pragmatic_exception"
+
+# ------------------------------------------------------------------------------
+# Machine Summary
+# ------------------------------------------------------------------------------
+
+# Inventory (machine countable)
+# - VALIDATION_RULE: flow_command_boundary
+# - VALIDATION_RULE: agent_skill_declaration
+# - VALIDATION_RULE: agent_enum_consistency
+# - VALIDATION_RULE: claudemd_skills_table
+# - VIOLATION: FLOW_VIO_001
+# - VIOLATION: FLOW_VIO_002
+# - VIOLATION: FLOW_VIO_003
+# - VIOLATION: AGENT_VIO_001
+# - VIOLATION: AGENT_VIO_002
+# - VIOLATION: AGENT_VIO_003
+# - SCHEMA: FlowCommandBoundaryViolation
+# - SCHEMA: AgentSkillDeclaration
+# - SCHEMA: AgentEnumConsistency
+# - SCHEMA: ClaudeMdSkillsTable
+# - SCHEMA: ViolationOutput
+
+machine_summary:
+  status: VERIFIED
+  recommended_action: PROCEED
+  route_to_flow: null
+  route_to_agent: null
+  blockers: []
+  missing_required: []
+  concerns:
+    - "OPT-002 pragmatic exception for agent examples requires judgment; may drift without guidelines"
+    - "CLAUDEMD violations are advisory initially; may need to become blocking"
+    - "pack-check Rust implementation assumed feasible per ASM-004"
+  validation_rules_count: 4
+  violation_types_count: 6
+  schemas_count: 5

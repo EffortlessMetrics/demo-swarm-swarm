@@ -1,0 +1,20 @@
+{
+  "run_id": "align-doc-ownership",
+  "canonical_key": "gh-49",
+  "aliases": ["align-doc-ownership", "gh-49"],
+  "task_key": null,
+  "task_title": "Normalize language and ownership boundaries across DemoSwarm pack",
+
+  "created_at": "2025-12-13T06:07:26Z",
+  "updated_at": "2025-12-13T11:25:32Z",
+  "iterations": 4,
+
+  "flows_started": ["signal", "plan", "build", "gate"],
+
+  "source": "fallback",
+  "issue_number": 49,
+  "pr_number": null,
+
+  "supersedes": null,
+  "related_runs": []
+}

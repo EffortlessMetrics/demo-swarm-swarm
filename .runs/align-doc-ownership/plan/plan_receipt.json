@@ -1,0 +1,56 @@
+{
+  "run_id": "align-doc-ownership",
+  "flow": "plan",
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [],
+
+  "counts": {
+    "design_options": 3,
+    "subtasks_total": 9,
+    "open_questions": 4,
+    "contract_endpoints": null,
+    "test_plan_entries": 31
+  },
+
+  "quality_gates": {
+    "design_critic": "VERIFIED",
+    "policy_analyst": "VERIFIED"
+  },
+
+  "decision_spine": {
+    "status": "VERIFIED",
+    "design_options": {
+      "has_machine_summary": true,
+      "status": "VERIFIED",
+      "recommendation": "OPT-002",
+      "confidence": "High"
+    },
+    "adr": {
+      "has_machine_summary": true,
+      "status": "VERIFIED",
+      "chosen_option": "OPT-002",
+      "drivers_total": 6
+    }
+  },
+
+  "key_artifacts": [
+    "design_options.md",
+    "adr.md",
+    "design_validation.md",
+    "test_plan.md",
+    "work_plan.md",
+    "policy_analysis.md",
+    "impact_map.json"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-13T07:36:17Z"
+}

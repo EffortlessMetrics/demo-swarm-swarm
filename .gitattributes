@@ -1,0 +1,9 @@
+# Force LF endings for shell scripts
+*.sh text eol=lf
+.claude/scripts/* text eol=lf
+
+# Other common files that should use LF
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf

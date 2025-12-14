@@ -1,0 +1,64 @@
+name: Pack CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check portable .claude repo shape
+        run: python scripts/check_portable_claude.py
+
+      - name: Lint .claude frontmatter
+        run: python scripts/lint_frontmatter.py
+
+  pack-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run pack self-check
+        run: bash .claude/scripts/pack-check.sh --no-color
+
+  demoswarm-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install demoswarm CLI
+        run: cargo install --path tools/demoswarm-runs-tools --root .demoswarm
+
+      - name: Smoke test - time command
+        run: bash .claude/scripts/demoswarm.sh time now
+
+      - name: Smoke test - count command
+        run: bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
+
+  doc-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for doc drift
+        run: bash scripts/check-doc-drift.sh

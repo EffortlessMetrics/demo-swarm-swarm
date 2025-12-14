@@ -1,0 +1,56 @@
+{
+  "schema_version": "gate_receipt_v1",
+  "run_id": "align-doc-ownership",
+  "flow": "gate",
+
+  "status": "UNVERIFIED",
+  "recommended_action": "BOUNCE",
+  "route_to_flow": 3,
+  "route_to_agent": "fixer",
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [
+    "MECH-001: Rust formatting violations (9 files need cargo fmt)"
+  ],
+  "concerns": [
+    "receipt_audit status UNVERIFIED (self_reviewer) - non-blocking for documentation run",
+    "mutation_score null - explicitly N/A per test plan",
+    "build_receipt.json inaccessible - cannot verify binding; gate artifacts are VERIFIED",
+    "REQ readiness UNKNOWN due to missing priority markers and inaccessible receipt"
+  ],
+
+  "merge_verdict": "BOUNCE",
+
+  "counts": {
+    "receipt_checks_total": null,
+    "receipt_checks_passed": null,
+    "contract_violations": 0,
+    "security_findings": 0,
+    "policy_violations": 0,
+    "coverage_line_percent": null,
+    "coverage_branch_percent": null
+  },
+
+  "quality_gates": {
+    "merge_decider": "VERIFIED",
+    "receipt_audit": "UNVERIFIED",
+    "contract_compliance": "VERIFIED",
+    "security_scan": "VERIFIED",
+    "coverage_audit": "VERIFIED"
+  },
+
+  "key_artifacts": [
+    "merge_decision.md",
+    "receipt_audit.md",
+    "contract_compliance.md",
+    "security_scan.md",
+    "coverage_audit.md",
+    "policy_analysis.md",
+    "risk_assessment.md",
+    "gate_fix_summary.md"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-13T11:40:10Z"
+}

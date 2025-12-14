@@ -1,0 +1,26 @@
+# Rust / Cargo
+**/target/
+*.pdb
+
+# DemoSwarm tool installs (repo-local)
+.demoswarm/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Windows device-name artifact (often from `2>nul` misuse in bash)
+nul
+**/nul

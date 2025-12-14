@@ -1,0 +1,260 @@
+{
+  "manifest_version": 2,
+  "run_id": "align-doc-ownership",
+  "generated_at": null,
+
+  "machine_summary": {
+    "status": "VERIFIED",
+    "recommended_action": "PROCEED",
+    "route_to_flow": null,
+    "route_to_agent": null,
+    "blockers": [],
+    "missing_required": [],
+    "concerns": [
+      "6 subtasks all at status TODO; selected ST-001 as first with no dependencies",
+      "ST-001 through ST-003 and ST-005 can run in parallel per work_plan.md"
+    ]
+  },
+
+  "subtask": {
+    "selector": "auto",
+    "resolution_source": "subtask_index_auto",
+    "id": "ST-001",
+    "title": "Align Flow 1 (Signal) documentation",
+    "status": "TODO",
+    "scope_summary": "Remove skill plumbing from flow-1-signal.md and ensure all Flow 1 agents (12 agents) have consistent status/action enums, Skills sections where needed (signal-cleanup, clarifier), and skill doc references instead of CLI duplication.",
+    "acceptance_criteria": [
+      "flow-1-signal.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)",
+      "All Flow 1 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)",
+      "All Flow 1 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)",
+      "signal-cleanup.md has Skills section listing runs-derive, runs-index",
+      "clarifier.md has Skills section listing openq-tools",
+      "Agent docs reference skill docs instead of duplicating CLI examples"
+    ],
+    "depends_on": [],
+    "touches": [
+      ".claude/commands/flow-1-signal.md",
+      ".claude/agents/signal-*.md",
+      ".claude/agents/problem-framer.md",
+      ".claude/agents/requirements-*.md",
+      ".claude/agents/bdd-*.md",
+      ".claude/agents/scope-assessor.md",
+      ".claude/agents/clarifier.md",
+      ".claude/agents/risk-analyst.md"
+    ],
+    "planned_tests": [
+      "pack-check passes for Flow 1 files",
+      "doc-drift passes for Flow 1 files"
+    ],
+    "planned_observability": [],
+    "estimate": "M"
+  },
+
+  "requirements": {
+    "req_ids": ["REQ-001", "REQ-002", "REQ-005"],
+    "nfr_ids": ["NFR-MAINT-001", "NFR-REGR-001"]
+  },
+
+  "inputs_read": [
+    ".runs/align-doc-ownership/plan/subtasks.yaml",
+    ".runs/align-doc-ownership/plan/work_plan.md",
+    ".runs/align-doc-ownership/plan/adr.md",
+    ".runs/align-doc-ownership/signal/requirements.md",
+    ".runs/align-doc-ownership/run_meta.json"
+  ],
+
+  "paths": {
+    "specs": [
+      ".runs/align-doc-ownership/plan/adr.md",
+      ".runs/align-doc-ownership/plan/work_plan.md",
+      ".runs/align-doc-ownership/plan/subtasks.yaml",
+      ".runs/align-doc-ownership/signal/requirements.md",
+      ".runs/align-doc-ownership/signal/features/doc-ownership.feature"
+    ],
+    "code": [],
+    "tests": [],
+    "docs": [
+      ".claude/commands/flow-1-signal.md",
+      ".claude/agents/signal-run-prep.md",
+      ".claude/agents/signal-normalizer.md",
+      ".claude/agents/problem-framer.md",
+      ".claude/agents/requirements-author.md",
+      ".claude/agents/requirements-critic.md",
+      ".claude/agents/bdd-author.md",
+      ".claude/agents/bdd-critic.md",
+      ".claude/agents/scope-assessor.md",
+      ".claude/agents/signal-cleanup.md",
+      ".claude/agents/clarifier.md",
+      ".claude/agents/risk-analyst.md",
+      ".claude/skills/runs-derive/SKILL.md",
+      ".claude/skills/runs-index/SKILL.md",
+      ".claude/skills/openq-tools/SKILL.md"
+    ],
+    "allow_new_files_under": []
+  },
+
+  "unresolved_patterns": [],
+
+  "rationale": [
+    {
+      "path": ".runs/align-doc-ownership/plan/adr.md",
+      "type": "spec",
+      "reason": "Defines OPT-002 Pragmatic Enforcement decision; guides what changes are in scope",
+      "signals": ["OPT-002", "boundary enforcement", "skill plumbing"],
+      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/align-doc-ownership/plan/work_plan.md",
+      "type": "spec",
+      "reason": "Defines subtask scope, acceptance criteria, and parallelization strategy",
+      "signals": ["ST-001", "Flow 1 agents", "acceptance criteria"],
+      "req_refs": ["REQ-005"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/align-doc-ownership/plan/subtasks.yaml",
+      "type": "spec",
+      "reason": "Machine-canonical subtask index with exact touches, tests, and scope_hints",
+      "signals": ["subtasks_v1", "touches", "scope_hints"],
+      "req_refs": ["REQ-005"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/align-doc-ownership/signal/requirements.md",
+      "type": "spec",
+      "reason": "Defines REQ-001 (flow boundary), REQ-002 (agent consistency), acceptance criteria",
+      "signals": ["REQ-001", "REQ-002", "canonical enums"],
+      "req_refs": ["REQ-001", "REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/align-doc-ownership/signal/features/doc-ownership.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for documentation ownership alignment",
+      "signals": ["BDD", "doc-ownership"],
+      "req_refs": ["REQ-001", "REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/commands/flow-1-signal.md",
+      "type": "doc",
+      "reason": "Primary flow command to clean of skill plumbing per REQ-001",
+      "signals": ["flow-1-signal", "orchestration", "demoswarm.sh removal"],
+      "req_refs": ["REQ-001"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/signal-run-prep.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["signal-run-prep", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/signal-normalizer.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["signal-normalizer", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/problem-framer.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["problem-framer", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/requirements-author.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["requirements-author", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/requirements-critic.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["requirements-critic", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/bdd-author.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["bdd-author", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/bdd-critic.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["bdd-critic", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/scope-assessor.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["scope-assessor", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/signal-cleanup.md",
+      "type": "doc",
+      "reason": "Flow 1 cleanup agent; needs Skills section for runs-derive, runs-index per acceptance criteria",
+      "signals": ["signal-cleanup", "Skills section", "runs-derive", "runs-index"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/clarifier.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs Skills section for openq-tools per acceptance criteria",
+      "signals": ["clarifier", "Skills section", "openq-tools"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/agents/risk-analyst.md",
+      "type": "doc",
+      "reason": "Flow 1 agent; needs enum consistency check per REQ-002",
+      "signals": ["risk-analyst", "status enum", "action enum"],
+      "req_refs": ["REQ-002"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/skills/runs-derive/SKILL.md",
+      "type": "doc",
+      "reason": "Reference for signal-cleanup Skills section; CLI truth source",
+      "signals": ["runs-derive", "CLI reference", "skill doc"],
+      "req_refs": ["REQ-003"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/skills/runs-index/SKILL.md",
+      "type": "doc",
+      "reason": "Reference for signal-cleanup Skills section; CLI truth source",
+      "signals": ["runs-index", "CLI reference", "skill doc"],
+      "req_refs": ["REQ-003"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".claude/skills/openq-tools/SKILL.md",
+      "type": "doc",
+      "reason": "Reference for clarifier Skills section; CLI truth source",
+      "signals": ["openq-tools", "CLI reference", "skill doc"],
+      "req_refs": ["REQ-003"],
+      "source": "subtask_index"
+    }
+  ]
+}

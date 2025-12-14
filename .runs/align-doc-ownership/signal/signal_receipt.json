@@ -1,0 +1,43 @@
+{
+  "run_id": "align-doc-ownership",
+  "flow": "signal",
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [],
+
+  "counts": {
+    "functional_requirements": 7,
+    "non_functional_requirements": 3,
+    "bdd_scenarios": 31,
+    "open_questions": 6,
+    "risks": {
+      "critical": 0,
+      "high": 1,
+      "medium": 3,
+      "low": 2
+    }
+  },
+
+  "quality_gates": {
+    "requirements_critic": "VERIFIED",
+    "bdd_critic": "VERIFIED"
+  },
+
+  "key_artifacts": [
+    "requirements.md",
+    "features/*.feature",
+    "open_questions.md",
+    "early_risks.md",
+    "risk_assessment.md"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-13T06:34:38Z"
+}

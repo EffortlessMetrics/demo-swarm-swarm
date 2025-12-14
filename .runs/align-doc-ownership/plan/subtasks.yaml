@@ -1,0 +1,279 @@
+schema_version: subtasks_v1
+subtasks:
+  - id: ST-001
+    title: "Align Flow 1 (Signal) documentation"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-001", "REQ-002", "REQ-005"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-1-signal.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 1 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)"
+      - "All Flow 1 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)"
+      - "signal-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "clarifier.md has Skills section listing openq-tools"
+      - "Agent docs reference skill docs instead of duplicating CLI examples"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-1-signal.md"
+        - ".claude/agents/signal-run-prep.md"
+        - ".claude/agents/signal-normalizer.md"
+        - ".claude/agents/problem-framer.md"
+        - ".claude/agents/requirements-author.md"
+        - ".claude/agents/requirements-critic.md"
+        - ".claude/agents/bdd-author.md"
+        - ".claude/agents/bdd-critic.md"
+        - ".claude/agents/scope-assessor.md"
+        - ".claude/agents/signal-cleanup.md"
+        - ".claude/agents/clarifier.md"
+        - ".claude/agents/risk-analyst.md"
+      allow_new_files_under: []
+    touches:
+      - ".claude/commands/flow-1-signal.md"
+      - ".claude/agents/signal-*.md"
+      - ".claude/agents/problem-framer.md"
+      - ".claude/agents/requirements-*.md"
+      - ".claude/agents/bdd-*.md"
+      - ".claude/agents/scope-assessor.md"
+      - ".claude/agents/clarifier.md"
+      - ".claude/agents/risk-analyst.md"
+    tests:
+      - "pack-check passes for Flow 1 files"
+      - "doc-drift passes for Flow 1 files"
+    observability: []
+    estimate: M
+
+  - id: ST-002
+    title: "Align Flow 2 (Plan) documentation"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-001", "REQ-002", "REQ-005"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-2-plan.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 2 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)"
+      - "All Flow 2 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)"
+      - "plan-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "Agent docs reference skill docs instead of duplicating CLI examples"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-2-plan.md"
+        - ".claude/agents/run-prep.md"
+        - ".claude/agents/impact-analyzer.md"
+        - ".claude/agents/design-optioneer.md"
+        - ".claude/agents/adr-author.md"
+        - ".claude/agents/interface-designer.md"
+        - ".claude/agents/observability-designer.md"
+        - ".claude/agents/test-strategist.md"
+        - ".claude/agents/work-planner.md"
+        - ".claude/agents/design-critic.md"
+        - ".claude/agents/policy-analyst.md"
+        - ".claude/agents/plan-cleanup.md"
+      allow_new_files_under: []
+    touches:
+      - ".claude/commands/flow-2-plan.md"
+      - ".claude/agents/run-prep.md"
+      - ".claude/agents/impact-analyzer.md"
+      - ".claude/agents/design-optioneer.md"
+      - ".claude/agents/adr-author.md"
+      - ".claude/agents/interface-designer.md"
+      - ".claude/agents/observability-designer.md"
+      - ".claude/agents/test-strategist.md"
+      - ".claude/agents/work-planner.md"
+      - ".claude/agents/design-critic.md"
+      - ".claude/agents/policy-analyst.md"
+      - ".claude/agents/plan-cleanup.md"
+    tests:
+      - "pack-check passes for Flow 2 files"
+      - "doc-drift passes for Flow 2 files"
+    observability: []
+    estimate: M
+
+  - id: ST-003
+    title: "Align Flow 3 (Build) documentation"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-001", "REQ-002", "REQ-005"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-3-build.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 3 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)"
+      - "All Flow 3 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)"
+      - "build-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "context-loader.md, mutator.md, fixer.md, self-reviewer.md updated for consistency"
+      - "Agent docs reference skill docs instead of duplicating CLI examples"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-3-build.md"
+        - ".claude/agents/context-loader.md"
+        - ".claude/agents/test-author.md"
+        - ".claude/agents/test-critic.md"
+        - ".claude/agents/code-implementer.md"
+        - ".claude/agents/code-critic.md"
+        - ".claude/agents/mutator.md"
+        - ".claude/agents/fixer.md"
+        - ".claude/agents/doc-writer.md"
+        - ".claude/agents/self-reviewer.md"
+        - ".claude/agents/build-cleanup.md"
+      allow_new_files_under: []
+    touches:
+      - ".claude/commands/flow-3-build.md"
+      - ".claude/agents/context-loader.md"
+      - ".claude/agents/test-*.md"
+      - ".claude/agents/code-*.md"
+      - ".claude/agents/mutator.md"
+      - ".claude/agents/fixer.md"
+      - ".claude/agents/doc-writer.md"
+      - ".claude/agents/self-reviewer.md"
+      - ".claude/agents/build-cleanup.md"
+    tests:
+      - "pack-check passes for Flow 3 files"
+      - "doc-drift passes for Flow 3 files"
+    observability: []
+    estimate: M
+
+  - id: ST-004
+    title: "Align Flow 4 (Gate) + cross-cutting enforcement + CLAUDE.md"
+    status: TODO
+    depends_on: ["ST-001", "ST-002", "ST-003"]
+    req_ids: ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-TEST-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-4-gate.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 4 agents use canonical status/action enums"
+      - "gate-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "secrets-sanitizer.md has Skills section listing secrets-tools"
+      - "pack-check extended with boundary enforcement rules"
+      - "pack-check detects skill plumbing in flow commands"
+      - "pack-check detects missing Skills sections in agents using skills"
+      - "pack-check detects non-canonical enum values in agent docs"
+      - "CLAUDE.md Skills table normalized to summary-level (no flag details)"
+      - "CLAUDE.md references skill docs for detailed usage"
+    scope_hints:
+      code_roots:
+        - "tools/demoswarm-pack-check/src/checks/"
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-4-gate.md"
+        - ".claude/agents/receipt-checker.md"
+        - ".claude/agents/contract-enforcer.md"
+        - ".claude/agents/security-scanner.md"
+        - ".claude/agents/coverage-enforcer.md"
+        - ".claude/agents/gate-fixer.md"
+        - ".claude/agents/merge-decider.md"
+        - ".claude/agents/gate-cleanup.md"
+        - ".claude/agents/repo-operator.md"
+        - ".claude/agents/secrets-sanitizer.md"
+        - ".claude/agents/gh-issue-manager.md"
+        - ".claude/agents/gh-reporter.md"
+        - ".claude/agents/gh-researcher.md"
+        - ".claude/agents/pack-customizer.md"
+        - "CLAUDE.md"
+      allow_new_files_under:
+        - "tools/demoswarm-pack-check/src/checks/"
+    touches:
+      - ".claude/commands/flow-4-gate.md"
+      - ".claude/agents/receipt-checker.md"
+      - ".claude/agents/contract-enforcer.md"
+      - ".claude/agents/security-scanner.md"
+      - ".claude/agents/coverage-enforcer.md"
+      - ".claude/agents/gate-*.md"
+      - ".claude/agents/merge-decider.md"
+      - ".claude/agents/repo-operator.md"
+      - ".claude/agents/secrets-sanitizer.md"
+      - ".claude/agents/gh-*.md"
+      - ".claude/agents/pack-customizer.md"
+      - "CLAUDE.md"
+      - "tools/demoswarm-pack-check/src/checks/*.rs"
+      - "tools/demoswarm-pack-check/src/checks/mod.rs"
+      - "scripts/check-doc-drift.sh"
+    tests:
+      - "pack-check passes with new boundary rules"
+      - "pack-check correctly fails on known violations (negative test)"
+      - "doc-drift passes"
+    observability: []
+    estimate: L
+
+  - id: ST-005
+    title: "Align Flow 5 (Deploy) documentation"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-001", "REQ-002", "REQ-005"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-5-deploy.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 5 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)"
+      - "All Flow 5 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)"
+      - "deploy-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "Clean separation of release ops vs reporting ops documented"
+      - "Agent docs reference skill docs instead of duplicating CLI examples"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-5-deploy.md"
+        - ".claude/agents/deploy-monitor.md"
+        - ".claude/agents/smoke-verifier.md"
+        - ".claude/agents/deploy-decider.md"
+        - ".claude/agents/deploy-cleanup.md"
+      allow_new_files_under: []
+    touches:
+      - ".claude/commands/flow-5-deploy.md"
+      - ".claude/agents/deploy-*.md"
+      - ".claude/agents/smoke-verifier.md"
+    tests:
+      - "pack-check passes for Flow 5 files"
+      - "doc-drift passes for Flow 5 files"
+    observability: []
+    estimate: S
+
+  - id: ST-006
+    title: "Align Flow 6 (Wisdom) + validation run"
+    status: TODO
+    depends_on: ["ST-001", "ST-002", "ST-003", "ST-004", "ST-005"]
+    req_ids: ["REQ-001", "REQ-002", "REQ-005", "REQ-006"]
+    nfr_ids: ["NFR-MAINT-001", "NFR-TEST-001", "NFR-REGR-001"]
+    acceptance_criteria:
+      - "flow-6-wisdom.md contains no skill plumbing (demoswarm.sh, skill names, CLI flags)"
+      - "All Flow 6 agents use canonical status enums (VERIFIED, UNVERIFIED, CANNOT_PROCEED)"
+      - "All Flow 6 agents use canonical action enums (PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV)"
+      - "wisdom-cleanup.md has Skills section listing runs-derive, runs-index"
+      - "Crisp stable marker contracts documented"
+      - "Toy Run A completes flows 1-4 successfully"
+      - "Toy Run B completes flows 1-4 successfully"
+      - "Validation log entry recorded in docs/maintainers/validation-log.md"
+      - "pack-check and doc-drift pass before validation log entry"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths:
+        - ".claude/commands/flow-6-wisdom.md"
+        - ".claude/agents/artifact-auditor.md"
+        - ".claude/agents/regression-analyst.md"
+        - ".claude/agents/flow-historian.md"
+        - ".claude/agents/learning-synthesizer.md"
+        - ".claude/agents/feedback-applier.md"
+        - ".claude/agents/wisdom-cleanup.md"
+        - "docs/maintainers/validation-log.md"
+      allow_new_files_under: []
+    touches:
+      - ".claude/commands/flow-6-wisdom.md"
+      - ".claude/agents/artifact-auditor.md"
+      - ".claude/agents/regression-analyst.md"
+      - ".claude/agents/flow-historian.md"
+      - ".claude/agents/learning-synthesizer.md"
+      - ".claude/agents/feedback-applier.md"
+      - ".claude/agents/wisdom-cleanup.md"
+      - "docs/maintainers/validation-log.md"
+    tests:
+      - "pack-check passes for Flow 6 files"
+      - "doc-drift passes for Flow 6 files"
+      - "Toy Run A/B validation succeeds"
+    observability: []
+    estimate: M

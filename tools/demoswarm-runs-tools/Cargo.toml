@@ -1,0 +1,23 @@
+[package]
+name = "demoswarm-runs-tools"
+version = "1.0.1"
+edition = "2024"
+rust-version = "1.89"
+description = "Deterministic helpers for .runs/ operations (counts, extraction, index updates)."
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["claude", "agents", "workflow", "sdlc"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "demoswarm"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.100"
+clap = { version = "4.5.53", features = ["derive"] }
+regex = "1.12.2"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+chrono = { version = "0.4.42", features = ["serde"] }
+tempfile = "3.19.1"

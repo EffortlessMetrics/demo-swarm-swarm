@@ -1,0 +1,48 @@
+{
+  "run_id": "align-doc-ownership",
+  "flow": "build",
+
+  "status": "UNVERIFIED",
+  "recommended_action": "RERUN",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [
+    "self_reviewer status is UNVERIFIED"
+  ],
+  "concerns": [
+    "mutation_score could not be extracted (no 'Mutation Score:' line found in mutation_report.md)"
+  ],
+
+  "counts": {
+    "tests_written": 27,
+    "files_changed": 22,
+    "mutation_score": null,
+    "open_questions": 5
+  },
+
+  "quality_gates": {
+    "test_critic": "VERIFIED",
+    "code_critic": "VERIFIED",
+    "self_reviewer": "UNVERIFIED"
+  },
+
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_critique.md",
+    "code_critique.md",
+    "mutation_report.md",
+    "fix_summary.md",
+    "doc_updates.md",
+    "open_questions.md",
+    "flow_plan.md",
+    "subtask_context_manifest.json"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-13T08:25:02Z"
+}
