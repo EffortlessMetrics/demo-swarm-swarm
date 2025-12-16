@@ -47,6 +47,7 @@ Primary:
 
 Cross-check surface (best-effort; missing => UNVERIFIED, not CANNOT_PROCEED):
 
+* `.runs/<run-id>/build/test_execution.md` (canonical test run)
 * `.runs/<run-id>/build/test_critique.md` (canonical pytest summary + counts)
 * `.runs/<run-id>/build/code_critique.md`
 * `.runs/<run-id>/build/test_changes_summary.md`
@@ -117,30 +118,32 @@ If `recommended_action != BOUNCE`, both `route_to_flow` and `route_to_agent` sho
 
 The receipt must contain test grounding and critic grounding:
 
-Tests (one of these must be present):
+Tests (all required):
 
-* a canonical pytest summary line (string), AND counts for passed/failed/skipped/xfailed/xpassed
-* OR a pointer to where that canonical summary lives (for example, `pytest_summary_source: test_critique.md`) plus counts copied from it
+* `tests.canonical_summary` (string) from the canonical summary line
+* counts for `passed/failed/skipped/xfailed/xpassed`
+* `tests.summary_source` identifying `build/test_execution.md`
+* `tests.metrics_binding` present and non-placeholder (e.g., `test_execution:test-runner`)
 
 Critics:
 
 * `critic_verdicts.test_critic` (VERIFIED|UNVERIFIED|CANNOT_PROCEED|null)
 * `critic_verdicts.code_critic` (VERIFIED|UNVERIFIED|CANNOT_PROCEED|null)
 
-If the receipt claims tests are bound to a source, it must say so explicitly (for example, `metrics_binding: pytest`, or `tests.metrics_binding: pytest`). If it admits hard_coded or unknown binding, that is UNVERIFIED.
+If the receipt admits an unknown/hard_coded metrics binding, treat as UNVERIFIED.
 
 ### D) Cross-checks (best-effort but strict when available)
 
 If the following inputs exist (direct or git-show), they must match:
 
-* If `test_critique.md` exists:
-  * Receipt pytest summary must equal the one in `test_critique.md` (verbatim line match preferred)
-  * Receipt pass/fail/x* counts must match `test_critique.md` Machine Summary coverage counts
-
+* If `test_execution.md` exists:
+  * Receipt `tests.canonical_summary` must match the canonical summary line
+  * Receipt test counts must match the `test_summary.*` fields in its Machine Summary block
+* If `test_critique.md` exists: mismatches are concerns (earlier microloop); do not block unless they indicate placeholder leakage.
 * If `code_critique.md` exists:
   * Receipt `critic_verdicts.code_critic` must match the code-critic Machine Summary status
 
-If these files are missing, list them under `missing_required` (for your audit), and set overall status UNVERIFIED unless everything else is perfectly validated.
+If `test_execution.md` is missing, list it under `missing_required` and set overall status UNVERIFIED.
 
 ### E) Snapshot sanity (optional; do not fail on this alone)
 

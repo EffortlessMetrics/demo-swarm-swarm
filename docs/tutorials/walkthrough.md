@@ -102,10 +102,10 @@ Open the sandbox repo in Claude Code. It will discover:
 
 **What happens:**
 1. `test-author` writes tests
-2. `test-critic` reviews (VERIFIED/UNVERIFIED)
-3. Loop until `can_further_iteration_help: no`
+2. `test-critic` reviews and returns `recommended_action`
+3. Route on `recommended_action` (RERUN/BOUNCE/ESCALATE/PROCEED); use `can_further_iteration_help` only as a tie-breaker when no action is set
 4. `code-implementer` writes code
-5. `code-critic` reviews
+5. `code-critic` reviews (same routing rules)
 6. `self-reviewer` produces final review
 7. `build-cleanup` computes the receipt
 8. `repo-operator` commits changes
@@ -251,7 +251,10 @@ Flows still run locally—GitHub posting is optional. Local artifacts are always
 
 ### "Critic keeps bouncing"
 
-Check the critic's output for `can_further_iteration_help: no`. If it says yes but issues aren't fixable, manually proceed.
+Route on the critic's `recommended_action`:
+- `BOUNCE` → follow `route_to_flow/route_to_agent`
+- `RERUN` → loop once more; if fixes are impossible, treat as `ESCALATE` with crisp blockers
+- If no `recommended_action`, use `can_further_iteration_help` as a tie-breaker (`no` → proceed)
 
 ---
 

@@ -13,6 +13,7 @@ mod commands;
 mod output;
 
 use commands::{Cli, Command};
+use output::print_null;
 
 /// Multicall dispatch table: maps argv[0] suffix to subcommand.
 const MULTICALL_MAP: &[(&str, &str)] = &[
@@ -43,8 +44,14 @@ fn main() -> ExitCode {
     }
 
     // Standard clap parsing
-    let cli = Cli::parse();
-    run_cli(cli)
+    match Cli::try_parse() {
+        Ok(cli) => run_cli(cli),
+        Err(e) => {
+            eprintln!("{e}");
+            print_null();
+            exit_code_for_mode()
+        }
+    }
 }
 
 /// Check if we're being invoked via multicall (argv[0] matches a helper name).
@@ -80,7 +87,8 @@ fn run_with_args(args: &[String]) -> ExitCode {
         Ok(cli) => run_cli(cli),
         Err(e) => {
             eprintln!("{e}");
-            ExitCode::from(2)
+            print_null();
+            exit_code_for_mode()
         }
     }
 }
@@ -90,7 +98,8 @@ fn run_cli(cli: Cli) -> ExitCode {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("Error: {e:#}");
-            ExitCode::from(2)
+            print_null();
+            exit_code_for_mode()
         }
     }
 }
@@ -110,4 +119,19 @@ fn execute_command(cmd: Command) -> anyhow::Result<()> {
         Command::Openq(sub) => commands::openq::run(sub),
         Command::Secrets(sub) => commands::secrets::run(sub),
     }
+}
+
+fn exit_code_for_mode() -> ExitCode {
+    if strict_mode() {
+        ExitCode::from(2)
+    } else {
+        ExitCode::SUCCESS
+    }
+}
+
+fn strict_mode() -> bool {
+    matches!(env::var("DEMOSWARM_STRICT"), Ok(val) if {
+        let lower = val.to_ascii_lowercase();
+        lower == "1" || lower == "true" || lower == "yes"
+    })
 }

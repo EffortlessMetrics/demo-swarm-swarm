@@ -70,7 +70,7 @@ route_to_agent: <agent-name> | null
 ```yaml
 ## Repo Operator Result
 operation: checkpoint | build | stage | merge | other
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | BLOCKED
+status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
 anomaly_paths: []
@@ -109,7 +109,7 @@ severity_summary:                      # critics/verifiers
 | Domain | Values | Used by |
 |--------|--------|---------|
 | Flow/Agent Status | `VERIFIED \| UNVERIFIED \| CANNOT_PROCEED` | Machine Summary, receipts |
-| Repo Operator Status | `COMPLETED \| COMPLETED_WITH_ANOMALY \| FAILED \| BLOCKED` | Repo Operator Result |
+| Repo Operator Status | `COMPLETED \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED` | Repo Operator Result |
 | Secrets Sanitizer Status | `CLEAN \| FIXED \| BLOCKED_PUBLISH` | Gate Result |
 | Gate Merge Verdict | `MERGE \| BOUNCE \| ESCALATE` | `merge_decision.md` |
 | Deploy Verdict | `STABLE \| NOT_DEPLOYED \| BLOCKED_BY_GATE` | `deployment_decision.md` |
@@ -134,6 +134,12 @@ severity_summary:                      # critics/verifiers
 ```
 
 Receipts are mechanical; counts are derived via `demoswarm` CLI (not estimated).
+
+Receipt writers may include a `schema_version` field for compatibility (e.g., `build_receipt_v1`).
+
+### Test count definitions
+
+`xpassed` counts tests marked expected-to-fail (xfail) that actually passed. If unknown, keep as `null`.
 
 ---
 
@@ -184,8 +190,8 @@ Used in `test_changes_summary.md`:
 
 | Pattern | Regex | Example |
 |---------|-------|---------|
-| Test item | `^- TEST:` | `- TEST: unit test for auth` |
-| Test change | `^- TEST_CHANGE:` | `- TEST_CHANGE: updated fixture` |
+| Test file changed | `^- TEST_FILE_CHANGED:` | `- TEST_FILE_CHANGED: tests/auth_test.py` |
+| Test file added | `^- TEST_FILE_ADDED:` | `- TEST_FILE_ADDED: tests/test_auth_flow.py` |
 
 ### File markers
 
@@ -193,7 +199,8 @@ Used in `impl_changes_summary.md`:
 
 | Pattern | Regex | Example |
 |---------|-------|---------|
-| File changed | `^- FILE:` | `- FILE: src/auth.rs` |
+| File changed | `^- IMPL_FILE_CHANGED:` | `- IMPL_FILE_CHANGED: src/auth.rs` |
+| File added | `^- IMPL_FILE_ADDED:` | `- IMPL_FILE_ADDED: src/new_module.rs` |
 
 ### Inventory markers
 
@@ -283,18 +290,40 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 
 ```json
 {
+  "schema_version": "build_receipt_v1",
   "counts": {
     "tests_written": null,
     "files_changed": null,
     "mutation_score": null,
     "open_questions": null
   },
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": null,
+    "passed": null,
+    "failed": null,
+    "skipped": null,
+    "xfailed": null,
+    "xpassed": null,
+    "metrics_binding": "test_execution:test-runner"
+  },
+  "critic_verdicts": {
+    "test_critic": null,
+    "code_critic": null
+  },
   "quality_gates": {
     "test_critic": null,
     "code_critic": null,
     "self_reviewer": null
   },
-  "key_artifacts": ["self_review.md", "test_changes_summary.md", "impl_changes_summary.md"]
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_execution.md",
+    "test_critique.md",
+    "code_critique.md"
+  ]
 }
 ```
 

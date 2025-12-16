@@ -28,6 +28,9 @@ find_repo_root() {
 
 REPO_ROOT="$(find_repo_root)"
 
+# Unset DEMOSWARM_STRICT so inherited parent env can't change agent tool semantics.
+unset DEMOSWARM_STRICT
+
 # Build candidate list (check both unix and windows binary names)
 TOOL_CANDIDATES=(
   "$REPO_ROOT/.demoswarm/bin/demoswarm"

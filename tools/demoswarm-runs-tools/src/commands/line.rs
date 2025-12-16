@@ -7,6 +7,7 @@ use anyhow::Result;
 use clap::{Args, Subcommand};
 
 use crate::output::{print_null, print_scalar};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct LineCommand {
@@ -25,12 +26,16 @@ pub enum LineSubcommand {
         /// Line prefix (e.g., "Mutation Score:")
         #[arg(long)]
         prefix: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: LineCommand) -> Result<()> {
     match cmd.command {
-        LineSubcommand::Get { file, prefix } => extract_line_value(&file, &prefix),
+        LineSubcommand::Get { file, prefix, .. } => extract_line_value(&file, &prefix),
     }
 }
 

@@ -55,9 +55,9 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 | Marker | Pattern | Example |
 |--------|---------|---------|
-| Question ID | `[QID-<flow>-###]` | `[QID-SIG-001]` |
+| Question ID | `^- QID: OQ-<FLOW>-###` | `- QID: OQ-SIG-001` |
 
-Flow prefixes: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS`
+`<FLOW>` values: SIG, PLAN, BUILD, GAT, DEP, WIS
 
 ---
 
@@ -72,6 +72,17 @@ Flow prefixes: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS`
 | Contract item | `CE_*:` | `CE_API_HEALTH:` |
 | Coverage item | `COV_*:` | `COV_UNIT_HEALTH:` |
 | Dependency | `DEP_*:` | `DEP_AUTH_LIB:` |
+
+## Build inventory markers
+
+**Producer:** `code-implementer`, `test-author`
+
+| Marker | Pattern | Example |
+|--------|---------|---------|
+| Impl file changed | `^- IMPL_FILE_CHANGED:` | `- IMPL_FILE_CHANGED: src/auth.rs` |
+| Impl file added | `^- IMPL_FILE_ADDED:` | `- IMPL_FILE_ADDED: src/new_module.rs` |
+| Test file changed | `^- TEST_FILE_CHANGED:` | `- TEST_FILE_CHANGED: tests/auth_test.py` |
+| Test file added | `^- TEST_FILE_ADDED:` | `- TEST_FILE_ADDED: tests/test_auth_flow.py` |
 
 ---
 
@@ -147,7 +158,7 @@ bash .claude/scripts/demoswarm.sh count pattern \
 # Count open questions
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/<run-id>/signal/open_questions.md" \
-  --regex '\[QID-' \
+  --regex '^- QID: OQ-[A-Z]+-[0-9]{3}' \
   --null-if-missing
 
 # Count BDD scenarios

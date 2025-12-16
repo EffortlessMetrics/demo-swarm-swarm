@@ -163,6 +163,12 @@ coverage:
 
 ## Assumptions Made
 - <assumption + why + impact>
+
+## Inventory (machine countable)
+- TEST_FILE_CHANGED: <path>
+- TEST_FILE_ADDED: <path>
+
+*Add one line per item; omit markers that do not apply.*
 ```
 
 ## Status + Routing Rules

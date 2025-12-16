@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use serde_json::Value;
 
 use crate::output::{print_null, print_scalar};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct ReceiptCommand {
@@ -26,12 +27,16 @@ pub enum ReceiptSubcommand {
         /// Top-level key to extract
         #[arg(long)]
         key: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: ReceiptCommand) -> Result<()> {
     match cmd.command {
-        ReceiptSubcommand::Get { file, key } => read_receipt_field(&file, &key),
+        ReceiptSubcommand::Get { file, key, .. } => read_receipt_field(&file, &key),
     }
 }
 

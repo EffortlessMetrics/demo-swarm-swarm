@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use regex::Regex;
 
 use crate::output::{print_count, print_null};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct OpenapiCommand {
@@ -22,12 +23,16 @@ pub enum OpenapiSubcommand {
         /// OpenAPI YAML file
         #[arg(long)]
         file: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: OpenapiCommand) -> Result<()> {
     match cmd.command {
-        OpenapiSubcommand::CountPaths { file } => count_openapi_paths(&file),
+        OpenapiSubcommand::CountPaths { file, .. } => count_openapi_paths(&file),
     }
 }
 

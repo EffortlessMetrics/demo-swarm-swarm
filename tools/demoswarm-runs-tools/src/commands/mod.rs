@@ -2,6 +2,7 @@
 
 use clap::{Parser, Subcommand};
 
+pub mod common;
 pub mod count;
 pub mod index;
 pub mod inv;

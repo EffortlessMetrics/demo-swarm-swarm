@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use regex::Regex;
 
 use crate::output::{print_count, print_null, print_scalar};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct YamlCommand {
@@ -26,6 +27,10 @@ pub enum YamlSubcommand {
         /// YAML key to extract
         #[arg(long)]
         key: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 
     /// Count items matching pattern in YAML block
@@ -37,13 +42,21 @@ pub enum YamlSubcommand {
         /// Pattern to count within YAML
         #[arg(long)]
         item_regex: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: YamlCommand) -> Result<()> {
     match cmd.command {
-        YamlSubcommand::Get { file, key } => extract_yaml_field(&file, &key),
-        YamlSubcommand::CountItems { file, item_regex } => count_yaml_items(&file, &item_regex),
+        YamlSubcommand::Get { file, key, .. } => extract_yaml_field(&file, &key),
+        YamlSubcommand::CountItems {
+            file,
+            item_regex,
+            ..
+        } => count_yaml_items(&file, &item_regex),
     }
 }
 

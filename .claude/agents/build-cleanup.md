@@ -136,16 +136,14 @@ Rules:
 # Use demoswarm shim (single source of truth for mechanical ops).
 # Missing file ⇒ null + reason. Never coerce missing/unknown to 0.
 
-# tests_written: prefer stable markers, fallback to top-level bullets
+# tests_written: inventory markers from test-author
 bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/build/test_changes_summary.md" \
-  --regex '^- TEST:|^- TEST_CHANGE:' \
-  --fallback-regex '^- ' \
+  --regex '^- TEST_FILE_CHANGED:|^- TEST_FILE_ADDED:' \
   --null-if-missing
 
-# files_changed: prefer stable markers, fallback to top-level bullets
+# files_changed: inventory markers from code-implementer
 bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/build/impl_changes_summary.md" \
-  --regex '^- FILE:' \
-  --fallback-regex '^- ' \
+  --regex '^- IMPL_FILE_CHANGED:|^- IMPL_FILE_ADDED:' \
   --null-if-missing
 
 # mutation_score: extract from mutation_report.md
@@ -159,6 +157,8 @@ bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/build/ope
   --regex '^- QID: OQ-BUILD-[0-9]{3}' \
   --null-if-missing
 ```
+
+If the inventory section is missing entirely, prefer `null` over guessing and explain why in `cleanup_report.md`. If the section exists and markers are legitimately absent, `0` is acceptable.
 
 Note: QID is the stable marker since clarifier update. Count QIDs, not `- Q:` lines.
 
@@ -213,10 +213,18 @@ Note: build-cleanup is mechanical and does not determine which fix agent to invo
 
 ### Step 5: Write build_receipt.json (single source of truth)
 
+Populate these fields before writing the receipt (prefer the demoswarm shim for extraction):
+
+* `tests.canonical_summary`: use `line get --prefix "## Test Summary (Canonical):"` on `build/test_execution.md`
+* `tests.passed/failed/skipped/xfailed/xpassed`: use `ms get` on `build/test_execution.md` Machine Summary `test_summary.*` keys (indent-safe)
+* `tests.metrics_binding`: `"test_execution:test-runner"` when counts present; otherwise `"unknown"` and set status UNVERIFIED
+* `critic_verdicts.test_critic` = `quality_gates.test_critic`, `critic_verdicts.code_critic` = `quality_gates.code_critic`
+
 Write `.runs/<run-id>/build/build_receipt.json`:
 
 ```json
 {
+  "schema_version": "build_receipt_v1",
   "run_id": "<run-id>",
   "flow": "build",
 
@@ -237,6 +245,22 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "open_questions": null
   },
 
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": null,
+    "passed": null,
+    "failed": null,
+    "skipped": null,
+    "xfailed": null,
+    "xpassed": null,
+    "metrics_binding": "test_execution:test-runner"
+  },
+
+  "critic_verdicts": {
+    "test_critic": null,
+    "code_critic": null
+  },
+
   "quality_gates": {
     "test_critic": null,
     "code_critic": null,
@@ -247,6 +271,7 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "self_review.md",
     "test_changes_summary.md",
     "impl_changes_summary.md",
+    "test_execution.md",
     "test_critique.md",
     "code_critique.md",
     "mutation_report.md",
@@ -263,6 +288,9 @@ Notes:
 
 * `key_artifacts` is a reference list; it may include files that are absent (their absence will show in missing arrays).
 * `completed_at` is informational; re-runs may update it.
+* `tests.*` is bound to `build/test_execution.md`: extract `canonical_summary` from the canonical summary line and counts from the `test_summary.*` fields in its Machine Summary block.
+* `metrics_binding` must be explicit (e.g., `test_execution:test-runner`), not `unknown` or `hard_coded`.
+* `critic_verdicts` duplicate the gate statuses extracted in Step 3 so Gate can validate without rereading artifacts.
 
 ### Step 6: Update .runs/index.json (minimal ownership)
 

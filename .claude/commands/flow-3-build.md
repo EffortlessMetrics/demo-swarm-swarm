@@ -200,10 +200,12 @@ Loop between `test-author` and `test-critic`:
 - Call `test-critic` to review them
 
 **Route on the Test Critic Result block** (not by re-reading the file):
-- If `status: VERIFIED` → proceed to code
-- If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → route back to `test-author` with specific feedback
-- If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues not addressable within scope)
 - If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+- If `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
+- If `recommended_action: RERUN` → rerun the specified agent (default `test-author` if none)
+- If `recommended_action: ESCALATE` → stop microloop; record evidence; proceed with status UNVERIFIED
+- If `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- If `recommended_action` is absent: use `can_further_iteration_help` as a tie-breaker (`yes` → rerun; `no` → proceed)
 
 **Loop guidance**: The Result block is the control plane; `test_critique.md` is the audit artifact.
 
@@ -213,10 +215,12 @@ Loop between `code-implementer` and `code-critic`:
 - Call `code-critic` to review code
 
 **Route on the Code Critic Result block** (not by re-reading the file):
-- If `status: VERIFIED` → proceed to hardening
-- If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → route back to `code-implementer` with specific feedback
-- If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues not addressable within scope)
 - If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+- If `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
+- If `recommended_action: RERUN` → rerun the specified agent (default `code-implementer` if none)
+- If `recommended_action: ESCALATE` → stop microloop; record evidence; proceed with status UNVERIFIED
+- If `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- If `recommended_action` is absent: use `can_further_iteration_help` as a tie-breaker (`yes` → rerun; `no` → proceed)
 
 **Loop guidance**: The Result block is the control plane; `code_critique.md` is the audit artifact.
 
@@ -431,13 +435,12 @@ Use critic status to decide whether to loop or proceed.
 ## Microloop Termination
 
 Termination is driven by the critic control plane:
-- Stop when `status: VERIFIED`, or
-- Stop when `status: UNVERIFIED` and `can_further_iteration_help: no`, or
-- Stop immediately on `status: CANNOT_PROCEED` (mechanical failure)
-
-The critic's explicit `can_further_iteration_help` judgment is the stop signal.
-Do not hand-wave. Continue while critical/major issues exist AND the critic
-believes iteration helps.
+- `status: CANNOT_PROCEED` → stop (FIX_ENV)
+- `recommended_action: BOUNCE` → bounce to `route_to_*`
+- `recommended_action: ESCALATE` → stop microloop; record evidence
+- `recommended_action: RERUN` → rerun specified agent (default author/implementer)
+- `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- If no `recommended_action`, use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
 
 ## Output Artifacts
 

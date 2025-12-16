@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use regex::Regex;
 
 use crate::output::{print_null, print_scalar};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct MsCommand {
@@ -30,12 +31,21 @@ pub enum MsSubcommand {
         /// Field name to extract
         #[arg(long)]
         key: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: MsCommand) -> Result<()> {
     match cmd.command {
-        MsSubcommand::Get { file, section, key } => extract_machine_field(&file, &section, &key),
+        MsSubcommand::Get {
+            file,
+            section,
+            key,
+            ..
+        } => extract_machine_field(&file, &section, &key),
     }
 }
 
@@ -64,7 +74,7 @@ fn extract_machine_field(file: &str, section: &str, key: &str) -> Result<()> {
     };
 
     // Extract the field value
-    let key_pattern = format!(r"^{}\s*:\s*(.+?)\s*$", regex::escape(key));
+    let key_pattern = format!(r"^\s*{}\s*:\s*(.+?)\s*$", regex::escape(key));
     let regex = match Regex::new(&key_pattern) {
         Ok(r) => r,
         Err(_) => {

@@ -122,7 +122,7 @@ def extract_machine_summary_section(content: str) -> Optional[str]:
 
 def extract_field_from_section(section: str, key: str) -> Optional[str]:
     """Extract a field value from a section (YAML-ish format)."""
-    pattern = rf'^{re.escape(key)}:\s*(.+?)\s*$'
+    pattern = rf'^\s*{re.escape(key)}\s*:\s*(.+?)\s*$'
     for line in section.splitlines():
         match = re.match(pattern, line)
         if match:
@@ -191,7 +191,10 @@ def cmd_count_pattern(args: argparse.Namespace) -> None:
     if count == 0 and args.fallback_regex:
         count = count_pattern(content, args.fallback_regex)
 
-    print_result(count)
+    if count == 0 and getattr(args, "null_if_zero", False):
+        print_result(None)
+    else:
+        print_result(count)
 
 
 def cmd_count_bdd(args: argparse.Namespace) -> None:
@@ -602,6 +605,7 @@ def build_parser() -> argparse.ArgumentParser:
     count_pattern_p.add_argument("--regex", required=True, help="Extended regex pattern")
     count_pattern_p.add_argument("--fallback-regex", help="Fallback regex if primary returns 0")
     count_pattern_p.add_argument("--null-if-missing", action="store_true")
+    count_pattern_p.add_argument("--null-if-zero", action="store_true")
     count_pattern_p.set_defaults(func=cmd_count_pattern)
 
     # count bdd

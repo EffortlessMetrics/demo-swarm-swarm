@@ -6,6 +6,7 @@ use anyhow::Result;
 use clap::{Args, Subcommand};
 
 use crate::output::{print_count, print_null};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct ReceiptsCommand {
@@ -20,12 +21,16 @@ pub enum ReceiptsSubcommand {
         /// Run directory path
         #[arg(long)]
         run_dir: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: ReceiptsCommand) -> Result<()> {
     match cmd.command {
-        ReceiptsSubcommand::Count { run_dir } => count_existing_receipts(&run_dir),
+        ReceiptsSubcommand::Count { run_dir, .. } => count_existing_receipts(&run_dir),
     }
 }
 

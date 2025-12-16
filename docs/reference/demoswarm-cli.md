@@ -12,6 +12,8 @@ This document specifies the CLI helper surface for mechanical operations in `.ru
 | No git/GitHub | These helpers never touch git or gh |
 | Repo-root paths | All paths are repo-root-relative |
 
+**Strict mode (optional):** set `DEMOSWARM_STRICT=1` to return non-zero exit codes on parse/exec errors. Agents never set this; it is for human debugging only. Note: `.claude/scripts/demoswarm.sh` unsets `DEMOSWARM_STRICT` to keep agent behavior stable; use direct `demoswarm ...` invocation for strict debugging.
+
 ## Architecture
 
 ### Shim Invocation (Required)
@@ -47,7 +49,7 @@ Count lines matching a regex in a file.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--fallback-regex <ere>]
+bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--fallback-regex <ere>] [--null-if-missing] [--null-if-zero]
 ```
 
 **Arguments:**
@@ -57,6 +59,8 @@ bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--f
 | `--file <path>` | Yes | File to search |
 | `--regex <ere>` | Yes | Extended regex pattern |
 | `--fallback-regex <ere>` | No | Try if primary returns 0 |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| `--null-if-zero` | No | Return `null` instead of `0` when no matches |
 
 **Stdout:** `null` | integer
 
@@ -66,6 +70,7 @@ bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--f
 - File exists, no matches -> `0`
 - File exists, grep error -> `null`
 - With `--fallback-regex`: if primary regex returns `0`, try fallback
+- With `--null-if-zero`: `null` instead of `0` when no matches
 
 **Example:**
 ```bash
@@ -83,7 +88,7 @@ Count BDD scenarios across feature files.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh count bdd --dir <path>
+bash .claude/scripts/demoswarm.sh count bdd --dir <path> [--null-if-missing]
 ```
 
 **Arguments:**
@@ -91,6 +96,7 @@ bash .claude/scripts/demoswarm.sh count bdd --dir <path>
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--dir <path>` | Yes | Features directory |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 
@@ -253,7 +259,7 @@ Extract value from a line with a known prefix.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh line get --file <path> --prefix <text>
+bash .claude/scripts/demoswarm.sh line get --file <path> --prefix <text> [--null-if-missing]
 ```
 
 **Arguments:**
@@ -262,6 +268,7 @@ bash .claude/scripts/demoswarm.sh line get --file <path> --prefix <text>
 |------|----------|-------------|
 | `--file <path>` | Yes | File to search |
 | `--prefix <text>` | Yes | Line prefix (e.g., `Mutation Score:`) |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | string
 
@@ -287,7 +294,7 @@ Count prior flow receipts in a run directory.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh receipts count --run-dir <path>
+bash .claude/scripts/demoswarm.sh receipts count --run-dir <path> [--null-if-missing]
 ```
 
 **Arguments:**
@@ -295,6 +302,7 @@ bash .claude/scripts/demoswarm.sh receipts count --run-dir <path>
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--run-dir <path>` | Yes | Run directory path |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 
@@ -318,7 +326,7 @@ Read a field from a receipt JSON file.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh receipt get --file <path> --key <name>
+bash .claude/scripts/demoswarm.sh receipt get --file <path> --key <name> [--null-if-missing]
 ```
 
 **Arguments:**
@@ -327,6 +335,7 @@ bash .claude/scripts/demoswarm.sh receipt get --file <path> --key <name>
 |------|----------|-------------|
 | `--file <path>` | Yes | Receipt JSON file |
 | `--key <name>` | Yes | Top-level key to extract |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | string
 
@@ -346,7 +355,7 @@ Count API paths in an OpenAPI YAML file.
 
 **Usage:**
 ```bash
-bash .claude/scripts/demoswarm.sh openapi count-paths --file <path>
+bash .claude/scripts/demoswarm.sh openapi count-paths --file <path> [--null-if-missing]
 ```
 
 **Arguments:**
@@ -354,6 +363,7 @@ bash .claude/scripts/demoswarm.sh openapi count-paths --file <path>
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--file <path>` | Yes | OpenAPI YAML file |
+| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 

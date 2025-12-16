@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use regex::Regex;
 
 use crate::output::{print_null, print_scalar};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct InvCommand {
@@ -26,12 +27,16 @@ pub enum InvSubcommand {
         /// Marker prefix (e.g., DEP_CI_SIGNAL)
         #[arg(long)]
         marker: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat: CompatNullIfMissing,
     },
 }
 
 pub fn run(cmd: InvCommand) -> Result<()> {
     match cmd.command {
-        InvSubcommand::Get { file, marker } => extract_inventory_marker(&file, &marker),
+        InvSubcommand::Get { file, marker, .. } => extract_inventory_marker(&file, &marker),
     }
 }
 

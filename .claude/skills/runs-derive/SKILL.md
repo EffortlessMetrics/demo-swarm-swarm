@@ -158,7 +158,7 @@ bash .claude/scripts/demoswarm.sh yaml get \
 # Count blockers array length
 bash .claude/scripts/demoswarm.sh yaml count-items \
   --file ".runs/feat-auth/gate/merge_decision.md" \
-  --key "blockers" \
+  --item-regex '^[[:space:]]*- check:' \
   --null-if-missing
 ```
 

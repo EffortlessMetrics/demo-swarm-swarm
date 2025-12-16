@@ -117,17 +117,17 @@ cleanup → sanitizer → modified_files: true → cleanup → sanitizer → mod
 
 **Symptom:** Critic keeps saying issues exist; author/implementer can't fix them.
 
-**Diagnosis:** Check the stop signal.
+**Diagnosis:** Route on the critic's `recommended_action` first (control plane wins).
 
-Microloops stop when:
-- `status: VERIFIED`, OR
-- `can_further_iteration_help: no`
+Microloops route as follows:
+- `status: CANNOT_PROCEED` → stop (FIX_ENV)
+- `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
+- `recommended_action: ESCALATE` → stop microloop; record evidence
+- `recommended_action: RERUN` → rerun the specified agent (default author/implementer)
+- `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
 
-If critic says `can_further_iteration_help: yes` but issues are unfixable:
-- Issues require upstream answers (e.g., clarification from humans)
-- Issues are out of scope for this flow
-
-**Fix:** End the flow UNVERIFIED with crisp blockers. Move to next flow or wait for human input.
+If a critic keeps saying `RERUN` but the issues are unfixable locally, treat it as `ESCALATE` with crisp blockers and move to the next flow.
 
 ---
 

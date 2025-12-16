@@ -81,16 +81,18 @@ If you cannot identify a test command safely:
 - set `UNVERIFIED` + `ESCALATE` to `pack-customizer`
 
 ### Step 2: Execute tests (tool-bound)
-Run tests via test-runner’s configured mechanism.
+Run tests via test-runner's configured mechanism.
 Capture:
 - command executed (exact)
 - exit code
-- counts: passed, failed, skipped, xfailed (use `null` if unknown)
+- counts: passed, failed, skipped, xfailed, xpassed (use `null` if unknown)
 - a short canonical summary line, if available (framework summary / "N passed, M failed")
 - up to ~20 lines of the most relevant failure output (if failed)
 
+`xpassed` counts tests marked expected-to-fail (xfail) that actually passed.
+
 Write the canonical summary line explicitly in the report as:
-`## Test Summary (Canonical): passed=<...> failed=<...> skipped=<...> xfailed=<...>`
+`## Test Summary (Canonical): passed=<...> failed=<...> skipped=<...> xfailed=<...> xpassed=<...>`
 (`...` can be integers or `null`; do not guess.)
 
 ### Step 3: Write report
@@ -116,6 +118,7 @@ test_summary:
   failed: <int|null>
   skipped: <int|null>
   xfailed: <int|null>
+  xpassed: <int|null>
   duration_seconds: <int|null>
 
 ## Inputs Used
@@ -131,7 +134,7 @@ test_summary:
 ## Canonical Summary (tool-bound)
 - <one line copied from test output, if present; else "unknown">
 
-## Test Summary (Canonical): passed=<int|null> failed=<int|null> skipped=<int|null> xfailed=<int|null>
+## Test Summary (Canonical): passed=<int|null> failed=<int|null> skipped=<int|null> xfailed=<int|null> xpassed=<int|null>
 
 ## Failures (if any)
 - <short list of failing tests/modules if available; else a short excerpt>

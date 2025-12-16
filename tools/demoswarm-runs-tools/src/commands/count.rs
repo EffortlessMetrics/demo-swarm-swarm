@@ -8,6 +8,7 @@ use clap::{Args, Subcommand};
 use regex::Regex;
 
 use crate::output::{print_count, print_null};
+use super::common::CompatNullIfMissing;
 
 #[derive(Args, Debug)]
 pub struct CountCommand {
@@ -30,6 +31,14 @@ pub enum CountSubcommand {
         /// Fallback regex if primary returns 0
         #[arg(long)]
         fallback_regex: Option<String>,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat_missing: CompatNullIfMissing,
+
+        /// When set, return null instead of 0 if no matches
+        #[arg(long, default_value_t = false)]
+        null_if_zero: bool,
     },
 
     /// Count BDD scenarios in feature files
@@ -37,6 +46,10 @@ pub enum CountSubcommand {
         /// Features directory
         #[arg(long)]
         dir: String,
+
+        /// Compatibility flag; accepted for interface parity
+        #[command(flatten)]
+        _compat_missing: CompatNullIfMissing,
     },
 }
 
@@ -46,12 +59,14 @@ pub fn run(cmd: CountCommand) -> Result<()> {
             file,
             regex,
             fallback_regex,
-        } => count_pattern(&file, &regex, fallback_regex.as_deref()),
-        CountSubcommand::Bdd { dir } => count_bdd_scenarios(&dir),
+            null_if_zero,
+            ..
+        } => count_pattern(&file, &regex, fallback_regex.as_deref(), null_if_zero),
+        CountSubcommand::Bdd { dir, .. } => count_bdd_scenarios(&dir),
     }
 }
 
-fn count_pattern(file: &str, pattern: &str, fallback: Option<&str>) -> Result<()> {
+fn count_pattern(file: &str, pattern: &str, fallback: Option<&str>, null_if_zero: bool) -> Result<()> {
     let path = Path::new(file);
     if !path.is_file() {
         print_null();
@@ -74,18 +89,21 @@ fn count_pattern(file: &str, pattern: &str, fallback: Option<&str>) -> Result<()
         }
     };
 
-    let count = content.lines().filter(|line| regex.is_match(line)).count();
+    let mut count = content.lines().filter(|line| regex.is_match(line)).count();
 
     // Try fallback if primary returns 0
     if count == 0
         && let Some(fb_pattern) = fallback
         && let Ok(fb_regex) = Regex::new(fb_pattern) {
         let fb_count = content.lines().filter(|line| fb_regex.is_match(line)).count();
-        print_count(fb_count);
-        return Ok(());
+        count = fb_count;
     }
 
-    print_count(count);
+    if count == 0 && null_if_zero {
+        print_null();
+    } else {
+        print_count(count);
+    }
     Ok(())
 }
 

@@ -531,7 +531,13 @@ CANNOT_PROCEED is mechanical failure only. Fix environment/tooling, then rerun.
 
 ### "Microloop won't terminate"
 
-The stop signal is `can_further_iteration_help: no`. If critics keep saying "yes" but nothing changes, end the flow UNVERIFIED with crisp blockers and proceed to the next boundary.
+Route on the critic control plane:
+- `status: CANNOT_PROCEED` → stop (FIX_ENV)
+- `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
+- `recommended_action: ESCALATE` → stop microloop; record evidence
+- `recommended_action: RERUN` → rerun specified agent
+- `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
 
 ### "No GitHub update happened"
 

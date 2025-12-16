@@ -54,6 +54,18 @@ jobs:
       - name: Smoke test - count command
         run: bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 
+  runs-tools-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run runs-tools tests
+        run: cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
+
   doc-drift:
     runs-on: ubuntu-latest
     steps:

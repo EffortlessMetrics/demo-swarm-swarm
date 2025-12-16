@@ -1,7 +1,7 @@
 //! Output utilities for scalar stdout contract.
 //!
 //! All helpers print a single scalar: `null`, integer, or string.
-//! Exit code is always 0 (errors expressed via `null` stdout).
+//! Default mode keeps exit code 0 (errors expressed via `null` stdout).
 
 /// Print a scalar value to stdout.
 pub fn print_scalar<T: std::fmt::Display>(value: T) {

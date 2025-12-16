@@ -141,9 +141,9 @@ Specific routing uses:
 - `route_to_agent: <agent|null>`
 
 ### can_further_iteration_help
-Critic-only field signaling whether another loop iteration can materially improve the artifact.
+Critic-only field used as a tie-breaker when `recommended_action` is absent.
 - `yes`: rerun the author/implementer with specific changes
-- `no`: remaining issues require upstream answers or are out-of-scope
+- `no`: proceed; remaining issues require upstream answers or are out-of-scope
 
 ---
 

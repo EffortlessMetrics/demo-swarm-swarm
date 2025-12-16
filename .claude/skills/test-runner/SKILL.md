@@ -25,7 +25,7 @@ You are a helper for running tests efficiently in this repository (Rust-focused)
 
 4. Capture output and artifacts:
    - Save raw output to `test_output.log` (overwrite per run) and a parsed summary to `test_summary.md`.
-   - `test_summary.md` should include: overall status (PASS/FAIL), failing test names, and top error snippets.
+   - `test_summary.md` should include: overall status (PASS/FAIL), failing test names, top error snippets, and counts (passed, failed, skipped, xfailed, xpassed). `xpassed` = xfail tests that unexpectedly passed.
 
 5. Failure handling:
    - Exit status is used by calling subagent; include failing test names in `test_summary.md`.
@@ -33,4 +33,3 @@ You are a helper for running tests efficiently in this repository (Rust-focused)
 6. Do not modify source or tests.
 
 7. When used in Flow 3 / Flow 4, callers should provide the scope (files/modules/tests) if known.
-

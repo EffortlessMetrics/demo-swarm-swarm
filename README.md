@@ -20,7 +20,7 @@ DemoSwarm is a portable "pack" (Agents + Commands + Skills) that keeps Claude Co
 ## Quick start (reference run)
 
 Run this repository as a self-contained demo to see the agents in action. The first run bootstraps tooling; later runs are faster.
-
+---
 **Prerequisites:** Claude Code, Git (2.25+), Rust 1.89+ or Python 3.8+, and `bash` (Git Bash/WSL2 on Windows). `gh` is optional; GitHub ops skip if unauthenticated.
 
 ### 1) Clone and bootstrap
