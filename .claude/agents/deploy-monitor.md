@@ -40,7 +40,7 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 ## Control-plane routing (closed enum)
 
 Populate in Machine Summary:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
@@ -61,9 +61,15 @@ Rules:
 - You must be able to write `.runs/<run-id>/deploy/verification_report.md`.
 - If you cannot write (permissions/IO), set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, populate `missing_required` with the output path, and stop.
 
+### Step 0.5: GitHub access guard (read-only)
+- Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
+- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Write the report with limitations noted, set `status: UNVERIFIED`, `recommended_action: PROCEED`, and capture the limitation in the Machine Summary.
+- Prefer `github_repo` from run_meta for any `gh` calls. Do not invent a repo; if missing and gh is available, record the inferred repo in the report rather than writing back.
+- If `gh` is unauthenticated, note the limitation and continue in **UNVERIFIED** (no gh calls, limitation recorded in Machine Summary).
+
 ### Step 1: Determine whether a deployment should exist (best-effort)
 Best-effort parse:
-- Gate decision from `.runs/<run-id>/gate/merge_decision.md` (MERGE | BOUNCE | ESCALATE | UNKNOWN)
+- Gate decision from `.runs/<run-id>/gate/merge_decision.md` (MERGE | BOUNCE | UNKNOWN)
 - Merge performed from `.runs/<run-id>/deploy/deployment_log.md` (yes | no | unknown)
 
 If gate decision is not MERGE **or** deployment_log indicates merge was skipped:
@@ -112,7 +118,7 @@ If CI is clearly in progress and you can re-check:
 ## Machine Summary
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
@@ -123,7 +129,7 @@ concerns: []
 ## Signals
 
 ```yaml
-gate_decision: MERGE | BOUNCE | ESCALATE | UNKNOWN
+gate_decision: MERGE | BOUNCE | UNKNOWN
 merge_performed: yes | no | unknown
 ci_signal: PASS | FAIL | UNKNOWN | N/A
 deploy_signal: PASS | FAIL | UNKNOWN | N/A
@@ -173,7 +179,7 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 
 (Only these prefixed lines; do not rename prefixes)
 
-- DEP_GATE_DECISION: <MERGE|BOUNCE|ESCALATE|UNKNOWN>
+- DEP_GATE_DECISION: <MERGE|BOUNCE|UNKNOWN>
 - DEP_MERGE_PERFORMED: <yes|no|unknown>
 - DEP_CI_SIGNAL: <PASS|FAIL|UNKNOWN|N/A>
 - DEP_DEPLOY_SIGNAL: <PASS|FAIL|UNKNOWN|N/A>
@@ -195,7 +201,7 @@ After writing the file, return:
 ```yaml
 ## Deploy Monitor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []

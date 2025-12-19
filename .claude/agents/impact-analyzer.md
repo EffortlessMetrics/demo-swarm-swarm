@@ -25,7 +25,7 @@ Do not write markdown. Do not write any other files.
 ## Control-plane routing (closed enum)
 
 Always populate:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
@@ -34,7 +34,7 @@ Rules:
 - `BOUNCE` only when `route_to_flow` and/or `route_to_agent` is set
 - Scope creep detected (blast radius materially larger than spec implies) → `BOUNCE` to Flow 1, `route_to_agent: scope-assessor`
 - Design gap detected (REQ implies interface/data decisions not present) → `BOUNCE` to Flow 2, `route_to_agent: design-optioneer`
-- High-risk unclear impact (security/data boundary) → `ESCALATE`
+- High-risk unclear impact (security/data boundary) → `PROCEED` (UNVERIFIED with blockers captured)
 
 ## Inputs (best-effort)
 
@@ -113,7 +113,7 @@ If some inputs are missing, continue best-effort and record them.
   "schema_version": 1,
 
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
 
@@ -186,7 +186,7 @@ At the end of your response, echo:
 ```markdown
 ## Impact Analyzer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 impact_summary:

@@ -28,7 +28,7 @@ Move an approved artifact from "ready to merge" to "deployed"—execute deployme
 
 **Flow 5 is always callable.** Its behavior depends on Gate's decision:
 - If Gate said MERGE: merge, verify, report.
-- If Gate said BOUNCE/ESCALATE: don't merge, write receipts explaining why.
+- If Gate said BOUNCE (including NEEDS_HUMAN_REVIEW): don't merge, write receipts explaining why.
 
 ## Before You Begin (Required)
 
@@ -50,18 +50,17 @@ Flow 5 uses **two complementary state machines**:
 ### Suggested TodoWrite Items
 
 ```
-- Establish run infrastructure (run-prep)
-- Read gate decision
-- Execute path (A: merge+verify OR B: skip+document)
-- Monitor CI (deploy-monitor)
-- Smoke tests (smoke-verifier)
-- Deployment decision (deploy-decider)
-- Finalize receipt (deploy-cleanup)
-- Sanitize secrets (secrets-sanitizer)
-- Checkpoint commit (repo-operator)
-- Update issue board (gh-issue-manager; gated)
-- Report deployment status (gh-reporter; gated)
-- Update flow_plan.md summary
+- run-prep (establish run infrastructure)
+- repo-operator (ensure run branch)
+- repo-operator (merge + tag + release; only if Gate verdict MERGE)
+- deploy-monitor (monitor CI; only if Gate verdict MERGE)
+- smoke-verifier (smoke tests; only if Gate verdict MERGE)
+- deploy-decider (deployment decision)
+- deploy-cleanup (finalize receipt)
+- secrets-sanitizer (publish gate)
+- repo-operator (checkpoint commit)
+- gh-issue-manager (update issue board; gated)
+- gh-reporter (report deployment status; gated)
 ```
 
 ### On Rerun
@@ -129,9 +128,10 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 
 - [ ] run-prep (establish run directory)
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
-- [ ] Read gate decision
-- [ ] Path A (if MERGE): merge + tag + monitor + smoke + decide
-- [ ] Path B (if BOUNCE/ESCALATE): document why not deployed
+- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
+- [ ] deploy-monitor (only if Gate verdict MERGE)
+- [ ] smoke-verifier (only if Gate verdict MERGE)
+- [ ] deploy-decider (deployment decision)
 - [ ] deploy-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
@@ -146,7 +146,7 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 ### Step 2: Read Gate Decision
 
 Read `.runs/<run-id>/gate/merge_decision.md` (if available):
-- Parse the `verdict:` field from `## Machine Summary` (preferred) or `## Verdict` section (MERGE, BOUNCE, or ESCALATE)
+- Parse the `verdict:` field from `## Machine Summary` (preferred) or `## Verdict` section (MERGE or BOUNCE (with reason))
 - This determines the entire flow path
 - If missing, default to Path B (NOT_DEPLOYED)
 
@@ -163,11 +163,11 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
 
 **Note on secrets governance:** The code being merged was already sanitized in Build (Flow 3). Deploy's secrets-sanitizer (Step 6) is specifically for `.runs/deploy/` artifacts and GitHub posting—not for code merge governance.
 
-1. **Merge & Tag** (repo-operator) — **Release Op**
+1. **Merge & Tag** (repo-operator) - **Release Op**
    - **Prerequisite:** Gate decision = MERGE
    - Execute `gh pr merge`, create git tag + GitHub release
    - Write `.runs/<run-id>/deploy/deployment_log.md` with merge details
-   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: ESCALATE`. Do not silently skip—this is a failed release op, not a skipped reporting op.
+   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: RERUN` (deterministic fix: auth/PR ref). Do not silently skip-this is a failed release op, not a skipped reporting op.
 
 2. **Monitor CI** (deploy-monitor)
    - Watch GitHub Actions status on main branch
@@ -201,15 +201,15 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
    ```
    ## Gate Result
    status: CLEAN | FIXED | BLOCKED_PUBLISH
-   safe_to_commit: true | false
-   safe_to_publish: true | false
-   modified_files: true | false
-   needs_upstream_fix: true | false
-   recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
-   route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-   route_to_agent: <agent-name> | null
-   ```
-   <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+safe_to_commit: true | false
+safe_to_publish: true | false
+modified_files: true | false
+needs_upstream_fix: true | false
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_agent: <agent-name> | null
+```
+<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
 6b. **Reseal If Modified** (conditional loop)
    - If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(deploy-cleanup → secrets-sanitizer)` until either:
@@ -219,9 +219,9 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
      - Append an evidence note to `secrets_scan.md`:
        - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
      - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-       - it must return `proceed_to_github_ops: false`
-     - Skip **all** GitHub ops (issue-manager / reporter).
-     - Flow outcome: `status: UNVERIFIED`, `recommended_action: ESCALATE`
+       - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
+     - GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
+     - Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
        - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
 
 6c. **Checkpoint Commit** (repo-operator)
@@ -241,13 +241,14 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
 
    **Control plane:** `repo-operator` returns a Repo Operator Result block:
    ```
-   ## Repo Operator Result
-   operation: checkpoint
-   status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
-   proceed_to_github_ops: true | false
-   commit_sha: <sha>
-   anomaly_paths: []
-   ```
+## Repo Operator Result
+operation: checkpoint
+status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+proceed_to_github_ops: true | false
+commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
+anomaly_paths: []
+```
    **Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
 
    Orchestrators route on this block, not by re-reading `git_status.md`.
@@ -259,28 +260,26 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
    - If `safe_to_publish: false`:
      - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`; flow ends UNVERIFIED
      - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-     - Otherwise → UNVERIFIED; skip push/post, document in `git_status.md`
+     - Otherwise → UNVERIFIED; commit locally but skip push; returns `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`.
 
-7. **Update Issue Board** (gh-issue-manager) — **Reporting Op**
-   - **Prerequisite:** Prior Gate Result `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
-   - This is a **Reporting Op**—distinct from Release Ops (merge/tag) above which are gated by Gate's decision
-   - If prerequisites not met:
-     - If `needs_upstream_fix: true` → already bounced in 6c
-     - If `status: BLOCKED_PUBLISH` → already stopped in 6c
-     - If anomaly → already documented; skip silently
-   - If `gh` CLI unauthenticated/unavailable: SKIPPED with evidence (not BLOCKED)
-   - Otherwise (gates true and gh available): update issue body status board from receipt
-   - **Creates GitHub issue if none exists** (allowed in any flow; includes "Signal pending" banner if created from Flow 5)
+### GitHub Access + Content Mode (canonical)
 
-8. **Report** (gh-reporter) — **Reporting Op**
-   - **Prerequisite:** Prior Gate Result `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
-   - This is a **Reporting Op**—distinct from Release Ops
-   - If prerequisites not met: write `github_report.md` locally, skip posting
-   - If `gh` CLI unauthenticated/unavailable: SKIPPED with evidence (not BLOCKED)
-   - Otherwise (gates true and gh available): post deployment summary **to the GitHub issue** (not PR)
-   - **Issue-first (hard):** All flow logs go to the issue, even if a PR exists
+See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
 
-### Path B: Gate Decision = BOUNCE or ESCALATE
+- Publish blocked → `RESTRICTED` (never skip when access is allowed)
+- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
+
+7. **Update Issue Board** (gh-issue-manager) - **Reporting Op**
+- Apply Access + Content Mode rules: skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED). Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
+- This is a **Reporting Op**-distinct from Release Ops (merge/tag) above which are gated by Gate's decision.
+- If the issue is missing and gh is available, gh-issue-manager may create it (with a Signal-pending banner when created from Flow 5).
+
+8. **Report** (gh-reporter) - **Reporting Op**
+- Apply Access + Content Mode rules: skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED). Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown). Publish-blocked reason must be explicit.
+- Issue-first (hard): all flow logs go to the issue, even if a PR exists.
+- **Content expectations:** Decisions Needed, Concerns for Review (deployment issues), Agent Notes (friction, cross-cutting insights, pack improvements). These make the GitHub update actionable.
+
+### Path B: Gate Decision = BOUNCE (including human-review reasons)
 
 1. **Skip Merge** (no repo-operator merge)
    - Write `.runs/<run-id>/deploy/deployment_log.md` noting: "No merge performed; Gate decision = <verdict>"
@@ -348,7 +347,7 @@ Update `flow_plan.md`:
 ## Completion
 
 Flow 5 is complete when:
-- `deployment_log.md` exists (even if minimal for BOUNCE/ESCALATE)
+- `deployment_log.md` exists (even if minimal for BOUNCE (including NEEDS_HUMAN_REVIEW))
 - `verification_report.md` exists
 - `deployment_decision.md` exists with valid verdict
 
@@ -362,28 +361,32 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 
 ```
 - [ ] run-prep
-- [ ] repo-operator: ensure run/<run-id> branch
-- [ ] Read gate decision
-- [ ] Path A: merge+tag OR Path B: document not deployed
-- [ ] deploy-monitor
-- [ ] smoke-verifier
+- [ ] repo-operator (ensure run/<run-id> branch)
+- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
+- [ ] deploy-monitor (only if Gate verdict MERGE)
+- [ ] smoke-verifier (only if Gate verdict MERGE)
 - [ ] deploy-decider
 - [ ] deploy-cleanup
-- [ ] secrets-sanitizer (capture Gate Result)
-- [ ] reseal cycle (deploy-cleanup ↔ secrets-sanitizer) if modified_files
-- [ ] repo-operator checkpoint (allowlist interlock + no-op handling)
-- [ ] gh-issue-manager (if gates true and gh available; otherwise SKIP with evidence)
-- [ ] gh-reporter (if gates true and gh available; otherwise SKIP with evidence)
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] deploy-cleanup ↔ secrets-sanitizer (reseal cycle; if modified_files: true)
+- [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 ```
 
-### Agent Call Order
+### Station order
 
-1. `run-prep`
-2. `repo-operator` (ensure run branch)
-3. (Path A or Path B stations based on gate decision)
-4. `deploy-cleanup`
-5. `secrets-sanitizer` (read Gate Result)
-6. (reseal cycle if `modified_files: true`)
-7. `repo-operator` (checkpoint commit with allowlist interlock)
-8. `gh-issue-manager` (if gates true and gh available; otherwise SKIP with evidence)
-9. `gh-reporter` (if gates true and gh available; otherwise SKIP with evidence)
+#### Station order
+
+- `run-prep`
+- `repo-operator` (ensure run branch)
+- `repo-operator` (merge + tag + release; only if Gate verdict MERGE)
+- `deploy-monitor` (only if Gate verdict MERGE)
+- `smoke-verifier` (only if Gate verdict MERGE)
+- `deploy-decider`
+- `deploy-cleanup`
+- `secrets-sanitizer`
+- `deploy-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+- `repo-operator` (checkpoint; read Repo Operator Result)
+- `gh-issue-manager` (if allowed)
+- `gh-reporter` (if allowed)

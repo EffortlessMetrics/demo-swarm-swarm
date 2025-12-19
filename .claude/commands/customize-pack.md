@@ -38,7 +38,7 @@ test -f Cargo.toml && echo "Rust tests (cargo test) detected"
 test -f .eslintrc.js -o -f .eslintrc.json -o -f .eslintrc.yml && echo "ESLint detected"
 test -f .prettierrc -o -f .prettierrc.json -o -f .prettierrc.js && echo "Prettier detected"
 test -f ruff.toml && echo "Ruff detected"
-test -f pyproject.toml && grep -q '\[tool.ruff\]' pyproject.toml && echo "Ruff (in pyproject) detected"
+test -f pyproject.toml && grep -Fq '[tool.ruff]' pyproject.toml && echo "Ruff (in pyproject) detected"
 test -f rustfmt.toml && echo "rustfmt detected"
 
 # Detect source layout (use test -d for directories)
@@ -63,6 +63,8 @@ Based on detection, ask for confirmation or clarification:
 4. **Source Layout**: "I see your source code is in [X] and tests in [Y]. Is this correct?"
 5. **Git Provider**: "Are you using GitHub, GitLab, Bitbucket, or another provider?"
 6. **Windows Environment**: "Are you using WSL2, Git Bash, or native PowerShell?"
+7. **Mutation Harness (optional)**: "Do you have mutation testing configured? If so, what command should we run?"
+8. **Fuzz Harness (optional)**: "Do you have fuzzing configured? If so, what command should we run?"
 
 Use the AskUserQuestion tool to gather this information.
 
@@ -112,6 +114,20 @@ Create `demo-swarm.config.json` in repo root:
     "test": "<test command>",
     "lint": "<lint command>",
     "format": "<format command>"
+  },
+  "mutation": {
+    "command": "<mutation command or null>",
+    "budget_seconds": 300,
+    "survivor_threshold": 0
+  },
+  "fuzz": {
+    "command": "<fuzz command or null>",
+    "budget_seconds": 300
+  },
+  "flakiness": {
+    "command": "<flakiness rerun command or null>",
+    "rerun_count": 3,
+    "budget_seconds": 180
   },
   "layout": {
     "source": "src/",

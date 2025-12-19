@@ -28,14 +28,14 @@ You are **not** a code author. You are **not** a git operator. You do not commit
 
 Always emit:
 
-* `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+* `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 * `route_to_flow: 1|2|3|4|5|6|null`
 * `route_to_agent: <agent-name|null>`
 
 Guidance:
 
 * `CANNOT_PROCEED` → `FIX_ENV`
-* If you need user answers before editing (rare) → `UNVERIFIED`, `recommended_action: ESCALATE`, `blockers` lists the exact questions.
+* If you need user answers before editing (rare) → `UNVERIFIED`, `recommended_action: PROCEED`, `blockers` lists the exact questions.
 * Otherwise → `PROCEED`
 
 ## Inputs
@@ -64,6 +64,7 @@ Ask only if the answer would materially change:
 
 * the **test command**
 * the **lint/format command**
+* the **mutation/fuzz commands** (only if a harness is detected)
 * the **Git provider**
 * the **primary source/test roots** (when detection yields multiple plausible options)
 
@@ -121,6 +122,18 @@ If multiple plausible roots: choose a primary, record alternates.
 * If `gitlab.com` → `gitlab`
 * Otherwise default `github` and record ambiguity
 
+### 6) Detect hardening harnesses (mutation/fuzz) (best-effort)
+
+Detect without installing dependencies:
+
+* Mutation:
+  * Prefer `scripts/mutation.sh|ps1|bat|cmd` if present.
+  * Otherwise leave `mutation.command: null` and record.
+* Fuzz:
+  * Prefer `scripts/fuzz.sh|ps1|bat|cmd` if present.
+  * If Rust: `fuzz/` directory (cargo-fuzz) may exist; prefer `cargo fuzz run <target>` only if the repo already uses it and a target is obvious.
+  * Otherwise leave `fuzz.command: null` and record.
+
 ## Phase 2: Configure (write demo-swarm.config.json)
 
 Write (or update) `demo-swarm.config.json`. If it exists, **merge**:
@@ -145,6 +158,20 @@ Recommended schema (supports monorepos):
     "test": "<command or null>",
     "lint": "<command or null>",
     "format": "<command or null>"
+  },
+  "mutation": {
+    "command": "<command or null>",
+    "budget_seconds": 300,
+    "survivor_threshold": 0
+  },
+  "fuzz": {
+    "command": "<command or null>",
+    "budget_seconds": 300
+  },
+  "flakiness": {
+    "command": "<command or null>",
+    "rerun_count": 3,
+    "budget_seconds": 180
   },
   "layout": {
     "source_roots": ["src/"],
@@ -241,7 +268,7 @@ Do **not** paste full output; summarize.
 ### If validation fails (exit != 0)
 
 1. Set `status: UNVERIFIED`
-2. Set `recommended_action: ESCALATE`
+2. Set `recommended_action: PROCEED`
 3. Populate `blockers` with the first few failing diagnostics:
    * `check_id` + `check_title`
    * shortest useful `message`
@@ -258,7 +285,7 @@ Write:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 
@@ -281,6 +308,9 @@ missing_required:
 - commands.test: `<... or null>`
 - commands.lint: `<... or null>`
 - commands.format: `<... or null>`
+- mutation.command: `<... or null>`
+- fuzz.command: `<... or null>`
+- flakiness.command: `<... or null>`
 - layout.primary_source_root: <...>
 - layout.primary_test_root: <...>
 
@@ -310,7 +340,7 @@ At the end of your response, return:
 ```markdown
 ## Pack Customizer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 blockers: []

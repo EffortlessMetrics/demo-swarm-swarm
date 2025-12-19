@@ -103,7 +103,7 @@ Open the sandbox repo in Claude Code. It will discover:
 **What happens:**
 1. `test-author` writes tests
 2. `test-critic` reviews and returns `recommended_action`
-3. Route on `recommended_action` (RERUN/BOUNCE/ESCALATE/PROCEED); use `can_further_iteration_help` only as a tie-breaker when no action is set
+3. Route on `recommended_action` (RERUN/BOUNCE/PROCEED; `FIX_ENV` only with `status: CANNOT_PROCEED`). PROCEED is the default even with open questions; use `can_further_iteration_help` only as a tie-breaker when no action is set.
 4. `code-implementer` writes code
 5. `code-critic` reviews (same routing rules)
 6. `self-reviewer` produces final review
@@ -137,7 +137,7 @@ bash .claude/scripts/demoswarm.sh version
 1. `receipt-checker` validates build receipt
 2. `coverage-enforcer` checks coverage
 3. `security-scanner` runs SAST
-4. `merge-decider` issues decision (MERGE/BOUNCE/ESCALATE)
+4. `merge-decider` issues decision (MERGE/BOUNCE with reason)
 5. `gate-cleanup` computes the receipt
 
 **You show:**
@@ -253,7 +253,7 @@ Flows still run locally—GitHub posting is optional. Local artifacts are always
 
 Route on the critic's `recommended_action`:
 - `BOUNCE` → follow `route_to_flow/route_to_agent`
-- `RERUN` → loop once more; if fixes are impossible, treat as `ESCALATE` with crisp blockers
+- `RERUN` → loop once more; if fixes are impossible, proceed with blockers/limitations documented (no separate escalate lane)
 - If no `recommended_action`, use `can_further_iteration_help` as a tie-breaker (`no` → proceed)
 
 ---

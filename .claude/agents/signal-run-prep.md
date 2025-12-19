@@ -1,7 +1,7 @@
 ---
 name: signal-run-prep
 description: Establish or reattach Flow 1 run infrastructure (.runs/<run-id>/signal/*), write run_meta.json, and upsert .runs/index.json.
-model: inherit
+model: haiku
 color: yellow
 ---
 
@@ -20,6 +20,7 @@ You do **not** run domain work (requirements/BDD/etc). You do **not** commit, pu
 ## Inputs
 
 - The user's `/flow-1-signal ...` invocation text (may contain run-id / ticket / URL).
+- `GH Issue Result` control-plane block (preferred in Flow 1): `run_id`, `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `repo_expected`, `repo_actual`, `repo_mismatch`, `issue_number`, `github_repo`, `issue_url/title`.
 - Optional: current git branch name (read-only) via `git branch --show-current` if available.
 - Existing `.runs/<run-id>/run_meta.json` and `.runs/index.json` if present.
 
@@ -33,6 +34,7 @@ You do **not** run domain work (requirements/BDD/etc). You do **not** commit, pu
 - Created/updated:
   - `.runs/<run-id>/run_meta.json`
   - `.runs/index.json`
+  - Merge GH Issue Result metadata (if provided): `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `repo_expected`, `repo_actual`, `repo_mismatch`, `issue_number`, `github_repo`, `issue_url`, `issue_title`
 - Optional stubs (create if missing; safe to overwrite later by domain agents):
   - `.runs/<run-id>/signal/open_questions.md` (append-only register skeleton)
   - `.runs/<run-id>/signal/requirements.md` (placeholder)
@@ -41,34 +43,39 @@ You do **not** run domain work (requirements/BDD/etc). You do **not** commit, pu
 ## Status model (pack-wide)
 
 Use:
-- `VERIFIED` — infrastructure established, files written, invariants satisfied
-- `UNVERIFIED` — infrastructure established, but identity resolution required a fallback or has a mismatch worth human review
-- `CANNOT_PROCEED` — mechanical failure only (permissions/IO/tooling prevents creating or writing required files)
+- `VERIFIED` - infrastructure established, files written, invariants satisfied
+- `UNVERIFIED` - infrastructure established, but identity resolution required a fallback or has a mismatch and needs human review
+- `CANNOT_PROCEED` - mechanical failure only (permissions/IO/tooling prevents creating or writing required files)
 
 Also emit:
-- `recommended_action`: `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action`: `PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `blockers`: list of must-fix items
 - `missing_required`: list of paths you could not read/write
 
-## Step 1: Derive or confirm run-id (deterministic)
+## Step 1: Derive or confirm run-id (deterministic, issue-first)
 
 Precedence (first match wins):
 
-1) **Explicit run-id provided**
-- `/flow-1-signal <run-id> <signal...>` → use `<run-id>` after sanitization.
+1) **GH Issue Result control plane (preferred for Flow 1)**
+- If provided, treat `run_id` and `issue_number` as authoritative. Use `github_repo`, `issue_url`, and `issue_title` when present.
+- If `run_id_kind: LOCAL_ONLY`, do not attempt to derive or force-bind an `issue_number`; preserve the local-only run-id. Preserve `github_ops_allowed` (policy/trust) and `issue_binding` (`IMMEDIATE` vs `DEFERRED`) from GH Issue Result; repo mismatch is the only case that sets `github_ops_allowed: false`.
+- If `run_id` suggests `gh-123` but GH Issue Result has a different issue number -> set `status: UNVERIFIED`, add a blocker, and do **not** overwrite existing `issue_number` silently.
 
-2) **Ticket/issue key in the signal**
+2) **Explicit run-id provided**
+- `/flow-1-signal <run-id> <signal...>` -> use `<run-id>` after sanitization. Issue-first Flow 1 should pass `gh-<issue_number>` explicitly. If it looks like `gh-<n>`, mirror `issue_number` when run_meta has null.
+
+3) **Ticket/issue key in the signal**
 - Patterns like `ABC-123`, `#456`, or a GitHub issue URL.
 - Normalize:
-  - `ABC-123` → `abc-123`
-  - `#456` → `gh-456`
+  - `ABC-123` -> `abc-123`
+  - `#456` -> `gh-456`
 
-3) **Branch name (read-only)**
+4) **Branch name (read-only)**
 - If available: `git branch --show-current`
 - Slugify:
-  - `feat/auth` → `feat-auth`
+  - `feat/auth` -> `feat-auth`
 
-4) **Fallback slug**
+5) **Fallback slug**
 - Slugify a short phrase from the signal + short suffix for uniqueness.
 
 ### Sanitization rules (applies to any candidate run-id)
@@ -87,8 +94,9 @@ If the user explicitly indicates restart ("restart/new/fresh") for an existing r
 ## Step 2: Decide reuse vs new (best-effort)
 
 If `.runs/<candidate>/run_meta.json` exists:
-- If it matches the same work item (`task_key` or explicit run_id match) → reuse
-- If it clearly does **not** match → create a new run-id (e.g., add suffix) and continue
+- If it matches the same work item (`task_key` or explicit run_id match) -> reuse.
+- If `run_id` is `gh-<n>` but existing `issue_number` differs -> set `status: UNVERIFIED`, record a blocker, and reuse without rewriting `issue_number` (requires human review).
+- If it clearly does **not** match -> create a new run-id (e.g., add suffix) and continue.
 
 If ambiguity remains, proceed with reuse **and** set overall status to `UNVERIFIED` with a blocker explaining the ambiguity.
 
@@ -107,10 +115,23 @@ Create or update `.runs/<run-id>/run_meta.json`:
 ```json
 {
   "run_id": "<run-id>",
+  "run_id_kind": "GH_ISSUE | LOCAL_ONLY | null",
+  "issue_binding": "IMMEDIATE | DEFERRED | null",
+  "issue_binding_deferred_reason": "gh_unauth | gh_unavailable | null",
   "canonical_key": null,
   "aliases": ["<run-id>"],
   "task_key": "<ticket-id | branch-slug | null>",
-  "task_title": "<short normalized title from signal | null>",
+  "task_title": "<short normalized title from signal | issue title | null>",
+
+  "github_repo": "<owner/repo | null>",
+  "github_repo_expected": "<owner/repo | null>",
+  "github_repo_actual_at_creation": "<owner/repo | null>",
+  "github_ops_allowed": true,
+  "repo_mismatch": false,
+
+  "issue_number": null,
+  "issue_url": "<url | null>",
+  "issue_title": "<string | null>",
 
   "created_at": "<ISO8601>",
   "updated_at": "<ISO8601>",
@@ -118,8 +139,7 @@ Create or update `.runs/<run-id>/run_meta.json`:
 
   "flows_started": ["signal"],
 
-  "source": "<explicit_run_id | ticket | branch | fallback>",
-  "issue_number": null,
+  "source": "<gh_issue_result | explicit_run_id | ticket | branch | fallback>",
   "pr_number": null,
 
   "supersedes": null,
@@ -129,7 +149,10 @@ Create or update `.runs/<run-id>/run_meta.json`:
 
 Rules:
 
-* Preserve existing fields you don't own (including `canonical_key`, `issue_number`, `pr_number`, `aliases`).
+* Preserve existing fields you don't own (including `canonical_key`, `issue_number`, `pr_number`, `aliases`). Never overwrite `issue_number`/`canonical_key`/`task_key` if already set.
+* Always ensure `github_repo*` fields and `issue_url` keys exist on first write (use `null` when unknown) and preserve any existing values.
+* Merge GH Issue Result when present: set `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `repo_mismatch`, `github_repo_expected`, `github_repo_actual_at_creation`, `issue_number`, `github_repo`, `issue_url`, `issue_title` only when null/absent. If `task_title` is null, set it from `issue_title`.
+* If `run_id` matches `gh-<number>` and `issue_number` is null, set `issue_number` to that number and set `task_key` and `canonical_key` to `gh-<number>` when they are null (do not overwrite existing values). Keep `github_ops_allowed` from GH Issue Result if present; default to `true` when unknown.
 * Always update `updated_at`.
 * Increment `iterations` on each invocation.
 * Ensure `"signal"` is present in `flows_started` (do not remove other flows).
@@ -148,6 +171,7 @@ Upsert the run entry by `run_id`:
 {
   "run_id": "<run-id>",
   "canonical_key": null,
+  "github_repo": "<owner/repo | null>",
   "task_key": "<task_key | null>",
   "task_title": "<task_title | null>",
   "issue_number": null,
@@ -160,10 +184,11 @@ Upsert the run entry by `run_id`:
 
 Rules:
 
-* Index is a pointer, not a receipt store.
+* Index is a pointer, not a receipt store. Do not overwrite existing `issue_number`/`canonical_key`/`github_repo` values.
 * Keep entries sorted by `run_id` for stable diffs.
 * `status: PENDING` means "run exists, no flow receipt has sealed a status yet".
   Cleanup agents will later set `status` to `VERIFIED | UNVERIFIED | CANNOT_PROCEED`.
+* If `run_id` matches `gh-<number>` and `issue_number` is null, set `issue_number` to that number and set `canonical_key` to `gh-<number>` when it is null.
 
 ## Step 6: Create Signal stubs (optional, safe defaults)
 
@@ -230,7 +255,7 @@ status: NEW | EXISTING | SUPERSEDING
 
 ## Signal Run Prep Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: null
 route_to_flow: null
 
@@ -241,5 +266,5 @@ supersedes: <prior-run-id | null>
 blockers: []
 missing_required: []
 notes:
-  - <e.g., "sanitized run-id from X → Y", "used branch fallback", "reused existing run_meta">
+  - <e.g., "sanitized run-id from X -> Y", "used branch fallback", "reused existing run_meta">
 ```

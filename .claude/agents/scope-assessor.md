@@ -50,7 +50,7 @@ Write all outputs under `.runs/<run-id>/signal/`:
 ## Status + routing contract
 
 Use this closed action vocabulary:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Guidance:
 - `CANNOT_PROCEED` → `recommended_action: FIX_ENV`
@@ -163,7 +163,7 @@ Heuristic guidance (use if counts are available):
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6|null>
 
@@ -217,7 +217,7 @@ At the end of your response, return this block (must match scope_estimate.md):
 ```markdown
 ## Scope Assessor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6|null>
 tshirt_size: <S|M|L|XL|null>

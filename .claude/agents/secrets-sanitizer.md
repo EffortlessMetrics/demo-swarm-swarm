@@ -50,6 +50,7 @@ Do **not** scan the entire repository. Do **not** scan other flow directories un
 3) **Externalize only when safe/obvious**. Otherwise set `needs_upstream_fix: true` and route.
 4) **No encryption-as-sanitization.** Do not "move secrets around."
 5) **Idempotent**: rerunning should converge (or clearly explain why it didn't).
+6) **Publish interaction**: `safe_to_publish: false` still permits downstream GH agents to post a restricted update **only if** they limit inputs to control-plane facts and receipt-derived machine data (counts/status). No human-authored markdown or raw signal may be read or quoted.
 
 ## Status model (gate-specific)
 
@@ -143,7 +144,7 @@ Write `.runs/<run-id>/<flow>/secrets_status.json` with this schema:
   "safe_to_commit": true,
   "safe_to_publish": true,
   "needs_upstream_fix": false,
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
 
@@ -196,7 +197,7 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
@@ -248,7 +249,7 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 - safe_to_commit: true|false
 - safe_to_publish: true|false
 - needs_upstream_fix: true|false
-- recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+- recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 - route_to_flow: <1-6|null>
 - route_to_agent: <agent|null>
 

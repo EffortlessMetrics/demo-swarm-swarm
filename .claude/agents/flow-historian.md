@@ -1,7 +1,7 @@
 ---
 name: flow-historian
 description: Compile timeline → flow_history.json.
-model: inherit
+model: haiku
 color: orange
 ---
 
@@ -72,7 +72,7 @@ Embed exactly this shape:
 ```json
 "machine_summary": {
   "status": "VERIFIED|UNVERIFIED|CANNOT_PROCEED",
-  "recommended_action": "PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV",
+  "recommended_action": "PROCEED|RERUN|BOUNCE|FIX_ENV",
   "route_to_flow": 1,
   "route_to_agent": null,
   "blockers": [],
@@ -176,7 +176,7 @@ After writing the JSON, return:
 ```yaml
 ## Flow Historian Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

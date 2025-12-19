@@ -1,7 +1,7 @@
 ---
 name: gh-researcher
 description: Read-only GitHub reconnaissance (issues/PRs/discussions + local prior art pointers) → .runs/<run-id>/signal/github_research.md (pack-standard Machine Summary).
-model: inherit
+model: haiku
 color: yellow
 ---
 
@@ -67,11 +67,21 @@ These prefixes are contract infrastructure. Do not rename them.
 
 Read `.runs/<run-id>/run_meta.json` and extract any available identifiers:
 - `canonical_key`, `aliases[]`, `issue_number`, `title`/`summary` fields (if present)
+- Repo trust flags: `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`
+
+If `github_ops_allowed: false`:
+- Do **not** call `gh` (even read-only).
+- Produce a local-prior-art-only report with an explicit limitation note in `## Access & Limitations`.
+- Status: UNVERIFIED, `recommended_action: PROCEED` (flows continue).
+- Still include Inventory markers for any local pointers you find (CODE_REF entries only).
+
+If allowed:
+- Prefer `github_repo` or `github_repo_expected` from run_meta as the repo scope for any `gh` calls before falling back to `gh repo view`.
 
 Derive search terms in this order (use what exists; don't invent):
 - Canonical key / aliases (exact matches)
 - Issue number (if present)
-- 3–8 keywords from the orchestrator's signal text (nouns/verbs, component names, error strings)
+- 3-8 keywords from the orchestrator's signal text (nouns/verbs, component names, error strings)
 - Key module/service names from ADR if available (optional, but helpful)
 
 Document the final query terms in `## Search Inputs`.
@@ -154,7 +164,7 @@ At the end of `github_research.md`, include:
 ```yaml
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

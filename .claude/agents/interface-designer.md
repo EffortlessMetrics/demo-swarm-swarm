@@ -149,7 +149,7 @@ At the end of `.runs/<run-id>/plan/schema.md`, include:
 ```yaml
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

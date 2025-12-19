@@ -69,6 +69,7 @@ operation: checkpoint | build
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
 
@@ -82,6 +83,10 @@ anomaly_paths: []
 
   * Always populated.
   * If no commit was created (no-op), return current `HEAD` SHA.
+* `publish_surface`:
+
+  * `PUSHED` only when a push is attempted and succeeds.
+  * `NOT_PUSHED` for `checkpoint_mode: local_only`, anomalies, skipped push, or push failure.
 * `status`:
 
   * `COMPLETED`: operation succeeded
@@ -204,9 +209,9 @@ If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is em
 
 Respect Gate Result + `checkpoint_mode`:
 
-* If `safe_to_commit: false` => skip commit entirely, return `proceed_to_github_ops: false`.
-* If `checkpoint_mode: local_only` => never push, return `proceed_to_github_ops: false`.
-* If anomaly detected => never push, return `proceed_to_github_ops: false`.
+* If `safe_to_commit: false` => skip commit entirely, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
+* If `checkpoint_mode: local_only` => never push, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
+* If anomaly detected => never push, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
 * If `safe_to_publish: true` AND `checkpoint_mode: normal` AND no anomaly:
 
   * push current branch ref (even if no-op). If push fails (auth/network), record `status: FAILED` and set `proceed_to_github_ops: false`:
@@ -214,6 +219,7 @@ Respect Gate Result + `checkpoint_mode`:
     ```bash
     gitc push -u origin "run/<run-id>" || push_failed=1
     ```
+  * Set `publish_surface: PUSHED` only when the push succeeds; otherwise `NOT_PUSHED`.
 
 ### Gitignore conflict: `.runs/`
 
@@ -231,9 +237,12 @@ Repo-operator may be asked to stage intended changes. Do **not** assume `src/` o
 
 Preferred staging sources, in order:
 
-1. `demo-swarm.config.json` layout roots (source/tests/docs/etc.)
-2. `.runs/<run-id>/build/subtask_context_manifest.json` file lists
-3. As last resort: stage only what is already modified/untracked under "project-defined roots"; if roots are unknown, treat as anomaly and stop for reconciliation.
+1. Fix-forward lane (Flow 4) only: `.runs/<run-id>/gate/fix_forward_report.md` `touched_files` list
+   - Stage exactly `touched_files` (plus required audit artifacts), not "everything under src/"
+   - Treat any dirty path outside `touched_files` as an anomaly and stop for reconciliation
+2. `demo-swarm.config.json` layout roots (source/tests/docs/etc.)
+3. `.runs/<run-id>/build/subtask_context_manifest.json` file lists
+4. As last resort: stage only what is already modified/untracked under "project-defined roots"; if roots are unknown, treat as anomaly and stop for reconciliation.
 
 Always stage audit artifacts:
 
@@ -278,6 +287,7 @@ Push gating (Build):
   ```bash
   gitc push -u origin "run/<run-id>" || push_failed=1
   ```
+* Set `publish_surface: PUSHED` only when the push succeeds; otherwise `NOT_PUSHED`.
 
 Return control-plane block:
 
@@ -287,6 +297,7 @@ operation: build
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: [...]
 ```
 

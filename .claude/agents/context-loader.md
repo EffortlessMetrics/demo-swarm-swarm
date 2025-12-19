@@ -30,6 +30,7 @@ Primary (in priority order):
 Helpful if present:
 - `demo-swarm.config.json` (preferred source of repo layout conventions)
 - `.runs/<run-id>/plan/test_plan.md`
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; maps ACs to test types + impl hints)
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/schema.md`
 - `.runs/<run-id>/plan/observability_spec.md`
@@ -47,7 +48,7 @@ Use:
 ## Control-plane routing (closed enum)
 
 Use:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Rules:
 - `FIX_ENV` only when `status: CANNOT_PROCEED`
@@ -199,7 +200,7 @@ If a pattern matches zero files:
 
   "machine_summary": {
     "status": "<VERIFIED or UNVERIFIED or CANNOT_PROCEED>",
-    "recommended_action": "<PROCEED or RERUN or BOUNCE or ESCALATE or FIX_ENV>",
+    "recommended_action": "<PROCEED or RERUN or BOUNCE or FIX_ENV>",
     "route_to_flow": null,
     "route_to_agent": null,
     "blockers": [],
@@ -310,7 +311,7 @@ Return this block at the end of your response:
 ```md
 ## Context Loader Result
 status: <VERIFIED or UNVERIFIED or CANNOT_PROCEED>
-recommended_action: <PROCEED or RERUN or BOUNCE or ESCALATE or FIX_ENV>
+recommended_action: <PROCEED or RERUN or BOUNCE or FIX_ENV>
 route_to_agent: <agent-name or null>
 route_to_flow: <integer 1-6 or null>
 blockers: []

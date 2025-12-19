@@ -31,6 +31,8 @@ Optional:
 ## Output
 
 - `.runs/<run-id>/plan/test_plan.md`
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract for Flow 3)
+- `.runs/<run-id>/plan/ac_status.json` (machine-readable AC status tracker)
 
 ## Core contracts
 
@@ -129,7 +131,7 @@ The mutator agent reads these fields to determine behavior:
 
 ### Step 5: Write `test_plan.md` (required structure)
 
-Write the plan using this structure:
+Write the plan using this structure (includes the Scenario → Test Type Matrix that feeds ac_matrix.md):
 
 ```markdown
 # Test Plan
@@ -142,7 +144,7 @@ blockers:
   - <short actionable blocker>
 concerns:
   - <non-gating issues>
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -150,6 +152,7 @@ counts:
   scenarios_total: <int|null>
   requirements_total: <int|null>
   requirements_with_scenarios: <int|null>
+  ac_count: <int|null>
 
 severity_summary:
   critical: <int>
@@ -200,11 +203,89 @@ Additional notes:
 - What Flow 3 should implement first (ordered list)
 ```
 
+### Step 5b: Write `ac_matrix.md` (AC-driven build contract)
+
+The AC matrix is the **build contract** for Flow 3. It decomposes the work into discrete Acceptance Criteria that Flow 3 will implement one at a time.
+
+**Derivation:** Each AC comes from a BDD scenario (preferred) or a requirement clause. The matrix maps each AC to what Flow 3 needs to build and verify.
+
+Write `ac_matrix.md` using this structure:
+
+```markdown
+# Acceptance Criteria Matrix
+
+## Machine Summary
+ac_count: <int>
+requirements_covered: <int>
+scenarios_covered: <int>
+
+## AC Inventory
+
+| AC-ID | Source | Description | Priority | Test Types | Impl Hints | Verification |
+|-------|--------|-------------|----------|------------|------------|--------------|
+| AC-001 | @REQ-001, login.feature:12 | User can log in with valid credentials | P0 | Unit, Integration | Auth module | Login succeeds, token issued |
+| AC-002 | @REQ-002, login.feature:25 | Invalid credentials rejected | P0 | Unit | Auth module | 401 returned, no token |
+| ... | | | | | | |
+
+## Column Definitions
+
+- **AC-ID**: Stable identifier (AC-001, AC-002, ...). Flow 3 references these.
+- **Source**: Traceability back to REQ tags and/or feature file:line.
+- **Description**: One-sentence statement of what "done" looks like.
+- **Priority**: P0 (must not fail) / P1 (primary path) / P2 (secondary).
+- **Test Types**: From test_plan.md mapping (Unit, Integration, Contract, E2E, Fuzz, Perf/Obs).
+- **Impl Hints**: Which module/component/file is likely affected.
+- **Verification**: How Flow 3 confirms this AC is satisfied (test assertion summary).
+
+## Implementation Order
+
+Recommended sequence for Flow 3 (respects dependencies):
+1. AC-001 (foundational)
+2. AC-002 (depends on AC-001)
+3. ...
+
+## Notes
+
+- Each AC should be completable in one test/code microloop iteration.
+- If an AC is too large, split it (AC-001a, AC-001b).
+- Flow 3 updates ac_status.json as it completes each AC.
+```
+
+### Step 5c: Write `ac_status.json` (machine-readable tracker)
+
+Initialize the status tracker that Flow 3 will update:
+
+```json
+{
+  "version": 1,
+  "ac_count": <int>,
+  "completed": 0,
+  "in_progress": null,
+  "items": [
+    {
+      "ac_id": "AC-001",
+      "status": "pending",
+      "tests_written": false,
+      "tests_passing": false,
+      "code_implemented": false,
+      "code_reviewed": false,
+      "files_touched": [],
+      "evidence": null
+    }
+  ]
+}
+```
+
+**Status values:** `pending` | `in_progress` | `completed` | `blocked`
+
+Flow 3 will update this file as it processes each AC. Gate can audit it for completeness.
+
 ### Step 6: Set completion state
 
 * `VERIFIED` if:
   * scenarios exist and are mapped, **and**
   * thresholds are defined, **and**
+  * AC matrix is complete (all scenarios/requirements have AC entries), **and**
   * no material blockers remain
 
 * `UNVERIFIED` if:
@@ -246,7 +327,7 @@ Routing:
 * If requirements are missing/unclear → `recommended_action: BOUNCE`, `route_to_agent: requirements-author`, `route_to_flow: 1`
 * If you can proceed with documented assumptions → `recommended_action: PROCEED`, `route_to_agent: null`, `route_to_flow: null` (and note assumptions in Gaps section)
 
-**Note:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`. For `PROCEED`, `RERUN`, `ESCALATE`, and `FIX_ENV`, set both to `null`.
+**Note:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`. For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.
 
 ### CANNOT_PROCEED
 
@@ -267,7 +348,7 @@ At the end of your response, return this block (must match the Machine Summary y
 ```markdown
 ## Test Strategist Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 missing_required: []
@@ -280,6 +361,7 @@ counts:
   scenarios_total: 0
   requirements_total: 0
   requirements_with_scenarios: 0
+  ac_count: 0
 ```
 
 The orchestrator routes on this block. `test_plan.md` remains the durable audit artifact.

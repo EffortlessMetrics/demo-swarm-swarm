@@ -1,8 +1,8 @@
 ---
-description: Run Flow 4 (Code → Artifact): verify receipts, contracts, security, policies; recommend merge or bounce.
+description: Run Flow 4 (Code -> Artifact): verify receipts, contracts, security, policies; decide merge vs bounce; execute bounded fix-forward lane when eligible.
 ---
 
-# Flow 4: Code → Artifact (Gate)
+# Flow 4: Code -> Artifact (Gate)
 
 You are orchestrating Flow 4 of the SDLC swarm.
 
@@ -18,8 +18,8 @@ You are orchestrating Flow 4 of the SDLC swarm.
 
 #### Artifact visibility rule
 
-* Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
+* Do **not** attempt to prove files exist under `.runs/<run-id>/` **before** `signal-run-prep` / `run-prep`.
+* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on verification agents (e.g., `receipt-checker`) to obtain evidence from committed state when necessary.
 * Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
 
 ## Your Goals
@@ -28,8 +28,8 @@ You are orchestrating Flow 4 of the SDLC swarm.
 - Check API/schema contracts
 - Scan security and coverage
 - Enforce policies
-- Decide: MERGE / BOUNCE / ESCALATE
-- **Optional, single-lane fix-forward** for deterministic mechanical drift (fmt/import order/whitespace) when `gate-fixer` says it is safe and resealable
+- Decide: MERGE / BOUNCE (with reason for human-review vs fix-required)
+- **Runner-bounded fix-forward lane** for deterministic mechanical drift (fmt/import/whitespace/docs) when `gate-fixer` says it is safe and resealable
 
 ## Before You Begin (Required)
 
@@ -52,20 +52,21 @@ Flow 4 uses **two complementary state machines**:
 ### Suggested TodoWrite Items
 
 ```
-- Establish run infrastructure (run-prep)
-- Verify receipts (receipt-checker first; route on Result)
-- Check contracts + security + coverage (parallel)
-- Mechanical issues report (gate-fixer)
-- Fix-forward lane (conditional; runner-bounded)
-- Risk assessment (risk-analyst)
-- Policy compliance (policy-analyst)
-- Merge decision (merge-decider)
-- Finalize receipt (gate-cleanup)
-- Sanitize secrets (secrets-sanitizer)
-- Checkpoint commit (repo-operator)
-- Update issue board (gh-issue-manager; gated)
-- Report gate verdict (gh-reporter; gated)
-- Update flow_plan.md summary
+- run-prep (establish run infrastructure)
+- repo-operator (ensure run branch)
+- receipt-checker (verify receipts first; route on Result)
+- contract-enforcer / security-scanner / coverage-enforcer (parallel checks)
+- gate-fixer (mechanical issues report; emits FIX_FORWARD_PLAN_V1)
+- fix-forward-runner (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via `receipt-checker` + `gate-fixer`)
+- traceability-auditor (traceability audit)
+- risk-analyst (risk assessment)
+- policy-analyst (policy compliance)
+- merge-decider (merge decision)
+- gate-cleanup (finalize receipt; update index; update `flow_plan.md`)
+- secrets-sanitizer (publish gate)
+- repo-operator (checkpoint commit)
+- gh-issue-manager (update issue board; gated)
+- gh-reporter (report gate verdict; gated)
 ```
 
 ### On Rerun
@@ -81,7 +82,7 @@ If you encounter missing receipts or unclear state, **document it and continue w
 ## Subagents to use
 
 **Infrastructure (Step 0)**:
-- **run-prep** -- MUST be called first to establish the run directory and `.runs/<run-id>/gate/`
+- run-prep (establish run directory)
 
 Domain agents (Flow 4 specific):
 - receipt-checker
@@ -89,17 +90,14 @@ Domain agents (Flow 4 specific):
 - security-scanner
 - coverage-enforcer
 - gate-fixer (reports mechanical issues; no repo mutations)
+- fix-forward-runner (executes FIX_FORWARD_PLAN_V1; no git side effects)
+- build-cleanup (reseal Build receipt after runner changes code)
 - merge-decider
 
 Cross-cutting agents:
 - risk-analyst
 - policy-analyst
-
-Fix-forward lane (conditional; runner-bounded):
-- lint-executor (apply deterministic format/lint)
-- test-executor (verify tests)
-- build-cleanup (reseal Build receipt after code changes)
-- repo-operator (stage/commit/push; owns git side effects)
+- traceability-auditor (run-level coherence + spec traceability before merge decision)
 
 Cleanup + Reporting (End of Flow):
 - gate-cleanup -- writes gate_receipt.json, updates index.json status
@@ -127,10 +125,11 @@ If these files are not visible locally but may exist in committed state, do **no
 | `security_scan.md` | security-scanner | Security scan findings |
 | `coverage_audit.md` | coverage-enforcer | Coverage threshold check |
 | `gate_fix_summary.md` | gate-fixer | Mechanical issues report (no fixes) + fix-forward plan |
-| `fix_forward_report.md` | fix-forward routine (conditional) | What ran, files changed, test summary, commit SHA |
+| `fix_forward_report.md` | fix-forward-runner (conditional) | Runner execution log: commands run, scope check, files touched, reseal guidance |
+| `traceability_audit.md` | traceability-auditor | Run-level coherence + spec traceability (REQ<->BDD) across receipts/index/GitHub markers |
 | `risk_assessment.md` | risk-analyst | Risk analysis |
 | `policy_analysis.md` | policy-analyst | Policy compliance check |
-| `merge_decision.md` | merge-decider | MERGE / BOUNCE / ESCALATE decision |
+| `merge_decision.md` | merge-decider | MERGE / BOUNCE decision (with reason) |
 | `cleanup_report.md` | gate-cleanup | Cleanup summary |
 | `gate_receipt.json` | gate-cleanup | Machine-readable receipt |
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings |
@@ -142,7 +141,7 @@ If these files are not visible locally but may exist in committed state, do **no
 
 All artifacts live under `.runs/<run-id>/gate/`.
 
-**Fix-forward contract:** `gate_fix_summary.md` must contain the `## Fix-forward Plan (machine readable)` block (`PACK-CONTRACT: FIX_FORWARD_PLAN_V1`). The optional `fix_forward_report.md` records what the fix-forward routine actually ran (commands, touched files, test summary, commit SHA).
+**Fix-forward contract:** `gate_fix_summary.md` must contain the `## Fix-forward Plan (machine readable)` block (`PACK-CONTRACT: FIX_FORWARD_PLAN_V1`). `fix_forward_report.md` records what the runner actually executed (commands, scope check, files touched, reseal guidance).
 
 ## Orchestration outline
 
@@ -180,10 +179,11 @@ Create or update `.runs/<run-id>/gate/flow_plan.md`:
 - [ ] receipt-checker (verify receipts first; route on Result)
 - [ ] contract-enforcer / security-scanner / coverage-enforcer (parallel)
 - [ ] gate-fixer (mechanical issues report)
-- [ ] fix-forward lane (conditional: lint-executor apply → test-executor verify → build-cleanup reseal → repo-operator commit/push → rerun receipt-checker + gate-fixer)
+- [ ] fix-forward-runner (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via `receipt-checker` + `gate-fixer`)
+- [ ] traceability-auditor (run-level coherence)
 - [ ] risk-analyst (risk assessment)
 - [ ] policy-analyst (policy compliance)
-- [ ] merge-decider (decide: MERGE/BOUNCE/ESCALATE)
+- [ ] merge-decider (decide: MERGE/BOUNCE + reason)
 - [ ] gate-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
@@ -198,6 +198,7 @@ Create or update `.runs/<run-id>/gate/flow_plan.md`:
 ### Step 2: Verify receipts
 - `receipt-checker` -> `.runs/<run-id>/gate/receipt_audit.md`
 - Run this before contracts/security/coverage; route on its Result block.
+- **AC completion check:** Receipt-checker should verify `build_receipt.json.counts.ac_completed == ac_total`. If not, BOUNCE to Flow 3 with blocker: "AC loop incomplete".
 
 ### Step 3: Check contracts (can run in parallel with security/coverage)
 - `contract-enforcer` -> `.runs/<run-id>/gate/contract_compliance.md`
@@ -208,48 +209,46 @@ Create or update `.runs/<run-id>/gate/flow_plan.md`:
 ### Step 5: Coverage (can run in parallel with contracts/security)
 - `coverage-enforcer` -> `.runs/<run-id>/gate/coverage_audit.md`
 
-### Step 6: Mechanical issues report (after verification agents complete)
+### Step 6: Mechanical issues report
 - `gate-fixer` -> `.runs/<run-id>/gate/gate_fix_summary.md` (recommendations only; **no repo mutations in Gate**)
 - Identifies lint, format, and doc issues that would be fixed in Build
-- Does NOT apply fixes—Gate has no commit governance
 
 ### Step 7: Fix-forward lane (conditional; runner-bounded)
-- Read the `FIX_FORWARD_PLAN_V1` block from `gate_fix_summary.md`.
-- If `fix_forward_eligible: false` → skip fix-forward; proceed to risk/policy.
-- If `fix_forward_eligible: true` → **execute the Fix-forward Plan** (as emitted by gate-fixer) using existing agents (lint-executor, test-executor, build-cleanup, repo-operator, secrets-sanitizer); do not re-diagnose or rescan beyond the plan.
-- After executing the plan (success or failure), re-run only:
-  - `receipt-checker` (attestation coherence after reseal)
-  - `gate-fixer` (confirm mechanical blockers are resolved; still report-only)
-- If the plan execution fails or remains unclean, proceed with the remaining Gate stations and expect merge-decider to bounce to Flow 3.
+Treat fix-forward as a **subroutine station**, not a per-call checklist.
 
-### Step 8: Risk assessment
+- Entry condition: `fix_forward_eligible: true` (from `gate-fixer` / `gate_fix_summary.md`)
+- Apply Fix-forward Subroutine Template with:
+  - producer = `gate-fixer` (emits `FIX_FORWARD_PLAN_V1`)
+  - fix lane = `fix-forward-runner` (executes `apply_steps`/`verify_steps`; no git side effects)
+  - confirm = rerun `receipt-checker`, then rerun `gate-fixer` once
+
+If the runner reports `changes_detected: true`, reseal + stage + Build publish gate + commit/push the runner-touched scope (Flow 3 reseal loop rules), then run the confirm pass.
+
+If the runner reports UNVERIFIED or scope violation, proceed with remaining Gate stations; `merge-decider` should BOUNCE to Flow 3 with the runner report as evidence.
+
+### Step 8: Traceability audit
+- `traceability-auditor` -> `.runs/<run-id>/gate/traceability_audit.md`
+- Run after fix-forward reruns so receipts/index are current.
+
+### Step 9: Risk assessment
 - `risk-analyst` -> `.runs/<run-id>/gate/risk_assessment.md`
 
-### Step 9: Policy compliance
+### Step 10: Policy compliance
 - `policy-analyst` -> `.runs/<run-id>/gate/policy_analysis.md`
 
-### Step 10: Merge decision
-- `merge-decider` -> `.runs/<run-id>/gate/merge_decision.md` (MERGE/BOUNCE/ESCALATE)
+### Step 11: Merge decision
+- `merge-decider` -> `.runs/<run-id>/gate/merge_decision.md` (MERGE/BOUNCE with reason)
 
-### Step 11: Finalize and Write Receipt
+### Step 12: Finalize and Write Receipt
 - `gate-cleanup` -> `.runs/<run-id>/gate/gate_receipt.json`, `.runs/<run-id>/gate/cleanup_report.md`
 - Verifies all required artifacts exist
 - Computes counts mechanically (never estimates)
 - Updates `.runs/index.json` with status, last_flow, updated_at
 
-### Step 12: Sanitize Secrets (Publish Gate)
+### Step 13: Sanitize Secrets (Publish Gate)
 - `secrets-sanitizer` -> `.runs/<run-id>/gate/secrets_scan.md`, `.runs/<run-id>/gate/secrets_status.json`
 - Scans .runs/ artifacts before GitHub posting
-- Fixes what it can (redacts artifacts)
-
-**Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED_PUBLISH).
-`safe_to_commit` / `safe_to_publish` are authoritative. Route on Gate Result booleans, not status.
-
-**Audit-only file:** `secrets_status.json` is audit-only; optional last-mile verification is allowed, but routing uses the Gate Result block.
-
-**Control plane:** `secrets-sanitizer` returns a Gate Result block for orchestrator routing; `secrets_status.json` is the durable audit record. Orchestrators route on the returned block, not by re-reading the file.
-
-**Gate Result block (returned by secrets-sanitizer):**
+- Returns a **Gate Result** block (control plane; file is audit-only)
 
 <!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
 ```
@@ -259,20 +258,22 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
 **Gating logic (from Gate Result):**
-- Proceed only if `safe_to_publish: true`
-- If `needs_upstream_fix: true` → **BOUNCE** (typically to Flow 3) with pointer to `secrets_scan.md`
-- If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+- If `safe_to_commit: true` → proceed to checkpoint commit (Step 13c)
+- If `safe_to_commit: false`:
+  - If `needs_upstream_fix: true` → **BOUNCE** (typically to Flow 3) with pointer to `secrets_scan.md`
+  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
 
-### Step 12b: Reseal If Modified (Conditional Loop)
+### Step 13b: Reseal If Modified (Conditional Loop)
 
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(gate-cleanup → secrets-sanitizer)` until either:
+If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(gate-cleanup -> secrets-sanitizer)` until either:
 - the sanitizer reports `modified_files: false`, or
 - the sanitizer indicates no reasonable path to fixing (non-convergent).
 
@@ -280,14 +281,12 @@ If reseal cannot make progress (sanitizer signals no reasonable path):
 - Append an evidence note to `secrets_scan.md`:
   - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
 - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - it must return `proceed_to_github_ops: false`
-- Skip **all** GitHub ops (issue-manager / reporter).
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: ESCALATE`
+  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
+- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
+- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
   - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
 
-**Note:** `checkpoint_mode: local_only` is a named parameter to `repo-operator` that mechanically enforces `proceed_to_github_ops: false` regardless of `safe_to_publish`. This ensures safe-bail cannot accidentally push.
-
-### Step 12c: Checkpoint Commit
+### Step 13c: Checkpoint Commit
 
 - `repo-operator` -> `.runs/<run-id>/gate/git_status.md` (if anomaly detected)
 
@@ -311,58 +310,55 @@ operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
 **Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
 
 Orchestrators route on this block, not by re-reading `git_status.md`.
 
-**Safe-bail override:** If this checkpoint was invoked due to safe-bail (Step 12b), `repo-operator` must set `proceed_to_github_ops: false` even if `safe_to_publish: true`.
+**Safe-bail enforcement:** If this checkpoint was invoked due to safe-bail (Step 13b), `repo-operator` must set `proceed_to_github_ops: false` even if `safe_to_publish: true`.
 
 **Gating logic (from prior secrets-sanitizer Gate Result + repo-operator result):**
 - If `safe_to_commit: false` (from Gate Result): `repo-operator` skips commit entirely
 - If anomaly detected: `repo-operator` commits allowlist only, skips push, returns `proceed_to_github_ops: false`
 - If `safe_to_publish: true` and no anomaly: `repo-operator` commits and pushes, returns `proceed_to_github_ops: true`
 - If `safe_to_publish: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
+  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`; flow ends UNVERIFIED
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-  - Otherwise → **UNVERIFIED**; commit locally, skip push
+  - Otherwise → UNVERIFIED; skip push (`publish_surface: NOT_PUSHED`). Continue with GitHub Reporting Ops in RESTRICTED mode when access allows.
 
-### Step 13: Update Issue Board
+### GitHub Access + Content Mode (canonical)
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
 
-Both must be true to proceed.
+- Publish blocked → `RESTRICTED` (never skip when access is allowed)
+- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
 
-- `gh-issue-manager` -> updates issue body status board from receipt
-- **Creates GitHub issue if none exists** (allowed in any flow; includes "Signal pending" banner if created from Flow 4)
+### Step 14: Update Issue Board
 
-**Route-and-fix behavior:**
-- If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) (already handled in 12c; should not reach here)
-- If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure; stop)
-- If `gh` CLI unauthenticated/unavailable → **SKIPPED** with evidence (not blocked)
-- If `proceed_to_github_ops: false` → **SKIPPED**; anomaly documented in `git_status.md`
+Apply Access + Content Mode rules:
+- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
+- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
 
-### Step 14: Report Gate Verdict
+`gh-issue-manager` updates issue body status board from receipt. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 4).
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+### Step 15: Report Gate Verdict
 
-Both must be true to proceed.
+Apply Access + Content Mode rules:
+- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
+- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown). Publish-blocked reason must be explicit.
 
-- `gh-reporter` -> post verdict **to the GitHub issue** (not PR)
-- Writes `.runs/<run-id>/gate/github_report.md` locally as record
-- **Issue-first (hard):** All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
+`gh-reporter` writes `.runs/<run-id>/gate/github_report.md` locally and posts to the issue (never PR). Issue-first (hard): flow logs go to the issue even if a PR exists. PRs are for PR-review dynamics only.
 
-**Route-and-fix behavior:**
-- If `safe_to_publish: false` → **SKIPPED**; write local report only
-- If `proceed_to_github_ops: false` → **SKIPPED**; anomaly documented in `git_status.md`
-- If `gh` CLI unauthenticated → **SKIPPED** (not blocked)
+**Content expectations:** The gh-reporter comment should include:
+- Decisions Needed (unanswered open questions requiring human input)
+- Concerns for Review (gate findings, merge blockers, policy issues)
+- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
 
-### Step 15: Finalize Flow
+These make the GitHub update actionable - humans can make decisions without leaving GitHub.
+
+### Step 16: Finalize Flow
 
 Update `flow_plan.md`:
 - Mark all steps as complete
@@ -372,7 +368,7 @@ Update `flow_plan.md`:
 ## Summary
 
 - **Final Status**: VERIFIED | UNVERIFIED
-- **Merge Decision**: MERGE | BOUNCE | ESCALATE
+- **Merge Decision**: MERGE | BOUNCE (reason: NEEDS_HUMAN_REVIEW | FIX_REQUIRED | POLICY_BLOCK | OTHER)
 - **Blockers**: <list if any>
 - **Next Flow**: `/flow-5-deploy` (if MERGE) or bounce target
 
@@ -394,7 +390,8 @@ Gate-fixer **remains report-only**. It emits the fix-forward plan; the **fix-for
 - API contract violations
 - Security vulnerabilities
 - Coverage below threshold
-- Mechanical drift that is **not** eligible for fix-forward or failed within the runner-bounded fix-forward lane
+- AC loop incomplete (`ac_completed < ac_total` in build_receipt.json)
+- Mechanical drift that is **not** eligible for fix-forward or failed within the runner-bounded lane
 
 **BOUNCE to Plan (Flow 2)**:
 - Design flaws
@@ -405,8 +402,8 @@ Gate-fixer **remains report-only**. It emits the fix-forward plan; the **fix-for
 
 Agents set status in their output artifacts:
 
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and check passed; here's why. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR check has concerns; here are the issues. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
+- **VERIFIED**: `blockers` empty, `missing_required` empty, and check passed. Set `recommended_action: PROCEED`.
+- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR check has concerns. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
 - **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
 
 **Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
@@ -418,8 +415,9 @@ Agents set status in their output artifacts:
 `merge-decider` outputs one of:
 
 - **MERGE**: All checks pass or concerns are acceptable; ready to deploy.
-- **BOUNCE**: Issues found; specifies target flow (Build or Plan) and reasons.
-- **ESCALATE**: Needs human judgment; explains why automated decision isn't sufficient.
+- **BOUNCE**: Issues found **or** human judgment is required. Include a `reason` field (e.g., `NEEDS_HUMAN_REVIEW`, `FIX_REQUIRED`, `POLICY_BLOCK`, `UNKNOWN_UPSTREAM`) and the target flow/agent when action is known.
+
+Human-review-only cases use `reason: NEEDS_HUMAN_REVIEW` instead of a separate human-only verdict.
 
 ---
 
@@ -427,35 +425,71 @@ Agents set status in their output artifacts:
 
 ### TodoWrite (copy exactly)
 - [ ] run-prep
-- [ ] repo-operator: ensure run/<run-id> branch
+- [ ] repo-operator (ensure `run/<run-id>` branch)
 - [ ] receipt-checker
 - [ ] contract-enforcer / security-scanner / coverage-enforcer (parallel)
 - [ ] gate-fixer (report + fix-forward plan)
-- [ ] fix-forward lane (if eligible: lint-executor apply → test-executor verify → build-cleanup reseal → repo-operator commit/push → rerun receipt-checker + gate-fixer)
+- [ ] fix-forward-runner (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via rerun `receipt-checker` + `gate-fixer`)
+- [ ] traceability-auditor
 - [ ] risk-analyst
 - [ ] policy-analyst
 - [ ] merge-decider
 - [ ] gate-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] reseal cycle (gate-cleanup ↔ secrets-sanitizer) if modified_files
-- [ ] repo-operator checkpoint (checkpoint mode; capture Repo Operator Result)
-- [ ] gh-issue-manager (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] gh-reporter (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] finalize flow_plan.md summary
+- [ ] gate-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; allowlist interlock + no-op handling)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 
-### Agent call order
-1) run-prep
-2) repo-operator (ensure run branch)
-3) receipt-checker
-4) contract-enforcer + security-scanner + coverage-enforcer (parallel)
-5) gate-fixer (report + fix-forward plan)
-6) fix-forward lane (if `fix_forward_eligible: true`: lint-executor apply → test-executor verify → build-cleanup reseal → repo-operator commit/push; then rerun receipt-checker + gate-fixer)
-7) risk-analyst
-8) policy-analyst
-9) merge-decider
-10) gate-cleanup
-11) secrets-sanitizer (read Gate Result)
-12) (reseal cycle if needed)
-13) repo-operator (checkpoint; read Repo Operator Result)
-14) gh-issue-manager (if gates true and gh available; otherwise SKIP with evidence)
-15) gh-reporter (if gates true and gh available; otherwise SKIP with evidence)
+### Station order + templates
+
+#### Station order
+
+1. `run-prep`
+
+2. `repo-operator` (ensure run branch)
+
+3. `receipt-checker`
+
+4. `contract-enforcer` / `security-scanner` / `coverage-enforcer` (parallel)
+
+5. `gate-fixer` (report + fix-forward plan)
+
+6. `fix-forward-runner` (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via rerun `receipt-checker` + `gate-fixer`)
+
+7. `traceability-auditor`
+
+8. `risk-analyst`
+
+9. `policy-analyst`
+
+10. `merge-decider`
+
+11. `gate-cleanup`
+
+12. `secrets-sanitizer`
+
+13. `gate-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+
+14. `repo-operator` (checkpoint; read Repo Operator Result)
+
+15. `gh-issue-manager` (if allowed)
+
+16. `gh-reporter` (if allowed)
+
+#### Fix-forward Subroutine Template (plan -> execute -> confirm)
+
+Do not treat fix-forward as "run runner, rerun runner". It is a bounded subroutine:
+
+1) Plan: run `gate-fixer` to emit `FIX_FORWARD_PLAN_V1` (report-only)
+2) Execute: if eligible, run `fix-forward-runner` to execute the plan (runner-bounded; no git side effects)
+3) If changes were made, reseal Build artifacts and rerun the Build publish gate per Flow 3 reseal rules
+4) Confirm: rerun `receipt-checker`, then rerun `gate-fixer` once
+
+#### Worklist Loop Template (producer → fix lane → confirm)
+
+1) Run the producer (`mutation-auditor` / `fuzz-triager` / `flakiness-detector`)
+2) If it returns `recommended_action: RERUN` or a worklist that routes to an agent:
+   - call the routed agent once (`test-author` / `code-implementer` / `fixer`)
+3) Confirm once: rerun the producer one time to verify the top items moved.
+4) If still UNVERIFIED, proceed with blockers unless the producer says another pass will help and the fix lane can actually address it.

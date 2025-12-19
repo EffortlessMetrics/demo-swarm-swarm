@@ -35,12 +35,12 @@ Write exactly one file:
 ## Control-plane routing (pack standard)
 
 Use this closed action enum everywhere:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing intent:
 - `RERUN` = rerun within Flow 1 (typically `requirements-author`).
 - `BOUNCE` = upstream dependency outside this station (e.g., missing/incorrect problem framing → `problem-framer` or Flow 1 rerun from earlier step).
-- `ESCALATE` = needs human judgment (irreconcilable contradictions, missing product decisions, compliance commitments).
+- `PROCEED` even when human judgment is needed; capture the decision points in assumptions/open questions with suggested defaults.
 - `FIX_ENV` only when `status: CANNOT_PROCEED`.
 
 Route fields:
@@ -87,7 +87,7 @@ If you cannot reliably enumerate (file missing or unreadable), set the relevant 
 For each `REQ-###`:
 - Does it have **at least one** `- AC-N:` marker? Missing markers = MAJOR.
 - Is each AC **observable** (output/state/error that a test can assert)?
-- Flag vague terms as MAJOR unless bounded: "fast", "secure", "scalable", "user-friendly", "robust", "appropriate".
+- Flag vague terms as MAJOR unless bounded: "secure", "scalable", "user-friendly", "robust", "appropriate".
 
 For each `NFR-*`:
 - Does it have **at least one** `- MET-N:` marker? Missing markers = MAJOR.
@@ -129,7 +129,7 @@ Use exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -141,6 +141,7 @@ missing_required:
 
 concerns:
   - <non-gating issues>
+observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
 
 can_further_iteration_help: yes | no
 
@@ -205,13 +206,15 @@ coverage_summary:
 
 ### Step 8: Decide status + routing
 
+- **Microloop invariant:** Use `recommended_action: RERUN` whenever there are writer-addressable items for `requirements-author` to fix in another pass. Use `recommended_action: PROCEED` only when no further `requirements-author` pass can reasonably resolve the remaining notes (informational only, or requires human decisions).
+
 - `VERIFIED` when `critical: 0` and `major: 0`.
   - `recommended_action: PROCEED`
   - `can_further_iteration_help: no`
 
 - `UNVERIFIED` when any CRITICAL or MAJOR exists, or critical inputs are missing.
   - If fixable by rewriting requirements: `recommended_action: RERUN`, `route_to_agent: requirements-author`, `can_further_iteration_help: yes`
-  - If not fixable without human product/legal decisions or framing: `recommended_action: ESCALATE`, `can_further_iteration_help: no`
+  - If not fixable without human product/legal decisions or framing: `recommended_action: PROCEED`, `can_further_iteration_help: no` (log assumptions + questions with suggested defaults)
   - If missing upstream framing is the blocker: `recommended_action: BOUNCE`, `route_to_agent: problem-framer` (or `clarifier`), `can_further_iteration_help: no`
 
 - `CANNOT_PROCEED` only for IO/permissions failures.
@@ -224,7 +227,7 @@ At the end of your response, echo this block (must match the file):
 ```markdown
 ## Requirements Critic Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 can_further_iteration_help: yes | no

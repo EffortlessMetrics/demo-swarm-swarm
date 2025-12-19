@@ -73,13 +73,14 @@ def write_file(path: str, content: str) -> bool:
         return False
 
 
-def count_pattern(content: str, pattern: str) -> int:
+def count_pattern(content: str, pattern: str) -> Optional[int]:
     """Count lines matching pattern in content."""
     try:
         regex = re.compile(pattern)
-        return sum(1 for line in content.splitlines() if regex.search(line))
     except re.error:
-        return 0
+        return None
+
+    return sum(1 for line in content.splitlines() if regex.search(line))
 
 
 def iso_now() -> str:
@@ -156,8 +157,8 @@ def extract_yaml_block(content: str) -> Optional[str]:
 
 
 def extract_yaml_field(yaml_content: str, key: str) -> Optional[str]:
-    """Extract a field from YAML content (simple parser)."""
-    pattern = rf'^{re.escape(key)}:\s*(.+?)\s*$'
+    """Extract a field from YAML content (simple parser, indent-tolerant)."""
+    pattern = rf'^\s*{re.escape(key)}:\s*(.+?)\s*$'
     for line in yaml_content.splitlines():
         match = re.match(pattern, line)
         if match:
@@ -186,10 +187,17 @@ def cmd_count_pattern(args: argparse.Namespace) -> None:
         return
 
     count = count_pattern(content, args.regex)
+    if count is None:
+        print_result(None)
+        return
 
     # Try fallback if primary returns 0
     if count == 0 and args.fallback_regex:
-        count = count_pattern(content, args.fallback_regex)
+        fallback = count_pattern(content, args.fallback_regex)
+        if fallback is None:
+            print_result(None)
+            return
+        count = fallback
 
     if count == 0 and getattr(args, "null_if_zero", False):
         print_result(None)
@@ -210,7 +218,11 @@ def cmd_count_bdd(args: argparse.Namespace) -> None:
     try:
         for feature_file in features_dir.glob("*.feature"):
             content = feature_file.read_text(encoding="utf-8")
-            total += count_pattern(content, pattern)
+            count = count_pattern(content, pattern)
+            if count is None:
+                print_result(None)
+                return
+            total += count
         print_result(total)
     except Exception:
         print_result(None)

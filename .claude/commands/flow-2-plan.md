@@ -43,6 +43,7 @@ Flow 2 uses **two complementary state machines**:
 1. Use Claude Code's **TodoWrite** tool to create a TODO list of **major stations**.
    - Track at the behavioral/station level, NOT per agent call.
    - Parallel steps (6-9) are ONE todo.
+   - Microloops (`design-optioneer` ↔ `option-critic`, `interface-designer` ↔ `contract-critic`, `observability-designer` ↔ `observability-critic`) are ONE todo each.
 
 2. Mirror the same list into `.runs/<run-id>/plan/flow_plan.md` as checkboxes.
    - As each station completes: mark TodoWrite done AND tick the checkbox.
@@ -50,22 +51,36 @@ Flow 2 uses **two complementary state machines**:
 ### Suggested TodoWrite Items
 
 ```
-- Establish run infrastructure (run-prep)
-- Initialize plan flow_plan.md
-- Capture plan open questions (clarifier)
-- Map impact (impact-analyzer)
-- Propose design options (design-optioneer)
-- Write ADR (adr-author)
-- Define contracts + schema + observability + test plan + work plan (parallel)
-- Validate design microloop (design-critic)
-- Check policy compliance (policy-analyst)
-- Finalize plan receipt (plan-cleanup)
-- Sanitize secrets (secrets-sanitizer)
-- Checkpoint commit (repo-operator)
-- Update issue status board (gh-issue-manager; gated)
-- Post Plan summary (gh-reporter; gated)
-- Finalize plan flow_plan.md summary
+- run-prep (establish run infrastructure; initialize `flow_plan.md`)
+- repo-operator (ensure run branch)
+- clarifier (plan open questions)
+- impact-analyzer (map impact)
+- design-optioneer ↔ option-critic (microloop; 2 passes default)
+- adr-author (write ADR)
+- interface-designer / observability-designer / test-strategist / work-planner (lanes; parallel)
+- interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
+- observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
+- design-critic (integrative validation; may return worklist)
+- policy-analyst (policy compliance)
+- plan-cleanup (finalize receipt; update index; update `flow_plan.md`)
+- secrets-sanitizer (publish gate)
+- repo-operator (checkpoint commit)
+- gh-issue-manager (update issue status board; gated)
+- gh-reporter (post Plan summary; gated)
 ```
+
+### Critic choreography (default behavior)
+
+Think in **worklists**, not "who wins".
+
+- **Default microloop cadence (bounded):** writer -> critic -> writer (apply critique worklist if any; may be a no-op) -> critic. Continue beyond that only when the critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
+- **Option critique (early):** Use the default microloop cadence between `design-optioneer` and `option-critic` (second `design-optioneer` pass applies the critique worklist when present).
+- **Lane worklists:** If `contract-critic` or `observability-critic` returns `recommended_action: RERUN | BOUNCE | FIX_ENV`, treat that as the active worklist for its lane unless you resolve it or explicitly defer it (Decision Log entry).
+- **Integration read (late):** `design-critic` is integrative across artifacts. Run it after lane worklists are resolved/deferred. A later `design-critic` `PROCEED` does not clear an open lane worklist.
+
+### Decision log (only when you defer a critic worklist)
+
+If you intentionally proceed while a critic still has an open worklist (e.g., you choose not to rerun/bounce), record a short entry in `.runs/<run-id>/plan/flow_plan.md` capturing what you deferred, why, evidence, and what you will re-check before sealing `plan_receipt.json`.
 
 ### On Rerun
 
@@ -87,9 +102,12 @@ Flow 2 uses infrastructure + domain agents + cross-cutting agents:
 ### Domain agents (in order)
 - impact-analyzer
 - design-optioneer
+- option-critic
 - adr-author
 - interface-designer
+- contract-critic
 - observability-designer
+- observability-critic
 - test-strategist
 - work-planner
 - design-critic
@@ -156,10 +174,15 @@ Create or update `.runs/<run-id>/plan/flow_plan.md`:
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
 - [ ] clarifier (Plan open questions)
 - [ ] impact-analyzer (map affected components)
-- [ ] design-optioneer (propose 2-3 options)
+- [ ] design-optioneer ↔ option-critic (microloop; apply Microloop Template)
 - [ ] adr-author (write architecture decision)
-- [ ] interface-designer / observability-designer / test-strategist / work-planner (parallel)
-- [ ] design-critic (validate design, loop if needed)
+- [ ] interface-designer (contracts/schema; lane; parallel)
+- [ ] interface-designer ↔ contract-critic (microloop; apply Microloop Template)
+- [ ] observability-designer (observability; lane; parallel)
+- [ ] observability-designer ↔ observability-critic (microloop; apply Microloop Template)
+- [ ] test-strategist (test plan; lane; parallel)
+- [ ] work-planner (work plan; lane; parallel)
+- [ ] design-critic (integrative validation; may return worklist)
 - [ ] policy-analyst (check compliance)
 - [ ] plan-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
@@ -170,6 +193,13 @@ Create or update `.runs/<run-id>/plan/flow_plan.md`:
 ## Progress Notes
 
 <Update as each step completes>
+
+## Decision Log (only when you defer a critic worklist)
+
+- Deferred: <critic-name> requested <RERUN|BOUNCE|FIX_ENV> on <artifact> -> proceeding with <action>
+  - Why: <short>
+  - Evidence: <artifact/path pointers>
+  - Re-check before seal: <what you will re-verify before plan-cleanup>
 ```
 
 ### Step 2: Plan Open Questions (Non-blocking)
@@ -182,14 +212,45 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 4: Propose design options
 - Use `design-optioneer` to propose design options.
 
+### Step 4b: Critique design options (microloop; recommended)
+- Use `option-critic` to critique `design_options.md` and write `option_critique.md`.
+
+**Route on the Option Critic Result block** (not by re-reading the file):
+ - If `recommended_action: FIX_ENV` -> stop (mechanical failure; IO/permissions/tooling)
+- If `recommended_action: BOUNCE` -> bounce to `route_to_flow`/`route_to_agent`
+- If `recommended_action: RERUN` -> do the apply pass: rerun `route_to_agent` once (typically `design-optioneer`) using the critique worklist, then rerun `option-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
+- If `recommended_action: PROCEED` -> proceed after the re-critique pass
+
 ### Step 5: Write ADR
 - Use `adr-author` to write the ADR.
 
 ### Step 6: Define contracts and schema (can run in parallel with steps 7-9)
 - Use `interface-designer` for contracts/schema/migrations (planned migrations live under the run directory; actual migrations move during Build).
 
+### Step 6b: Validate contracts (microloop; recommended)
+- Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.
+
+**Route on the Contract Critic Result block** (not by re-reading the file):
+- If `recommended_action: FIX_ENV` → stop (mechanical failure; IO/permissions/tooling)
+- If `recommended_action: BOUNCE` → bounce to `route_to_flow`/`route_to_agent`
+- If `recommended_action: RERUN` → do the apply pass: rerun `route_to_agent` once (typically `interface-designer`) using the critique worklist, then rerun `contract-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
+- If `recommended_action: PROCEED` → proceed after the re-critique pass
+
+**Conflict note (default):** If Contract Critic requests `RERUN`/`BOUNCE`/`FIX_ENV`, treat that as an open contract-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
+
 ### Step 7: Plan observability (parallel)
 - Use `observability-designer` to define observability.
+
+### Step 7b: Validate observability (microloop; recommended)
+- Use `observability-critic` to validate `observability_spec.md` and write `observability_critique.md`.
+
+**Route on the Observability Critic Result block** (not by re-reading the file):
+- If `recommended_action: FIX_ENV` → stop (mechanical failure; IO/permissions/tooling)
+- If `recommended_action: BOUNCE` → bounce to `route_to_flow`/`route_to_agent`
+- If `recommended_action: RERUN` → do the apply pass: rerun `route_to_agent` once (typically `observability-designer`) using the critique worklist, then rerun `observability-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
+- If `recommended_action: PROCEED` → proceed after the re-critique pass
+
+**Conflict note (default):** If Observability Critic requests `RERUN`/`BOUNCE`/`FIX_ENV`, treat that as an open observability-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
 
 ### Step 8: Plan testing (parallel)
 - Use `test-strategist` to write the test plan (incorporate Signal BDD + verification notes).
@@ -200,9 +261,12 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 10: Validate design (microloop)
 - Use `design-critic` to validate the design.
 
+**Conflict handling (default):**
+- If a targeted critic is still requesting `RERUN`/`BOUNCE`/`FIX_ENV`, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
+
 **Route on the Design Critic Result block** (not by re-reading the file):
 - If `status: VERIFIED` → proceed to policy check
-- If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → rerun affected steps (options/ADR/contracts/plans), then re-run design-critic
+- If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → rerun affected steps (options/ADR/contracts/plans); if you rerun `interface-designer` or `observability-designer`, run the matching targeted critic (`contract-critic` / `observability-critic`) before re-running design-critic
 - If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues documented)
 - If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
 
@@ -229,7 +293,7 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
@@ -249,7 +313,7 @@ route_to_agent: <agent-name> | null
 - If `safe_to_commit: false`:
   - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-- Push + GitHub operations require: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- Publish mode gating: `FULL` only when `safe_to_publish: true`, Repo Operator Result `proceed_to_github_ops: true`, **and** `publish_surface: PUSHED`. Otherwise, GitHub ops (when access is allowed) run in `RESTRICTED` mode. Publish blocked implies RESTRICTED, **not skip**.
 
 ### Step 13b: Reseal If Modified (Conditional Loop)
 
@@ -261,9 +325,9 @@ If reseal cannot make progress (sanitizer signals no reasonable path):
 - Append an evidence note to `secrets_scan.md`:
   - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
 - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - it must return `proceed_to_github_ops: false`
-- Skip **all** GitHub ops (issue-manager / reporter).
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: ESCALATE`
+  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
+- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
+- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
   - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
 
 **Note:** `checkpoint_mode: local_only` is a named parameter to `repo-operator` that mechanically enforces `proceed_to_github_ops: false` regardless of `safe_to_publish`. This ensures safe-bail cannot accidentally push.
@@ -292,10 +356,11 @@ operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
 
-**Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
+**Note:** `commit_sha` is always populated (current HEAD on no-op), never null. `publish_surface` must always be present (PUSHED or NOT_PUSHED), even on no-op commits, anomalies, `safe_to_commit: false`, push skipped, or push failure.
 
 **Routing logic (from Repo Operator Result):**
 - `status: COMPLETED` + `proceed_to_github_ops: true` → proceed to GitHub ops
@@ -305,43 +370,39 @@ anomaly_paths: []
 **Gating interaction with secrets-sanitizer:**
 - `repo-operator` reads `safe_to_commit` and `safe_to_publish` from the prior Gate Result
 - If `safe_to_commit: false`: skips commit entirely
-- If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false`
+- If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
+### GitHub Access + Content Mode (canonical)
+
+See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+
+- Publish blocked → `RESTRICTED` (never skip when access is allowed)
+- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
+
 ### Step 14: Update GitHub issue status board
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+Apply Access + Content Mode rules:
+- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
+- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
 
-Both must be true to proceed.
-
-- If `safe_to_publish: false` or `proceed_to_github_ops: false` → skip GH ops; document why.
-- If `gh` CLI unauthenticated/unavailable → SKIPPED with evidence (not BLOCKED).
-- Otherwise (gates true and gh available) → GitHub ops must run.
-
-**Actions:**
-- `gh-issue-manager` updates issue body status board from `.runs/<run-id>/plan/plan_receipt.json`
-- **Creates GitHub issue if none exists** (allowed in any flow; includes "Signal pending" banner if created from Flow 2)
+`gh-issue-manager` updates issue body status board from `.runs/<run-id>/plan/plan_receipt.json`. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 2).
 
 ### Step 15: Post Plan summary to issue
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+Apply Access + Content Mode rules:
+- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
+- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
 
-Both must be true to proceed.
+`gh-reporter` writes `.runs/<run-id>/plan/github_report.md` locally and posts to the issue (never PR).
 
-- If `safe_to_publish: false` or `proceed_to_github_ops: false` → skip GH ops; document why.
-- If `gh` CLI unauthenticated/unavailable → SKIPPED with evidence (not BLOCKED).
-- Otherwise (gates true and gh available) → GitHub ops must run.
+**Content expectations:** The gh-reporter comment should include:
+- Decisions Needed (unanswered open questions requiring human input)
+- Concerns for Review (critic findings, HIGH risks)
+- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
 
-**Actions:**
-- `gh-reporter` posts one short, link-heavy comment **to the GitHub issue** (not PR)
-- Uses checkmarks for status, sourced from `.runs/<run-id>/plan/plan_receipt.json`
-- Writes `.runs/<run-id>/plan/github_report.md` locally as record
-- **Issue-first (hard):** All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
+These make the GitHub update actionable - humans can make decisions without leaving GitHub.
 
 ### Step 16: Finalize flow_plan.md
 
@@ -374,12 +435,15 @@ Flow 2 is complete when these exist (even if imperfect):
 - `plan_receipt.json` - Receipt for downstream consumers
 - `impact_map.json` - Services, modules, data, external systems affected
 - `design_options.md` - 2-3 architecture options with trade-offs
+- `option_critique.md` - Options critique + worklist (decision readiness)
 - `adr.md` - Chosen option with rationale and consequences
 - `api_contracts.yaml` - Endpoints, schemas, error shapes
 - `schema.md` - Data models, relationships, invariants
 - `migrations/*.sql` - Draft migrations (optional, if DB changes needed)
 - `observability_spec.md` - Metrics, logs, traces, SLOs, alerts
 - `test_plan.md` - BDD to test types mapping, priorities
+- `ac_matrix.md` - AC-driven build contract (Flow 3 iterates per AC)
+- `ac_status.json` - Machine-readable AC status tracker
 - `work_plan.md` - Subtasks, ordering, dependencies
 - `design_validation.md` - Feasibility assessment, known issues
 
@@ -393,12 +457,13 @@ Agents set status in their output artifacts:
 
 **Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
 
-Use `design-critic` status and `plan_receipt.json` to determine flow outcome.
+Use `plan_receipt.json` (primary) and the latest critic Result blocks (secondary) to determine flow outcome. When critic signals conflict, default to keeping targeted-critic `RERUN`/`BOUNCE`/`FIX_ENV` as an open lane worklist unless explicitly deferred (Decision Log entry in `flow_plan.md`).
 
 ## Notes
 
 - Steps 6-9 can run in parallel after `adr-author` completes
 - `design-critic` reviews ALL artifacts before policy check
+- `option-critic` critiques options before ADR authoring
 - Human gate at end: "Is this the right design?"
 - Agents never block; they document concerns and continue
 
@@ -412,12 +477,17 @@ All written to `.runs/<run-id>/plan/`:
 | `open_questions.md` | clarifier | Plan-local questions register |
 | `impact_map.json` | impact-analyzer | Affected services, modules, data |
 | `design_options.md` | design-optioneer | 2-3 architecture options |
+| `option_critique.md` | option-critic | Options critique + worklist |
 | `adr.md` | adr-author | Chosen option with rationale |
 | `api_contracts.yaml` | interface-designer | Endpoints, schemas, errors |
 | `schema.md` | interface-designer | Data models, relationships |
 | `migrations/*.sql` | interface-designer | Draft migrations (if needed) |
+| `contract_critique.md` | contract-critic | Contract validation critique (optional) |
 | `observability_spec.md` | observability-designer | Metrics, logs, traces, SLOs |
+| `observability_critique.md` | observability-critic | Observability validation critique (optional) |
 | `test_plan.md` | test-strategist | BDD to test types mapping |
+| `ac_matrix.md` | test-strategist | AC-driven build contract |
+| `ac_status.json` | test-strategist | Machine-readable AC tracker |
 | `work_plan.md` | work-planner | Subtasks, ordering, dependencies |
 | `design_validation.md` | design-critic | Feasibility assessment |
 | `policy_analysis.md` | policy-analyst | Policy compliance check |
@@ -436,35 +506,73 @@ All written to `.runs/<run-id>/plan/`:
 
 ### TodoWrite (copy exactly)
 - [ ] run-prep
-- [ ] repo-operator: ensure run/<run-id> branch
+- [ ] repo-operator (ensure `run/<run-id>` branch)
 - [ ] clarifier (plan open questions)
 - [ ] impact-analyzer
-- [ ] design-optioneer
+- [ ] design-optioneer ↔ option-critic (microloop; 2 passes default)
 - [ ] adr-author
 - [ ] interface-designer / observability-designer / test-strategist / work-planner (parallel)
+- [ ] interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
+- [ ] observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
 - [ ] design-critic (microloop if needed)
 - [ ] policy-analyst
 - [ ] plan-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] reseal cycle (plan-cleanup ↔ secrets-sanitizer) if modified_files
-- [ ] repo-operator checkpoint (checkpoint mode; capture Repo Operator Result)
-- [ ] gh-issue-manager (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] gh-reporter (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] finalize flow_plan.md summary
+- [ ] plan-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; capture Repo Operator Result)
+- [ ] gh-issue-manager (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
+- [ ] gh-reporter (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
 
-### Agent call order
-1) run-prep
-2) repo-operator (ensure run branch)
-3) clarifier
-4) impact-analyzer
-5) design-optioneer
-6) adr-author
-7) interface-designer + observability-designer + test-strategist + work-planner (parallel)
-8) design-critic (loop if needed)
-9) policy-analyst
-10) plan-cleanup
-11) secrets-sanitizer (read Gate Result)
-12) (reseal cycle if needed)
-13) repo-operator (checkpoint; read Repo Operator Result)
-14) gh-issue-manager (if allowed)
-15) gh-reporter (if allowed)
+### Station order + templates
+
+#### Station order
+
+1. `run-prep`
+
+2. `repo-operator` (ensure run branch)
+
+3. `clarifier`
+
+4. `impact-analyzer`
+
+5. `design-optioneer` ↔ `option-critic` (microloop; apply Microloop Template)
+
+6. `adr-author`
+
+7. `interface-designer` / `observability-designer` / `test-strategist` / `work-planner` (parallel)
+
+8. `interface-designer` ↔ `contract-critic` (microloop; apply Microloop Template; recommended)
+
+9. `observability-designer` ↔ `observability-critic` (microloop; apply Microloop Template; recommended)
+
+10. `design-critic` (integrative validation; route to options/contracts/observability/plans as returned; rerun once to confirm the top worklist moved)
+
+11. `policy-analyst`
+
+12. `plan-cleanup`
+
+13. `secrets-sanitizer`
+
+14. `plan-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+
+15. `repo-operator` (checkpoint; read Repo Operator Result)
+
+16. `gh-issue-manager` (if allowed)
+
+17. `gh-reporter` (if allowed)
+
+#### Microloop Template (writer ↔ critic)
+
+Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
+
+1) Writer pass: call `<writer>`
+2) Critique pass: call `<critic>` and read its control-plane Result
+3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
+4) Re-critique: call `<critic>` again
+
+Continue looping beyond the default two passes only when:
+- critic returns `recommended_action: RERUN`, and
+- `can_further_iteration_help: yes`, and
+- the remaining items are concrete and writer-addressable (a new writer pass can plausibly clear them).
+
+Otherwise proceed with `UNVERIFIED` + blockers recorded.

@@ -6,7 +6,7 @@ allowed-tools: Bash, Read, Write
  
 # Test Runner Skill
 
-You are a helper for running tests efficiently in this repository (Rust-focused).
+You are a helper for running tests in this repository (Rust-focused).
 
 ## Behavior
 
@@ -20,7 +20,7 @@ You are a helper for running tests efficiently in this repository (Rust-focused)
    - Fallback / full run:
      - `cargo test --workspace --tests --color=always`
 
-3. Runtime flags and speed:
+3. Runtime flags and run bounds:
    - Prefer to keep runs bounded; if the full suite is required, note this in the summary.
 
 4. Capture output and artifacts:

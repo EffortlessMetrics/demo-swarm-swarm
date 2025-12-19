@@ -34,7 +34,7 @@ Optional:
 ## Control-plane routing (closed enum)
 
 Always populate in Machine Summary:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
@@ -42,7 +42,7 @@ Rules:
 - `FIX_ENV` only when `status: CANNOT_PROCEED`
 - `BOUNCE` only when `route_to_flow` and/or `route_to_agent` is set
 - If tests are failing / cannot run → `BOUNCE` to Flow 3 (`route_to_agent: test-author` or `code-implementer`)
-- If mutation tool missing but mutation is *required* by `test_plan.md` → `ESCALATE`
+- If mutation tool missing but mutation is *required* by `test_plan.md` → `PROCEED` (UNVERIFIED with blocker; no gh/install)
 - Otherwise (mutation not required) → `PROCEED` with a clear `concerns[]` note
 
 ## Hard rules
@@ -97,7 +97,7 @@ Detection order:
 
 If `mutation_required: true` and tool unavailable:
 - `status: UNVERIFIED`
-- `recommended_action: ESCALATE`
+- `recommended_action: PROCEED`
 - `blockers`: "Mutation testing required by test_plan.md but no tool available."
 
 If `mutation_required: false` and tool unavailable:
@@ -144,7 +144,7 @@ Write exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 
@@ -220,7 +220,7 @@ At the end of your response, echo:
 ```markdown
 ## Mutator Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 mutation_summary:

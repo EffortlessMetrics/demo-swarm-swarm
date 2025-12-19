@@ -27,6 +27,15 @@ Primary (scope + intent):
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml` (if present)
 - `.runs/<run-id>/plan/observability_spec.md` (if present)
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; if AC-scoped invocation)
+
+**AC-scoped invocation:** When invoked as part of the AC loop (Flow 3), you will receive:
+- `ac_id`: The specific AC being implemented (e.g., AC-001)
+- `ac_description`: What "done" looks like for this AC
+- `ac_impl_hints`: Which modules/files to modify (from ac_matrix.md)
+- `ac_test_files`: Tests written for this AC (from test-author)
+
+When AC-scoped, focus **only** on implementing the specified AC. Keep changes minimal and scoped to what's needed for this AC's tests to pass.
 
 Feedback loops (if present):
 - `.runs/<run-id>/build/code_critique.md`
@@ -106,7 +115,7 @@ Write using this structure:
 ## Machine Summary
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
@@ -196,7 +205,7 @@ After writing the file, return (must match Machine Summary):
 ```yaml
 ## Code Implementer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

@@ -53,7 +53,7 @@ Missing inputs are **UNVERIFIED** (not mechanical failure) unless you cannot rea
   - Prefer exceptions only when BDD is genuinely not the right tool; otherwise it's a coverage gap.
 
 ### 2) Testability (hard)
-- No vague language in Thens ("works", "successful", "as expected", "fast", "valid" without observable criteria).
+- No vague language in Thens ("works", "successful", "as expected", "valid" without observable criteria).
 - Thens must be observable (state change, emitted event, returned token, persisted record, error code/message shape, audit log entry — whatever is appropriate).
 - UI-coupled steps are only allowed when the requirement is explicitly UI-level.
 
@@ -103,7 +103,7 @@ Your markdown must include these sections in this order:
 ```yaml
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
@@ -174,6 +174,8 @@ Do not rename these prefixes.
 
 ## Completion States (pack-standard)
 
+- **Microloop invariant:** Use `recommended_action: RERUN` whenever there are writer-addressable scenario fixes that `bdd-author` can apply in another pass. Use `recommended_action: PROCEED` only when no further `bdd-author` pass can resolve the remaining notes (informational only, or requires upstream decisions).
+
 - **VERIFIED**
   - No CRITICAL issues
   - Traceability satisfied (or explicit, justified exceptions in verification notes)
@@ -185,7 +187,7 @@ Do not rename these prefixes.
   - Typical routing:
     - Fixable by scenarios → `recommended_action: RERUN`, `route_to_agent: bdd-author`
     - Upstream requirements ambiguity → `recommended_action: BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author` (or `clarifier`)
-    - Human judgment needed → `recommended_action: ESCALATE`
+    - Human judgment needed → `recommended_action: PROCEED` with `can_further_iteration_help: no` and questions/defaults documented
 
 - **CANNOT_PROCEED**
   - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
@@ -198,12 +200,13 @@ After writing the file, return:
 ```yaml
 ## BDD Critic Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []
 concerns: []
+observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
 can_further_iteration_help: yes | no
 severity_summary:
   critical: N

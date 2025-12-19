@@ -45,7 +45,7 @@ Use:
 ## Control-plane routing (closed enum)
 
 Always populate in the **Machine Summary** (end of file):
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_agent: <agent-name|null>`
 - `route_to_flow: <1|2|3|4|5|6|null>`
 
@@ -74,7 +74,7 @@ Rules:
 2. Make trade-offs concrete (components, coupling, failure modes, ops burden).
 3. Include a **minimal / do-nothing** option when plausible (even if it fails some REQs—state that clearly).
 4. State assumptions, and the impact if wrong.
-5. Rate reversibility and switching cost.
+5. Rate reversibility and switching effort.
 
 ## Option template (use exactly)
 
@@ -108,7 +108,7 @@ Fit enum (machine-parseable): `SATISFIED | PARTIAL | TRADE_OFF`
 
 ### Reversibility
 - Rating: Easy | Moderate | Hard | One-way
-- Switch cost: <what it takes to move later>
+- Switch effort: <what it takes to move later>
 - Blast radius if wrong: <what breaks and who notices>
 
 ### Risks
@@ -173,7 +173,7 @@ What would change this:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -199,4 +199,4 @@ confidence: High | Medium | Low
 
 ## Philosophy
 
-Your output should make the ADR decision easy to justify later. The point isn't picking the "best" design; it's making costs and reversibility obvious, tied to requirement IDs, so we can commit with eyes open.
+Your output should make the ADR decision easy to justify later. The point isn't picking the "best" design; it's making trade-offs and reversibility obvious, tied to requirement IDs, so we can commit with eyes open.

@@ -1,0 +1,60 @@
+{
+  "schema_version": "gate_receipt_v1",
+  "run_id": "compliance-drift-proofing",
+  "flow": "gate",
+
+  "status": "UNVERIFIED",
+  "recommended_action": "BOUNCE",
+  "route_to_flow": 3,
+  "route_to_agent": null,
+
+  "merge_verdict": "BOUNCE",
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [
+    "Receipt fabrication: build_receipt.json claims 420 tests vs 294 actual (42.8% inflation); 89.29% coverage claimed vs 75.12% actual (14.17% gap)",
+    "Coverage threshold not met: 75.12% actual < 80% required per test_plan.md",
+    "Policy violations: POL-003 (counts not mechanical), POL-004 (quality_gates not from Machine Summaries), POL-015 (quality_gates misrepresent artifact state)"
+  ],
+  "concerns": [
+    "Reseal operation (commit bacacfe) updated receipt without updating test_execution.md - audit trail gap",
+    "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)",
+    "cargo-audit could not run due to CVSS 4.0 incompatibility; manual review substituted"
+  ],
+
+  "counts": {
+    "receipt_checks_total": 12,
+    "receipt_checks_passed": 8,
+    "contract_violations": 0,
+    "security_findings": 0,
+    "policy_violations": 3,
+    "coverage_line_percent": null,
+    "coverage_branch_percent": null
+  },
+
+  "quality_gates": {
+    "merge_decider": "UNVERIFIED",
+    "receipt_audit": "UNVERIFIED",
+    "contract_compliance": "VERIFIED",
+    "security_scan": "VERIFIED",
+    "coverage_audit": "UNVERIFIED",
+    "policy_analysis": "UNVERIFIED"
+  },
+
+  "key_artifacts": [
+    "merge_decision.md",
+    "receipt_audit.md",
+    "contract_compliance.md",
+    "security_scan.md",
+    "coverage_audit.md",
+    "policy_analysis.md",
+    "risk_assessment.md",
+    "gate_fix_summary.md",
+    "flow_plan.md",
+    "traceability_audit.md"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-19T08:50:30Z"
+}

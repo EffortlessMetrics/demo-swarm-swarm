@@ -27,7 +27,7 @@ Do **not** append into other artifacts.
 
 Always populate:
 
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
@@ -37,7 +37,7 @@ Rules:
 - Code fixes → `BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer` (or `fixer`)
 - Test fixes → `BOUNCE`, `route_to_flow: 3`, `route_to_agent: test-author`
 - Spec/design ambiguity → `BOUNCE`, `route_to_flow: 1|2`, `route_to_agent: requirements-author|adr-author|clarifier`
-- High-impact + unclear ownership → `ESCALATE`
+- High-impact + unclear ownership → `PROCEED` (UNVERIFIED) with blockers capturing ownership gap
 
 ## Inputs (best-effort)
 
@@ -140,7 +140,7 @@ Severity guidance:
 - If `status: CANNOT_PROCEED` → `recommended_action: FIX_ENV`
 - If CRITICAL regressions with clear owner → `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer|test-author`
 - If regressions imply spec/design change → `BOUNCE`, `route_to_flow: 1|2`
-- If CRITICAL and unclear → `ESCALATE`
+- If CRITICAL and unclear → `PROCEED` (UNVERIFIED) with blockers capturing the ownership gap
 - If no actionable regressions → `PROCEED`
 
 ## Output format (write exactly)
@@ -151,7 +151,7 @@ Severity guidance:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 
@@ -257,7 +257,7 @@ At the end of your response, echo:
 ```markdown
 ## Regression Analyst Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 severity_summary:

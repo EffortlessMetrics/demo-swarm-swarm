@@ -16,11 +16,22 @@ Primary (prefer these):
 - `.runs/<run-id>/plan/adr.md` (decision + constraints)
 - `.runs/<run-id>/plan/api_contracts.yaml` (or equivalent interface spec)
 - `.runs/<run-id>/plan/observability_spec.md` (if present)
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; if AC-scoped invocation)
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/requirements_critique.md` (if present)
 - `.runs/<run-id>/signal/verification_notes.md` (if present)
 - `.runs/<run-id>/signal/features/*.feature` (if present)
 - `.runs/<run-id>/build/test_critique.md` (and/or `.runs/<run-id>/build/test_changes_summary.md` if present)
+
+**AC-scoped invocation:** When invoked as part of the AC loop (Flow 3), you will receive:
+- `ac_id`: The specific AC being reviewed (e.g., AC-001)
+- `ac_description`: What "done" looks like for this AC
+- `ac_impl_hints`: Expected modules/files for this AC
+
+When AC-scoped, focus **only** on whether implementation for the specified AC:
+1. Satisfies the AC's described behavior
+2. Aligns with ADR/contracts for this AC's scope
+3. Works with the tests written for this AC
 
 Fallbacks (if primary missing):
 - Read the changed files referenced by other artifacts.
@@ -118,13 +129,14 @@ Write exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name | null>
 
 blockers: []
 missing_required: []
 concerns: []
+observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
 
 can_further_iteration_help: yes | no
 
@@ -202,7 +214,7 @@ coverage_summary:
 ## Recommended Next
 - If issues are code/test-local: rerun build implement/test agents
 - If issues require design/contract change: BOUNCE to Flow 2 (Plan) with pointers to ADR/contracts gaps
-- If issues require unanswered product decisions: ESCALATE (and ensure Clarifier logs the questions)
+- If issues require unanswered product decisions: PROCEED with blockers documented and ensure Clarifier logs the questions
 ```
 
 ## Status / routing rules
@@ -222,7 +234,8 @@ Routing:
 - If `recommended_action: PROCEED` ⇒ `route_to_flow: null`, `route_to_agent: null`
 - If `recommended_action: RERUN` ⇒ `route_to_agent: code-implementer | test-author | observability-designer | null`, `route_to_flow: null`
 - If `recommended_action: BOUNCE` ⇒ `route_to_flow: 2`, `route_to_agent: null`
-- If `recommended_action: ESCALATE` ⇒ both routes null (human decision)
+- If product decisions remain open, keep `recommended_action: PROCEED` with routes null and capture blockers/questions.
+- **Microloop invariant:** Use `recommended_action: RERUN` whenever there are writer-addressable items that a Build pass can fix (code/tests/observability within Flow 3). Use `recommended_action: PROCEED` only when no further Build writer pass can reasonably clear the remaining notes (informational only, or requires upstream/human decisions).
 
 Set `can_further_iteration_help`:
 - `yes` when a Build iteration can plausibly fix the listed blockers
@@ -235,7 +248,7 @@ At the end of your response, echo the same Machine Summary block:
 ```markdown
 ## Code Critic Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name | null>
 can_further_iteration_help: yes | no

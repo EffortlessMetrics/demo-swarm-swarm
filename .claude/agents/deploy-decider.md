@@ -78,16 +78,22 @@ If write fails due to I/O/permissions:
 - set Machine Summary `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`
 - write as much as possible explaining failure
 
+### Step 0.5: GitHub access guard (read-only)
+- Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
+- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Treat branch protection checks as `UNKNOWN`, set `status: UNVERIFIED`, `recommended_action: PROCEED`, and explain the limitation in the Machine Summary.
+- Prefer `github_repo` from run_meta for any `gh` API call. Do not invent a repo; if missing and gh is available, record the inferred repo in the decision (do not persist).
+- If `gh` is unauthenticated, skip gh API calls; mark the relevant checks `UNKNOWN` with concerns and note the limitation in the Machine Summary.
+
 ### Step 1: Read Gate verdict (authoritative)
 Prefer extracting from `merge_decision.md` `## Machine Summary`:
-- `verdict:` (MERGE | BOUNCE | ESCALATE)
+- `verdict:` (MERGE | BOUNCE) with a `reason` field (e.g., `FIX_REQUIRED`, `NEEDS_HUMAN_REVIEW`, `POLICY_BLOCK`)
 - (optional) `recommended_action:` / `route_to_flow:` / `route_to_agent:`
 
 If no Machine Summary is present, fall back to the `## Verdict` section only if clearly structured; otherwise set `gate_verdict: null` and record a concern.
 
 If `gate_verdict != MERGE`:
 - `deployment_verdict: BLOCKED_BY_GATE`
-- propagate gate routing signals if present (do not reinterpret); otherwise `recommended_action: ESCALATE`
+- propagate gate routing signals if present (do not reinterpret); otherwise `recommended_action: PROCEED`
 - skip governance checks; write decision
 
 ### Step 2: Determine default branch (no silent assumptions)
@@ -174,9 +180,9 @@ Routing (pack control plane):
 - `NOT_DEPLOYED`:
   - If repo-owned (missing workflows, ambiguous CI config, missing verification report content): `recommended_action: BOUNCE`, `route_to_flow: 3`
   - If missing evidence can be supplied without code changes (no gh auth + no manual snapshot): `recommended_action: RERUN`, routes null
-  - If org-level constraint (permission denied, cannot change protection): `recommended_action: ESCALATE`, routes null
+  - If org-level constraint (permission denied, cannot change protection): `recommended_action: BOUNCE`, routes null
 - `BLOCKED_BY_GATE`:
-  - propagate gate routing if available; else `ESCALATE`
+  - propagate gate routing if available; else `recommended_action: PROCEED`
 
 Machine `status`:
 - `VERIFIED` if both critical checks are PASS/FAIL (not UNKNOWN), and (if verification report exists) runtime_verification is PASS/FAIL (not UNKNOWN), OR blocked-by-gate with a readable gate verdict.
@@ -191,7 +197,7 @@ Write the file exactly with this structure:
 ```yaml
 schema_version: deployment_decision_v1
 deployment_verdict: STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE
-gate_verdict: MERGE | BOUNCE | ESCALATE | null
+gate_verdict: MERGE | BOUNCE | null
 default_branch: <name or null>
 
 verification:
@@ -222,7 +228,7 @@ recommended_actions: []  # explicit next steps; include remediations for FAIL/UN
 ## Machine Summary
 
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name | null>
 blockers: []
@@ -238,7 +244,7 @@ After writing the file, return:
 ## Deploy Decider Result
 deployment_verdict: STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name | null>
 blockers: []

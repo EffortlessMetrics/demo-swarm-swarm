@@ -63,7 +63,7 @@ If the manifest is missing or unparseable:
 - Prefer "surgical" fixes: localized behavior, small diffs, no reshaping.
 - If a fix requires new abstractions, cross-module refactors, or new files:
   - Do not force it.
-  - Create a HANDOFF to `code-implementer` (or `clarifier` if the issue is spec ambiguity), or `ESCALATE` if it needs human judgment.
+  - Create a HANDOFF to `code-implementer` (or `clarifier` if the issue is spec ambiguity); if it needs human judgment, keep `recommended_action: PROCEED` with blockers documented.
 
 ## Required Output Structure (`fix_summary.md`)
 
@@ -149,7 +149,7 @@ Do not rename these prefixes. Keep each line short (avoid wrapping).
 ```yaml
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
@@ -174,7 +174,7 @@ After writing the file, return:
 ```yaml
 ## Fixer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

@@ -99,7 +99,7 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -233,7 +233,7 @@ ST-001 → ST-002 → ST-003
 
 ## Rollback Plan
 
-* <fast rollback lever>
+* <rollback lever>
 * <data/schema notes>
 * <what you monitor to decide rollback>
 

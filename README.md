@@ -70,7 +70,7 @@ Use a dedicated `<repo>-swarm` clone (the pack creates `run/<run-id>` branches a
 | 1. Signal | `/flow-1-signal` | Intent -> requirements, BDD, risks, receipt |
 | 2. Plan | `/flow-2-plan` | Spec -> ADR, contracts, observability, plans, receipt |
 | 3. Build | `/flow-3-build` | Design -> code/tests + build receipt |
-| 4. Gate | `/flow-4-gate` | Code -> verdict (**MERGE/BOUNCE/ESCALATE**) + gate receipt |
+| 4. Gate | `/flow-4-gate` | Code -> verdict (**MERGE/BOUNCE**) + gate receipt |
 | 5. Deploy | `/flow-5-deploy` | Verdict -> promote to swarm mainline (or NOT_DEPLOYED) + deploy receipt |
 | 6. Wisdom | `/flow-6-wisdom` | Run history -> regressions, learnings, feedback + terminal receipt |
 

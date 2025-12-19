@@ -36,7 +36,7 @@ This is the **single source of truth** for pack portability and contract drift.
 ### Enums
 
 - Status axis: `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
-- Recommended action: `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- Recommended action: `PROCEED | RERUN | BOUNCE | FIX_ENV`
 - No bespoke status strings
 
 ### Machine Summary blocks
@@ -64,6 +64,24 @@ This is the **single source of truth** for pack portability and contract drift.
 - Ownership boundaries: `runs-index` for index writes, `secrets-tools` for secrets ops, `openq-tools` for questions
 
 See [demoswarm-cli.md](demoswarm-cli.md) for the shim surface and command contracts.
+
+### Flow boundary enforcement (check 52)
+
+- Flow commands must NOT contain `demoswarm.sh` invocations
+- Flow commands must NOT contain skill CLI subcommands (count, ms, yaml, index, receipt, receipts, openapi, line, inv, time, openq, secrets)
+- Enforces three-tier ownership: flow commands delegate to agents; agents use skills
+
+**Violations reported as warnings** (not errors). Use `--strict` to elevate to errors.
+
+### OpenQ prefix validation (check 53)
+
+- QID patterns in `.runs/**/open_questions.md` must use canonical flow codes
+- Valid format: `OQ-<FLOW>-<NNN>` where:
+  - `<FLOW>` is one of: SIG, PLN, BLD, GAT, DEP, WIS
+  - `<NNN>` is a three-digit zero-padded number (001-999)
+- Reports warnings for non-canonical codes (PLAN instead of PLN, BUILD instead of BLD)
+
+**Violations reported as warnings** (not errors). Use `--strict` to elevate to errors.
 
 ### Wisdom markers
 
@@ -204,6 +222,24 @@ These are supplements, not replacements for pack-check.
 **Symptom:** `Machine Summary Block` vs `Machine Summary` mismatch.
 
 **Fix:** Use exact casing as defined in contracts.
+
+### Flow boundary violation (check 52)
+
+**Symptom:** pack-check warns about `demoswarm.sh` or skill CLI subcommands in flow commands.
+
+**Fix:** Move the CLI invocation to the appropriate agent. Flow commands should delegate to agents (e.g., call `context-loader` or `build-cleanup`), not invoke skill-layer CLI directly.
+
+### OpenQ prefix invalid (check 53)
+
+**Symptom:** pack-check warns about non-canonical QID flow codes.
+
+**Fix:** Update QIDs to use canonical abbreviations:
+- `SIGNAL` or `SIG` -> `SIG`
+- `PLAN` -> `PLN`
+- `BUILD` -> `BLD`
+- `GATE` -> `GAT`
+- `DEPLOY` -> `DEP`
+- `WISDOM` -> `WIS`
 
 ---
 

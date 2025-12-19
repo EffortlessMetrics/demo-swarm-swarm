@@ -36,7 +36,7 @@ Write exactly one file:
 ## Control-plane routing (pack standard)
 
 Closed action enum:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Guidance for this author station:
 - If you can write `requirements.md`, your next step is almost always `PROCEED` (to `requirements-critic`).
@@ -44,7 +44,7 @@ Guidance for this author station:
 - If you cannot read/write due to IO/permissions, set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
 
 Route fields:
-- Populate `route_to_agent` / `route_to_flow` only when `recommended_action` is `BOUNCE` or `ESCALATE`. Otherwise set both to `null`.
+- Populate `route_to_agent` / `route_to_flow` only when `recommended_action` is `BOUNCE`. Otherwise set both to `null`.
 
 ## Typed NFR ID Contract (mandatory)
 
@@ -67,7 +67,7 @@ No bare `NFR-###`. If you need a new domain, use a short uppercase code and decl
 - **Acceptance criteria must be an atomic list** using stable markers:
   - `- AC-1: ...`
   - `- AC-2: ...`
-- Avoid vague terms ("fast", "secure", "appropriate") unless bounded by thresholds or predicates.
+- Avoid vague terms ("secure", "appropriate") unless bounded by thresholds or predicates.
 
 ### Non-functional requirements (NFR)
 - Must be measurable or verifiable.
@@ -103,7 +103,7 @@ If `.runs/<run-id>/signal/requirements_critique.md` exists:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -179,7 +179,7 @@ At the end of your response, echo this block (must match the file):
 ```markdown
 ## Requirements Author Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 missing_required: []

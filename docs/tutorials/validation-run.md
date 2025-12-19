@@ -129,7 +129,7 @@ Run Flow 4:
 ### A4) After Flow 4 completes, verify (local)
 
 * [ ] `.runs/val-a/gate/gate_receipt.json` exists
-* [ ] `.runs/val-a/gate/merge_decision.md` exists and contains MERGE/BOUNCE/ESCALATE
+* [ ] `.runs/val-a/gate/merge_decision.md` exists and contains MERGE/BOUNCE (with reason)
 * [ ] `.runs/val-a/gate/contract_compliance.md` exists
 * [ ] `.runs/val-a/gate/coverage_audit.md` exists
 * [ ] `.runs/index.json` updated for `val-a` with `last_flow: "gate"`
@@ -221,6 +221,38 @@ Verify:
 
 ---
 
+## Mode Matrix Validation (optional; recommended)
+
+These scenarios validate the **Access + Content Mode** matrix end-to-end:
+
+1) **FULL path** (publish allowed, pushed)
+   - Preconditions: `safe_to_publish: true`, Repo Operator Result `proceed_to_github_ops: true`, and `publish_surface: PUSHED`.
+   - Verify:
+     - [ ] `gh-issue-manager` and `gh-reporter` run in `FULL` mode
+     - [ ] GitHub comment uses blob links (not path-only) and links resolve
+
+2) **RESTRICTED path** (publish blocked OR not pushed)
+   - Preconditions: any of `safe_to_publish: false` OR `proceed_to_github_ops: false` OR `publish_surface: NOT_PUSHED`.
+   - Verify:
+     - [ ] `gh-issue-manager` and `gh-reporter` still run when access is allowed (no silent skip)
+     - [ ] GitHub comment is **receipt-first**: only machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`) and paths; no quoting of human-authored markdown
+
+3) **Access gate disabled** (`github_ops_allowed: false`)
+   - Preconditions: run_meta has `github_ops_allowed: false` (e.g., repo mismatch).
+   - Verify:
+     - [ ] `gh-issue-manager` and `gh-reporter` **skip** GitHub operations
+     - [ ] They still write local status artifacts with explicit skip reasons
+
+4) **Fix-forward reseal loop**
+   - Goal: validate the runner-bounded hygiene lane and deterministic reseal.
+   - Verify:
+     - [ ] `gate-fixer` emits `FIX_FORWARD_PLAN_V1`
+     - [ ] `fix-forward-runner` executes apply+verify, enforces scope, and writes `fix_forward_report.md`
+     - [ ] If code changed: `build-cleanup` reseals Build receipt
+     - [ ] `receipt-checker` + `gate-fixer` are rerun after fix-forward so receipts/blocks reflect post-fix state
+
+---
+
 ## Expected "good output" (shape, not exact fields)
 
 ### Receipts
@@ -232,7 +264,7 @@ Every `<flow>_receipt.json` should include at least:
   "run_id": "<run-id>",
   "flow": "<flow-name>",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
   "missing_required": [],

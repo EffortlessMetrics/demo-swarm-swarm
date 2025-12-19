@@ -1,7 +1,7 @@
 ---
 name: build-cleanup
 description: Finalizes Flow 3 (Build) by verifying artifacts, mechanically deriving counts, writing build_receipt.json, and updating .runs/index.json status fields. Runs AFTER self-reviewer and BEFORE secrets-sanitizer and GitHub operations.
-model: inherit
+model: haiku
 color: blue
 ---
 
@@ -45,6 +45,8 @@ Required (missing ⇒ UNVERIFIED):
 - `test_changes_summary.md` **OR** `impl_changes_summary.md` (at least one)
 - `lint_report.md` (from lint-executor)
 - `test_execution.md` (from test-executor)
+- `doc_updates.md`
+- `doc_critique.md`
 
 Optional (missing ⇒ note, continue):
 - `flow_plan.md`
@@ -52,14 +54,19 @@ Optional (missing ⇒ note, continue):
 - `open_questions.md`
 - `test_critique.md`
 - `code_critique.md`
+- `flakiness_report.md`
 - `mutation_report.md`
+- `fuzz_report.md`
 - `fix_summary.md`
-- `doc_updates.md`
+
+AC status (from Plan; updated by Build):
+- `.runs/<run-id>/plan/ac_status.json` (AC completion tracker; verify all ACs completed)
 
 ## Outputs
 
 - `.runs/<run-id>/build/build_receipt.json`
 - `.runs/<run-id>/build/cleanup_report.md`
+- `.runs/<run-id>/build/github_report.md` (pre-composed GitHub comment body for gh-reporter)
 - Update `.runs/index.json` for this run (if entry exists): `status`, `last_flow`, `updated_at` only
 
 ## Helper: anchored Machine Summary extraction
@@ -125,6 +132,8 @@ Counts in receipt:
 * `files_changed`
 * `mutation_score`
 * `open_questions`
+* `ac_total` (from ac_status.json)
+* `ac_completed` (from ac_status.json)
 
 Rules:
 
@@ -156,7 +165,21 @@ bash .claude/scripts/demoswarm.sh line get \
 bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/build/open_questions.md" \
   --regex '^- QID: OQ-BUILD-[0-9]{3}' \
   --null-if-missing
+
+# ac_total: from ac_status.json (Plan artifact updated by Build)
+bash .claude/scripts/demoswarm.sh receipt get \
+  --file ".runs/<run-id>/plan/ac_status.json" \
+  --key "ac_count" \
+  --null-if-missing
+
+# ac_completed: from ac_status.json
+bash .claude/scripts/demoswarm.sh receipt get \
+  --file ".runs/<run-id>/plan/ac_status.json" \
+  --key "completed" \
+  --null-if-missing
 ```
+
+**AC completion check:** If `ac_status.json` exists and `ac_completed < ac_total`, add a blocker: "AC loop incomplete: {ac_completed}/{ac_total} ACs completed". This prevents sealing a build with incomplete AC coverage.
 
 If the inventory section is missing entirely, prefer `null` over guessing and explain why in `cleanup_report.md`. If the section exists and markers are legitimately absent, `0` is acceptable.
 
@@ -207,7 +230,7 @@ Routing fields:
 
 * `RERUN` = stay in current flow; `route_to_flow` and `route_to_agent` must be `null`
 * `BOUNCE` = cross-flow routing; only use when routing to a different flow
-* For `PROCEED`, `ESCALATE`, and `FIX_ENV`: set both route fields to `null`
+* For `PROCEED` and `FIX_ENV`: set both route fields to `null`
 
 Note: build-cleanup is mechanical and does not determine which fix agent to invoke. That decision is made by the orchestrator based on the specific blockers/concerns.
 
@@ -229,7 +252,7 @@ Write `.runs/<run-id>/build/build_receipt.json`:
   "flow": "build",
 
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
 
@@ -242,7 +265,9 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "tests_written": null,
     "files_changed": null,
     "mutation_score": null,
-    "open_questions": null
+    "open_questions": null,
+    "ac_total": null,
+    "ac_completed": null
   },
 
   "tests": {
@@ -274,9 +299,12 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "test_execution.md",
     "test_critique.md",
     "code_critique.md",
+    "flakiness_report.md",
     "mutation_report.md",
+    "fuzz_report.md",
     "fix_summary.md",
-    "doc_updates.md"
+    "doc_updates.md",
+    "doc_critique.md"
   ],
 
   "github_reporting": "PENDING",
@@ -374,6 +402,61 @@ concerns: [...]
 * notes: ...
 ```
 
+### Step 8: Write `github_report.md` (pre-composed GitHub comment)
+
+Write `.runs/<run-id>/build/github_report.md`. This file is the exact comment body that `gh-reporter` will post to GitHub.
+
+```markdown
+<!-- DEMOSWARM_RUN:<run-id> FLOW:build -->
+# Flow 3: Build Report
+
+**Status:** <status from receipt>
+**Run:** `<run-id>`
+
+## Summary
+
+| Metric | Count |
+|--------|-------|
+| Tests Passed | <n or "—"> |
+| Tests Failed | <n or "—"> |
+| Lint Issues Fixed | <n or "—"> |
+| Code Critic (Critical/Major/Minor) | <c/m/n or "—/—/—"> |
+| Test Critic (Critical/Major/Minor) | <c/m/n or "—/—/—"> |
+
+## Quality Gates
+
+| Gate | Status |
+|------|--------|
+| self-reviewer | <status or "—"> |
+| test-executor | <status or "—"> |
+| lint-executor | <status or "—"> |
+| code-critic | <status or "—"> |
+| test-critic | <status or "—"> |
+| doc-critic | <status or "—"> |
+
+## Key Artifacts
+
+- `build/impl_changes_summary.md`
+- `build/test_changes_summary.md`
+- `build/test_execution.md`
+- `build/self_review.md`
+
+## Next Steps
+
+<One of:>
+- ✅ Build complete. Run `/flow-4-gate` to continue.
+- ⚠️ Build incomplete: <brief reason>. Run the flow again to resolve.
+- 🚫 Cannot proceed: <mechanical failure reason>.
+
+---
+_Generated by build-cleanup at <timestamp>_
+```
+
+Notes:
+- Use counts from the receipt (no recomputation)
+- Use "—" for null/missing values
+- This file is the source of truth for what gets posted
+
 ## Hard Rules
 
 1) Mechanical counts only. Never estimate.
@@ -390,7 +473,7 @@ After writing files, return:
 ```yaml
 ## Build Cleanup Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

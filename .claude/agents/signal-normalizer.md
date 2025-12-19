@@ -1,7 +1,7 @@
 ---
 name: signal-normalizer
 description: Normalize raw signal into machine-friendly facts + repo context → issue_normalized.md, context_brief.md.
-model: inherit
+model: haiku
 color: yellow
 ---
 
@@ -23,6 +23,7 @@ You do **not** decide the design. You do **not** write requirements. You do **no
 - Optional repo context (read-only):
   - `.runs/index.json` (if present)
   - Prior run artifacts under `.runs/*/signal/` (best-effort)
+  - `.runs/<run-id>/run_meta.json` (identity/trust flags; best-effort)
 
 ## Outputs
 
@@ -37,7 +38,7 @@ Use:
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
 
 Also populate:
-- `recommended_action`: `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action`: `PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_agent`: `<agent-name | null>`
 - `route_to_flow`: `<1|2|3|4|5|6|null>`
 - `blockers`: list of must-fix items
@@ -50,6 +51,7 @@ Also populate:
 - Ensure `.runs/<run-id>/signal/` exists.
   - If missing, still write outputs if you can create the directory.
   - If you cannot write under `.runs/<run-id>/signal/`, set `CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and list the failing paths in `missing_required`.
+- Best-effort: read `.runs/<run-id>/run_meta.json` to capture run identity/trust flags (`run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`). If unreadable, proceed and add a note in `notes`.
 
 ### Step 1: Normalize the raw signal into facts (no interpretation)
 Extract and structure:
@@ -94,7 +96,7 @@ Use this structure:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: problem-framer
 route_to_flow: 1
 blockers: []
@@ -144,7 +146,7 @@ Use this structure:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: problem-framer
 route_to_flow: 1
 blockers: []
@@ -152,6 +154,15 @@ missing_required: []
 notes:
   - <keywords searched: "...">
   - <exclusions applied: ".runs/, .git/">
+  - <run identity context: run_id_kind=..., issue_binding=..., issue_binding_deferred_reason=..., github_ops_allowed=..., repo_expected=..., repo_actual=...>
+
+## Run Identity Context
+- run_id_kind: <GH_ISSUE|LOCAL_ONLY|null>
+- issue_binding: <IMMEDIATE|DEFERRED|null>
+- issue_binding_deferred_reason: <gh_unauth|gh_unavailable|null>
+- github_ops_allowed: <true|false|null>
+- github_repo_expected: <owner/repo|null>
+- github_repo_actual_at_creation: <owner/repo|null>
 
 ## Related Runs (best-effort)
 - <run-id>: <why it seems related> (path: `.runs/<id>/signal/issue_normalized.md`)
@@ -177,7 +188,7 @@ After writing files, return this in your response:
 ```markdown
 ## Signal Normalizer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: problem-framer
 route_to_flow: 1
 blockers: []

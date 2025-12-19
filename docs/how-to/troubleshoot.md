@@ -122,12 +122,11 @@ cleanup → sanitizer → modified_files: true → cleanup → sanitizer → mod
 Microloops route as follows:
 - `status: CANNOT_PROCEED` → stop (FIX_ENV)
 - `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
-- `recommended_action: ESCALATE` → stop microloop; record evidence
 - `recommended_action: RERUN` → rerun the specified agent (default author/implementer)
-- `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- `recommended_action: PROCEED` → proceed even if UNVERIFIED (capture blockers/limitations)
 - If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
 
-If a critic keeps saying `RERUN` but the issues are unfixable locally, treat it as `ESCALATE` with crisp blockers and move to the next flow.
+If a critic keeps saying `RERUN` but the issues are unfixable locally, proceed with crisp blockers/limitations documented (or `BOUNCE` to the upstream owner when clear).
 
 ---
 

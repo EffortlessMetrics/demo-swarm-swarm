@@ -1,0 +1,9 @@
+{
+  "flow": "build",
+  "status": "VERIFIED",
+  "counts": {
+    "tests_passed": 5
+  },
+  "quality_gates": {},
+  "timestamp": "2025-01-15T10:00:00Z"
+}

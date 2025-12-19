@@ -15,7 +15,16 @@ Primary:
 - `.runs/<run-id>/build/subtask_context_manifest.json` (scope anchor; preferred)
 - `.runs/<run-id>/signal/features/*.feature` (BDD scenarios + @REQ tags)
 - `.runs/<run-id>/plan/test_plan.md` (test-type expectations + priorities)
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; if AC-scoped invocation)
 - `.runs/<run-id>/signal/requirements.md` (REQ-* / NFR-*)
+
+**AC-scoped invocation:** When invoked as part of the AC loop (Flow 3), you will receive:
+- `ac_id`: The specific AC being implemented (e.g., AC-001)
+- `ac_description`: What "done" looks like for this AC
+- `ac_test_types`: Which test types to write (from ac_matrix.md)
+- `ac_verification`: How to confirm this AC is satisfied
+
+When AC-scoped, focus **only** on tests for the specified AC. Tag/name tests with the AC-ID for filtering (e.g., `test_ac_001_*` or `@AC-001` marker).
 
 Feedback loops (if present):
 - `.runs/<run-id>/build/test_critique.md` (critic findings + blockers)
@@ -96,7 +105,7 @@ Existing tests:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -203,7 +212,7 @@ Routing:
 - If you need implementation to proceed (but tests exist) → `recommended_action: PROCEED`, `route_to_agent: null`, `route_to_flow: null` (and set `tests_passed: expected_failures`)
 - If ambiguity/spec hole blocks correct tests → `recommended_action: BOUNCE`, `route_to_agent: clarifier`, `route_to_flow: 1` (or `2` if it's a design-level gap)
 
-**Note:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`. For `PROCEED`, `RERUN`, `ESCALATE`, and `FIX_ENV`, set both to `null`.
+**Note:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`. For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.
 
 ### CANNOT_PROCEED
 
@@ -224,7 +233,7 @@ At the end of your response, return this block (must match the Machine Summary y
 ```markdown
 ## Test Author Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 tests_run: yes | no

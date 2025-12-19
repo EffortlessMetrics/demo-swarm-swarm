@@ -40,6 +40,13 @@ pub struct Contracts {
     pub index_allowed_agents: &'static [&'static str],
     pub secrets_allowed_agents: &'static [&'static str],
     pub openq_allowed_agents: &'static [&'static str],
+    // GH body hygiene
+    pub gh_posting_agents: &'static [&'static str],
+    pub gh_body_forbidden_patterns: &'static [&'static str],
+    // Flow boundary enforcement (check 52)
+    pub skill_cli_subcommands: &'static [&'static str],
+    // OpenQ prefix validation (check 53)
+    pub openq_flow_codes: &'static [&'static str],
 }
 
 impl Default for Contracts {
@@ -63,6 +70,10 @@ impl Default for Contracts {
             index_allowed_agents: INDEX_ALLOWED_AGENTS,
             secrets_allowed_agents: SECRETS_ALLOWED_AGENTS,
             openq_allowed_agents: OPENQ_ALLOWED_AGENTS,
+            gh_posting_agents: GH_POSTING_AGENTS,
+            gh_body_forbidden_patterns: GH_BODY_FORBIDDEN_PATTERNS,
+            skill_cli_subcommands: SKILL_CLI_SUBCOMMANDS,
+            openq_flow_codes: OPENQ_FLOW_CODES,
         }
     }
 }
@@ -136,10 +147,17 @@ pub struct Regexes {
     pub shim_line_continuation: Regex,
     pub direct_demoswarm_invocation: Regex,
 
+    // Structured extraction calls (cross-agent contract checks)
+    pub ms_get_invocation: Regex,
+    pub inv_get_invocation: Regex,
+
     // Boundary check patterns (checks 45-47)
     pub skill_names_in_prose: Regex,
     pub demoswarm_shim_ref: Regex,
     pub flow_output_arrow: Regex,
+
+    // GH body hygiene patterns (check 50)
+    pub gh_heredoc_pattern: Regex,
 }
 
 impl Regexes {
@@ -148,6 +166,12 @@ impl Regexes {
         let ml = |pattern: &str| -> anyhow::Result<Regex> {
             Ok(RegexBuilder::new(pattern).multi_line(true).build()?)
         };
+        let dotall = |pattern: &str| -> anyhow::Result<Regex> {
+            Ok(RegexBuilder::new(pattern)
+                .dot_matches_new_line(true)
+                .multi_line(true)
+                .build()?)
+        };
 
         Ok(Self {
             // Machine Summary canonical axis lines (line-anchored, need multiline)
@@ -155,7 +179,7 @@ impl Regexes {
                 r"^\s*status:\s*VERIFIED\s*\|\s*UNVERIFIED\s*\|\s*CANNOT_PROCEED\s*$",
             )?,
             canon_action: ml(
-                r"^\s*recommended_action:\s*PROCEED\s*\|\s*RERUN\s*\|\s*BOUNCE\s*\|\s*ESCALATE\s*\|\s*FIX_ENV\s*$",
+                r"^\s*recommended_action:\s*PROCEED\s*\|\s*RERUN\s*\|\s*BOUNCE\s*\|\s*FIX_ENV\s*$",
             )?,
             route_to_agent: ml(r"^\s*route_to_agent:")?,
             route_to_flow: ml(r"^\s*route_to_flow:")?,
@@ -232,6 +256,14 @@ impl Regexes {
                 r"(^|\s)demoswarm\s+(count|ms|yaml|inv|line|receipt|receipts|openapi|time|index|openq|secrets)",
             )?,
 
+            // Structured extraction calls (cross-agent contract checks)
+            ms_get_invocation: dotall(
+                r###"(?m)^\s*bash\s+\.claude/scripts/demoswarm\.sh\s+ms\s+get.*?--file\s+"([^"]+)".*?--section\s+"## Machine Summary".*?--key\s+"([^"]+)""###,
+            )?,
+            inv_get_invocation: dotall(
+                r###"(?m)^\s*bash\s+\.claude/scripts/demoswarm\.sh\s+inv\s+get.*?--file\s+"([^"]+)".*?--marker\s+"([^"]+)""###,
+            )?,
+
             // Boundary check patterns (checks 45-47)
             // Check 45: Skill names that should not appear in flow commands
             skill_names_in_prose: Regex::new(
@@ -243,6 +275,10 @@ impl Regexes {
             flow_output_arrow: Regex::new(
                 r"(agent|cleanup|author|critic|analyzer|designer|planner)\s*[-→>]+\s*\.?runs/",
             )?,
+
+            // GH body hygiene (check 50): heredoc pattern for safe body passing
+            // Matches: -f body="$(cat <<'EOF' or --body "$(cat <<'EOF'
+            gh_heredoc_pattern: Regex::new(r#"(-f\s+body=|--body\s+)"\$\(cat\s+<<'EOF'"#)?,
         })
     }
 }
@@ -283,7 +319,9 @@ pub const REQUIRED_AGENTS: &[&str] = &[
     "design-optioneer",
     "adr-author",
     "interface-designer",
+    "contract-critic",
     "observability-designer",
+    "observability-critic",
     "test-strategist",
     "work-planner",
     "design-critic",
@@ -296,7 +334,10 @@ pub const REQUIRED_AGENTS: &[&str] = &[
     "code-critic",
     "mutator",
     "fixer",
+    "lint-executor",
+    "test-executor",
     "doc-writer",
+    "doc-critic",
     "self-reviewer",
     // Flow 4 domain
     "receipt-checker",
@@ -304,6 +345,8 @@ pub const REQUIRED_AGENTS: &[&str] = &[
     "security-scanner",
     "coverage-enforcer",
     "gate-fixer",
+    "fix-forward-runner",
+    "traceability-auditor",
     "merge-decider",
     // Flow 5 domain
     "deploy-monitor",
@@ -346,8 +389,11 @@ pub const CRITICS: &[&str] = &[
     "requirements-critic",
     "bdd-critic",
     "design-critic",
+    "contract-critic",
+    "observability-critic",
     "code-critic",
     "test-critic",
+    "doc-critic",
 ];
 
 /// Critics and verifiers (must have Machine Summary with canonical axis).
@@ -355,14 +401,20 @@ pub const CRITIC_AND_VERIFIER_AGENTS: &[&str] = &[
     "requirements-critic",
     "bdd-critic",
     "design-critic",
+    "contract-critic",
+    "observability-critic",
     "code-critic",
     "test-critic",
+    "doc-critic",
     "contract-enforcer",
     "coverage-enforcer",
     "artifact-auditor",
     "receipt-checker",
     "security-scanner",
     "deploy-monitor",
+    "smoke-verifier",
+    "traceability-auditor",
+    "fix-forward-runner",
 ];
 
 /// Gate agents (must use unified recommended_action).
@@ -408,6 +460,7 @@ pub const REPO_OPERATOR_RESULT_FIELDS: &[&str] = &[
     "status:",
     "proceed_to_github_ops:",
     "commit_sha:",
+    "publish_surface:",
     "anomaly_paths:",
 ];
 
@@ -454,3 +507,41 @@ pub const SECRETS_ALLOWED_AGENTS: &[&str] = &["secrets-sanitizer"];
 
 /// Skill ownership: agents allowed to use `openq next-id` / `openq append`.
 pub const OPENQ_ALLOWED_AGENTS: &[&str] = &["clarifier"];
+
+/// GitHub-posting agents that must follow GH body hygiene rules.
+pub const GH_POSTING_AGENTS: &[&str] = &["gh-reporter", "gh-issue-manager", "gh-issue-resolver"];
+
+/// Dangerous patterns that must NOT appear in GH agent body handling.
+/// These patterns indicate temp files, absolute paths, or placeholders that will fail.
+pub const GH_BODY_FORBIDDEN_PATTERNS: &[&str] = &[
+    "--body-file",          // Temp file paths break on Windows
+    "@/",                   // File reference that will fail
+    "C:\\",                 // Windows absolute path
+    "C:/",                  // Windows absolute path (forward slash)
+    "/tmp/",                // Unix temp directory
+    "/var/",                // Unix system directory
+    "/home/",               // Unix home directory
+    "/Users/",              // macOS home directory
+    "AppData\\Local\\Temp", // Windows temp directory
+    "<updated_body>",       // Placeholder that should be replaced
+    "comment content here", // Template placeholder
+];
+
+/// Skill CLI subcommands that should NOT appear in flow commands (check 52).
+/// Flow commands delegate to agents; agents use skills. Flow commands should not
+/// contain direct skill-layer CLI syntax.
+pub const SKILL_CLI_SUBCOMMANDS: &[&str] = &[
+    "count", "ms", "yaml", "index", "receipt", "receipts", "openapi", "line", "inv", "time",
+    "openq", "secrets",
+];
+
+/// Canonical OpenQ flow codes (check 53).
+/// QID format: OQ-<FLOW>-<NNN> where FLOW is one of these.
+pub const OPENQ_FLOW_CODES: &[&str] = &[
+    "SIG", // Signal (Flow 1)
+    "PLN", // Plan (Flow 2)
+    "BLD", // Build (Flow 3)
+    "GAT", // Gate (Flow 4)
+    "DEP", // Deploy (Flow 5)
+    "WIS", // Wisdom (Flow 6)
+];

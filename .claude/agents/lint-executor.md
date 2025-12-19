@@ -1,7 +1,7 @@
 ---
 name: lint-executor
 description: Run configured lint/format checks (via auto-linter skill) and write a tool-bound report → .runs/<run-id>/build/lint_report.md. Supports check/apply modes. No git. No refactors.
-model: inherit
+model: haiku
 color: blue
 ---
 
@@ -56,13 +56,13 @@ Helpful:
 ## Control-plane routing (closed enum)
 
 Always populate:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
 Routing guidance:
 - Lint/format failed → `UNVERIFIED`, `recommended_action: RERUN`, `route_to_flow: 3`, `route_to_agent: fixer` (default).
-- Commands unknown/missing → `UNVERIFIED`, `recommended_action: ESCALATE`, `route_to_agent: pack-customizer`.
+- Commands unknown/missing → `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: pack-customizer`.
 - Mechanical tooling failure → `CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
 
 ## Behavior
@@ -77,7 +77,7 @@ If not, `CANNOT_PROCEED` + `FIX_ENV`.
 Use the **auto-linter** skill's guidance and repo configuration if present. Respect `mode` (`check` default, `apply` allowed for deterministic autofix).
 If you cannot identify commands safely:
 - record missing config/commands in `missing_required`
-- set `UNVERIFIED` + `ESCALATE` to `pack-customizer`
+- set `UNVERIFIED` + `BOUNCE` to `pack-customizer`
 
 ### Step 2: Execute checks (tool-bound)
 Run in this order (if configured):
@@ -107,7 +107,7 @@ Write exactly this structure:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
@@ -148,7 +148,7 @@ At the end of your response, echo:
 ```markdown
 ## Lint Executor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []

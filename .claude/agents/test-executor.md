@@ -1,7 +1,7 @@
 ---
 name: test-executor
 description: Execute the configured test suite (via test-runner skill) and write a tool-bound verification report → .runs/<run-id>/build/test_execution.md. No git. No fixes.
-model: inherit
+model: haiku
 color: blue
 ---
 
@@ -32,7 +32,8 @@ Do not write additional logs or temp files. Summarize and cite.
 
 ## Mode
 
-- `verify` (only) → execute configured tests without modifying code. Fix-forward lane reuses this mode.
+- `verify` → execute configured tests without modifying code. Fix-forward lane reuses this mode.
+- `verify_ac` → execute only tests scoped to a specific AC (fast confirm during AC loop).
 
 ## Inputs (best-effort)
 
@@ -42,8 +43,20 @@ Prefer:
 
 Helpful:
 - `.runs/<run-id>/plan/test_plan.md` (if it specifies required/optional test layers)
+- `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; for AC-scoped runs)
 - `.runs/<run-id>/build/test_critique.md` (if re-running after a microloop)
 - `.runs/<run-id>/build/impl_changes_summary.md` (what changed; context only)
+
+**AC-scoped invocation:** When invoked with `mode: verify_ac`, you will receive:
+- `ac_id`: The specific AC to test (e.g., AC-001)
+- `ac_test_files`: Test files written for this AC (from test-author)
+
+Use AC-ID to filter tests:
+- By test name pattern: `*ac_001*`, `*AC_001*`
+- By marker/tag: `@AC-001`, `-m AC_001`
+- By file: run only the `ac_test_files` provided
+
+If no AC-specific filtering is possible, run the full suite and note the limitation.
 
 If inputs are missing, proceed and record `missing_required`/`concerns`.
 
@@ -56,13 +69,13 @@ If inputs are missing, proceed and record `missing_required`/`concerns`.
 ## Control-plane routing (closed enum)
 
 Always populate:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
 Routing guidance:
 - Tests failed (non-zero exit) → `UNVERIFIED`, `recommended_action: RERUN`, `route_to_flow: 3`, `route_to_agent: code-implementer` (default).
-- Tests cannot run because test command is unknown/missing → `UNVERIFIED`, `recommended_action: ESCALATE`, `route_to_agent: pack-customizer`.
+- Tests cannot run because test command is unknown/missing → `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: pack-customizer`.
 - Mechanical inability to run tooling (missing runtime, permissions) → `CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
 
 ## Behavior
@@ -78,7 +91,7 @@ Use the **test-runner** skill’s guidance and the repo configuration if present
 If you cannot identify a test command safely:
 - record `missing_required: ["demo-swarm.config.json: commands.test"]` (or equivalent)
 - do not invent `npm test` / `cargo test` unless it is explicitly specified by skill/config
-- set `UNVERIFIED` + `ESCALATE` to `pack-customizer`
+- set `UNVERIFIED` + `BOUNCE` to `pack-customizer`
 
 ### Step 2: Execute tests (tool-bound)
 Run tests via test-runner's configured mechanism.
@@ -104,14 +117,16 @@ Write exactly this structure:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []
 concerns: []
 test_summary:
-  mode: verify
+  mode: verify | verify_ac
+  ac_id: <string|null>           # only for verify_ac mode
+  ac_filter_applied: <bool|null> # true if AC filtering worked
   command: <string|null>
   exit_code: <int|null>
   passed: <int|null>
@@ -126,7 +141,9 @@ test_summary:
 
 ## Execution
 - tool: test-runner
-- mode: verify
+- mode: verify | verify_ac
+- ac_id: <string|null>
+- ac_filter_applied: <bool|null>
 - command: `<exact command or null>`
 - exit_code: <int|null>
 - duration: <value or "unknown">
@@ -154,12 +171,14 @@ At the end of your response, echo:
 ```markdown
 ## Test Executor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []
-mode: verify
+mode: verify | verify_ac
+ac_id: <string|null>
+ac_filter_applied: <bool|null>
 ```
 
 The file is the audit record. This block is the control plane.

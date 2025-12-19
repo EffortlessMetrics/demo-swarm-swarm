@@ -26,14 +26,14 @@ Use:
 ## Control-plane routing (closed enum)
 
 Use:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Rules:
 - `FIX_ENV` only when `status: CANNOT_PROCEED`
 - `BOUNCE` only when you set `route_to_flow` and/or `route_to_agent`
 - Plan-local fixes → `recommended_action: RERUN` and set `route_to_agent`
 - Upstream spec must change → `recommended_action: BOUNCE`, `route_to_flow: 1`
-- Human judgment/waiver needed → `recommended_action: ESCALATE`
+- Human judgment/waiver needed → `recommended_action: PROCEED` (UNVERIFIED with blockers)
 
 ## Inputs (best-effort)
 
@@ -135,13 +135,17 @@ Write these sections in this order.
 
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []
 concerns: []
+observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
+can_further_iteration_help: yes | no
 ```
+
+**Using observations:** As the integrative critic, you see the full picture. If you notice things that aren't blockers but worth capturing (friction in the process, cross-cutting concerns, potential pack improvements), add them to `observations`. These feed into Wisdom flow.
 
 ## Iteration Control
 
@@ -232,7 +236,7 @@ Include only these line prefixes (one per line):
 * If the issue is **test plan missing contract/BDD mapping** → `RERUN`, `route_to_agent: test-strategist`
 * If the issue is **work breakdown/rollout missing** → `RERUN`, `route_to_agent: work-planner`
 * If the issue is **requirements ambiguous / untestable** → `BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author` (or `problem-framer` if framing is wrong)
-* If the issue requires **human waiver/priority trade-off** → `ESCALATE` (keep routes null)
+* If the issue requires **human waiver/priority trade-off** → keep `recommended_action: PROCEED`, routes null, and capture the blocker.
 
 ## Completion states
 
@@ -245,7 +249,7 @@ Include only these line prefixes (one per line):
 * **UNVERIFIED**
 
   * Any CRITICAL issue, or missing required artifacts, or major binding gaps
-  * `recommended_action` is `RERUN` (plan-local), `BOUNCE` (upstream), or `ESCALATE` (human)
+  * `recommended_action` is `RERUN` (plan-local), `BOUNCE` (upstream), or `PROCEED` (human judgment captured as blockers)
 
 * **CANNOT_PROCEED**
 
@@ -259,12 +263,13 @@ After writing the file, return:
 ```yaml
 ## Design Critic Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []
 concerns: []
+observations: []
 can_further_iteration_help: yes | no
 severity_summary:
   critical: N|null

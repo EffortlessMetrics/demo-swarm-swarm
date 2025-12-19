@@ -15,7 +15,11 @@ You are orchestrating Flow 1 of the SDLC swarm. This flow transforms messy input
 - Flow artifacts live under: `.runs/<run-id>/signal/`
 - Do **not** rely on `cd` into any folder to make relative paths work.
 
-**Important**: The `signal-run-prep` agent (Step 0) establishes the run directory. Do not skip this step.
+**Important**: Run identity now comes from `gh-issue-resolver` (Step 0). The `repo-operator` ensures the run branch (Step 0b) and `signal-run-prep` (Step 0c) establishes the run directory using that run-id. Do not skip these steps.
+- `run_id_kind: LOCAL_ONLY` means the run-id is a local slug (`local-...`) and the issue is not bound yet (`issue_number: null`).
+  - If `github_ops_allowed: false` → repo mismatch / trust block (never bind/create issues in this repo).
+  - If `github_ops_allowed: true` + `issue_number: null` → GitHub binding is deferred (bind later when GitHub works; handled by `gh-issue-manager`).
+- Only repo mismatch sets `github_ops_allowed: false`. If GitHub is temporarily unavailable/unauthenticated, `github_ops_allowed` remains `true` and binding is deferred (`issue_binding: DEFERRED`; later handled by `gh-issue-manager` when access allows).
 
 #### Artifact visibility rule
 
@@ -45,7 +49,7 @@ Flow 1 uses **two complementary state machines**:
 
 1. Use Claude Code's **TodoWrite** tool to create a TODO list of **major stations**.
    - Track at the behavioral/station level, NOT per agent call.
-   - Microloops (e.g., requirements author/critic) are ONE todo.
+   - Microloops (`requirements-author` ↔ `requirements-critic`, `bdd-author` ↔ `bdd-critic`) are ONE todo each.
 
 2. Mirror the same list into `.runs/<run-id>/signal/flow_plan.md` as checkboxes.
    - As each station completes: mark TodoWrite done AND tick the checkbox.
@@ -53,21 +57,22 @@ Flow 1 uses **two complementary state machines**:
 ### Suggested TodoWrite Items
 
 ```
-- Establish run infrastructure (signal-run-prep)
-- Research GitHub context (gh-researcher)
-- Normalize signal (signal-normalizer)
-- Frame the problem (problem-framer)
-- Capture open questions (clarifier)
-- Requirements microloop (author/critic)
-- BDD microloop (author/critic)
-- Assess scope + initial risks (scope-assessor)
-- Deep risk analysis (risk-analyst)
-- Finalize receipt (signal-cleanup)
-- Sanitize secrets (secrets-sanitizer)
-- Checkpoint commit (repo-operator)
-- Ensure GitHub issue exists (gh-issue-manager; gated)
-- Post GitHub summary (gh-reporter; gated)
-- Update flow_plan.md summary
+- gh-issue-resolver (resolve/bind GitHub issue; may defer when GH unavailable)
+- repo-operator (ensure run branch)
+- signal-run-prep (establish run infrastructure)
+- gh-researcher (research GitHub context)
+- signal-normalizer (normalize signal)
+- problem-framer (frame the problem)
+- clarifier (capture open questions; non-blocking)
+- requirements-author ↔ requirements-critic (microloop; 2 passes default)
+- bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- scope-assessor (assess scope + initial risks)
+- risk-analyst (deep risk analysis)
+- signal-cleanup (finalize receipt; update index; update `flow_plan.md`)
+- secrets-sanitizer (publish gate)
+- repo-operator (checkpoint commit)
+- gh-issue-manager (sync GitHub issue; skip when `github_ops_allowed: false`; restricted mode when publish is blocked or artifacts are not pushed)
+- gh-reporter (post GitHub summary; skip when `github_ops_allowed: false`; restricted handoff when publish is blocked or artifacts are not pushed)
 ```
 
 ### On Rerun
@@ -80,9 +85,14 @@ If running `/flow-1-signal` on an existing run-id:
 
 ## Agents to Use
 
-### Infrastructure (Step 0)
+### Issue binding (Step 0)
 
-- **signal-run-prep** - MUST be called first to establish the run directory
+- **gh-issue-resolver** - MUST be called first to resolve/create the GitHub issue (or mark repo mismatch / defer binding) and emit `run_id` (`gh-<issue_number>` or `local-<slug>-<hash6>`)
+
+### Infrastructure (Step 0b/0c)
+
+- **repo-operator** - Ensure run branch `run/<run-id>` exists
+- **signal-run-prep** - Establish the run directory using the issue-derived run-id
 
 ### Research (Step 1)
 
@@ -92,8 +102,8 @@ If running `/flow-1-signal` on an existing run-id:
 
 - signal-normalizer
 - problem-framer
-- requirements-author / requirements-critic (microloop)
-- bdd-author / bdd-critic (microloop)
+- requirements-author ↔ requirements-critic (microloop; 2 passes default)
+- bdd-author ↔ bdd-critic (microloop; 2 passes default)
 - scope-assessor
 
 ### Cross-Cutting Agents
@@ -106,28 +116,39 @@ If running `/flow-1-signal` on an existing run-id:
 - signal-cleanup - seal receipt, update index
 - secrets-sanitizer - publish gate: scans for secrets, fixes or blocks
 - repo-operator - checkpoint commit (gated on secrets-sanitizer result)
-- gh-issue-manager - ensure GitHub issue exists and update metadata
-- gh-reporter - post summary to GitHub issue when gates allow
+- gh-issue-manager - sync GitHub issue metadata (always attempt when `gh` auth is available; full vs restricted mode based on publish gates and publish_surface)
+- gh-reporter - post summary to GitHub issue (full vs restricted handoff based on publish gates)
 
 ## Orchestration Outline
 
-### Step 0: Establish Run Infrastructure
+### Step 0: Resolve or Create GitHub Issue
 
-**Call `signal-run-prep` first.**
+**Call `gh-issue-resolver` first.**
 
 This agent will:
-- Derive or confirm the `run-id` from user input, branch name, or ticket reference
-- Create `.runs/<run-id>/signal/` directory structure
-- Write `.runs/<run-id>/run_meta.json` with run metadata
-- Create artifact stub files
+- Resolve an explicit issue reference **or** create a new GitHub issue from the signal text
+- Return `run_id` (gh-<issue_number> or local-<slug>-<hash6> when repo mismatch prevents GitHub ops) plus issue metadata in a control-plane block
+- Perform no filesystem writes (runs before `.runs/<run-id>/` exists)
 
-After this step, you will have a confirmed run directory. All subsequent agents write to `.runs/<run-id>/signal/`.
+Use the returned `run_id` for all subsequent steps.
 
 ### Step 0b: Ensure Run Branch
 
 **Call `repo-operator`** with task: "ensure run branch `run/<run-id>`"
 
-The agent handles branch creation/switching safely. This keeps checkpoint commits off main.
+The agent handles branch creation/switching safely. This keeps checkpoint commits off main so run artifacts land on the run branch.
+
+### Step 0c: Establish Run Infrastructure
+
+**Call `signal-run-prep`** using the issue-derived `run_id` while on the run branch.
+
+This agent will:
+- Confirm the provided `run-id` (should already be `gh-<issue_number>`)
+- Create `.runs/<run-id>/signal/` directory structure
+- Write `.runs/<run-id>/run_meta.json` with run metadata (binding `issue_number` when the run-id matches `gh-<n>`)
+- Create artifact stub files
+
+After this step, you will have a confirmed run directory on the run branch. All subsequent agents write to `.runs/<run-id>/signal/`.
 
 ### Step 1: Initialize Flow Plan
 
@@ -138,21 +159,22 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 
 ## Planned Steps
 
-- [ ] signal-run-prep (establish run directory)
+- [ ] gh-issue-resolver (resolve/create issue, emit run_id)
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
+- [ ] signal-run-prep (establish run directory)
 - [ ] gh-researcher (GitHub context)
 - [ ] signal-normalizer (parse input)
 - [ ] problem-framer (synthesize problem)
 - [ ] clarifier (document ambiguities)
-- [ ] requirements-author / requirements-critic (microloop)
-- [ ] bdd-author / bdd-critic (microloop)
+- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
+- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
 - [ ] scope-assessor (stakeholders, risks, estimate)
 - [ ] risk-analyst (enrich risks)
 - [ ] signal-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
-- [ ] gh-issue-manager (create issue if missing)
-- [ ] gh-reporter (post summary)
+- [ ] gh-issue-manager (sync issue metadata; restricted issue updates when publish is blocked or not pushed)
+- [ ] gh-reporter (post summary; restricted handoff when publish is blocked or not pushed)
 
 ## Progress Notes
 
@@ -192,13 +214,13 @@ Alternate between `requirements-author` and `requirements-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
-3. **Route on the Requirements Critic Result block** (not by re-reading the file):
-   - If `status: VERIFIED` → proceed to BDD scenarios
-   - If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → route feedback to `requirements-author` and loop
-   - If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues documented; not addressable within scope)
-   - If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+ 3. **Route on the Requirements Critic Result block** (not by re-reading the file):
+    - If `status: CANNOT_PROCEED` -> **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+    - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`
+    - If `recommended_action: RERUN` -> do the apply pass: rerun `requirements-author` once with the critique worklist, then rerun `requirements-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
+    - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: The critic's `can_further_iteration_help: no` is the stop signal. Continue while critical/major issues exist AND the critic believes iteration helps. The Result block is the control plane; the critique file is the audit artifact.
+**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 7: BDD Scenarios (Microloop)
 
@@ -218,13 +240,13 @@ Alternate between `bdd-author` and `bdd-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
-3. **Route on the BDD Critic Result block** (not by re-reading the file):
-   - If `status: VERIFIED` → proceed to scope assessment
-   - If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → route feedback to `bdd-author` and loop
-   - If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues documented)
-   - If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+ 3. **Route on the BDD Critic Result block** (not by re-reading the file):
+    - If `status: CANNOT_PROCEED` -> **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+    - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`
+    - If `recommended_action: RERUN` -> do the apply pass: rerun `bdd-author` once with the critique worklist, then rerun `bdd-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
+    - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: Same as requirements—route on the Result block. The critique file is the audit artifact.
+**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 8: Assess Scope
 
@@ -277,7 +299,7 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
@@ -288,7 +310,7 @@ route_to_agent: <agent-name> | null
 - If `safe_to_commit: false`:
   - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-- Push + GitHub operations require: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub issue/comment updates still run in restricted mode when publish is blocked or `publish_surface: NOT_PUSHED`.
 
 ### Step 11b: Reseal If Modified (Conditional Loop)
 
@@ -301,11 +323,11 @@ If reseal cannot make progress (sanitizer signals no reasonable path):
   - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
 - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
   - Agent commits allowlist locally, does **not** push
-  - Agent returns `proceed_to_github_ops: false` (mechanically enforced)
-- Skip **all** GitHub ops (issue-manager / reporter).
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: ESCALATE`
+  - Agent returns `proceed_to_github_ops: false` (mechanically enforced) and `publish_surface: NOT_PUSHED`
+- GitHub ops will run in **restricted issue-publish mode** if `gh` auth and an issue exist (paths only, publish blocked reason).
+- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
   - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-- Exit cleanly (Steps 12/13 will be skipped due to `proceed_to_github_ops: false`)
+- Exit cleanly
 
 ### Step 11c: Checkpoint Commit
 
@@ -331,10 +353,11 @@ operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
 
-**Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
+**Note:** `commit_sha` is always populated (current HEAD on no-op), never null. `publish_surface` must always be present (PUSHED or NOT_PUSHED), even on no-op commits, anomalies, `safe_to_commit: false`, or push failures.
 
 **Routing logic (from Repo Operator Result):**
 - `status: COMPLETED` + `proceed_to_github_ops: true` → proceed to GitHub ops
@@ -344,52 +367,50 @@ anomaly_paths: []
 **Gating interaction with secrets-sanitizer:**
 - `repo-operator` reads `safe_to_commit` and `safe_to_publish` from the prior Gate Result
 - If `safe_to_commit: false`: skips commit entirely
-- If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false`
+- If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
-### Step 12: Ensure GitHub Issue Exists
+### Step 12: Sync GitHub Issue
 
-**Call `gh-issue-manager`** -> creates issue if missing, updates metadata
+**Call `gh-issue-manager`** -> sync/update issue metadata (and create/bind the issue if needed). If `run_meta.github_ops_allowed: false` (repo mismatch), the agent skips GitHub calls, writes a local status, and proceeds.
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+**Two-stage GitHub behavior:**
+- Issue updates run only when `github_ops_allowed: true` **and** `gh` is authenticated.
+  - `FULL` mode when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Status board uses blob links; Next Steps + Open Questions include real content.
+  - `RESTRICTED` mode otherwise: status board uses paths only (marked "not published") with a publish-blocked reason (secrets gate/anomaly/local-only/push failure/gh unavailable/publish_surface: NOT_PUSHED). Receipts may be read for counts/status rows; no human-authored markdown is quoted. Open Questions shows counts only with a withheld-content note. Next Steps still populate from control-plane facts.
+- No blob links when `publish_surface: NOT_PUSHED`, even if other gates are clear.
 
-Both must be true to proceed. If either gate fails, skip this step.
+If `issue_number` is missing (e.g., deferred binding) and `gh` is available/authenticated, attempt a one-time create/bind; otherwise record SKIPPED and continue. Update `run_meta.json`, `.runs/index.json`, and write `gh_issue_status.md`.
 
-**Hard requirement:** If both gates are true **and** `gh` is authenticated, failure to create/update the issue is a flow failure (`status: UNVERIFIED` with `recommended_action: BOUNCE` to `gh-issue-manager` or `repo-operator`).
-
-This agent:
-- Creates GitHub issue if none exists (preferred in Flow 1; allowed in any flow if missing)
-- Sets `issue_number`, `canonical_key`, and `aliases` in `run_meta.json`
-- Updates `.runs/index.json` with `issue_number` and `canonical_key`
-- Writes `gh_issue_status.md`
-
-**Note:** Issues created in Flows 2-6 include a "Signal pending" banner instructing humans to run `/flow-1-signal` to backfill.
-
-If `gh` CLI is not authenticated, this step is SKIPPED (not blocked).
+If `gh` CLI is not authenticated, record SKIPPED/UNVERIFIED (flow not blocked).
 
 ### Step 13: Report to GitHub
 
-**Call `gh-reporter`** -> posts summary **to the GitHub issue** (not PR)
+**Call `gh-reporter`** -> posts summary **to the GitHub issue** (not PR). If `run_meta.github_ops_allowed: false`, it writes local reports only and skips posting.
 
-**Prerequisite (two gates):**
-- Gate Result: `safe_to_publish: true`
-- Repo Operator Result: `proceed_to_github_ops: true`
+**Posting prerequisites:** `issue_number` present, `github_ops_allowed: true`, and `gh` authenticated.
 
-Both must be true to proceed. If either gate fails, skip posting.
+**Content modes:**
+- `FULL` when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Uses receipts (and optionally `open_questions.md`) with blob links.
+- `RESTRICTED` otherwise (`safe_to_publish: false`, `needs_upstream_fix: true`, `proceed_to_github_ops: false`, or `publish_surface: NOT_PUSHED`). You may read receipts for machine-derived status/counts; do **not** quote human-authored markdown or raw signal. Post a minimal handoff with the block reason, next steps to rerun cleanup/sanitizer/checkpoint, and optional high-level counts. Use paths only.
 
-The reporter:
-- Reads `.runs/<run-id>/signal/signal_receipt.json` (source of truth for counts/status)
-- Optionally reads `secrets_status.json` as last-mile safety check (Gate Result already cleared publish)
-- Reads `issue_number` from `.runs/<run-id>/run_meta.json`
-- Posts summary comment to GitHub issue
-- Writes `.runs/<run-id>/signal/github_report.md` locally as a record
+The reporter writes `.runs/<run-id>/signal/github_report.md` locally as a record. Posting failures are recorded and non-blocking.
+
+**Content expectations:** The gh-reporter comment should include:
+- Decisions Needed (unanswered open questions requiring human input)
+- Concerns for Review (critic findings, HIGH risks)
+- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
+
+These make the GitHub update actionable - humans can make decisions without leaving GitHub.
 
 **Issue-first (hard):** All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
 
-If secrets gate blocked or no issue exists, sets status to SKIPPED.
+Skip posting only when:
+- `run_meta.github_ops_allowed: false`, or
+- `issue_number` is missing, or
+- `gh` is not authenticated.
+Otherwise post in FULL or RESTRICTED mode.
 
 ### Step 14: Finalize Flow
 
@@ -445,7 +466,7 @@ All written to `.runs/<run-id>/signal/`:
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings and actions taken |
 | `secrets_status.json` | secrets-sanitizer | Machine-readable publish gate status |
 | `git_status.md` | repo-operator | Anomaly documentation (if detected) |
-| `gh_issue_status.md` | gh-issue-manager | GitHub issue creation status |
+| `gh_issue_status.md` | gh-issue-manager | GitHub issue sync status |
 | `gh_report_status.md` | gh-reporter | GitHub posting status |
 | `github_report.md` | gh-reporter | Record of GitHub post |
 
@@ -503,39 +524,74 @@ If yes, proceed to `/flow-2-plan`.
 
 ### TodoWrite (copy exactly)
 
+- [ ] gh-issue-resolver (issue binding -> run_id)
+- [ ] repo-operator (ensure `run/<run-id>` branch)
 - [ ] signal-run-prep
-- [ ] repo-operator: ensure run/`run-id` branch
 - [ ] gh-researcher
 - [ ] signal-normalizer
 - [ ] problem-framer
 - [ ] clarifier
-- [ ] requirements-author ↔ requirements-critic (microloop)
-- [ ] bdd-author ↔ bdd-critic (microloop)
+- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
+- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
 - [ ] scope-assessor
 - [ ] risk-analyst
 - [ ] signal-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] reseal cycle (signal-cleanup ↔ secrets-sanitizer) if modified_files
-- [ ] repo-operator checkpoint (checkpoint mode; capture Repo Operator Result)
-- [ ] gh-issue-manager (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] gh-reporter (only if safe_to_publish AND proceed_to_github_ops)
-- [ ] finalize flow_plan.md summary
+- [ ] signal-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; capture Repo Operator Result)
+- [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
+- [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)
 
-### Agent call order
+### Station order + templates
 
-1) signal-run-prep
-2) repo-operator (ensure run branch)
-3) gh-researcher
-4) signal-normalizer
-5) problem-framer
-6) clarifier
-7) requirements-author ↔ requirements-critic
-8) bdd-author ↔ bdd-critic
-9) scope-assessor
-10) risk-analyst
-11) signal-cleanup
-12) secrets-sanitizer (read Gate Result)
-13) (reseal cycle if needed)
-14) repo-operator (checkpoint; read Repo Operator Result)
-15) gh-issue-manager (if allowed)
-16) gh-reporter (if allowed)
+#### Station order
+
+1. `gh-issue-resolver`
+
+2. `repo-operator` (ensure run branch)
+
+3. `signal-run-prep`
+
+4. `gh-researcher`
+
+5. `signal-normalizer`
+
+6. `problem-framer`
+
+7. `clarifier`
+
+8. `requirements-author` ↔ `requirements-critic` (microloop; apply Microloop Template)
+
+9. `bdd-author` ↔ `bdd-critic` (microloop; apply Microloop Template)
+
+10. `scope-assessor`
+
+11. `risk-analyst`
+
+12. `signal-cleanup`
+
+13. `secrets-sanitizer`
+
+14. `signal-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+
+15. `repo-operator` (checkpoint; read Repo Operator Result)
+
+16. `gh-issue-manager` (if allowed)
+
+17. `gh-reporter` (if allowed)
+
+#### Microloop Template (writer ↔ critic)
+
+Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
+
+1) Writer pass: call `<writer>`
+2) Critique pass: call `<critic>` and read its control-plane Result
+3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
+4) Re-critique: call `<critic>` again
+
+Continue looping beyond the default two passes only when:
+- critic returns `recommended_action: RERUN`, and
+- `can_further_iteration_help: yes`, and
+- the critic's open items are specific, and the writer can change the artifact to address them.
+
+Otherwise proceed with `UNVERIFIED` + blockers recorded.

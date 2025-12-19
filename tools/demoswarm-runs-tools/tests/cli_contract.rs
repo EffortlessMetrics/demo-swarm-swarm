@@ -1,4 +1,4 @@
-use assert_cmd::{cargo::cargo_bin_cmd, Command};
+use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use std::io::Write;
 use tempfile::NamedTempFile;
 
@@ -21,9 +21,7 @@ fn ms_get_missing_file_returns_null_and_zero_exit() {
         "--null-if-missing",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 #[test]
@@ -43,9 +41,7 @@ fn count_pattern_honors_null_if_zero_flag() {
         "--null-if-zero",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 #[test]
@@ -64,7 +60,5 @@ fn invalid_regex_does_not_break_contract() {
         "[",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
