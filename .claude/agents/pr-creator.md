@@ -19,7 +19,6 @@ You create a Draft PR from the run branch (`run/<run-id>`) to `main` at the end 
 
 Run identity:
 - `.runs/<run-id>/run_meta.json` (required; contains `run_id`, `task_title`, `github_repo`, `github_ops_allowed`, `issue_number`)
-- `.runs/index.json`
 
 Control plane inputs (from prior agents):
 - Gate Result (from secrets-sanitizer): `safe_to_publish`
@@ -34,7 +33,6 @@ Build artifacts:
 - Draft PR on GitHub (if created)
 - `.runs/<run-id>/build/pr_creation_status.md`
 - Update `.runs/<run-id>/run_meta.json` with `pr_number`, `pr_url`
-- Update `.runs/index.json` with `pr_number`
 
 ## Status Model (Pack Standard)
 
@@ -58,7 +56,6 @@ If any prerequisite fails, write status as SKIPPED and proceed (PR can be create
 
 Verify you can:
 - Read `.runs/<run-id>/run_meta.json`
-- Read/write `.runs/index.json`
 - Write `.runs/<run-id>/build/pr_creation_status.md`
 
 If IO/permissions fail:
@@ -95,7 +92,7 @@ gh -R "<github_repo>" pr list --head "run/<run-id>" --json number,url,state -q '
 
 If PR exists:
 - Read its `number` and `url`
-- Update `run_meta.json` and `index.json` with existing `pr_number`
+- Update `run_meta.json` with existing `pr_number`
 - Write status with `operation_status: EXISTING`, `pr_number`, `pr_url`
 - `status: VERIFIED`, `recommended_action: PROCEED`
 - Exit cleanly.
@@ -164,8 +161,7 @@ Update `.runs/<run-id>/run_meta.json`:
 - Set `pr_url` to the PR URL
 - Add `pr-<number>` to `aliases` array
 
-Update `.runs/index.json`:
-- Set `pr_number` for this run entry
+Note: `.runs/index.json` updates are handled by allowlisted agents (`build-cleanup`, `gh-issue-manager`).
 
 ### Step 6: Write Status Report
 
@@ -187,7 +183,6 @@ head_branch: run/<run-id>
 
 ## Metadata Updates
 run_meta_updated: yes | no
-index_updated: yes | no
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED

@@ -382,7 +382,8 @@ modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
+route_to_station: <string | null>
+route_to_agent: <agent-name | null>
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
@@ -724,7 +725,7 @@ If `build/ac_status.json` does not exist:
 
 If `build/ac_status.json` exists (rerun):
 - Load it and resume from the first non-completed AC
-- Preserve prior `completed` count and item states
+- Preserve prior `completed` tally and item states
 
 **For each AC (in Implementation Order from ac_matrix.md):**
 
