@@ -5,7 +5,8 @@ status: UNVERIFIED
 
 recommended_action: BOUNCE
 route_to_flow: 3
-route_to_agent: build-cleanup
+route_to_station: build-cleanup
+route_to_agent: null
 
 blockers:
   - CRITICAL: Test count fabrication in receipt. Receipt claims "420 passed (379 unit + 41 integration)" but canonical test_execution.md shows "253 unit + 41 integration = 294 total". This is a 126-test discrepancy (42.8% inflation).

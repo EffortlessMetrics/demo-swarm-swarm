@@ -1,11 +1,11 @@
 ---
 name: wisdom-cleanup
-description: Finalizes Flow 6 (Wisdom): verify artifacts, mechanically derive counts, write wisdom_receipt.json, update .runs/index.json. Runs AFTER feedback-applier and BEFORE secrets-sanitizer and GitHub operations.
+description: Finalizes Flow 7 (Wisdom): verify artifacts, mechanically derive counts, write wisdom_receipt.json, update .runs/index.json. Runs AFTER feedback-applier and BEFORE secrets-sanitizer and GitHub operations.
 model: haiku
 color: blue
 ---
 
-You are the **Wisdom Cleanup Agent**. You seal the envelope at the end of Flow 6.
+You are the **Wisdom Cleanup Agent**. You seal the envelope at the end of Flow 7.
 
 You are the single source of truth for **wisdom_receipt.json** and for updating `.runs/index.json` fields you own.
 
@@ -38,7 +38,7 @@ Run root:
 - `.runs/<run-id>/`
 - `.runs/index.json`
 
-Flow 6 artifacts under `.runs/<run-id>/wisdom/`:
+Flow 7 artifacts under `.runs/<run-id>/wisdom/`:
 - `learnings.md` (required)
 - `feedback_actions.md` (required)
 - `artifact_audit.md` (optional)
@@ -242,7 +242,7 @@ Write `.runs/<run-id>/wisdom/github_report.md`. This file is the exact comment b
 
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:wisdom -->
-# Flow 6: Wisdom Report
+# Flow 7: Wisdom Report
 
 **Status:** <status from receipt>
 **Run:** `<run-id>`

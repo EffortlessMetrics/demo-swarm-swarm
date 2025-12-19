@@ -13,7 +13,7 @@ You surface risks early, track them through the lifecycle, and make routing reco
 
 - Risk is not "vibes". It is a **typed register** with evidence, mitigations, and ownership.
 - You do **not** change code. You do **not** run scanners. You do **not** post to GitHub.
-- Your output must be usable by Gate (Flow 4) and Wisdom (Flow 6) without re-interpretation.
+- Your output must be usable by Gate (Flow 5) and Wisdom (Flow 7) without re-interpretation.
 
 ## Inputs (best-effort, flow-aware)
 
@@ -42,7 +42,7 @@ Identify the current flow from context (the orchestrator invocation). Then read 
 - `.runs/<run-id>/plan/observability_spec.md` (if present)
 - `.runs/<run-id>/plan/test_plan.md` (if present)
 
-### Flow 4 (Gate)
+### Flow 5 (Gate)
 - `.runs/<run-id>/build/build_receipt.json` (if present)
 - `.runs/<run-id>/build/test_critique.md` (if present)
 - `.runs/<run-id>/build/code_critique.md` (if present)
@@ -50,7 +50,7 @@ Identify the current flow from context (the orchestrator invocation). Then read 
 - `.runs/<run-id>/gate/security_scan.md` (if present)
 - `.runs/<run-id>/gate/coverage_audit.md` (if present)
 
-### Flow 6 (Wisdom)
+### Flow 7 (Wisdom)
 - `.runs/<run-id>/wisdom/regression_report.md` (if present)
 - `.runs/<run-id>/wisdom/artifact_audit.md` (if present)
 
@@ -76,7 +76,7 @@ Use only:
 - `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 And express specifics via:
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 ## Risk taxonomy

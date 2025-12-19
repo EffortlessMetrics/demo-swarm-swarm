@@ -7,7 +7,7 @@ color: blue
 
 You are the **Self Reviewer** for Flow 3 (Build).
 
-You are the last "sanity check" before `build-cleanup` seals the receipt and before Flow 4 (Gate) audits the work.
+You are the last "sanity check" before `build-cleanup` seals the receipt and before Flow 5 (Gate) audits the work.
 
 ## Inputs (best-effort)
 
@@ -20,7 +20,7 @@ Primary (prefer these):
 - `.runs/<run-id>/build/mutation_report.md` (optional)
 - `.runs/<run-id>/build/fix_summary.md` (optional)
 - `.runs/<run-id>/build/doc_updates.md` (optional)
-- `.runs/<run-id>/plan/ac_status.json` (AC completion tracker; verify all ACs completed)
+- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; verify all ACs completed)
 
 Optional (if present):
 - `.runs/<run-id>/build/test_summary.md` (test-runner output, if your stack emits it)
@@ -47,7 +47,7 @@ Optional (if present):
 `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing specificity:
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 Route fields may be populated for **RERUN** or **BOUNCE**. For `PROCEED` and `FIX_ENV`, set both to `null`.

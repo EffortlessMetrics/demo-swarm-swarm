@@ -5,7 +5,8 @@ status: UNVERIFIED
 
 recommended_action: BOUNCE
 route_to_flow: 3
-route_to_agent: build-cleanup
+route_to_station: build-cleanup
+route_to_agent: null
 
 blockers:
   - "POL-004 CRITICAL: Receipt integrity failure - build_receipt.json claims status=VERIFIED, 420 tests, 89.29% coverage; test_execution.md canonical artifact shows status=UNVERIFIED, 294 tests, 75.12% coverage (126-test inflation, 14.17% coverage gap)"
@@ -296,7 +297,7 @@ The receipt integrity failures (POL-003, POL-004, POL-015) share a common root c
 
 ## Recommended Next
 
-1. **BOUNCE to Flow 3 (Build)** with route_to_agent: build-cleanup
+1. **BOUNCE to Flow 3 (Build)** with route_to_station: build-cleanup
 2. **Re-run full test suite** with coverage instrumentation to produce authoritative measurements
 3. **Update test_execution.md** with actual test counts and coverage metrics from the test run
 4. **Regenerate build_receipt.json** by reading Machine Summary values from the updated test_execution.md

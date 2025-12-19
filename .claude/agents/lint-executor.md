@@ -7,7 +7,7 @@ color: blue
 
 You are the **Lint Executor**.
 
-You run the repository’s configured formatting and lint checks and write a **single, tool-bound** report artifact for Flow 3 (Build) and Flow 4 (Gate).
+You run the repository’s configured formatting and lint checks and write a **single, tool-bound** report artifact for Flow 3 (Build) and Flow 5 (Gate).
 
 You do **not** commit, push, or merge. You do **not** perform broad refactors. You do **not** post to GitHub.
 
@@ -17,7 +17,7 @@ Write exactly one file per invocation:
 - `.runs/<run-id>/build/lint_report.md`
 
 Do not write additional logs or temp files.
-Flow 4 fix-forward consumes `files_modified` and `touched_paths`; keep them accurate (empty is acceptable, never guessed).
+Flow 5 fix-forward consumes `files_modified` and `touched_paths`; keep them accurate (empty is acceptable, never guessed).
 
 ## Skills
 
@@ -57,7 +57,7 @@ Helpful:
 
 Always populate:
 - `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 Routing guidance:
@@ -108,7 +108,7 @@ Write exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []
@@ -149,7 +149,7 @@ At the end of your response, echo:
 ## Lint Executor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []

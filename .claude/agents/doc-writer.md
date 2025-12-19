@@ -67,7 +67,7 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 Always populate in Machine Summary:
 - `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_agent: <agent-name|null>`
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 
 Rules:
 - `FIX_ENV` only when `status: CANNOT_PROCEED`
@@ -131,7 +131,7 @@ Write `.runs/<run-id>/build/doc_updates.md` using the template below and include
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []
@@ -199,7 +199,7 @@ After writing the file, return:
 ## Doc Writer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []

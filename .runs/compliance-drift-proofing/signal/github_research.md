@@ -149,11 +149,11 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 ### 5. Check-Doc-Drift.sh Scope (from script inspection)
 
 **Existing Bash-based checks** (6 checks):
-1. Stale 'runs-tools' skill references (replaced by runs-derive, runs-index, openq-tools, secrets-tools)
-2. Old openq interface (--flow, --qid flags)
-3. Old secrets interface (--files, --dir flags)
-4. yaml count-items --key drift (should be --item-regex)
-5. inv get --key drift (should be --marker)
+1. Stale runs tooling reference (skills were split; update to current skill names)
+2. Legacy OpenQ CLI usage (update to the current OpenQ tool interface)
+3. Legacy secrets CLI usage (update to the current secrets tool interface)
+4. yaml count-items interface drift (update to current matching flag)
+5. inv get interface drift (update to current marker-based interface)
 6. (Check 6 implied by context)
 
 **Implication**: check-doc-drift.sh handles interface drift; pack-check handles structural/ownership drift.

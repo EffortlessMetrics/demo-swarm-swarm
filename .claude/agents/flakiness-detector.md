@@ -38,13 +38,16 @@ Optional:
 
 `recommended_action` MUST be one of: `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
-`route_to_flow`: `3 | null`
+`route_to_flow`: `3 | null` (required for BOUNCE)
 
-`route_to_agent`: `test-author | code-implementer | pack-customizer | null`
+`route_to_station`: `<string | null>` — free-text hint (e.g., "test-executor", "test-author") when you know the station but aren't certain the agent enum is valid
+
+`route_to_agent`: `test-author | code-implementer | pack-customizer | null` — strict enum, only set when certain
 
 Rules:
 - `FIX_ENV` only when `status: CANNOT_PROCEED`
 - Populate `route_to_*` only when `recommended_action: BOUNCE`
+- **Never guess agent names.** If uncertain, use `route_to_station` hint + `route_to_agent: null`
 
 ## Execution (deterministic)
 
@@ -63,7 +66,8 @@ Prefer:
 If `test_execution.md` is missing or does not contain enough information to identify whether there are failures:
 - set `status: UNVERIFIED`
 - set `recommended_action: BOUNCE`
-- route to `test-executor` (Flow 3) by setting `route_to_flow: 3` and `route_to_agent: code-implementer` only if that is the usual default; otherwise keep `route_to_agent: null` and record the ambiguity as a blocker.
+- set `route_to_flow: 3`, `route_to_station: "test-executor"`, `route_to_agent: null`
+- add blocker: "Missing test execution evidence; rerun test-executor station"
 
 ### Step 2: Skip when there are no failures
 
@@ -113,6 +117,7 @@ Write `.runs/<run-id>/build/flakiness_report.md` in exactly this structure:
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 3 | null
+route_to_station: <string | null>
 route_to_agent: test-author | code-implementer | pack-customizer | null
 blockers: []
 missing_required: []
@@ -162,6 +167,7 @@ After writing the file, return:
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 3 | null
+route_to_station: <string | null>
 route_to_agent: test-author | code-implementer | pack-customizer | null
 counts:
   deterministic: <int|null>

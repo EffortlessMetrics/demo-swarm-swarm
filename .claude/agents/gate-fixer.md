@@ -209,7 +209,8 @@ At the end of `gate_fix_summary.md`, include:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
+route_to_station: <string|null>
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []
@@ -219,8 +220,9 @@ concerns: []
 Guidance:
 
 * If any `MECH-*` exists: typically `recommended_action: BOUNCE`, `route_to_flow: 3`.
-  - For format/lint gaps: set `route_to_agent: lint-executor`.
-  - For “re-run tests” gaps: set `route_to_agent: test-executor`.
+  - For format/lint gaps: set `route_to_station: lint-executor`, `route_to_agent: null`.
+  - For "re-run tests" gaps: set `route_to_station: test-executor`, `route_to_agent: null`.
+  - Note: `lint-executor` and `test-executor` are stations, not agent enums. Use `route_to_station` for these; never set `route_to_agent` to a station name.
 * If only non-mechanical issues exist: typically keep `recommended_action: PROCEED` (UNVERIFIED with blockers), `route_to_flow: null`.
 * If key evidence inputs are missing: `status: UNVERIFIED` and populate `missing_required` with the missing artifact paths.
 * `CANNOT_PROCEED` → `recommended_action: FIX_ENV`.
@@ -234,6 +236,7 @@ After writing the file, return:
 status: ...
 recommended_action: ...
 route_to_flow: ...
+route_to_station: ...
 route_to_agent: ...
 blockers: [...]
 missing_required: [...]

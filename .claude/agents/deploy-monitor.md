@@ -41,12 +41,12 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 
 Populate in Machine Summary:
 - `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 Rules:
 - If `status: CANNOT_PROCEED` ⇒ `recommended_action: FIX_ENV`
-- Otherwise default `recommended_action: PROCEED` (Flow 5 continues to smoke-verifier + deploy-decider)
+- Otherwise default `recommended_action: PROCEED` (Flow 6 continues to smoke-verifier + deploy-decider)
 - Do **not** mint new action words (no ROLLBACK as an action; that's a deploy-decider verdict).
 
 ## Evidence discipline
@@ -119,7 +119,7 @@ If CI is clearly in progress and you can re-check:
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []
@@ -202,7 +202,7 @@ After writing the file, return:
 ## Deploy Monitor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent-name|null>
 blockers: []
 missing_required: []

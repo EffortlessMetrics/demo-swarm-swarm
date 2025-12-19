@@ -10,7 +10,7 @@ This repository contains an SDLC swarm pack under `.claude/`.
 
 This pack provides:
 
-- **6 flows**: Signal → Plan → Build → Gate → Deploy → Wisdom
+- **7 flows**: Signal → Plan → Build → Review → Gate → Deploy → Wisdom
 - **50+ agents**: narrow specialists (requirements-author, code-critic, test-author, *-cleanup, etc.)
 - **7 skills**: test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 
@@ -22,7 +22,7 @@ Start here:
 
 Then proceed in order (unless you are intentionally running out-of-order):
 
-`/flow-2-plan` → `/flow-3-build` → `/flow-4-gate` → `/flow-5-deploy` → `/flow-6-wisdom`
+`/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
 
 ---
 
@@ -52,7 +52,7 @@ Size discipline:
 ### Repo Topology (Invariant)
 
 - **Swarm repo (`*-swarm`) is autonomous**. Flows run here end-to-end.
-- **Flow 5 (Deploy) merges a run PR into `*-swarm/main`** (the swarm's mainline).
+- **Flow 6 (Deploy) merges a run PR into `*-swarm/main`** (the swarm's mainline).
 - This pack does **not** merge into the upstream human repo by default.
   (Upstream export is a customization / separate concern.)
 
@@ -93,7 +93,7 @@ You'll see these repeated in the relevant sections on purpose.
 - All paths are **repo-root-relative**
 - Run artifacts live under: `.runs/<run-id>/`
 - Flow artifacts live under: `.runs/<run-id>/<flow>/`
-- `<flow>` is one of: `signal`, `plan`, `build`, `gate`, `deploy`, `wisdom`
+- `<flow>` is one of: `signal`, `plan`, `build`, `review`, `gate`, `deploy`, `wisdom`
 
 Example: `.runs/feat-auth/build/impl_changes_summary.md`
 
@@ -183,18 +183,19 @@ Every flow uses two complementary state machines:
 
 **Timing rule:** Create TodoWrite immediately. Write/update `flow_plan.md` only **after** `run-prep` / `signal-run-prep` has created `.runs/<run-id>/<flow>/`.
 
-### The Six Flows
+### The Seven Flows
 
 | Flow | Slash Command | Inputs | Key Outputs |
 |------|---------------|--------|-------------|
 | 1. Signal | `/flow-1-signal` | raw feature request | `requirements.md`, `features/*.feature`, `verification_notes.md`, risks, `signal_receipt.json` |
-| 2. Plan | `/flow-2-plan` | Signal outputs (if present) | `adr.md`, `api_contracts.yaml`, `observability_spec.md`, `test_plan.md`, `ac_matrix.md`, `ac_status.json`, `work_plan.md`, `plan_receipt.json` |
-| 3. Build | `/flow-3-build` | Plan outputs (if present) | code/tests, critiques, `ac_status.json` (updated), `build_receipt.json` |
-| 4. Gate | `/flow-4-gate` | Build outputs (if present) | `merge_decision.md` (verdict: MERGE or BOUNCE), `gate_receipt.json` |
-| 5. Deploy (Mainline) | `/flow-5-deploy` | Gate outputs (if present) | `deployment_log.md`, `verification_report.md`, `deployment_decision.md`, `deploy_receipt.json` |
-| 6. Wisdom | `/flow-6-wisdom` | all prior outputs | `learnings.md`, `feedback_actions.md`, `wisdom_receipt.json` |
+| 2. Plan | `/flow-2-plan` | Signal outputs (if present) | `adr.md`, `api_contracts.yaml`, `observability_spec.md`, `test_plan.md`, `ac_matrix.md`, `work_plan.md`, `plan_receipt.json` |
+| 3. Build | `/flow-3-build` | Plan outputs (if present) | code/tests, critiques, `build/ac_status.json` (created/updated), `build_receipt.json`, Draft PR |
+| 4. Review | `/flow-4-review` | Build outputs + Draft PR | `pr_feedback.md`, `review_worklist.md`, `review_actions.md`, `review_receipt.json` |
+| 5. Gate | `/flow-5-gate` | Review outputs (if present) | `merge_decision.md` (verdict: MERGE or BOUNCE), `gate_receipt.json` |
+| 6. Deploy (Mainline) | `/flow-6-deploy` | Gate outputs (if present) | `deployment_log.md`, `verification_report.md`, `deployment_decision.md`, `deploy_receipt.json` |
+| 7. Wisdom | `/flow-7-wisdom` | all prior outputs | `learnings.md`, `feedback_actions.md`, `wisdom_receipt.json` |
 
-**Note on Flow 5:** "Deploy" merges the run PR into `*-swarm/main` (the swarm repo's mainline), not an upstream human repo. This pack treats "mainline promotion" as the Deploy target. Upstream export is a separate concern.
+**Note on Flow 6:** "Deploy" merges the run PR into `*-swarm/main` (the swarm repo's mainline), not an upstream human repo. This pack treats "mainline promotion" as the Deploy target. Upstream export is a separate concern.
 
 Out-of-order is allowed: proceed best-effort, document assumptions, and expect UNVERIFIED outcomes when upstream artifacts are missing.
 
@@ -209,6 +210,7 @@ Receipt naming:
 | Signal | `.runs/<run-id>/signal/signal_receipt.json` |
 | Plan | `.runs/<run-id>/plan/plan_receipt.json` |
 | Build | `.runs/<run-id>/build/build_receipt.json` |
+| Review | `.runs/<run-id>/review/review_receipt.json` |
 | Gate | `.runs/<run-id>/gate/gate_receipt.json` |
 | Deploy | `.runs/<run-id>/deploy/deploy_receipt.json` |
 | Wisdom | `.runs/<run-id>/wisdom/wisdom_receipt.json` |
@@ -230,8 +232,9 @@ Critic and verification agents include a machine-parseable summary block:
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+route_to_flow: <1|2|3|4|5|6|7 | null>
+route_to_station: <string | null>      # e.g. "test-executor", "lint-executor" — hint, not strict enum
+route_to_agent: <agent-name | null>    # strict enum — only when certain the name is valid
 
 blockers: []
 missing_required: []
@@ -260,10 +263,21 @@ Routing:
 - The summary is the control plane. The artifact body is the audit plane.
 
 Recommended action semantics (closed enum):
-- `PROCEED` = default, even when human judgment is required; capture blockers/assumptions.
+- `PROCEED` = default, even when human judgment is required; capture blockers/assumptions. Do **not** use PROCEED as a fallback for "can't name the target."
 - `RERUN` = rerun the same station when a deterministic improvement is expected.
-- `BOUNCE` = reroute to a specific upstream flow/agent with a clear fix target.
+- `BOUNCE` = reroute to an upstream flow. Requires `route_to_flow`; optionally set `route_to_station` (hint) and/or `route_to_agent` (strict enum).
 - `FIX_ENV` = only with `status: CANNOT_PROCEED` (mechanical/env failure).
+
+Routing field rules:
+- **`route_to_agent`** = strict enum. Only set when certain the agent name is valid. Never guess.
+- **`route_to_station`** = free-text hint (e.g., "test-executor", "build-cleanup"). Use when you know the station but aren't certain of the exact agent enum.
+- **`route_to_flow`** = required for BOUNCE. If you know which phase needs work but not the specific agent/station, set only this.
+
+BOUNCE fallback ladder:
+1. Know flow + station + agent → set all three
+2. Know flow + station only → set `route_to_flow` + `route_to_station`, leave `route_to_agent: null`
+3. Know flow only → set `route_to_flow`, explain in blockers what to rerun
+4. Don't know flow → use PROCEED with blockers (rare; document what evidence is missing)
 
 ---
 
@@ -282,8 +296,9 @@ safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
+route_to_station: <string | null>
+route_to_agent: <agent-name | null>
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
@@ -346,9 +361,10 @@ Publish surface = what secrets-sanitizer scans and what repo-operator checkpoint
 | 1 | `.runs/<run-id>/signal/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
 | 2 | `.runs/<run-id>/plan/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
 | 3 | `.runs/<run-id>/build/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json`, plus staged code/test changes |
-| 4 | `.runs/<run-id>/gate/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
-| 5 | `.runs/<run-id>/deploy/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
-| 6 | `.runs/<run-id>/wisdom/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
+| 4 | `.runs/<run-id>/review/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json`, plus staged code/test changes |
+| 5 | `.runs/<run-id>/gate/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
+| 6 | `.runs/<run-id>/deploy/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
+| 7 | `.runs/<run-id>/wisdom/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json` |
 
 Key invariant: secrets-sanitizer scans only the current flow's publish surface, not the entire `.runs/<run-id>/`.
 
@@ -383,7 +399,7 @@ GitHub is an **observability pane**, not the work substrate. GitHub operations (
 
 - **Every flow checkpoints**: audit commit of the flow's publish surface on the run branch.
 - **Flow 3 additionally commits code/tests**: the "work product" commit.
-- **Flow 5 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
+- **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
 
 ### Required Tasks (Conceptual)
 
@@ -424,9 +440,9 @@ Reseal:
 
 ---
 
-## Flow 5 Distinction: Release Ops vs Reporting Ops
+## Flow 6 Distinction: Release Ops vs Reporting Ops
 
-Flow 5 has two categories with different gating:
+Flow 6 has two categories with different gating:
 
 | Category | Operations | Gating |
 |----------|------------|--------|
@@ -559,7 +575,7 @@ CANNOT_PROCEED is mechanical failure only. Fix environment/tooling, then rerun.
 
 Route on the critic control plane:
 - `status: CANNOT_PROCEED` → stop (FIX_ENV)
-- `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
+- `recommended_action: BOUNCE` → follow `route_to_flow` (required), then `route_to_station` (hint), then `route_to_agent` (if present)
 - `recommended_action: RERUN` → rerun specified agent
 - `recommended_action: PROCEED` → proceed even if UNVERIFIED (capture blockers/limitations)
 - If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)

@@ -195,9 +195,10 @@ Each flow has a receipt that is the single source of truth. Prefer these canonic
 | 1 | `.runs/<run-id>/signal/signal_receipt.json` |
 | 2 | `.runs/<run-id>/plan/plan_receipt.json` |
 | 3 | `.runs/<run-id>/build/build_receipt.json` |
-| 4 | `.runs/<run-id>/gate/gate_receipt.json` |
-| 5 | `.runs/<run-id>/deploy/deploy_receipt.json` |
-| 6 | `.runs/<run-id>/wisdom/wisdom_receipt.json` |
+| 4 | `.runs/<run-id>/review/review_receipt.json` |
+| 5 | `.runs/<run-id>/gate/gate_receipt.json` |
+| 6 | `.runs/<run-id>/deploy/deploy_receipt.json` |
+| 7 | `.runs/<run-id>/wisdom/wisdom_receipt.json` |
 
 **Schema tolerance rule:** prefer canonical keys, but allow legacy keys if present.
 If you cannot find a value safely, emit `null` and add a concern.
@@ -347,7 +348,7 @@ comment_id: <id or null>
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 blockers: []
 missing_required: []
@@ -366,7 +367,7 @@ link_style: LINKS | PATHS_ONLY
 publish_surface: PUSHED | NOT_PUSHED
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 blockers: []
 missing_required: []

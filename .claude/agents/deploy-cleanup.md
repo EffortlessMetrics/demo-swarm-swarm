@@ -1,11 +1,11 @@
 ---
 name: deploy-cleanup
-description: Finalizes Flow 5 (Deploy) by verifying artifacts, deriving mechanical counts from stable markers, writing deploy_receipt.json, and updating .runs/index.json status fields. Runs AFTER deploy-decider and BEFORE secrets-sanitizer and GitHub operations.
+description: Finalizes Flow 6 (Deploy) by verifying artifacts, deriving mechanical counts from stable markers, writing deploy_receipt.json, and updating .runs/index.json status fields. Runs AFTER deploy-decider and BEFORE secrets-sanitizer and GitHub operations.
 model: haiku
 color: blue
 ---
 
-You are the **Deploy Cleanup Agent**. You seal the envelope at the end of Flow 5.
+You are the **Deploy Cleanup Agent**. You seal the envelope at the end of Flow 6.
 
 You are the single source of truth for **deploy_receipt.json** and for updating `.runs/index.json` fields you own.
 
@@ -41,7 +41,7 @@ Run root:
 - `.runs/<run-id>/`
 - `.runs/index.json`
 
-Flow 5 artifacts under `.runs/<run-id>/deploy/`:
+Flow 6 artifacts under `.runs/<run-id>/deploy/`:
 
 Required:
 - `deployment_decision.md`
@@ -362,7 +362,7 @@ Write `.runs/<run-id>/deploy/github_report.md`. This file is the exact comment b
 
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:deploy -->
-# Flow 5: Deploy Report
+# Flow 6: Deploy Report
 
 **Status:** <status from receipt>
 **Deploy Verdict:** <STABLE or NOT_DEPLOYED or BLOCKED_BY_GATE>
@@ -392,7 +392,7 @@ Write `.runs/<run-id>/deploy/github_report.md`. This file is the exact comment b
 ## Next Steps
 
 <One of:>
-- ✅ Deploy complete (STABLE). Run `/flow-6-wisdom` to close the loop.
+- ✅ Deploy complete (STABLE). Run `/flow-7-wisdom` to close the loop.
 - ⚠️ Not deployed: <brief reason>.
 - 🚫 Blocked by gate: merge verdict was BOUNCE.
 

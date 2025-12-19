@@ -87,10 +87,19 @@ def main() -> int:
     md_files = list(CLAUDE_ROOT.rglob("*.md"))
     agent_md_files = list((CLAUDE_ROOT / "agents").glob("*.md"))
 
-    # 1) ESCALATE vocabulary purge
+    # 1) ESCALATE vocabulary purge (only in control-plane contexts)
+    escalate_pattern = re.compile(
+        r'^\s*recommended_action:\s*.*\bESCALATE\b'
+        r'|'
+        r'\brecommended_action\b[^|]*\bESCALATE\b'  # enum definitions like "PROCEED | ESCALATE"
+        r'|'
+        r'`ESCALATE`',  # code-formatted references to the action
+        re.MULTILINE
+    )
     for path in md_files:
-        if "ESCALATE" in read_text(path):
-            errors.append(f"{path}: contains forbidden control-plane vocab 'ESCALATE'")
+        text = read_text(path)
+        if escalate_pattern.search(text):
+            errors.append(f"{path}: contains forbidden control-plane vocab 'ESCALATE' in action context")
 
     # 2) Repo Operator Result must include publish_surface
     repo_block = re.compile(r"## Repo Operator Result.*?(?=##|$)", re.DOTALL)

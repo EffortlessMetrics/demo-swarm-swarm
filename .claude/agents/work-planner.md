@@ -80,7 +80,7 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
 6. **Rollout strategy**:
    - Prefer feature flags / staged enablement if applicable.
    - Tie phase gates to **observability_spec** signals (what you watch and what "good" means).
-   - Keep it GitHub-native: assume Flow 5 verifies via CI + smoke checks; don't require a bespoke platform.
+   - Keep it GitHub-native: assume Flow 6 verifies via CI + smoke checks; don't require a bespoke platform.
 
 7. **Rollback strategy**:
    - Must be realistic.
