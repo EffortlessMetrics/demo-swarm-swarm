@@ -60,7 +60,7 @@ Also read (for dedupe/context only):
 
 Prioritize questions that would change design, scope, or tests:
 
-- Vague terms: "fast", "large", "sometimes", "as needed", "secure", "supported"
+- Vague terms: "large", "sometimes", "as needed", "secure", "supported"
 - Unbounded numbers: limits, thresholds, timeouts, retention, concurrency
 - Conflicts across docs (requirements vs ADR vs contracts)
 - Missing invariants: identity keys, ordering, idempotency, error semantics
@@ -73,7 +73,7 @@ Each question must be:
 - Specific and answerable
 - Paired with a **Suggested default** you will proceed with
 - Include **Impact if different** (what changes in spec/design/tests)
-- Include **Needs answer by** (Flow boundary where changing it would be most costly)
+- Include **Needs answer by** (Flow boundary where changing it would be hardest / create the most rework)
 
 Avoid brainstorming questions.
 
@@ -163,7 +163,7 @@ Then, for every run (including the first), append an Update block at the end:
 
 ### Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 output_path: .runs/<run-id>/<flow>/open_questions.md

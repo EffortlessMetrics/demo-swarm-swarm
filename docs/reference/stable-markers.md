@@ -57,7 +57,7 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 |--------|---------|---------|
 | Question ID | `^- QID: OQ-<FLOW>-###` | `- QID: OQ-SIG-001` |
 
-`<FLOW>` values: SIG, PLAN, BUILD, GAT, DEP, WIS
+`<FLOW>` values: SIG, PLN, BLD, GAT, DEP, WIS
 
 ---
 

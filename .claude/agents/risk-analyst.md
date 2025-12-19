@@ -73,7 +73,7 @@ Use:
 ### Control-plane routing (closed enum)
 
 Use only:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 And express specifics via:
 - `route_to_flow: 1|2|3|4|5|6|null`
@@ -108,7 +108,7 @@ Each risk must have:
    - CRITICAL/HIGH require either a mitigation plan with verification, or explicit acceptance with owner + scope.
 6. **Decide routing recommendation** (closed enum):
    - If mechanical IO failure → `CANNOT_PROCEED`, `recommended_action: FIX_ENV`
-   - If CRITICAL/HIGH risks are OPEN with no viable mitigation/acceptance plan → `recommended_action: ESCALATE`
+   - If CRITICAL/HIGH risks are OPEN with no viable mitigation/acceptance plan → prefer `recommended_action: BOUNCE` with a concrete `route_to_flow`/`route_to_agent`; if no clear owner, use `recommended_action: PROCEED` and record assumptions + defaults
    - If risks are fixable by changing spec/design → `recommended_action: BOUNCE`, `route_to_flow: 1|2`
    - If risks are fixable by implementation/tests/observability → `recommended_action: BOUNCE`, `route_to_flow: 3`
    - If risks are understood, mitigated/accepted, and inputs were sufficient → `recommended_action: PROCEED`
@@ -124,7 +124,7 @@ Each risk must have:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 
@@ -174,7 +174,7 @@ severity_summary:
 - Verification:
   - <how to prove mitigation: tests, scans, policy-runner, monitoring>
 - Recommendation:
-  - <bounce/escalate detail; keep the Machine Summary canonical>
+  - <bounce/proceed detail; keep the Machine Summary canonical>
 
 ## Deltas Since Prior (if any)
 - NEW: [RSK-003, RSK-005]
@@ -203,7 +203,7 @@ At the end of your response, echo the Machine Summary block as:
 ```md
 ## Risk Analyst Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 severity_summary:

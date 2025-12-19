@@ -1,0 +1,55 @@
+{
+  "run_id": "compliance-drift-proofing",
+  "canonical_key": "gh-8",
+  "issue_number": 8,
+  "flow": "signal",
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [
+    "OQ-SIG-002 (PLN vs PLAN prefix discrepancy) remains open; requirements assume PLN/BLD is canonical",
+    "OQ-SIG-001 (warnings vs failures) open; requirements specify warning-first approach with --strict flag",
+    "4 agents using demoswarm.sh may lack Skills sections; enumeration assumed from context_brief.md"
+  ],
+
+  "counts": {
+    "functional_requirements": 6,
+    "non_functional_requirements": 6,
+    "bdd_scenarios": 40,
+    "open_questions": 10,
+    "risks": {
+      "critical": 0,
+      "high": 1,
+      "medium": 4,
+      "low": 3
+    }
+  },
+
+  "quality_gates": {
+    "requirements_critic": "VERIFIED",
+    "bdd_critic": "VERIFIED"
+  },
+
+  "key_artifacts": [
+    "requirements.md",
+    "features/*.feature",
+    "open_questions.md",
+    "early_risks.md",
+    "risk_assessment.md",
+    "problem_statement.md",
+    "stakeholders.md",
+    "scope_estimate.md",
+    "verification_notes.md"
+  ],
+
+  "github_reporting": "COMPLETED",
+  "commit_sha": "51a1259d97f4d990a16f4e8e9484dd8a3caeeb91",
+  "completed_at": "2025-12-18T19:35:26Z",
+  "updated_at": "2025-12-18T21:45:00Z"
+}

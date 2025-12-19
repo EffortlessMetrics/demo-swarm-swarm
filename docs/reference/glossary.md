@@ -134,7 +134,7 @@ A list of concrete items preventing `VERIFIED`. This is the sanctioned "blocked 
 
 ### recommended_action
 Closed enum (pack-wide):
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Specific routing uses:
 - `route_to_flow: 1|2|3|4|5|6|null`

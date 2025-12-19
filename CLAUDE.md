@@ -139,16 +139,26 @@ Per-run metadata at `.runs/<run-id>/run_meta.json`:
 ```json
 {
   "run_id": "<run-id>",
+  "run_id_kind": "GH_ISSUE | LOCAL_ONLY | null",
+  "issue_binding": "IMMEDIATE | DEFERRED | null",
+  "issue_binding_deferred_reason": "gh_unauth | gh_unavailable | null",
   "canonical_key": "<gh-456 | pr-789 | null>",
   "aliases": ["<run-id>", "<gh-456>", "<branch-name>"],
   "task_key": "<ticket-id | branch-slug | null>",
   "task_title": "<short normalized title>",
+  "github_repo": "<owner/repo | null>",
+  "github_repo_expected": "<owner/repo | null>",
+  "github_repo_actual_at_creation": "<owner/repo | null>",
+  "github_ops_allowed": true,
+  "repo_mismatch": false,
   "created_at": "<ISO8601>",
   "updated_at": "<ISO8601>",
   "iterations": 1,
   "flows_started": ["signal", "plan"],
   "source": "<branch:name | ticket:id | manual>",
   "issue_number": 456,
+  "issue_url": "<url | null>",
+  "issue_title": "<string | null>",
   "pr_number": null,
   "supersedes": "<previous-run-id | null>",
   "related_runs": []
@@ -178,9 +188,9 @@ Every flow uses two complementary state machines:
 | Flow | Slash Command | Inputs | Key Outputs |
 |------|---------------|--------|-------------|
 | 1. Signal | `/flow-1-signal` | raw feature request | `requirements.md`, `features/*.feature`, `verification_notes.md`, risks, `signal_receipt.json` |
-| 2. Plan | `/flow-2-plan` | Signal outputs (if present) | `adr.md`, `api_contracts.yaml`, `observability_spec.md`, `test_plan.md`, `work_plan.md`, `plan_receipt.json` |
-| 3. Build | `/flow-3-build` | Plan outputs (if present) | code/tests, critiques, `build_receipt.json` |
-| 4. Gate | `/flow-4-gate` | Build outputs (if present) | `merge_decision.md` (verdict: MERGE, BOUNCE, or ESCALATE), `gate_receipt.json` |
+| 2. Plan | `/flow-2-plan` | Signal outputs (if present) | `adr.md`, `api_contracts.yaml`, `observability_spec.md`, `test_plan.md`, `ac_matrix.md`, `ac_status.json`, `work_plan.md`, `plan_receipt.json` |
+| 3. Build | `/flow-3-build` | Plan outputs (if present) | code/tests, critiques, `ac_status.json` (updated), `build_receipt.json` |
+| 4. Gate | `/flow-4-gate` | Build outputs (if present) | `merge_decision.md` (verdict: MERGE or BOUNCE), `gate_receipt.json` |
 | 5. Deploy (Mainline) | `/flow-5-deploy` | Gate outputs (if present) | `deployment_log.md`, `verification_report.md`, `deployment_decision.md`, `deploy_receipt.json` |
 | 6. Wisdom | `/flow-6-wisdom` | all prior outputs | `learnings.md`, `feedback_actions.md`, `wisdom_receipt.json` |
 
@@ -219,13 +229,15 @@ Critic and verification agents include a machine-parseable summary block:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
 blockers: []
 missing_required: []
 concerns: []
+
+observations: []                       # optional; things noticed worth capturing (friction, cross-cutting, improvements)
 
 can_further_iteration_help: yes | no   # critics only
 
@@ -240,11 +252,18 @@ Semantics:
 - `CANNOT_PROCEED` = mechanical failure only (I/O, permissions, tooling unusable). `missing_required` must be non-empty.
 - `UNVERIFIED` = gaps/uncertainty/issues documented. `blockers` should explain what prevents VERIFIED.
 - `VERIFIED` = adequate for purpose. `blockers` empty.
+- `observations` = optional; things the agent noticed that aren't blockers but worth capturing (friction encountered, cross-cutting insights, pack/flow improvements). Feeds into Wisdom flow via `learning-synthesizer`.
 
 Routing:
 
 - Orchestrators route on `recommended_action` + `route_to_*`.
 - The summary is the control plane. The artifact body is the audit plane.
+
+Recommended action semantics (closed enum):
+- `PROCEED` = default, even when human judgment is required; capture blockers/assumptions.
+- `RERUN` = rerun the same station when a deterministic improvement is expected.
+- `BOUNCE` = reroute to a specific upstream flow/agent with a clear fix target.
+- `FIX_ENV` = only with `status: CANNOT_PROCEED` (mechanical/env failure).
 
 ---
 
@@ -262,7 +281,7 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
@@ -277,6 +296,7 @@ operation: checkpoint | build | stage | merge | other
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
 <!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V1 END -->
@@ -284,6 +304,9 @@ anomaly_paths: []
 Notes:
 
 - `commit_sha` is always populated (current HEAD on no-op).
+- `publish_surface` is always present:
+  - `PUSHED` only when a push is attempted and succeeds.
+  - `NOT_PUSHED` for local-only checkpoints, anomalies, skipped pushes, and push failures.
 - Orchestrators route on these returned blocks, not by rereading files.
 
 ---
@@ -302,7 +325,7 @@ Do not conflate these domains:
    `CLEAN | FIXED | BLOCKED_PUBLISH`
 
 4. **Gate Merge Verdict** (`merge_decision.md`)
-   `MERGE | BOUNCE | ESCALATE`
+   `MERGE | BOUNCE` (use BOUNCE reason to signal human review)
 
 5. **Deploy Verdict** (`deployment_decision.md`)
    `STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE`
@@ -331,21 +354,24 @@ Key invariant: secrets-sanitizer scans only the current flow's publish surface, 
 
 ---
 
-## Two-Gate Prerequisites for GitHub Operations
+## GitHub Access + Content Mode (Canonical)
 
-GitHub operations (`gh-issue-manager`, `gh-reporter`) require BOTH gates:
+GitHub is an **observability pane**, not the work substrate. GitHub operations (`gh-issue-manager`, `gh-reporter`) are governed by:
 
-| Gate | Source | Field |
-|------|--------|-------|
-| Secrets Gate | secrets-sanitizer Gate Result | `safe_to_publish: true` |
-| Repo Hygiene Gate | repo-operator Result | `proceed_to_github_ops: true` |
+1) **Access gate (hard)**
+- If `run_meta.github_ops_allowed == false`: do **not** call GitHub (even read-only); flows proceed locally.
+- If `gh` is unauthenticated/unavailable: SKIP GitHub calls; record the limitation locally; proceed.
+- Prefer `run_meta.github_repo` (or `github_repo_actual_at_creation`) for repo scope; do **not** invent a repo when missing.
 
-If either gate fails:
-
-- skip GH ops
-- complete the flow locally
-- record why in artifacts
-- expect the receipt status to be UNVERIFIED
+2) **Content mode (soft)**
+- **FULL** only when all are true:
+  - secrets Gate Result `safe_to_publish: true`
+  - repo-operator Result `proceed_to_github_ops: true`
+  - repo-operator Result `publish_surface: PUSHED`
+- **RESTRICTED** otherwise (publish blocked, local-only/anomaly, push skipped/failed). Publish blocked **never** means skip when access is allowed.
+  - Allowed inputs: run identity (`run_meta`), control-plane blocks (Gate Result + Repo Operator Result), and receipt machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
+  - Disallowed: human-authored markdown/raw signal (`requirements.md`, `open_questions.md`, `*.feature`, ADR text), diffs, and blob links.
+  - Link style derives from `publish_surface`: `PUSHED` → links allowed in FULL; otherwise PATHS_ONLY.
 
 ---
 
@@ -389,7 +415,7 @@ Execution order in every flow (conceptual):
 1. `<flow>-cleanup` writes receipt
 2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
 3. `repo-operator` checkpoints (gated on `safe_to_commit`)
-4. `gh-issue-manager` + `gh-reporter` only if both gates pass
+4. `gh-issue-manager` + `gh-reporter` (when access allows; FULL vs RESTRICTED per GitHub Access + Content Mode above)
 
 Reseal:
 
@@ -405,7 +431,7 @@ Flow 5 has two categories with different gating:
 | Category | Operations | Gating |
 |----------|------------|--------|
 | Release Ops | merge PR, tag/release | Gate merge verdict = MERGE + repo-operator mechanics |
-| Reporting Ops | gh-issue-manager, gh-reporter | Two-gate prerequisites (safe_to_publish + proceed_to_github_ops) |
+| Reporting Ops | gh-issue-manager, gh-reporter | Access gate; FULL only when `safe_to_publish: true` + `proceed_to_github_ops: true` + `publish_surface: PUSHED` (else RESTRICTED) |
 
 This distinction prevents "can we post?" from affecting "can we merge?".
 
@@ -534,9 +560,8 @@ CANNOT_PROCEED is mechanical failure only. Fix environment/tooling, then rerun.
 Route on the critic control plane:
 - `status: CANNOT_PROCEED` → stop (FIX_ENV)
 - `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
-- `recommended_action: ESCALATE` → stop microloop; record evidence
 - `recommended_action: RERUN` → rerun specified agent
-- `recommended_action: PROCEED` → proceed even if UNVERIFIED
+- `recommended_action: PROCEED` → proceed even if UNVERIFIED (capture blockers/limitations)
 - If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
 
 ### "No GitHub update happened"

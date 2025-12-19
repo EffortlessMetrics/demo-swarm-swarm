@@ -115,7 +115,7 @@ We choose **OPT-00N: <Option Name>**.
 - <benefit>
 
 ### Negative
-- <cost / trade-off>
+- <trade-off / downside>
 
 ## Risks and Mitigations
 Use stable markers:
@@ -163,7 +163,7 @@ Use stable markers and include suggested defaults:
 ```yaml
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []
@@ -191,7 +191,7 @@ drivers_total: N
   - Choose:
     - `recommended_action: RERUN` if improving inputs/wording can fix it
     - `recommended_action: BOUNCE` with `route_to_flow: 2` and `route_to_agent: design-optioneer|clarifier` if upstream Plan artifacts must change
-    - `recommended_action: ESCALATE` if human decision is required (true trade-off / scope conflict)
+    - `recommended_action: PROCEED` (UNVERIFIED with blockers) if human decision is required (true trade-off / scope conflict)
 - **CANNOT_PROCEED**
   - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
   - `recommended_action: FIX_ENV`
@@ -203,7 +203,7 @@ After writing the file, return:
 ```yaml
 ## ADR Author Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent|null>
 blockers: []

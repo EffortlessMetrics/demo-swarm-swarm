@@ -1,7 +1,7 @@
 ---
 name: gate-cleanup
 description: Finalizes Flow 4 (Gate) by verifying artifacts, deriving mechanical counts from stable markers, writing gate_receipt.json, and updating .runs/index.json fields it owns. Runs AFTER merge-decider and BEFORE secrets-sanitizer and GitHub operations.
-model: inherit
+model: haiku
 color: blue
 ---
 
@@ -55,10 +55,14 @@ Optional:
 - `gate_fix_summary.md` (report-only; no fixes are applied in Gate)
 - `flow_plan.md`
 
+From Build (for AC status passthrough):
+- `.runs/<run-id>/build/build_receipt.json` (contains ac_total, ac_completed)
+
 ## Outputs
 
 - `.runs/<run-id>/gate/gate_receipt.json`
 - `.runs/<run-id>/gate/cleanup_report.md`
+- `.runs/<run-id>/gate/github_report.md` (pre-composed GitHub comment body for gh-reporter)
 - Update `.runs/index.json` for this run: `status`, `last_flow`, `updated_at` only
 
 ## Stable Marker Contracts (required for mechanical counts)
@@ -83,14 +87,15 @@ These are the *only* acceptable sources for counts:
 - `checks_total:` / `checks_passed:`
 
 **policy_analysis.md** (from policy-analyst):
-- `violations_total:` (policy violations)
+- `compliance_summary.non_compliant:` (policy violations)
+- `compliance_summary.waivers_needed:` (optional)
 
 ### 2) Fallback: stable inventory markers (only if numeric field is missing)
 
 - Contract violations: count lines `^- CE_CRITICAL:` + `^- CE_MAJOR:` + `^- CE_MINOR:`
 - Coverage findings: count lines `^- COV_CRITICAL:` + `^- COV_MAJOR:` + `^- COV_MINOR:`
-- Security findings: count lines `^- FINDING:`
-- Policy violations: count lines `^- VIOLATION:`
+- Security findings: count bullets tagged `[CRITICAL]` + `[MAJOR]` + `[MINOR]` in `security_scan.md`
+- Policy violations: prefer `compliance_summary.non_compliant` from Machine Summary; otherwise `null`
 
 If neither (1) nor (2) is present → count is `null` with a blocker explaining "no stable markers".
 
@@ -140,7 +145,7 @@ bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/coverage_au
 Required extractions:
 
 - From `merge_decision.md`:
-  - `verdict:` (MERGE | BOUNCE | ESCALATE)
+- `verdict:` (MERGE | BOUNCE | null)
   - `status:` (VERIFIED | UNVERIFIED | CANNOT_PROCEED)
 
 - From each of:
@@ -174,11 +179,15 @@ bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/contract_co
 bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/security_scan.md" --section "## Machine Summary" --key "findings_total" --null-if-missing
 
 # Policy violations (optional)
-bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/policy_analysis.md" --section "## Machine Summary" --key "violations_total" --null-if-missing
+bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/policy_analysis.md" --section "## Machine Summary" --key "compliance_summary.non_compliant" --null-if-missing
 
 # Coverage (from coverage_audit.md)
 bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/coverage_audit.md" --section "## Machine Summary" --key "coverage_line_percent" --null-if-missing
 bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/gate/coverage_audit.md" --section "## Machine Summary" --key "coverage_branch_percent" --null-if-missing
+
+# AC status passthrough (from build_receipt.json)
+bash .claude/scripts/demoswarm.sh receipt get --file ".runs/<run-id>/build/build_receipt.json" --key "counts.ac_total" --null-if-missing
+bash .claude/scripts/demoswarm.sh receipt get --file ".runs/<run-id>/build/build_receipt.json" --key "counts.ac_completed" --null-if-missing
 ```
 
 Counts in receipt:
@@ -186,9 +195,11 @@ Counts in receipt:
 - `counts.receipt_checks_passed` (from receipt_audit.md)
 - `counts.contract_violations` (from contract_compliance.md `violations_total:`)
 - `counts.security_findings` (from security_scan.md `findings_total:`)
-- `counts.policy_violations` (from policy_analysis.md; null if missing)
+- `counts.policy_violations` (from policy_analysis.md `compliance_summary.non_compliant`; null if missing)
 - `counts.coverage_line_percent` (from coverage_audit.md)
 - `counts.coverage_branch_percent` (from coverage_audit.md; optional)
+- `counts.ac_total` (passthrough from build_receipt.json)
+- `counts.ac_completed` (passthrough from build_receipt.json)
 
 Rules:
 - Missing file ⇒ `null` for that metric (and a blocker if the metric is required for VERIFIED).
@@ -212,18 +223,14 @@ Else if `merge_verdict: BOUNCE` ⇒
   - `route_to_flow: 3` (Build)
   - `route_to_agent: null`
 
-Else if `merge_verdict: ESCALATE` ⇒
-  - `recommended_action: ESCALATE`
-  - `route_to_flow: null`, `route_to_agent: null`
-
 Else (`merge_verdict: MERGE`) ⇒
   - If all required gate statuses are VERIFIED and required counts are non-null:
     - `recommended_action: PROCEED`
   - Otherwise:
-    - `recommended_action: ESCALATE` with blocker describing the inconsistency (e.g., MERGE but security_scan UNVERIFIED)
+    - `recommended_action: PROCEED` (UNVERIFIED) with a blocker describing the inconsistency (e.g., MERGE but security_scan UNVERIFIED)
 
 **Routing rule:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`.
-For `PROCEED`, `RERUN`, `ESCALATE`, and `FIX_ENV`, set both to `null`.
+For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.
 
 ### Step 5: Write gate_receipt.json
 
@@ -236,7 +243,7 @@ Write `.runs/<run-id>/gate/gate_receipt.json`:
   "flow": "gate",
 
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
 
@@ -245,7 +252,7 @@ Write `.runs/<run-id>/gate/gate_receipt.json`:
   "blockers": [],
   "concerns": [],
 
-  "merge_verdict": "MERGE | BOUNCE | ESCALATE | null",
+  "merge_verdict": "MERGE | BOUNCE | null",
 
   "counts": {
     "receipt_checks_total": null,
@@ -254,7 +261,9 @@ Write `.runs/<run-id>/gate/gate_receipt.json`:
     "security_findings": null,
     "policy_violations": null,
     "coverage_line_percent": null,
-    "coverage_branch_percent": null
+    "coverage_branch_percent": null,
+    "ac_total": null,
+    "ac_completed": null
   },
 
   "quality_gates": {
@@ -285,7 +294,7 @@ Write `.runs/<run-id>/gate/gate_receipt.json`:
 
 * `CANNOT_PROCEED`: IO/permissions failure only
 * `VERIFIED`: merge_verdict MERGE AND required artifacts present AND required gate statuses VERIFIED AND required counts non-null
-* `UNVERIFIED`: everything else (including BOUNCE/ESCALATE verdicts)
+* `UNVERIFIED`: everything else (including BOUNCE verdicts)
 
 ### Step 6: Update .runs/index.json (minimal ownership)
 
@@ -322,10 +331,10 @@ Write `.runs/<run-id>/gate/cleanup_report.md`:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: null
 route_to_agent: null
-merge_verdict: MERGE | BOUNCE | ESCALATE | null
+merge_verdict: MERGE | BOUNCE | null
 missing_required: []
 missing_optional: []
 blockers: []
@@ -359,9 +368,11 @@ concerns: []
 | receipt_checks_passed | ... | receipt_audit.md |
 | contract_violations | ... | contract_compliance.md (violations_total) |
 | security_findings | ... | security_scan.md (findings_total) |
-| policy_violations | ... | policy_analysis.md (violations_total) |
+| policy_violations | ... | policy_analysis.md (compliance_summary.non_compliant) |
 | coverage_line_percent | ... | coverage_audit.md (coverage_line_percent) |
 | coverage_branch_percent | ... | coverage_audit.md (coverage_branch_percent) |
+| ac_total | ... | build_receipt.json (passthrough) |
+| ac_completed | ... | build_receipt.json (passthrough) |
 
 ## Index Updated
 - Fields changed: status, last_flow, updated_at
@@ -369,6 +380,59 @@ concerns: []
 - last_flow: gate
 - updated_at: <timestamp>
 ```
+
+### Step 8: Write `github_report.md` (pre-composed GitHub comment)
+
+Write `.runs/<run-id>/gate/github_report.md`. This file is the exact comment body that `gh-reporter` will post to GitHub.
+
+```markdown
+<!-- DEMOSWARM_RUN:<run-id> FLOW:gate -->
+# Flow 4: Gate Report
+
+**Status:** <status from receipt>
+**Merge Verdict:** <MERGE or BOUNCE>
+**Run:** `<run-id>`
+
+## Summary
+
+| Check | Result |
+|-------|--------|
+| Receipt Audit | <VERIFIED/UNVERIFIED/—> |
+| Contract Compliance | <VERIFIED/UNVERIFIED/—> |
+| Security Scan | <VERIFIED/UNVERIFIED/—> |
+| Coverage Audit | <VERIFIED/UNVERIFIED/—> |
+| Policy Violations | <n or "—"> |
+
+## Coverage
+
+| Metric | Value |
+|--------|-------|
+| Line Coverage | <n% or "—"> |
+| Branch Coverage | <n% or "—"> |
+
+## Key Artifacts
+
+- `gate/merge_decision.md`
+- `gate/receipt_audit.md`
+- `gate/contract_compliance.md`
+- `gate/security_scan.md`
+- `gate/coverage_audit.md`
+
+## Next Steps
+
+<One of:>
+- ✅ Gate passed (MERGE). Run `/flow-5-deploy` to continue.
+- ⚠️ Gate bounced: <brief reason from merge_decision.md>.
+- 🚫 Cannot proceed: <mechanical failure reason>.
+
+---
+_Generated by gate-cleanup at <timestamp>_
+```
+
+Notes:
+- Use counts from the receipt (no recomputation)
+- Use "—" for null/missing values
+- Copy merge verdict exactly from merge_decision.md
 
 ## Hard Rules
 

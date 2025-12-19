@@ -74,7 +74,7 @@ Write exactly:
 ## Control-plane routing (closed enum)
 
 Always use:
-`recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing fields:
 
@@ -105,7 +105,7 @@ The receipt must include these keys (location may be top-level or nested under a
 * `run_id` (string)
 * `flow` (string; should be `build`)
 * `status` in {VERIFIED, UNVERIFIED, CANNOT_PROCEED}
-* `recommended_action` in {PROCEED, RERUN, BOUNCE, ESCALATE, FIX_ENV}
+* `recommended_action` in {PROCEED, RERUN, BOUNCE, FIX_ENV}
 * `route_to_flow` (null or 1..6)
 * `route_to_agent` (null or string)
 * `missing_required` (array; may be empty)
@@ -129,6 +129,13 @@ Critics:
 
 * `critic_verdicts.test_critic` (VERIFIED|UNVERIFIED|CANNOT_PROCEED|null)
 * `critic_verdicts.code_critic` (VERIFIED|UNVERIFIED|CANNOT_PROCEED|null)
+
+AC completion (required when AC-driven build):
+
+* `counts.ac_total` (int or null)
+* `counts.ac_completed` (int or null)
+* If both are present: `ac_completed` must equal `ac_total`
+* If `ac_completed < ac_total`: UNVERIFIED with blocker "AC loop incomplete: {ac_completed}/{ac_total} ACs completed", recommend BOUNCE to Flow 3
 
 If the receipt admits an unknown/hard_coded metrics binding, treat as UNVERIFIED.
 
@@ -163,7 +170,7 @@ Write exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name | null>
 
@@ -181,6 +188,9 @@ severity_summary:
   major: 0
   minor: 0
 
+checks_total: <int|null>
+checks_passed: <int|null>
+
 ## Receipt Parse + Contract Checks
 - discovery_method: direct_read | git_show | missing
 - build_receipt.json parseable: YES | NO
@@ -195,6 +205,9 @@ severity_summary:
 - test counts present: YES | NO
 - metrics binding present + acceptable: YES | NO (value: <value>)
 - critic_verdicts present: YES | NO
+- ac_total: <int | null>
+- ac_completed: <int | null>
+- ac_loop_complete: YES | NO | N/A (null counts)
 
 ## Cross-Reference Results (best-effort)
 - test_critique.md: CONSISTENT | MISMATCH | MISSING
@@ -217,6 +230,8 @@ severity_summary:
 ### Counting rules
 
 * `severity_summary.*` equals the number of bullets you wrote tagged `[CRITICAL]`, `[MAJOR]`, `[MINOR]`.
+* `checks_total` = number of receipt-audit checks you evaluated (exclude purely informational fields like `discovery_method`).
+* `checks_passed` = number of those evaluated checks that indicate a pass (e.g., `YES` where applicable; `NO` for "placeholders detected"; `CONSISTENT` where applicable). Treat `MISSING`/`UNKNOWN`/`MISMATCH` as not passed.
 * No estimates.
 
 ## Completion decision rules
@@ -234,7 +249,7 @@ At the end of your response, echo:
 ```markdown
 ## Receipt Checker Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name | null>
 severity_summary:

@@ -1,0 +1,274 @@
+schema_version: subtasks_v1
+subtasks:
+  - id: ST-001
+    title: "Add skill CLI subcommands and OpenQ flow codes constants to contracts.rs"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-001", "REQ-003"]
+    nfr_ids: ["NFR-MAINT-001"]
+    acceptance_criteria:
+      - "contracts.rs contains SKILL_CLI_SUBCOMMANDS constant with all demoswarm CLI subcommands"
+      - "contracts.rs contains OPENQ_FLOW_CODES constant with SIG, PLN, BLD, GAT, DEP, WIS"
+      - "Constants are referenced from Contracts struct and exposed to checks"
+      - "cargo check passes with no errors"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - "tools/demoswarm-pack-check/src/contracts.rs"
+    tests: ["cargo test contracts"]
+    observability: []
+    estimate: S
+
+  - id: ST-002
+    title: "Add check 50 for flow boundary enforcement (demoswarm.sh in flow commands)"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-001"]
+    nfr_ids: ["NFR-PERF-001", "NFR-REL-001", "NFR-OPS-001"]
+    acceptance_criteria:
+      - "Check 50 scans all .claude/commands/flow-*.md files"
+      - "Check 50 reports warning when flow command contains 'demoswarm.sh'"
+      - "Check 50 reports warning when flow command contains skill CLI subcommands (count, ms, yaml, index, etc.)"
+      - "Existing flow command files pass validation without warnings"
+      - "Diagnostic output includes rule ID, file path, and line number"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/checks/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - "tools/demoswarm-pack-check/src/checks/drift.rs"
+      - "tools/demoswarm-pack-check/src/checks/mod.rs"
+    tests: ["@check-50", "cargo test check_flow_boundary"]
+    observability: []
+    estimate: M
+
+  - id: ST-003
+    title: "Verify check 49 adequacy for REQ-002 (Skills section enforcement)"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-002"]
+    nfr_ids: []
+    acceptance_criteria:
+      - "Check 49 correctly identifies agents using demoswarm.sh without ## Skills section"
+      - "Check 49 diagnostic output includes specific agent file paths"
+      - "Agents using demoswarm.sh indirectly are not flagged (per REQ-002 AC-3)"
+      - "All agents currently having Skills sections pass validation"
+      - "Gap analysis documented: list any agents needing Skills sections added"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/checks/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - "tools/demoswarm-pack-check/src/checks/drift.rs"
+    tests: ["@check-49", "cargo test check_skills_section"]
+    observability: []
+    estimate: S
+
+  - id: ST-004
+    title: "Remediate agents missing Skills sections (if any)"
+    status: TODO
+    depends_on: ["ST-003"]
+    req_ids: ["REQ-002", "REQ-006"]
+    nfr_ids: []
+    acceptance_criteria:
+      - "All agents using demoswarm.sh have ## Skills section"
+      - "Skills sections list the specific skills used (runs-derive, runs-index, etc.)"
+      - "pack-check reports no warnings for check 49 after remediation"
+    scope_hints:
+      code_roots: [".claude/agents/"]
+      test_roots: []
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - ".claude/agents/*.md"
+    tests: ["pack-check --no-color | grep 'check 49'"]
+    observability: []
+    estimate: S
+
+  - id: ST-005
+    title: "Add check 51 for OpenQ prefix pattern validation"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-003"]
+    nfr_ids: ["NFR-PERF-001", "NFR-REL-001", "NFR-OPS-001"]
+    acceptance_criteria:
+      - "Check 51 scans .runs/**/open_questions.md files for QID patterns"
+      - "Check 51 validates QID format: OQ-<FLOW>-<NNN> where FLOW is SIG/PLN/BLD/GAT/DEP/WIS"
+      - "Check 51 reports warning for non-canonical flow codes (PLAN instead of PLN)"
+      - "Check 51 validates three-digit zero-padded numeric suffix"
+      - "Diagnostic output includes rule ID, file path, and line number"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/checks/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - "tools/demoswarm-pack-check/src/checks/drift.rs"
+      - "tools/demoswarm-pack-check/src/checks/mod.rs"
+      - "tools/demoswarm-pack-check/src/contracts.rs"
+    tests: ["@check-51", "cargo test check_openq_prefix"]
+    observability: []
+    estimate: M
+
+  - id: ST-006
+    title: "Resolve PLN vs PLAN prefix in documentation (normalize to PLN/BLD)"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-003"]
+    nfr_ids: ["NFR-MAINT-001"]
+    acceptance_criteria:
+      - "stable-markers.md uses PLN/BLD (not PLAN/BUILD)"
+      - "contracts.md uses PLN/BLD (not PLAN/BUILD)"
+      - "openq-tools/SKILL.md remains canonical (PLN/BLD already correct)"
+      - "Documentation is internally consistent"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/reference/stable-markers.md", "docs/reference/contracts.md"]
+      allow_new_files_under: []
+    touches:
+      - "docs/reference/stable-markers.md"
+      - "docs/reference/contracts.md"
+    tests: ["grep -E 'PLAN|BUILD' docs/reference/stable-markers.md docs/reference/contracts.md"]
+    observability: []
+    estimate: S
+
+  - id: ST-007
+    title: "Verify --strict_warnings flag behavior matches REQ-005"
+    status: TODO
+    depends_on: ["ST-002", "ST-005"]
+    req_ids: ["REQ-005"]
+    nfr_ids: ["NFR-COMP-001"]
+    acceptance_criteria:
+      - "--strict_warnings elevates warnings to errors for all new compliance rules"
+      - "Without --strict_warnings, validation completes with exit code 0 when only warnings present"
+      - "With --strict_warnings, validation exits non-zero when any warning present"
+      - "Warning output includes rule identifier and file location"
+      - "Existing pack-check exit codes and output format preserved"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches:
+      - "tools/demoswarm-pack-check/src/cli.rs"
+      - "tools/demoswarm-pack-check/src/main.rs"
+      - "tools/demoswarm-pack-check/src/reporter.rs"
+    tests: ["cargo test strict_warnings", "@exit-codes"]
+    observability: []
+    estimate: S
+
+  - id: ST-008
+    title: "Create Build-to-Gate test fixtures directory and valid receipt fixture"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-004"]
+    nfr_ids: ["NFR-SEC-001"]
+    acceptance_criteria:
+      - "tools/demoswarm-pack-check/tests/fixtures/ directory exists"
+      - "build_receipt_valid.json contains all required fields per receipt schema"
+      - "Fixture uses obviously synthetic values (no real secrets or credentials)"
+      - "Valid fixture passes receipt-checker validation logic"
+    scope_hints:
+      code_roots: []
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: ["tools/demoswarm-pack-check/tests/fixtures/"]
+    touches:
+      - "tools/demoswarm-pack-check/tests/fixtures/build_receipt_valid.json"
+    tests: ["cargo test fixtures"]
+    observability: []
+    estimate: S
+
+  - id: ST-009
+    title: "Create invalid Build receipt fixture for failure path testing"
+    status: TODO
+    depends_on: ["ST-008"]
+    req_ids: ["REQ-004"]
+    nfr_ids: ["NFR-SEC-001"]
+    acceptance_criteria:
+      - "build_receipt_invalid.json has missing required field or invalid value"
+      - "Invalid fixture fails receipt-checker validation logic"
+      - "Fixture uses obviously synthetic values"
+    scope_hints:
+      code_roots: []
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: ["tools/demoswarm-pack-check/tests/fixtures/"]
+    touches:
+      - "tools/demoswarm-pack-check/tests/fixtures/build_receipt_invalid.json"
+    tests: ["cargo test fixtures_invalid"]
+    observability: []
+    estimate: S
+
+  - id: ST-010
+    title: "Add Rust test case exercising Build receipt validation"
+    status: TODO
+    depends_on: ["ST-008", "ST-009"]
+    req_ids: ["REQ-004"]
+    nfr_ids: ["NFR-REL-001"]
+    acceptance_criteria:
+      - "Test case loads valid fixture and verifies it passes validation"
+      - "Test case loads invalid fixture and verifies it fails validation"
+      - "Test documents handshake contract being validated (required fields)"
+      - "Tests are deterministic (same result on repeated runs)"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/"]
+      test_roots: ["tools/demoswarm-pack-check/tests/"]
+      doc_paths: []
+      allow_new_files_under: ["tools/demoswarm-pack-check/tests/"]
+    touches:
+      - "tools/demoswarm-pack-check/tests/receipt_validation_test.rs"
+      - "tools/demoswarm-pack-check/src/lib.rs"
+    tests: ["cargo test receipt_validation"]
+    observability: []
+    estimate: M
+
+  - id: ST-011
+    title: "Establish validation baseline (REQ-006)"
+    status: TODO
+    depends_on: ["ST-002", "ST-003", "ST-005"]
+    req_ids: ["REQ-006"]
+    nfr_ids: []
+    acceptance_criteria:
+      - "pack-check runs on current pack state before new rules introduced"
+      - "Baseline output captured and documented"
+      - "No false positives on existing valid artifacts"
+      - "Any divergent patterns enumerated as known exceptions or remediated"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: []
+      allow_new_files_under: [".runs/compliance-drift-proofing/build/"]
+    touches:
+      - ".runs/compliance-drift-proofing/build/validation_baseline.md"
+    tests: ["bash .claude/scripts/pack-check.sh --no-color"]
+    observability: []
+    estimate: S
+
+  - id: ST-012
+    title: "Update pack-check.md documentation with new validation rules"
+    status: TODO
+    depends_on: ["ST-002", "ST-005", "ST-007"]
+    req_ids: []
+    nfr_ids: ["NFR-OPS-001"]
+    acceptance_criteria:
+      - "pack-check.md documents check 50 (flow boundary enforcement)"
+      - "pack-check.md documents check 51 (OpenQ prefix validation)"
+      - "pack-check.md documents --strict_warnings flag behavior"
+      - "Suggested remediation for each rule is documented"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/reference/pack-check.md"]
+      allow_new_files_under: []
+    touches:
+      - "docs/reference/pack-check.md"
+    tests: []
+    observability: []
+    estimate: S

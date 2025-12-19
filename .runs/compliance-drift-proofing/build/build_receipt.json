@@ -1,0 +1,69 @@
+{
+  "schema_version": "build_receipt_v1",
+  "run_id": "compliance-drift-proofing",
+  "flow": "build",
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [],
+  "counts": {
+    "tests_written": 420,
+    "files_changed": 15,
+    "mutation_score": null,
+    "open_questions": 6
+  },
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": "420 passed (379 unit + 41 integration), 0 failed, 0 skipped",
+    "passed": 420,
+    "failed": 0,
+    "skipped": 0,
+    "xfailed": null,
+    "xpassed": null,
+    "metrics_binding": "test_execution:test-runner"
+  },
+  "coverage": {
+    "line_coverage": 89.29,
+    "branch_coverage": null,
+    "threshold_met": true,
+    "modules": {
+      "control_plane_rs": 99.3,
+      "structure_rs": 100.0,
+      "reporter_rs": 98.6,
+      "runner_rs": 100.0,
+      "drift_rs": 87.1,
+      "flow_rs": 82.5,
+      "wisdom_rs": 76.3,
+      "ctx_rs": 83.7,
+      "util_rs": 98.4
+    }
+  },
+  "critic_verdicts": {
+    "test_critic": "VERIFIED",
+    "code_critic": "VERIFIED"
+  },
+  "quality_gates": {
+    "test_critic": "VERIFIED",
+    "code_critic": "VERIFIED",
+    "self_reviewer": "VERIFIED",
+    "lint": "VERIFIED",
+    "coverage": "VERIFIED"
+  },
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_execution.md",
+    "test_critique.md",
+    "code_critique.md",
+    "lint_report.md",
+    "doc_updates.md",
+    "doc_critique.md"
+  ],
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-19T09:10:18Z"
+}

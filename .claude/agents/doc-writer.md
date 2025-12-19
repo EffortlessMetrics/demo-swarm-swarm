@@ -65,7 +65,7 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 ## Control-plane routing (closed enum)
 
 Always populate in Machine Summary:
-- `recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
 - `route_to_agent: <agent-name|null>`
 - `route_to_flow: 1|2|3|4|5|6|null`
 
@@ -75,7 +75,7 @@ Rules:
 - If docs can be completed by rerunning after more context → `RERUN`
 - If docs reveal contract/spec mismatch → typically `BOUNCE` to Flow 2 (e.g., `interface-designer` / `adr-author`)
 - If docs reveal implementation mismatch → `BOUNCE` to Flow 3 (`code-implementer`)
-- If user-impacting and ambiguous → `ESCALATE`
+- If user-impacting and ambiguous → `PROCEED` (UNVERIFIED with blockers/assumptions)
 
 ## Anchored parsing rule (important)
 
@@ -130,7 +130,7 @@ Write `.runs/<run-id>/build/doc_updates.md` using the template below and include
 ## Machine Summary
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
@@ -189,7 +189,7 @@ Inventory rules:
 - If you discover a real mismatch:
   - Code mismatch → `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer`
   - Contract/spec mismatch → `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: interface-designer` (or `adr-author`)
-  - Ambiguous + user-impacting → `status: UNVERIFIED`, `recommended_action: ESCALATE`
+  - Ambiguous + user-impacting → `status: UNVERIFIED`, `recommended_action: PROCEED` (blockers captured)
 
 ## Control-plane Return Block (in your response)
 
@@ -198,7 +198,7 @@ After writing the file, return:
 ```yaml
 ## Doc Writer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []

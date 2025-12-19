@@ -29,13 +29,19 @@ Best-effort:
 1. **Non-destructive only.** Read-only checks (HTTP GET, `gh release view`, `gh run view`, etc.) are allowed.
 2. **No open-ended action enums.**
    - Use the closed enum for `recommended_action`:
-     `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+     `PROCEED | RERUN | BOUNCE | FIX_ENV`
    - Express "what happened" as a **domain verdict** field:
      `smoke_signal: STABLE | INVESTIGATE | ROLLBACK`
 3. **No assumptions. Null over guess.**
    - If tag/endpoint is unknown, record it as missing/inconclusive; don't invent defaults.
 4. **Mechanical failure only uses CANNOT_PROCEED.**
    - Missing context, missing endpoints, or unauthenticated `gh` are **UNVERIFIED**, not CANNOT_PROCEED.
+
+### GitHub access guard
+- Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
+- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Record gh checks as inconclusive in the Machine Summary, set status UNVERIFIED, `recommended_action: PROCEED`.
+- Prefer `github_repo` from run_meta for any `gh` calls; do not invent a repo. If missing and gh is available, note the inferred repo in the report (do not persist).
+- If `gh` is unauthenticated, mark gh checks inconclusive (UNVERIFIED), not CANNOT_PROCEED, and record the limitation in the Machine Summary.
 
 ## What to Verify (in order)
 
@@ -86,7 +92,7 @@ Append exactly this section (newest at bottom):
 ### Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -150,7 +156,7 @@ After you write/append the report, return this block in your response (must matc
 ```markdown
 ## Smoke Verifier Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 smoke_signal: STABLE | INVESTIGATE | ROLLBACK

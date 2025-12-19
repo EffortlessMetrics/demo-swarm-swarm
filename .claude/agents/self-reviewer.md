@@ -20,6 +20,7 @@ Primary (prefer these):
 - `.runs/<run-id>/build/mutation_report.md` (optional)
 - `.runs/<run-id>/build/fix_summary.md` (optional)
 - `.runs/<run-id>/build/doc_updates.md` (optional)
+- `.runs/<run-id>/plan/ac_status.json` (AC completion tracker; verify all ACs completed)
 
 Optional (if present):
 - `.runs/<run-id>/build/test_summary.md` (test-runner output, if your stack emits it)
@@ -43,19 +44,25 @@ Optional (if present):
 
 `recommended_action` MUST be one of:
 
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing specificity:
 - `route_to_flow: 1|2|3|4|5|6|null`
 - `route_to_agent: <agent-name|null>`
 
-Route fields may be populated for **RERUN** or **BOUNCE**. For `PROCEED`, `ESCALATE`, `FIX_ENV`, set both to `null`.
+Route fields may be populated for **RERUN** or **BOUNCE**. For `PROCEED` and `FIX_ENV`, set both to `null`.
 
 ## What you are checking
 
 1) **Artifact completeness for review**
 - If `test_critique.md` or `code_critique.md` is missing → UNVERIFIED (not CANNOT_PROCEED).
 - If files are unreadable due to IO/perms → CANNOT_PROCEED.
+
+1b) **AC loop completion (when AC-driven build)**
+- If `ac_status.json` exists, verify `completed == ac_count` (all ACs done).
+- If `completed < ac_count`: UNVERIFIED with blocker "AC loop incomplete: {completed}/{ac_count} ACs completed".
+- If any AC has `status: blocked`: UNVERIFIED with blocker listing the blocked ACs.
+- If `ac_status.json` is missing but `ac_matrix.md` exists: add a concern (AC status not tracked).
 
 2) **Canonical bindings**
 - Treat `test_critique.md` "Pytest Summary (Canonical)" as the ground truth for pytest outcomes.
@@ -80,6 +87,7 @@ Do NOT try to parse counts out of prose. Compare exact lines and cite file paths
   - code-critic status is VERIFIED
   - no canonical mismatches
   - no blockers
+  - AC loop complete (if AC-driven build): `completed == ac_count` and no blocked ACs
 
 ## Output format: `.runs/<run-id>/build/self_review.md`
 
@@ -90,7 +98,7 @@ Write exactly this structure:
 
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 
@@ -135,6 +143,12 @@ Source: `.runs/<run-id>/build/mutation_report.md`
 ## Open Issues / Gaps (from critics)
 - <bullets, cite which critic flagged them>
 
+## AC Loop Status (if ac_status.json present)
+- ac_total: <int | null>
+- ac_completed: <int | null>
+- ac_blocked: <list of AC-IDs or "none">
+- ac_loop_complete: YES | NO | N/A
+
 ## Docs / Ops
 - doc_updates.md: present | missing
 - observability_spec referenced: yes | no | n/a
@@ -162,7 +176,7 @@ At the end of your response, echo this block (must match the Machine Summary you
 ```markdown
 ## Self Reviewer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
 route_to_agent: <agent-name|null>
 blockers: []

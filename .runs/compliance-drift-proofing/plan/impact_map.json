@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "blockers": [],
+  "missing_required": [],
+  "concerns": [
+    "OQ-SIG-002 (PLN vs PLAN prefix discrepancy) open - stable-markers.md says PLAN, openq-tools says PLN; REQ-003 implementation needs authoritative resolution",
+    "contracts.md line 184 shows 'Flow prefixes: SIG, PLAN, BUILD, GAT, DEP, WIS' which conflicts with openq-tools SKILL.md (PLN/BLD)",
+    "No existing test fixtures in tools/demoswarm-pack-check/tests/fixtures/ - REQ-004 requires creating new fixture directory",
+    "pack-check already has check 49 (Skills section enforcement) - REQ-002 may be partially addressed, verify coverage"
+  ],
+  "assumptions": [
+    "ASM-001: pack-check (Rust) is the preferred venue for new structural validation rules",
+    "ASM-002: PLN/BLD abbreviations are canonical per openq-tools/SKILL.md (authoritative CLI implementation)",
+    "ASM-003: Warning-first approach per REQ-005 requires CLI changes (--strict flag handling)",
+    "ASM-004: All 8 agents using demoswarm.sh have Skills sections per grep results (check 49 may already pass)"
+  ],
+
+  "impact_summary": {
+    "total_files": 17,
+    "high_risk": 3,
+    "medium_risk": 7,
+    "low_risk": 7
+  },
+
+  "context": {
+    "flow": "plan",
+    "run_id": "compliance-drift-proofing",
+    "inputs_used": [
+      ".runs/compliance-drift-proofing/signal/requirements.md",
+      ".runs/compliance-drift-proofing/signal/problem_statement.md",
+      ".runs/compliance-drift-proofing/run_meta.json"
+    ],
+    "search_terms": [
+      "demoswarm.sh",
+      "## Skills",
+      "OQ-",
+      "flow-*.md",
+      "contracts.rs",
+      "drift.rs",
+      "cli.rs",
+      "pack-check",
+      "stable-markers",
+      "openq",
+      "receipt",
+      "build_receipt"
+    ]
+  },
+
+  "affected": [
+    {
+      "id": "IMP-001",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/contracts.rs",
+      "change_type": "MODIFIED",
+      "risk": "HIGH",
+      "confidence": "HIGH",
+      "summary": "Add OpenQ flow codes constant (SIG/PLN/BLD/GAT/DEP/WIS) and skill CLI subcommands list for REQ-001/REQ-003",
+      "evidence": [
+        "grep:contracts.rs contains canonical patterns, enums, and constants for pack validation",
+        "requirements.md REQ-001 AC-2 specifies skill CLI subcommands list",
+        "requirements.md REQ-003 specifies OpenQ flow codes pattern",
+        "NFR-MAINT-001 MET-1/MET-2 require constants in contracts.rs"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-002", "IMP-003"],
+      "tests_referencing": [],
+      "notes": ["Central contract file - changes affect all checks using these constants"]
+    },
+    {
+      "id": "IMP-002",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/drift.rs",
+      "change_type": "MODIFIED",
+      "risk": "HIGH",
+      "confidence": "HIGH",
+      "summary": "Add new checks for REQ-001 (flow boundary) and REQ-003 (OpenQ prefix); check 49 already exists for REQ-002",
+      "evidence": [
+        "grep:drift.rs contains checks 7,8,14,23,30,38,39,40,42,45,46,47,48,49",
+        "drift.rs check 49 (check_skills_section_required) addresses REQ-002",
+        "requirements.md REQ-001 requires flow command scanning for demoswarm.sh",
+        "requirements.md REQ-003 requires OpenQ prefix validation"
+      ],
+      "depends_on": ["IMP-001"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["New checks likely check 50 (flow boundary) and check 51 (OpenQ prefix)"]
+    },
+    {
+      "id": "IMP-003",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/cli.rs",
+      "change_type": "MODIFIED",
+      "risk": "HIGH",
+      "confidence": "HIGH",
+      "summary": "Implement --strict flag behavior per REQ-005 for warning-first mode",
+      "evidence": [
+        "cli.rs line 38 shows existing --strict_warnings flag",
+        "requirements.md REQ-005 AC-1 specifies --strict flag elevates warnings to errors",
+        "requirements.md REQ-005 AC-2/AC-3 specify exit code behavior"
+      ],
+      "depends_on": ["IMP-001"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["--strict_warnings already exists; may need verification of behavior alignment"]
+    },
+    {
+      "id": "IMP-004",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/reporter.rs",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Add warning severity level for new compliance rules if not already present",
+      "evidence": [
+        "inferred:reporter.rs handles output formatting; REQ-005 requires warning vs error distinction",
+        "NFR-OPS-001 MET-1 requires rule ID, file path, line number in diagnostics"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-002"],
+      "tests_referencing": [],
+      "notes": ["Confidence MEDIUM - may already support warnings"]
+    },
+    {
+      "id": "IMP-005",
+      "kind": "test",
+      "path": "tools/demoswarm-pack-check/tests/fixtures/build_receipt_valid.json",
+      "change_type": "NEW",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Create valid build receipt fixture per REQ-004 AC-1",
+      "evidence": [
+        "glob:no existing fixtures directory found",
+        "requirements.md REQ-004 AC-1 requires valid build_receipt.json fixture"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-007"],
+      "tests_referencing": [],
+      "notes": ["New fixture file - directory may need creation"]
+    },
+    {
+      "id": "IMP-006",
+      "kind": "test",
+      "path": "tools/demoswarm-pack-check/tests/fixtures/build_receipt_invalid.json",
+      "change_type": "NEW",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Create invalid build receipt fixture per REQ-004 AC-2",
+      "evidence": [
+        "requirements.md REQ-004 AC-2 requires invalid build_receipt.json fixture (missing field or invalid value)"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-007"],
+      "tests_referencing": [],
+      "notes": ["New fixture file - tests receipt validation failure paths"]
+    },
+    {
+      "id": "IMP-007",
+      "kind": "test",
+      "path": "tools/demoswarm-pack-check/tests/receipt_validation_test.rs",
+      "change_type": "NEW",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Create test case exercising Build receipt validation per REQ-004 AC-3",
+      "evidence": [
+        "glob:no existing test files in tools/demoswarm-pack-check/tests/",
+        "requirements.md REQ-004 AC-3 requires test case exercising Build receipt validation"
+      ],
+      "depends_on": ["IMP-005", "IMP-006"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Confidence MEDIUM - test location may vary based on Rust project structure"]
+    },
+    {
+      "id": "IMP-008",
+      "kind": "doc",
+      "path": "docs/reference/pack-check.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Document new validation rules (REQ-001, REQ-002, REQ-003) and --strict flag behavior",
+      "evidence": [
+        "grep:pack-check.md exists at docs/reference/pack-check.md",
+        "problem_statement.md success criteria mention 'pack-check.md updated with new rules'"
+      ],
+      "depends_on": ["IMP-002", "IMP-003"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Documentation update required for new checks"]
+    },
+    {
+      "id": "IMP-009",
+      "kind": "doc",
+      "path": "docs/reference/stable-markers.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Resolve PLN vs PLAN discrepancy - line 60 shows 'SIG, PLAN, BUILD, GAT, DEP, WIS' but openq-tools uses PLN/BLD",
+      "evidence": [
+        "grep:stable-markers.md line 60 shows PLAN, BUILD",
+        "openq-tools/SKILL.md line 31 shows PLN, BLD",
+        "OQ-SIG-002 captures this discrepancy"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-001"],
+      "tests_referencing": [],
+      "notes": ["Must align with openq-tools or update openq-tools - likely update docs to PLN/BLD"]
+    },
+    {
+      "id": "IMP-010",
+      "kind": "doc",
+      "path": "docs/reference/contracts.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Update Open question markers section (line 184) - shows PLAN/BUILD, should be PLN/BLD per openq-tools",
+      "evidence": [
+        "grep:contracts.md line 184 shows 'Flow prefixes: SIG, PLAN, BUILD, GAT, DEP, WIS'",
+        "openq-tools/SKILL.md uses PLN/BLD"
+      ],
+      "depends_on": ["IMP-009"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Must be consistent with stable-markers.md resolution"]
+    },
+    {
+      "id": "IMP-011",
+      "kind": "doc",
+      "path": "docs/reference/demoswarm-cli.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Verify OpenQ flow codes documentation matches resolution",
+      "evidence": [
+        "grep:demoswarm-cli.md contains SIG|PLN|BLD patterns",
+        "inferred:CLI docs should match SKILL.md"
+      ],
+      "depends_on": ["IMP-009"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Confidence MEDIUM - may already be correct"]
+    },
+    {
+      "id": "IMP-012",
+      "kind": "config",
+      "path": ".claude/skills/openq-tools/SKILL.md",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Verify PLN/BLD is canonical (current implementation); may need no changes",
+      "evidence": [
+        "grep:openq-tools/SKILL.md line 31 shows 'SIG, PLN, BLD, GAT, DEP, WIS'",
+        "requirements.md assumes PLN/BLD is canonical"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-009", "IMP-010"],
+      "tests_referencing": [],
+      "notes": ["Source of truth for OpenQ prefixes - likely no change needed"]
+    },
+    {
+      "id": "IMP-013",
+      "kind": "code",
+      "path": ".claude/commands/flow-1-signal.md",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Validation target for REQ-001 - verify no demoswarm.sh references",
+      "evidence": [
+        "grep:no demoswarm.sh matches in .claude/commands/ (0 files found)",
+        "requirements.md REQ-001 AC-3 expects existing flow commands pass validation"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Should pass REQ-001 validation - no changes expected"]
+    },
+    {
+      "id": "IMP-014",
+      "kind": "code",
+      "path": ".claude/agents/clarifier.md",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Primary consumer of openq-tools; already has ## Skills section",
+      "evidence": [
+        "grep:clarifier.md contains demoswarm.sh",
+        "grep:clarifier.md contains ## Skills section"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Already compliant with REQ-002 - no changes expected"]
+    },
+    {
+      "id": "IMP-015",
+      "kind": "code",
+      "path": ".claude/agents/receipt-checker.md",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Defines Build-to-Gate handshake contract; may inform REQ-004 test fixture design",
+      "evidence": [
+        "grep:receipt-checker.md defines build_receipt.json validation rules",
+        "requirements.md REQ-004 AC-4 requires handshake contract documentation"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-005", "IMP-006"],
+      "tests_referencing": [],
+      "notes": ["Contract reference for test fixtures - no changes expected to agent itself"]
+    },
+    {
+      "id": "IMP-016",
+      "kind": "doc",
+      "path": "CLAUDE.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "May need minor updates if new pack-check rules affect documented contracts",
+      "evidence": [
+        "inferred:CLAUDE.md is pack reference; NFR-MAINT-001 MET-3 limits changes to 2 files",
+        "problem_statement.md constraints mention CLAUDE.md as table of contents only"
+      ],
+      "depends_on": ["IMP-001"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Confidence MEDIUM - scope intentionally limited per three-tier ownership"]
+    },
+    {
+      "id": "IMP-017",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/mod.rs",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Register new checks if added to drift.rs",
+      "evidence": [
+        "inferred:Rust module pattern requires mod.rs registration of new check modules"
+      ],
+      "depends_on": ["IMP-002"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Standard Rust module registration"]
+    }
+  ],
+
+  "interfaces_impacted": {
+    "api_endpoints": [],
+    "data_entities": [
+      {
+        "name": "build_receipt.json",
+        "change_type": "VALIDATION_ADDED",
+        "evidence": ["REQ-004 adds test fixtures validating schema"],
+        "confidence": "HIGH"
+      },
+      {
+        "name": "open_questions.md",
+        "change_type": "VALIDATION_ADDED",
+        "evidence": ["REQ-003 adds QID pattern validation"],
+        "confidence": "HIGH"
+      }
+    ],
+    "events": []
+  },
+
+  "configuration_impact": [
+    {
+      "path": "tools/demoswarm-pack-check/Cargo.toml",
+      "change_type": "UNKNOWN",
+      "reason": "May need dev-dependencies if test fixtures require JSON parsing",
+      "confidence": "LOW"
+    }
+  ],
+
+  "test_impact": [
+    {
+      "path": "tools/demoswarm-pack-check/tests/",
+      "change_type": "NEW",
+      "reason": "REQ-004 requires new test fixtures and test cases for Build-to-Gate handshake",
+      "confidence": "HIGH"
+    }
+  ],
+
+  "external_dependencies": [],
+
+  "recommended_next": [
+    "Resolve OQ-SIG-002: confirm PLN/BLD (openq-tools) is canonical, update stable-markers.md and contracts.md to match",
+    "Review existing check 49 in drift.rs - verify it fully addresses REQ-002 or needs enhancement",
+    "Design new check for REQ-001 (flow boundary enforcement) - scan flow-*.md for demoswarm.sh and skill subcommands",
+    "Design new check for REQ-003 (OpenQ prefix validation) - validate QID patterns in .runs/**/open_questions.md",
+    "Create test fixture directory at tools/demoswarm-pack-check/tests/fixtures/",
+    "Verify --strict_warnings flag behavior aligns with REQ-005 requirements"
+  ],
+
+  "completed_at": "2025-12-18T21:45:00Z"
+}

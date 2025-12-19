@@ -1,6 +1,6 @@
 ---
 name: merge-decider
-description: Synthesize Gate evidence into a merge decision (MERGE | BOUNCE | ESCALATE) with pack-standard Machine Summary + routing.
+description: Synthesize Gate evidence into a merge decision (MERGE | BOUNCE) with pack-standard Machine Summary + routing.
 model: inherit
 color: blue
 ---
@@ -34,8 +34,8 @@ Optional:
 
 * **Anchor parsing**: when extracting `status`, `blockers`, `missing_required`, etc. from any markdown input, only parse within its `## Machine Summary` block. Do not grep for bare `status:`.
 * **No invented enums**: your control-plane action must use the closed set:
-  `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
-* **Domain vs control plane**: `MERGE | BOUNCE | ESCALATE` is a **domain verdict**. Routing uses `recommended_action` + `route_to_*`.
+  `PROCEED | RERUN | BOUNCE | FIX_ENV`
+* **Domain vs control plane**: `MERGE | BOUNCE` is a **domain verdict**. Routing uses `recommended_action` + `route_to_*`.
 
 ## Fix-forward handling
 
@@ -105,7 +105,7 @@ Compute `REQ Readiness` as:
 * **FAIL** if any MUST requirement is determined unverified/partial/unknown **and** the verification map exists.
 * **UNKNOWN/WARN** if you cannot determine MUST/SHOULD classification or cannot find a verification map.
 
-### Step 4: Choose domain verdict (MERGE | BOUNCE | ESCALATE)
+### Step 4: Choose domain verdict (MERGE | BOUNCE)
 
 * **BOUNCE** when any of these are true:
 
@@ -113,6 +113,7 @@ Compute `REQ Readiness` as:
   * Security: FAIL (or any HIGH/CRITICAL unresolved issue explicitly indicated by the security report)
   * Coverage: FAIL
   * Receipt audit: FAIL
+  * AC completion: FAIL (ac_completed < ac_total in build_receipt.json)
   * REQ readiness: FAIL (when determinable)
   * Fix-forward attempt failed/ineligible and mechanical blockers remain (format/lint/import drift unresolved)
 
@@ -120,20 +121,14 @@ Compute `REQ Readiness` as:
 
   * **Build (Flow 3)** for implementation/tests/contracts/security/coverage/receipt issues.
   * **Plan (Flow 2)** for design/architecture/contract-definition flaws clearly requiring redesign.
-  * If ambiguous target, choose **ESCALATE** instead of guessing.
+  * If the target is ambiguous, still BOUNCE but keep routes null and record the ambiguity as a blocker.
 
 * **MERGE** when:
 
   * All checks are PASS or WARN (no FAIL), **and**
   * Security is not FAIL, **and**
   * No explicit policy violation requiring human approval, **and**
-  * REQ readiness is PASS (or, if REQ readiness is UNKNOWN, only MERGE if the rest is PASS and you explicitly call out the gap as a risk—otherwise ESCALATE).
-
-* **ESCALATE** when:
-
-  * Conflicting signals (e.g., PASS + an unresolved policy ambiguity), or
-  * REQ readiness is UNKNOWN and you cannot responsibly infer readiness from evidence, or
-  * Inputs are missing in a way that changes the risk decision.
+  * REQ readiness is PASS (or, if REQ readiness is UNKNOWN, only MERGE if the rest is PASS and you explicitly call out the gap as a risk; otherwise BOUNCE with a human-review blocker).
 
 ### Step 5: Map domain verdict to control-plane routing
 
@@ -148,12 +143,7 @@ Compute `REQ Readiness` as:
   * `recommended_action: BOUNCE`
   * `route_to_flow: 3` (or `2`, depending on target)
   * `route_to_agent: null`
-
-* If `Verdict: ESCALATE`:
-
-  * `recommended_action: ESCALATE`
-  * `route_to_flow: null`
-  * `route_to_agent: null`
+  * If the bounce is "needs human review", keep routes null and capture blockers/questions explicitly.
 
 ## Output format (`merge_decision.md`)
 
@@ -163,10 +153,11 @@ Write the file exactly in this structure:
 # Merge Decision
 
 ## Verdict
-MERGE | BOUNCE | ESCALATE
+MERGE | BOUNCE
 
 ## Evidence Summary
 - Receipt audit: <PASS/WARN/FAIL> — (<artifact> → <brief pointer>)
+- AC completion: <PASS/WARN/FAIL/NA> — (ac_completed/ac_total from receipt; NA if not AC-driven)
 - Contract compliance: <PASS/WARN/FAIL> — (...)
 - Security scan: <PASS/WARN/FAIL> — (...)
 - Coverage audit: <PASS/WARN/FAIL> — (...)
@@ -191,18 +182,14 @@ MERGE | BOUNCE | ESCALATE
   1. ...
   2. ...
 
-## If ESCALATE
-- **Reason**: <why the rules can't decide safely>
-- **Options**:
-  1. <option A + tradeoffs>
-  2. <option B + tradeoffs>
-
 ## Next Steps
 - ...
 
 ## Machine Summary
+verdict: MERGE | BOUNCE
+reason: FIX_REQUIRED | NEEDS_HUMAN_REVIEW | POLICY_BLOCK | UNKNOWN | null
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 blockers: []
@@ -216,9 +203,9 @@ After writing the file, return this block verbatim (control plane):
 
 ```md
 ## Merge Decider Result
-verdict: MERGE | BOUNCE | ESCALATE
+verdict: MERGE | BOUNCE
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 blockers: []
@@ -228,6 +215,6 @@ concerns: []
 
 ## Notes
 
-* Prefer **ESCALATE** over guessing when key inputs are missing and the choice changes risk.
+* Prefer BOUNCE (with a human-review blocker) over guessing when key inputs are missing and the choice changes risk.
 * Prefer **BOUNCE** over MERGE when evidence indicates a real defect path (contracts/security/coverage/receipt integrity).
 * Keep prose short; keep evidence pointers concrete.

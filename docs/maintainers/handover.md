@@ -93,7 +93,7 @@ These are the pack invariants. Breaking them breaks the pack.
 
 1. **Repo root + paths**: All commands from repo root, all paths repo-root-relative
 2. **Status axis**: `VERIFIED | UNVERIFIED | CANNOT_PROCEED` (closed enum)
-3. **Routing enum**: `PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV` (closed enum)
+3. **Routing enum**: `PROCEED | RERUN | BOUNCE | FIX_ENV` (closed enum)
 4. **Two gates for GH ops**: `safe_to_publish` AND `proceed_to_github_ops`
 5. **Publish surface only**: secrets-sanitizer scans flow surface, not everything
 6. **Reseal pattern**: If `modified_files: true`, rerun until false or safe-bail

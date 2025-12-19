@@ -24,6 +24,12 @@ From `.runs/<run-id>/wisdom/`:
 - `regression_report.md`
 - `artifact_audit.md`
 
+From `.runs/<run-id>/build/` (hardening worklists; optional):
+- `mutation_report.md`
+- `fuzz_report.md`
+- `flakiness_report.md`
+- `doc_critique.md`
+
 Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot write the output file.
 
 ## Output
@@ -43,10 +49,17 @@ Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot wri
 
 1) Read available wisdom artifacts. Record which were present.
 
+1b) If Build hardening worklists are present, extract a small, high-signal set (bounded):
+- From `build/mutation_report.md`: use the "Survivor Worklist" and/or `MUT_SURVIVOR` inventory lines.
+- From `build/fuzz_report.md`: use the "Crash Worklist" and/or `FUZZ_CRASH` inventory lines.
+- From `build/flakiness_report.md`: use the classification worklist and/or `FLAKE_ITEM` inventory lines.
+- Promote up to ~3 items per category into Flow 3 issue drafts with evidence pointers.
+
 2) Build a backlog organized by target:
 - Flow 1 (Signal): template/checklist/marker improvements, ambiguity prompts.
 - Flow 2 (Plan): ADR/contracts/observability/test-plan template gaps.
-- Flow 3 (Build): test gaps, mutation survivors, coverage holes, brittle patterns.
+- Flow 3 (Build): test gaps, mutation survivors, fuzz crashes, flakiness, coverage holes, brittle patterns.
+- **Pack/Flow improvements**: agent prompt gaps, missing automation, friction points, cross-cutting concerns (from `PACK_OBS` markers in learnings.md).
 - Cross-cutting: pack-check / marker contract / receipt schema improvements (only if evidenced).
 
 3) Create **issue drafts** (not real issues):
@@ -105,6 +118,22 @@ Write using this structure:
   - evidence: <path>#<heading>
   - proposed_change: <file + insertion point + what>
 
+## Pack/Flow Improvements
+Surfaced from `PACK_OBS` markers in learnings.md (agent friction, missing automation, gaps):
+
+- [ ] SUG-00X: <pack/flow improvement>
+  - evidence: wisdom/learnings.md#Pack/Flow Observations
+  - proposed_change: <agent prompt file + what to add/change>
+
+- ISSUE: ISSUE-DRAFT-00X: <pack improvement needing larger work>
+  - target: pack
+  - labels: pack-improvement, agent-prompt
+  - summary: <what needs to change>
+  - acceptance_criteria:
+    - [ ] <testable AC>
+  - evidence:
+    - wisdom/learnings.md#Pack/Flow Observations
+
 ## Cross-cutting (Optional)
 - [ ] SUG-00X: <proposal>
   - evidence: <path>#<heading>
@@ -128,7 +157,7 @@ None. (Drafts only; no GitHub side effects.)
 ## Machine Summary
 ```yaml
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []
@@ -162,7 +191,7 @@ After writing the file, return:
 ```yaml
 ## Feedback Applier Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|null
 route_to_agent: <agent-name|null>
 blockers: []

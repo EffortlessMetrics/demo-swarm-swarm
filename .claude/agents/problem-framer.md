@@ -25,7 +25,7 @@ You do **not** block the flow for ambiguity. You document assumptions + question
 ## Status + routing contract (closed enum)
 
 Use this closed action vocabulary:
-`PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV`
+`PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing fields:
 - `route_to_agent: <agent-name | null>`
@@ -96,7 +96,7 @@ Write exactly this structure:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -156,7 +156,7 @@ At the end of your response, return this block (must match the Machine Summary y
 ```markdown
 ## Problem Framer Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 confidence: <High | Medium | Low>

@@ -25,16 +25,15 @@ VERIFIED | UNVERIFIED | CANNOT_PROCEED
 ### Recommended action (routing)
 
 ```
-PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+PROCEED | RERUN | BOUNCE | FIX_ENV
 ```
 
 | Value | Meaning |
 |-------|---------|
-| `PROCEED` | Continue to next step/flow |
-| `RERUN` | Same flow again |
-| `BOUNCE` | Route to different flow/agent |
-| `ESCALATE` | Human decision needed |
-| `FIX_ENV` | Environment/tooling issue |
+| `PROCEED` | Default: continue even when open questions exist (capture blockers/assumptions) |
+| `RERUN` | Same station again with a deterministic improvement expected |
+| `BOUNCE` | Route to a specific flow/agent for an actionable fix |
+| `FIX_ENV` | Environment/tooling issue (paired with `status: CANNOT_PROCEED`) |
 
 ### Route fields
 
@@ -58,7 +57,7 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
 route_to_agent: <agent-name> | null
 ```
@@ -86,7 +85,7 @@ anomaly_paths: []
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 
@@ -111,7 +110,7 @@ severity_summary:                      # critics/verifiers
 | Flow/Agent Status | `VERIFIED \| UNVERIFIED \| CANNOT_PROCEED` | Machine Summary, receipts |
 | Repo Operator Status | `COMPLETED \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED` | Repo Operator Result |
 | Secrets Sanitizer Status | `CLEAN \| FIXED \| BLOCKED_PUBLISH` | Gate Result |
-| Gate Merge Verdict | `MERGE \| BOUNCE \| ESCALATE` | `merge_decision.md` |
+| Gate Merge Verdict | `MERGE \| BOUNCE` (include reason when bouncing) | `merge_decision.md` |
 | Deploy Verdict | `STABLE \| NOT_DEPLOYED \| BLOCKED_BY_GATE` | `deployment_decision.md` |
 | Smoke Signal | `STABLE \| INVESTIGATE \| ROLLBACK` | `verification_report.md` |
 
@@ -124,7 +123,7 @@ severity_summary:                      # critics/verifiers
   "run_id": "<run-id>",
   "flow": "<flow-name>",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
   "missing_required": [],
@@ -182,7 +181,7 @@ Used in `open_questions.md`:
 |---------|-------|---------|
 | Question ID | `^- QID: OQ-.*-[0-9]{3}` | `- QID: OQ-SIG-001` |
 
-Flow prefixes: `SIG`, `PLAN`, `BUILD`, `GAT`, `DEP`, `WIS`
+Flow prefixes: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS`
 
 ### Test markers
 
@@ -234,7 +233,7 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
   "run_id": "<run-id>",
   "flow": "<flow-name>",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | ESCALATE | FIX_ENV",
+  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
   "missing_required": [],
@@ -331,7 +330,7 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 
 ```json
 {
-  "merge_verdict": "MERGE | BOUNCE | ESCALATE | null",
+  "merge_verdict": "MERGE | BOUNCE | null",
   "counts": {
     "receipt_checks_total": null,
     "receipt_checks_passed": null,
@@ -357,7 +356,7 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 ```json
 {
   "deployment_verdict": "STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE | null",
-  "gate_verdict": "MERGE | BOUNCE | ESCALATE | null",
+  "gate_verdict": "MERGE | BOUNCE | null",
   "counts": {
     "failed_checks": null,
     "ci_checks_total": null,
@@ -434,16 +433,26 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 ```json
 {
   "run_id": "<run-id>",
+  "run_id_kind": "GH_ISSUE | LOCAL_ONLY | null",
+  "issue_binding": "IMMEDIATE | DEFERRED | null",
+  "issue_binding_deferred_reason": "gh_unauth | gh_unavailable | null",
   "canonical_key": "<gh-456 | pr-789 | null>",
   "aliases": ["<run-id>", "<gh-456>", "<branch-name>"],
   "task_key": "<ticket-id | branch-slug | null>",
   "task_title": "<short normalized title>",
+  "github_repo": "<owner/repo | null>",
+  "github_repo_expected": "<owner/repo | null>",
+  "github_repo_actual_at_creation": "<owner/repo | null>",
+  "github_ops_allowed": true,
+  "repo_mismatch": false,
   "created_at": "<ISO8601>",
   "updated_at": "<ISO8601>",
   "iterations": 1,
   "flows_started": ["signal", "plan"],
   "source": "<branch:name | ticket:id | manual>",
   "issue_number": 456,
+  "issue_url": "<url | null>",
+  "issue_title": "<string | null>",
   "pr_number": null,
   "supersedes": "<previous-run-id | null>",
   "related_runs": []

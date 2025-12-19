@@ -1,0 +1,48 @@
+[1m[92m    Finished[0m ]8;;https://doc.rust-lang.org/cargo/reference/profiles.html#default-profiles\`test` profile [unoptimized + debuginfo]]8;;\ target(s) in 0.04s
+[1m[92m     Running[0m tests\check_integration_test.rs (target\debug\deps\check_integration_test-b262e3443a8f443d.exe)
+
+running 41 tests
+test flow_boundary_enforcement::test_flow_command_skill_subcommand_has_cli_patterns ... ok
+test flow_boundary_enforcement::test_flow_command_violation_has_demoswarm ... ok
+test build_receipt_fixtures::test_missing_run_id_receipt ... ok
+test build_receipt_fixtures::test_invalid_build_receipt_has_invalid_status ... ok
+test security::test_fixtures_use_synthetic_identifiers ... ok
+test determinism::test_fixture_content_is_deterministic ... ok
+test flow_boundary_enforcement::test_flow_command_prose_is_not_violation ... ok
+test flow_boundary_enforcement::test_flow_command_clean_fixture_structure ... ok
+test openq_prefix_validation::test_bad_padding_fixture_has_invalid_suffixes ... ok
+test no_false_positives::test_fixtures_have_realistic_structure ... ok
+test openq_prefix_validation::test_invalid_openq_fixture_has_non_canonical_codes ... ok
+test openq_prefix_validation::test_mixed_openq_fixture_structure ... ok
+test skills_section_enforcement::test_agent_no_demoswarm_no_skills_is_ok ... ok
+test skills_section_enforcement::test_agent_skill_tool_only_is_ok ... ok
+test skills_section_enforcement::test_agent_with_skills_section_has_required_elements ... ok
+test skills_section_enforcement::test_agent_without_skills_section_is_violation ... ok
+test openq_prefix_validation::test_valid_openq_fixture_has_canonical_codes ... ok
+test no_false_positives::test_prose_vs_command_distinction ... ok
+test build_receipt_fixtures::test_valid_build_receipt_has_required_fields ... ok
+test security::test_fixtures_contain_no_secrets ... ok
+test warning_first_mode::test_cli_has_strict_warnings_field ... ok
+test warning_first_mode::test_strict_warnings_flag_accepted ... ok
+test backward_compatibility::test_all_expected_checks_run ... ok
+test baseline_validation::test_pack_check_counts_populated ... ok
+test flow_boundary_enforcement::test_check_52_passes_clean_flow_command ... ok
+test openq_prefix_validation::test_check_53_passes_valid_qids ... ok
+test baseline_validation::test_pack_check_runs_on_actual_pack ... ok
+test backward_compatibility::test_exit_code_contract ... ok
+test openq_prefix_validation::test_check_53_detects_non_canonical_flow_code ... ok
+test baseline_validation::test_existing_flow_commands_no_false_positives ... ok
+test skills_section_integration::test_check_49_multi_agent_detection ... ok
+test skills_section_integration::test_check_49_identifies_missing_skills_section ... ok
+test openq_prefix_validation::test_check_53_detects_invalid_padding ... ok
+test flow_boundary_enforcement::test_check_52_detects_demoswarm_in_flow_command ... ok
+test skills_section_integration::test_check_49_runs_on_actual_pack ... ok
+test warning_first_exit_codes::test_strict_warnings_flag_is_valid ... ok
+test baseline_validation::test_pack_check_json_output_valid ... ok
+test warning_first_exit_codes::test_warnings_exit_zero_without_strict ... ok
+test warning_first_exit_codes::test_warnings_exit_nonzero_with_strict ... ok
+test baseline_validation::test_pack_check_deterministic_output ... ok
+test warning_first_exit_codes::test_clean_output_consistency ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.80s
+
