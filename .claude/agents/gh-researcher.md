@@ -165,7 +165,7 @@ At the end of `github_research.md`, include:
 ## Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []

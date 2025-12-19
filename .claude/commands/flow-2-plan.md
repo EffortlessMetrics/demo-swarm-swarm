@@ -294,7 +294,7 @@ safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
@@ -442,8 +442,7 @@ Flow 2 is complete when these exist (even if imperfect):
 - `migrations/*.sql` - Draft migrations (optional, if DB changes needed)
 - `observability_spec.md` - Metrics, logs, traces, SLOs, alerts
 - `test_plan.md` - BDD to test types mapping, priorities
-- `ac_matrix.md` - AC-driven build contract (Flow 3 iterates per AC)
-- `ac_status.json` - Machine-readable AC status tracker
+- `ac_matrix.md` - AC-driven build contract (Flow 3 iterates per AC; Build creates `build/ac_status.json` at runtime)
 - `work_plan.md` - Subtasks, ordering, dependencies
 - `design_validation.md` - Feasibility assessment, known issues
 
@@ -486,8 +485,7 @@ All written to `.runs/<run-id>/plan/`:
 | `observability_spec.md` | observability-designer | Metrics, logs, traces, SLOs |
 | `observability_critique.md` | observability-critic | Observability validation critique (optional) |
 | `test_plan.md` | test-strategist | BDD to test types mapping |
-| `ac_matrix.md` | test-strategist | AC-driven build contract |
-| `ac_status.json` | test-strategist | Machine-readable AC tracker |
+| `ac_matrix.md` | test-strategist | AC-driven build contract (Build creates `build/ac_status.json`) |
 | `work_plan.md` | work-planner | Subtasks, ordering, dependencies |
 | `design_validation.md` | design-critic | Feasibility assessment |
 | `policy_analysis.md` | policy-analyst | Policy compliance check |

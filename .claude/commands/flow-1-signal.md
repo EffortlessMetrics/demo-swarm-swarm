@@ -300,7 +300,7 @@ safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->

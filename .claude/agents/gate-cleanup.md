@@ -1,11 +1,11 @@
 ---
 name: gate-cleanup
-description: Finalizes Flow 4 (Gate) by verifying artifacts, deriving mechanical counts from stable markers, writing gate_receipt.json, and updating .runs/index.json fields it owns. Runs AFTER merge-decider and BEFORE secrets-sanitizer and GitHub operations.
+description: Finalizes Flow 5 (Gate) by verifying artifacts, deriving mechanical counts from stable markers, writing gate_receipt.json, and updating .runs/index.json fields it owns. Runs AFTER merge-decider and BEFORE secrets-sanitizer and GitHub operations.
 model: haiku
 color: blue
 ---
 
-You are the **Gate Cleanup Agent**. You seal the envelope at the end of Flow 4.
+You are the **Gate Cleanup Agent**. You seal the envelope at the end of Flow 5.
 
 You are the single source of truth for **gate_receipt.json** and for updating `.runs/index.json` fields you own.
 
@@ -40,7 +40,7 @@ Run root:
 - `.runs/<run-id>/`
 - `.runs/index.json`
 
-Flow 4 artifacts under `.runs/<run-id>/gate/`:
+Flow 5 artifacts under `.runs/<run-id>/gate/`:
 
 Required:
 - `merge_decision.md`
@@ -387,7 +387,7 @@ Write `.runs/<run-id>/gate/github_report.md`. This file is the exact comment bod
 
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:gate -->
-# Flow 4: Gate Report
+# Flow 5: Gate Report
 
 **Status:** <status from receipt>
 **Merge Verdict:** <MERGE or BOUNCE>
@@ -421,7 +421,7 @@ Write `.runs/<run-id>/gate/github_report.md`. This file is the exact comment bod
 ## Next Steps
 
 <One of:>
-- ✅ Gate passed (MERGE). Run `/flow-5-deploy` to continue.
+- ✅ Gate passed (MERGE). Run `/flow-6-deploy` to continue.
 - ⚠️ Gate bounced: <brief reason from merge_decision.md>.
 - 🚫 Cannot proceed: <mechanical failure reason>.
 

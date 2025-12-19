@@ -59,8 +59,8 @@ Optional (missing ⇒ note, continue):
 - `fuzz_report.md`
 - `fix_summary.md`
 
-AC status (from Plan; updated by Build):
-- `.runs/<run-id>/plan/ac_status.json` (AC completion tracker; verify all ACs completed)
+AC status (created and updated by Build):
+- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; verify all ACs completed)
 
 ## Outputs
 
@@ -166,15 +166,15 @@ bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/build/ope
   --regex '^- QID: OQ-BUILD-[0-9]{3}' \
   --null-if-missing
 
-# ac_total: from ac_status.json (Plan artifact updated by Build)
+# ac_total: from ac_status.json (Build artifact)
 bash .claude/scripts/demoswarm.sh receipt get \
-  --file ".runs/<run-id>/plan/ac_status.json" \
+  --file ".runs/<run-id>/build/ac_status.json" \
   --key "ac_count" \
   --null-if-missing
 
 # ac_completed: from ac_status.json
 bash .claude/scripts/demoswarm.sh receipt get \
-  --file ".runs/<run-id>/plan/ac_status.json" \
+  --file ".runs/<run-id>/build/ac_status.json" \
   --key "completed" \
   --null-if-missing
 ```
@@ -444,7 +444,7 @@ Write `.runs/<run-id>/build/github_report.md`. This file is the exact comment bo
 ## Next Steps
 
 <One of:>
-- ✅ Build complete. Run `/flow-4-gate` to continue.
+- ✅ Build complete. Run `/flow-5-gate` to continue.
 - ⚠️ Build incomplete: <brief reason>. Run the flow again to resolve.
 - 🚫 Cannot proceed: <mechanical failure reason>.
 
@@ -474,7 +474,7 @@ After writing files, return:
 ## Build Cleanup Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|null
+route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent|null>
 blockers: []
 missing_required: []

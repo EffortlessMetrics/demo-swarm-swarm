@@ -63,7 +63,7 @@ Flow 3 uses **two complementary state machines**:
   - code-implementer (scope: current AC)
   - code-critic (scope: current AC)
   - test-executor (fast confirm: AC-scoped tests only)
-  - update ac_status.json
+  - update build/ac_status.json
 - lint-executor (format/lint; global)
 - test-executor (full suite; global)
 - flakiness-detector (if failures; apply Worklist Loop Template)
@@ -78,6 +78,8 @@ Flow 3 uses **two complementary state machines**:
 - build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - repo-operator (restage intended changes; if reseal happened)
 - repo-operator (commit/push; only if secrets gate passes)
+- pr-creator (create Draft PR; gated on push)
+- secrets-sanitizer + repo-operator (commit PR metadata; if PR created)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report to GitHub; gated)
 ```
@@ -132,6 +134,7 @@ If you encounter ambiguity, **document it and continue**. Write assumptions in a
 - build-cleanup -- writes build_receipt.json, updates index.json status
 - secrets-sanitizer -- publish gate (scans staged changes before commit)
 - repo-operator -- commit only after secrets gate passes
+- pr-creator -- create Draft PR after push (gets bots spinning early)
 - gh-issue-manager -- updates issue body status board
 - gh-reporter -- post summary to GitHub
 
@@ -142,8 +145,7 @@ Read from `.runs/<run-id>/plan/` (if available):
 - `api_contracts.yaml`
 - `schema.md`
 - `test_plan.md`
-- `ac_matrix.md` (AC-driven build contract - Flow 3 iterates per AC)
-- `ac_status.json` (machine-readable AC tracker - Flow 3 updates as it goes)
+- `ac_matrix.md` (AC-driven build contract - Flow 3 iterates per AC; read-only)
 - `work_plan.md`
 
 **If upstream artifacts are missing**: Flow 3 can start without Flows 1-2. Proceed best-effort: document assumptions, set status to UNVERIFIED, and continue. This enables flexibility for hotfixes or code-first workflows.
@@ -229,9 +231,37 @@ The agent ensures clean tree and handles branch creation/switching safely. This 
 
 **Flow 3 executes test/code microloops per AC (within a single build run).**
 
-Read `.runs/<run-id>/plan/ac_matrix.md` to get the ordered list of ACs. For each AC, run the AC microloop. Update `.runs/<run-id>/plan/ac_status.json` after each AC completes.
+Read `.runs/<run-id>/plan/ac_matrix.md` to get the ordered list of ACs. Initialize `.runs/<run-id>/build/ac_status.json` before starting the loop.
 
 **If `ac_matrix.md` is missing:** Call `test-strategist` to generate it before proceeding (see Upstream Inputs).
+
+**Initialize `build/ac_status.json` (before first AC):**
+
+If `build/ac_status.json` does not exist, create it from `ac_matrix.md`:
+
+```json
+{
+  "schema_version": "ac_status_v1",
+  "run_id": "<run-id>",
+  "ac_count": <number of ACs in ac_matrix.md>,
+  "completed": 0,
+  "in_progress": null,
+  "items": [
+    {
+      "ac_id": "AC-001",
+      "status": "pending",
+      "tests_written": false,
+      "code_implemented": false,
+      "code_reviewed": false,
+      "tests_passing": false,
+      "files_touched": [],
+      "evidence": []
+    }
+  ]
+}
+```
+
+If `build/ac_status.json` exists (rerun scenario), read it and resume from the first non-completed AC.
 
 #### AC Loop Iteration (for each AC in order)
 
@@ -253,7 +283,7 @@ For each AC (e.g., AC-001):
 
 4. **test-executor** (fast confirm: run only tests for this AC, not full suite)
 
-5. **Update ac_status.json**: Mark AC as `completed` if all checks pass, `blocked` if critic issues remain
+5. **Update build/ac_status.json**: Mark AC as `completed` if all checks pass, `blocked` if critic issues remain
 
 **Route on critic Result blocks** (same rules as Microloop Template):
 - If `status: CANNOT_PROCEED` -> **FIX_ENV**; stop AC loop
@@ -351,7 +381,7 @@ safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
@@ -422,6 +452,56 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
   - Otherwise → UNVERIFIED; skip push (`publish_surface: NOT_PUSHED`), write evidence
 
+### Step 12b: Create Draft PR
+
+**Call `pr-creator`** to create a Draft PR after the branch is pushed.
+
+This gets bots (CodeRabbit, CI) spinning early before Flow 4 (Review) harvests their feedback.
+
+**Prerequisites (checked by pr-creator):**
+- `github_ops_allowed: true` in run_meta
+- `gh` authenticated
+- `publish_surface: PUSHED` (from Repo Operator Result)
+
+**Call `pr-creator`** with context:
+- run-id
+- github_repo from run_meta
+- Repo Operator Result (for commit_sha and publish_surface)
+
+**Route on PR Creator Result block:**
+- If `operation_status: CREATED`: PR created successfully, `pr_number` available
+- If `operation_status: EXISTING`: PR already existed, `pr_number` captured
+- If `operation_status: SKIPPED`: Prerequisites not met (branch not pushed, auth issue), note reason and continue
+- If `operation_status: FAILED`: Creation failed, note in concerns and continue
+
+**Metadata updates (handled by pr-creator):**
+- `run_meta.json`: `pr_number`, `pr_url`
+- `index.json`: `pr_number`
+
+**Artifact output:**
+- `.runs/<run-id>/build/pr_creation_status.md`
+
+**Important:** PR creation failure does not block the flow. Flow 4 (Review) can create the PR if needed.
+
+### Step 12c: Commit PR Metadata (Conditional)
+
+**If PR was created or found (operation_status: CREATED or EXISTING):**
+
+The `run_meta.json` and `index.json` now contain `pr_number` but this isn't on the branch yet. Commit this metadata so the run state is complete.
+
+1. **Stage metadata only:**
+   - `.runs/<run-id>/run_meta.json`
+   - `.runs/<run-id>/build/pr_creation_status.md`
+   - `.runs/index.json`
+
+2. **Call `secrets-sanitizer`** on the staged surface (likely CLEAN, but required for gate consistency).
+
+3. **Call `repo-operator`** with task: "commit PR metadata"
+   - Commit message: "chore(<run-id>): add PR metadata"
+   - Push if `safe_to_publish: true`
+
+**If PR was skipped or failed:** Skip this step (nothing to commit).
+
 ### GitHub Access + Content Mode (canonical)
 
 See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
@@ -464,7 +544,7 @@ Update `flow_plan.md`:
 - **Final Status**: VERIFIED | UNVERIFIED
 - **Tests**: <pass/fail counts from build_receipt.json>
 - **Mutation Score**: <score from mutation_report.md>
-- **Next Flow**: `/flow-4-gate` (after human review)
+- **Next Flow**: `/flow-4-review` (after human review)
 
 ## Human Review Checklist
 
@@ -523,9 +603,10 @@ After this flow completes, `.runs/<run-id>/build/` should contain:
 - `gh_report_status.md`
 - `github_report.md`
 - `git_status.md` (if anomaly detected)
+- `pr_creation_status.md` (from pr-creator)
 
-Also updates in `.runs/<run-id>/plan/`:
-- `ac_status.json` (updated with completion status for each AC)
+Also creates in `.runs/<run-id>/build/`:
+- `ac_status.json` (runtime AC completion tracker - created by Build, updated per AC)
 
 Code/test changes in project-defined locations.
 
@@ -554,6 +635,7 @@ Code/test changes in project-defined locations.
 - [ ] build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (restage intended changes; if reseal occurred)
 - [ ] repo-operator (commit/push; return Repo Operator Result)
+- [ ] pr-creator (create Draft PR; gated on publish_surface: PUSHED)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 
@@ -599,9 +681,13 @@ Code/test changes in project-defined locations.
 
 19. `repo-operator` (commit/push)
 
-20. `gh-issue-manager` (if allowed)
+20. `pr-creator` (create Draft PR; gated on publish_surface: PUSHED)
 
-21. `gh-reporter` (if allowed)
+21. `secrets-sanitizer` + `repo-operator` (commit PR metadata; if PR created/found)
+
+22. `gh-issue-manager` (if allowed)
+
+23. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -625,11 +711,24 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 
 **Prerequisites:**
 - Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list
-- Read `.runs/<run-id>/plan/ac_status.json` for current state (on rerun)
+- Initialize or read `.runs/<run-id>/build/ac_status.json`
+
+**Initialization (before first AC):**
+
+If `build/ac_status.json` does not exist:
+- Parse `ac_matrix.md` to extract AC count and AC IDs
+- Create `build/ac_status.json` with schema:
+  - `schema_version: "ac_status_v1"`
+  - `run_id`, `ac_count`, `completed: 0`, `in_progress: null`
+  - `items[]` with one entry per AC (all `status: "pending"`)
+
+If `build/ac_status.json` exists (rerun):
+- Load it and resume from the first non-completed AC
+- Preserve prior `completed` count and item states
 
 **For each AC (in Implementation Order from ac_matrix.md):**
 
-1. **Mark in-progress:** Update `ac_status.json` with `"status": "in_progress"` and `"in_progress": "<AC-ID>"`
+1. **Mark in-progress:** Update `build/ac_status.json` with `"status": "in_progress"` and `"in_progress": "<AC-ID>"`
 
 2. **Scope context:** Extract from ac_matrix.md for this AC:
    - AC-ID, Description, Priority
@@ -642,18 +741,18 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
    - test-critic: Confirms tests actually exercise this specific AC
    - Apply pass if critic returns `recommended_action: RERUN`
    - Re-critique, then proceed (2 passes default)
-   - Update `ac_status.json`: `"tests_written": true`
+   - Update `build/ac_status.json`: `"tests_written": true`
 
 4. **code-implementer ↔ code-critic microloop** (scope: this AC only; apply Microloop Template):
    - code-implementer: Pass AC-ID, Description, Impl Hints, test file locations
    - code-critic: Reviews code for this AC against ADR/contracts
    - Apply pass if critic returns `recommended_action: RERUN`
    - Re-critique, then proceed (2 passes default)
-   - Update `ac_status.json`: `"code_implemented": true`, `"code_reviewed": true`, `"files_touched": [...]`
+   - Update `build/ac_status.json`: `"code_implemented": true`, `"code_reviewed": true`, `"files_touched": [...]`
 
 5. **test-executor** (fast confirm: AC-scoped tests only)
    - Run filtered test subset (by AC-ID tag/name)
-   - Update `ac_status.json`: `"tests_passing": true/false`
+   - Update `build/ac_status.json`: `"tests_passing": true/false`
 
 6. **Finalize AC:**
    - If all checks pass: `"status": "completed"`, increment `"completed"` count

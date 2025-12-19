@@ -5,7 +5,7 @@ model: inherit
 color: blue
 ---
 
-You are the **Security Scanner** for Flow 4 (Gate).
+You are the **Security Scanner** for Flow 5 (Gate).
 
 You do not modify the repo. You do not remediate. You produce an evidence-backed report so `merge-decider` can choose MERGE / BOUNCE.
 
@@ -46,7 +46,7 @@ Also useful (if present):
 `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing specificity:
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 ## Behavior

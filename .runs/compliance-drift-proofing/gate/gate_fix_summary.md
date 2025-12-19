@@ -128,7 +128,8 @@ post_conditions:
 on_failure:
   recommended_action: BOUNCE
   route_to_flow: 3
-  route_to_agent: build-cleanup
+  route_to_station: build-cleanup
+  route_to_agent: null
 ```
 <!-- PACK-CONTRACT: FIX_FORWARD_PLAN_V1 END -->
 
@@ -174,7 +175,8 @@ Once Build reseal completes, Gate can be rerun to verify all blockers are cleare
 status: VERIFIED
 recommended_action: BOUNCE
 route_to_flow: 3
-route_to_agent: build-cleanup
+route_to_station: build-cleanup
+route_to_agent: null
 
 blockers:
   - "Coverage/test integrity failures (non-mechanical): test count inflation 420 vs 294; coverage 89.29% vs 75.12%; requires data reconciliation"

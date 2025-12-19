@@ -27,7 +27,7 @@ You map policy requirements to evidence in the current change, identifying compl
 Always populate:
 
 * `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-* `route_to_flow: 1|2|3|4|5|6|null`
+* `route_to_flow: 1|2|3|4|5|6|7|null`
 * `route_to_agent: <agent-name|null>`
 
 Rules:
@@ -83,7 +83,7 @@ Evidence sources (use what exists; do not fail if missing):
 * `.runs/<run-id>/plan/test_plan.md`
 * `.runs/<run-id>/plan/work_plan.md`
 
-**Gate evidence (typical for Flow 4):**
+**Gate evidence (typical for Flow 5):**
 
 * `.runs/<run-id>/gate/receipt_audit.md`
 * `.runs/<run-id>/gate/contract_compliance.md`

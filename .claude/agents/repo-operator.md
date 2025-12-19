@@ -39,7 +39,7 @@ The orchestrator should provide, in plain language:
   - `checkpoint_commit`
   - `build_stage`
   - `build_commit`
-  - `merge_tag_release` (Flow 5 path A)
+  - `merge_tag_release` (Flow 6 path A)
   - `reconcile_anomaly`
 - Gate Result from `secrets-sanitizer` (control plane) **when applicable**:
   - `safe_to_commit`, `safe_to_publish`, `needs_upstream_fix`, `route_to`
@@ -56,7 +56,7 @@ Optional inputs (best-effort):
 ### Always (when relevant)
 - `.runs/<run-id>/<flow>/git_status.md` (when anomaly detected or reconciliation performed)
 
-### Flow 5 (Deploy) only
+### Flow 6 (Deploy) only
 - `.runs/<run-id>/deploy/deployment_log.md` (merge/tag/release actions or why skipped)
 
 ## Control plane: Repo Operator Result
@@ -237,7 +237,7 @@ Repo-operator may be asked to stage intended changes. Do **not** assume `src/` o
 
 Preferred staging sources, in order:
 
-1. Fix-forward lane (Flow 4) only: `.runs/<run-id>/gate/fix_forward_report.md` `touched_files` list
+1. Fix-forward lane (Flow 5) only: `.runs/<run-id>/gate/fix_forward_report.md` `touched_files` list
    - Stage exactly `touched_files` (plus required audit artifacts), not "everything under src/"
    - Treat any dirty path outside `touched_files` as an anomaly and stop for reconciliation
 2. `demo-swarm.config.json` layout roots (source/tests/docs/etc.)
@@ -329,7 +329,7 @@ actions_applied:
   manual_review: 0
 ```
 
-## Flow 5 (Deploy): merge / tag / release (Path A only)
+## Flow 6 (Deploy): merge / tag / release (Path A only)
 
 Read `.runs/<run-id>/gate/merge_decision.md`:
 

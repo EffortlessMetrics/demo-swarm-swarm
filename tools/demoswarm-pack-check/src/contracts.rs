@@ -379,6 +379,7 @@ pub const CLEANUP_AGENTS: &[(&str, &str)] = &[
     ("signal-cleanup", "signal_receipt.json"),
     ("plan-cleanup", "plan_receipt.json"),
     ("build-cleanup", "build_receipt.json"),
+    ("review-cleanup", "review_receipt.json"),
     ("gate-cleanup", "gate_receipt.json"),
     ("deploy-cleanup", "deploy_receipt.json"),
     ("wisdom-cleanup", "wisdom_receipt.json"),
@@ -469,7 +470,7 @@ pub const CLAUDE_MD_SECTIONS: &[&str] = &[
     ".runs/<run-id>",
     "run_meta.json",
     "index.json",
-    "Six Flows",
+    "Seven Flows",
     "Receipt",
     "secrets-sanitizer",
 ];
@@ -495,6 +496,7 @@ pub const INDEX_ALLOWED_AGENTS: &[&str] = &[
     "signal-cleanup",
     "plan-cleanup",
     "build-cleanup",
+    "review-cleanup",
     "gate-cleanup",
     "deploy-cleanup",
     "wisdom-cleanup",
@@ -541,7 +543,8 @@ pub const OPENQ_FLOW_CODES: &[&str] = &[
     "SIG", // Signal (Flow 1)
     "PLN", // Plan (Flow 2)
     "BLD", // Build (Flow 3)
-    "GAT", // Gate (Flow 4)
-    "DEP", // Deploy (Flow 5)
-    "WIS", // Wisdom (Flow 6)
+    "REV", // Review (Flow 4)
+    "GAT", // Gate (Flow 5)
+    "DEP", // Deploy (Flow 6)
+    "WIS", // Wisdom (Flow 7)
 ];

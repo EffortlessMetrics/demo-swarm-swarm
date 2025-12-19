@@ -198,8 +198,9 @@ safe_to_publish: true | false
 modified_files: true | false
 needs_upstream_fix: true | false
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
+route_to_station: <string | null>
+route_to_agent: <agent-name | null>
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
@@ -209,6 +210,12 @@ route_to_agent: <agent-name> | null
 - `modified_files` is the **reseal trigger** (if true, rerun cleanup ↔ sanitizer).
 - `needs_upstream_fix` means the sanitizer can't make it safe (code/config needs remediation).
 - `recommended_action` + `route_to_*` give you a closed-vocab routing signal.
+
+**Routing field guidance:**
+- Prefer `route_to_flow` (+ blockers) over `route_to_station`; use `route_to_station` only when the fix is literally "rerun X station".
+- For secrets in code that need remediation: set `route_to_flow: 3`, `route_to_agent: code-implementer` (known agent).
+- For secrets in artifacts that can't be auto-redacted: set `route_to_flow` to the producing flow, explain in blockers what artifact needs regeneration.
+- Never set `route_to_agent` to a station name (e.g., don't use `test-executor` or `lint-executor` as agent values).
 
 **Control plane vs audit plane:**
 
@@ -250,7 +257,8 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 - safe_to_publish: true|false
 - needs_upstream_fix: true|false
 - recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-- route_to_flow: <1-6|null>
+- route_to_flow: <1-7|null>
+- route_to_station: <string|null>
 - route_to_agent: <agent|null>
 
 ## Notes

@@ -46,7 +46,7 @@ Do **not** use "BLOCKED" as a status. If you feel "blocked", put it in `blockers
 
 Routing specificity is expressed via fields:
 
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 Route fields may be populated for **RERUN** or **BOUNCE**. For `PROCEED` and `FIX_ENV`, set both to `null`.

@@ -5,10 +5,11 @@ status: UNVERIFIED
 
 recommended_action: BOUNCE
 route_to_flow: 3
-route_to_agent: build-cleanup
+route_to_station: build-cleanup
+route_to_agent: null
 
 blockers:
-  - "RSK-014 (CRITICAL): Receipt fabrication - build_receipt.json claims 420 tests and 89.29% coverage; test_execution.md reports 294 tests and 75.12% coverage. This is a 42.8% test count inflation and 14.17 percentage-point coverage inflation."
+  - "RSK-014 (CRITICAL): Receipt fabrication - build_receipt.json claims 420 tests and 89.29% coverage; test_execution.md reports 294 tests and 75.12% coverage. Test count inflated by 126 tests (42.9% relative to actual count of 294); coverage overstated by 14.17 percentage points."
   - "RSK-015 (CRITICAL): Coverage threshold not met - actual coverage (75.12%) is 4.88% below the 80% threshold specified in test_plan.md."
 
 missing_required: []
@@ -74,7 +75,7 @@ severity_summary:
 - Evidence:
   - `.runs/compliance-drift-proofing/build/build_receipt.json` (via git show): claims 420 tests passed, 89.29% line coverage
   - `.runs/compliance-drift-proofing/build/test_execution.md` (via git show): reports 294 tests passed (253 unit + 41 integration), 75.12% line coverage (1386/1845 lines)
-  - `.runs/compliance-drift-proofing/gate/receipt_audit.md`: documents 42.8% test count inflation (420 claimed vs 294 actual)
+  - `.runs/compliance-drift-proofing/gate/receipt_audit.md`: documents test count inflation of 126 tests (42.9% relative to actual count of 294)
   - `.runs/compliance-drift-proofing/gate/coverage_audit.md`: documents 14.17% coverage inflation (89.29% claimed vs 75.12% actual)
   - Git commit bacacfe: "reseal with 89.29% coverage" - modified build_receipt.json but not test_execution.md
 - Impact:
@@ -352,13 +353,14 @@ Changes in iteration 7:
 status: UNVERIFIED
 recommended_action: BOUNCE
 route_to_flow: 3
-route_to_agent: build-cleanup
+route_to_station: build-cleanup
+route_to_agent: null
 severity_summary:
   critical: 2
   high: 1
   medium: 5
   low: 3
 blockers:
-  - "RSK-014 (CRITICAL): Receipt fabrication - 42.8% test count inflation, 14.17% coverage inflation"
+  - "RSK-014 (CRITICAL): Receipt fabrication - test count inflated by 126 (42.9% vs actual 294), coverage overstated by 14.17 ppts"
   - "RSK-015 (CRITICAL): Coverage threshold not met - 75.12% actual vs 80% required"
 missing_required: []

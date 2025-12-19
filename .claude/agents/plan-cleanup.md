@@ -44,7 +44,7 @@ Do **not** use "BLOCKED" as a status. If you feel blocked, put it in `blockers[]
 `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Routing fields:
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent-name|null>`
 
 Routing rules:
@@ -68,7 +68,6 @@ Required (missing ⇒ UNVERIFIED):
 - `work_plan.md`
 - `test_plan.md`
 - `ac_matrix.md` (AC-driven build contract for Flow 3)
-- `ac_status.json` (AC completion tracker; initialized by test-strategist)
 - `design_options.md` (required for a complete decision spine)
 - `option_critique.md` (required for options critique loop)
 - `policy_analysis.md` (policy check result file, even if it says "no policies found")
@@ -160,10 +159,8 @@ bash .claude/scripts/demoswarm.sh openapi count-paths --file ".runs/<run-id>/pla
 # Test plan entries (prefer checklist if present)
 bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/plan/test_plan.md" --regex '^- \[[ xX]\] ' --null-if-missing
 
-# AC count (from ac_matrix.md Machine Summary or ac_status.json)
+# AC count (from ac_matrix.md Machine Summary)
 bash .claude/scripts/demoswarm.sh ms get --file ".runs/<run-id>/plan/ac_matrix.md" --section "## Machine Summary" --key "ac_count" --null-if-missing
-# Fallback: from ac_status.json
-bash .claude/scripts/demoswarm.sh receipt get --file ".runs/<run-id>/plan/ac_status.json" --key "ac_count" --null-if-missing
 
 # Contract Critic issue counts (inventory markers; optional)
 bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/plan/contract_critique.md" --regex '^- CC_CRITICAL:' --null-if-missing
@@ -339,7 +336,7 @@ Derive `recommended_action` (closed enum):
   - missing `design_validation.md` ⇒ `design-critic`
   - missing `work_plan.md` ⇒ `work-planner`
   - missing `test_plan.md` ⇒ `test-strategist`
-  - missing `ac_matrix.md` or `ac_status.json` ⇒ `test-strategist`
+  - missing `ac_matrix.md` ⇒ `test-strategist`
   - missing `policy_analysis.md` ⇒ `policy-analyst`
   - missing impact artifact ⇒ `impact-analyzer`
 - If a critic requests action, default to propagating it into the receipt:
@@ -502,7 +499,6 @@ concerns: []
 | work_plan.md | ✓ Found / ⚠ Missing |
 | test_plan.md | ✓ Found / ⚠ Missing |
 | ac_matrix.md | ✓ Found / ⚠ Missing |
-| ac_status.json | ✓ Found / ⚠ Missing |
 | policy_analysis.md | ✓ Found / ⚠ Missing |
 | impact_map.json | ✓ Found / ⚠ Missing |
 | api_contracts.yaml | ✓ Found / ⚠ Missing |
@@ -520,7 +516,7 @@ concerns: []
 | Open Questions | <n|null> | grep '^- QID: OQ-PLAN-' open_questions.md |
 | Contract Endpoints | <n|null> | api_contracts.yaml (best-effort; see notes) |
 | Test Plan Entries | <n|null> | test_plan.md (marker-dependent; see notes) |
-| AC Count | <n|null> | ac_matrix.md / ac_status.json |
+| AC Count | <n|null> | ac_matrix.md |
 | Option Critic (critical) | <n|null> | option_critique.md (severity-tagged issue lines) |
 | Option Critic (major) | <n|null> | option_critique.md (severity-tagged issue lines) |
 | Option Critic (minor) | <n|null> | option_critique.md (severity-tagged issue lines) |

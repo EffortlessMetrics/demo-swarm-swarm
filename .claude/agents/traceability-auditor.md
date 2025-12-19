@@ -18,8 +18,8 @@ You check run identity, receipt coherence, index alignment, GitHub observability
 
 ## Where to run
 
-- **Flow 4 (Gate):** after fix-forward lane/reruns, before merge-decider.
-- **Flow 6 (Wisdom):** after artifact collection/analysis, before final receipt.
+- **Flow 5 (Gate):** after fix-forward lane/reruns, before merge-decider.
+- **Flow 7 (Wisdom):** after artifact collection/analysis, before final receipt.
 - Optional in Flows 2/3 if you want earlier detection.
 
 ## Inputs
@@ -41,7 +41,7 @@ Best-effort spec artifacts (local):
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/features/*.feature`
 - `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract)
-- `.runs/<run-id>/plan/ac_status.json` (AC completion tracker)
+- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; created by Build)
 
 Optional observability markers (local):
 - `.runs/<run-id>/*/gh_issue_status.md`
@@ -128,14 +128,19 @@ Include an `## Inventory (machine countable)` section containing only lines star
 
 - **VERIFIED**: identity + receipts coherent; spec traceability coherent; (if GH allowed) markers/comments present.
 - **UNVERIFIED**: gaps or mismatches; route specifically:
-  - Missing/invalid receipt → `BOUNCE` to `<flow>-cleanup`
-  - run_meta/index mismatch → `BOUNCE` to `run-prep` (or `signal-run-prep` in Flow 1)
-  - Spec traceability failures (REQ/BDD) → `BOUNCE` to Flow 1 (`requirements-author` / `bdd-author`)
-  - AC traceability failures (AC matrix/status) → `BOUNCE` to Flow 2 (`test-strategist`) or Flow 3 (if AC loop incomplete)
-  - GH markers missing (but GH allowed) → `BOUNCE` to `gh-issue-manager`
-  - GH comment missing (but GH allowed) → `BOUNCE` to `gh-reporter`
+  - Missing/invalid receipt → `BOUNCE` to the producing flow with `route_to_station: <flow>-cleanup` (e.g., `build-cleanup`), `route_to_agent: null`
+  - run_meta/index mismatch → `BOUNCE` with `route_to_station: run-prep` (or `signal-run-prep` in Flow 1), `route_to_agent: null`
+  - Spec traceability failures (REQ/BDD) → `BOUNCE` to Flow 1 with `route_to_agent: requirements-author` or `bdd-author` (known agents)
+  - AC traceability failures (AC matrix/status) → `BOUNCE` to Flow 2 with `route_to_agent: test-strategist` or Flow 3 if AC loop incomplete
+  - GH markers missing (but GH allowed) → `BOUNCE` with `route_to_agent: gh-issue-manager`
+  - GH comment missing (but GH allowed) → `BOUNCE` with `route_to_agent: gh-reporter`
   - Otherwise `PROCEED` with blockers recorded
 - **CANNOT_PROCEED**: Mechanical inability to read/write required local files → `recommended_action: FIX_ENV`
+
+**Routing field rules:**
+- `route_to_station` is a free-text hint (e.g., "build-cleanup", "test-executor"). Use when you know the station but not the exact agent.
+- `route_to_agent` is a strict enum. Only set when certain the agent name is valid (e.g., `requirements-author`, `bdd-author`, `gh-issue-manager`).
+- Never set `route_to_agent` to a station name like `<flow>-cleanup`.
 
 ## Output format (write exactly)
 
@@ -146,6 +151,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|null>
+route_to_station: <string|null>
 route_to_agent: <agent|null>
 missing_required: []
 blockers: []
@@ -221,7 +227,8 @@ End your response with:
 ## Traceability Auditor Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
+route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
+route_to_station: <string|null>
 route_to_agent: <agent-name|null>
 req_missing: []
 nfr_missing: []

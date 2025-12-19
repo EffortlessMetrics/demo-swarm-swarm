@@ -38,11 +38,11 @@ Build (Flow 3):
 - `build_receipt.json`
 - `test_critique.md`, `code_critique.md`, `self_review.md`
 
-Gate (Flow 4):
+Gate (Flow 5):
 - `merge_decision.md`
 - `receipt_audit.md`, `contract_compliance.md`, `security_scan.md`, `coverage_audit.md`
 
-Deploy (Flow 5):
+Deploy (Flow 6):
 - `deployment_decision.md`, `verification_report.md`, `deployment_log.md` (if exists)
 
 ## Coherence checks (lightweight, fail-soft)
