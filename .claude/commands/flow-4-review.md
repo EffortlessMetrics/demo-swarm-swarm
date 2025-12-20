@@ -136,6 +136,7 @@ Read from `.runs/<run-id>/run_meta.json`:
 | `review_worklist.md` | review-worklist-writer | Actionable items with stable markers |
 | `review_worklist.json` | review-worklist-writer | Machine-readable worklist |
 | `review_actions.md` | Orchestrator | Cumulative log of changes made |
+| `style_sweep.md` | Orchestrator | Style sweep result (NOOP if no pending MINOR Markdown items) |
 | `cleanup_report.md` | review-cleanup | Cleanup summary |
 | `review_receipt.json` | review-cleanup | Machine-readable receipt |
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings |
@@ -233,10 +234,11 @@ Sources:
 
 **Call `review-worklist-writer`** to convert feedback into actionable items.
 
-- Each item gets a stable `RW-NNN` ID
+- Each item gets a stable `RW-NNN` ID (except the grouped Markdown sweep uses `RW-MD-SWEEP`)
 - Items are categorized: CORRECTNESS, TESTS, STYLE, DOCS
 - Items are prioritized: CRITICAL, MAJOR, MINOR, INFO
 - Items are routed to appropriate agents
+- MINOR markdownlint/formatting nits are grouped into `RW-MD-SWEEP` (STYLE, MINOR, route_to: fixer) with files/rules/examples/scope and optional children for traceability
 
 **Route on Review Worklist Writer Result block:**
 - Proceed with the worklist regardless of status
@@ -260,40 +262,53 @@ while not terminated:
     2. If pending == 0: break (complete)
     3. If context exhausted: break (can resume later)
 
-    4. Pick next pending item (priority order: CRITICAL > MAJOR > MINOR)
+    4. Run Style Sweep station (always):
+       - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
+       - Update `RW-MD-SWEEP` status and write style_sweep.md (NOOP if no pending MINOR style items)
+       - If sweep touched `.runs/<run-id>/build/`, run build-cleanup to reseal build_receipt.json
 
-    5. Route to appropriate agent based on item.route_to:
+    5. Pick next pending item (priority order: CRITICAL > MAJOR > MINOR)
+
+    6. Route to appropriate agent based on item.route_to:
        - test-author: for TESTS items
        - code-implementer: for CORRECTNESS/ARCHITECTURE items
        - doc-writer: for DOCS items
        - fixer: for STYLE items
 
-    6. Run test-executor to verify the fix (fast confirm)
+    7. Run test-executor to verify the fix (fast confirm)
 
-    7. Update item status in review_worklist.json:
+    8. Update item status in review_worklist.json:
        - RESOLVED: if fix verified
        - PENDING: if fix failed (will retry)
        - SKIPPED: if out of scope (document reason)
 
-    8. Append to review_actions.md what was done
+    9. Append to review_actions.md what was done
 
-    9. If meaningful code changes made:
+    10. If meaningful code changes made:
        - Run build-cleanup to reseal build_receipt.json
        - Run test-executor (full suite) periodically
 
-    10. Re-harvest feedback (pr-feedback-harvester) periodically:
+    11. Re-harvest feedback (pr-feedback-harvester) periodically:
         - New CodeRabbit comments may appear after pushes
         - CI results update after commits
         - Human reviewers may add comments
 
-    11. If new feedback items found:
+    12. If new feedback items found:
         - Run review-worklist-writer to update worklist
         - New items get appended (IDs continue from last)
 ```
 
+**Style Sweep station (standard, always run):**
+- Check for a pending `RW-MD-SWEEP` or pending MINOR markdownlint items in the worklist.
+- If none: write `.runs/<run-id>/review/style_sweep.md` with `status: NOOP` and "no pending MINOR style items".
+- If present: call `fixer` with "apply all remaining MINOR Markdown formatting fixes in one pass" and `scope: mechanical formatting only`, then run `test-executor` once (pack-check), then re-harvest feedback once.
+- After re-harvest, call `review-worklist-writer` to refresh `review_worklist.json`, then append to `review_actions.md`. If noise remains, leave `RW-MD-SWEEP` PENDING (non-blocking).
+- Do not route markdownlint child items individually; resolve them via the `RW-MD-SWEEP` parent.
+- Guardrail: if the sweep touches anything under `.runs/<run-id>/build/`, call `build-cleanup` to reseal `build_receipt.json`.
+
 **Per-item fix process:**
 
-For each pending worklist item RW-NNN:
+For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
 
 1. Read the item details (category, severity, location, summary)
 2. Call the routed agent with context:
@@ -306,7 +321,7 @@ For each pending worklist item RW-NNN:
 
 **Reseal after changes:**
 
-When code/test changes are made:
+When code/test changes are made (or the Style Sweep touches `.runs/<run-id>/build/`):
 1. Stage changes (repo-operator)
 2. Run build-cleanup to update build_receipt.json
 3. Periodically run full test suite (test-executor)
@@ -458,21 +473,6 @@ MINOR and INFO items may remain pending without blocking.
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-- [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] pr-creator (create Draft PR if needed)
-- [ ] pr-feedback-harvester
-- [ ] review-worklist-writer
-- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
-- [ ] pr-commenter (post/update PR summary comment)
-- [ ] pr-status-manager (flip Draft to Ready if review complete)
-- [ ] review-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (commit/push; return Repo Operator Result)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 
 ### Station order + templates
 
@@ -518,31 +518,35 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
 2) If pending == 0: exit loop (complete)
 3) If context exhausted: exit loop (can resume later)
 
-4) Pick next pending item by priority:
+4) Run Style Sweep station (always; NOOP if no pending MINOR Markdown items):
+   - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
+   - Update `review_worklist.json`, write `style_sweep.md`, and reseal build receipt if `.runs/<run-id>/build/` is touched
+
+5) Pick next pending item by priority:
    - CRITICAL first
    - Then MAJOR
-   - Then MINOR (optional)
+   - Then MINOR (optional; exclude `RW-MD-SWEEP` children)
    - Skip INFO
 
-5) Route to agent:
+6) Route to agent:
    - TESTS items → test-author
    - CORRECTNESS items → code-implementer
    - STYLE items → fixer or lint-executor
    - DOCS items → doc-writer
    - ARCHITECTURE items → code-implementer
 
-6) Run fix agent with item context
+7) Run fix agent with item context
 
-7) Run test-executor (fast confirm: relevant tests)
+8) Run test-executor (fast confirm: relevant tests)
 
-8) Update worklist item status:
+9) Update worklist item status:
    - If fix verified: RESOLVED
    - If fix failed: keep PENDING
    - If out of scope: SKIPPED with reason
 
-9) Append to review_actions.md
+10) Append to review_actions.md
 
-10) Every N items or after major changes:
+11) Every N items or after major changes:
     - Apply Reseal → Gate → Push → Re-harvest subroutine (see Re-harvest cadence)
     - This ensures proper gating before push and captures new bot feedback
 ```
@@ -562,3 +566,22 @@ Reused from Build when needed within the worklist loop.
 4) Re-critique: call `<critic>` again
 
 Continue beyond default two passes only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
+
+### TodoWrite (copy exactly)
+- [ ] run-prep
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] pr-creator (create Draft PR if needed)
+- [ ] pr-feedback-harvester
+- [ ] review-worklist-writer
+- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
+- [ ] pr-commenter (post/update PR summary comment)
+- [ ] pr-status-manager (flip Draft to Ready if review complete)
+- [ ] review-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (commit/push; return Repo Operator Result)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
+
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
+

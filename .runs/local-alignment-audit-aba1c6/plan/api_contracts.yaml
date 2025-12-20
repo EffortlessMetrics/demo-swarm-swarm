@@ -1,0 +1,472 @@
+# CONTRACT_INVENTORY_V1
+# SCHEMA: FlowModel
+# SCHEMA: FlowCommandRegistry
+# SCHEMA: FlowVariant
+# SCHEMA: DocumentationConsistencySpec
+# SCHEMA: FlowArtifactPath
+# ENTITY: Flow
+# ENTITY: FlowCommand
+# ENTITY: DocumentationFile
+
+# DemoSwarm Documentation Alignment - Flow Model Contracts
+# Run ID: local-alignment-audit-aba1c6
+#
+# This file defines the canonical data structures that documentation must align to.
+# Since this is a documentation-only change (no API endpoints), we define schemas
+# that serve as the "contract" for what correct documentation looks like.
+
+openapi: 3.1.0
+info:
+  title: DemoSwarm Flow Model Contract
+  version: 1.0.0
+  description: |
+    Schema definitions for the DemoSwarm seven-flow SDLC model.
+    These schemas define the canonical structure that documentation must reference.
+    This is NOT an HTTP API - it's a documentation consistency contract.
+
+# No servers/paths - this is a schema-only contract for documentation alignment
+paths: {}
+
+components:
+  schemas:
+    # ============================================================
+    # Core Flow Model
+    # ============================================================
+
+    FlowModel:
+      type: object
+      description: |
+        The canonical seven-flow SDLC model.
+        Authoritative source: CLAUDE.md L13, L186-200
+      required:
+        - flow_count
+        - flows
+        - command_count
+      properties:
+        flow_count:
+          type: integer
+          const: 7
+          description: |
+            The number of distinct SDLC flows.
+            Documentation MUST say "seven flows" (not "six flows").
+        flows:
+          type: array
+          items:
+            $ref: '#/components/schemas/Flow'
+          minItems: 7
+          maxItems: 7
+        command_count:
+          type: integer
+          const: 7
+          description: |
+            Total slash command files implementing the 7 flows.
+            One command file per flow (no variant entry points).
+        pipeline_order:
+          type: string
+          const: "Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom"
+          description: Canonical flow sequence as stated in CLAUDE.md L13
+
+    Flow:
+      type: object
+      description: A single SDLC flow with its primary command and optional variants
+      required:
+        - number
+        - name
+        - primary_command
+        - artifact_dir
+      properties:
+        number:
+          type: integer
+          minimum: 1
+          maximum: 7
+        name:
+          type: string
+          enum: [Signal, Plan, Build, Review, Gate, Deploy, Wisdom]
+        primary_command:
+          type: string
+          pattern: '^/flow-[1-7]-[a-z]+$'
+          description: The primary slash command for this flow
+        variant_commands:
+          type: array
+          items:
+            type: string
+            pattern: '^/flow-[1-7]-[a-z]+$'
+          maxItems: 0
+          description: |
+            Reserved for future alternate entry points.
+            Currently empty for all flows (7 flows = 7 command files).
+        artifact_dir:
+          type: string
+          enum: [signal, plan, build, review, gate, deploy, wisdom]
+          description: |
+            Directory under .runs/<run-id>/ where flow artifacts are stored.
+            Per CLAUDE.md L96.
+        key_outputs:
+          type: array
+          items:
+            type: string
+          description: Primary artifacts produced by this flow
+
+    # ============================================================
+    # Flow Command Registry
+    # ============================================================
+
+    FlowCommandRegistry:
+      type: object
+      description: |
+        Complete registry of all 7 flow command files.
+        Source: .claude/commands/flow-*.md enumeration
+      required:
+        - commands
+        - total
+      properties:
+        total:
+          type: integer
+          const: 7
+          description: Total number of command files (one per flow)
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowCommand'
+          minItems: 7
+          maxItems: 7
+
+    FlowCommand:
+      type: object
+      description: A single flow command file
+      required:
+        - filename
+        - flow_number
+        - flow_name
+        - is_variant
+      properties:
+        filename:
+          type: string
+          pattern: '^flow-[1-7]-[a-z]+\.md$'
+        flow_number:
+          type: integer
+          minimum: 1
+          maximum: 7
+        flow_name:
+          type: string
+        is_variant:
+          type: boolean
+          description: |
+            True if this is an alternate entry point (not the primary command).
+            Currently false for all commands (no variants exist).
+        variant_purpose:
+          type: string
+          description: |
+            For variants, explains when to use this entry point.
+            Required when is_variant is true.
+
+    FlowVariant:
+      type: object
+      description: |
+        Reserved schema for future flow variant commands.
+        Currently unused - all 7 flows have exactly one command each.
+      required:
+        - flow_number
+        - primary_command
+      properties:
+        flow_number:
+          type: integer
+          minimum: 1
+          maximum: 7
+        primary_command:
+          type: string
+        variant_command:
+          type: string
+          description: Reserved for future use
+        primary_use_case:
+          type: string
+          description: When to invoke the primary command
+        variant_use_case:
+          type: string
+          description: Reserved for future use
+
+    # ============================================================
+    # Documentation Consistency Specification
+    # ============================================================
+
+    DocumentationConsistencySpec:
+      type: object
+      description: |
+        Defines what "consistent documentation" means for NFR-DOC-001.
+        Verification via grep/search for prohibited patterns.
+      required:
+        - prohibited_patterns
+        - required_patterns
+        - validation_files
+      properties:
+        prohibited_patterns:
+          type: array
+          items:
+            type: object
+            properties:
+              pattern:
+                type: string
+              reason:
+                type: string
+              replacement:
+                type: string
+          description: Patterns that MUST NOT appear in documentation
+        required_patterns:
+          type: array
+          items:
+            type: object
+            properties:
+              pattern:
+                type: string
+              files:
+                type: array
+                items:
+                  type: string
+              reason:
+                type: string
+          description: Patterns that MUST appear in specified files
+        validation_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentationFile'
+
+    DocumentationFile:
+      type: object
+      description: A documentation file subject to consistency validation
+      required:
+        - path
+        - tier
+      properties:
+        path:
+          type: string
+          description: Repo-root-relative path
+        tier:
+          type: string
+          enum: [authoritative, primary, secondary]
+          description: |
+            - authoritative: CLAUDE.md, architecture.md (update first)
+            - primary: README.md, DEMO_RUN.md, CHANGELOG.md (derive from authoritative)
+            - secondary: glossary, CONTRIBUTING, tutorials (update last or defer)
+        flow_references:
+          type: boolean
+          description: Whether this file contains flow count references
+
+    FlowArtifactPath:
+      type: object
+      description: |
+        Standard artifact paths for each flow.
+        Per CLAUDE.md L94-99 and receipts table L206-216.
+      required:
+        - flow
+        - base_path
+        - receipt_file
+      properties:
+        flow:
+          type: string
+          enum: [signal, plan, build, review, gate, deploy, wisdom]
+        base_path:
+          type: string
+          pattern: '^\\.runs/<run-id>/[a-z]+/$'
+          description: Pattern for flow artifact directory
+        receipt_file:
+          type: string
+          pattern: '^[a-z]+_receipt\\.json$'
+        key_artifacts:
+          type: array
+          items:
+            type: string
+
+# ============================================================
+# Canonical Data Instances
+# ============================================================
+# The following section defines the ACTUAL values that documentation must align to.
+# This is the "single source of truth" for documentation validation.
+
+x-canonical-flow-model:
+  flow_count: 7
+  command_count: 7
+  pipeline_order: "Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom"
+  flows:
+    - number: 1
+      name: Signal
+      primary_command: /flow-1-signal
+      variant_commands: []
+      artifact_dir: signal
+      key_outputs:
+        - requirements.md
+        - features/*.feature
+        - verification_notes.md
+        - early_risks.md
+        - signal_receipt.json
+
+    - number: 2
+      name: Plan
+      primary_command: /flow-2-plan
+      variant_commands: []
+      artifact_dir: plan
+      key_outputs:
+        - adr.md
+        - api_contracts.yaml
+        - observability_spec.md
+        - test_plan.md
+        - ac_matrix.md
+        - work_plan.md
+        - plan_receipt.json
+
+    - number: 3
+      name: Build
+      primary_command: /flow-3-build
+      variant_commands: []
+      artifact_dir: build
+      key_outputs:
+        - code/tests (project-defined locations)
+        - critiques
+        - ac_status.json
+        - build_receipt.json
+        - Draft PR
+
+    - number: 4
+      name: Review
+      primary_command: /flow-4-review
+      variant_commands: []
+      artifact_dir: review
+      key_outputs:
+        - pr_feedback.md
+        - review_worklist.md
+        - review_actions.md
+        - review_receipt.json
+
+    - number: 5
+      name: Gate
+      primary_command: /flow-5-gate
+      variant_commands: []
+      artifact_dir: gate
+      key_outputs:
+        - merge_decision.md
+        - gate_receipt.json
+
+    - number: 6
+      name: Deploy
+      primary_command: /flow-6-deploy
+      variant_commands: []
+      artifact_dir: deploy
+      key_outputs:
+        - deployment_log.md
+        - verification_report.md
+        - deployment_decision.md
+        - deploy_receipt.json
+
+    - number: 7
+      name: Wisdom
+      primary_command: /flow-7-wisdom
+      variant_commands: []
+      artifact_dir: wisdom
+      key_outputs:
+        - learnings.md
+        - feedback_actions.md
+        - wisdom_receipt.json
+
+x-canonical-command-registry:
+  total: 7
+  commands:
+    - filename: flow-1-signal.md
+      flow_number: 1
+      flow_name: Signal
+      is_variant: false
+
+    - filename: flow-2-plan.md
+      flow_number: 2
+      flow_name: Plan
+      is_variant: false
+
+    - filename: flow-3-build.md
+      flow_number: 3
+      flow_name: Build
+      is_variant: false
+
+    - filename: flow-4-review.md
+      flow_number: 4
+      flow_name: Review
+      is_variant: false
+
+    - filename: flow-5-gate.md
+      flow_number: 5
+      flow_name: Gate
+      is_variant: false
+
+    - filename: flow-6-deploy.md
+      flow_number: 6
+      flow_name: Deploy
+      is_variant: false
+
+    - filename: flow-7-wisdom.md
+      flow_number: 7
+      flow_name: Wisdom
+      is_variant: false
+
+x-flow-variant-semantics:
+  description: |
+    Reserved for future multi-path design.
+    Currently all 7 flows have exactly one command each.
+    No variant commands exist at this time.
+  variants: []
+
+x-documentation-consistency-spec:
+  prohibited_patterns:
+    - pattern: "six flows"
+      reason: "Stale; canonical model has 7 flows per CLAUDE.md L13"
+      replacement: "seven flows"
+    - pattern: "6 flows"
+      reason: "Stale; canonical model has 7 flows"
+      replacement: "7 flows"
+    - pattern: "Six Flows"
+      reason: "Stale; title case variant"
+      replacement: "Seven Flows"
+
+  required_patterns:
+    - pattern: "seven flows"
+      files:
+        - README.md
+        - DEMO_RUN.md
+        - docs/explanation/architecture.md
+      reason: "REQ-001: All public docs must say 'seven flows'"
+
+    - pattern: "Signal.*Plan.*Build.*Review.*Gate.*Deploy.*Wisdom"
+      files:
+        - CLAUDE.md
+        - README.md
+      reason: "Complete 7-flow pipeline enumeration"
+
+  validation_files:
+    # Tier 1: Authoritative (Phase 1)
+    - path: CLAUDE.md
+      tier: authoritative
+      flow_references: true
+    - path: docs/explanation/architecture.md
+      tier: authoritative
+      flow_references: true
+
+    # Tier 2: Primary (Phase 2)
+    - path: README.md
+      tier: primary
+      flow_references: true
+    - path: DEMO_RUN.md
+      tier: primary
+      flow_references: true
+    - path: CHANGELOG.md
+      tier: primary
+      flow_references: true
+
+    # Tier 3: Secondary (Phase 3, optional)
+    - path: docs/reference/glossary.md
+      tier: secondary
+      flow_references: false  # To be verified
+    - path: CONTRIBUTING.md
+      tier: secondary
+      flow_references: false
+    - path: docs/how-to/work-without-github.md
+      tier: secondary
+      flow_references: false
+    - path: docs/tutorials/walkthrough.md
+      tier: secondary
+      flow_references: false

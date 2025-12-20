@@ -438,24 +438,6 @@ Human-review-only cases use `reason: NEEDS_HUMAN_REVIEW` instead of a separate h
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-- [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] receipt-checker
-- [ ] contract-enforcer / security-scanner / coverage-enforcer (parallel)
-- [ ] gate-fixer (report + fix-forward plan)
-- [ ] fix-forward-runner (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via rerun `receipt-checker` + `gate-fixer`)
-- [ ] traceability-auditor
-- [ ] risk-analyst
-- [ ] policy-analyst
-- [ ] merge-decider
-- [ ] gate-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] gate-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (checkpoint; allowlist interlock + no-op handling)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-
 ### Station order + templates
 
 #### Station order
@@ -508,3 +490,24 @@ Do not treat fix-forward as "run runner, rerun runner". It is a bounded subrouti
    - call the routed agent once (`test-author` / `code-implementer` / `fixer`)
 3) Confirm once: rerun the producer one time to verify the top items moved.
 4) If still UNVERIFIED, proceed with blockers unless the producer says another pass will help and the fix lane can actually address it.
+
+### TodoWrite (copy exactly)
+- [ ] run-prep
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] receipt-checker
+- [ ] contract-enforcer / security-scanner / coverage-enforcer (parallel)
+- [ ] gate-fixer (report + fix-forward plan)
+- [ ] fix-forward-runner (if eligible; execute `FIX_FORWARD_PLAN_V1`; confirm via rerun `receipt-checker` + `gate-fixer`)
+- [ ] traceability-auditor
+- [ ] risk-analyst
+- [ ] policy-analyst
+- [ ] merge-decider
+- [ ] gate-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] gate-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; allowlist interlock + no-op handling)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

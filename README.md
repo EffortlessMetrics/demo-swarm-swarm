@@ -1,6 +1,6 @@
 # DemoSwarm
 
-> SDLC pack for Claude Code: Signal -> Plan -> Build -> Gate -> Deploy -> Wisdom  
+> SDLC pack for Claude Code: Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom  
 > Produces inspectable artifacts under `.runs/<run-id>/` and routes via returned result blocks.
 
 **Important:** Run DemoSwarm in a dedicated swarm clone. It creates `run/<run-id>` branches and commits `.runs/` artifacts as an audit trail. Flow 5 promotes to the swarm mainline. Open PRs back to your upstream repo when ready.
@@ -64,15 +64,16 @@ Use a dedicated `<repo>-swarm` clone (the pack creates `run/<run-id>` branches a
 
 ## Core concepts
 
-### The six flows
+### The seven flows
 | Flow | Command | Input -> Output |
 | :--- | :--- | :--- |
 | 1. Signal | `/flow-1-signal` | Intent -> requirements, BDD, risks, receipt |
 | 2. Plan | `/flow-2-plan` | Spec -> ADR, contracts, observability, plans, receipt |
 | 3. Build | `/flow-3-build` | Design -> code/tests + build receipt |
-| 4. Gate | `/flow-4-gate` | Code -> verdict (**MERGE/BOUNCE**) + gate receipt |
-| 5. Deploy | `/flow-5-deploy` | Verdict -> promote to swarm mainline (or NOT_DEPLOYED) + deploy receipt |
-| 6. Wisdom | `/flow-6-wisdom` | Run history -> regressions, learnings, feedback + terminal receipt |
+| 4. Review | `/flow-4-review` | Draft PR -> PR feedback, worklist, receipt |
+| 5. Gate | `/flow-5-gate` | Review -> verdict (**MERGE/BOUNCE**) + gate receipt |
+| 6. Deploy | `/flow-6-deploy` | Verdict -> promote to swarm mainline (or NOT_DEPLOYED) + deploy receipt |
+| 7. Wisdom | `/flow-7-wisdom` | Run history -> regressions, learnings, feedback + terminal receipt |
 
 ### The "sealed station" pattern
 Agents do not pass context via chat history (which drifts). They pass context via artifacts.

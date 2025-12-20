@@ -358,6 +358,23 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 
 ## Orchestrator Kickoff
 
+### Station order
+
+#### Station order
+
+- `run-prep`
+- `repo-operator` (ensure run branch)
+- `repo-operator` (merge + tag + release; only if Gate verdict MERGE)
+- `deploy-monitor` (only if Gate verdict MERGE)
+- `smoke-verifier` (only if Gate verdict MERGE)
+- `deploy-decider`
+- `deploy-cleanup`
+- `secrets-sanitizer`
+- `deploy-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+- `repo-operator` (checkpoint; read Repo Operator Result)
+- `gh-issue-manager` (if allowed)
+- `gh-reporter` (if allowed)
+
 ### TodoWrite (copy exactly)
 
 ```
@@ -375,19 +392,4 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 ```
 
-### Station order
-
-#### Station order
-
-- `run-prep`
-- `repo-operator` (ensure run branch)
-- `repo-operator` (merge + tag + release; only if Gate verdict MERGE)
-- `deploy-monitor` (only if Gate verdict MERGE)
-- `smoke-verifier` (only if Gate verdict MERGE)
-- `deploy-decider`
-- `deploy-cleanup`
-- `secrets-sanitizer`
-- `deploy-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
-- `repo-operator` (checkpoint; read Repo Operator Result)
-- `gh-issue-manager` (if allowed)
-- `gh-reporter` (if allowed)
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

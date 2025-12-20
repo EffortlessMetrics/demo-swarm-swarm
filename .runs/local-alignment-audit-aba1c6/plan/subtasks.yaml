@@ -1,0 +1,211 @@
+schema_version: subtasks_v1
+subtasks:
+  - id: ST-001
+    title: "Update CLAUDE.md flow table to seven flows with variants"
+    status: TODO
+    depends_on: []
+    req_ids: ["REQ-004"]
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "CLAUDE.md flow table lists all seven flows (Signal, Plan, Build, Review, Gate, Deploy, Wisdom)"
+      - "Flow table includes variant commands (flow-4-review, flow-5-gate, flow-6-deploy, flow-7-wisdom) with brief descriptions"
+      - "Flow table numbering is consistent with '7 flows' statement in CLAUDE.md L13"
+      - "Each variant has a brief description of its use case"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["CLAUDE.md"]
+      allow_new_files_under: []
+    touches: ["CLAUDE.md"]
+    tests: ["grep 'seven flows' CLAUDE.md returns match", "pack-check passes"]
+    observability: []
+    estimate: S
+
+  - id: ST-002
+    title: "Document flow overlap semantics and Flow 7 purpose in architecture.md"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-002", "REQ-003"]
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "Explains relationship between /flow-4-gate and /flow-4-review (different entry points into review/gate cycle)"
+      - "Explains relationship between /flow-5-gate and /flow-5-deploy (gate verdict re-entry vs deployment execution)"
+      - "Explains relationship between /flow-6-deploy and /flow-6-wisdom (deploy-after-gate vs wisdom extraction paths)"
+      - "Provides guidance on when to use each variant"
+      - "Flow 7 purpose documented as second-cycle wisdom extraction for multi-iteration runs"
+      - "Documentation explains how /flow-7-wisdom differs from /flow-6-wisdom"
+      - "Section header updated from 'six flows' to 'seven flows'"
+      - "Flow enumeration updated to include all seven flows"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/explanation/architecture.md"]
+      allow_new_files_under: []
+    touches: ["docs/explanation/architecture.md"]
+    tests: ["grep 'six flows' docs/explanation/architecture.md returns zero matches", "grep 'seven flows' docs/explanation/architecture.md returns match"]
+    observability: []
+    estimate: M
+
+  - id: ST-003
+    title: "Update security posture and test count documentation"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-005", "REQ-006"]
+    nfr_ids: ["NFR-SEC-001"]
+    acceptance_criteria:
+      - "Documentation states Rust regex crate is immune to ReDoS (finite automata implementation)"
+      - "Documentation notes path traversal as known limitation in secrets scanner"
+      - "Security claims reference code evidence (secrets.rs, Rust regex crate)"
+      - "Documentation does not claim ReDoS vulnerability in secrets scanner"
+      - "Documentation references 102 unit tests passing as current test count"
+      - "Documentation explains 277 filtered tests (integration tests)"
+      - "Test count claims include source artifact reference"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/explanation/architecture.md"]
+      allow_new_files_under: []
+    touches: ["docs/explanation/architecture.md"]
+    tests: ["grep 'ReDoS' docs/explanation/architecture.md shows immunity claim", "grep '102' docs/explanation/architecture.md returns match"]
+    observability: []
+    estimate: S
+
+  - id: ST-004
+    title: "Clarify agent color coding purpose"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-007"]
+    nfr_ids: []
+    acceptance_criteria:
+      - "Documentation acknowledges agent frontmatter includes color: field"
+      - "Documentation clarifies color coding is advisory (human consumption)"
+      - "Example agent frontmatter in documentation includes color: field"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/explanation/architecture.md", "CLAUDE.md"]
+      allow_new_files_under: []
+    touches: ["docs/explanation/architecture.md"]
+    tests: ["grep 'color:' docs/explanation/architecture.md returns match"]
+    observability: []
+    estimate: S
+
+  - id: ST-005
+    title: "Update README.md flow count references"
+    status: TODO
+    depends_on: ["ST-001", "ST-002"]
+    req_ids: ["REQ-001"]
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "README.md section header updated from 'six flows' to 'seven flows'"
+      - "README.md body text references 'seven flows'"
+      - "No remaining occurrences of 'six flows' in README.md"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["README.md"]
+      allow_new_files_under: []
+    touches: ["README.md"]
+    tests: ["grep 'six flows' README.md returns zero matches", "grep 'seven flows' README.md returns match"]
+    observability: []
+    estimate: S
+
+  - id: ST-006
+    title: "Update DEMO_RUN.md flow count references"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-001"]
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "DEMO_RUN.md references 'seven flows' instead of 'six flows'"
+      - "Flow enumeration includes Signal through Wisdom"
+      - "No remaining occurrences of 'six flows' in DEMO_RUN.md"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["DEMO_RUN.md"]
+      allow_new_files_under: []
+    touches: ["DEMO_RUN.md"]
+    tests: ["grep 'six flows' DEMO_RUN.md returns zero matches"]
+    observability: []
+    estimate: S
+
+  - id: ST-007
+    title: "Annotate CHANGELOG.md v1.0.0 entry"
+    status: TODO
+    depends_on: ["ST-001"]
+    req_ids: ["REQ-001"]
+    nfr_ids: []
+    acceptance_criteria:
+      - "CHANGELOG.md v1.0.0 entry annotated to clarify 10 command files implementing 7 flows"
+      - "Historical accuracy preserved (v1.0.0 did ship with 6 commands initially)"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["CHANGELOG.md"]
+      allow_new_files_under: []
+    touches: ["CHANGELOG.md"]
+    tests: ["grep 'seven flows' CHANGELOG.md returns match or annotation explains evolution"]
+    observability: []
+    estimate: S
+
+  - id: ST-008
+    title: "Update secondary documentation (glossary, CONTRIBUTING, work-without-github)"
+    status: TODO
+    depends_on: ["ST-005", "ST-006"]
+    req_ids: []
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "docs/reference/glossary.md updated from '6 flows' to '7 flows'"
+      - "CONTRIBUTING.md updated from '6 flows' to '7 flows'"
+      - "docs/how-to/work-without-github.md updated from '6 flows' to '7 flows'"
+      - "No remaining occurrences of '6 flows' in secondary documentation"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: ["docs/reference/glossary.md", "CONTRIBUTING.md", "docs/how-to/work-without-github.md"]
+      allow_new_files_under: []
+    touches: ["docs/reference/glossary.md", "CONTRIBUTING.md", "docs/how-to/work-without-github.md"]
+    tests: ["grep '6 flows' docs/reference/glossary.md returns zero matches", "grep '6 flows' CONTRIBUTING.md returns zero matches"]
+    observability: []
+    estimate: S
+
+  - id: ST-009
+    title: "Verify pack-check passes and update test fixtures if needed"
+    status: TODO
+    depends_on: ["ST-001", "ST-002", "ST-005", "ST-006", "ST-007"]
+    req_ids: []
+    nfr_ids: ["NFR-TRACE-001"]
+    acceptance_criteria:
+      - "pack-check validation passes after all documentation updates"
+      - "If pack-check fails on 'Six Flows' string in structure.rs, update test fixtures"
+      - "wisdom.rs checks continue to pass"
+    scope_hints:
+      code_roots: ["tools/demoswarm-pack-check/src/checks/"]
+      test_roots: ["tools/demoswarm-pack-check/src/checks/"]
+      doc_paths: []
+      allow_new_files_under: []
+    touches: ["tools/demoswarm-pack-check/src/checks/structure.rs"]
+    tests: ["bash .claude/scripts/pack-check.sh --no-color exits 0"]
+    observability: []
+    estimate: S
+
+  - id: ST-010
+    title: "Final verification - grep 'six flows' returns zero matches"
+    status: TODO
+    depends_on: ["ST-005", "ST-006", "ST-007", "ST-008", "ST-009"]
+    req_ids: ["REQ-001"]
+    nfr_ids: ["NFR-DOC-001"]
+    acceptance_criteria:
+      - "grep 'six flows' across README.md, DEMO_RUN.md, docs/explanation/architecture.md returns zero matches"
+      - "All public documentation agrees on flow count (seven flows)"
+      - "pack-check passes"
+    scope_hints:
+      code_roots: []
+      test_roots: []
+      doc_paths: []
+      allow_new_files_under: []
+    touches: []
+    tests: ["grep -r 'six flows' README.md DEMO_RUN.md docs/explanation/architecture.md returns zero matches", "pack-check exits 0"]
+    observability: []
+    estimate: S

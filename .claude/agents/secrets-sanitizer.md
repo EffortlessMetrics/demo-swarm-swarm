@@ -68,10 +68,10 @@ That is `needs_upstream_fix: true` + `safe_to_publish: false` (routing, not mech
 - `safe_to_publish`: whether it is safe to push/post to GitHub
 
 Typical outcomes:
-- CLEAN → `safe_to_commit: true`, `safe_to_publish: true`
-- FIXED (artifact redaction only) → typically both true
-- FIXED (requires upstream fix) → `safe_to_commit` may be true, but `safe_to_publish: false` and `needs_upstream_fix: true`
-- BLOCKED_PUBLISH → both false
+- CLEAN -> `safe_to_commit: true`, `safe_to_publish: true`
+- FIXED (artifact redaction only) -> typically both true
+- FIXED (requires upstream fix) -> `safe_to_commit` may be true, but `safe_to_publish: false` and `needs_upstream_fix: true`
+- BLOCKED_PUBLISH -> both false
 
 ## Step 1: Build the scan file list (do not leak secrets)
 
@@ -207,7 +207,7 @@ route_to_agent: <agent-name | null>
 **Field semantics:**
 - `status` is **descriptive** (what happened). **Never infer permissions** from it.
 - `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
-- `modified_files` is the **reseal trigger** (if true, rerun cleanup ↔ sanitizer).
+- `modified_files` is the **reseal trigger** (if true, rerun cleanup <-> sanitizer).
 - `needs_upstream_fix` means the sanitizer can't make it safe (code/config needs remediation).
 - `recommended_action` + `route_to_*` give you a closed-vocab routing signal.
 
@@ -237,19 +237,24 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 - Notes: <skipped binaries/large files, if any>
 
 ## Findings (redacted)
+
 | # | Type | File | Line | Action |
 |---|------|------|------|--------|
 | 1 | github-token | .runs/<run-id>/<flow>/github_research.md | 42 | redacted |
 | 2 | password | src/config.ts | 15 | needs_upstream_fix (unstaged) |
 
 ## Actions Taken
+
 ### Redacted
-- <file:line> → `[REDACTED:<type>]`
+
+- <file:line> -> `[REDACTED:<type>]`
 
 ### Externalized
-- <file:line> → env var `<NAME>` (no value recorded)
+
+- <file:line> -> env var `<NAME>` (no value recorded)
 
 ### Unstaged
+
 - <file> (reason: cannot safely externalize automatically)
 
 ## Safety Flags
@@ -268,8 +273,9 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 ## Reseal convention
 
 If you changed any allowlist artifacts (redaction), set `modified_files: true`.
-The orchestrator will rerun `(<flow>-cleanup ↔ secrets-sanitizer)` until `modified_files: false` so receipts reflect the final redacted state.
+The orchestrator will rerun `(<flow>-cleanup <-> secrets-sanitizer)` until `modified_files: false` so receipts reflect the final redacted state.
 
 ## Philosophy
 
 A swarm that leaks secrets can't be trusted. Be conservative, fix what's safe, and when you can't safely repair code/config, route upstream without guessing.
+

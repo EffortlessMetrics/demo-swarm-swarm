@@ -8,7 +8,7 @@
 
 The DemoSwarm pack is a **Claude Code definition layer**:
 
-- 6 flows exposed as slash commands
+- 7 flows exposed as slash commands
 - 50+ agents as subagents
 - 7 skills as mechanical helpers
 - Validation via pack-check
@@ -59,18 +59,46 @@ Why: Orchestrators route on control plane (fast, deterministic); humans inspect 
 
 ---
 
-## The six flows
+## The seven flows
 
 | Flow | Input | Output | Purpose |
 |------|-------|--------|---------|
 | 1. Signal | Raw request | Requirements, BDD, risks | Shape the work |
 | 2. Plan | Signal outputs | ADR, contracts, plans | Design the solution |
 | 3. Build | Plan outputs | Code, tests, reviews | Implement with tests |
-| 4. Gate | Build outputs | Merge decision | Pre-merge verification |
-| 5. Deploy | Gate outputs | Verification, deployment | Release and verify |
-| 6. Wisdom | All outputs | Learnings, regressions | Close feedback loops |
+| 4. Review | Build outputs + Draft PR | PR feedback, worklist | Harvest PR feedback |
+| 5. Gate | Review outputs | Merge decision | Pre-merge verification |
+| 6. Deploy | Gate outputs | Verification, deployment | Release to mainline |
+| 7. Wisdom | All outputs | Learnings, regressions | Close feedback loops |
 
 Flows can run out-of-order; missing inputs result in documented assumptions and UNVERIFIED outcomes.
+
+### Flow commands
+
+Each flow has exactly one slash command:
+
+| Command | Flow | Purpose |
+|---------|------|---------|
+| `/flow-1-signal` | Signal | Shape raw request into requirements |
+| `/flow-2-plan` | Plan | Design the solution |
+| `/flow-3-build` | Build | Implement code and tests |
+| `/flow-4-review` | Review | Harvest PR feedback |
+| `/flow-5-gate` | Gate | Pre-merge verification |
+| `/flow-6-deploy` | Deploy | Merge to mainline |
+| `/flow-7-wisdom` | Wisdom | Extract learnings |
+
+The recommended sequence is: `/flow-1-signal` → `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
+
+**Re-entry:** Any flow can be invoked at any point. Missing upstream artifacts result in documented assumptions and UNVERIFIED outcomes (see "out-of-order" note above).
+
+### Flow 7: Second-cycle wisdom
+
+Flow 7 (`/flow-7-wisdom`) is for **second-cycle wisdom extraction**. Use it when:
+- Multiple runs have completed and you want to synthesize cross-run learnings.
+- An iteration has finished and you want to extract batch insights.
+- You've already run `/flow-6-deploy` and want a deeper retrospective.
+
+Flow 7 differs from the wisdom extraction in Flow 6 in that it's designed for **post-cycle reflection** rather than immediate run closure.
 
 ---
 
@@ -117,6 +145,48 @@ When reseal doesn't converge:
 - Flow completes UNVERIFIED with evidence
 
 Why: Prefer local completion over stuck or exposed state.
+
+---
+
+## Security posture
+
+### Regex safety
+
+The secrets scanner uses the **Rust regex crate**, which implements finite automata (not backtracking). This makes it immune to ReDoS (Regular Expression Denial of Service) attacks. The regex engine has guaranteed linear time complexity relative to input size.
+
+Reference: `tools/demoswarm-runs-tools/src/commands/secrets.rs` uses the `regex` crate.
+
+### Known limitations
+
+**Path traversal in secrets scanner**: The secrets scanner operates on provided paths without full canonicalization. This is a known limitation in the local execution context. Mitigation: The scanner runs within Claude Code sessions where filesystem access is already scoped. A formal threat assessment for production deployments is recommended.
+
+---
+
+## Test status
+
+Test counts are **receipt-derived** (mechanical, from actual execution). Current baseline:
+- Unit tests: derived from `cargo test --workspace` execution
+- Test counts should be read from `test_summary.md` or receipt artifacts, not hard-coded in documentation
+
+This ensures documentation stays aligned with actual test results.
+
+---
+
+## Agent metadata
+
+### Color coding
+
+Agent frontmatter includes a `color:` field for categorization:
+
+```yaml
+---
+name: requirements-author
+description: Write functional + non-functional requirements
+color: purple
+---
+```
+
+Color coding is **advisory metadata** for human consumption and tooling visualization. It is not schema-enforced or used for routing decisions. The taxonomy table above shows color conventions by agent family.
 
 ---
 

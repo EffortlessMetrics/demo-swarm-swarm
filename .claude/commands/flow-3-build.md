@@ -615,31 +615,6 @@ Code/test changes in project-defined locations.
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-- [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] context-loader
-- [ ] clarifier
-- [ ] test-strategist (if ac_matrix.md missing)
-- [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
-- [ ] lint-executor (global)
-- [ ] test-executor (full suite; global)
-- [ ] flakiness-detector (if failures)
-- [ ] mutation-auditor
-- [ ] fuzz-triager (if configured)
-- [ ] fixer (only if critiques/worklists require it)
-- [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
-- [ ] self-reviewer
-- [ ] build-cleanup
-- [ ] repo-operator (stage intended changes; project-defined)
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (restage intended changes; if reseal occurred)
-- [ ] repo-operator (commit/push; return Repo Operator Result)
-- [ ] pr-creator (create Draft PR; gated on publish_surface: PUSHED)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-
 ### Station order + templates
 
 #### Station order
@@ -771,3 +746,30 @@ If `build/ac_status.json` exists (rerun):
    - call the routed agent once (`test-author` / `code-implementer` / `fixer`)
 3) Confirm once: rerun the producer one time to verify the top items moved.
 4) If still UNVERIFIED, proceed with blockers unless the producer says another pass will help and the fix lane can actually address it.
+
+### TodoWrite (copy exactly)
+- [ ] run-prep
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] context-loader
+- [ ] clarifier
+- [ ] test-strategist (if ac_matrix.md missing)
+- [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
+- [ ] lint-executor (global)
+- [ ] test-executor (full suite; global)
+- [ ] flakiness-detector (if failures)
+- [ ] mutation-auditor
+- [ ] fuzz-triager (if configured)
+- [ ] fixer (only if critiques/worklists require it)
+- [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
+- [ ] self-reviewer
+- [ ] build-cleanup
+- [ ] repo-operator (stage intended changes; project-defined)
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (restage intended changes; if reseal occurred)
+- [ ] repo-operator (commit/push; return Repo Operator Result)
+- [ ] pr-creator (create Draft PR; gated on publish_surface: PUSHED)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
