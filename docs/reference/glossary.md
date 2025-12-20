@@ -5,13 +5,14 @@
 ## Core Concepts
 
 ### Flow
-A sequence of agent invocations that transforms inputs into outputs. The swarm has 6 flows:
+A sequence of agent invocations that transforms inputs into outputs. The swarm has 7 flows:
 - **Flow 1 (Signal)**: Raw input → problem statement, requirements, BDD, scope/risks
 - **Flow 2 (Plan)**: Specs → options, ADR, contracts, observability, test/work plans
 - **Flow 3 (Build)**: Plans → tests, code, reviews, build receipt
-- **Flow 4 (Gate)**: Build output → audits, policy/security/coverage checks, merge decision
-- **Flow 5 (Deploy)**: Gate-approved work → release verification + deploy receipt
-- **Flow 6 (Wisdom)**: Outcomes → regressions, learnings, feedback actions, final receipt
+- **Flow 4 (Review)**: Build output + Draft PR → PR feedback, worklist, review receipt
+- **Flow 5 (Gate)**: Review output → audits, policy/security/coverage checks, merge decision
+- **Flow 6 (Deploy)**: Gate-approved work → release verification + deploy receipt
+- **Flow 7 (Wisdom)**: Outcomes → regressions, learnings, feedback actions, final receipt
 
 ### Step (Station)
 A discrete unit of work within a flow. Steps invoke one or more agents and produce specific artifacts. In this pack, steps are "stations" tracked in TodoWrite and `flow_plan.md`.
@@ -137,7 +138,7 @@ Closed enum (pack-wide):
 `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
 Specific routing uses:
-- `route_to_flow: 1|2|3|4|5|6|null`
+- `route_to_flow: 1|2|3|4|5|6|7|null`
 - `route_to_agent: <agent|null>`
 
 ### can_further_iteration_help

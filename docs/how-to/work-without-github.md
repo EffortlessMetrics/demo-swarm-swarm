@@ -12,7 +12,7 @@
 
 Everything local:
 
-- All 6 flows execute normally
+- All 7 flows execute normally
 - Artifacts written to `.runs/<run-id>/`
 - Receipts computed and written
 - Local Git commits (checkpoint + build)

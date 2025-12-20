@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 #### Pack Structure
 - **50+ agents** across 8 role families (see `.claude/agents/` for current count)
-- **6 flow commands**: `/flow-1-signal` through `/flow-6-wisdom`
+- **7 flow commands**: `/flow-1-signal` through `/flow-7-wisdom` (Signal, Plan, Build, Review, Gate, Deploy, Wisdom)
 - **7 skills**: test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 - **Pack customizer**: `/customize-pack` for adapting to target stack
 

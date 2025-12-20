@@ -11,7 +11,7 @@ This stub exists so that top-level discovery finds the demo walkthrough. The can
 A walkthrough for demonstrating the swarm pack in action. Covers:
 
 1. Setup (copy pack, open in Claude Code)
-2. Run all six flows with commentary
+2. Run all seven flows with commentary
 3. Show artifacts and receipts
 4. Troubleshooting common issues
 
