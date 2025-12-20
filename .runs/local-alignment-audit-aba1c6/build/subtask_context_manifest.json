@@ -1,0 +1,249 @@
+{
+  "manifest_version": 2,
+  "run_id": "local-alignment-audit-aba1c6",
+  "generated_at": null,
+
+  "machine_summary": {
+    "status": "VERIFIED",
+    "recommended_action": "PROCEED",
+    "route_to_flow": null,
+    "route_to_agent": null,
+    "blockers": [],
+    "missing_required": [],
+    "concerns": [
+      "Phase 3 (secondary docs) and Phase 4 (pack-check fixtures) may be deferred per ADR OPT-003",
+      "All subtasks have status: TODO; no selection filter applied - manifest covers full build scope"
+    ]
+  },
+
+  "subtask": {
+    "selector": "auto",
+    "resolution_source": "subtask_index_auto",
+    "id": "ST-001",
+    "title": "Update CLAUDE.md flow table to seven flows with variants",
+    "status": "TODO",
+    "scope_summary": "Update CLAUDE.md flow table (currently 6 rows at L186-196) to list all 7 flows with variant commands, aligning with the '7 flows' statement at L13. First subtask in layered approach per ADR OPT-003.",
+    "acceptance_criteria": [
+      "CLAUDE.md flow table lists all seven flows (Signal, Plan, Build, Review, Gate, Deploy, Wisdom)",
+      "Flow table includes variant commands (flow-4-review, flow-5-gate, flow-6-deploy, flow-7-wisdom) with brief descriptions",
+      "Flow table numbering is consistent with '7 flows' statement in CLAUDE.md L13",
+      "Each variant has a brief description of its use case"
+    ],
+    "depends_on": [],
+    "touches": ["CLAUDE.md"],
+    "planned_tests": ["grep 'seven flows' CLAUDE.md returns match", "pack-check passes"],
+    "planned_observability": [],
+    "estimate": "S"
+  },
+
+  "requirements": {
+    "req_ids": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+    "nfr_ids": ["NFR-DOC-001", "NFR-SEC-001", "NFR-TRACE-001"]
+  },
+
+  "inputs_read": [
+    ".runs/local-alignment-audit-aba1c6/plan/subtasks.yaml",
+    ".runs/local-alignment-audit-aba1c6/plan/work_plan.md",
+    ".runs/local-alignment-audit-aba1c6/plan/adr.md",
+    ".runs/local-alignment-audit-aba1c6/plan/ac_matrix.md",
+    ".runs/local-alignment-audit-aba1c6/plan/test_plan.md",
+    ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
+    ".runs/local-alignment-audit-aba1c6/signal/requirements.md",
+    ".runs/local-alignment-audit-aba1c6/signal/features/flow_count_alignment.feature"
+  ],
+
+  "paths": {
+    "specs": [
+      ".runs/local-alignment-audit-aba1c6/plan/adr.md",
+      ".runs/local-alignment-audit-aba1c6/plan/work_plan.md",
+      ".runs/local-alignment-audit-aba1c6/plan/subtasks.yaml",
+      ".runs/local-alignment-audit-aba1c6/plan/ac_matrix.md",
+      ".runs/local-alignment-audit-aba1c6/plan/test_plan.md",
+      ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
+      ".runs/local-alignment-audit-aba1c6/signal/requirements.md",
+      ".runs/local-alignment-audit-aba1c6/signal/features/flow_count_alignment.feature",
+      ".runs/local-alignment-audit-aba1c6/signal/features/flow_overlap_documentation.feature",
+      ".runs/local-alignment-audit-aba1c6/signal/features/security_posture_documentation.feature",
+      ".runs/local-alignment-audit-aba1c6/signal/features/test_count_documentation.feature",
+      ".runs/local-alignment-audit-aba1c6/signal/features/agent_color_coding.feature"
+    ],
+    "code": [],
+    "tests": [],
+    "docs": [
+      "CLAUDE.md",
+      "README.md",
+      "DEMO_RUN.md",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "docs/explanation/architecture.md",
+      "docs/reference/glossary.md",
+      "docs/how-to/work-without-github.md"
+    ],
+    "allow_new_files_under": []
+  },
+
+  "unresolved_patterns": [],
+
+  "rationale": [
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/adr.md",
+      "type": "spec",
+      "reason": "ADR defines chosen approach (OPT-003 Layered) with 4 phases: authoritative sources first, then primary/secondary docs",
+      "signals": ["OPT-003", "seven-flow model", "layered approach"],
+      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/work_plan.md",
+      "type": "spec",
+      "reason": "Work plan defines 10 subtasks (ST-001 through ST-010) with dependency graph and rollout phases",
+      "signals": ["subtask index", "dependency graph", "phase rollout"],
+      "req_refs": [],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/subtasks.yaml",
+      "type": "spec",
+      "reason": "Machine-parseable subtask index; authoritative source for Build subtask selection",
+      "signals": ["ST-001", "ST-010", "touches", "scope_hints"],
+      "req_refs": [],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/ac_matrix.md",
+      "type": "spec",
+      "reason": "32 acceptance criteria mapped to test types and impl hints; defines verification methods",
+      "signals": ["AC-001-001", "AC-007-005", "grep", "pack-check", "manual"],
+      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/test_plan.md",
+      "type": "spec",
+      "reason": "Test strategy for documentation work: verification via grep, pack-check, and manual review",
+      "signals": ["grep verification", "pack-check", "32 scenarios"],
+      "req_refs": ["NFR-DOC-001", "NFR-SEC-001", "NFR-TRACE-001"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
+      "type": "spec",
+      "reason": "Defines canonical 7-flow model schema, command registry (10 commands), and documentation consistency spec",
+      "signals": ["FlowModel", "flow_count: 7", "command_count: 10", "prohibited_patterns"],
+      "req_refs": ["REQ-001", "REQ-002", "REQ-004"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/requirements.md",
+      "type": "spec",
+      "reason": "7 functional requirements (REQ-001 to REQ-007) and 3 NFRs with acceptance criteria",
+      "signals": ["REQ-001 flow count", "REQ-002 overlap semantics", "REQ-006 security posture"],
+      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/features/flow_count_alignment.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for flow count alignment (8 scenarios covering REQ-001, REQ-004)",
+      "signals": ["@REQ-001", "@REQ-004", "seven flows", "flow table"],
+      "req_refs": ["REQ-001", "REQ-004"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/features/flow_overlap_documentation.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for flow overlap semantics and Flow 7 documentation (REQ-002, REQ-003)",
+      "signals": ["@REQ-002", "@REQ-003", "flow-4-gate", "flow-7-wisdom"],
+      "req_refs": ["REQ-002", "REQ-003"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/features/security_posture_documentation.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for security claims (ReDoS immunity, path traversal) per REQ-006",
+      "signals": ["@REQ-006", "ReDoS", "path traversal", "code evidence"],
+      "req_refs": ["REQ-006"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/features/test_count_documentation.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for test count accuracy (102 passing tests) per REQ-005",
+      "signals": ["@REQ-005", "102 tests", "filtered tests"],
+      "req_refs": ["REQ-005"],
+      "source": "subtask_index"
+    },
+    {
+      "path": ".runs/local-alignment-audit-aba1c6/signal/features/agent_color_coding.feature",
+      "type": "spec",
+      "reason": "BDD scenarios for agent color coding clarification per REQ-007",
+      "signals": ["@REQ-007", "color field", "advisory metadata"],
+      "req_refs": ["REQ-007"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "CLAUDE.md",
+      "type": "doc",
+      "reason": "Authoritative source (Tier 1, Phase 1). Flow table at L186-196 must list 7 flows. L13 states '7 flows'.",
+      "signals": ["flow table", "7 flows", "L13", "L186-196"],
+      "req_refs": ["REQ-004"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "README.md",
+      "type": "doc",
+      "reason": "Primary public doc (Tier 2, Phase 2). Section header at L67 must say 'seven flows' not 'six flows'.",
+      "signals": ["seven flows", "L67", "section header"],
+      "req_refs": ["REQ-001"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "DEMO_RUN.md",
+      "type": "doc",
+      "reason": "Primary public doc (Tier 2, Phase 2). L14 must reference 'seven flows' with full enumeration.",
+      "signals": ["seven flows", "L14", "enumeration"],
+      "req_refs": ["REQ-001"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "type": "doc",
+      "reason": "Primary public doc (Tier 2, Phase 2). v1.0.0 entry needs annotation clarifying '10 command files implementing 7 flows'.",
+      "signals": ["v1.0.0", "annotation", "10 command files"],
+      "req_refs": ["REQ-001"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "docs/explanation/architecture.md",
+      "type": "doc",
+      "reason": "Authoritative source (Tier 1, Phase 1). Must document flow overlap semantics, Flow 7 purpose, security posture, and test counts.",
+      "signals": ["flow overlap", "Flow 7", "ReDoS immunity", "102 tests", "L11", "L62"],
+      "req_refs": ["REQ-002", "REQ-003", "REQ-005", "REQ-006"],
+      "source": "subtask_index"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "type": "doc",
+      "reason": "Secondary doc (Tier 3, Phase 3). Update from '6 flows' to '7 flows' at L8.",
+      "signals": ["6 flows", "L8"],
+      "req_refs": [],
+      "source": "subtask_index"
+    },
+    {
+      "path": "docs/reference/glossary.md",
+      "type": "doc",
+      "reason": "Secondary doc (Tier 3, Phase 3). Update from '6 flows' to '7 flows' at L8.",
+      "signals": ["6 flows", "L8"],
+      "req_refs": [],
+      "source": "subtask_index"
+    },
+    {
+      "path": "docs/how-to/work-without-github.md",
+      "type": "doc",
+      "reason": "Secondary doc (Tier 3, Phase 3). Update from '6 flows' to '7 flows' at L15.",
+      "signals": ["6 flows", "L15"],
+      "req_refs": [],
+      "source": "subtask_index"
+    }
+  ]
+}

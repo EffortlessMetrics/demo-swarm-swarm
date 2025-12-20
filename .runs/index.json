@@ -28,10 +28,10 @@
       "last_flow": "build",
       "pr_number": 2,
       "run_id": "local-alignment-audit-aba1c6",
-      "status": "VERIFIED",
+      "status": "CANNOT_PROCEED",
       "task_key": "alignment-audit",
       "task_title": "DemoSwarm Documentation-Code Alignment Audit",
-      "updated_at": "2025-12-20T05:30:00Z"
+      "updated_at": "2025-12-20T12:15:00Z"
     }
   ],
   "version": 1

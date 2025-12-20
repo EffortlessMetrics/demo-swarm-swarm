@@ -2,63 +2,72 @@
   "schema_version": "build_receipt_v1",
   "run_id": "local-alignment-audit-aba1c6",
   "flow": "build",
-  "status": "VERIFIED",
-  "recommended_action": "PROCEED",
+
+  "status": "CANNOT_PROCEED",
+  "recommended_action": "FIX_ENV",
   "route_to_flow": null,
   "route_to_agent": null,
-  "completed_at": "2025-12-20T05:30:00Z",
+
+  "missing_required": [
+    ".runs/local-alignment-audit-aba1c6/build/self_review.md",
+    ".runs/local-alignment-audit-aba1c6/build/test_changes_summary.md or impl_changes_summary.md",
+    ".runs/local-alignment-audit-aba1c6/build/lint_report.md",
+    ".runs/local-alignment-audit-aba1c6/build/test_execution.md"
+  ],
+  "missing_optional": [],
+  "blockers": [
+    "Build directory inaccessible: I/O permission restrictions prevent reading/writing artifacts",
+    "Cannot verify artifact existence due to sandbox restrictions on .runs/local-alignment-audit-aba1c6/build/ directory",
+    "Cannot extract counts or quality gate statuses without access to build artifacts"
+  ],
+  "concerns": [],
+
   "counts": {
-    "subtasks_total": 10,
-    "subtasks_completed": 10,
-    "files_changed": 7,
-    "lines_added": 82,
-    "lines_removed": 12,
-    "pack_check_passed": true,
-    "pack_check_warnings": 2
+    "tests_written": null,
+    "files_changed": null,
+    "mutation_score": null,
+    "open_questions": null,
+    "ac_total": null,
+    "ac_completed": null
   },
+
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": null,
+    "passed": null,
+    "failed": null,
+    "skipped": null,
+    "xfailed": null,
+    "xpassed": null,
+    "metrics_binding": "unknown"
+  },
+
+  "critic_verdicts": {
+    "test_critic": null,
+    "code_critic": null
+  },
+
   "quality_gates": {
-    "all_ac_verified": true,
-    "pack_check_status": "VERIFIED",
-    "grep_six_flows_matches": 0,
-    "self_review_status": "VERIFIED"
+    "test_critic": null,
+    "code_critic": null,
+    "self_reviewer": null
   },
-  "artifacts": {
-    "impl_changes_summary": ".runs/local-alignment-audit-aba1c6/build/impl_changes_summary.md",
-    "self_review": ".runs/local-alignment-audit-aba1c6/build/self_review.md",
-    "flow_plan": ".runs/local-alignment-audit-aba1c6/build/flow_plan.md",
-    "open_questions": ".runs/local-alignment-audit-aba1c6/build/open_questions.md"
-  },
-  "files_changed": [
-    "docs/explanation/architecture.md",
-    "README.md",
-    "DEMO_RUN.md",
-    "CHANGELOG.md",
-    "docs/reference/glossary.md",
-    "CONTRIBUTING.md",
-    "docs/how-to/work-without-github.md"
+
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_execution.md",
+    "test_critique.md",
+    "code_critique.md",
+    "flakiness_report.md",
+    "mutation_report.md",
+    "fuzz_report.md",
+    "fix_summary.md",
+    "doc_updates.md",
+    "doc_critique.md"
   ],
-  "requirements_satisfied": [
-    "REQ-001",
-    "REQ-002",
-    "REQ-003",
-    "REQ-004",
-    "REQ-005",
-    "REQ-006",
-    "REQ-007"
-  ],
-  "nfr_satisfied": [
-    "NFR-DOC-001",
-    "NFR-SEC-001",
-    "NFR-TRACE-001"
-  ],
-  "blockers": [],
-  "concerns": [
-    "walkthrough.md not updated (optional per impact map)",
-    "Specific test counts not documented to avoid drift (intentional)"
-  ],
-  "observations": [
-    "CLAUDE.md was already correct; no changes needed",
-    "10 command files claim in requirements was inaccurate (actually 7 flow + 1 customize)",
-    "Pack-check passes without test fixture updates (RSK-001 did not materialize)"
-  ]
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-20T12:15:00Z"
 }

@@ -149,7 +149,7 @@ Why: Prefer local completion over stuck or exposed state.
 
 The secrets scanner uses the **Rust regex crate**, which implements finite automata (not backtracking). This makes it immune to ReDoS (Regular Expression Denial of Service) attacks. The regex engine has guaranteed linear time complexity relative to input size.
 
-Reference: `tools/demoswarm-runs-tools/src/secrets.rs` uses the `regex` crate.
+Reference: `tools/demoswarm-runs-tools/src/commands/secrets.rs` uses the `regex` crate.
 
 ### Known limitations
 

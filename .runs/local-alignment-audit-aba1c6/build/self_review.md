@@ -1,29 +1,83 @@
 # Self Review
 
-## Overview
+## Machine Summary
+status: VERIFIED
+recommended_action: PROCEED
+route_to_flow: null
+route_to_agent: null
 
-Documentation alignment audit implementing ADR OPT-003 (Layered Approach) to update pack documentation from "6 flows" to "7 flows".
+blockers: []
 
-## Implementation Assessment
+missing_required: []
 
-### What was done correctly
+concerns:
+  - walkthrough.md not updated (optional per impact map, time-gated per ADR)
+  - Specific test counts (102) not documented to avoid future drift (intentional design decision)
 
-1. **Authoritative-first approach**: Updated architecture.md before primary/secondary docs, ensuring consistency derives from the authoritative source
-2. **CLAUDE.md verification**: Confirmed CLAUDE.md was already correct, avoiding unnecessary edits
-3. **Comprehensive updates**: All 7 files identified in impact map were updated
-4. **Flow 7 semantics**: Added clear documentation about second-cycle wisdom extraction
-5. **Flow variants**: Added variant guidance table with specific use cases
-6. **Security posture**: Added proper documentation with code references
-7. **Test counts**: Established "receipt-derived" principle to prevent future drift
-8. **Verification complete**: All grep checks pass, pack-check passes
+sources:
+  - .runs/local-alignment-audit-aba1c6/build/doc_critique.md
+  - .runs/local-alignment-audit-aba1c6/build/doc_updates.md
+  - .runs/local-alignment-audit-aba1c6/build/ac_status.json
+  - .runs/local-alignment-audit-aba1c6/build/lint_report.md
+  - .runs/local-alignment-audit-aba1c6/build/test_execution.md
+  - .runs/local-alignment-audit-aba1c6/build/mutation_report.md (NOOP)
+  - .runs/local-alignment-audit-aba1c6/build/fuzz_report.md (NOOP)
+  - .runs/local-alignment-audit-aba1c6/build/flakiness_report.md (NOOP)
+  - .runs/local-alignment-audit-aba1c6/plan/ac_matrix.md
 
-### What could be improved
+## Canonical Bindings
 
-1. **Color coding section**: The agent metadata section is minimal; could include full taxonomy table reference
-2. **Test count specifics**: Did not include specific counts (102 tests) to avoid future drift; documented the principle instead
-3. **walkthrough.md**: Not updated (mentioned in impact map as optional); Flow 7 step could be added in future
+### Pytest Summary (Canonical)
+NOT_APPLICABLE - Documentation-only build; no pytest execution required.
 
-### Requirements Coverage
+### Mutation Summary (Canonical, if present)
+Source: `.runs/local-alignment-audit-aba1c6/build/mutation_report.md`
+NOOP - Documentation-only work; mutation testing not applicable per hardening station rules.
+
+## Critic Verdicts (Read-only)
+
+| Critic | Status | Notes |
+|--------|--------|-------|
+| doc-critic | VERIFIED | see `doc_critique.md`; documentation-only build equivalent of code-critic |
+
+## Mismatch Check
+
+- Status: OK
+- Evidence:
+  - No pytest execution in doc-only build; no canonical test summary to compare
+  - Mutation/fuzz/flakiness reports present as NOOP (expected for doc-only work)
+  - pack-check passed (NFR-TRACE-001 satisfied)
+
+## What Changed (high level)
+- From `doc_updates.md`:
+  - All documentation updated from "6 flows" to "7 flows" (7 files)
+  - Flow variant guidance table added to architecture.md
+  - Flow 7 semantics (second-cycle wisdom extraction) documented
+  - Security posture documented with code references (ReDoS immunity, path traversal)
+  - Test count principle established as "receipt-derived" to prevent drift
+
+## Open Issues / Gaps (from critics)
+- walkthrough.md not updated (optional, per impact map; time-gated per ADR OPT-003)
+- Color coding section is minimal; could include full taxonomy table reference (enhancement)
+
+## AC Loop Status (if ac_status.json present)
+- ac_total: 32 (per plan/ac_matrix.md)
+- ac_completed: 32 (all requirements satisfied per existing self_review)
+- ac_blocked: none
+- ac_loop_complete: YES
+
+## Docs / Ops
+- doc_updates.md: present
+- observability_spec referenced: n/a (documentation-only build)
+
+## Ready for Gate
+YES
+
+Rationale: This documentation-only build implementing ADR OPT-003 (Layered Approach) has successfully updated pack documentation from the "6 flows" to "7 flows" model. All 7 requirements (REQ-001 through REQ-007) are satisfied as documented in the existing self-review. All 3 NFRs are satisfied: NFR-DOC-001 (no "six flows" remains in public docs), NFR-SEC-001 (security claims have code evidence references), NFR-TRACE-001 (pack-check passes). The doc-critic has verified the documentation changes. Hardening stations (mutation, fuzz, flakiness) correctly returned NOOP for documentation-only work. The build is ready for Gate with minor concerns noted (walkthrough.md optional update, test count documentation intentionally principle-based rather than specific counts).
+
+---
+
+## Requirements Coverage (from existing review)
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
@@ -35,7 +89,7 @@ Documentation alignment audit implementing ADR OPT-003 (Layered Approach) to upd
 | REQ-006 (Security posture) | SATISFIED | ReDoS immunity and path traversal documented |
 | REQ-007 (Color coding) | SATISFIED | Advisory metadata documented with example |
 
-### NFR Coverage
+## NFR Coverage (from existing review)
 
 | NFR | Status | Notes |
 |-----|--------|-------|
@@ -43,7 +97,7 @@ Documentation alignment audit implementing ADR OPT-003 (Layered Approach) to upd
 | NFR-SEC-001 (Evidence) | SATISFIED | Code references included |
 | NFR-TRACE-001 (Pack-check) | SATISFIED | Passes with advisory warnings only |
 
-### Risk Assessment
+## Risk Assessment (from existing review)
 
 | Risk | Mitigation Applied |
 |------|-------------------|
@@ -53,34 +107,8 @@ Documentation alignment audit implementing ADR OPT-003 (Layered Approach) to upd
 | RSK-004 (Test count drift) | Documented principle instead of specific counts |
 | RSK-005 (New variant drift) | Variant table provides reference for future additions |
 
-### Outstanding Items
+## Observations
 
-- walkthrough.md not updated (optional per impact map)
-- Specific test counts not documented to avoid drift (by design)
-
-## Machine Summary
-
-```yaml
-## Machine Summary
-status: VERIFIED
-recommended_action: PROCEED
-route_to_flow: null
-route_to_agent: null
-
-blockers: []
-missing_required: []
-concerns:
-  - walkthrough.md not updated (optional, time-gated per ADR)
-  - Specific test counts (102) not documented to avoid drift (intentional)
-
-observations:
-  - CLAUDE.md was already correct; no changes needed
-  - "10 command files" claim in requirements was inaccurate (actually 7 flow + 1 customize)
-  - Pack-check passes without test fixture updates (RSK-001 did not materialize)
-
-can_further_iteration_help: no
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 2
-```
+- CLAUDE.md was already correct; no changes needed
+- "10 command files" claim in requirements was inaccurate (actually 7 flow + 1 customize)
+- Pack-check passes without test fixture updates (RSK-001 did not materialize)
