@@ -26,7 +26,8 @@ Append-only register for Build-phase clarifications.
   - Rationale: Per RSK-001, fixtures may assert old counts
   - Impact if wrong: Pack-check needs deeper investigation
 
-## Machine Summary
+## Initial Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -67,7 +68,7 @@ assumptions_added: 3
   - Added: 2025-12-20T11:59:09Z
 
 
-### Assumptions Made to Proceed
+### Additional Assumptions
 
 - Assumption: The build directory will be created by run-prep before subtask implementation begins.
   - Rationale: Standard flow requires run-prep to create flow directories
@@ -93,11 +94,13 @@ assumptions_added: 3
   - Rationale: ADR explicitly states no code changes to secrets.rs; this is a documentation-only run
   - Impact if wrong: Would need to escalate to security hardening work item before proceeding
   - Linked question: OQ-SIG-004
+
 ### Resolutions (if any)
 
 (none yet - Build phase just started)
 
-### Machine Summary
+### Final Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null

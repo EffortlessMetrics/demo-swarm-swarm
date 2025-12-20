@@ -15,7 +15,7 @@
   ],
   "assumptions": [
     "ASM-001: Seven-flow model is canonical per CLAUDE.md L13; public docs are stale",
-    "ASM-002: Flow variants (flow-4-review, flow-5-gate, flow-6-deploy, flow-7-wisdom) are intentional entry points",
+    "ASM-002: Seven flow commands exist with no variants; re-entry uses the primary command",
     "ASM-003: 102 passing unit tests from test_output.log is authoritative",
     "ASM-004: Path traversal in secrets.rs is documentation-only concern (local execution context)",
     "ASM-005: Agent color coding is functional metadata (color: field in frontmatter)"
@@ -120,7 +120,7 @@
       "summary": "v1.0.0 entry L24 says '6 flow commands'; needs annotation per REQ-001 AC-4",
       "evidence": [
         "Read CHANGELOG.md L24: '- **6 flow commands**: `/flow-1-signal` through `/flow-6-wisdom`'",
-        "Signal requirements.md AC-4: CHANGELOG annotated to clarify 10 command files implementing 7 flows"
+        "Signal requirements.md AC-4: CHANGELOG annotated to clarify 7 flow commands implementing 7 flows"
       ],
       "depends_on": [],
       "depended_on_by": [],
@@ -134,16 +134,16 @@
       "change_type": "MODIFIED",
       "risk": "MEDIUM",
       "confidence": "HIGH",
-      "summary": "Flow table at L186-196 lists 6 flows; must expand to 7 flows with variants per REQ-004",
+      "summary": "Flow table at L186-196 lists seven flows; verify it stays aligned with the 7-command model per REQ-004",
       "evidence": [
         "grep:'Seven Flows' hit at CLAUDE.md L186: '### The Seven Flows'",
         "Read CLAUDE.md L13: '- **7 flows**: Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom'",
-        "Signal requirements.md AC-1-4: Flow table lists all seven flows with variants"
+        "Signal requirements.md AC-1-4: Flow table lists all seven flows with primary commands"
       ],
       "depends_on": [],
       "depended_on_by": ["IMP-001", "IMP-002", "IMP-003"],
       "tests_referencing": ["IMP-012"],
-      "notes": ["Authoritative pack reference; flow table currently shows 6 rows but header says 7 flows"]
+      "notes": ["Authoritative pack reference; ensure flow table stays aligned with the 7-command model"]
     },
     {
       "id": "IMP-006",
@@ -322,8 +322,8 @@
     "Update README.md section header from 'six flows' to 'seven flows' (REQ-001)",
     "Update DEMO_RUN.md to reference seven flows (REQ-001)",
     "Update docs/explanation/architecture.md: flow count and add flow overlap semantics (REQ-001, REQ-002, REQ-003)",
-    "Annotate CHANGELOG.md v1.0.0 to clarify 10 command files implementing 7 flows (REQ-001)",
-    "Expand CLAUDE.md flow table to show all 7 flows with variants (REQ-004)",
+    "Annotate CHANGELOG.md v1.0.0 to clarify 7 flow commands implementing 7 flows (REQ-001)",
+    "Verify CLAUDE.md flow table shows all 7 flows with primary commands (REQ-004)",
     "Update secondary docs: glossary.md, CONTRIBUTING.md, work-without-github.md for consistency",
     "Run pack-check to verify no regressions (NFR-TRACE-001)",
     "Update structure.rs test fixtures if pack-check fails on 'Six Flows' assertion"

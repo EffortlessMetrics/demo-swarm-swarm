@@ -31,13 +31,13 @@ line_required: null
 branch_required: null
 critical_path_defined: no
 critical_path_pointer: "Coverage thresholds explicitly marked null; not applicable for documentation-only work"
-measurement_notes: "This run produces documentation changes (markdown + YAML contracts), not code logic. Verification is via grep searches, pack-check validation, and manual review checklists per test_plan.md lines 144-153."
+measurement_notes: "This run produces documentation changes (Markdown + YAML contracts), not code logic. Verification is via grep searches, pack-check validation, and manual review checklists per test_plan.md lines 144-153."
 ```
 
 ## Coverage Evidence Found
 
 * `.runs/local-alignment-audit-aba1c6/plan/test_plan.md` — Scenario count: 32 total scenarios from 5 feature files covering 7 functional requirements + 3 non-functional requirements (lines 16-19)
-* `.runs/local-alignment-audit-aba1c6/review/review_receipt.json` — Feedback resolution status: 6 of 30 items resolved; all critical (1) and major (5) items resolved; 24 minor items pending (non-blocking) (lines 18-30, 37-39, 147-153)
+* `.runs/local-alignment-audit-aba1c6/review/review_receipt.json` - Feedback resolution status: 29 of 30 items resolved; 1 skipped; 24 minor items resolved (0 pending) (lines 18-30, 37-39, 147-153)
 * `.runs/local-alignment-audit-aba1c6/review/impl_changes_summary.md` — Contract changes verified: RW-001 (CRITICAL) resolved; api_contracts.yaml updated to reflect 7-command reality (lines 14-49)
 
 ## Results (mechanical)
@@ -85,21 +85,21 @@ evidence_consistency: consistent
 ### MAJOR
 
 * [MAJOR] COV-MAJ-001: All blocking review items resolved before Gate; ready for Gate verification
-  * Count: Critical (1), Major (5) all resolved; only 24 non-blocking Minor items pending
+  * Count: Critical (1) resolved; Major (4) resolved, 1 skipped; 0 minor items pending
   * Evidence: review_receipt.json lines 25-38, 147-153
 
 ### MINOR
 
-* [MINOR] COV-MIN-001: 24 non-blocking Minor review items (markdown formatting, style issues) remain pending post-review
+* [MINOR] COV-MIN-001: 24 non-blocking Minor review items (Markdown formatting, style issues) resolved via style sweep
   * Category breakdown: 25 style issues, 3 docs issues, 2 correctness issues (5 corrected, 1 skipped as not-a-bug, 6 sub-items)
   * Evidence: review_receipt.json lines 57-67, 125-134
-  * Impact: Non-blocking per review_completion_criteria (line 147); suitable for post-merge cleanup per doc_updates.md lines 80-86
+  * Impact: Non-blocking per review_completion_criteria (line 147); no pending items remain
 
 ## Notes for Merge-Decider
 
 This is a **documentation alignment audit** (not code coverage). The run:
 
-1. **Correctly declares zero code coverage thresholds** because all changes are markdown + YAML contracts (test_plan.md line 50).
+1. **Correctly declares zero code coverage thresholds** because all changes are Markdown + YAML contracts (test_plan.md line 50).
 
 2. **Coverage metric (scenario count):** 32 BDD scenarios across 10 requirements (7 functional + 3 non-functional), all mapped in test_plan.md.
 
@@ -107,7 +107,7 @@ This is a **documentation alignment audit** (not code coverage). The run:
    - RW-001 (CRITICAL): api_contracts.yaml command registry corrected from 10 to 7 commands
    - RW-002 through RW-006 (MAJOR): Documentation and contract fixes applied
 
-4. **Non-blocking items:** 24 minor items (markdown formatting, style) remain pending; non-blocking per review completion criteria (line 151 in review_receipt.json).
+4. **Non-blocking items:** 24 minor items (Markdown formatting, style) resolved via style sweep; 0 pending.
 
 5. **Readiness for Gate:** Documentation verification methods are defined (grep, pack-check, manual review). All blocking issues resolved. Ready to proceed.
 
@@ -125,4 +125,4 @@ This is a **documentation alignment audit** (not code coverage). The run:
 - COV_REQUIREMENT_COUNT: 10
 - COV_BLOCKING_ITEMS_CRITICAL: 0 (all resolved)
 - COV_BLOCKING_ITEMS_MAJOR: 0 (all resolved)
-- COV_NONBLOCKING_ITEMS_MINOR: 24 (pending, non-blocking)
+- COV_NONBLOCKING_ITEMS_MINOR: 24 (resolved; 0 pending)

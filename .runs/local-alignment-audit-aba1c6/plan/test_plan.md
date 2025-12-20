@@ -50,11 +50,12 @@ Additional notes:
 - measurement_notes: Coverage thresholds not applicable for documentation-only work. This run produces documentation changes, not code changes. Verification is via grep searches, pack-check validation, and manual review checklists.
 
 ## Mutation Testing
+
 - mutation_required: false
 - mutation_threshold: null
 - mutation_scope: []
 - mutation_tool_hint: null
-- rationale: Documentation-only work; no code logic to mutate. All changes are markdown content updates, not executable code.
+- rationale: Documentation-only work; no code logic to mutate. All changes are Markdown content updates, not executable code.
 
 ## Scenario to Test Type Matrix
 

@@ -235,7 +235,7 @@ These scenarios validate the **Access + Content Mode** matrix end-to-end:
    - Preconditions: any of `safe_to_publish: false` OR `proceed_to_github_ops: false` OR `publish_surface: NOT_PUSHED`.
    - Verify:
      - [ ] `gh-issue-manager` and `gh-reporter` still run when access is allowed (no silent skip)
-     - [ ] GitHub comment is **receipt-first**: only machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`) and paths; no quoting of human-authored markdown
+     - [ ] GitHub comment is **receipt-first**: only machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`) and paths; no quoting of human-authored Markdown
 
 3) **Access gate disabled** (`github_ops_allowed: false`)
    - Preconditions: run_meta has `github_ops_allowed: false` (e.g., repo mismatch).

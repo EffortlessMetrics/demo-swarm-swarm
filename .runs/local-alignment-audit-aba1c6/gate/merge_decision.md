@@ -1,9 +1,11 @@
 # Merge Decision
 
 ## Verdict
+
 MERGE
 
 ## Evidence Summary
+
 - Receipt audit: PASS — (receipt_audit.md: 11/11 checks passed, AC loop 35/35 complete, cross-flow chain verified)
 - AC completion: PASS — (ac_completed: 35, ac_total: 35 per build ac_status.json; confirmed in receipt_audit.md L57-59)
 - Contract compliance: PASS — (contract_compliance.md: 0 violations, 7 flow commands verified, all schema checks OK)
@@ -14,6 +16,7 @@ MERGE
 - Traceability audit: PASS — (traceability_audit.md: 7 REQs covered, 32 BDD scenarios, 35 ACs mapped, no orphans)
 
 ## Requirements Readiness
+
 | Item | Outcome | Notes |
 |------|---------|-------|
 | Priority classification | KNOWN | requirements.md explicitly marks REQ-001 through REQ-007 as HIGH/MEDIUM/LOW priority |
@@ -33,13 +36,13 @@ All Gate checks return PASS or N/A. The critical evidence chain:
    - `has_critical_pending: false`
    - `has_major_pending: false`
 
-2. **Gate fix summary BOUNCE recommendation is stale.** The `gate_fix_summary.md` analyzed worklist items (RW-001 through RW-030) without consulting their resolution status in `review_receipt.json`. Specifically:
+2. **Gate fix summary aligns with review status.** The `gate_fix_summary.md` reflects resolved/skipped worklist items and confirms no pending MINOR items. Specifically:
    - RW-001 (CRITICAL): RESOLVED — api_contracts.yaml command registry corrected
    - RW-002 (MAJOR): SKIPPED — Not a bug; implementation matches CLAUDE.md contract spec
    - RW-003 through RW-006 (MAJOR): All RESOLVED — Documentation and typo fixes applied
-   - RW-007 through RW-030 (MINOR): 23 pending — Non-blocking per Review Completion Criteria
+   - RW-007 through RW-030 (MINOR): 24 resolved - Style sweep complete (0 pending)
 
-3. **No blocking issues remain.** All CRITICAL and MAJOR items are resolved or correctly skipped. The 23 pending MINOR items (markdown formatting, style) are explicitly non-blocking per the Review Completion Criteria and suitable for post-merge cleanup.
+3. **No blocking issues remain.** All CRITICAL and MAJOR items are resolved or correctly skipped. All 24 MINOR items (Markdown formatting, style) are resolved via style sweep; 0 pending.
 
 4. **Security posture is clean.** Zero secrets, zero SAST findings, zero HIGH/CRITICAL risks. RSK-001 (path traversal) is ACCEPTED with explicit deferral to future security hardening (not in scope for docs-only run).
 
@@ -48,14 +51,16 @@ All Gate checks return PASS or N/A. The critical evidence chain:
 **Conclusion:** The BOUNCE recommendation in `gate_fix_summary.md` is based on incomplete analysis. The authoritative `review_receipt.json` confirms all blocking items are resolved. All Gate checks pass. This run is ready for merge.
 
 ## If BOUNCE
-N/A — Verdict is MERGE.
+
+N/A - Verdict is MERGE.
 
 ## Next Steps
+
 - Proceed to Flow 6 (Deploy) for merge to mainline
-- Post-merge: Address 23 MINOR markdown formatting items in follow-up housekeeping PR
 - Future: Track RSK-001 (path traversal) in separate security hardening run if threat model escalates
 
 ## Machine Summary
+
 ```yaml
 verdict: MERGE
 reason: null
@@ -67,7 +72,6 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - "23 MINOR markdown formatting items pending (non-blocking; suitable for post-merge cleanup)"
   - "RSK-001 (path traversal in secrets.rs) deferred to future security hardening run"
   - "Build receipt CANNOT_PROCEED is a permissions artifact, not content defect; artifacts verified via git"
 ```

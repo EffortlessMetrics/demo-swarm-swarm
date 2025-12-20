@@ -1,9 +1,11 @@
 # Gate Cleanup Report
 
 ## Run: local-alignment-audit-aba1c6
+
 ## Completed: 2025-12-20T15:13:38Z
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -14,12 +16,12 @@ missing_required: []
 missing_optional: []
 blockers: []
 concerns:
-  - "23 MINOR markdown formatting items pending (non-blocking; suitable for post-merge cleanup)"
   - "RSK-001 (path traversal in secrets.rs) deferred to future security hardening run"
   - "Build receipt CANNOT_PROCEED is a permissions artifact, not content defect; artifacts verified via git"
 ```
 
 ## Artifact Verification
+
 | Artifact | Status |
 |----------|--------|
 | merge_decision.md | ✓ Found |
@@ -33,6 +35,7 @@ concerns:
 | traceability_audit.md | ✓ Found |
 
 ## Extracted Gate Statuses (Machine Summary)
+
 | Check | Status | Source |
 |------|--------|--------|
 | merge_decider | VERIFIED | merge_decision.md (verdict: MERGE) |
@@ -42,6 +45,7 @@ concerns:
 | coverage_audit | VERIFIED | coverage_audit.md |
 
 ## Counts Derived (Stable Markers)
+
 | Metric | Value | Source |
 |--------|-------|--------|
 | receipt_checks_total | 11 | receipt_audit.md (Machine Summary: checks_total) |
@@ -55,6 +59,7 @@ concerns:
 | ac_completed | 35 | receipt_audit.md (passthrough from build_receipt.json) |
 
 ## Merge Verdict Analysis
+
 - Verdict extracted: MERGE
 - Status: VERIFIED
 - Decision source: merge_decision.md Machine Summary
@@ -67,12 +72,14 @@ concerns:
   - Traceability audit: PASS (7 REQs covered, 32 BDD scenarios, 35 ACs mapped)
 
 ## Index Updated
+
 - Fields changed: status, last_flow, updated_at
 - status: VERIFIED
 - last_flow: gate
 - updated_at: 2025-12-20T15:13:38Z
 
 ## Gate Receipt Created
+
 - File: .runs/local-alignment-audit-aba1c6/gate/gate_receipt.json
 - Schema version: gate_receipt_v1
 - Overall status: VERIFIED
@@ -82,12 +89,14 @@ concerns:
 - All required counts derived mechanically (no null required metrics)
 
 ## Routing Decision
+
 - Merge verdict is MERGE
 - All required gate statuses are VERIFIED
 - Required counts are non-null (ac_total: 35, ac_completed: 35, checks: 11/11, contract violations: 0, security findings: 0)
 - Recommended action: PROCEED to Flow 6 (Deploy)
 
 ## Summary
+
 Gate cleanup complete for run `local-alignment-audit-aba1c6`. All required gate artifacts verified, counts mechanically derived, and receipt sealed. This run is ready for promotion to mainline in Flow 6 (Deploy).
 
-Non-blocking concerns noted (23 MINOR markdown items, future RSK-001 security work) are suitable for post-merge cleanup or separate tracking, not merge blockers.
+Non-blocking concerns noted (RSK-001 deferred; build receipt I/O artifact) are suitable for separate tracking, not merge blockers.

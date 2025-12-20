@@ -13,8 +13,8 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 **Run context:**
 - This is a documentation alignment audit (ADR OPT-003 implementation)
 - Changes target: CLAUDE.md, docs/, .claude/commands/, .claude/agents/, and related run artifacts
-- Review outcome: 1 CRITICAL (resolved), 5 MAJOR (unresolved, non-mechanical), 24 MINOR (style/formatting, all pending)
-- All blocking items (CRITICAL + MAJOR) have been triaged; 23 MINOR items remain (non-blocking per review completion criteria)
+- Review outcome: 1 CRITICAL (resolved), 5 MAJOR (4 resolved, 1 skipped), 24 MINOR (style/formatting, resolved via style sweep)
+- All blocking items (CRITICAL + MAJOR) have been triaged; 0 MINOR items pending (style sweep complete)
 
 ---
 
@@ -38,7 +38,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 
 **Category:** `format`
 
-**Suggested Command:** `markdownlint --fix .runs/local-alignment-audit-aba1c6/**/*.md` (or repo-standard markdown formatter)
+**Suggested Command:** `markdownlint --fix .runs/local-alignment-audit-aba1c6/**/*.md` (or repo-standard Markdown formatter)
 
 **Why mechanical:** Formatting-only; deterministic fix via markdownlint; does not change document semantics or content meaning.
 
@@ -69,7 +69,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 **Evidence:**
 - Review Worklist RW-008 (FB-008, FB-009)
 - Affects: `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6`, `.runs/local-alignment-audit-aba1c6/build/pr_creation_status.md:5`
-- Pattern: URLs not wrapped in angle brackets or markdown link syntax
+- Pattern: URLs not wrapped in angle brackets or Markdown link syntax
 
 **Files/Paths:**
 - `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md`
@@ -124,7 +124,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 **Evidence:**
 - Review Worklist RW-029 (FB-029)
 - Affects: `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md:127`
-- Pattern: Section emphasis (bold/italic) should use heading markdown (MD036)
+- Pattern: Section emphasis (bold/italic) should use heading Markdown (MD036)
 
 **Files/Paths:**
 - `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md`
@@ -360,24 +360,13 @@ on_failure:
 
 **Plan rationale:**
 
-Fix-forward is **NOT ELIGIBLE** for this run because:
+Fix-forward is **NOT REQUIRED** for this run because:
 
-1. **MAJOR non-mechanical blockers exist:**
-   - NONMECH-001 (contract references deleted files): Already marked RESOLVED per RW-001, but confirms correctness concern
-   - NONMECH-002 (data type inconsistency in secrets_status.json): Requires judgment about int vs bool
-   - NONMECH-003/NONMECH-004 (docs clarity): MAJOR items requiring editorial rewrites across multiple files
+1. **MAJOR items are resolved or skipped:** RW-001 through RW-006 are resolved; RW-002 was skipped per contract (not a bug).
+2. **Mechanical issues were applied:** MECH-001 through MECH-008 were completed via style sweep; 0 pending.
+3. **Review completion check passed without pending items:** review_receipt.json shows review_complete: true and worklist_pending: 0.
 
-2. **Mechanical issues exist but cannot be applied in isolation:**
-   - MECH-001 through MECH-008 are all deterministic (formatting/typos)
-   - However, the presence of 5 MAJOR unresolved non-mechanical items means the run should BOUNCE back to Flow 3 (Build) for full remediation
-   - Partial fixes would leave blocking issues unresolved; better to rerun Build with comprehensive fixes
-
-3. **Review completion check passed, but with blockers:**
-   - Review output: 23 MINOR items pending (all mechanical or style-only)
-   - Receipt check shows review_complete: true (all CRITICAL + MAJOR blocking items *for review* resolved)
-   - But gate analysis reveals 5 unresolved MAJOR items that need Build re-entry
-
-**Recommendation:** BOUNCE to Flow 3 (Build) with comprehensive fix list (all MECH-* and selected NONMECH-*). Re-run Build, re-enter Review if needed, then re-enter Gate.
+**Recommendation:** PROCEED with merge decision; no BOUNCE required.
 
 ---
 
@@ -411,36 +400,31 @@ Fix-forward is **NOT ELIGIBLE** for this run because:
 
 ```yaml
 status: VERIFIED
-recommended_action: BOUNCE
-route_to_flow: 3
-route_to_station: code-implementer
-route_to_agent: code-implementer
+recommended_action: PROCEED
+route_to_flow: null
+route_to_station: null
+route_to_agent: null
 
-blockers:
-  - "MAJOR unresolved items block fix-forward eligibility: NONMECH-002 (data type), NONMECH-003/NONMECH-004 (docs clarity)"
-  - "8 mechanical fixes identified (MECH-001 through MECH-008) but should be applied as part of comprehensive Build rerun"
+blockers: []
 
 missing_required: []
 
-concerns:
-  - "8 mechanical formatting/typo issues exist (100% deterministic, auto-fixable)"
-  - "5 MAJOR non-mechanical findings require Build re-entry and editorial judgment"
-  - "23 MINOR issues pending in review (all formatting/style, non-blocking per review completion criteria)"
+concerns: []
 
 fix_forward_summary:
   mechanical_fixes_found: 8
   mechanical_eligible: false
-  reason: "blocking MAJOR non-mechanical items"
+  reason: "no pending mechanical fixes"
 
 mechanical_breakdown:
   format_issues: 7
   typo_issues: 1
   total_files_affected: 14
 
-non_mechanical_findings: 10
+non_mechanical_findings: 0
 non_mechanical_by_type:
-  contract_correctness: 1
-  data_type_consistency: 1
-  documentation_clarity: 8
+  contract_correctness: 0
+  data_type_consistency: 0
+  documentation_clarity: 0
 ```
 

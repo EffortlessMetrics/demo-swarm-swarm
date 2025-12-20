@@ -91,6 +91,7 @@ components:
           items:
             type: string
             pattern: '^/flow-[1-7]-[a-z]+$'
+          maxItems: 0
           description: |
             Reserved for future alternate entry points.
             Currently empty for all flows (7 flows = 7 command files).

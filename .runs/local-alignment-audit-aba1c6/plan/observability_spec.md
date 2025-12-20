@@ -39,9 +39,9 @@ Documentation alignment verification is measured through deterministic checks:
 
 ### VS-003: Test Count Source Verification
 - **Purpose**: Verify 102 passing test count claim has valid source
-- **Command**: `grep -c "102 tests" test_output.log` or equivalent
+- **Command**: `grep -c "102 tests" ./test_output.log` or equivalent
 - **Pass Criteria**: Count matches documented claim
-- **Actual Source**: `test_output.log` (line 109 per requirements)
+- **Actual Source**: `./test_output.log` (repo root; line 109 per requirements)
 - **Traceability**: REQ-005 AC-4, RSK-002 mitigation
 
 ### VS-004: Security Claim Evidence Verification

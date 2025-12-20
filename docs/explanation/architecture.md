@@ -94,9 +94,9 @@ The recommended sequence is: `/flow-1-signal` → `/flow-2-plan` → `/flow-3-bu
 ### Flow 7: Second-cycle wisdom
 
 Flow 7 (`/flow-7-wisdom`) is for **second-cycle wisdom extraction**. Use it when:
-- Multiple runs have completed and you want to synthesize cross-run learnings
-- An iteration has finished and you want to extract batch insights
-- You've already run `/flow-6-deploy` and want a deeper retrospective
+- Multiple runs have completed and you want to synthesize cross-run learnings.
+- An iteration has finished and you want to extract batch insights.
+- You've already run `/flow-6-deploy` and want a deeper retrospective.
 
 Flow 7 differs from the wisdom extraction in Flow 6 in that it's designed for **post-cycle reflection** rather than immediate run closure.
 

@@ -48,6 +48,7 @@ coverage_summary:
 None. All scenarios have exactly one primary @REQ-### tag at the scenario level. No scenarios have multiple conflicting REQ tags.
 
 **Traceability verification:**
+
 | REQ | Scenario Count | Status |
 |-----|----------------|--------|
 | REQ-001 | 5 | Covered |

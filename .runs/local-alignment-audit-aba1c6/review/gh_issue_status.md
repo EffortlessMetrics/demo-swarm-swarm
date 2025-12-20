@@ -15,8 +15,7 @@ blockers: []
 
 missing_required: []
 
-concerns:
-  - 23 MINOR feedback items still pending (non-blocking; suitable for post-merge cleanup)
+concerns: []
 
 ## Issue
 
@@ -45,14 +44,14 @@ Flow Progress updated:
 ## Next Steps Block Updated
 
 Updated with:
-- PR feedback resolution summary (6 items resolved, 23 minor pending)
-- PR transition status (Draft → Ready for Review)
+- PR feedback resolution summary (29 resolved, 1 skipped, 0 pending)
+- PR transition status (Draft -> Ready for Review)
 - Advancement to Flow 5 (Gate)
 
 ## PR Status
 
 - PR #2: Ready for Review (CI passing; blockers resolved)
-- Worklist: 30 items (6 resolved, 23 MINOR pending, 1 skipped)
+- Worklist: 30 items (29 resolved, 1 skipped, 0 pending)
 - Critical/Major items: All resolved
 
 ## Notes
@@ -61,3 +60,4 @@ Updated with:
 - Publish mode FULL enabled full artifact linking
 - No secrets or access issues encountered
 - Ready to proceed to Flow 5 (Gate)
+

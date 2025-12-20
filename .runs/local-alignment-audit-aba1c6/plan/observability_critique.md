@@ -61,6 +61,7 @@ severity_summary:
 
 All REQ and NFR identifiers have observability coverage:
 
+
 | Identifier | Coverage |
 |------------|----------|
 | REQ-001 | VS-001, SLO-001, ALERT-001 |
@@ -146,6 +147,7 @@ All four alerts specify severity (BLOCKING or MAJOR) and include runbook guidanc
 - Risks to Detection Map (lines 221-229)
 
 **Verification hooks alignment with test_plan.md**:
+
 | Observability Signal | test_plan.md Verification |
 |---------------------|---------------------------|
 | VS-001 (grep six flows) | Verification Commands Reference (lines 164-177) |

@@ -14,7 +14,7 @@
 
 ## Processing Order
 
-_Process categories in this order: CORRECTNESS → DOCS → STYLE_
+_Process categories in this order: CORRECTNESS -> DOCS -> STYLE_
 
 ---
 
@@ -34,7 +34,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/secrets_status.json:10`
 - **Summary:** Field `modified_files` uses boolean (`false`) but should be integer (`0`) for consistency with semantic meaning (count metric).
 - **Route:** code-implementer
-- **Status:** PENDING
+- **Status:** SKIPPED
 - **Evidence:** Data type inconsistency flagged by CodeRabbit
 
 ---
@@ -46,7 +46,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `docs/explanation/architecture.md:85`
 - **Summary:** Flow variants table is incorrect and misleading. Lists primary commands in "Variant" column with inaccurate "Use When" descriptions. Should rename section to describe re-entry points and remove incorrect file references.
 - **Route:** doc-writer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Table claims `/flow-4-gate`, `/flow-5-deploy`, `/flow-6-wisdom` are variants but they're actually the primary commands
 
 ### RW-004 [MAJOR] - FB-003, FB-004, FB-005
@@ -54,7 +54,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `CHANGELOG.md:24`, `CONTRIBUTING.md:8`, `docs/explanation/architecture.md:11`
 - **Summary:** Clarify command count vs flow count across multiple docs. "7 flow commands" should be "7 flows" (implemented by 10 command files including variants). Avoid confusion between 7 flows and 10 slash command files.
 - **Route:** doc-writer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Ambiguous phrasing in CHANGELOG, CONTRIBUTING, and architecture docs
 
 ### RW-005 [MAJOR] - Run artifacts sweep
@@ -62,7 +62,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/**/*.md`
 - **Summary:** Fix "6 flows" references and missing `flow-6-wisdom.md` in build artifacts. Sweep `.runs/local-alignment-audit-aba1c6/build/*.md` for outdated flow count references.
 - **Route:** doc-writer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Run artifacts may contain stale references from pre-consolidation state
 
 ---
@@ -72,9 +72,9 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 ### RW-006 [MAJOR] - FB-026
 - **Source:** CodeRabbit (user priority elevation)
 - **Location:** `.claude/commands/flow-*.md`
-- **Summary:** Typo "immeidate" → "immediate" in multiple flow command docs (directive text). Worth fixing to reduce bot noise in future PRs.
+- **Summary:** Typo "immeidate" -> "immediate" in multiple flow command docs (directive text). Worth fixing to reduce bot noise in future PRs.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Recurring typo across flow command files
 
 ### RW-007 [MINOR] - FB-007
@@ -82,15 +82,15 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/flow_plan.md:64`
 - **Summary:** Duplicate "Summary" heading (also at line 3). Rename second to "Final Summary" or "Outcome".
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** MD024 duplicate heading violation
 
 ### RW-008 [MINOR] - FB-008, FB-009
 - **Source:** CodeRabbit
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6`, `pr_creation_status.md:5`
-- **Summary:** Bare URLs should be wrapped in angle brackets or markdown link syntax (MD034).
+- **Summary:** Bare URLs should be wrapped in angle brackets or Markdown link syntax (MD034).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Markdown linting violations
 
 ### RW-009 [MINOR] - FB-010
@@ -98,7 +98,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/open_questions.md:29`
 - **Summary:** Add blank line before "Machine Summary" heading (MD022).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Missing blank line before heading
 
 ### RW-010 [MINOR] - FB-011
@@ -106,7 +106,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/secrets_scan.md`
 - **Summary:** Multiple headings/tables lack blank lines (lines 5-40). MD022/MD058 violations.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Recurring formatting issues suggest generator/template needs updating
 
 ### RW-011 [MINOR] - FB-012
@@ -114,7 +114,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/secrets_scan.md`
 - **Summary:** Same formatting issues as build variant - headings/tables missing blank lines.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Template-generated formatting violations
 
 ### RW-012 [MINOR] - FB-013
@@ -122,7 +122,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md:35,41`
 - **Summary:** Headings need blank lines after (MD022).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Markdown formatting violations
 
 ### RW-013 [MINOR] - FB-014
@@ -130,7 +130,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/observability_critique.md:149`
 - **Summary:** Table needs blank line before (MD058).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Missing blank line before table
 
 ### RW-014 [MINOR] - FB-015
@@ -138,7 +138,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md`
 - **Summary:** Multiple headings missing blank lines (lines 3, 74, ~85). MD022 violations.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Recurring formatting issues
 
 ### RW-015 [MINOR] - FB-016
@@ -146,7 +146,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/signal/bdd_critique.md:51`
 - **Summary:** Traceability table needs blank lines around it (MD058).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Missing blank lines around table
 
 ### RW-016 [MINOR] - FB-017
@@ -154,7 +154,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md:35,41`
 - **Summary:** Headings need blank lines after (MD022).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Markdown formatting violations
 
 ### RW-017 [MINOR] - FB-018
@@ -162,7 +162,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md:85-87`
 - **Summary:** Unordered list has incorrect indentation (MD007).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** List indentation violation
 
 ### RW-018 [MINOR] - FB-019
@@ -170,7 +170,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/self_review.md:1`
 - **Summary:** Use hyphenated "Self-Review" heading.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Heading style inconsistency
 
 ### RW-019 [MINOR] - FB-020
@@ -178,7 +178,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml:96`
 - **Summary:** Consider adding `maxItems` constraint to `variant_commands` array for schema strictness.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Schema completeness suggestion
 
 ### RW-020 [MINOR] - FB-021
@@ -186,7 +186,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/schema.md:47`
 - **Summary:** Flow entity invariants inconsistent (says flows 4-7 may have variants, but only 4-6 actually do).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Documentation inconsistency
 
 ### RW-021 [MINOR] - FB-022
@@ -194,7 +194,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/impact_map.json:146`
 - **Summary:** IMP-005 summary internally inconsistent about flow table state.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Internal inconsistency in impact analysis
 
 ### RW-022 [MINOR] - FB-023
@@ -202,7 +202,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/signal/bdd_critique.md:51`
 - **Summary:** Missing terminal punctuation.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Grammar/punctuation issue
 
 ### RW-023 [MINOR] - FB-024
@@ -210,7 +210,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/self_review.md:54`
 - **Summary:** Clarify risk deferral strategy for RSK-002.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Unclear risk documentation
 
 ### RW-024 [MINOR] - FB-025
@@ -218,15 +218,15 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md:54`
 - **Summary:** Test artifact path not fully qualified in VS-003.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Path specification incomplete
 
 ### RW-025 [MINOR] - FB-027
 - **Source:** CodeRabbit
 - **Location:** Multiple `secrets_scan.md` files
-- **Summary:** Recurring formatting issues suggest generator/template needs updating. Update secrets-sanitizer output template to emit proper markdown (blank lines around headings/tables).
+- **Summary:** Recurring formatting issues suggest generator/template needs updating. Update secrets-sanitizer output template to emit proper Markdown (blank lines around headings/tables).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Pattern of formatting violations across generated files
 
 ### RW-026 [MINOR] - FB-028
@@ -234,7 +234,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/build/subtask_context_manifest.json`
 - **Summary:** Has null `generated_at` field. Should populate with ISO8601 timestamp.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Missing timestamp in manifest metadata
 
 ### RW-027 [MINOR] - FB-029
@@ -242,7 +242,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md:127`
 - **Summary:** Emphasis used instead of heading (MD036).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Markdown semantic violation
 
 ### RW-028 [MINOR] - FB-030
@@ -250,7 +250,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md`
 - **Summary:** Missing blank lines after section headings (MD022).
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Recurring formatting pattern
 
 ### RW-029 [MINOR] - Glossary duplicates
@@ -258,7 +258,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** `docs/reference/glossary.md`
 - **Summary:** Remove duplicated flow definitions, keep canonical 7-flow list.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** Content duplication identified in user analysis
 
 ### RW-030 [MINOR] - Additional markdownlint fixes
@@ -266,7 +266,7 @@ _Process categories in this order: CORRECTNESS → DOCS → STYLE_
 - **Location:** Various `.runs/**/*.md`
 - **Summary:** Catchall for any remaining MD022/MD034/MD036 violations not explicitly listed above.
 - **Route:** fixer
-- **Status:** PENDING
+- **Status:** RESOLVED
 - **Evidence:** General formatting cleanup needed
 
 ---
@@ -280,16 +280,13 @@ route_to_flow: null
 route_to_agent: null
 blockers: []
 missing_required: []
-concerns:
-  - "api_contracts.yaml must be fixed to remove deleted file references (RW-001)"
-  - "Flow variants table in architecture.md is misleading (RW-003)"
-  - "Command count vs flow count needs clarification in multiple docs (RW-004)"
+concerns: []
 
 worklist_counts:
   total: 30
-  pending: 29
-  resolved: 1
-  skipped: 0
+  pending: 0
+  resolved: 29
+  skipped: 1
 
 by_category:
   CORRECTNESS: 2
@@ -306,3 +303,7 @@ by_route:
   doc-writer: 3
   fixer: 25
 ```
+
+
+
+

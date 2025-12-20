@@ -57,7 +57,7 @@
 - **FB-007:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/flow_plan.md:64` - Duplicate "Summary" heading (also at line 3). Rename second to "Final Summary" or "Outcome".
 
 **Bare URLs:**
-- **FB-008:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6` - Bare URL should be wrapped in angle brackets or markdown link syntax (MD034).
+- **FB-008:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6` - Bare URL should be wrapped in angle brackets or Markdown link syntax (MD034).
 - **FB-009:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/pr_creation_status.md:5` - Bare URL needs wrapping (MD034).
 
 **Missing Blank Lines (MD022/MD058):**
@@ -138,7 +138,7 @@ No general PR discussion comments found.
 ### Minor (Nice to Have)
 
 5. **Fix typo** "immeidate" → "immediate" in flow command docs (FB-026)
-6. **Fix markdown formatting** across `.runs/` artifacts (24 items: FB-007 through FB-030)
+6. **Fix Markdown formatting** across `.runs/` artifacts (24 items: FB-007 through FB-030)
 7. **Update generator/template** for secrets_scan.md to emit proper formatting
 
 ## Machine Summary
@@ -155,7 +155,7 @@ missing_required: []
 concerns:
   - "Command count vs flow count needs clarification in multiple docs"
   - "Data type inconsistency in secrets_status.json"
-  - "Extensive markdown formatting issues in .runs/ artifacts"
+  - "Extensive Markdown formatting issues in .runs/ artifacts"
   - "Typo in flow command directive text"
 
 feedback_counts:

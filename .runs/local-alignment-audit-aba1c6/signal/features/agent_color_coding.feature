@@ -5,7 +5,7 @@ Feature: Agent Color Coding Documentation
 
   Background:
     Given agent frontmatter includes a color field
-    And color coding exists in agent markdown files
+    And color coding exists in agent Markdown files
 
   @REQ-007 @smoke
   Scenario: Documentation acknowledges color field existence

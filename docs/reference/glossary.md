@@ -6,13 +6,13 @@
 
 ### Flow
 A sequence of agent invocations that transforms inputs into outputs. The swarm has 7 flows:
-- **Flow 1 (Signal)**: Raw input → problem statement, requirements, BDD, scope/risks
-- **Flow 2 (Plan)**: Specs → options, ADR, contracts, observability, test/work plans
-- **Flow 3 (Build)**: Plans → tests, code, reviews, build receipt
-- **Flow 4 (Review)**: Build output + Draft PR → PR feedback, worklist, review receipt
-- **Flow 5 (Gate)**: Review output → audits, policy/security/coverage checks, merge decision
-- **Flow 6 (Deploy)**: Gate-approved work → release verification + deploy receipt
-- **Flow 7 (Wisdom)**: Outcomes → regressions, learnings, feedback actions, final receipt
+- **Flow 1 (Signal)**: Raw input -> problem statement, requirements, BDD, scope/risks.
+- **Flow 2 (Plan)**: Specs -> options, ADR, contracts, observability, test/work plans.
+- **Flow 3 (Build)**: Plans -> tests, code, reviews, build receipt.
+- **Flow 4 (Review)**: Build output + Draft PR -> PR feedback, worklist, review receipt.
+- **Flow 5 (Gate)**: Review output -> audits, policy/security/coverage checks, merge decision.
+- **Flow 6 (Deploy)**: Gate-approved work -> release verification + deploy receipt.
+- **Flow 7 (Wisdom)**: Outcomes -> regressions, learnings, feedback actions, final receipt.
 
 ### Step (Station)
 A discrete unit of work within a flow. Steps invoke one or more agents and produce specific artifacts. In this pack, steps are "stations" tracked in TodoWrite and `flow_plan.md`.
@@ -69,7 +69,7 @@ An agent that reviews work but never fixes it. Critics produce harsh critiques w
 ## Planes and Contracts
 
 ### Audit plane
-Durable files under `.runs/<run-id>/…` that exist for inspection, handoffs, and reruns (e.g., `*_receipt.json`, critiques, reports).
+Durable files under `.runs/<run-id>/...` that exist for inspection, handoffs, and reruns (e.g., `*_receipt.json`, critiques, reports).
 
 ### Control plane
 Machine-parseable **Result blocks** returned by agents to drive orchestrator routing **without rereading files**.
@@ -87,14 +87,14 @@ GitHub operations require both:
 If either is false, flows still write artifacts/receipts but skip external operations.
 
 ### Reseal
-If `secrets-sanitizer` modifies files (`modified_files: true`), the orchestrator reruns `(cleanup ↔ secrets-sanitizer)` until `modified_files: false` so receipts match the final tree.
+If `secrets-sanitizer` modifies files (`modified_files: true`), the orchestrator reruns `(cleanup <-> secrets-sanitizer)` until `modified_files: false` so receipts match the final tree.
 
 ---
 
 ## Patterns
 
 ### Microloop
-Adversarial iteration between writer and critic agents. Used in Flows 1–3 (and design validation in Flow 2). Loops until:
+Adversarial iteration between writer and critic agents. Used in Flows 1-3 (and design validation in Flow 2). Loops until:
 - critic `status: VERIFIED`, or
 - critic `can_further_iteration_help: no` (explicit stop signal)
 
@@ -104,7 +104,7 @@ A structured JSON artifact produced by a cleanup/sealing agent summarizing what 
 Receipts are **sealed**: reporters read receipts; they do not recompute counts or upgrade statuses.
 
 ### Critique
-A structured review artifact produced by a critic (markdown). Contains a `## Machine Summary` section for mechanical parsing plus human-readable analysis.
+A structured review artifact produced by a critic (Markdown). Contains a `## Machine Summary` section for mechanical parsing plus human-readable analysis.
 
 ### Bounce
 Routing from one station/flow back to another due to issues. In pack terms, expressed via:
@@ -161,3 +161,4 @@ Audit record written by `secrets-sanitizer`: `.runs/<run-id>/<flow>/secrets_stat
 
 ### index.json
 `.runs/index.json` is a global registry of runs and minimal pointers (status, last_flow, timestamps, identity keys). It is not a receipt store.
+

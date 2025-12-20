@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -13,7 +14,6 @@ missing_required: []
 
 concerns:
   - RSK-001 (path traversal in secrets.rs) deferred to future security hardening run (not addressed in this documentation-only run)
-  - 23 MINOR review items pending (markdown formatting) - non-blocking per review completion criteria
   - cargo audit failed due to external tooling limitation (CVSS 4.0 parser) - does not affect pack security posture
 
 severity_summary:
@@ -190,7 +190,7 @@ severity_summary:
 
 - **PROCEED to merge**: All CRITICAL and MAJOR review items resolved. No HIGH or CRITICAL severity risks remain open.
 - RSK-001 (path traversal) explicitly accepted and deferred - track in separate security hardening run if threat model escalates
-- 23 MINOR formatting items are non-blocking; suitable for post-merge cleanup or future formatter iteration
+- No pending Markdown formatting items; style sweep complete
 - cargo audit tooling issue is external (CVSS 4.0 parser) and does not affect merge decision
 
 ---

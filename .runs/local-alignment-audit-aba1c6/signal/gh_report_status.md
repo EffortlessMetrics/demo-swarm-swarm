@@ -17,7 +17,7 @@ repository: EffortlessMetrics/demo-swarm-swarm
 ## Comment
 
 comment_id: 3677358406
-comment_url: https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1#issuecomment-3677358406
+comment_url: <https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1#issuecomment-3677358406>
 
 ## Content Posted
 

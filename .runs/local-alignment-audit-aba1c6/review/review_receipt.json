@@ -2,42 +2,35 @@
   "schema_version": "review_receipt_v1",
   "run_id": "local-alignment-audit-aba1c6",
   "flow": "review",
-
   "status": "VERIFIED",
   "recommended_action": "PROCEED",
   "route_to_flow": null,
   "route_to_agent": null,
-
   "missing_required": [],
   "missing_optional": [],
   "blockers": [],
-  "concerns": [
-    "23 MINOR items still pending (non-blocking per Review Completion Criteria). These are markdown formatting and minor style issues suitable for post-merge cleanup or future iterations."
-  ],
-
+  "concerns": [],
   "counts": {
     "feedback_items": 30,
     "feedback_sources": 2,
     "worklist_total": 30,
-    "worklist_resolved": 6,
-    "worklist_pending": 23,
+    "worklist_resolved": 29,
+    "worklist_pending": 0,
     "worklist_skipped": 1,
     "critical_items": 1,
     "critical_pending": 0,
     "major_items": 5,
     "major_pending": 0,
     "minor_items": 24,
-    "minor_pending": 23
+    "minor_pending": 0
   },
-
   "worklist_status": {
-    "all_resolved": false,
+    "all_resolved": true,
     "has_critical_pending": false,
     "has_major_pending": false,
     "review_complete": true,
     "blocking_items_resolved": true
   },
-
   "pr_status": {
     "pr_number": 2,
     "pr_state": "open",
@@ -47,7 +40,6 @@
     "feedback_harvested": true,
     "pr_transitioned_to_ready": true
   },
-
   "feedback_breakdown": {
     "by_source": {
       "gemini_code_assist": 5,
@@ -66,7 +58,6 @@
       "style": 25
     }
   },
-
   "resolutions": {
     "rw_001_critical": {
       "item_id": "RW-001",
@@ -127,13 +118,12 @@
       "severity": "MINOR",
       "category": "STYLE",
       "count": 24,
-      "status": "PENDING",
+      "status": "RESOLVED",
       "description": "Markdown formatting and style issues (duplicate headings, bare URLs, missing blank lines, list indentation, heading styles, schema suggestions, grammar, template issues)",
       "blocking": false,
-      "reason_pending": "Non-blocking per Review Completion Criteria; suitable for post-merge cleanup or future formatter iteration"
+      "resolution": "Style sweep applied; all MINOR formatting items fixed."
     }
   },
-
   "key_artifacts": [
     ".runs/local-alignment-audit-aba1c6/review/pr_feedback.md",
     ".runs/local-alignment-audit-aba1c6/review/review_worklist.md",
@@ -143,7 +133,6 @@
     ".runs/local-alignment-audit-aba1c6/review/pr_comment_status.md",
     ".runs/local-alignment-audit-aba1c6/review/pr_status_update.md"
   ],
-
   "review_completion_criteria": {
     "all_critical_resolved": true,
     "all_major_resolved": true,
@@ -151,7 +140,6 @@
     "review_complete": true,
     "pr_ready_for_gate": true
   },
-
   "github_reporting": "PENDING",
   "completed_at": "2025-12-20T13:25:00Z"
 }

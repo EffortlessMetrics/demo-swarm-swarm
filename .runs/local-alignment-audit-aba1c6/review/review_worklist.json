@@ -3,14 +3,12 @@
   "run_id": "local-alignment-audit-aba1c6",
   "generated_at": "2025-12-20T13:20:00Z",
   "source": ".runs/local-alignment-audit-aba1c6/review/pr_feedback.md",
-
   "summary": {
     "total": 30,
-    "pending": 23,
-    "resolved": 6,
+    "pending": 0,
+    "resolved": 29,
     "skipped": 1
   },
-
   "items": [
     {
       "id": "RW-001",
@@ -96,7 +94,7 @@
         "file": ".claude/commands/flow-*.md",
         "line": null
       },
-      "summary": "Typo immeidate → immediate in multiple flow command docs (directive text). Worth fixing to reduce bot noise in future PRs.",
+      "summary": "Typo immeidate -> immediate in multiple flow command docs (directive text). Worth fixing to reduce bot noise in future PRs.",
       "route_to": "fixer",
       "status": "RESOLVED",
       "evidence": "Recurring typo across flow command files",
@@ -113,7 +111,7 @@
       },
       "summary": "Duplicate Summary heading (also at line 3). Rename second to Final Summary or Outcome.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "MD024 duplicate heading violation"
     },
     {
@@ -125,9 +123,9 @@
         "file": ".runs/local-alignment-audit-aba1c6/build/gh_issue_status.md, pr_creation_status.md",
         "line": null
       },
-      "summary": "Bare URLs should be wrapped in angle brackets or markdown link syntax (MD034).",
+      "summary": "Bare URLs should be wrapped in angle brackets or Markdown link syntax (MD034).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Markdown linting violations"
     },
     {
@@ -141,7 +139,7 @@
       },
       "summary": "Add blank line before Machine Summary heading (MD022).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Missing blank line before heading"
     },
     {
@@ -155,7 +153,7 @@
       },
       "summary": "Multiple headings/tables lack blank lines (lines 5-40). MD022/MD058 violations.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Recurring formatting issues suggest generator/template needs updating"
     },
     {
@@ -169,7 +167,7 @@
       },
       "summary": "Same formatting issues as build variant - headings/tables missing blank lines.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Template-generated formatting violations"
     },
     {
@@ -183,7 +181,7 @@
       },
       "summary": "Headings need blank lines after (MD022).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Markdown formatting violations"
     },
     {
@@ -197,7 +195,7 @@
       },
       "summary": "Table needs blank line before (MD058).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Missing blank line before table"
     },
     {
@@ -211,7 +209,7 @@
       },
       "summary": "Multiple headings missing blank lines (lines 3, 74, ~85). MD022 violations.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Recurring formatting issues"
     },
     {
@@ -225,7 +223,7 @@
       },
       "summary": "Traceability table needs blank lines around it (MD058).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Missing blank lines around table"
     },
     {
@@ -239,7 +237,7 @@
       },
       "summary": "Headings need blank lines after (MD022).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Markdown formatting violations"
     },
     {
@@ -253,7 +251,7 @@
       },
       "summary": "Unordered list has incorrect indentation (MD007).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "List indentation violation"
     },
     {
@@ -267,7 +265,7 @@
       },
       "summary": "Use hyphenated Self-Review heading.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Heading style inconsistency"
     },
     {
@@ -281,7 +279,7 @@
       },
       "summary": "Consider adding maxItems constraint to variant_commands array for schema strictness.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Schema completeness suggestion"
     },
     {
@@ -295,7 +293,7 @@
       },
       "summary": "Flow entity invariants inconsistent (says flows 4-7 may have variants, but only 4-6 actually do).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Documentation inconsistency"
     },
     {
@@ -309,7 +307,7 @@
       },
       "summary": "IMP-005 summary internally inconsistent about flow table state.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Internal inconsistency in impact analysis"
     },
     {
@@ -323,7 +321,7 @@
       },
       "summary": "Missing terminal punctuation.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Grammar/punctuation issue"
     },
     {
@@ -337,7 +335,7 @@
       },
       "summary": "Clarify risk deferral strategy for RSK-002.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Unclear risk documentation"
     },
     {
@@ -351,7 +349,7 @@
       },
       "summary": "Test artifact path not fully qualified in VS-003.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Path specification incomplete"
     },
     {
@@ -363,9 +361,9 @@
         "file": "Multiple secrets_scan.md files",
         "line": null
       },
-      "summary": "Recurring formatting issues suggest generator/template needs updating. Update secrets-sanitizer output template to emit proper markdown (blank lines around headings/tables).",
+      "summary": "Recurring formatting issues suggest generator/template needs updating. Update secrets-sanitizer output template to emit proper Markdown (blank lines around headings/tables).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Pattern of formatting violations across generated files"
     },
     {
@@ -379,7 +377,7 @@
       },
       "summary": "Has null generated_at field. Should populate with ISO8601 timestamp.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Missing timestamp in manifest metadata"
     },
     {
@@ -393,7 +391,7 @@
       },
       "summary": "Emphasis used instead of heading (MD036).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Markdown semantic violation"
     },
     {
@@ -407,7 +405,7 @@
       },
       "summary": "Missing blank lines after section headings (MD022).",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Recurring formatting pattern"
     },
     {
@@ -421,7 +419,7 @@
       },
       "summary": "Remove duplicated flow definitions, keep canonical 7-flow list.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "Content duplication identified in user analysis"
     },
     {
@@ -435,7 +433,7 @@
       },
       "summary": "Catchall for any remaining MD022/MD034/MD036 violations not explicitly listed above.",
       "route_to": "fixer",
-      "status": "PENDING",
+      "status": "RESOLVED",
       "evidence": "General formatting cleanup needed"
     }
   ]

@@ -19,8 +19,8 @@ This is a **documentation alignment task**, not an API or code change. The "inte
 | Interface | Type | Purpose |
 |-----------|------|---------|
 | FlowModel | Data Schema | Canonical 7-flow structure |
-| FlowCommandRegistry | Data Schema | 10 command files enumeration |
-| FlowVariant | Data Schema | Multi-path entry point semantics |
+| FlowCommandRegistry | Data Schema | 7 command files enumeration |
+| FlowVariant | Data Schema | Reserved variant semantics (none defined) |
 | DocumentationConsistencySpec | Validation Contract | Prohibited/required patterns |
 | FlowArtifactPath | Data Schema | Standard artifact locations |
 
@@ -37,13 +37,12 @@ The core unit of the SDLC model. Seven flows exist with the following structure:
 | number | integer | 1-7, unique | Flow sequence number |
 | name | string | enum: Signal, Plan, Build, Review, Gate, Deploy, Wisdom | Canonical flow name |
 | primary_command | string | pattern: `/flow-[1-7]-[a-z]+` | Primary slash command |
-| variant_commands | string[] | optional | Alternate entry points (flows 4-7 only) |
+| variant_commands | string[] | optional | Alternate entry points (none currently) |
 | artifact_dir | string | lowercase flow name | Directory under `.runs/<run-id>/` |
 | key_outputs | string[] | required | Primary artifacts produced |
 
 **Invariants:**
-- Flow numbers 1-3 have no variants
-- Flow numbers 4-7 may have one variant each
+- All flows currently have no variants (one command per flow)
 - artifact_dir matches lowercase flow name
 
 ### Entity: FlowCommand
@@ -59,9 +58,8 @@ A slash command file under `.claude/commands/`.
 | variant_purpose | string | required if is_variant | When to use this variant |
 
 **Invariants:**
-- Exactly 10 command files exist (verified by enumeration)
-- 7 primary commands + 3 variants
-- Variants exist for flows 4, 5, 6 (not 7)
+- Exactly 7 command files exist (verified by enumeration)
+- 7 primary commands, no variants
 
 ### Entity: DocumentationFile
 
@@ -89,12 +87,12 @@ Per CLAUDE.md L13 and L186-197, the seven flows are:
 | 1 | Signal | /flow-1-signal | - | signal |
 | 2 | Plan | /flow-2-plan | - | plan |
 | 3 | Build | /flow-3-build | - | build |
-| 4 | Review | /flow-4-review | /flow-4-gate | review |
-| 5 | Gate | /flow-5-gate | /flow-5-deploy | gate |
-| 6 | Deploy | /flow-6-deploy | /flow-6-wisdom | deploy |
+| 4 | Review | /flow-4-review | - | review |
+| 5 | Gate | /flow-5-gate | - | gate |
+| 6 | Deploy | /flow-6-deploy | - | deploy |
 | 7 | Wisdom | /flow-7-wisdom | - | wisdom |
 
-**Total: 7 flows, 10 command files**
+**Total: 7 flows, 7 command files**
 
 ---
 
@@ -132,7 +130,7 @@ Documentation changes are low-risk but should follow these rules:
 | REQ | Interface/Entity | Constraint/Validation |
 |-----|------------------|----------------------|
 | REQ-001 | DocumentationConsistencySpec | prohibited_patterns: "six flows" -> zero matches |
-| REQ-002 | FlowVariant | variant_purpose required for all 3 variants |
+| REQ-002 | Flow | Re-entry semantics documented; no variants in schema |
 | REQ-003 | Flow (flow 7) | Flow 7 must appear in enumeration with usage_note |
 | REQ-004 | FlowModel | CLAUDE.md flow table shows all 7 flows |
 | REQ-005 | (out of scope) | Test count is separate; no schema change |
@@ -163,10 +161,10 @@ Not applicable - documentation changes have no runtime errors. Validation failur
 
 ## Assumptions Made to Proceed
 
-- **ASM-IFACE-001**: Flow variants (flow-4-gate, flow-5-deploy, flow-6-wisdom) are intentional alternate entry points and should be documented as such, not consolidated or deprecated.
-  - Impact if wrong: Would need to remove variant documentation; unlikely given consistent pattern across multiple flow pairs
+- **ASM-IFACE-001**: No flow variants exist in the current 7-command model; re-entry uses the primary command for each flow.
+  - Impact if wrong: Add variant documentation and update command registry accordingly
 
-- **ASM-IFACE-002**: The 10 command files under `.claude/commands/flow-*.md` are the complete and authoritative enumeration.
+- **ASM-IFACE-002**: The 7 command files under `.claude/commands/flow-*.md` are the complete and authoritative enumeration.
   - Impact if wrong: Additional commands would need to be added to the registry
 
 - **ASM-IFACE-003**: Pack-check test fixtures use string literals for "Six Flows" and can be updated to "Seven Flows" without breaking test semantics.
@@ -176,13 +174,7 @@ Not applicable - documentation changes have no runtime errors. Validation failur
 
 ## Questions / Clarifications Needed
 
-- **Q-IFACE-001**: Should the variant commands be listed inline in the CLAUDE.md flow table, or in a separate "Flow Variants" section?
-  - Suggested default: Separate section to avoid cluttering the main table
-  - Impact: Inline is more discoverable but makes the table wider
-
-- **Q-IFACE-002**: Should architecture.md explain why variants exist (historical context) or just when to use them (operational guidance)?
-  - Suggested default: Operational guidance only; "when to use each variant"
-  - Impact: Historical context may be useful for maintainers but adds verbosity
+None. The current model has one command per flow with no variants.
 
 ---
 

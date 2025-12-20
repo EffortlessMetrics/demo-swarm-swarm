@@ -12,8 +12,7 @@ missing_required: []
 blockers: []
 concerns:
   - Build artifacts permission-denied (build_receipt.json); documented as known state per context
-  - Gate receipt (gate_receipt.json) does not exist yet (expected—audit precedes receipt creation)
-  - 23 MINOR markdown style items pending in review worklist (non-blocking per Review Completion Criteria)
+  - Gate receipt (gate_receipt.json) does not exist yet (expected-audit precedes receipt creation)
 ```
 
 ## Run Identity
@@ -77,7 +76,7 @@ concerns:
 
 **Note:** Auditor does not read issue body; markers are sourced from local artifacts and previous flow reporting.
 
-- Issue #1 exists (per run_meta.issue_url = https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1)
+- Issue #1 exists (per run_meta.issue_url = <https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1>)
 - PR #2 linked (per run_meta.pr_number = 2, pr_state = open)
 
 ### Flow Comments
@@ -319,7 +318,7 @@ All REQ-driven ACs reference a feature file:line in Source column.
 8. **Known Non-Issues (Documented Limitations)**
    - Build receipt (build_receipt.json) not readable: context indicates documentation-only run (no build artifacts generated). This is expected and does not affect traceability.
    - Gate receipt (gate_receipt.json) does not exist: audit precedes gate phase receipt creation. Expected.
-   - 23 MINOR markdown style items pending in review worklist: non-blocking per Review Completion Criteria (marked as suitable for post-merge cleanup). Does not affect traceability.
+   - 0 MINOR Markdown style items pending (style sweep complete). Does not affect traceability.
 
 ## Inventory (machine countable)
 

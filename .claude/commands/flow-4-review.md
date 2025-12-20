@@ -136,7 +136,7 @@ Read from `.runs/<run-id>/run_meta.json`:
 | `review_worklist.md` | review-worklist-writer | Actionable items with stable markers |
 | `review_worklist.json` | review-worklist-writer | Machine-readable worklist |
 | `review_actions.md` | Orchestrator | Cumulative log of changes made |
-| `style_sweep.md` | Orchestrator | Style sweep result (NOOP if no pending MINOR markdown items) |
+| `style_sweep.md` | Orchestrator | Style sweep result (NOOP if no pending MINOR Markdown items) |
 | `cleanup_report.md` | review-cleanup | Cleanup summary |
 | `review_receipt.json` | review-cleanup | Machine-readable receipt |
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings |
@@ -234,7 +234,7 @@ Sources:
 
 **Call `review-worklist-writer`** to convert feedback into actionable items.
 
-- Each item gets a stable `RW-NNN` ID (except the grouped markdown sweep uses `RW-MD-SWEEP`)
+- Each item gets a stable `RW-NNN` ID (except the grouped Markdown sweep uses `RW-MD-SWEEP`)
 - Items are categorized: CORRECTNESS, TESTS, STYLE, DOCS
 - Items are prioritized: CRITICAL, MAJOR, MINOR, INFO
 - Items are routed to appropriate agents
@@ -263,7 +263,7 @@ while not terminated:
     3. If context exhausted: break (can resume later)
 
     4. Run Style Sweep station (always):
-       - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
+       - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
        - Update `RW-MD-SWEEP` status and write style_sweep.md (NOOP if no pending MINOR style items)
        - If sweep touched `.runs/<run-id>/build/`, run build-cleanup to reseal build_receipt.json
 
@@ -301,7 +301,7 @@ while not terminated:
 **Style Sweep station (standard, always run):**
 - Check for a pending `RW-MD-SWEEP` or pending MINOR markdownlint items in the worklist.
 - If none: write `.runs/<run-id>/review/style_sweep.md` with `status: NOOP` and "no pending MINOR style items".
-- If present: call `fixer` with "apply all remaining MINOR markdown formatting fixes in one pass" and `scope: mechanical formatting only`, then run `test-executor` once (pack-check), then re-harvest feedback once.
+- If present: call `fixer` with "apply all remaining MINOR Markdown formatting fixes in one pass" and `scope: mechanical formatting only`, then run `test-executor` once (pack-check), then re-harvest feedback once.
 - After re-harvest, call `review-worklist-writer` to refresh `review_worklist.json`, then append to `review_actions.md`. If noise remains, leave `RW-MD-SWEEP` PENDING (non-blocking).
 - Do not route markdownlint child items individually; resolve them via the `RW-MD-SWEEP` parent.
 - Guardrail: if the sweep touches anything under `.runs/<run-id>/build/`, call `build-cleanup` to reseal `build_receipt.json`.
@@ -518,8 +518,8 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
 2) If pending == 0: exit loop (complete)
 3) If context exhausted: exit loop (can resume later)
 
-4) Run Style Sweep station (always; NOOP if no pending MINOR markdown items):
-   - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
+4) Run Style Sweep station (always; NOOP if no pending MINOR Markdown items):
+   - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
    - Update `review_worklist.json`, write `style_sweep.md`, and reseal build receipt if `.runs/<run-id>/build/` is touched
 
 5) Pick next pending item by priority:
@@ -584,3 +584,4 @@ Continue beyond default two passes only when critic returns `recommended_action:
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
+

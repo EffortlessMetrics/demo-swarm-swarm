@@ -6,8 +6,8 @@
 |----------|----------|---------|---------|
 | CRITICAL | 1 | 0 | 0 |
 | MAJOR | 5 | 1 | 0 |
-| MINOR | 0 | 0 | 23 |
-| **Total** | **6** | **1** | **23** |
+| MINOR | 24 | 0 | 0 |
+| **Total** | **29** | **1** | **0** |
 
 ## Resolved Items
 
@@ -78,19 +78,13 @@
 - `.claude/commands/flow-7-wisdom.md`
 
 **Actions Taken:**
-- Fixed typo "immeidate" → "immediate" in the TodoWrite guidance section of all 7 flow command files
+- Fixed typo "immeidate" -> "immediate" in the TodoWrite guidance section of all 7 flow command files
 
 ---
 
-## Pending Items (MINOR - Not Blocking)
+## Resolved Items (MINOR)
 
-RW-007 through RW-030 are all MINOR markdown formatting issues (MD022, MD034, MD058, etc.). Per Review Completion Criteria, MINOR items do not block review completion.
-
-These include:
-- Duplicate headings in flow_plan.md (RW-007)
-- Bare URLs needing angle brackets (RW-008)
-- Missing blank lines before headings/tables (RW-009 through RW-017)
-- Various style suggestions (RW-018 through RW-030)
+RW-007 through RW-030 are resolved via a single style sweep (Markdown formatting fixes, schema/grammar tweaks, and template cleanup).
 
 ## Machine Summary
 ```yaml
@@ -100,12 +94,12 @@ route_to_flow: null
 route_to_agent: null
 blockers: []
 missing_required: []
-concerns:
-  - "23 MINOR items remain pending (markdown formatting)"
+concerns: []
 
 items_summary:
   critical_resolved: 1
   major_resolved: 5
   major_skipped: 1
-  minor_pending: 23
+  minor_pending: 0
 ```
+

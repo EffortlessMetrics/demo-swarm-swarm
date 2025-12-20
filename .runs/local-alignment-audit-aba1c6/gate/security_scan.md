@@ -81,7 +81,7 @@ No high-signal vulnerability patterns detected in scanned surface.
 
 **Flow Commands and Agent Prompts:**
 
-All flow commands (flow-1-signal.md through flow-7-wisdom.md) are markdown documentation files that:
+All flow commands (flow-1-signal.md through flow-7-wisdom.md) are Markdown documentation files that:
 - Define orchestration instructions for Claude Code agents
 - Reference paths using safe templated patterns (`.runs/<run-id>/...`)
 - Do not contain executable code that could be exploited
@@ -119,7 +119,7 @@ This run (`local-alignment-audit-aba1c6`) represents a documentation alignment a
    - Flow command documentation (`.claude/commands/flow-*.md`)
    - Contract schema corrections (`.runs/.../plan/api_contracts.yaml`)
 
-2. **No code execution surface changes:** The changed files are markdown documentation and YAML schemas. No executable code (shell scripts, Python, Rust) was modified in this run.
+2. **No code execution surface changes:** The changed files are Markdown documentation and YAML schemas. No executable code (shell scripts, Python, Rust) was modified in this run.
 
 3. **No secrets detected:** Comprehensive pattern matching found zero suspected credentials in the changed surface.
 

@@ -1,9 +1,11 @@
 # Signal Cleanup Report
 
 ## Run: local-alignment-audit-aba1c6
+
 ## Completed: 2025-12-20T03:52:42Z
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -12,6 +14,7 @@ missing_required: []
 blockers: []
 
 ## Artifact Verification
+
 | Artifact | Status |
 |----------|--------|
 | requirements.md | Found |
@@ -30,6 +33,7 @@ blockers: []
 | example_matrix.md | Found |
 
 ## Counts Derived
+
 | Metric | Count | Source |
 |--------|-------|--------|
 | Functional Requirements | 7 | grep '^### REQ-' requirements.md |
@@ -43,6 +47,7 @@ blockers: []
 | Total Risks | 6 | Sum of all severity levels |
 
 ## Quality Gates
+
 | Gate | Status | Source |
 |------|--------|--------|
 | requirements-critic | VERIFIED | requirements_critique.md (Machine Summary) |

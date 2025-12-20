@@ -22,7 +22,7 @@ concerns:
 
 - number: #1
 - canonical_key: gh-1
-- url: https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1
+- url: <https://github.com/EffortlessMetrics/demo-swarm-swarm/issues/1>
 
 ## Gates (Control Plane)
 

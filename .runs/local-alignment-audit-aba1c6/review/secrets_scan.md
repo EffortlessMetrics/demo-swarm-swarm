@@ -23,12 +23,15 @@ No secrets detected on publish surface.
 ## Actions Taken
 
 ### Redacted
+
 (none)
 
 ### Externalized
+
 (none)
 
 ### Unstaged
+
 (none)
 
 ## Safety Flags
