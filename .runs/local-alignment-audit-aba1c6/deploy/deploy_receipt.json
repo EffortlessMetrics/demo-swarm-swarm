@@ -1,0 +1,52 @@
+{
+  "schema_version": "deploy_receipt_v1",
+  "run_id": "local-alignment-audit-aba1c6",
+  "flow": "deploy",
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [
+    "ORG_CONSTRAINT: Branch protection not enabled on main branch; required status checks not configured"
+  ],
+  "concerns": [
+    "Merge operation completed successfully but governance enforcement is not verifiable",
+    "CI workflows exist and would run on push/PR, but are not required to pass before merge",
+    "Post-merge CI signal is UNKNOWN (workflow has not yet triggered)"
+  ],
+
+  "deployment_verdict": "NOT_DEPLOYED",
+  "gate_verdict": "MERGE",
+
+  "counts": {
+    "failed_checks": 1,
+    "ci_checks_total": 1,
+    "deploy_events_total": 1,
+    "verification_checks_total": 2
+  },
+
+  "signals": {
+    "ci_signal": "UNKNOWN",
+    "deploy_signal": "STABLE",
+    "not_deployed": "no"
+  },
+
+  "quality_gates": {
+    "deploy_decider": "VERIFIED",
+    "verification_report": "VERIFIED"
+  },
+
+  "key_artifacts": [
+    "deployment_decision.md",
+    "deployment_log.md",
+    "verification_report.md",
+    "flow_plan.md"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-20T17:16:49Z"
+}
