@@ -771,3 +771,5 @@ If `build/ac_status.json` exists (rerun):
 - [ ] pr-creator (create Draft PR; gated on publish_surface: PUSHED)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.

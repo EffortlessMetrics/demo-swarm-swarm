@@ -596,3 +596,5 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)
 - [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
 - [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)
+
+Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.

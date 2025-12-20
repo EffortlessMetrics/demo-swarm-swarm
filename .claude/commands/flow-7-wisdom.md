@@ -861,3 +861,5 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.

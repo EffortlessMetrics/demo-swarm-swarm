@@ -575,3 +575,5 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)
 - [ ] gh-issue-manager (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
 - [ ] gh-reporter (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
+
+Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.
