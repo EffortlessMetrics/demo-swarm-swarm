@@ -1,0 +1,157 @@
+{
+  "schema_version": "review_receipt_v1",
+  "run_id": "local-alignment-audit-aba1c6",
+  "flow": "review",
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [
+    "23 MINOR items still pending (non-blocking per Review Completion Criteria). These are markdown formatting and minor style issues suitable for post-merge cleanup or future iterations."
+  ],
+
+  "counts": {
+    "feedback_items": 30,
+    "feedback_sources": 2,
+    "worklist_total": 30,
+    "worklist_resolved": 6,
+    "worklist_pending": 23,
+    "worklist_skipped": 1,
+    "critical_items": 1,
+    "critical_pending": 0,
+    "major_items": 5,
+    "major_pending": 0,
+    "minor_items": 24,
+    "minor_pending": 23
+  },
+
+  "worklist_status": {
+    "all_resolved": false,
+    "has_critical_pending": false,
+    "has_major_pending": false,
+    "review_complete": true,
+    "blocking_items_resolved": true
+  },
+
+  "pr_status": {
+    "pr_number": 2,
+    "pr_state": "open",
+    "pr_draft": false,
+    "ci_passing": true,
+    "reviews_approved": null,
+    "feedback_harvested": true,
+    "pr_transitioned_to_ready": true
+  },
+
+  "feedback_breakdown": {
+    "by_source": {
+      "gemini_code_assist": 5,
+      "coderabbit": 25,
+      "human_reviews": 0
+    },
+    "by_severity": {
+      "critical": 1,
+      "major": 5,
+      "minor": 24,
+      "info": 0
+    },
+    "by_category": {
+      "correctness": 2,
+      "docs": 3,
+      "style": 25
+    }
+  },
+
+  "resolutions": {
+    "rw_001_critical": {
+      "item_id": "RW-001",
+      "severity": "CRITICAL",
+      "category": "CORRECTNESS",
+      "status": "RESOLVED",
+      "description": "api_contracts.yaml command registry - removed references to deleted files (flow-4-gate.md, flow-5-deploy.md, flow-6-wisdom.md), updated command counts from 10 to 7",
+      "agent": "code-implementer",
+      "evidence": "Files listed in variant_commands array no longer exist after seven-flow consolidation"
+    },
+    "rw_002_major": {
+      "item_id": "RW-002",
+      "severity": "MAJOR",
+      "category": "CORRECTNESS",
+      "status": "SKIPPED",
+      "description": "modified_files data type (boolean vs integer) - CLAUDE.md Gate Result contract specifies boolean, current implementation correct",
+      "agent": "code-implementer",
+      "reason_skipped": "Not a bug - implementation matches contract specification"
+    },
+    "rw_003_major": {
+      "item_id": "RW-003",
+      "severity": "MAJOR",
+      "category": "DOCS",
+      "status": "RESOLVED",
+      "description": "architecture.md flow variants table - renamed to 'Flow commands', replaced misleading variant table with accurate 7-command table",
+      "agent": "doc-writer",
+      "evidence": "Table incorrectly listed primary commands as variants"
+    },
+    "rw_004_major": {
+      "item_id": "RW-004",
+      "severity": "MAJOR",
+      "category": "DOCS",
+      "status": "RESOLVED",
+      "description": "CHANGELOG.md, CONTRIBUTING.md, architecture.md - verified public docs already correctly say '7 flow commands' (10 command count was in stale Signal artifacts only)",
+      "agent": "doc-writer",
+      "evidence": "Public documentation correctly describes 7 flows vs internal artifact references"
+    },
+    "rw_005_major": {
+      "item_id": "RW-005",
+      "severity": "MAJOR",
+      "category": "DOCS",
+      "status": "RESOLVED",
+      "description": "Run artifacts sweep - fixed test_execution.md, changed '6 flows, 8 commands' to '7 flows, 7 commands'",
+      "agent": "doc-writer",
+      "evidence": "Stale flow count references in build artifacts"
+    },
+    "rw_006_major": {
+      "item_id": "RW-006",
+      "severity": "MAJOR",
+      "category": "STYLE",
+      "status": "RESOLVED",
+      "description": "Typo 'immeidate' -> 'immediate' in flow command directive text - fixed across all 7 flow command files",
+      "agent": "fixer",
+      "evidence": "Recurring typo reduced bot noise for future PRs"
+    },
+    "rw_007_through_030_minor": {
+      "item_ids": "RW-007 through RW-030",
+      "severity": "MINOR",
+      "category": "STYLE",
+      "count": 24,
+      "status": "PENDING",
+      "description": "Markdown formatting and style issues (duplicate headings, bare URLs, missing blank lines, list indentation, heading styles, schema suggestions, grammar, template issues)",
+      "blocking": false,
+      "reason_pending": "Non-blocking per Review Completion Criteria; suitable for post-merge cleanup or future formatter iteration"
+    }
+  },
+
+  "key_artifacts": [
+    ".runs/local-alignment-audit-aba1c6/review/pr_feedback.md",
+    ".runs/local-alignment-audit-aba1c6/review/review_worklist.md",
+    ".runs/local-alignment-audit-aba1c6/review/review_worklist.json",
+    ".runs/local-alignment-audit-aba1c6/review/review_actions.md",
+    ".runs/local-alignment-audit-aba1c6/review/flow_plan.md",
+    ".runs/local-alignment-audit-aba1c6/review/pr_comment_status.md",
+    ".runs/local-alignment-audit-aba1c6/review/pr_status_update.md"
+  ],
+
+  "review_completion_criteria": {
+    "all_critical_resolved": true,
+    "all_major_resolved": true,
+    "blocking_items_resolved": true,
+    "review_complete": true,
+    "pr_ready_for_gate": true
+  },
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-20T13:25:00Z"
+}

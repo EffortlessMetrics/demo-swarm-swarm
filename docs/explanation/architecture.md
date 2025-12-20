@@ -73,18 +73,23 @@ Why: Orchestrators route on control plane (fast, deterministic); humans inspect 
 
 Flows can run out-of-order; missing inputs result in documented assumptions and UNVERIFIED outcomes.
 
-### Flow command variants
+### Flow commands
 
-Some flows have alternative entry points for different contexts:
+Each flow has exactly one slash command:
 
-| Variant | Primary Flow | Use When |
-|---------|--------------|----------|
-| `/flow-4-review` | 4. Review | After PR feedback arrives; harvests comments before Gate |
-| `/flow-5-gate` | 5. Gate | Re-running gate checks (e.g., after fix-forward) |
-| `/flow-6-deploy` | 6. Deploy | Merge + deploy to mainline |
-| `/flow-7-wisdom` | 7. Wisdom | Second-cycle wisdom extraction for multi-iteration runs |
+| Command | Flow | Purpose |
+|---------|------|---------|
+| `/flow-1-signal` | Signal | Shape raw request into requirements |
+| `/flow-2-plan` | Plan | Design the solution |
+| `/flow-3-build` | Build | Implement code and tests |
+| `/flow-4-review` | Review | Harvest PR feedback |
+| `/flow-5-gate` | Gate | Pre-merge verification |
+| `/flow-6-deploy` | Deploy | Merge to mainline |
+| `/flow-7-wisdom` | Wisdom | Extract learnings |
 
-The primary sequence is: `/flow-1-signal` → `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
+The recommended sequence is: `/flow-1-signal` → `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
+
+**Re-entry:** Any flow can be invoked at any point. Missing upstream artifacts result in documented assumptions and UNVERIFIED outcomes (see "out-of-order" note above).
 
 ### Flow 7: Second-cycle wisdom
 

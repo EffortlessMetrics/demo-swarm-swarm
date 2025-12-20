@@ -66,7 +66,7 @@ The pack-check validation framework executed 53 distinct checks covering:
    - regression-analyst, flow-historian, learning-synthesizer
    - feedback-applier, gh-issue-manager, gh-reporter
 
-2. **Flow Commands** (6 flows, 8 commands total)
+2. **Flow Commands** (7 flows, 7 commands)
    - All flows reference complete sealing sequence (cleanup → secrets → repo-op → GH ops)
    - All flows document reseal-if-modified pattern
    - All flows document Gate Result contract block with modified_files field
@@ -117,7 +117,7 @@ The pack-check validation framework executed 53 distinct checks covering:
     - No domain drift in recommended_action (no BOUNCE_BUILD, BOUNCE_PLAN, RERUN_FLOW_*)
     - All critics/verifiers have route_to_agent and route_to_flow fields
     - gh-issue-manager and gh-reporter enforce two gates (safe_to_publish + proceed_to_github_ops)
-    - checkpoint_mode: local_only contract documented in repo-operator and referenced across 6 flows
+    - checkpoint_mode: local_only contract documented in repo-operator and referenced across 7 flows
 
 13. **Decision Spine and ADR Contracts**
     - design-optioneer.md has marker-level schema hints
@@ -166,7 +166,7 @@ The pack-check validation framework executed 53 distinct checks covering:
 
 ### Warnings (Non-Critical)
 
-1. **flow-6-wisdom.md not found** — This is expected during local-alignment-audit runs. Cannot validate regression marker docs for Flow 7, but wisdom-cleanup correctly references REG marker pattern.
+1. **flow-7-wisdom.md present** — Flow 7 (Wisdom) command documentation is now available and validated. The wisdom-cleanup agent correctly references REG marker pattern for regression detection.
 
 2. **Non-canonical OpenQ flow codes** — 9 instances of OQ-PLAN-* found in open_questions.md files; pack-check recommends OQ-PLN-* for consistency with flow code abbreviations (SIG, PLN, BLD, REV, GT, DPL, WIS). This is advisory only and does not impact validation.
 

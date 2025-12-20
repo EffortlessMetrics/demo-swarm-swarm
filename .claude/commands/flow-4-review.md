@@ -564,4 +564,4 @@ Continue beyond default two passes only when critic returns `recommended_action:
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 
-Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

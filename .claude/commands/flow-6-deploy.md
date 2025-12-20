@@ -392,4 +392,4 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 ```
 
-Use explore agents to answer any immeidate questions you have and then create the todo list and call the agents.
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

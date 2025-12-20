@@ -57,10 +57,10 @@ components:
           maxItems: 7
         command_count:
           type: integer
-          const: 10
+          const: 7
           description: |
             Total slash command files implementing the 7 flows.
-            10 command files due to variant entry points (e.g., flow-4-gate, flow-4-review).
+            One command file per flow (no variant entry points).
         pipeline_order:
           type: string
           const: "Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom"
@@ -90,10 +90,10 @@ components:
           type: array
           items:
             type: string
-            pattern: '^/flow-[4-7]-[a-z]+$'
+            pattern: '^/flow-[1-7]-[a-z]+$'
           description: |
-            Alternate entry points for flows 4-7.
-            These represent re-entry points for rework or alternate paths.
+            Reserved for future alternate entry points.
+            Currently empty for all flows (7 flows = 7 command files).
         artifact_dir:
           type: string
           enum: [signal, plan, build, review, gate, deploy, wisdom]
@@ -113,7 +113,7 @@ components:
     FlowCommandRegistry:
       type: object
       description: |
-        Complete registry of all 10 flow command files.
+        Complete registry of all 7 flow command files.
         Source: .claude/commands/flow-*.md enumeration
       required:
         - commands
@@ -121,14 +121,14 @@ components:
       properties:
         total:
           type: integer
-          const: 10
-          description: Total number of command files (7 primary + 3 variants)
+          const: 7
+          description: Total number of command files (one per flow)
         commands:
           type: array
           items:
             $ref: '#/components/schemas/FlowCommand'
-          minItems: 10
-          maxItems: 10
+          minItems: 7
+          maxItems: 7
 
     FlowCommand:
       type: object
@@ -152,7 +152,7 @@ components:
           type: boolean
           description: |
             True if this is an alternate entry point (not the primary command).
-            Variants exist for flows 4, 5, 6, 7.
+            Currently false for all commands (no variants exist).
         variant_purpose:
           type: string
           description: |
@@ -162,29 +162,27 @@ components:
     FlowVariant:
       type: object
       description: |
-        Explains the relationship between flow variant commands.
-        REQ-002 requires documenting when to use each variant.
+        Reserved schema for future flow variant commands.
+        Currently unused - all 7 flows have exactly one command each.
       required:
         - flow_number
         - primary_command
-        - variant_command
-        - primary_use_case
-        - variant_use_case
       properties:
         flow_number:
           type: integer
-          minimum: 4
+          minimum: 1
           maximum: 7
         primary_command:
           type: string
         variant_command:
           type: string
+          description: Reserved for future use
         primary_use_case:
           type: string
           description: When to invoke the primary command
         variant_use_case:
           type: string
-          description: When to invoke the variant command
+          description: Reserved for future use
 
     # ============================================================
     # Documentation Consistency Specification
@@ -285,7 +283,7 @@ components:
 
 x-canonical-flow-model:
   flow_count: 7
-  command_count: 10
+  command_count: 7
   pipeline_order: "Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom"
   flows:
     - number: 1
@@ -329,8 +327,7 @@ x-canonical-flow-model:
     - number: 4
       name: Review
       primary_command: /flow-4-review
-      variant_commands:
-        - /flow-4-gate  # Alternate entry point before merge
+      variant_commands: []
       artifact_dir: review
       key_outputs:
         - pr_feedback.md
@@ -341,8 +338,7 @@ x-canonical-flow-model:
     - number: 5
       name: Gate
       primary_command: /flow-5-gate
-      variant_commands:
-        - /flow-5-deploy  # Alternate for deployment execution path
+      variant_commands: []
       artifact_dir: gate
       key_outputs:
         - merge_decision.md
@@ -351,8 +347,7 @@ x-canonical-flow-model:
     - number: 6
       name: Deploy
       primary_command: /flow-6-deploy
-      variant_commands:
-        - /flow-6-wisdom  # Alternate for wisdom extraction path
+      variant_commands: []
       artifact_dir: deploy
       key_outputs:
         - deployment_log.md
@@ -369,13 +364,9 @@ x-canonical-flow-model:
         - learnings.md
         - feedback_actions.md
         - wisdom_receipt.json
-      usage_note: |
-        Flow 7 is a second-cycle wisdom extraction for multi-iteration runs.
-        Use /flow-7-wisdom for explicit second-pass learnings after a complete cycle.
-        Use /flow-6-wisdom (variant) for inline wisdom extraction during deploy.
 
 x-canonical-command-registry:
-  total: 10
+  total: 7
   commands:
     - filename: flow-1-signal.md
       flow_number: 1
@@ -397,33 +388,15 @@ x-canonical-command-registry:
       flow_name: Review
       is_variant: false
 
-    - filename: flow-4-gate.md
-      flow_number: 4
-      flow_name: Gate (Review entry point)
-      is_variant: true
-      variant_purpose: "Gate evaluation entry; use before merge decision"
-
     - filename: flow-5-gate.md
       flow_number: 5
       flow_name: Gate
       is_variant: false
 
-    - filename: flow-5-deploy.md
-      flow_number: 5
-      flow_name: Deploy (Gate entry point)
-      is_variant: true
-      variant_purpose: "Deploy after gate; execution path for verified changes"
-
     - filename: flow-6-deploy.md
       flow_number: 6
       flow_name: Deploy
       is_variant: false
-
-    - filename: flow-6-wisdom.md
-      flow_number: 6
-      flow_name: Wisdom (Deploy entry point)
-      is_variant: true
-      variant_purpose: "Inline wisdom extraction during deploy cycle"
 
     - filename: flow-7-wisdom.md
       flow_number: 7
@@ -432,29 +405,10 @@ x-canonical-command-registry:
 
 x-flow-variant-semantics:
   description: |
-    Explains the multi-path design (REQ-002).
-    Variants are intentional re-entry points, not duplicates.
-  variants:
-    - flow_number: 4
-      primary_command: /flow-4-review
-      variant_command: /flow-4-gate
-      primary_use_case: "Harvest PR feedback after build creates Draft PR"
-      variant_use_case: "Gate evaluation before merge; use when review is complete"
-      relationship: "Different entry points into the review/gate cycle"
-
-    - flow_number: 5
-      primary_command: /flow-5-gate
-      variant_command: /flow-5-deploy
-      primary_use_case: "Gate verdict evaluation; decide MERGE or BOUNCE"
-      variant_use_case: "Execute deployment after gate passes"
-      relationship: "Gate verdict vs deployment execution paths"
-
-    - flow_number: 6
-      primary_command: /flow-6-deploy
-      variant_command: /flow-6-wisdom
-      primary_use_case: "Execute mainline merge and deployment artifacts"
-      variant_use_case: "Wisdom extraction inline with deploy"
-      relationship: "Deploy execution vs wisdom extraction paths"
+    Reserved for future multi-path design.
+    Currently all 7 flows have exactly one command each.
+    No variant commands exist at this time.
+  variants: []
 
 x-documentation-consistency-spec:
   prohibited_patterns:
