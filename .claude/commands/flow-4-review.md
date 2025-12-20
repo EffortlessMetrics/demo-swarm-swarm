@@ -458,21 +458,6 @@ MINOR and INFO items may remain pending without blocking.
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-- [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] pr-creator (create Draft PR if needed)
-- [ ] pr-feedback-harvester
-- [ ] review-worklist-writer
-- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
-- [ ] pr-commenter (post/update PR summary comment)
-- [ ] pr-status-manager (flip Draft to Ready if review complete)
-- [ ] review-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (commit/push; return Repo Operator Result)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 
 ### Station order + templates
 
@@ -562,3 +547,19 @@ Reused from Build when needed within the worklist loop.
 4) Re-critique: call `<critic>` again
 
 Continue beyond default two passes only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
+
+### TodoWrite (copy exactly)
+- [ ] run-prep
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] pr-creator (create Draft PR if needed)
+- [ ] pr-feedback-harvester
+- [ ] review-worklist-writer
+- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
+- [ ] pr-commenter (post/update PR summary comment)
+- [ ] pr-status-manager (flip Draft to Ready if review complete)
+- [ ] review-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (commit/push; return Repo Operator Result)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)

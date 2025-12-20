@@ -523,26 +523,6 @@ If yes, proceed to `/flow-2-plan`.
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-
-- [ ] gh-issue-resolver (issue binding -> run_id)
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] signal-run-prep
-- [ ] gh-researcher
-- [ ] signal-normalizer
-- [ ] problem-framer
-- [ ] clarifier
-- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
-- [ ] scope-assessor
-- [ ] risk-analyst
-- [ ] signal-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] signal-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (checkpoint; capture Repo Operator Result)
-- [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
-- [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)
-
 ### Station order + templates
 
 #### Station order
@@ -596,3 +576,23 @@ Continue looping beyond the default two passes only when:
 - the critic's open items are specific, and the writer can change the artifact to address them.
 
 Otherwise proceed with `UNVERIFIED` + blockers recorded.
+
+### TodoWrite (copy exactly)
+
+- [ ] gh-issue-resolver (issue binding -> run_id)
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] signal-run-prep
+- [ ] gh-researcher
+- [ ] signal-normalizer
+- [ ] problem-framer
+- [ ] clarifier
+- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
+- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- [ ] scope-assessor
+- [ ] risk-analyst
+- [ ] signal-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] signal-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; capture Repo Operator Result)
+- [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
+- [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)

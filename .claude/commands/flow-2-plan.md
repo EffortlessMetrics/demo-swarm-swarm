@@ -503,25 +503,6 @@ All written to `.runs/<run-id>/plan/`:
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-- [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-- [ ] clarifier (plan open questions)
-- [ ] impact-analyzer
-- [ ] design-optioneer ↔ option-critic (microloop; 2 passes default)
-- [ ] adr-author
-- [ ] interface-designer / observability-designer / test-strategist / work-planner (parallel)
-- [ ] interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
-- [ ] observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
-- [ ] design-critic (microloop if needed)
-- [ ] policy-analyst
-- [ ] plan-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] plan-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (checkpoint; capture Repo Operator Result)
-- [ ] gh-issue-manager (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
-- [ ] gh-reporter (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
-
 ### Station order + templates
 
 #### Station order
@@ -575,3 +556,22 @@ Continue looping beyond the default two passes only when:
 - the remaining items are concrete and writer-addressable (a new writer pass can plausibly clear them).
 
 Otherwise proceed with `UNVERIFIED` + blockers recorded.
+
+### TodoWrite (copy exactly)
+- [ ] run-prep
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] clarifier (plan open questions)
+- [ ] impact-analyzer
+- [ ] design-optioneer ↔ option-critic (microloop; 2 passes default)
+- [ ] adr-author
+- [ ] interface-designer / observability-designer / test-strategist / work-planner (parallel)
+- [ ] interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
+- [ ] observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
+- [ ] design-critic (microloop if needed)
+- [ ] policy-analyst
+- [ ] plan-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] plan-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint; capture Repo Operator Result)
+- [ ] gh-issue-manager (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
+- [ ] gh-reporter (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)

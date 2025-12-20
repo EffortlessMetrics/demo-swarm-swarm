@@ -358,23 +358,6 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 
 ## Orchestrator Kickoff
 
-### TodoWrite (copy exactly)
-
-```
-- [ ] run-prep
-- [ ] repo-operator (ensure run/<run-id> branch)
-- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
-- [ ] deploy-monitor (only if Gate verdict MERGE)
-- [ ] smoke-verifier (only if Gate verdict MERGE)
-- [ ] deploy-decider
-- [ ] deploy-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] deploy-cleanup ↔ secrets-sanitizer (reseal cycle; if modified_files: true)
-- [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-```
-
 ### Station order
 
 #### Station order
@@ -391,3 +374,20 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - `repo-operator` (checkpoint; read Repo Operator Result)
 - `gh-issue-manager` (if allowed)
 - `gh-reporter` (if allowed)
+
+### TodoWrite (copy exactly)
+
+```
+- [ ] run-prep
+- [ ] repo-operator (ensure run/<run-id> branch)
+- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
+- [ ] deploy-monitor (only if Gate verdict MERGE)
+- [ ] smoke-verifier (only if Gate verdict MERGE)
+- [ ] deploy-decider
+- [ ] deploy-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] deploy-cleanup ↔ secrets-sanitizer (reseal cycle; if modified_files: true)
+- [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+```
