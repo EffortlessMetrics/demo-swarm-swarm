@@ -12,17 +12,26 @@
       "updated_at": "2025-12-13T11:40:10Z"
     },
     {
-      "canonical_key": "gh-8",
-      "gate_verdict": "BOUNCE",
-      "issue_number": 8,
-      "iterations": 8,
-      "last_flow": "build",
+      "canonical_key": null,
+      "issue_number": null,
+      "last_flow": "signal",
       "pr_number": null,
       "run_id": "compliance-drift-proofing",
       "status": "VERIFIED",
       "task_key": null,
       "task_title": "DemoSwarm Compliance Enforcement & Drift-Proofing Analysis",
       "updated_at": "2025-12-19T10:30:00Z"
+    },
+    {
+      "canonical_key": null,
+      "issue_number": null,
+      "last_flow": "signal",
+      "pr_number": null,
+      "run_id": "local-alignment-audit-aba1c6",
+      "status": "VERIFIED",
+      "task_key": "alignment-audit",
+      "task_title": "DemoSwarm Documentation-Code Alignment Audit",
+      "updated_at": "2025-12-20T03:52:42Z"
     }
   ],
   "version": 1

@@ -1,0 +1,38 @@
+{
+  "run_id": "local-alignment-audit-aba1c6",
+  "flow": "signal",
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "concerns": [],
+  "counts": {
+    "functional_requirements": 7,
+    "non_functional_requirements": 3,
+    "bdd_scenarios": 32,
+    "open_questions": 6,
+    "risks": {
+      "critical": 0,
+      "high": 0,
+      "medium": 2,
+      "low": 3
+    }
+  },
+  "quality_gates": {
+    "requirements_critic": "VERIFIED",
+    "bdd_critic": "VERIFIED"
+  },
+  "key_artifacts": [
+    "requirements.md",
+    "features/*.feature",
+    "open_questions.md",
+    "early_risks.md",
+    "risk_assessment.md",
+    "verification_notes.md"
+  ],
+  "github_reporting": "SKIPPED_LOCAL_ONLY",
+  "completed_at": "2025-12-20T03:52:42Z"
+}
