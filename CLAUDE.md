@@ -304,24 +304,37 @@ route_to_agent: <agent-name | null>
 
 ### Repo Operator Result (emitted by `repo-operator`)
 
-<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V1 START -->
+<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 START -->
 ```yaml
 ## Repo Operator Result
-operation: checkpoint | build | stage | merge | other
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+operation: checkpoint | build | final_checkpoint | stage | merge | other
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
 anomaly_paths: []
 ```
-<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V1 END -->
+<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 END -->
 
 Notes:
 
 - `commit_sha` is always populated (current HEAD on no-op).
 - `publish_surface` is always present:
   - `PUSHED` only when a push is attempted and succeeds.
-  - `NOT_PUSHED` for local-only checkpoints, anomalies, skipped pushes, and push failures.
+  - `NOT_PUSHED` for local-only checkpoints, tracked anomalies, skipped pushes, and push failures.
+- `status` values:
+  - `COMPLETED` - operation succeeded, no anomalies
+  - `COMPLETED_WITH_WARNING` - only untracked anomalies; push allowed
+  - `COMPLETED_WITH_ANOMALY` - tracked/staged anomalies; push blocked
+- `anomaly_classification` provides breakdown by risk level:
+  - `unexpected_staged_paths` - HIGH risk (blocks push)
+  - `unexpected_unstaged_paths` - HIGH risk (blocks push)
+  - `unexpected_untracked_paths` - LOW risk (warning only, allows push)
+- `anomaly_paths` - DEPRECATED; union of classification arrays for backward compatibility
 - Orchestrators route on these returned blocks, not by rereading files.
 
 ---
@@ -334,7 +347,7 @@ Do not conflate these domains:
    `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
 
 2. **Repo Operator Status** (Repo Operator Result)
-   `COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`
+   `COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`
 
 3. **Secrets Sanitizer Status** (Gate Result)
    `CLEAN | FIXED | BLOCKED_PUBLISH`
@@ -342,8 +355,12 @@ Do not conflate these domains:
 4. **Gate Merge Verdict** (`merge_decision.md`)
    `MERGE | BOUNCE` (use BOUNCE reason to signal human review)
 
-5. **Deploy Verdict** (`deployment_decision.md`)
-   `STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE`
+5. **Deploy Verdict** (`deployment_decision.md`) - Two-Axis Model
+   - `deploy_action`: `COMPLETED | SKIPPED | FAILED`
+   - `governance_enforcement`: `VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN`
+   - `deployment_verdict` (derived): `STABLE | NOT_DEPLOYED | GOVERNANCE_UNVERIFIABLE | BLOCKED_BY_GATE`
+
+   Note: `GOVERNANCE_UNVERIFIABLE` means deploy action succeeded but governance cannot be verified. This is distinct from `NOT_DEPLOYED` (deploy action failed).
 
 6. **Smoke Signal** (runtime signal inside `verification_report.md`)
    `smoke_signal: STABLE | INVESTIGATE | ROLLBACK`
@@ -374,20 +391,37 @@ Key invariant: secrets-sanitizer scans only the current flow's publish surface, 
 
 GitHub is an **observability pane**, not the work substrate. GitHub operations (`gh-issue-manager`, `gh-reporter`) are governed by:
 
-1) **Access gate (hard)**
+### 1) Access gate (hard)
+
 - If `run_meta.github_ops_allowed == false`: do **not** call GitHub (even read-only); flows proceed locally.
 - If `gh` is unauthenticated/unavailable: SKIP GitHub calls; record the limitation locally; proceed.
 - Prefer `run_meta.github_repo` (or `github_repo_actual_at_creation`) for repo scope; do **not** invent a repo when missing.
 
-2) **Content mode (soft)**
-- **FULL** only when all are true:
-  - secrets Gate Result `safe_to_publish: true`
-  - repo-operator Result `proceed_to_github_ops: true`
-  - repo-operator Result `publish_surface: PUSHED`
-- **RESTRICTED** otherwise (publish blocked, local-only/anomaly, push skipped/failed). Publish blocked **never** means skip when access is allowed.
-  - Allowed inputs: run identity (`run_meta`), control-plane blocks (Gate Result + Repo Operator Result), and receipt machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
-  - Disallowed: human-authored markdown/raw signal (`requirements.md`, `open_questions.md`, `*.feature`, ADR text), diffs, and blob links.
-  - Link style derives from `publish_surface`: `PUSHED` → links allowed in FULL; otherwise PATHS_ONLY.
+### 2) Content Mode Ladder (4 levels)
+
+Content mode is derived from **secrets safety** and **push surface**, NOT from workspace hygiene (`proceed_to_github_ops`).
+
+| Mode | Conditions | Allowed Content | Link Style |
+|------|------------|-----------------|------------|
+| **FULL** | `safe_to_publish: true` AND `publish_surface: PUSHED` | Narrative, links, quotes, open questions | Blob links |
+| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions | Paths only |
+| **SUMMARY_ONLY** | `safe_to_publish: true` AND tracked anomalies exist | Counts + concise narrative | Paths only |
+| **MACHINE_ONLY** | `safe_to_publish: false` | Counts and paths only | Paths only |
+
+**Key invariants:**
+- Secrets gate (`safe_to_publish`) drives MACHINE_ONLY. This is the security gate.
+- Push surface (`publish_surface`) drives link style. PUSHED = blob links allowed; NOT_PUSHED = paths only.
+- Workspace hygiene (`proceed_to_github_ops`) gates pushing, NOT content mode. Untracked anomalies do not degrade content.
+- Only tracked/staged anomalies force SUMMARY_ONLY (uncertain provenance) but NOT MACHINE_ONLY.
+
+### 3) Anomaly classification
+
+Repo-operator classifies anomalies by type:
+- `unexpected_staged_paths` - HIGH risk: staged changes outside allowlist (blocks push, SUMMARY_ONLY)
+- `unexpected_unstaged_paths` - HIGH risk: tracked file modifications outside allowlist (blocks push, SUMMARY_ONLY)
+- `unexpected_untracked_paths` - LOW risk: new files not yet tracked (warning only, allows push, FULL_PATHS_ONLY)
+
+Only HIGH risk anomalies block `proceed_to_github_ops`. Untracked-only anomalies allow FULL/FULL_PATHS_ONLY.
 
 ---
 
@@ -397,7 +431,8 @@ GitHub is an **observability pane**, not the work substrate. GitHub operations (
 
 ### Commit Cadence
 
-- **Every flow checkpoints**: audit commit of the flow's publish surface on the run branch.
+- **Every flow checkpoints** (main checkpoint): audit commit of the flow's publish surface on the run branch.
+- **Every flow final-checkpoints**: commits GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) after GH ops complete.
 - **Flow 3 additionally commits code/tests**: the "work product" commit.
 - **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
 
@@ -410,6 +445,7 @@ Exact phrasing is standardized in flow docs:
 - stage intended changes (Build): `task: "stage intended changes for build"`
 - commit/push build changes (Build): `task: "commit and push build changes"`
 - merge/tag/release (Deploy release ops): `task: "merge and tag release"`
+- final checkpoint: `task: "final checkpoint for flow <flow>"` (commits GH status files, no push)
 
 Safe-bail:
 
@@ -417,10 +453,13 @@ Safe-bail:
 
 Anomaly handling:
 
-- If unexpected paths exist outside allowlist (or Build's cleanliness interlock fails), repo-operator:
+- If **tracked/staged** anomalies exist outside allowlist (or Build's cleanliness interlock fails), repo-operator:
   - commits only the allowlist when safe (`safe_to_commit: true`)
-  - sets `proceed_to_github_ops: false`
+  - sets `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`
   - writes `git_status.md` in the current flow directory
+- If **untracked-only** anomalies exist:
+  - sets `status: COMPLETED_WITH_WARNING`, `proceed_to_github_ops: true`
+  - writes `git_status.md` as a hygiene warning (does not block push)
 
 ---
 
@@ -430,8 +469,9 @@ Execution order in every flow (conceptual):
 
 1. `<flow>-cleanup` writes receipt
 2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
-3. `repo-operator` checkpoints (gated on `safe_to_commit`)
-4. `gh-issue-manager` + `gh-reporter` (when access allows; FULL vs RESTRICTED per GitHub Access + Content Mode above)
+3. `repo-operator` main checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
+4. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
+5. `repo-operator` final checkpoint (commits GH status files; no push; no secrets scan needed)
 
 Reseal:
 
@@ -447,7 +487,7 @@ Flow 6 has two categories with different gating:
 | Category | Operations | Gating |
 |----------|------------|--------|
 | Release Ops | merge PR, tag/release | Gate merge verdict = MERGE + repo-operator mechanics |
-| Reporting Ops | gh-issue-manager, gh-reporter | Access gate; FULL only when `safe_to_publish: true` + `proceed_to_github_ops: true` + `publish_surface: PUSHED` (else RESTRICTED) |
+| Reporting Ops | gh-issue-manager, gh-reporter | Access gate; content mode per ladder (FULL/FULL_PATHS_ONLY/SUMMARY_ONLY/MACHINE_ONLY) |
 
 This distinction prevents "can we post?" from affecting "can we merge?".
 

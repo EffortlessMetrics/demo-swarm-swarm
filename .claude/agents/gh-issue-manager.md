@@ -336,7 +336,7 @@ Next Steps block:
   - If repo anomaly/local-only/push failure blocked publish: `Resolve dirty paths in git_status.md; rerun repo-operator checkpoint.`
 
 Open Questions block (framed as "Decisions Needed"):
-- `FULL`: include actual questions from `open_questions.md` that need human input. Focus on:
+- **FULL** / **FULL_PATHS_ONLY**: include actual questions from `open_questions.md` that need human input. Focus on:
   - Questions without an `Answer:` field
   - Questions that would block or affect the next flow
   - Questions actionable by humans (not implementation details)
@@ -356,7 +356,8 @@ Open Questions block (framed as "Decisions Needed"):
   <!-- OPEN_QUESTIONS_END -->
   ```
 
-- `RESTRICTED` or `safe_to_publish: false`: show counts only (from receipts when available) with a note like `Content withheld until publish unblocked; sanitize then re-run publish.`
+- **SUMMARY_ONLY**: show counts only (from receipts when available) with a note like `Open questions exist; see receipt for counts.`
+- **MACHINE_ONLY**: show `Content withheld until publish unblocked; sanitize then re-run publish.`
 
 Concerns block (optional, in FULL mode):
 - If critics flagged concerns or risks are HIGH, add a brief concerns section:
@@ -429,8 +430,9 @@ route_to_flow: null
 route_to_agent: null
 
 operation_status: CREATED | UPDATED | SKIPPED | FAILED
-publish_mode: FULL | RESTRICTED
-publish_blocked_reason: <reason or null>
+content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
+content_mode_reason: <reason or null>
+link_style: BLOB_LINKS | PATHS_ONLY
 
 blockers:
   - <only when something must change for this agent to succeed>
@@ -482,8 +484,9 @@ The file is the audit record. This block is the control plane.
 1. **One issue per run**. Never create a second issue for the same run-id.
 2. **Never rename folders**. Only update canonical_key + aliases.
 3. **Marker-based edits only**. Do not clobber human-written content outside markers.
-4. **Tighten-only last-mile checks**. Never loosen a blocked control plane.
+4. **Tighten-only last-mile checks**. Never loosen content mode.
 5. **Failures don't block flows**. Record them and move on.
+6. **Content mode ladder**: FULL → FULL_PATHS_ONLY → SUMMARY_ONLY → MACHINE_ONLY. Only secrets gate forces MACHINE_ONLY. Untracked anomalies do NOT degrade content mode.
 
 ## Philosophy
 
