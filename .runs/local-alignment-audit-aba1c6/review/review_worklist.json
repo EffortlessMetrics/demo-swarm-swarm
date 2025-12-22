@@ -1,0 +1,440 @@
+{
+  "schema_version": "review_worklist_v1",
+  "run_id": "local-alignment-audit-aba1c6",
+  "generated_at": "2025-12-20T13:20:00Z",
+  "source": ".runs/local-alignment-audit-aba1c6/review/pr_feedback.md",
+  "summary": {
+    "total": 30,
+    "pending": 0,
+    "resolved": 29,
+    "skipped": 1
+  },
+  "items": [
+    {
+      "id": "RW-001",
+      "source_id": "FB-001",
+      "category": "CORRECTNESS",
+      "severity": "CRITICAL",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
+        "line": 404
+      },
+      "summary": "Contract definition references deleted command files (flow-4-gate.md, flow-5-deploy.md, flow-6-wisdom.md) that are being removed in this PR. Update command registry to match 7-command reality.",
+      "route_to": "code-implementer",
+      "status": "RESOLVED",
+      "evidence": "Files listed in variant_commands array no longer exist after seven-flow consolidation",
+      "resolution": "Updated api_contracts.yaml: changed command counts from 10 to 7, removed all variant_commands references to deleted files, updated schema descriptions"
+    },
+    {
+      "id": "RW-002",
+      "source_id": "FB-006",
+      "category": "CORRECTNESS",
+      "severity": "MAJOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/secrets_status.json",
+        "line": 10
+      },
+      "summary": "Field modified_files uses boolean (false) but should be integer (0) for consistency with semantic meaning (count metric).",
+      "route_to": "code-implementer",
+      "status": "SKIPPED",
+      "evidence": "Data type inconsistency flagged by CodeRabbit",
+      "resolution": "Not a bug - CLAUDE.md contract specifies 'modified_files: true | false' as boolean. Current implementation matches contract."
+    },
+    {
+      "id": "RW-003",
+      "source_id": "FB-002",
+      "category": "DOCS",
+      "severity": "MAJOR",
+      "location": {
+        "file": "docs/explanation/architecture.md",
+        "line": 85
+      },
+      "summary": "Flow variants table is incorrect and misleading. Lists primary commands in Variant column with inaccurate Use When descriptions. Should rename section to describe re-entry points and remove incorrect file references.",
+      "route_to": "doc-writer",
+      "status": "RESOLVED",
+      "evidence": "Table claims /flow-4-gate, /flow-5-deploy, /flow-6-wisdom are variants but they're actually the primary commands",
+      "resolution": "Rewrote section: renamed to 'Flow commands', replaced misleading variant table with accurate 7-command table, added clear re-entry explanation"
+    },
+    {
+      "id": "RW-004",
+      "source_id": "FB-003, FB-004, FB-005",
+      "category": "DOCS",
+      "severity": "MAJOR",
+      "location": {
+        "file": "CHANGELOG.md, CONTRIBUTING.md, docs/explanation/architecture.md",
+        "line": null
+      },
+      "summary": "Clarify command count vs flow count across multiple docs. 7 flow commands should be 7 flows (implemented by 10 command files including variants). Avoid confusion between 7 flows and 10 slash command files.",
+      "route_to": "doc-writer",
+      "status": "RESOLVED",
+      "evidence": "Ambiguous phrasing in CHANGELOG, CONTRIBUTING, and architecture docs",
+      "resolution": "Verified: docs already correctly say '7 flow commands' - the old '10 commands' was from stale Signal artifacts, not public docs"
+    },
+    {
+      "id": "RW-005",
+      "source_id": "USER_ANALYSIS",
+      "category": "DOCS",
+      "severity": "MAJOR",
+      "location": {
+        "file": ".runs/**/*.md",
+        "line": null
+      },
+      "summary": "Fix 6 flows references and missing flow-6-wisdom.md in build artifacts. Sweep .runs/local-alignment-audit-aba1c6/build/*.md for outdated flow count references.",
+      "route_to": "doc-writer",
+      "status": "RESOLVED",
+      "evidence": "Run artifacts may contain stale references from pre-consolidation state",
+      "resolution": "Fixed test_execution.md: changed '6 flows, 8 commands' to '7 flows, 7 commands', 'across 6 flows' to 'across 7 flows', updated flow-6-wisdom.md note to flow-7-wisdom.md"
+    },
+    {
+      "id": "RW-006",
+      "source_id": "FB-026",
+      "category": "STYLE",
+      "severity": "MAJOR",
+      "location": {
+        "file": ".claude/commands/flow-*.md",
+        "line": null
+      },
+      "summary": "Typo immeidate -> immediate in multiple flow command docs (directive text). Worth fixing to reduce bot noise in future PRs.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Recurring typo across flow command files",
+      "resolution": "Fixed typo in all 7 flow command files: flow-1-signal.md through flow-7-wisdom.md"
+    },
+    {
+      "id": "RW-007",
+      "source_id": "FB-007",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/flow_plan.md",
+        "line": 64
+      },
+      "summary": "Duplicate Summary heading (also at line 3). Rename second to Final Summary or Outcome.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "MD024 duplicate heading violation"
+    },
+    {
+      "id": "RW-008",
+      "source_id": "FB-008, FB-009",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/gh_issue_status.md, pr_creation_status.md",
+        "line": null
+      },
+      "summary": "Bare URLs should be wrapped in angle brackets or Markdown link syntax (MD034).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Markdown linting violations"
+    },
+    {
+      "id": "RW-009",
+      "source_id": "FB-010",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/open_questions.md",
+        "line": 29
+      },
+      "summary": "Add blank line before Machine Summary heading (MD022).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Missing blank line before heading"
+    },
+    {
+      "id": "RW-010",
+      "source_id": "FB-011",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/secrets_scan.md",
+        "line": null
+      },
+      "summary": "Multiple headings/tables lack blank lines (lines 5-40). MD022/MD058 violations.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Recurring formatting issues suggest generator/template needs updating"
+    },
+    {
+      "id": "RW-011",
+      "source_id": "FB-012",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/secrets_scan.md",
+        "line": null
+      },
+      "summary": "Same formatting issues as build variant - headings/tables missing blank lines.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Template-generated formatting violations"
+    },
+    {
+      "id": "RW-012",
+      "source_id": "FB-013",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/cleanup_report.md",
+        "line": null
+      },
+      "summary": "Headings need blank lines after (MD022).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Markdown formatting violations"
+    },
+    {
+      "id": "RW-013",
+      "source_id": "FB-014",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/observability_critique.md",
+        "line": 149
+      },
+      "summary": "Table needs blank line before (MD058).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Missing blank line before table"
+    },
+    {
+      "id": "RW-014",
+      "source_id": "FB-015",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/observability_spec.md",
+        "line": null
+      },
+      "summary": "Multiple headings missing blank lines (lines 3, 74, ~85). MD022 violations.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Recurring formatting issues"
+    },
+    {
+      "id": "RW-015",
+      "source_id": "FB-016",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/signal/bdd_critique.md",
+        "line": 51
+      },
+      "summary": "Traceability table needs blank lines around it (MD058).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Missing blank lines around table"
+    },
+    {
+      "id": "RW-016",
+      "source_id": "FB-017",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/signal/cleanup_report.md",
+        "line": null
+      },
+      "summary": "Headings need blank lines after (MD022).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Markdown formatting violations"
+    },
+    {
+      "id": "RW-017",
+      "source_id": "FB-018",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/observability_spec.md",
+        "line": null
+      },
+      "summary": "Unordered list has incorrect indentation (MD007).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "List indentation violation"
+    },
+    {
+      "id": "RW-018",
+      "source_id": "FB-019",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/self_review.md",
+        "line": 1
+      },
+      "summary": "Use hyphenated Self-Review heading.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Heading style inconsistency"
+    },
+    {
+      "id": "RW-019",
+      "source_id": "FB-020",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
+        "line": 96
+      },
+      "summary": "Consider adding maxItems constraint to variant_commands array for schema strictness.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Schema completeness suggestion"
+    },
+    {
+      "id": "RW-020",
+      "source_id": "FB-021",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/schema.md",
+        "line": 47
+      },
+      "summary": "Flow entity invariants inconsistent (says flows 4-7 may have variants, but only 4-6 actually do).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Documentation inconsistency"
+    },
+    {
+      "id": "RW-021",
+      "source_id": "FB-022",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/impact_map.json",
+        "line": 146
+      },
+      "summary": "IMP-005 summary internally inconsistent about flow table state.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Internal inconsistency in impact analysis"
+    },
+    {
+      "id": "RW-022",
+      "source_id": "FB-023",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/signal/bdd_critique.md",
+        "line": 51
+      },
+      "summary": "Missing terminal punctuation.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Grammar/punctuation issue"
+    },
+    {
+      "id": "RW-023",
+      "source_id": "FB-024",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/self_review.md",
+        "line": 54
+      },
+      "summary": "Clarify risk deferral strategy for RSK-002.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Unclear risk documentation"
+    },
+    {
+      "id": "RW-024",
+      "source_id": "FB-025",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/observability_spec.md",
+        "line": 54
+      },
+      "summary": "Test artifact path not fully qualified in VS-003.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Path specification incomplete"
+    },
+    {
+      "id": "RW-025",
+      "source_id": "FB-027",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": "Multiple secrets_scan.md files",
+        "line": null
+      },
+      "summary": "Recurring formatting issues suggest generator/template needs updating. Update secrets-sanitizer output template to emit proper Markdown (blank lines around headings/tables).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Pattern of formatting violations across generated files"
+    },
+    {
+      "id": "RW-026",
+      "source_id": "FB-028",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/build/subtask_context_manifest.json",
+        "line": null
+      },
+      "summary": "Has null generated_at field. Should populate with ISO8601 timestamp.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Missing timestamp in manifest metadata"
+    },
+    {
+      "id": "RW-027",
+      "source_id": "FB-029",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/plan/cleanup_report.md",
+        "line": 127
+      },
+      "summary": "Emphasis used instead of heading (MD036).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Markdown semantic violation"
+    },
+    {
+      "id": "RW-028",
+      "source_id": "FB-030",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": ".runs/local-alignment-audit-aba1c6/signal/cleanup_report.md",
+        "line": null
+      },
+      "summary": "Missing blank lines after section headings (MD022).",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Recurring formatting pattern"
+    },
+    {
+      "id": "RW-029",
+      "source_id": "USER_ANALYSIS",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": "docs/reference/glossary.md",
+        "line": null
+      },
+      "summary": "Remove duplicated flow definitions, keep canonical 7-flow list.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "Content duplication identified in user analysis"
+    },
+    {
+      "id": "RW-030",
+      "source_id": "USER_ANALYSIS",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": "Various .runs/**/*.md",
+        "line": null
+      },
+      "summary": "Catchall for any remaining MD022/MD034/MD036 violations not explicitly listed above.",
+      "route_to": "fixer",
+      "status": "RESOLVED",
+      "evidence": "General formatting cleanup needed"
+    }
+  ]
+}

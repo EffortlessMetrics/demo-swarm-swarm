@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "blockers": [],
+  "missing_required": [],
+  "concerns": [
+    "pack-check structure.rs test uses \"Six Flows\" string literal (test fixture, not production logic)",
+    "pack-check flow.rs uses 6-element FLOWS array (may need review if wisdom is treated as distinct from deploy)",
+    "Some documentation files outside primary scope also reference \"6 flows\" (CONTRIBUTING.md, glossary.md, work-without-github.md)"
+  ],
+  "assumptions": [
+    "ASM-001: Seven-flow model is canonical per CLAUDE.md L13; public docs are stale",
+    "ASM-002: Seven flow commands exist with no variants; re-entry uses the primary command",
+    "ASM-003: 102 passing unit tests from test_output.log is authoritative",
+    "ASM-004: Path traversal in secrets.rs is documentation-only concern (local execution context)",
+    "ASM-005: Agent color coding is functional metadata (color: field in frontmatter)"
+  ],
+
+  "impact_summary": {
+    "total_files": 14,
+    "high_risk": 0,
+    "medium_risk": 6,
+    "low_risk": 8
+  },
+
+  "context": {
+    "flow": "plan",
+    "run_id": "local-alignment-audit-aba1c6",
+    "inputs_used": [
+      ".runs/local-alignment-audit-aba1c6/run_meta.json",
+      ".runs/local-alignment-audit-aba1c6/signal/requirements.md",
+      ".runs/local-alignment-audit-aba1c6/signal/problem_statement.md"
+    ],
+    "search_terms": [
+      "six flows",
+      "seven flows",
+      "7 flows",
+      "6 flows",
+      "REQ-001",
+      "REQ-002",
+      "REQ-003",
+      "REQ-004",
+      "REQ-005",
+      "REQ-006",
+      "REQ-007",
+      "flow-7-wisdom",
+      "wisdom",
+      "102 test",
+      "ReDoS",
+      "path traversal",
+      "color:"
+    ]
+  },
+
+  "affected": [
+    {
+      "id": "IMP-001",
+      "kind": "doc",
+      "path": "README.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Section header L67 says 'The six flows'; must update to 'The seven flows' per REQ-001",
+      "evidence": [
+        "grep:'six flows' hit at README.md L67: '### The six flows'",
+        "Signal requirements.md AC-1: README.md references 'seven flows'"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-003", "IMP-004"],
+      "tests_referencing": [],
+      "notes": ["Primary public documentation entry point"]
+    },
+    {
+      "id": "IMP-002",
+      "kind": "doc",
+      "path": "DEMO_RUN.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "L14 says 'Run all six flows with commentary'; must update to seven flows per REQ-001",
+      "evidence": [
+        "grep:'six flows' hit at DEMO_RUN.md L14: '2. Run all six flows with commentary'",
+        "Signal requirements.md AC-2: DEMO_RUN.md references 'seven flows'"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Stub pointing to walkthrough.md"]
+    },
+    {
+      "id": "IMP-003",
+      "kind": "doc",
+      "path": "docs/explanation/architecture.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "L11 says '6 flows' and L62 section header says 'The six flows'; must update per REQ-001, REQ-002, REQ-003",
+      "evidence": [
+        "grep:'six flows' hit at docs/explanation/architecture.md L62: '## The six flows'",
+        "grep:'6 flows' hit at docs/explanation/architecture.md L11: '- 6 flows exposed as slash commands'",
+        "Signal requirements.md AC-3: architecture.md references 'seven flows'"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Flow overlap semantics (REQ-002) and Flow 7 documentation (REQ-003) likely added here"]
+    },
+    {
+      "id": "IMP-004",
+      "kind": "doc",
+      "path": "CHANGELOG.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "v1.0.0 entry L24 says '6 flow commands'; needs annotation per REQ-001 AC-4",
+      "evidence": [
+        "Read CHANGELOG.md L24: '- **6 flow commands**: `/flow-1-signal` through `/flow-6-wisdom`'",
+        "Signal requirements.md AC-4: CHANGELOG annotated to clarify 7 flow commands implementing 7 flows"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Historical record; annotation rather than correction preferred"]
+    },
+    {
+      "id": "IMP-005",
+      "kind": "doc",
+      "path": "CLAUDE.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Flow table at L186-196 lists seven flows; verify it stays aligned with the 7-command model per REQ-004",
+      "evidence": [
+        "grep:'Seven Flows' hit at CLAUDE.md L186: '### The Seven Flows'",
+        "Read CLAUDE.md L13: '- **7 flows**: Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom'",
+        "Signal requirements.md AC-1-4: Flow table lists all seven flows with primary commands"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-001", "IMP-002", "IMP-003"],
+      "tests_referencing": ["IMP-012"],
+      "notes": ["Authoritative pack reference; ensure flow table stays aligned with the 7-command model"]
+    },
+    {
+      "id": "IMP-006",
+      "kind": "doc",
+      "path": "docs/reference/glossary.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "L8 says 'The swarm has 6 flows'; must update to 7 flows for consistency",
+      "evidence": [
+        "grep:'6 flows' hit at docs/reference/glossary.md L8: 'The swarm has 6 flows:'",
+        "Signal NFR-DOC-001: All public documentation agrees on flow count"
+      ],
+      "depends_on": ["IMP-005"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Secondary documentation; enumeration lists 6 flows (Signal through Wisdom)"]
+    },
+    {
+      "id": "IMP-007",
+      "kind": "doc",
+      "path": "CONTRIBUTING.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "L8 says '6 flows + customize'; should say 7 flows for consistency",
+      "evidence": [
+        "grep:'6 flows' hit at CONTRIBUTING.md L8: '- `.claude/commands/` — Slash command orchestrators (6 flows + customize)'"
+      ],
+      "depends_on": ["IMP-005"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Contributor documentation"]
+    },
+    {
+      "id": "IMP-008",
+      "kind": "doc",
+      "path": "docs/how-to/work-without-github.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "L15 says 'All 6 flows execute normally'; should say 7 flows for consistency",
+      "evidence": [
+        "grep:'6 flows' hit at docs/how-to/work-without-github.md L15: '- All 6 flows execute normally'"
+      ],
+      "depends_on": ["IMP-005"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["How-to guide for offline usage"]
+    },
+    {
+      "id": "IMP-009",
+      "kind": "doc",
+      "path": "docs/tutorials/walkthrough.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "May need Flow 7 step added to demonstrate full flow sequence",
+      "evidence": [
+        "Read walkthrough.md: Shows Flow 1-6 steps but not Flow 7",
+        "Signal requirements.md REQ-003: Document Flow 7 purpose and usage"
+      ],
+      "depends_on": ["IMP-003"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Tutorial walkthrough; Flow 7 step may be optional"]
+    },
+    {
+      "id": "IMP-010",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/structure.rs",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Test fixture L481 uses 'Six Flows' string; may need update if contracts.rs changes",
+      "evidence": [
+        "grep:'Six Flows' hit at structure.rs L481, L617, L645, L665, L688, L711, L735, L762, L805, L827, L850 (test fixtures)",
+        "contracts.rs L473: 'Seven Flows' is the production constant"
+      ],
+      "depends_on": ["IMP-012"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Test fixtures use stale 'Six Flows' string; tests may fail if not updated"]
+    },
+    {
+      "id": "IMP-011",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/flow.rs",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "FLOWS array L1092 has 6 elements; may need review for Flow 7 expansion",
+      "evidence": [
+        "grep:'FLOWS' hit at flow.rs L1092: 'const FLOWS: [&str; 6] = [\"signal\", \"plan\", \"build\", \"gate\", \"deploy\", \"wisdom\"];'",
+        "Flow 7 is wisdom (second-cycle); array may be correct as-is since wisdom is already included"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["The 6-element array lists 6 flow names; wisdom is present. Flow 7 uses same wisdom folder. Likely no change needed but requires verification."]
+    },
+    {
+      "id": "IMP-012",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/contracts.rs",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Already uses 'Seven Flows' at L473; no change needed",
+      "evidence": [
+        "grep:'Seven Flows' hit at contracts.rs L473: '\"Seven Flows\",'",
+        "CLAUDE_MD_SECTIONS constant already aligned to seven flows"
+      ],
+      "depends_on": [],
+      "depended_on_by": ["IMP-010"],
+      "tests_referencing": [],
+      "notes": ["Production constant is correct; structure.rs test fixtures need update to match"]
+    },
+    {
+      "id": "IMP-013",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/control_plane.rs",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "L328 mentions 'All 6 flows'; may need review",
+      "evidence": [
+        "grep:'6 flows' hit at control_plane.rs L328: 'rep.pass(\"All 6 flows mention checkpoint_mode: local_only for safe-bail\");'",
+        "grep:'6 flows' hit at control_plane.rs L331: expected 6 flows message"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Check validates 6 flow commands mention checkpoint_mode. Flow 7 may not need it if it's read-only wisdom extraction."]
+    },
+    {
+      "id": "IMP-014",
+      "kind": "test",
+      "path": "tools/demoswarm-pack-check/src/checks/wisdom.rs",
+      "change_type": "UNKNOWN",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "wisdom.rs checks flow-6-wisdom and wisdom-cleanup; continues to work with current model",
+      "evidence": [
+        "grep:'flow-6-wisdom' hit at wisdom.rs L80",
+        "grep:'wisdom-cleanup' hit at wisdom.rs L98",
+        "NFR-TRACE-001: pack-check tests continue to pass"
+      ],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Checks 24, 36, 41 validate wisdom/regression markers. No Flow 7 specific checks exist but this is documentation task."]
+    }
+  ],
+
+  "interfaces_impacted": {
+    "api_endpoints": [],
+    "data_entities": [],
+    "events": []
+  },
+
+  "configuration_impact": [],
+
+  "test_impact": [
+    {
+      "test_file": "tools/demoswarm-pack-check/src/checks/structure.rs",
+      "reason": "Test fixtures use 'Six Flows' string literal; may need update if CLAUDE.md section heading changes",
+      "confidence": "MEDIUM",
+      "evidence": "grep:'Six Flows' at L481, L617, L645, etc."
+    }
+  ],
+
+  "external_dependencies": [],
+
+  "recommended_next": [
+    "Update README.md section header from 'six flows' to 'seven flows' (REQ-001)",
+    "Update DEMO_RUN.md to reference seven flows (REQ-001)",
+    "Update docs/explanation/architecture.md: flow count and add flow overlap semantics (REQ-001, REQ-002, REQ-003)",
+    "Annotate CHANGELOG.md v1.0.0 to clarify 7 flow commands implementing 7 flows (REQ-001)",
+    "Verify CLAUDE.md flow table shows all 7 flows with primary commands (REQ-004)",
+    "Update secondary docs: glossary.md, CONTRIBUTING.md, work-without-github.md for consistency",
+    "Run pack-check to verify no regressions (NFR-TRACE-001)",
+    "Update structure.rs test fixtures if pack-check fails on 'Six Flows' assertion"
+  ],
+
+  "completed_at": "2025-12-20T10:45:00Z"
+}

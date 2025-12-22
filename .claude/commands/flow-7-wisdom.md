@@ -807,32 +807,6 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 ## Orchestrator Kickoff
 
 
-
-### TodoWrite (copy exactly)
-
-
-
-- [ ] run-prep
-
-- [ ] repo-operator (ensure `run/<run-id>` branch)
-
-- [ ] artifact-auditor
-- [ ] regression-analyst
-- [ ] flow-historian
-- [ ] learning-synthesizer
-- [ ] feedback-applier (draft actions only; no gh issue create before secrets gate)
-- [ ] traceability-auditor (run-level coherence + spec traceability)
-- [ ] risk-analyst
-- [ ] wisdom-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-
-
-
 ### Station order
 
 #### Station order
@@ -866,3 +840,26 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 14. `gh-issue-manager` (if allowed)
 
 15. `gh-reporter` (if allowed)
+
+### TodoWrite (copy exactly)
+
+- [ ] run-prep
+
+- [ ] repo-operator (ensure `run/<run-id>` branch)
+
+- [ ] artifact-auditor
+- [ ] regression-analyst
+- [ ] flow-historian
+- [ ] learning-synthesizer
+- [ ] feedback-applier (draft actions only; no gh issue create before secrets gate)
+- [ ] traceability-auditor (run-level coherence + spec traceability)
+- [ ] risk-analyst
+- [ ] wisdom-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
+- [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+
+Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

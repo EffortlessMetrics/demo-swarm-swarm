@@ -1,6 +1,6 @@
 ---
 name: review-worklist-writer
-description: Convert raw PR feedback into actionable worklist with stable markers (RW-NNN). Clusters items by category (CORRECTNESS, TESTS, STYLE, DOCS). Used in Flow 4 (Review).
+description: Convert raw PR feedback into actionable worklist with stable markers (RW-NNN + RW-MD-SWEEP for grouped markdownlint MINOR items). Clusters items by category (CORRECTNESS, TESTS, STYLE, DOCS). Used in Flow 4 (Review).
 model: sonnet
 color: cyan
 ---
@@ -71,7 +71,7 @@ FB-003: [MINOR] Human src/api.ts:23 - Simplify this function
 
 For each feedback item:
 
-1. **Assign worklist ID**: `RW-NNN` (sequential)
+1. **Assign worklist ID**: `RW-NNN` (sequential) for normal items; use `RW-MD-SWEEP` for grouped markdownlint MINOR items
 2. **Map to category**: Based on content and source
 3. **Determine route**: Which agent should handle it
 4. **Set priority**: Based on severity
@@ -97,9 +97,29 @@ Priority order:
 3. MINOR items (nice to have)
 4. INFO items (optional)
 
+### Step 2b: Group MINOR markdownlint nits (style sweep)
+
+If any feedback items are **MINOR** and clearly markdownlint/MD0xx formatting-only issues (e.g., summary contains "markdownlint" or "MD0xx", location is a `.md` file), group them into a single STYLE item:
+
+- **ID:** `RW-MD-SWEEP`
+- **Severity:** `MINOR`
+- **Route:** `fixer`
+- **Summary:** "Markdown style sweep (mechanical formatting only)"
+- **files[]:** unique list of affected files
+- **rules[]:** unique list of MD rule codes (MD022, MD034, ...)
+- **examples[]:** 2-3 short representative snippets or paraphrased item summaries
+- **scope:** "mechanical formatting only"
+- **children (optional, preferred):** list of the original FB items (source_id, location, rule, summary) for traceability
+
+Count the sweep as a single worklist item; children do not increment summary totals.
+
+Do not emit separate top-level RW items for grouped markdownlint entries. If no markdownlint MINOR items exist, do not create `RW-MD-SWEEP`.
+
 ### Step 3: Group by Category
 
 Organize items by category for efficient processing:
+
+If a markdownlint MINOR sweep exists, list it under STYLE as `RW-MD-SWEEP` with files/rules/examples/scope and an optional child list.
 
 ```markdown
 ## CORRECTNESS (2 items)
@@ -179,6 +199,16 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ## STYLE (2 items)
 
+### RW-MD-SWEEP [MINOR] - FB-007..FB-012
+- **Source:** markdownlint
+- **Scope:** mechanical formatting only
+- **Files:** docs/guide.md, README.md
+- **Rules:** MD022, MD034
+- **Examples:** "Missing blank line before heading", "No bare URL"
+- **Route:** fixer
+- **Status:** PENDING
+- **Children:** FB-007, FB-008, FB-009, FB-010, FB-011, FB-012
+
 ### RW-004 [MINOR] - FB-003
 - **Source:** Human Comment
 - **Location:** src/api.ts:23
@@ -255,6 +285,34 @@ Write `.runs/<run-id>/review/review_worklist.json`:
 
   "items": [
     {
+      "id": "RW-MD-SWEEP",
+      "source_id": "FB-007..FB-012",
+      "category": "STYLE",
+      "severity": "MINOR",
+      "location": {
+        "file": null,
+        "line": null
+      },
+      "summary": "Markdown style sweep (mechanical formatting only)",
+      "route_to": "fixer",
+      "status": "PENDING",
+      "files": ["docs/guide.md", "README.md"],
+      "rules": ["MD022", "MD034"],
+      "examples": [
+        "Missing blank line before heading",
+        "No bare URL"
+      ],
+      "scope": "mechanical formatting only",
+      "children": [
+        {
+          "source_id": "FB-007",
+          "location": { "file": "docs/guide.md", "line": 12 },
+          "rule": "MD022",
+          "summary": "Missing blank line before heading"
+        }
+      ]
+    },
+    {
       "id": "RW-001",
       "source_id": "FB-001",
       "category": "CORRECTNESS",
@@ -290,13 +348,13 @@ Write `.runs/<run-id>/review/review_worklist.json`:
 
 Items can have these statuses:
 
-- `PENDING` — Not yet addressed
-- `IN_PROGRESS` — Currently being worked on
-- `RESOLVED` — Fixed and verified
-- `SKIPPED` — Intentionally not addressed (with reason)
-- `DEFERRED` — Postponed to later (out of scope for this run)
+- `PENDING` - Not yet addressed
+- `IN_PROGRESS` - Currently being worked on
+- `RESOLVED` - Fixed and verified
+- `SKIPPED` - Intentionally not addressed (with reason)
+- `DEFERRED` - Postponed to later (out of scope for this run)
 
-The orchestrator updates statuses as work progresses.
+The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 
 ## Control-plane Return Block
 
@@ -333,8 +391,8 @@ routes:
 
 ## Hard Rules
 
-1) **One-to-one mapping**: Each FB-NNN item becomes exactly one RW-NNN item.
-2) **Stable IDs**: RW-NNN IDs must not change between runs (append-only).
+1) **One-to-one mapping (with sweep exception)**: Each FB-NNN item becomes exactly one RW item, except MINOR markdownlint items which are grouped into a single `RW-MD-SWEEP` item (children optional, preferred).
+2) **Stable IDs**: RW-NNN IDs must not change between runs (append-only). `RW-MD-SWEEP` is reserved for markdownlint MINOR sweeps only.
 3) **Clear routing**: Every item must have a `route_to` agent.
 4) **Priority order**: CRITICAL > MAJOR > MINOR > INFO.
 5) **Category order**: CORRECTNESS → TESTS → STYLE → DOCS.

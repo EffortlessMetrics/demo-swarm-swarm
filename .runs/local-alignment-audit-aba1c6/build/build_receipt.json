@@ -1,0 +1,73 @@
+{
+  "schema_version": "build_receipt_v1",
+  "run_id": "local-alignment-audit-aba1c6",
+  "flow": "build",
+
+  "status": "CANNOT_PROCEED",
+  "recommended_action": "FIX_ENV",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "missing_required": [
+    ".runs/local-alignment-audit-aba1c6/build/self_review.md",
+    ".runs/local-alignment-audit-aba1c6/build/test_changes_summary.md or impl_changes_summary.md",
+    ".runs/local-alignment-audit-aba1c6/build/lint_report.md",
+    ".runs/local-alignment-audit-aba1c6/build/test_execution.md"
+  ],
+  "missing_optional": [],
+  "blockers": [
+    "Build directory inaccessible: I/O permission restrictions prevent reading/writing artifacts",
+    "Cannot verify artifact existence due to sandbox restrictions on .runs/local-alignment-audit-aba1c6/build/ directory",
+    "Cannot extract counts or quality gate statuses without access to build artifacts"
+  ],
+  "concerns": [],
+
+  "counts": {
+    "tests_written": null,
+    "files_changed": null,
+    "mutation_score": null,
+    "open_questions": null,
+    "ac_total": null,
+    "ac_completed": null
+  },
+
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": null,
+    "passed": null,
+    "failed": null,
+    "skipped": null,
+    "xfailed": null,
+    "xpassed": null,
+    "metrics_binding": "unknown"
+  },
+
+  "critic_verdicts": {
+    "test_critic": null,
+    "code_critic": null
+  },
+
+  "quality_gates": {
+    "test_critic": null,
+    "code_critic": null,
+    "self_reviewer": null
+  },
+
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_execution.md",
+    "test_critique.md",
+    "code_critique.md",
+    "flakiness_report.md",
+    "mutation_report.md",
+    "fuzz_report.md",
+    "fix_summary.md",
+    "doc_updates.md",
+    "doc_critique.md"
+  ],
+
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-20T12:15:00Z"
+}
