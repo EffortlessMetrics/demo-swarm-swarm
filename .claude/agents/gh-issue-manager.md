@@ -354,7 +354,7 @@ Open Questions block (framed as "Decisions Needed"):
 
   | ID | Question | Suggested Default | Needs Answer By |
   |----|----------|-------------------|-----------------|
-  | OQ-PLN-004 | PLN vs PLAN prefix format? | PLN/BLD | Before Flow 3 |
+  | OQ-PLAN-004 | Should retry use exponential backoff? | Yes, base 2s with jitter | Before Flow 3 |
 
   **To answer:** Reply to this issue or update the artifact directly.
 

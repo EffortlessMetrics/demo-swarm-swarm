@@ -296,7 +296,7 @@ The following questions were flagged during this flow and may need human input b
 
 | ID | Question | Suggested Default | Impact if Unanswered |
 |----|----------|-------------------|---------------------|
-| OQ-PLN-004 | Should OpenQ prefixes use PLN/BLD or PLAN/BUILD? | PLN/BLD (matches openq-tools) | Implementation may diverge from docs |
+| OQ-PLAN-004 | Should retry logic use exponential backoff? | Yes, base 2s with jitter | Error handling may be suboptimal |
 | OQ-SIG-002 | Is the 80% coverage threshold acceptable? | Yes | Tests may be under-scoped |
 
 To answer: Reply to this comment with your decision, or update the artifact directly.
@@ -315,7 +315,7 @@ Surface critic concerns and risk items that humans should be aware of:
 ## Concerns for Review
 
 **From design-critic:** 6 minor concerns documented in `design_validation.md`. None are blockers, but humans should review:
-- The PLN vs PLAN prefix discrepancy (OQ-PLN-004)
+- The retry backoff configuration (OQ-PLAN-004)
 - 4 agents missing Skills sections not yet enumerated
 
 **From risk-analyst:** 1 HIGH risk (RSK-001: Prior issue #49 bounced at Gate). Mitigation: warning-first mode allows escape valve.
@@ -345,7 +345,7 @@ Add an **Agent Notes** section when you have substantive observations that add v
 
 - **Potential gap:** REQ-004 (receipt validation) has no corresponding BDD scenario in Signal. Consider backfilling before Gate.
 - **Cross-cutting:** The 80% coverage threshold in NFR-PERF-001 may be aggressive given the fixture-heavy test strategy. Review during Build.
-- **Improvement opportunity:** The 4 agents missing Skills sections (per OQ-PLN-009) should be enumerated now rather than discovered during implementation.
+- **Improvement opportunity:** The 4 agents missing Skills sections (per OQ-PLAN-009) should be enumerated now rather than discovered during implementation.
 - **Risk flag:** RSK-001 (prior Gate bounce) has mitigation documented, but the --strict flag behavior isn't tested yet.
 ```
 
