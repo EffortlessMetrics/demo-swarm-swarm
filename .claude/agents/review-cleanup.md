@@ -224,6 +224,9 @@ Write `.runs/<run-id>/review/review_receipt.json`:
     "review_actions.md"
   ],
 
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
+
   "github_reporting": "PENDING",
   "completed_at": "<ISO8601 timestamp>"
 }

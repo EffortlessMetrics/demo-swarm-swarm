@@ -476,44 +476,43 @@ Call `secrets-sanitizer` with publish surface:
 - `status` = what happened:
   - `CLEAN`: No secrets found
   - `FIXED`: Secrets found and auto-remediated
-  - `BLOCKED_PUBLISH`: Mechanical failure only (IO/permissions/tool failure)
+  - `BLOCKED`: Cannot safely remediate (requires human judgment or upstream fix)
 - `safe_to_commit/safe_to_publish` = what you're allowed to do (authoritative)
-- `needs_upstream_fix` + `route_to_agent` = where to bounce if code contains secrets
+- `blocker_kind` = why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
 
 **Key posture:** Publishing can be blocked, but work never stops.
-- If `safe_to_publish: false` with `needs_upstream_fix: true`: **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`)
-- If `BLOCKED_PUBLISH` (mechanical failure): **FIX_ENV** — tool/IO issue, not a code problem
-- Either way: continue engineering locally while remediation routes
+- If `blocker_kind: SECRET_IN_CODE`: route to `code-implementer` or `fixer` (orchestrator decides)
+- If `blocker_kind: MECHANICAL`: **FIX_ENV** — tool/IO issue, not a code problem
+- Either way: continue engineering locally while remediation proceeds
 
 Typically `safe_to_*` are true for CLEAN/FIXED, but **the orchestrator must use the Gate Result booleans, not infer from status**.
 
 **Gate Result block (returned by secrets-sanitizer):**
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
-**Gating logic (route-and-fix triage):**
-- If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`), with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **FIX_ENV** (mechanical failure — IO/permissions/tool issue)
-  - Otherwise → UNVERIFIED; write evidence, do not commit/push
-- If `safe_to_commit: true` but `safe_to_publish: false`:
-  - Commit locally (audit trail preserved)
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` for remediation, then retry publish
-  - Continue engineering locally while remediation routes
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
+- `blocker_kind` explains why blocked (machine-readable category):
+  - `NONE`: not blocked
+  - `MECHANICAL`: IO/permissions/tooling failure → **FIX_ENV**
+  - `SECRET_IN_CODE`: secret in staged code → route to `code-implementer` or `fixer` (orchestrator decides)
+  - `SECRET_IN_ARTIFACT`: secret in `.runs/` artifact that can't be redacted → investigate manually
+- If `safe_to_commit: false`: skip commit, continue engineering locally
+- If `safe_to_commit: true` but `safe_to_publish: false`: commit locally (audit trail preserved), skip push
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`
 
 ### Step 12: Commit and Push (Only if Secrets Gate Passes)
 
@@ -543,10 +542,10 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
 **Push logic:**
 - If `safe_to_publish: true` AND `proceed_to_github_ops: true`: repo-operator pushes the branch
 - If `safe_to_publish: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`) for remediation
-  - If `status: BLOCKED_PUBLISH` → **FIX_ENV** (mechanical failure — IO/permissions/tool issue)
-  - Otherwise → UNVERIFIED; skip push (`publish_surface: NOT_PUSHED`), write evidence
-- **Keep engineering locally** while remediation routes. Publishing is gated; work is not.
+  - If `blocker_kind: SECRET_IN_CODE` → route to `code-implementer` or `fixer` (orchestrator decides)
+  - If `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO issue)
+  - Otherwise → skip push (`publish_surface: NOT_PUSHED`), write evidence
+- **Keep engineering locally** while remediation proceeds. Publishing is gated; work is not.
 
 ### Step 12b: PR Status Check (Conditional)
 

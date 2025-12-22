@@ -413,13 +413,33 @@ If either is non-empty:
 * This is an anomaly (not mechanical failure).
 * Write `.runs/<run-id>/build/git_status.md` and return `proceed_to_github_ops: false`.
 
+### Commit Message Policy (Semantic)
+
+When `operation: build` or `checkpoint`, generate **Conventional Commit** messages:
+
+1. **Analyze the staged diff:** Look at file paths and content changes.
+2. **Generate a Conventional Commit:**
+   - Format: `<type>(<scope>): <subject>`
+   - Types: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
+   - Scope: derive from primary changed module/area (e.g., `auth`, `api`, `config`)
+   - Subject: concise description of what changed and why
+   - Examples:
+     - `feat(auth): implement jwt token refresh`
+     - `test(api): add negative assertions for login`
+     - `fix(validation): handle null input in email check`
+     - `refactor(db): extract connection pooling to module`
+3. **No generic messages:** Avoid "update", "checkpoint", "wip", "implement changes" unless truly empty.
+
+**Why:** The audit trail must prove the agent understood the change. Generic messages signal "I didn't read the diff."
+
 ### Build commit (commit/push)
 
 * Only commit when the orchestrator indicates `safe_to_commit: true` from the prior Gate Result.
 * Commit message:
 
-  * Prefer a short summary from `.runs/<run-id>/build/impl_changes_summary.md` if present.
-  * Otherwise: `feat(<run-id>): implement changes`
+  * Apply the Semantic Commit Policy above: analyze the diff and generate a Conventional Commit.
+  * Use `.runs/<run-id>/build/impl_changes_summary.md` for context on what was implemented.
+  * Fallback (empty or trivial): `chore(<run-id>): checkpoint build artifacts`
 
 No-op commit handling:
 

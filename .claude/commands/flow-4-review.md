@@ -386,25 +386,26 @@ After worklist loop completes, manage PR status via dedicated agents.
 
 **secrets-sanitizer** returns a **Gate Result** block:
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 **Gating logic (from Gate Result):**
-- If `safe_to_commit: false`: apply route-and-fix triage
+- The sanitizer is a boolean gate — it says yes/no, not where to route
+- If `safe_to_commit: false`: skip commit (blocked by `blocker_kind`)
+- If `safe_to_commit: true` but `safe_to_publish: false`: commit locally, skip push
 - `modified_files: true`: artifact files were changed (for audit purposes)
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- `blocker_kind` explains why blocked: `MECHANICAL` (IO failure), `SECRET_IN_CODE` (needs fix), `SECRET_IN_ARTIFACT` (can't redact)
 
 ### Step 10: Commit and Push
 

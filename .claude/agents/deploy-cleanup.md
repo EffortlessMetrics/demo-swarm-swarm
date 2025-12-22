@@ -281,6 +281,9 @@ Write `.runs/<run-id>/deploy/deploy_receipt.json`:
     "flow_plan.md"
   ],
 
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
+
   "github_reporting": "PENDING",
   "completed_at": "<ISO8601 timestamp>"
 }

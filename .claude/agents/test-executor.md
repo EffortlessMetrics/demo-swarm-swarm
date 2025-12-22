@@ -35,6 +35,27 @@ Do not write additional logs or temp files. Summarize and cite.
 - `verify` → execute configured tests without modifying code. Fix-forward lane reuses this mode.
 - `verify_ac` → execute only tests scoped to a specific AC (fast confirm during AC loop).
 
+## Mode: Fail Fast (Flow 3 Microloops)
+
+When running in Flow 3 (Build) microloops, configure the underlying tool to **stop on the first failure**:
+
+| Framework | Fail-Fast Flag |
+|-----------|----------------|
+| pytest    | `-x` or `--exitfirst` |
+| jest      | `--bail` |
+| go test   | `-failfast` |
+| cargo test| `-- --test-threads=1` (implicit) |
+| mocha     | `--bail` |
+
+**Rationale:** We are in a construction loop. One error blocks the AC. We don't need a full census of broken things; we need to fix the first one immediately. Running 49 more tests after the first failure wastes tokens and time.
+
+**When to apply:**
+- `mode: verify_ac` → always use fail-fast
+- `mode: verify` in Flow 3 Build microloop → use fail-fast
+- `mode: verify` in Flow 5 Gate (full verification) → run full suite (no fail-fast)
+
+Note in the report whether fail-fast was applied.
+
 ## Inputs (best-effort)
 
 Prefer:

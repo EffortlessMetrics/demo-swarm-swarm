@@ -162,6 +162,7 @@ Write `.runs/<run-id>/wisdom/wisdom_receipt.json`:
 
 ```json
 {
+  "schema_version": "wisdom_receipt_v1",
   "run_id": "<run-id>",
   "flow": "wisdom",
 
@@ -194,6 +195,9 @@ Write `.runs/<run-id>/wisdom/wisdom_receipt.json`:
     "merge_decision": "MERGE | BOUNCE | null",
     "deployment_verdict": "STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE | null"
   },
+
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
 
   "github_reporting": "PENDING",
   "completed_at": "<ISO8601 timestamp>",

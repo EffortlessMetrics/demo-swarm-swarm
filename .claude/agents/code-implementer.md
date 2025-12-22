@@ -74,6 +74,17 @@ If the manifest is missing/unparseable:
    - If tests appear to demand behavior that violates ADR/contracts, prefer contract-correct behavior and document the mismatch.
 5) **No secrets.**
    - Never paste tokens/keys. Keep logs/summaries high-level.
+6) **No debug artifacts.**
+   Before requesting a verification run, **scan your changes** for debug leftovers and remove them:
+   - Debug prints: `console.log`, `print()`, `fmt.Println`, `System.out.println`, `puts`, `echo`
+   - Commented-out code blocks (more than 2 lines)
+   - TODO/FIXME markers you added during debugging
+   - Hardcoded test values (e.g., `sleep(5)`, `timeout = 999999`)
+
+   **Exception:** Proper structured logging is allowed and encouraged:
+   - `logger.debug()`, `log.info()`, `slog.Debug()`, `console.debug()` (if framework-idiomatic)
+
+   **Why:** Code hitting the repo must look professional. Debug artifacts create noise for `gate-fixer`, human reviewers, and downstream flows. A "Competent Junior" cleans up before asking for review.
 
 ## Anchored parsing rule (important)
 
