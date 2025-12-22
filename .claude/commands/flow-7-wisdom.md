@@ -335,6 +335,8 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 - Include timestamps, commits, decision points
 
+- **Calculate Dev Lead Time (DevLT):** Derive `human_attention_time` vs `total_run_time` from timestamps and human interaction markers. Goal: prove that `Human Attention Time << Total Run Time`. This closes the loop on the economic argument that swarm compute is cheaper than human attention.
+
 
 
 ### Step 5: Synthesize learnings
@@ -687,7 +689,7 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 
 - `regression_report.md` - what got worse and where
 
-- `flow_history.json` - timeline linking all flow events
+- `flow_history.json` - timeline linking all flow events + DevLT metrics
 
 - `learnings.md` - narrative lessons extracted
 
@@ -754,6 +756,8 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 | learning-synthesizer | `^## Learning: ` | learnings.md | `## Learning: Requirements` |
 
 | feedback-applier | `^- ISSUE: ` | feedback_actions.md | `- ISSUE: Missing tests for REQ-004` |
+
+| flow-historian | `"devlt":` | flow_history.json | `"devlt": {"total_run_minutes": 45, "human_attention_minutes": 8}` |
 
 
 
