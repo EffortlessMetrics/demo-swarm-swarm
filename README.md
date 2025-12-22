@@ -17,7 +17,7 @@ Most AI coding tools are "Chatbots"—you type, watch them generate, fix their t
 We optimize for **Dev Lead Time (DevLT)**—minimizing the minutes *you* spend verifying changes, even if the machine takes longer to generate them.
 
 *   **Copilot** is autocomplete. You watch it work.
-*   **DemoSwarm** is async. You dispatch a flow, walk away, and return to a receipt that proves the work is correct.
+*   **DemoSwarm** is async (within a flow). You dispatch, walk away, and return to a receipt with a status: `VERIFIED`, `UNVERIFIED`, or `PARTIAL`.
 
 ---
 
@@ -123,13 +123,13 @@ DemoSwarm is designed to run in a **downstream clone** (e.g., `my-app-swarm`). I
 2.  **Copy** the `.claude/` folder from this pack.
 3.  **Run** `/customize-pack` to auto-detect your stack (Rust/Python/Node) and align the test runners.
 
-### The "Senior Dev" Loop
-1.  Run **Flow 1 & 2** to lock in the design.
-2.  Run **Flow 3**. It will push a **Draft PR** immediately.
-3.  **Walk away.** The swarm will work.
-4.  If it stops (PARTIAL status), rerun the flow.
-5.  Run **Flow 4** to polish.
-6.  Review the **Evidence** (Receipts), not the Code.
+### The Dispatch Rhythm
+1.  `/flow-1-signal` → skim requirements, answer open questions
+2.  `/flow-2-plan` → approve ADR
+3.  `/flow-3-build` → Draft PR created; if `PARTIAL`, rerun
+4.  `/flow-4-review` → worklist drained; if `PARTIAL`, rerun
+5.  `/flow-5-gate` → MERGE or BOUNCE verdict
+6.  Review **receipts** (the evidence), not raw code
 7.  **Merge.**
 
 ---

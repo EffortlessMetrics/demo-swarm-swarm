@@ -23,10 +23,11 @@ cp -r /path/to/demo-swarm/.claude /path/to/your-repo/
 |---------|---------|
 | `/flow-1-signal [run-id] "description"` | Messy input → requirements, BDD, risks, Signal receipt |
 | `/flow-2-plan [run-id]` | Spec → ADR, contracts, observability, plans |
-| `/flow-3-build [run-id] [subtask-id]` | Implement → tests/code/docs, Build receipt |
-| `/flow-4-gate [run-id]` | Verify → receipts/contracts/security/coverage/policy, merge decision |
-| `/flow-5-deploy [run-id]` | Release → merge/tag (if approved), verify, deploy receipt |
-| `/flow-6-wisdom [run-id]` | Learn → artifact audit, regressions, timeline, feedback drafts |
+| `/flow-3-build [run-id] [subtask-id]` | Implement → tests/code/docs, Draft PR, Build receipt |
+| `/flow-4-review [run-id]` | Drain worklist → harvest PR feedback, fix items, Review receipt |
+| `/flow-5-gate [run-id]` | Verify → receipts/contracts/security/coverage/policy, merge decision |
+| `/flow-6-deploy [run-id]` | Release → merge/tag (if approved), verify, Deploy receipt |
+| `/flow-7-wisdom [run-id]` | Learn → artifact audit, regressions, timeline, feedback drafts |
 | `/customize-pack` | Adapt pack to your stack/repo layout |
 
 ---
@@ -55,6 +56,7 @@ All durable artifacts live under:
 | Signal | `requirements.md`, `features/*.feature`, `verification_notes.md`, `signal_receipt.json` |
 | Plan | `adr.md`, `api_contracts.yaml`, `schema.md`, `observability_spec.md`, `plan_receipt.json` |
 | Build | `test_changes_summary.md`, `impl_changes_summary.md`, `self_review.md`, `build_receipt.json` |
+| Review | `pr_feedback.md`, `review_worklist.md`, `review_actions.md`, `review_receipt.json` |
 | Gate | `merge_decision.md`, `contract_compliance.md`, `coverage_audit.md`, `gate_receipt.json` |
 | Deploy | `deployment_log.md`, `verification_report.md`, `deployment_decision.md`, `deploy_receipt.json` |
 | Wisdom | `artifact_audit.md`, `regression_report.md`, `flow_history.json`, `feedback_actions.md`, `wisdom_receipt.json` |

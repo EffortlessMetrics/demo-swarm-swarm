@@ -48,9 +48,10 @@ The portable pack that gets copied into target repos.
 |   |-- flow-1-signal.md        # /flow-1-signal
 |   |-- flow-2-plan.md          # /flow-2-plan
 |   |-- flow-3-build.md         # /flow-3-build
-|   |-- flow-4-gate.md          # /flow-4-gate
-|   |-- flow-5-deploy.md        # /flow-5-deploy
-|   `-- flow-6-wisdom.md        # /flow-6-wisdom
+|   |-- flow-4-review.md        # /flow-4-review
+|   |-- flow-5-gate.md          # /flow-5-gate
+|   |-- flow-6-deploy.md        # /flow-6-deploy
+|   `-- flow-7-wisdom.md        # /flow-7-wisdom
 |
 |-- skills/                     # Claude Code Skill definitions
 |   |-- test-runner/SKILL.md    # Execute tests
@@ -160,6 +161,7 @@ When the pack runs in a target repo, it creates:
 |-- signal/
 |-- plan/
 |-- build/
+|-- review/
 |-- gate/
 |-- deploy/
 `-- wisdom/
