@@ -222,6 +222,42 @@ tests_passed: yes | no | unknown
 output_file: .runs/<run-id>/build/impl_changes_summary.md
 ```
 
+## Obstacle Protocol (When Stuck)
+
+If you encounter ambiguity, missing context, or confusing errors, do **not** simply exit. Follow this hierarchy to keep the conveyor belt moving:
+
+1. **Self-Correction:** Can you resolve it by reading the provided context files again?
+   - Re-read `subtask_context_manifest.json`, ADR, contracts, requirements.
+   - Often the answer is already there.
+
+2. **Peer Handoff:**
+   - Is context missing? → Request `RERUN` with `route_to_agent: context-loader`.
+   - Is the spec broken or contradictory? → Request `BOUNCE` with `route_to_flow: 1` or `2` and `route_to_agent: clarifier`.
+
+3. **Assumption (Preferred):**
+   - Can you make a reasonable "Senior Dev" assumption to keep moving?
+   - **Action:** Document it in `impl_changes_summary.md` under `## Assumptions Made`. Proceed with implementation.
+   - Example: "Assumption: Retry limit defaulting to 3 (spec silent on exact value)."
+
+4. **Async Question (The "Sticky Note"):**
+   - Is it a blocker that prevents *correct* implementation but not *any* implementation?
+   - **Action:** Append the question to `.runs/<run-id>/build/open_questions.md` using this format:
+     ```
+     ## OQ-BUILD-### <short title>
+     - **Context:** <what you were implementing>
+     - **Question:** <the specific question>
+     - **Impact:** <what depends on the answer>
+     - **Default assumption (if any):** <what you're doing in the meantime>
+     ```
+   - **Then:** Mark that specific REQ/AC as `IMPL_REQ_DEFERRED: REQ-###` in your inventory, but **continue implementing the rest**.
+   - Return `status: VERIFIED` if all non-deferred work is complete.
+
+5. **Mechanical Failure (Last Resort):**
+   - Is the disk full? Permissions denied? Tool crashing?
+   - **Action:** Only *then* return `CANNOT_PROCEED` with `recommended_action: FIX_ENV`.
+
+**Goal:** Ship a "Best Effort" implementation. Code with one `TODO` comment and a logged question is better than no code and `CANNOT_PROCEED`.
+
 ## Philosophy
 
 Convert spec + tests into working code without smuggling in design changes. Keep the diff tight, keep contracts honest, and leave an audit trail that makes critique and cleanup mechanical.
