@@ -335,7 +335,7 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 - Include timestamps, commits, decision points
 
-- **Calculate Dev Lead Time (DevLT):** Derive `human_attention_time` vs `total_run_time` from timestamps and human interaction markers. Goal: prove that `Human Attention Time << Total Run Time`. This closes the loop on the economic argument that swarm compute is cheaper than human attention.
+- **Calculate Dev Lead Time (DevLT):** Estimate developer time spent working on the change — researching, analyzing, writing, reviewing, iterating. This is manhours, not wall clock time. Excludes machine time and wait time.
 
 
 
