@@ -412,7 +412,9 @@ Notes:
 Do not conflate these domains:
 
 1. **Flow/Agent Status** (Machine Summary + receipts)
-   `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
+   `VERIFIED | UNVERIFIED | PARTIAL | CANNOT_PROCEED`
+
+   Note: `PARTIAL` is valid for unbounded loops (Flow 4 Review) when context checkpoint occurs. It means "progress made, more to do, rerun to continue." This is a feature, not a failure—it prevents hallucination from context stuffing.
 
 2. **Repo Operator Status** (Repo Operator Result)
    `COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`

@@ -250,9 +250,18 @@ Sources:
 **This is the core of Flow 4: iteratively resolve worklist items until completion.**
 
 **Termination conditions** (any of):
-1. All worklist items resolved (`pending == 0`)
-2. Context window exhaustion (approaching limit)
-3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce)
+1. All worklist items resolved (`pending == 0`) → status: VERIFIED
+2. Context window exhaustion (approaching limit) → status: PARTIAL (checkpoint & exit)
+3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
+
+**Context checkpoint behavior (PARTIAL):**
+When context is approaching limits, checkpoint immediately:
+- Write current worklist state to `review_worklist.json`
+- Update `review_receipt.json` with `status: PARTIAL`, `items_resolved`, `items_remaining`
+- Commit and push (if gates allow)
+- Exit with message: "Resolved {N} items. {M} remain. Context full. Rerun `/flow-4-review` to continue."
+
+This is a **feature, not a failure**. It prevents hallucination from context stuffing and enables incremental progress. The next `/flow-4-review` invocation will resume from the checkpoint.
 
 **Loop structure:**
 
