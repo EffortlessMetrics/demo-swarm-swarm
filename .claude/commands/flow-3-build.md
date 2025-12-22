@@ -339,28 +339,23 @@ This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse 
 **Routing logic (Route on Result block's `blockers[]`):**
 
 ```yaml
-# Route on PR Feedback Harvester Result — analyzed blockers with fix instructions
+# Route on PR Feedback Harvester Result — triaged blockers with quick-read thoughts
 if ci_status == FAILING:
-  # CI red — the harvester already analyzed this and provided fix instructions
+  # CI red — route to fix
   for blocker in blockers where blocker.source == "CI":
     call blocker.route_to_agent with:
-      - blocker.fix_file
-      - blocker.fix_lines
-      - blocker.fix_instruction   # "Add input validation at line 23"
-      - blocker.verification      # "Run npm test -- auth.test.ts"
-    run blocker.verification to confirm
+      - blocker.evidence          # "check:test → auth.test.ts:45"
+      - blocker.thoughts          # "Looks like hashPassword returns undefined for empty input"
+    run test-executor to confirm fix
     # fix one at a time, then re-harvest
 
 elif blockers_count > 0:
-  # CRITICAL/MAJOR items from comments — already analyzed with fix instructions
-  for blocker in blockers[:3] where blocker.validity != "FALSE_POSITIVE":
+  # CRITICAL/MAJOR items — route top 1-3 for the agent to investigate and fix
+  for blocker in blockers[:3]:
     call blocker.route_to_agent with:
-      - blocker.analysis          # "MD5 is cryptographically broken for passwords"
-      - blocker.fix_file          # "src/auth.ts"
-      - blocker.fix_lines         # "42-48"
-      - blocker.fix_instruction   # "Replace crypto.createHash('md5') with bcrypt.hash()"
-      - blocker.verification      # "Existing password tests should still pass"
-    run blocker.verification to confirm
+      - blocker.evidence          # "src/auth.ts:42"
+      - blocker.thoughts          # "Real security issue - md5 for passwords"
+    run relevant verification
   # do NOT drain the full list (Flow 4 owns that)
 
 else:
@@ -368,13 +363,12 @@ else:
   continue_ac_loop: true
 ```
 
-**Key shift:** The harvester did the analysis work. The routed agent receives:
-- What file and lines to modify
-- What's actually wrong (not "security issue" but "MD5 is cryptographically broken")
-- Exactly how to fix it
-- How to verify the fix worked
+**Key shift:** The harvester triaged and added quick-read thoughts. The routed agent:
+- Receives the evidence (file:line, check name)
+- Sees the harvester's triage thoughts ("looks like real issue", "bot probably wrong")
+- Does the deep investigation and fix
 
-The routed agent **executes**, it doesn't re-investigate. This is why CI failures, CodeRabbit warnings, and "you deleted tests" comments all get handled correctly — the harvester already read the code and produced specific fix instructions.
+The harvester gets feedback back fast. The routed agents do the deep work.
 
 **Record unresolved blockers:**
 After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (FB-###). Flow 4 will harvest and drain everything systematically.

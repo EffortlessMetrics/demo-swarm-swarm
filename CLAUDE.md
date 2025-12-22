@@ -428,21 +428,16 @@ pr_number: <int | null>
 ci_status: PASSING | FAILING | PENDING | NONE
 ci_failing_checks: [<check-name>]    # names of failing checks
 
-blockers_count: <int>                # analyzed blockers requiring action
+blockers_count: <int>                # items needing action (CRITICAL + MAJOR)
 blockers:
   - id: FB-001
     source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
     severity: CRITICAL | MAJOR
     category: CORRECTNESS | TESTS | BUILD | SECURITY | DOCS | STYLE
-    validity: VALID | FALSE_POSITIVE | UNCLEAR
-    title: <short summary of actual issue>
+    title: <short title>
     route_to_agent: code-implementer | test-author | fixer | doc-writer
     evidence: <check name | file:line | comment id>
-    analysis: <what's actually wrong after reading code>
-    fix_file: <file to modify>
-    fix_lines: <line range>
-    fix_instruction: <specific actionable fix>
-    verification: <how to confirm fix worked>
+    thoughts: <triage-level quick read>
 
 counts:
   total: <n>
@@ -450,8 +445,6 @@ counts:
   major: <n>
   minor: <n>
   info: <n>
-  actionable: <n>
-  false_positives: <n>
 
 sources_harvested: [reviews, review_comments, check_runs, ...]
 sources_unavailable: []
@@ -459,10 +452,9 @@ sources_unavailable: []
 <!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 END -->
 
 Notes:
-- The harvester **analyzes** feedback (reads the code, determines validity, produces fix instructions) — not just classifies
-- `blockers[]` contains **analyzed** items with actionable `fix_instruction` and `verification`
-- `validity: FALSE_POSITIVE` items are counted but not routed (the bot/reviewer was wrong)
-- Flow 3 routes on `blockers[]` — fix top 1-3 immediately using the provided fix instructions
+- The harvester **triages** feedback (quick read, categorize, route) — not deep analysis
+- `thoughts` is triage-level: "looks like real issue", "outdated suggestion", "bot probably wrong"
+- Flow 3 routes on `blockers[]` — the routed agent does deep investigation
 - Flow 4 drains the complete worklist (all severities)
 - Per-flow outputs: `build/pr_feedback.md` (Flow 3), `review/pr_feedback.md` (Flow 4)
 

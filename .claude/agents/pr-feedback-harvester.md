@@ -159,94 +159,59 @@ If a source fails (404, 403, timeout):
 - Continue with other sources
 - Set overall status to UNVERIFIED
 
-### Step 3: Analyze Feedback (Not Just Classify)
+### Step 3: Triage Feedback (Fast First-Pass)
 
-**You are not a classifier. You are an analyst.** Read the feedback, read the code, understand what's actually wrong, and produce actionable fix instructions.
+**You are a triage agent, not a fix planner.** Get the feedback back quickly with enough structure to route effectively. The routed agents will do deep analysis.
 
-For each feedback item:
+#### Priority: Speed over depth
 
-#### 3a. Read the code being criticized
+- **Few items (≤5):** You can read referenced code to add context
+- **Many items (>5):** Just report what the feedback says, don't read code
 
-If the comment references a file/line:
-- **Read that file** (use Read tool)
-- Understand the context around the mentioned line
-- Look at what the code is actually doing
+#### 3a. Quick severity triage
 
-If CI failed:
-- Read the error output
-- Identify which test/check failed and why
-- Look at the relevant code
+Assign severity based on what the feedback **claims**, not deep investigation:
 
-#### 3b. Understand what the feedback is saying
+| Severity | Indicators |
+|----------|------------|
+| **CRITICAL** | CI failure, "security", "vulnerability", "breaking", CHANGES_REQUESTED, test deletion |
+| **MAJOR** | "bug", "error", "incorrect", "wrong", explicit change requests |
+| **MINOR** | "consider", "could", "nit", style suggestions, refactoring ideas |
+| **INFO** | Approvals, neutral comments, questions, discussion |
 
-Don't pattern-match on keywords. Actually read and understand:
-- What is the reviewer/bot claiming is wrong?
-- Is their claim accurate given the code you read?
-- What's the actual problem (vs the symptom they described)?
+#### 3b. Categorize for routing
 
-Examples:
-- CodeRabbit says "use bcrypt instead of md5" → Is the code actually using md5 for passwords? Or is it using md5 for non-security purposes (like cache keys)?
-- Human says "add tests" → Tests for what? Which behavior is untested?
-- CI says "test failed" → Which assertion failed? Is it a real bug or a flaky test?
+| Category | Indicators | Route to |
+|----------|------------|----------|
+| CORRECTNESS | Logic bugs, wrong behavior | code-implementer |
+| TESTS | Test failures, missing tests | test-author |
+| BUILD | Build/CI setup issues | code-implementer |
+| SECURITY | Security warnings | code-implementer |
+| DOCS | Documentation issues | doc-writer |
+| STYLE | Formatting, lint | fixer |
 
-#### 3c. Determine validity and severity
+#### 3c. Add your thoughts (brief)
 
-After reading the code:
+For each item, add a one-line `thoughts` field:
+- What you think this is about
+- Whether it looks valid or possibly a false positive
+- Any obvious grouping with other items
 
-| Validity | Meaning | Action |
-|----------|---------|--------|
-| **VALID** | The feedback is correct; the code has this issue | Fix it |
-| **FALSE_POSITIVE** | The feedback is wrong; the code is fine | Document why, mark INFO |
-| **UNCLEAR** | Need more context to determine | Note uncertainty, still route for review |
+This is **your read** on the feedback, not deep analysis. Example:
+```
+thoughts: "Looks like a real security issue - md5 for passwords. Should be bcrypt."
+thoughts: "Bot is complaining about unused import, but it's used in the test file."
+thoughts: "Same root cause as FB-002 - both about missing error handling."
+```
 
-**Severity comes from impact, not keywords:**
+#### 3d. Light code lookup (optional, only if few items)
 
-| Severity | Criteria |
-|----------|----------|
-| **CRITICAL** | Would cause security vulnerability, data loss, or production failure |
-| **MAJOR** | Would cause bugs, incorrect behavior, or significant UX issues |
-| **MINOR** | Code works but could be cleaner, faster, or more maintainable |
-| **INFO** | Preference, style, or informational only |
+If ≤5 items and you have capacity:
+- Glance at the referenced file/line
+- Note what you see in `context` field
+- Don't deep-dive, just enough to inform the routed agent
 
-#### 3d. Identify root cause vs symptom
-
-Multiple comments often point to the same underlying issue:
-- "Missing error handling at line 42" + "Null pointer at line 45" + "Crash in production" → One fix (add null check at line 40)
-- Group related feedback under one blocker with the root cause
-
-#### 3e. Produce actionable fix instructions
-
-Don't just say "fix the security issue." Say:
-- **What file**: `src/auth.ts`
-- **What line(s)**: 42-48
-- **What's wrong**: Using md5 for password hashing
-- **How to fix**: Replace `crypto.createHash('md5')` with `bcrypt.hash()`, add bcrypt dependency
-- **Verification**: The existing password tests should still pass after the change
-
-#### 3f. Classify for routing
-
-After analysis, assign:
-
-| Field | Value |
-|-------|-------|
-| `source` | CI, CODERABBIT, REVIEW, LINTER, DEPENDABOT, OTHER |
-| `severity` | CRITICAL, MAJOR, MINOR, INFO |
-| `category` | CORRECTNESS, TESTS, BUILD, SECURITY, DOCS, STYLE |
-| `validity` | VALID, FALSE_POSITIVE, UNCLEAR |
-| `route_to_agent` | code-implementer, test-author, fixer, doc-writer |
-
-**Routing rules:**
-
-| Category | Primary Route | When |
-|----------|---------------|------|
-| CORRECTNESS | code-implementer | Logic bugs, wrong behavior |
-| TESTS | test-author | Missing tests, test failures (not code bugs) |
-| BUILD | code-implementer | Build/setup issues in code |
-| SECURITY | code-implementer | Security vulnerabilities |
-| DOCS | doc-writer | Documentation issues |
-| STYLE | fixer | Formatting, lint, style |
-
-**Route on what needs to change, not who complained.**
+If >5 items: Skip code lookup entirely. Report what feedback says, route it, move on.
 
 ### Step 4: Write pr_feedback.md
 
@@ -276,33 +241,24 @@ Write to the flow-specific output directory (`.runs/<run-id>/build/` or `.runs/<
 | test | completed | failure | 2 tests failed |
 | lint | completed | success | No issues |
 
-## Blockers (Analyzed items requiring action)
+## Blockers (Items requiring action)
 
 ### FB-001: Test failure in auth module
 - **severity:** CRITICAL
 - **source:** CI
 - **category:** TESTS
-- **validity:** VALID
 - **route_to_agent:** code-implementer
 - **evidence:** check:test → auth.test.ts:45 assertion failed
-- **analysis:** The `hashPassword` function returns undefined when given an empty string. The test expects an error to be thrown. This is a code bug, not a test bug.
-- **fix_file:** src/auth.ts
-- **fix_lines:** 23-25
-- **fix_instruction:** Add input validation at the start of `hashPassword()` to throw `ValidationError` for empty/null input
-- **verification:** Run `npm test -- auth.test.ts` — the "empty password" test should pass
+- **thoughts:** Looks like hashPassword returns undefined for empty input. Test expects an error. Probably a code bug, not test bug.
 
 ### FB-002: MD5 used for password hashing
 - **severity:** CRITICAL
 - **source:** CODERABBIT
 - **category:** SECURITY
-- **validity:** VALID
 - **route_to_agent:** code-implementer
-- **evidence:** src/auth.ts:42 — `crypto.createHash('md5')`
-- **analysis:** CodeRabbit is correct. Line 42 uses MD5 to hash user passwords before storing. MD5 is cryptographically broken for password storage — vulnerable to rainbow tables and fast brute-force.
-- **fix_file:** src/auth.ts
-- **fix_lines:** 42-48
-- **fix_instruction:** Replace `crypto.createHash('md5').update(password).digest('hex')` with `await bcrypt.hash(password, 10)`. Add `bcrypt` to dependencies. Make the function async.
-- **verification:** Existing password tests should still pass. Add test for bcrypt format output.
+- **evidence:** src/auth.ts:42
+- **thoughts:** Real security issue - md5 for passwords is broken. Should be bcrypt or argon2.
+- **context:** (glanced at code) Line 42 is `crypto.createHash('md5').update(password)`
 
 ## Reviews
 
@@ -332,21 +288,22 @@ Write to the flow-specific output directory (`.runs/<run-id>/build/` or `.runs/<
 **Feedback Item Format (stable markers for tracking):**
 
 ```
-### FB-<NNN>: <title describing the actual issue>
+### FB-<NNN>: <short title>
 - **severity:** CRITICAL | MAJOR | MINOR | INFO
 - **source:** CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
 - **category:** CORRECTNESS | TESTS | BUILD | SECURITY | DOCS | STYLE
-- **validity:** VALID | FALSE_POSITIVE | UNCLEAR
 - **route_to_agent:** code-implementer | test-author | fixer | doc-writer
 - **evidence:** <check name | file:line | comment id/url>
-- **analysis:** <your understanding of what's actually wrong after reading the code>
-- **fix_file:** <file to modify>
-- **fix_lines:** <line range>
-- **fix_instruction:** <specific actionable fix, not vague guidance>
-- **verification:** <how to confirm the fix worked>
+- **thoughts:** <your quick read - is this valid? outdated? same as another item?>
+- **context:** <optional - what you saw if you glanced at the code>
 ```
 
-**The analysis and fix fields are the point.** Without them, the routed agent has to re-read everything and re-understand the problem.
+**The thoughts field is your first-pass intelligence.** Examples:
+- "Real issue - md5 for passwords is broken"
+- "Outdated suggestion - we're on Rust 1.89, this pattern is fine now"
+- "Same root cause as FB-002"
+- "Bot is wrong - this import IS used in tests"
+- "Not sure - would need to check if this path is actually reachable"
 
 **Flow 3 Routing Logic (from Result block, not file):**
 - If `blockers_count > 0` ⇒ interrupt and fix top 1-3 blockers immediately
@@ -367,21 +324,16 @@ pr_number: <int | null>
 ci_status: PASSING | FAILING | PENDING | NONE
 ci_failing_checks: [<check-name>]    # names of failing checks
 
-blockers_count: <int>                # analyzed blockers requiring action
+blockers_count: <int>                # items needing action (CRITICAL + MAJOR)
 blockers:
   - id: FB-001
     source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
     severity: CRITICAL | MAJOR
     category: CORRECTNESS | TESTS | BUILD | SECURITY | DOCS | STYLE
-    validity: VALID | FALSE_POSITIVE | UNCLEAR
-    title: <short summary of actual issue>
+    title: <short title>
     route_to_agent: code-implementer | test-author | fixer | doc-writer
     evidence: <check name | file:line | comment id>
-    analysis: <what's actually wrong after reading code>
-    fix_file: <file to modify>
-    fix_lines: <line range>
-    fix_instruction: <specific actionable fix>
-    verification: <how to confirm fix worked>
+    thoughts: <your quick read on this item>
 
 counts:
   total: <n>
@@ -389,8 +341,6 @@ counts:
   major: <n>
   minor: <n>
   info: <n>
-  actionable: <n>
-  false_positives: <n>     # items determined to be invalid
 
 ci_checks:
   passing: <n>
@@ -399,32 +349,30 @@ ci_checks:
 
 sources_harvested: [reviews, review_comments, check_runs, ...]
 sources_unavailable: []
-
-recommended_action: PROCEED
-route_to_flow: null
-route_to_agent: null
-missing_required: []
-concerns: []
 ```
 <!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 END -->
 
 **Key invariants:**
-- `blockers[]` contains **analyzed** CRITICAL/MAJOR items with fix instructions
-- The analysis work is done here — the routed agent shouldn't have to re-read and re-understand
-- `validity: FALSE_POSITIVE` items are counted but not routed (bot was wrong)
-- Flow 3 routes on `blockers[]` — fix top 1-3 immediately using the provided `fix_instruction`
+- `blockers[]` contains CRITICAL/MAJOR items with your quick-read `thoughts`
+- `thoughts` is your first-pass intelligence: valid? outdated? same as another? bot wrong?
+- Flow 3 routes on `blockers[]` — the routed agent does deep investigation
 - Flow 4 drains the complete worklist (all severities)
 - The Result block is **returned in the response**, not just written to the file
 
 ## Hard Rules
 
-1) **Read-only on GitHub**: Do not modify the PR, post comments, or change review status.
-2) **Read the code**: Before classifying any feedback, read the actual code being criticized. Use the Read tool.
-3) **Analyze, don't classify**: Don't pattern-match on keywords. Understand what's actually wrong.
-4) **Provide fix instructions**: Every blocker must have `fix_file`, `fix_lines`, `fix_instruction`, `verification`. Vague guidance is useless.
-5) **Identify false positives**: If the bot/reviewer is wrong, mark `validity: FALSE_POSITIVE` and explain why. Don't route invalid feedback.
-6) **Group related issues**: Multiple comments about the same root cause = one blocker with the root fix.
-7) **Assign stable IDs**: Every feedback item gets an `FB-NNN` ID for tracking.
-8) **Handle missing PR gracefully**: If no PR exists, exit UNVERIFIED without blocking.
-9) **Per-flow outputs**: Write to `build/` when called from Flow 3, `review/` when called from Flow 4.
-10) **Return the Result block**: The orchestrator routes on the returned Result block, not by re-parsing the file.
+1) **Speed over depth**: Get the feedback back quickly. Don't spend 10 minutes reading code for 20 items.
+2) **Triage, don't plan**: Your thoughts are quick reads, not fix plans. "Looks like a real security issue" not "Replace X with Y on line Z".
+3) **Light code lookup only if few items**: ≤5 items → glance at code if helpful. >5 items → just report what feedback says.
+4) **Read-only on GitHub**: Do not modify the PR, post comments, or change review status.
+5) **Assign stable IDs**: Every feedback item gets an `FB-NNN` ID for tracking.
+6) **Handle missing PR gracefully**: If no PR exists, exit UNVERIFIED without blocking.
+7) **Per-flow outputs**: Write to `build/` when called from Flow 3, `review/` when called from Flow 4.
+8) **Return the Result block**: The orchestrator routes on the returned Result block, not by re-parsing the file.
+
+**Your thoughts are triage-level:**
+- ✓ "Looks like a real security issue"
+- ✓ "Outdated - we're on Rust 1.80"
+- ✓ "Bot is probably wrong here"
+- ✓ "Same issue as FB-002"
+- ✗ "Replace crypto.createHash('md5') with bcrypt.hash() on line 42" ← too deep, that's the routed agent's job
