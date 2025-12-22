@@ -12,3 +12,5 @@ Task-oriented: pick the guide that matches the job you need to do.
 | [Work Without GitHub](work-without-github.md) | Operate locally with no `gh` | Local-only flow checklist and skip behavior |
 | [Adapt to Non-GitHub](adapt-to-non-github.md) | Use GitLab/Azure/Bitbucket | Mapping of GitHub ops to your provider |
 | [Troubleshoot](troubleshoot.md) | Debug pack runs | Checklists for common failures and reseal loops |
+| [Working with Microloops](working-with-microloops.md) | Understand and use writer↔critic patterns | Effective adversarial iteration |
+| [Working with Receipts](working-with-receipts.md) | Read and interpret flow receipts | Understanding flow outputs and routing |

@@ -74,19 +74,18 @@ Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
 
 | Value | Model Used | Use Case |
 |-------|------------|----------|
-| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file reasoning, architectural decisions, nuanced judgment across context |
-| `haiku` | Claude Haiku | Well-scoped tasks: single-file analysis, structured extraction, validation, cleanup operations |
+| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
+| `haiku` | Claude Haiku | Most focused tasks: implementation, reviews, validation, extraction — Haiku 4.5 is nearly as capable as earlier Sonnet versions |
 
 **Guidance:**
-- Use `inherit` for agents that need to synthesize across multiple files or make architectural decisions.
-- Use `haiku` for agents with well-defined scope and clear input/output contracts — Haiku is quite capable for focused tasks.
-- Critics reviewing single artifacts can often use `haiku` effectively.
-- Cleanup agents, receipt generators, and validators are good `haiku` candidates.
-- Cross-flow agents that need broad context awareness should use `inherit`.
+- Haiku 4.5 is highly capable — it performs nearly as well as Sonnet 4 and can handle code implementation, reviews, and complex reasoning for focused tasks.
+- Use `haiku` as the default for agents with clear scope: critics, implementers working on specific subtasks, cleanup agents, validators.
+- Use `inherit` when the agent must synthesize across many files simultaneously or needs the orchestrator's full context window.
+- When in doubt, try `haiku` first — it's faster and cheaper while maintaining high quality.
 
 **Trade-offs:**
-- `haiku`: Faster, cheaper, excellent for focused single-purpose work
-- `inherit`: Better for tasks requiring long context synthesis or multi-step reasoning
+- `haiku`: Faster, cheaper, excellent for most agent tasks (recommended default for focused work)
+- `inherit`: Better for broad multi-file synthesis or when you need the orchestrator's accumulated context
 
 ### color (agent YAML field)
 

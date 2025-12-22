@@ -184,13 +184,13 @@ Agents specify a `model` field in their YAML frontmatter:
 
 | Value | Meaning | Use Case |
 |-------|---------|----------|
-| `inherit` | Use the orchestrator's model (typically Sonnet or Opus) | Complex multi-file reasoning, architectural decisions, nuanced judgment across context |
-| `haiku` | Use Claude Haiku (faster, cheaper) | Well-scoped tasks: single-file analysis, structured extraction, validation, cleanup operations |
+| `inherit` | Use the orchestrator's model (typically Sonnet or Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
+| `haiku` | Use Claude Haiku (faster, cheaper) | Most focused tasks — Haiku 4.5 is nearly as capable as earlier Sonnet versions |
 
 **Guidance:**
-- Use `inherit` for agents that synthesize across multiple files or make architectural decisions.
-- Use `haiku` for agents with well-defined scope and clear contracts — Haiku is quite capable for focused tasks.
-- Critics reviewing single artifacts, cleanup agents, receipt generators, and validators are good `haiku` candidates.
+- Haiku 4.5 is highly capable and can handle implementation, reviews, and complex reasoning for focused tasks.
+- Use `haiku` as the default for agents with clear scope: critics, implementers on specific subtasks, cleanup agents, validators.
+- Use `inherit` when the agent must synthesize across many files simultaneously or needs the orchestrator's full context.
 
 ---
 

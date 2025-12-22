@@ -202,3 +202,19 @@ if [[ "$REQ_COUNT" == "null" ]]; then
   BLOCKERS+=("requirements.md missing or unparseable")
 fi
 ```
+
+---
+
+## Installation
+
+The Rust implementation is preferred. Install to repo-local directory:
+
+```bash
+cargo install --path tools/demoswarm-runs-tools --root .demoswarm
+```
+
+The shim will automatically resolve in order:
+1. `.demoswarm/bin/demoswarm` (repo-local install, preferred)
+2. `demoswarm` on PATH (global install)
+3. `cargo run` fallback (dev environments)
+4. Python fallback (legacy)
