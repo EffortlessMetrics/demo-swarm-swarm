@@ -339,24 +339,28 @@ This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse 
 **Routing logic (Route on Result block's `blockers[]`):**
 
 ```yaml
-# Route on PR Feedback Harvester Result — not counts, but actual blockers
+# Route on PR Feedback Harvester Result — analyzed blockers with fix instructions
 if ci_status == FAILING:
-  # CI red — interrupt immediately
-  for each failing_check in ci_failing_checks:
-    route by check name:
-      - tests failing → code-implementer then test-executor (fast confirm)
-      - lint/style failing → fixer then lint-executor
-      - build/setup failing → code-implementer
-    # fix one check at a time, then re-harvest
+  # CI red — the harvester already analyzed this and provided fix instructions
+  for blocker in blockers where blocker.source == "CI":
+    call blocker.route_to_agent with:
+      - blocker.fix_file
+      - blocker.fix_lines
+      - blocker.fix_instruction   # "Add input validation at line 23"
+      - blocker.verification      # "Run npm test -- auth.test.ts"
+    run blocker.verification to confirm
+    # fix one at a time, then re-harvest
 
 elif blockers_count > 0:
-  # CRITICAL/MAJOR items from comments — interrupt and fix top 1-3 only
-  for blocker in blockers[:3]:  # bounded interrupt, not worklist drain
+  # CRITICAL/MAJOR items from comments — already analyzed with fix instructions
+  for blocker in blockers[:3] where blocker.validity != "FALSE_POSITIVE":
     call blocker.route_to_agent with:
-      - blocker.id
-      - blocker.evidence
-      - blocker.title
-    run test-executor (fast confirm: relevant scope)
+      - blocker.analysis          # "MD5 is cryptographically broken for passwords"
+      - blocker.fix_file          # "src/auth.ts"
+      - blocker.fix_lines         # "42-48"
+      - blocker.fix_instruction   # "Replace crypto.createHash('md5') with bcrypt.hash()"
+      - blocker.verification      # "Existing password tests should still pass"
+    run blocker.verification to confirm
   # do NOT drain the full list (Flow 4 owns that)
 
 else:
@@ -364,11 +368,13 @@ else:
   continue_ac_loop: true
 ```
 
-**Key shift:** Flow 3 now routes on **which** blockers to fix (from `blockers[]`), not just **whether** blockers exist (from `counts.critical`). This means:
-- CI failures route by check name
-- CodeRabbit security warnings route to code-implementer
-- "You deleted tests" comments route to test-author
-- Bot/human "must fix" items get immediate attention
+**Key shift:** The harvester did the analysis work. The routed agent receives:
+- What file and lines to modify
+- What's actually wrong (not "security issue" but "MD5 is cryptographically broken")
+- Exactly how to fix it
+- How to verify the fix worked
+
+The routed agent **executes**, it doesn't re-investigate. This is why CI failures, CodeRabbit warnings, and "you deleted tests" comments all get handled correctly — the harvester already read the code and produced specific fix instructions.
 
 **Record unresolved blockers:**
 After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (FB-###). Flow 4 will harvest and drain everything systematically.
