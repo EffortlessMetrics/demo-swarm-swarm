@@ -337,6 +337,47 @@ Respect Gate Result + `checkpoint_mode` + **anomaly classification**:
 
 **Key distinction:** Untracked files cannot be accidentally pushed (they're not in the git index). They represent a hygiene warning, not a safety risk. Content mode should NOT be degraded for untracked-only anomalies.
 
+### Conflict Resolution Strategy (Aggressive)
+
+**Context:** The swarm operates in a downstream shadow repo where aggressive rebasing is safe. If a push fails due to remote divergence (e.g., human pushed a fix to the branch mid-flow), the bot resolves conflicts rather than stopping.
+
+If `git push` fails due to remote divergence:
+
+1. **Attempt rebase:**
+   ```bash
+   gitc pull --rebase origin "run/<run-id>"
+   ```
+
+2. **If conflicts occur, resolve by type:**
+   - **Generated files/receipts** (`.runs/`, `*.json` receipts): Use `git checkout --ours` (keep local/bot work)
+   - **Source/config/docs where "Extras" were detected**: Use `git checkout --theirs` (keep remote/human fixes)
+   - **Ambiguous conflicts**: Favor local state (the work we just did), but log the overwrite in `git_status.md`
+
+   ```bash
+   # Example resolution for receipts (keep ours)
+   gitc checkout --ours ".runs/<run-id>/build/build_receipt.json"
+   gitc add ".runs/<run-id>/build/build_receipt.json"
+
+   # Example resolution for human extras (keep theirs)
+   gitc checkout --theirs "README.md"
+   gitc add "README.md"
+   ```
+
+3. **Complete rebase and retry push:**
+   ```bash
+   gitc rebase --continue
+   gitc push -u origin "run/<run-id>"
+   ```
+
+4. **If rebase still fails** (non-trivial semantic conflict):
+   - Do not attempt further resolution
+   - Set `status: COMPLETED_WITH_ANOMALY`
+   - Write `git_status.md` with conflict details
+   - Return `proceed_to_github_ops: false`
+   - The flow continues locally; conflict becomes a documented anomaly
+
+**Why aggressive?** In the shadow repo model, the blast radius is contained. Human work in `upstream` is never at risk. The bot fights through conflicts to preserve both human extras and swarm progress.
+
 ### Gitignore conflict: `.runs/`
 
 If `.runs/` is ignored such that allowlist staging produces an empty index **while artifacts exist**:

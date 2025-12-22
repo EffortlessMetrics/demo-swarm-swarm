@@ -320,13 +320,32 @@ while not terminated:
 For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
 
 1. Read the item details (category, severity, location, summary)
-2. Call the routed agent with context:
+
+2. **Verify Relevance (Stale Check):**
+   Before routing to a fix agent, verify the referenced code still exists at HEAD:
+   - Does the file at the specified path still exist?
+   - Does the code/line referenced in the comment still exist and match the context?
+   - Has the code changed significantly since the feedback was posted?
+
+   **Stale classification:**
+   - **STALE**: Code has been refactored, deleted, or substantially changed. The feedback no longer applies.
+   - **OUTDATED**: Code exists but has been partially modified. May still apply but needs verification.
+   - **CURRENT**: Code matches the feedback context. Proceed with fix.
+
+   **Action on stale/outdated:**
+   - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
+   - Log the skip in `review_actions.md` with evidence (what changed, when)
+   - Move to the next item. Do not hallucinate fixes for missing code.
+
+   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Acting on stale feedback wastes cycles and risks regression.
+
+3. Call the routed agent with context:
    - Item ID and summary
    - File path and line number
    - Evidence from feedback
-3. If agent succeeds: mark RESOLVED
-4. If agent fails: keep PENDING (may need different approach)
-5. Log action in `review_actions.md`
+4. If agent succeeds: mark RESOLVED
+5. If agent fails: keep PENDING (may need different approach)
+6. Log action in `review_actions.md`
 
 **Reseal after changes:**
 
