@@ -26,8 +26,8 @@
 
 ## After
 - Branch: run/local-alignment-audit-aba1c6
-- Head: (pending commit)
-- Porcelain: untracked files remain
+- Head: 32f2f6518419617bd521209c525654a0e951d53a
+- Porcelain: 3 untracked files remain in deploy/
 
 ## Notes
 - Tighten-only safety: anomaly detected from untracked files in deploy/ folder

@@ -65,11 +65,15 @@ Return this block at the end of **commit operations** used for orchestration gat
 
 ```markdown
 ## Repo Operator Result
-operation: checkpoint | build
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+operation: checkpoint | build | final_checkpoint
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
 anomaly_paths: []
 ```
 
@@ -77,8 +81,9 @@ anomaly_paths: []
 
 * `operation`:
 
-  * `checkpoint` = audit-trail-only commit of `.runs/...` (Flows 1,2,4,5,6)
+  * `checkpoint` = audit-trail-only commit of `.runs/...` (Flows 1,2,4,5,6,7)
   * `build` = code/test + audit commit (Flow 3)
+  * `final_checkpoint` = lightweight commit of GitHub status files after GH ops (all flows)
 * `commit_sha`:
 
   * Always populated.
@@ -86,27 +91,49 @@ anomaly_paths: []
 * `publish_surface`:
 
   * `PUSHED` only when a push is attempted and succeeds.
-  * `NOT_PUSHED` for `checkpoint_mode: local_only`, anomalies, skipped push, or push failure.
+  * `NOT_PUSHED` for `checkpoint_mode: local_only`, tracked anomalies, skipped push, or push failure.
 * `status`:
 
-  * `COMPLETED`: operation succeeded
-  * `COMPLETED_WITH_ANOMALY`: allowlist committed, but unexpected paths exist; push/GH ops skipped
+  * `COMPLETED`: operation succeeded, no anomalies
+  * `COMPLETED_WITH_WARNING`: operation succeeded, only untracked anomalies exist; push allowed
+  * `COMPLETED_WITH_ANOMALY`: allowlist committed, but tracked/staged anomalies exist; push/GH ops skipped
   * `FAILED`: git command failed (non-mechanical)
   * `CANNOT_PROCEED`: mechanical failure (permissions/tooling/IO)
+* `anomaly_classification`:
+
+  * `unexpected_staged_paths`: HIGH risk - staged changes outside allowlist (blocks push)
+  * `unexpected_unstaged_paths`: HIGH risk - tracked file modifications outside allowlist (blocks push)
+  * `unexpected_untracked_paths`: LOW risk - new files not yet tracked (warning only, allows push)
+* `anomaly_paths`:
+
+  * DEPRECATED - union of all three classification arrays for backward compatibility
+  * New code should read from `anomaly_classification`
 * `proceed_to_github_ops`:
 
   * `true` only when it is safe to push and proceed with GH agents
-  * must be `false` for `checkpoint_mode: local_only` and for anomalies
+  * must be `false` for `checkpoint_mode: local_only` and for **tracked/staged** anomalies
+  * may be `true` for untracked-only anomalies (warning, not blocking)
 
 ### proceed_to_github_ops policy
 
-If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is empty:
-- `proceed_to_github_ops` MUST be `true` (even if the branch is ahead/behind origin).
+If `safe_to_publish: true`, `checkpoint_mode: normal`, and no **tracked/staged** anomalies:
+- `proceed_to_github_ops` MUST be `true` (even if untracked files exist outside allowlist).
 - Only a **push failure** may force it to `false`.
+
+Untracked-only anomalies:
+- Set `status: COMPLETED_WITH_WARNING`
+- Set `proceed_to_github_ops: true` (untracked files cannot be pushed accidentally)
+- Push is allowed; content mode is not degraded
+
+Tracked/staged anomalies:
+- Set `status: COMPLETED_WITH_ANOMALY`
+- Set `proceed_to_github_ops: false`
+- Push is blocked; downstream agents may degrade content mode
 
 ### Hard invariants
 
 * `checkpoint_mode: local_only` => `proceed_to_github_ops: false` (always).
+* Only tracked/staged anomalies block `proceed_to_github_ops`, never untracked-only.
 * Orchestrators route on this block, not by re-reading `git_status.md`.
 
 ## Checkpoint operations (Flows 1/2/4/5/6)
@@ -126,7 +153,7 @@ If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is em
    gitc add ".runs/<run-id>/<flow>/" ".runs/<run-id>/run_meta.json" ".runs/index.json"
    ```
 
-2. Detect anomaly (dirty outside allowlist):
+2. Detect and classify anomalies (dirty outside allowlist):
 
    ```bash
    allowlist_prefixes=(
@@ -147,36 +174,55 @@ If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is em
    unstaged=$(gitc diff --name-only)
    untracked=$(gitc ls-files --others --exclude-standard)
 
-   anomaly_paths=()
+   # Classify anomalies by type (different risk levels)
+   unexpected_staged_paths=()    # HIGH risk: blocks push
+   unexpected_unstaged_paths=()  # HIGH risk: blocks push
+   unexpected_untracked_paths=() # LOW risk: warning only
 
    while IFS= read -r p; do
      [[ -z "$p" ]] && continue
-     in_allowlist "$p" || anomaly_paths+=("$p")
+     in_allowlist "$p" || unexpected_staged_paths+=("$p")
    done <<<"$staged"
 
    while IFS= read -r p; do
      [[ -z "$p" ]] && continue
-     in_allowlist "$p" || anomaly_paths+=("$p")
+     in_allowlist "$p" || unexpected_unstaged_paths+=("$p")
    done <<<"$unstaged"
 
    while IFS= read -r p; do
      [[ -z "$p" ]] && continue
-     in_allowlist "$p" || anomaly_paths+=("$p")
+     in_allowlist "$p" || unexpected_untracked_paths+=("$p")
    done <<<"$untracked"
 
-   # de-dupe for reporting
+   # de-dupe each category
+   mapfile -t unexpected_staged_paths < <(printf "%s\n" "${unexpected_staged_paths[@]}" | sort -u)
+   mapfile -t unexpected_unstaged_paths < <(printf "%s\n" "${unexpected_unstaged_paths[@]}" | sort -u)
+   mapfile -t unexpected_untracked_paths < <(printf "%s\n" "${unexpected_untracked_paths[@]}" | sort -u)
+
+   # Deprecated: flat union for backward compatibility
+   anomaly_paths=("${unexpected_staged_paths[@]}" "${unexpected_unstaged_paths[@]}" "${unexpected_untracked_paths[@]}")
    mapfile -t anomaly_paths < <(printf "%s\n" "${anomaly_paths[@]}" | sort -u)
+
+   # Determine anomaly severity
+   has_tracked_anomaly=false
+   if [[ ${#unexpected_staged_paths[@]} -gt 0 || ${#unexpected_unstaged_paths[@]} -gt 0 ]]; then
+     has_tracked_anomaly=true
+   fi
    ```
 
    ### Anomaly definition (hard rule)
 
-   `anomaly_paths` MUST be derived only from **git's dirtiness signals**:
+   Anomalies MUST be derived only from **git's dirtiness signals**:
 
-   - unstaged changes: `git diff --name-only`
-   - staged changes: `git diff --cached --name-only`
-   - untracked: `git ls-files --others --exclude-standard`
+   - staged changes: `git diff --cached --name-only` → `unexpected_staged_paths` (HIGH risk)
+   - unstaged changes: `git diff --name-only` → `unexpected_unstaged_paths` (HIGH risk)
+   - untracked: `git ls-files --others --exclude-standard` → `unexpected_untracked_paths` (LOW risk)
 
    Then filter to **paths outside the allowlist**.
+
+   **Risk classification:**
+   - **HIGH risk (tracked/staged):** These files could be accidentally committed/pushed. Blocks push.
+   - **LOW risk (untracked):** These files cannot be pushed (not in index). Warning only.
 
    **Do NOT** use any of:
    - `git diff origin/main...HEAD`
@@ -186,11 +232,23 @@ If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is em
    Committed differences vs origin are **not** anomalies.
    Only "dirty now" is an anomaly.
 
-3. If anomaly detected:
+3. Determine status and routing based on anomaly classification:
 
+   **If tracked/staged anomalies exist** (`has_tracked_anomaly=true`):
    * Commit allowlist only (audit trail preserved)
-   * Write `.runs/<run-id>/<flow>/git_status.md` with unexpected paths
+   * Write `.runs/<run-id>/<flow>/git_status.md` with unexpected paths (classified by type)
    * Set `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`
+   * Push is BLOCKED (tracked changes could be accidentally pushed)
+
+   **If only untracked anomalies exist** (`has_tracked_anomaly=false` but `unexpected_untracked_paths` non-empty):
+   * Commit allowlist (audit trail preserved)
+   * Write `.runs/<run-id>/<flow>/git_status.md` with unexpected paths as WARNING
+   * Set `status: COMPLETED_WITH_WARNING`, `proceed_to_github_ops: true`
+   * Push is ALLOWED (untracked files cannot be pushed - they're not in the index)
+   * Content mode is NOT degraded (this is a hygiene warning, not a safety issue)
+
+   **If no anomalies**:
+   * Set `status: COMPLETED`, `proceed_to_github_ops: true` (subject to other gates)
 
 4. No-op commit handling:
 
@@ -207,12 +265,13 @@ If `safe_to_publish: true`, `checkpoint_mode: normal`, and `anomaly_paths` is em
 
 ### Push gating (checkpoint)
 
-Respect Gate Result + `checkpoint_mode`:
+Respect Gate Result + `checkpoint_mode` + **anomaly classification**:
 
 * If `safe_to_commit: false` => skip commit entirely, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
 * If `checkpoint_mode: local_only` => never push, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
-* If anomaly detected => never push, return `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
-* If `safe_to_publish: true` AND `checkpoint_mode: normal` AND no anomaly:
+* If **tracked/staged anomalies** detected (`has_tracked_anomaly=true`) => never push, return `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`.
+* If **only untracked anomalies** exist => push IS allowed, return `status: COMPLETED_WITH_WARNING`, `proceed_to_github_ops: true`.
+* If `safe_to_publish: true` AND `checkpoint_mode: normal` AND no tracked/staged anomaly:
 
   * push current branch ref (even if no-op). If push fails (auth/network), record `status: FAILED` and set `proceed_to_github_ops: false`:
 
@@ -220,6 +279,8 @@ Respect Gate Result + `checkpoint_mode`:
     gitc push -u origin "run/<run-id>" || push_failed=1
     ```
   * Set `publish_surface: PUSHED` only when the push succeeds; otherwise `NOT_PUSHED`.
+
+**Key distinction:** Untracked files cannot be accidentally pushed (they're not in the git index). They represent a hygiene warning, not a safety risk. Content mode should NOT be degraded for untracked-only anomalies.
 
 ### Gitignore conflict: `.runs/`
 
@@ -294,11 +355,15 @@ Return control-plane block:
 ```markdown
 ## Repo Operator Result
 operation: build
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
-anomaly_paths: [...]
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
+anomaly_paths: []
 ```
 
 ## Reconcile anomaly (orchestrator-invoked)
@@ -345,6 +410,69 @@ Always write `.runs/<run-id>/deploy/deployment_log.md` with:
 * decision, merge status, tag/release details, SHAs, timestamps
 * links when available (do not paste tokens)
 
+## Final Checkpoint (all flows)
+
+A lightweight checkpoint after GitHub operations complete. Used to commit GH status artifacts that are written by `gh-issue-manager` and `gh-reporter` **after** the main checkpoint.
+
+### When to use
+
+Orchestrator calls `repo-operator` with `operation: final_checkpoint` as the last station in a flow, after:
+1. Main checkpoint committed and pushed
+2. `gh-issue-manager` ran (wrote `gh_issue_status.md`)
+3. `gh-reporter` ran (wrote `gh_report_status.md`, `gh_comment_id.txt`, `github_report.md`)
+
+### Allowlist (fixed)
+
+* `.runs/<run-id>/<flow>/gh_issue_status.md`
+* `.runs/<run-id>/<flow>/gh_report_status.md`
+* `.runs/<run-id>/<flow>/gh_comment_id.txt`
+* `.runs/<run-id>/<flow>/github_report.md` (if exists)
+* `.runs/<run-id>/<flow>/gh_issue_body.md` (if exists)
+
+### Procedure (mechanical)
+
+1. Reset staging and stage only GH status files (skip if they don't exist):
+
+   ```bash
+   gitc reset HEAD
+   gitc add ".runs/<run-id>/<flow>/gh_issue_status.md" \
+            ".runs/<run-id>/<flow>/gh_report_status.md" \
+            ".runs/<run-id>/<flow>/gh_comment_id.txt" 2>/dev/null || true
+   gitc add ".runs/<run-id>/<flow>/github_report.md" \
+            ".runs/<run-id>/<flow>/gh_issue_body.md" 2>/dev/null || true
+   ```
+
+2. **No secrets scanning required** - these files are mechanical status reports with counts and IDs only.
+
+3. No-op handling: If nothing staged, skip commit (success).
+
+4. Commit message: `chore(runs): finalize <flow> <run-id> github ops`
+
+5. **No push** - the branch was already pushed in the main checkpoint; this is a local-only commit.
+
+### Control plane
+
+Return:
+
+```markdown
+## Repo Operator Result
+operation: final_checkpoint
+status: COMPLETED | FAILED | CANNOT_PROCEED
+proceed_to_github_ops: false
+commit_sha: <sha>
+publish_surface: NOT_PUSHED
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
+anomaly_paths: []
+```
+
+Notes:
+* `proceed_to_github_ops` is always `false` (GitHub ops already complete).
+* `publish_surface` is always `NOT_PUSHED` (no push attempt in final checkpoint).
+* Status is typically `COMPLETED` (mechanical operation).
+
 ## git_status.md (audit format)
 
 For anomalies or reconciliations, write:
@@ -352,8 +480,8 @@ For anomalies or reconciliations, write:
 ```markdown
 # Git Status
 
-## Status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
-## Operation: checkpoint | build_stage | build_commit | reconcile_anomaly | merge_tag_release
+## Status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+## Operation: checkpoint | build_stage | build_commit | reconcile_anomaly | merge_tag_release | final_checkpoint
 
 ## Before
 - Branch: <name>
@@ -363,8 +491,13 @@ For anomalies or reconciliations, write:
 ## Allowlist (if checkpoint)
 - <paths>
 
-## Unexpected Paths (if any)
-- <path> (<modified|untracked|staged>)
+## Anomaly Classification
+### HIGH Risk (blocks push)
+- Staged: <list or "none">
+- Unstaged (tracked): <list or "none">
+
+### LOW Risk (warning only)
+- Untracked: <list or "none">
 
 ## Actions Taken
 - <bullets>
@@ -376,6 +509,7 @@ For anomalies or reconciliations, write:
 
 ## Notes
 - <tighten-only safety notes, if used>
+- For COMPLETED_WITH_WARNING: "Untracked files outside allowlist do not block push; hygiene warning only."
 ```
 
 ## Failure semantics
