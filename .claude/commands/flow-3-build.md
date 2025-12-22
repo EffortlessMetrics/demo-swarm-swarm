@@ -559,9 +559,23 @@ blocker_reason: <string | null>
 
 ### Step 12: Commit and Push (Only if Secrets Gate Passes)
 
-**Call `repo-operator`** to commit code/test changes + audit trail. The agent generates an appropriate commit message from `impl_changes_summary.md`.
+**Two-step atomic commit strategy:**
 
-**No-op commit guard:** If `git diff --cached --quiet` → commit SKIPPED (not an error), do not push. `repo-operator` handles this gracefully.
+Flow 3 uses two sequential commits to preserve the audit trail even when code changes need to be reverted:
+
+1. **Step 12a: Commit `.runs/` artifacts**
+   - **Call `repo-operator`** with task: "commit build artifacts"
+   - Commits only `.runs/<run-id>/build/`, `run_meta.json`, `index.json`
+   - Preserves audit trail independently of code changes
+   - **Rationale:** This allows reverting code without losing the audit trail
+
+2. **Step 12b: Commit code/test changes**
+   - **Call `repo-operator`** with task: "commit and push build changes"
+   - Commits code/test/doc changes (project-defined locations)
+   - Generates commit message from `impl_changes_summary.md`
+   - Pushes both commits (gated by secrets + hygiene checks)
+
+**No-op commit guard:** If either commit has no staged changes (`git diff --cached --quiet` → empty), that commit is SKIPPED (not an error). `repo-operator` handles this gracefully.
 
 **Control plane:** `repo-operator` returns a Repo Operator Result block:
 ```
@@ -573,7 +587,7 @@ commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
-**Note:** `commit_sha` is always populated (current HEAD on no-op), never null. Flow 3 uses `operation: build` (not `checkpoint`) because it commits code/tests alongside audit artifacts.
+**Note:** `commit_sha` is always populated (current HEAD after both commits, or current HEAD on no-op), never null. Flow 3 uses `operation: build` (not `checkpoint`) because it commits code/tests alongside audit artifacts.
 
 Orchestrators route on this block, not by re-reading `git_status.md`.
 

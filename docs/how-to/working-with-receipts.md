@@ -68,6 +68,54 @@ All receipts share a base schema:
 }
 ```
 
+### DevLT Tracking (Developer Lead Time)
+
+Receipts may include a `devlt` section for retrospective analysis of human vs machine effort:
+
+```json
+{
+  "devlt": {
+    "flow_started_at": "2025-12-22T10:00:00Z",
+    "flow_completed_at": "2025-12-22T10:45:00Z",
+    "human_checkpoints": [
+      {"at": "2025-12-22T10:00:00Z", "action": "flow_start"},
+      {"at": "2025-12-22T10:30:00Z", "action": "question_answered"},
+      {"at": "2025-12-22T10:45:00Z", "action": "flow_approved"}
+    ],
+    "machine_duration_sec": 2700,
+    "human_checkpoint_count": 3,
+    "estimated_human_attention_min": 15,
+    "estimation_basis": "checkpoint_count * 5min average"
+  }
+}
+```
+
+**Field semantics:**
+
+| Field | Type | Meaning |
+|-------|------|---------|
+| `flow_started_at` | Observable | ISO8601 timestamp when flow began |
+| `flow_completed_at` | Observable | ISO8601 timestamp when flow completed |
+| `human_checkpoints` | Observable | Array of human interaction points with timestamps and action types |
+| `machine_duration_sec` | Derived | Wall-clock time (not execution time) |
+| `human_checkpoint_count` | Observable | Count of human interactions |
+| `estimated_human_attention_min` | Inference | Rough estimate based on checkpoint count and typical review times |
+| `estimation_basis` | Metadata | Explanation of how the estimate was derived |
+
+**Observable vs inferred:**
+- Timestamps and counts are **facts** (derived from logs/artifacts)
+- `estimated_human_attention_min` is an **inference** (labeled as such)
+- Token costs are **not tracked** here (unreliably available)
+
+**Purpose:** DevLT is for retrospective analysis in Flow 7 (Wisdom), not for gating or routing. It helps answer: "How much human attention did this run actually require?"
+
+**Common checkpoint actions:**
+- `flow_start` — Flow initiated
+- `question_answered` — Human responded to a clarifying question
+- `decision_made` — Human made a routing or design decision
+- `approval_given` — Human approved proceeding
+- `flow_approved` — Flow completed and approved
+
 ### Status Values
 
 | Status | Meaning |

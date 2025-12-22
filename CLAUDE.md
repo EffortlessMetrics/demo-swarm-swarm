@@ -667,10 +667,16 @@ Only HIGH risk anomalies block `proceed_to_github_ops`. Untracked-only anomalies
 
 **Rule (repeat):** do not embed raw git commands in flow commands or agent prompts. All git is executed via `repo-operator` using **task phrasing**.
 
+**Two-step atomic (Flow 3):** Artifacts first, code second. This ensures the audit trail persists even if code changes are reverted.
+
 ### Commit Cadence
 
 - **Every flow checkpoints** (main checkpoint): audit commit of the flow's publish surface on the run branch.
-- **Flow 3 additionally commits code/tests**: the "work product" commit.
+- **Flow 3 uses two-step atomic commits**:
+  1. Artifacts commit: `.runs/<run-id>/build/` + flow metadata (audit trail)
+  2. Code commit: staged code/test changes (work product)
+
+  This separation allows reverting code changes without losing the audit trail of what was attempted and why.
 - **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
 
 GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are **gitignored** — they are operational exhaust, not audit trail.

@@ -49,11 +49,16 @@ The orchestrator passes an **intent**. You map it to the appropriate paths and b
 |--------|------------------|----------|
 | `signal` | `.runs/<run-id>/signal/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `plan` | `.runs/<run-id>/plan/`, `run_meta.json`, `index.json` | Stage output locations only |
-| `build` | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, **plus** project code/tests | Stage output + project changes + extras |
+| `build` | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, **plus** project code/tests | **Two-step commit:** artifacts first, then code changes + extras |
 | `review` | `.runs/<run-id>/review/`, `run_meta.json`, `index.json`, **plus** project code/tests | Stage output + project changes + extras |
 | `gate` | `.runs/<run-id>/gate/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `deploy` | `.runs/<run-id>/deploy/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `wisdom` | `.runs/<run-id>/wisdom/`, `run_meta.json`, `index.json` | Stage output locations only |
+
+**Build two-step commit pattern:**
+- Step 1: Commit `.runs/<run-id>/build/` + metadata (audit trail)
+- Step 2: Commit project code/tests (work product)
+- See "Two-Step Commit Strategy" section for details
 
 **Build/Review "plus project" behavior:**
 - Derive project paths from `demo-swarm.config.json` layout roots (if present)
@@ -435,6 +440,44 @@ If `.runs/` is ignored such that allowlist staging produces an empty index **whi
 
 ## Flow 3 (Build): staging and commit
 
+### Two-Step Commit Strategy
+
+Flow 3 Build checkpoints use a **two-step atomic commit pattern** to separate audit trail from work product.
+
+**Why:** Allows reverting code changes without losing the audit trail (receipts, Machine Summaries, verification evidence).
+
+**When:** Flow 3 (Build) checkpoints only. Other flows use single-step checkpoints (artifacts only).
+
+**How:**
+
+1. **Step 1: Checkpoint artifacts first**
+   ```bash
+   gitc reset HEAD
+   gitc add ".runs/<run-id>/build/" ".runs/<run-id>/run_meta.json" ".runs/index.json"
+   gitc commit -m "chore(.runs): checkpoint build artifacts [<run-id>]"
+   ```
+
+2. **Step 2: Commit code changes second**
+   ```bash
+   gitc reset HEAD
+   # Stage project files (src/, tests/, docs/, etc.) + extras
+   gitc add <project-paths>
+   # Generate Conventional Commit message (see Commit Message Policy)
+   gitc commit -m "<type>(<scope>): <subject>"
+   ```
+
+**Benefits:**
+- Audit trail is preserved even if code commit is reverted
+- Receipts reference the code SHA (linkage maintained)
+- Git history cleanly separates "what we verified" from "what we built"
+- Revert-safety: `git revert <code-sha>` does not lose `.runs/` evidence
+
+**Implementation notes:**
+- Both commits happen on the same branch (`run/<run-id>`)
+- Push happens after both commits (one push, two commits)
+- Secrets sanitizer scans the combined publish surface before push
+- Anomaly detection applies to the combined staged diff
+
 ### Build staging (no commit)
 
 Repo-operator may be asked to stage intended changes. Do **not** assume `src/` or `tests/`.
@@ -505,15 +548,37 @@ When `operation: build` or `checkpoint`, generate **Conventional Commit** messag
 ### Build commit (commit/push)
 
 * Only commit when the orchestrator indicates `safe_to_commit: true` from the prior Gate Result.
-* Commit message:
+* **Use the Two-Step Commit Strategy** (see above):
+
+  **Step 1 - Artifacts commit:**
+  ```bash
+  gitc reset HEAD
+  gitc add ".runs/<run-id>/build/" ".runs/<run-id>/run_meta.json" ".runs/index.json"
+  gitc commit -m "chore(.runs): checkpoint build artifacts [<run-id>]"
+  artifacts_sha=$(gitc rev-parse HEAD)
+  ```
+
+  **Step 2 - Code commit:**
+  ```bash
+  gitc reset HEAD
+  # Stage project files based on manifest/config (see Build staging section)
+  gitc add <project-paths>
+  # Generate Conventional Commit (analyze the diff)
+  gitc commit -m "<type>(<scope>): <subject>"
+  code_sha=$(gitc rev-parse HEAD)
+  ```
+
+* Commit message (Step 2):
 
   * Apply the Semantic Commit Policy above: analyze the diff and generate a Conventional Commit.
   * Use `.runs/<run-id>/build/impl_changes_summary.md` for context on what was implemented.
-  * Fallback (empty or trivial): `chore(<run-id>): checkpoint build artifacts`
+  * Fallback (empty or trivial): `chore(<run-id>): implement changes`
 
 No-op commit handling:
 
-* If nothing is staged, do not create an empty commit; return `commit_sha = HEAD`, `proceed_to_github_ops: false` (no new work to publish).
+* If nothing is staged for artifacts (Step 1), skip that commit; proceed to Step 2.
+* If nothing is staged for code (Step 2), skip that commit; return `commit_sha = artifacts_sha`.
+* If both are no-op, return `commit_sha = HEAD`, `proceed_to_github_ops: false` (no new work to publish).
 
 Push gating (Build):
 
@@ -533,7 +598,9 @@ Return control-plane block:
 operation: build
 status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
-commit_sha: <sha>
+commit_sha: <sha>                    # HEAD after both commits (code_sha if present, else artifacts_sha, else HEAD)
+artifacts_sha: <sha | null>          # Step 1 commit (null if skipped)
+code_sha: <sha | null>               # Step 2 commit (null if skipped)
 publish_surface: PUSHED | NOT_PUSHED
 anomaly_classification:
   unexpected_staged_paths: []
@@ -541,6 +608,12 @@ anomaly_classification:
   unexpected_untracked_paths: []
 anomaly_paths: []
 ```
+
+**Note:** For two-step Build commits:
+- `commit_sha` = final HEAD (the code commit SHA if code was committed, else artifacts commit SHA)
+- `artifacts_sha` = Step 1 commit SHA (or null if no artifacts to commit)
+- `code_sha` = Step 2 commit SHA (or null if no code changes to commit)
+- These fields allow receipts to reference the artifacts commit for audit trail stability
 
 ## Reconcile anomaly (orchestrator-invoked)
 

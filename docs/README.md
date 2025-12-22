@@ -15,6 +15,8 @@ Pick docs by intent (Diataxis): **learn**, **do**, **look up**, **understand**, 
 - [Validation Run](tutorials/validation-run.md) - exercise Flows 1-4 in a sandbox
 - [Customize Pack](how-to/customize-pack.md) - point tests/lint/policy at your stack
 - [Architecture](explanation/architecture.md) - understand how the pack is built and why
+- [Failure Recovery](how-to/failure-recovery.md) - recover from failed runs
+- [Trust Model](reference/trust-model.md) - understand evidence hierarchy and state verification
 
 ---
 

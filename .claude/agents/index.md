@@ -6,6 +6,8 @@ This directory contains all agent prompts for the DemoSwarm pack. Each agent is 
 
 **Core principle:** Speed is a commodity. Model choice is driven by **cost-to-reasoning ratio**, not speed.
 
+For detailed allocation strategy and percentages, see [Model Allocation](../../docs/reference/model-allocation.md).
+
 ### Model Tiers
 
 | Tier | Models | Use For |
@@ -16,11 +18,8 @@ This directory contains all agent prompts for the DemoSwarm pack. Each agent is 
 ### Agent Model Assignments
 
 **Haiku-tier agents** (high-speed execution, research, cleanup):
-- `context-loader` — RAG-style search and context distillation
 - `*-cleanup` agents — Mechanical receipt generation and index updates
 - `test-executor` — Run tests and capture output
-- `standards-enforcer` — Run formatters/linters (mechanical)
-- `fixer` — Apply targeted fixes from critics (mechanical)
 - `traceability-auditor` — Coherence checks (mechanical)
 - `flow-historian` — Timeline compilation (mechanical)
 - `gh-researcher` — Read-only GitHub reconnaissance
@@ -161,6 +160,8 @@ Haiku distills context; Sonnet/Opus implements with that context.
 | `traceability-auditor` | Read-only coherence + spec traceability audit |
 | `artifact-auditor` | Audit existence + coherence of expected artifacts |
 | `impact-analyzer` | Map blast radius of change |
+| `flow-historian` | Compile reconstructable timeline of run history |
+| `pack-customizer` | Detect repo conventions and adapt pack to target stack |
 
 ## No Wait Policy
 

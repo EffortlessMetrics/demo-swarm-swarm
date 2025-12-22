@@ -154,6 +154,9 @@ A structured JSON artifact produced by a cleanup/sealing agent summarizing what 
 
 Receipts are **sealed**: reporters read receipts; they do not recompute counts or upgrade statuses.
 
+### DevLT (Developer Lead Time)
+An optional section in receipts that captures timing and human interaction data for retrospective analysis. Includes observable timestamps (`flow_started_at`, `flow_completed_at`), human checkpoint events, and inferred estimates of human attention time. Used in Flow 7 (Wisdom) for understanding how much human attention a run required. Not used for gating or routing.
+
 ### Critique
 A structured review artifact produced by a critic (Markdown). Contains a `## Machine Summary` section for mechanical parsing plus human-readable analysis.
 
