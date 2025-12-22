@@ -253,6 +253,36 @@ Sources:
 1. All worklist items resolved (`pending == 0`) → status: VERIFIED
 2. Context window exhaustion (approaching limit) → status: PARTIAL (checkpoint & exit)
 3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
+4. **Stuck detection triggered** → status: PARTIAL (checkpoint & exit with documented stuck state)
+
+### Stuck Detection (prevents infinite loops)
+
+The loop is **stuck** when no meaningful progress is made across iterations. Track these signals:
+
+**Progress indicators (reset stuck counter):**
+- Item moved from PENDING to RESOLVED
+- Item moved from PENDING to SKIPPED (with valid reason)
+- New items added to worklist (from re-harvest)
+- Git diff shows meaningful code changes
+
+**Stuck signals (increment stuck counter):**
+- Same item attempted twice with same failure mode
+- Fix agent returns UNVERIFIED with identical blockers
+- No worklist state change after a full iteration
+- No git diff after fix attempt
+
+**Stuck counter threshold:** 3 consecutive iterations without progress.
+
+**On stuck detection:**
+1. Mark remaining PENDING items as `DEFERRED` with reason: `"STUCK: No progress after 3 iterations"`
+2. Write detailed stuck analysis to `review_actions.md`:
+   - Which items were attempted
+   - What failures occurred
+   - Why the loop couldn't make progress
+3. Checkpoint with `status: PARTIAL`
+4. Exit with message: "Review loop stuck. {N} items deferred. See review_actions.md for analysis. Human intervention may be required."
+
+**Why this matters:** An unbounded loop without stuck detection can burn tokens indefinitely trying the same failed fix. Stuck detection ensures the swarm admits defeat gracefully rather than spinning.
 
 **Context checkpoint behavior (PARTIAL):**
 When context is approaching limits, checkpoint immediately:
@@ -266,10 +296,15 @@ This is a **feature, not a failure**. It prevents hallucination from context stu
 **Loop structure:**
 
 ```
+stuck_counter = 0
+last_worklist_hash = null
+last_diff_hash = null
+
 while not terminated:
     1. Read current worklist status from review_worklist.json
     2. If pending == 0: break (complete)
     3. If context exhausted: break (can resume later)
+    3b. If stuck_counter >= 3: break (stuck detection triggered)
 
     4. Run Style Sweep station (always):
        - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
@@ -305,6 +340,19 @@ while not terminated:
     12. If new feedback items found:
         - Run review-worklist-writer to update worklist
         - New items get appended (IDs continue from last)
+
+    13. **Track progress for stuck detection:**
+        current_worklist_hash = hash(review_worklist.json pending items)
+        current_diff_hash = hash(git diff HEAD~1)
+
+        if (item resolved OR item skipped OR new items added OR diff changed):
+            stuck_counter = 0  # Progress made
+            last_worklist_hash = current_worklist_hash
+            last_diff_hash = current_diff_hash
+        else:
+            stuck_counter += 1  # No progress
+            if stuck_counter >= 3:
+                log "Stuck detection triggered after 3 iterations without progress"
 ```
 
 **Style Sweep station (standard, always run):**

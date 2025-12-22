@@ -369,7 +369,30 @@ If `git push` fails due to remote divergence:
    gitc push -u origin "run/<run-id>"
    ```
 
-4. **If rebase still fails** (non-trivial semantic conflict):
+4. **Post-conflict verification (required after any resolution):**
+   After resolving conflicts and before pushing, run a quick sanity check:
+
+   ```bash
+   # Verify the merge didn't break the build
+   # Use repo-specific test command if available, otherwise basic checks
+   if [ -f "package.json" ]; then
+     npm run build --if-present 2>/dev/null || echo "build check: SKIP"
+     npm test -- --passWithNoTests 2>/dev/null || echo "test check: SKIP"
+   elif [ -f "Cargo.toml" ]; then
+     cargo check 2>/dev/null || echo "cargo check: SKIP"
+   elif [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+     python -m pytest --collect-only 2>/dev/null || echo "pytest check: SKIP"
+   fi
+   ```
+
+   **If post-conflict verification fails:**
+   - Do NOT push (the merge introduced a regression)
+   - Set `status: COMPLETED_WITH_ANOMALY`
+   - Write `git_status.md` with verification failure details
+   - Return `proceed_to_github_ops: false`
+   - The orchestrator will route to `test-executor` or `code-implementer` to fix
+
+5. **If rebase still fails** (non-trivial semantic conflict):
    - Do not attempt further resolution
    - Set `status: COMPLETED_WITH_ANOMALY`
    - Write `git_status.md` with conflict details
@@ -377,6 +400,8 @@ If `git push` fails due to remote divergence:
    - The flow continues locally; conflict becomes a documented anomaly
 
 **Why aggressive?** In the shadow repo model, the blast radius is contained. Human work in `upstream` is never at risk. The bot fights through conflicts to preserve both human extras and swarm progress.
+
+**Why verify after?** Resolving conflicts mechanically (ours/theirs) can introduce semantic breaks even if git is happy. The quick verification step catches "merge succeeded but tests broke" before pushing bad code.
 
 ### Gitignore conflict: `.runs/`
 

@@ -194,6 +194,33 @@ bash .claude/scripts/demoswarm.sh receipt get \
 
 If the inventory section is missing entirely, prefer `null` over guessing and explain why in `cleanup_report.md`. If the section exists and markers are legitimately absent, `0` is acceptable.
 
+### Dependency Change Detection (supply chain visibility)
+
+Check for dependency manifest and lockfile changes in the staged diff:
+
+```bash
+# Detect touched dependency files
+git diff --cached --name-only | grep -E '(package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.toml|Cargo\.lock|requirements\.txt|poetry\.lock|Pipfile\.lock|go\.mod|go\.sum|Gemfile|Gemfile\.lock)'
+```
+
+**Manifest files** (human-edited; intentional changes):
+- `package.json`, `Cargo.toml`, `requirements.txt`, `Pipfile`, `go.mod`, `Gemfile`
+
+**Lockfile files** (generated; reflect resolved versions):
+- `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `Cargo.lock`, `poetry.lock`, `Pipfile.lock`, `go.sum`, `Gemfile.lock`
+
+**Populate `dependencies` section:**
+- `changed: true` if any manifest or lockfile was touched
+- `manifest_files_touched`: list of manifest files in the diff
+- `lockfile_files_touched`: list of lockfiles in the diff
+- `packages_added/removed/updated`: parse diff if possible (best-effort; `[]` if unparseable)
+- `security_advisory`: note if a security scanner ran and found advisories (null if not applicable)
+
+**Why this matters:** Dependencies are supply chain risk. Calling them out explicitly ensures:
+1. Human reviewers see "this PR adds axios@1.5.0"
+2. Gate can flag known vulnerable versions
+3. Flow 7 (Wisdom) can track "we added 12 deps this quarter"
+
 Note: QID is the stable marker since clarifier update. Count QIDs, not `- Q:` lines.
 
 ### Step 3: Quality gate status (anchored, read-only)
@@ -295,6 +322,16 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "open_questions": null,
     "ac_total": null,
     "ac_completed": null
+  },
+
+  "dependencies": {
+    "changed": false,
+    "manifest_files_touched": [],
+    "lockfile_files_touched": [],
+    "packages_added": [],
+    "packages_removed": [],
+    "packages_updated": [],
+    "security_advisory": null
   },
 
   "tests": {
@@ -466,6 +503,20 @@ Write `.runs/<run-id>/build/github_report.md`. This file is the exact comment bo
 | Lint Issues Fixed | <n or "—"> |
 | Code Critic (Critical/Major/Minor) | <c/m/n or "—/—/—"> |
 | Test Critic (Critical/Major/Minor) | <c/m/n or "—/—/—"> |
+
+## Dependencies Changed
+
+<If dependencies.changed is false:>
+_No dependency changes in this build._
+
+<If dependencies.changed is true:>
+| Change Type | Details |
+|-------------|---------|
+| Manifests | <list or "none"> |
+| Lockfiles | <list or "none"> |
+| Added | <packages or "none"> |
+| Removed | <packages or "none"> |
+| Updated | <packages or "none"> |
 
 ## Quality Gates
 
