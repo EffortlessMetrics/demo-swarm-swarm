@@ -810,7 +810,7 @@ If `build/ac_status.json` exists (rerun):
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
   - (after checkpoint push) feedback check (pr-feedback-harvester; route on `blockers[]`)
   - (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] lint-executor (global)
+- [ ] standards-enforcer (global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
 - [ ] mutation-auditor

@@ -131,7 +131,7 @@ Recommended (missing ⇒ concern, not blocker):
 
 * `.runs/<run-id>/build/self_review.md`
 * `.runs/<run-id>/build/test_execution.md`
-* `.runs/<run-id>/build/lint_report.md`
+* `.runs/<run-id>/build/standards_report.md`
 
 ### Step 2: Mechanical counts (null over guess)
 
@@ -234,7 +234,7 @@ Derive `status`:
   * quality gates like `test_critic` or `code_critic` are `null` or `UNVERIFIED` (verification incomplete)
 * Else `VERIFIED`
 
-**SKIPPED stubs:** If a station artifact is missing (e.g., `lint_report.md`, `test_execution.md`), create an explicit SKIPPED stub before writing the receipt:
+**SKIPPED stubs:** If a station artifact is missing (e.g., `standards_report.md`, `test_execution.md`), create an explicit SKIPPED stub before writing the receipt:
 
 ```markdown
 # <Artifact Name>
@@ -321,7 +321,7 @@ Write `.runs/<run-id>/build/build_receipt.json`:
 
   "stations": {
     "test_executor": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
-    "lint_executor": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "standards_enforcer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
     "self_reviewer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
     "test_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
     "code_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" }
