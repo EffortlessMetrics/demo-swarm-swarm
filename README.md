@@ -21,19 +21,28 @@ We optimize for **Dev Lead Time (DevLT)**—minimizing the minutes *you* spend v
 
 ---
 
-## How It Feels: Dispatchable CI/CD
+## How It Feels: You Are the Tech Lead
 
-It behaves like a team of **Competent Junior Developers** who know the rules of the repo. It is **not** an always-on background daemon; it is a dispatchable worker.
+It behaves like a **team of well-instructed Junior Developers** working from your playbook. You dispatch each flow; there's no always-on background daemon.
 
-1.  **Delegate:** You run `/flow-1-signal "Add user auth"` and step away.
-2.  **The Grind (Async):** The swarm spins up a bounded run.
-    *   It plans the architecture (**Plan**).
-    *   It writes tests *before* code (**Build**).
-    *   It pushes a Draft PR immediately to wake up CI.
-    *   It harvests CI/Bot feedback at checkpoints and fixes critical issues automatically.
-    *   It cleans up linting errors and redacts secrets (**Polish**).
-3.  **Review:** You return to see a **Green PR** and a **Build Receipt** (`build_receipt.json`).
-4.  **Resume:** If the swarm hits context limits, it checkpoints its state to disk. You simply rerun the flow to continue exactly where it left off.
+1.  **Dispatch a flow:** You run `/flow-1-signal "Add user auth"`.
+2.  **It grinds inside that run:** Agents loop, write artifacts, and (where relevant) push checkpoint commits and harvest CI/bot feedback.
+3.  **Quick phase-boundary skim:** You review the receipt + key questions/summary (locally under `.runs/` and, if enabled, in GitHub issue/PR comments).
+4.  **Dispatch the next flow:** The pack tells you what to run next; you choose when.
+
+### What "walk away" actually means
+
+You can walk away **while a flow is executing** (especially Flow 3/4). If the run hits a context/time budget, it checkpoints to disk and exits `PARTIAL` with the next command to continue.
+
+### Typical loop
+
+*   **Flow 1** writes requirements + open questions → you skim/answer → run **Flow 2**
+*   **Flow 2** writes ADR + AC matrix → you skim/agree → run **Flow 3**
+*   **Flow 3** pushes early, harvests feedback, interrupts for CRITICAL blockers → ends with `build_receipt.json` (VERIFIED/UNVERIFIED/PARTIAL)
+*   **Flow 4** drains the worklist (may require reruns if PARTIAL) → ends with a Ready PR
+*   **You merge.**
+
+**The "extra wait" is a feature.** You trade machine time for attention. While the swarm grinds through the build loop or drains the review worklist, you are free.
 
 ---
 

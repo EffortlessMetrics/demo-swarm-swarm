@@ -16,6 +16,25 @@ Human docs **explain and guide**—they do not redefine behavior.
 
 ---
 
+## Mental Model: The "Junior Team"
+
+When designing agents, think of them as **Junior Developers**:
+
+*   **High Energy:** They will generate infinite code if you let them.
+*   **Low Context:** They forget the "Big Picture" easily.
+*   **Need Guardrails:** They might delete tests to make the build pass (Reward Hacking) unless you physically stop them.
+*   **Need Specific Roles:** A "Generalist" junior gets lost. A "Test Writer" junior succeeds.
+
+Your job as a maintainer is to write the **Playbook** (Flows) and the **Guardrails** (Repo Operator) that keep this team productive.
+
+The **user** is the Tech Lead. They:
+*   Dispatch flows (delegate work)
+*   Skim phase-boundary outputs (supervise)
+*   Answer open questions (provide context)
+*   Merge when satisfied (approve)
+
+---
+
 ## Quick sanity check
 
 ```bash
