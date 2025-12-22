@@ -331,6 +331,19 @@ When these fields mismatch current HEAD, the receipt is advisory, not authoritat
 
 **Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
 
+### Evidence over Format
+
+If verification evidence exists but a receipt is malformed or missing fields:
+
+- Treat it as a **pack/tooling defect**, not an engineering failure.
+- Keep the line moving: ship based on the underlying evidence **if gates pass**.
+- Record the defect explicitly (e.g., `status: UNVERIFIED`, `blockers: ["receipt_tooling_error: <details>"]`) and open a maintenance issue.
+
+If the evidence itself is missing (tests didn't run, CI unknown, etc.), that's not paperwork drift — that's **unverified work**. Route back to run the missing verification.
+
+**Maintainer mantra:**
+> Build the asset. Capture the evidence. State the truth. Ship when the evidence is green.
+
 ---
 
 ## Machine Summary Contract

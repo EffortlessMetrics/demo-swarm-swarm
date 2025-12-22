@@ -134,6 +134,18 @@ Rules:
 - Pattern absent / ambiguous ⇒ `null` + blocker ("marker not present; cannot derive mechanically").
 - Never coerce missing/unknown to `0`.
 
+**SKIPPED stubs:** If a station artifact is missing (e.g., `regression_report.md`, `artifact_audit.md`), create an explicit SKIPPED stub:
+
+```markdown
+# <Artifact Name>
+status: SKIPPED
+reason: <why it wasn't produced>   # e.g., "station not run", "no regressions to analyze"
+evidence_sha: <current HEAD>
+generated_at: <iso8601>
+```
+
+This ensures nothing is silently missing. The receipt reflects what actually happened.
+
 ### Step 3: Aggregate prior receipts (best-effort)
 
 Use the demoswarm shim to read prior receipt fields:

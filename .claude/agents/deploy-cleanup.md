@@ -210,6 +210,18 @@ Never coerce unknown to `0`.
 
 **Core principle:** `VERIFIED` requires executed evidence. The deployment verdict is the primary evidence for Flow 6.
 
+**SKIPPED stubs:** If a station artifact is missing (e.g., `verification_report.md`), create an explicit SKIPPED stub:
+
+```markdown
+# <Artifact Name>
+status: SKIPPED
+reason: <why it wasn't produced>   # e.g., "station not run", "no deployments configured"
+evidence_sha: <current HEAD>
+generated_at: <iso8601>
+```
+
+This ensures nothing is silently missing. Downstream and Flow 7 (Wisdom) can see what happened.
+
 Compute receipt `status`:
 
 - `CANNOT_PROCEED`: preflight I/O failure only
