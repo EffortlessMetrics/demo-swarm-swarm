@@ -64,25 +64,26 @@ Run root:
 
 Flow 2 artifacts under `.runs/<run-id>/plan/`:
 
-Required (missing ⇒ UNVERIFIED):
-- `adr.md`
-- `design_validation.md`
-- `work_plan.md`
-- `test_plan.md`
-- `ac_matrix.md` (AC-driven build contract for Flow 3)
-- `design_options.md` (required for a complete decision spine)
-- `option_critique.md` (required for options critique loop)
-- `policy_analysis.md` (policy check result file, even if it says "no policies found")
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
 
-Impact artifact (required):
-- `impact_map.json` (JSON output from impact-analyzer)
+Required (missing ⇒ UNVERIFIED):
+- `adr.md` OR `work_plan.md` (at least one actionable plan artifact)
+
+Recommended (missing ⇒ concern, not blocker):
+- `design_options.md`
+- `design_validation.md`
+- `test_plan.md`
+- `ac_matrix.md`
+- `impact_map.json`
+- `policy_analysis.md`
 
 Optional (missing ⇒ warn only):
+- `option_critique.md`
 - `api_contracts.yaml`
 - `schema.md`
-- `contract_critique.md` (if contract microloop ran)
+- `contract_critique.md`
 - `observability_spec.md`
-- `observability_critique.md` (if observability microloop ran)
+- `observability_critique.md`
 - `open_questions.md`
 - `migrations/` (directory; planned migrations)
 - `flow_plan.md`
@@ -117,16 +118,15 @@ If you cannot read/write these due to IO/permissions/tooling:
 
 Populate:
 - `missing_required` (paths)
+- `missing_recommended` (paths; note as concerns)
 - `missing_optional` (paths)
 - `blockers` (plain-English "what prevents VERIFIED")
 - `concerns` (non-gating notes)
 
 Rules:
-- Missing required artifact ⇒ `UNVERIFIED` + add a blocker.
-- Missing optional artifact ⇒ add to `missing_optional` + add a concern.
-
-Impact rule:
-- If `impact_map.json` is missing ⇒ add a blocker.
+- Missing required artifact (neither `adr.md` nor `work_plan.md` exists) ⇒ `UNVERIFIED` + add a blocker.
+- Missing recommended artifact ⇒ add to `missing_recommended` + add a concern.
+- Missing optional artifact ⇒ add to `missing_optional`.
 
 ### Step 2: Mechanical counts (null over guess)
 
@@ -315,44 +315,24 @@ bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/plan/adr.
 
 ### Step 4: Derive receipt status + routing
 
+**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+
 Derive `status`:
 
 - If Step 0 failed ⇒ `CANNOT_PROCEED`
-- Else if `missing_required` non-empty ⇒ `UNVERIFIED`
-- Else if `quality_gates.design_critic` is `UNVERIFIED` or `null` ⇒ `UNVERIFIED`
-- Else if `quality_gates.policy_analyst` is `UNVERIFIED` or `null` ⇒ `UNVERIFIED`
-- Else if `quality_gates.option_critic` is `UNVERIFIED` or `CANNOT_PROCEED` or `null` ⇒ `UNVERIFIED`
-- Else if `quality_gates.contract_critic` is `UNVERIFIED` or `CANNOT_PROCEED` ⇒ `UNVERIFIED`
-- Else if `quality_gates.observability_critic` is `UNVERIFIED` or `CANNOT_PROCEED` ⇒ `UNVERIFIED`
-- Else if `decision_spine.status` is `UNVERIFIED` ⇒ `UNVERIFIED`
+- Else if `missing_required` non-empty (neither `adr.md` nor `work_plan.md` exists) ⇒ `UNVERIFIED`
+- Else if any quality gate is `CANNOT_PROCEED` ⇒ `UNVERIFIED` (mechanical failure)
 - Else ⇒ `VERIFIED`
+
+Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If a step was skipped, that's a choice, not a failure.
 
 Derive `recommended_action` (closed enum):
 
 - `CANNOT_PROCEED` ⇒ `FIX_ENV`
-- If missing required artifacts exist ⇒ `RERUN` with `route_to_agent` set to the most specific next station:
-
-  - missing `design_options.md` ⇒ `design-optioneer`
-  - missing `option_critique.md` ⇒ `option-critic`
+- If missing required artifacts ⇒ `RERUN` with `route_to_agent` set to the most specific next station:
   - missing `adr.md` ⇒ `adr-author`
-  - missing `design_validation.md` ⇒ `design-critic`
   - missing `work_plan.md` ⇒ `work-planner`
-  - missing `test_plan.md` ⇒ `test-strategist`
-  - missing `ac_matrix.md` ⇒ `test-strategist`
-  - missing `policy_analysis.md` ⇒ `policy-analyst`
-  - missing impact artifact ⇒ `impact-analyzer`
-- If a critic requests action, default to propagating it into the receipt:
-  - Default routing priority: option-critic, then contract-critic, then observability-critic
-  - `FIX_ENV` ⇒ `FIX_ENV`
-  - `BOUNCE` ⇒ `BOUNCE` + copy `route_to_flow`/`route_to_agent`
-  - `RERUN` ⇒ `RERUN` + copy `route_to_agent` (keep `route_to_flow: null`)
-- Deferral allowed (orchestrator discretion): if `.runs/<run-id>/plan/flow_plan.md` contains a Decision Log entry deferring that critic's requested action, you may keep `recommended_action: PROCEED` (routes null) and record the deferral in `concerns` (the run remains `UNVERIFIED`).
-- If design-critic is UNVERIFIED and `can_further_iteration_help: no` ⇒ keep `recommended_action: PROCEED` with blockers noted
-- If decision spine is UNVERIFIED (fields missing/unparseable) ⇒ `RERUN` with `route_to_agent` = `design-optioneer` or `adr-author` based on which fields failed
-- Otherwise:
-
-  - `VERIFIED` ⇒ `PROCEED`
-  - `UNVERIFIED` with only optional gaps/concerns ⇒ `PROCEED` (with blockers/concerns recorded)
+- Else ⇒ `PROCEED`
 
 Route fields:
 

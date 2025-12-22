@@ -392,20 +392,22 @@ Flows and agents should use these blocks **verbatim** (copy/paste) to avoid sche
 
 ### Gate Result (emitted by `secrets-sanitizer`)
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
+<!-- PACK-CONTRACT: GATE_RESULT_V2 START -->
 ```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V2 END -->
+
+Notes:
+- The sanitizer is a **boolean gate**, not a router. It says yes/no.
+- If `safe_to_publish: false`, the flow doesn't push. The orchestrator decides next steps.
+- `blocker_reason` explains why (if BLOCKED); otherwise null.
 
 ### Repo Operator Result (emitted by `repo-operator`)
 
@@ -457,7 +459,7 @@ Do not conflate these domains:
    `COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`
 
 3. **Secrets Sanitizer Status** (Gate Result)
-   `CLEAN | FIXED | BLOCKED_PUBLISH`
+   `CLEAN | FIXED | BLOCKED`
 
 4. **Gate Merge Verdict** (`merge_decision.md`)
    `MERGE | BOUNCE` (use BOUNCE reason to signal human review)

@@ -56,13 +56,12 @@ Do **not** scan the entire repository. Do **not** scan other flow directories un
 
 ## Status model (gate-specific)
 
-- `status` (descriptive): `CLEAN | FIXED | BLOCKED_PUBLISH`
+- `status` (descriptive): `CLEAN | FIXED | BLOCKED`
   - `CLEAN`: no findings on publish surface
   - `FIXED`: findings existed and you applied protective changes (redact/externalize/unstage)
-  - `BLOCKED_PUBLISH`: mechanical failure prevented scanning/remediation (IO/permissions/tool failure)
+  - `BLOCKED`: cannot safely remediate (requires human judgment, upstream code fix, or mechanical failure)
 
-**Important:** "Unfixable without judgment" is **not** `BLOCKED_PUBLISH`.
-That is `needs_upstream_fix: true` + `safe_to_publish: false` (routing, not mechanical failure).
+**Note:** `BLOCKED` covers both "unfixable without judgment" and mechanical failures. The `blocker_reason` field explains which. The sanitizer is a boolean gate—it doesn't route, it just says yes/no.
 
 ## Flags (authoritative permissions)
 
@@ -70,10 +69,10 @@ That is `needs_upstream_fix: true` + `safe_to_publish: false` (routing, not mech
 - `safe_to_publish`: whether it is safe to push/post to GitHub
 
 Typical outcomes:
-- CLEAN -> `safe_to_commit: true`, `safe_to_publish: true`
-- FIXED (artifact redaction only) -> typically both true
-- FIXED (requires upstream fix) -> `safe_to_commit` may be true, but `safe_to_publish: false` and `needs_upstream_fix: true`
-- BLOCKED_PUBLISH -> both false
+- CLEAN -> `safe_to_commit: true`, `safe_to_publish: true`, `findings_count: 0`
+- FIXED (artifact redaction only) -> both true, `findings_count: N`
+- FIXED (code needs upstream fix) -> `safe_to_commit: true`, `safe_to_publish: false`, `blocker_reason: "requires code remediation"`
+- BLOCKED -> both false, `blocker_reason` explains why
 
 ## Step 1: Build the scan file list (do not leak secrets)
 
@@ -142,15 +141,13 @@ Write `.runs/<run-id>/<flow>/secrets_status.json` with this schema:
 
 ```json
 {
-  "status": "CLEAN | FIXED | BLOCKED_PUBLISH",
+  "status": "CLEAN | FIXED | BLOCKED",
   "safe_to_commit": true,
   "safe_to_publish": true,
-  "needs_upstream_fix": false,
-  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
-  "route_to_flow": null,
-  "route_to_agent": null,
-
   "modified_files": false,
+  "findings_count": 0,
+  "blocker_reason": null,
+
   "modified_paths": [],
 
   "scan_scope": {
@@ -161,7 +158,6 @@ Write `.runs/<run-id>/<flow>/secrets_status.json` with this schema:
   },
 
   "summary": {
-    "total_findings": 0,
     "redacted": 0,
     "externalized": 0,
     "unstaged": 0,
@@ -185,44 +181,40 @@ Write `.runs/<run-id>/<flow>/secrets_status.json` with this schema:
 Rules:
 
 * `modified_files: true` only when file contents changed (redaction/externalization).
-* `remaining_on_publish_surface` means "still present on allowlist or staged surface after your actions" — should be 0 unless `BLOCKED_PUBLISH` or you explicitly cannot remediate.
+* `remaining_on_publish_surface` means "still present on allowlist or staged surface after your actions" — should be 0 unless `BLOCKED` or you explicitly cannot remediate.
 
 ## Step 5: Return Gate Result block (control plane)
 
 Return this exact block at end of response (no extra fields):
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
+<!-- PACK-CONTRACT: GATE_RESULT_V2 START -->
 ```markdown
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V2 END -->
 
 **Field semantics:**
-- `status` is **descriptive** (what happened). **Never infer permissions** from it.
+- `status` is **descriptive** (what happened):
+  - `CLEAN`: no findings on publish surface
+  - `FIXED`: findings existed and you applied protective changes (redact/externalize/unstage)
+  - `BLOCKED`: cannot safely remediate (requires human judgment or upstream fix)
 - `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
-- `modified_files` is the **reseal trigger** (if true, rerun cleanup <-> sanitizer).
-- `needs_upstream_fix` means the sanitizer can't make it safe (code/config needs remediation).
-- `recommended_action` + `route_to_*` give you a closed-vocab routing signal.
+- `modified_files`: whether artifact files were changed (for audit purposes).
+- `findings_count`: total secrets/tokens detected (before remediation).
+- `blocker_reason`: why blocked (if `status: BLOCKED`); otherwise `null`.
 
-**Routing field guidance:**
-- Prefer `route_to_flow` (+ blockers) over `route_to_station`; use `route_to_station` only when the fix is literally "rerun X station".
-- For secrets in code that need remediation: set `route_to_flow: 3`, `route_to_agent: code-implementer` (known agent).
-- For secrets in artifacts that can't be auto-redacted: set `route_to_flow` to the producing flow, explain in blockers what artifact needs regeneration.
-- Never set `route_to_agent` to a station name (e.g., don't use `test-executor` or `lint-executor` as agent values).
+**No routing:** The sanitizer is a boolean gate, not a router. If `safe_to_publish: false`, the flow simply doesn't push. The orchestrator decides what to do next based on the work context, not routing hints from the sanitizer.
 
 **Control plane vs audit plane:**
 
-* The block above is the routing signal.
-* `secrets_status.json` is the durable record.
+* The block above is the gating signal.
+* `secrets_status.json` is the durable record with full details.
 
 ## Step 6: Write `secrets_scan.md` (human-readable, redacted)
 
@@ -231,7 +223,7 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 ```markdown
 # Secrets Scan Report
 
-## Status: CLEAN | FIXED | BLOCKED_PUBLISH
+## Status: CLEAN | FIXED | BLOCKED
 
 ## Scope
 - Allowlist scanned: `.runs/<run-id>/<flow>/`, `.runs/<run-id>/run_meta.json`, `.runs/index.json`
@@ -262,11 +254,8 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 ## Safety Flags
 - safe_to_commit: true|false
 - safe_to_publish: true|false
-- needs_upstream_fix: true|false
-- recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-- route_to_flow: <1-7|null>
-- route_to_station: <string|null>
-- route_to_agent: <agent|null>
+- findings_count: <int>
+- blocker_reason: <string|null>
 
 ## Notes
 - <anything surprising, kept short>

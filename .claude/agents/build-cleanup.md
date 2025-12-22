@@ -42,13 +42,15 @@ Run root:
 
 Flow 3 artifacts under `.runs/<run-id>/build/`:
 
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
+
 Required (missing ⇒ UNVERIFIED):
+- At least one change summary: `test_changes_summary.md` **OR** `impl_changes_summary.md`
+
+Recommended (missing ⇒ note as concern, not blocker):
 - `self_review.md`
-- `test_changes_summary.md` **OR** `impl_changes_summary.md` (at least one)
-- `lint_report.md` (from lint-executor)
 - `test_execution.md` (from test-executor)
-- `doc_updates.md`
-- `doc_critique.md`
+- `lint_report.md` (from lint-executor)
 
 Optional (missing ⇒ note, continue):
 - `flow_plan.md`
@@ -60,9 +62,11 @@ Optional (missing ⇒ note, continue):
 - `mutation_report.md`
 - `fuzz_report.md`
 - `fix_summary.md`
+- `doc_updates.md`
+- `doc_critique.md`
 
 AC status (created and updated by Build):
-- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; verify all ACs completed)
+- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; best-effort verification)
 
 ## Outputs
 
@@ -110,19 +114,22 @@ If you cannot read/write these due to I/O/permissions:
 Populate:
 
 * `missing_required` (repo-root-relative paths)
+* `missing_recommended` (repo-root-relative paths; note as concerns)
 * `missing_optional` (repo-root-relative paths)
 * `blockers` (strings describing what prevents VERIFIED)
 * `concerns` (non-gating issues)
 
-Required:
+Required (missing ⇒ UNVERIFIED):
 
-* `.runs/<run-id>/build/self_review.md`
 * One of:
-
   * `.runs/<run-id>/build/test_changes_summary.md`
   * `.runs/<run-id>/build/impl_changes_summary.md`
-* `.runs/<run-id>/build/lint_report.md`
+
+Recommended (missing ⇒ concern, not blocker):
+
+* `.runs/<run-id>/build/self_review.md`
 * `.runs/<run-id>/build/test_execution.md`
+* `.runs/<run-id>/build/lint_report.md`
 
 ### Step 2: Mechanical counts (null over guess)
 
@@ -207,25 +214,27 @@ Gates:
 If a gate file is missing or the field is not extractable:
 
 * Set that gate value to `null`
-* Record a concern (and this will typically prevent VERIFIED)
+* Record a concern (missing gate files are expected if those steps were skipped)
 
 ### Step 4: Derive receipt status + routing (mechanical)
+
+**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
 
 Derive `status`:
 
 * `CANNOT_PROCEED` only if Step 0 failed (IO/perms/tooling)
 * Else `UNVERIFIED` if ANY are true:
-
-  * `missing_required` non-empty
-  * any quality gate is `UNVERIFIED` or `CANNOT_PROCEED` or `null`
+  * `missing_required` non-empty (no change summary at all)
+  * any quality gate is `CANNOT_PROCEED` (mechanical failure in that station)
 * Else `VERIFIED`
+
+Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If a step was skipped, that's a choice, not a failure.
 
 Derive `recommended_action` (closed enum):
 
 * If receipt `status: CANNOT_PROCEED` ⇒ `FIX_ENV`
 * Else if any quality gate is `CANNOT_PROCEED` ⇒ `FIX_ENV`
 * Else if `missing_required` non-empty ⇒ `RERUN` (stay in Flow 3)
-* Else if any quality gate is `UNVERIFIED` or `null` ⇒ `RERUN` (stay in Flow 3)
 * Else ⇒ `PROCEED`
 
 Routing fields:

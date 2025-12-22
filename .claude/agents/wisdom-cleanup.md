@@ -41,13 +41,18 @@ Run root:
 - `.runs/index.json`
 
 Flow 7 artifacts under `.runs/<run-id>/wisdom/`:
-- `learnings.md` (required)
-- `feedback_actions.md` (required)
-- `artifact_audit.md` (optional)
-- `regression_report.md` (optional)
-- `flow_history.json` (optional)
-- `risk_assessment.md` (optional)
-- `flow_plan.md` (optional)
+
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
+
+Required (missing ⇒ UNVERIFIED):
+- `learnings.md` OR `feedback_actions.md` (at least one wisdom artifact)
+
+Optional (missing ⇒ note, continue):
+- `artifact_audit.md`
+- `regression_report.md`
+- `flow_history.json`
+- `risk_assessment.md`
+- `flow_plan.md`
 
 Prior flow receipts (optional aggregation):
 - `.runs/<run-id>/signal/signal_receipt.json`
@@ -80,10 +85,9 @@ If you cannot read/write these due to I/O/permissions, set `status: CANNOT_PROCE
 ### Step 1: Artifact existence
 
 Required (missing ⇒ `UNVERIFIED`):
-- `.runs/<run-id>/wisdom/learnings.md`
-- `.runs/<run-id>/wisdom/feedback_actions.md`
+- `.runs/<run-id>/wisdom/learnings.md` OR `.runs/<run-id>/wisdom/feedback_actions.md` (at least one)
 
-Optional (missing ⇒ warn + blockers, still continue):
+Optional (missing ⇒ note, continue):
 - `.runs/<run-id>/wisdom/artifact_audit.md`
 - `.runs/<run-id>/wisdom/regression_report.md`
 - `.runs/<run-id>/wisdom/flow_history.json`
@@ -94,6 +98,7 @@ Populate arrays:
 - `missing_required` (filenames)
 - `missing_optional` (filenames)
 - `blockers` ("what prevents VERIFIED")
+- `concerns` (non-gating issues)
 
 ### Step 2: Mechanical counts (null over guess)
 

@@ -61,11 +61,17 @@ Run root:
 - `.runs/<run-id>/run_meta.json` (expected; used to determine GitHub routing flags)
 
 Flow 1 artifacts under `.runs/<run-id>/signal/`:
-- `requirements.md` (required)
-- `features/*.feature` (required, at least one)
-- `open_questions.md` (required)
 
-Optional:
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
+
+Required (missing ⇒ UNVERIFIED):
+- `requirements.md` (core output of Signal)
+
+Recommended (missing ⇒ concern, not blocker):
+- `features/*.feature` (at least one BDD scenario)
+- `open_questions.md`
+
+Optional (missing ⇒ note, continue):
 - `requirements_critique.md`
 - `bdd_critique.md`
 - `risk_assessment.md`
@@ -102,6 +108,8 @@ If you cannot read/write the required Signal paths due to I/O/permissions:
 
 Required (missing ⇒ UNVERIFIED):
 - `.runs/<run-id>/signal/requirements.md`
+
+Recommended (missing ⇒ concern, not blocker):
 - `.runs/<run-id>/signal/features/*.feature` (at least one)
 - `.runs/<run-id>/signal/open_questions.md`
 
@@ -114,6 +122,7 @@ Optional (missing ⇒ warn only):
 
 Populate:
 - `missing_required` (paths)
+- `missing_recommended` (paths; note as concerns)
 - `missing_optional` (paths)
 - `blockers` (plain-English "what prevents VERIFIED")
 
@@ -184,27 +193,23 @@ If file missing or status not found:
 
 ### Step 5: Derive receipt status + routing
 
+**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+
 Derive `status`:
 
 * If Step 0 failed ⇒ `CANNOT_PROCEED`
 * Else if `missing_required` non-empty ⇒ `UNVERIFIED`
-* Else if a critic gate is `UNVERIFIED` ⇒ `UNVERIFIED`
+* Else if a critic gate is `CANNOT_PROCEED` ⇒ `UNVERIFIED` (mechanical failure)
 * Else ⇒ `VERIFIED`
+
+Note: `null` or `UNVERIFIED` critic gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If critics were skipped, that's a choice, not a failure.
 
 Derive `recommended_action` (closed enum):
 
 * `CANNOT_PROCEED` ⇒ `FIX_ENV`
-* `UNVERIFIED` due to missing Flow 1 artifacts ⇒ `RERUN` with `route_to_flow: 1`
-
+* `UNVERIFIED` due to missing required artifacts ⇒ `RERUN` with `route_to_flow: 1`
   * If exactly one missing source is obvious, also set `route_to_agent`:
-
     * missing `requirements.md` ⇒ `route_to_agent: requirements-author`
-    * missing `features/*.feature` ⇒ `route_to_agent: bdd-author`
-    * missing `open_questions.md` ⇒ `route_to_agent: clarifier`
-* `UNVERIFIED` due to critic gates ⇒ `RERUN` with `route_to_flow: 1`
-
-  * If requirements_critic UNVERIFIED ⇒ `route_to_agent: requirements-author`
-  * If bdd_critic UNVERIFIED ⇒ `route_to_agent: bdd-author`
 * `VERIFIED` ⇒ `PROCEED`
 
 Never invent new action words.

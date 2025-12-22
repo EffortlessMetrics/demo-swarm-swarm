@@ -44,14 +44,18 @@ Run root:
 
 Flow 5 artifacts under `.runs/<run-id>/gate/`:
 
-Required:
-- `merge_decision.md`
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
+
+Required (missing ⇒ UNVERIFIED):
+- `merge_decision.md` (the final gate verdict)
+
+Recommended (missing ⇒ concern, not blocker):
 - `receipt_audit.md`
 - `contract_compliance.md`
 - `security_scan.md`
 - `coverage_audit.md`
 
-Optional:
+Optional (missing ⇒ note, continue):
 - `policy_analysis.md`
 - `risk_assessment.md`
 - `gate_fix_summary.md` (report-only; no fixes are applied in Gate)
@@ -122,11 +126,14 @@ If you cannot read/write due to I/O/permissions:
 
 Populate arrays:
 - `missing_required` (filenames)
+- `missing_recommended` (filenames; note as concerns)
 - `missing_optional` (filenames)
 - `blockers` (what prevents VERIFIED)
 - `concerns` (non-blocking concerns)
 
-Missing required ⇒ `UNVERIFIED` and `recommended_action: RERUN`.
+Rules:
+- Missing required artifact (`merge_decision.md`) ⇒ `UNVERIFIED` and `recommended_action: RERUN`.
+- Missing recommended artifact ⇒ add to `missing_recommended` + add a concern.
 
 ### Step 2: Extract verdict + quality gate statuses (anchored)
 
@@ -204,11 +211,13 @@ Counts in receipt:
 - `counts.ac_completed` (passthrough from build_receipt.json)
 
 Rules:
-- Missing file ⇒ `null` for that metric (and a blocker if the metric is required for VERIFIED).
-- Marker absent / ambiguous ⇒ `null` + blocker ("no stable markers").
+- Missing file ⇒ `null` for that metric + concern.
+- Marker absent / ambiguous ⇒ `null` + concern ("no stable markers").
 - Never coerce missing/unknown to `0`.
 
 ### Step 4: Determine recommended_action + routing (control plane)
+
+**Ops-First Status Logic:** Be permissive. Missing recommended artifacts don't block. The receipt logs what happened; the merge verdict drives the decision.
 
 Compute:
 
@@ -216,7 +225,7 @@ Compute:
   - `recommended_action: FIX_ENV`
   - `route_to_flow: null`, `route_to_agent: null`
 
-Else if `missing_required` non-empty OR any required gate status is `null` ⇒
+Else if `missing_required` non-empty (`merge_decision.md` missing) ⇒
   - `recommended_action: RERUN`
   - `route_to_flow: null`, `route_to_agent: null`
 
@@ -226,10 +235,10 @@ Else if `merge_verdict: BOUNCE` ⇒
   - `route_to_agent: null`
 
 Else (`merge_verdict: MERGE`) ⇒
-  - If all required gate statuses are VERIFIED and required counts are non-null:
-    - `recommended_action: PROCEED`
-  - Otherwise:
-    - `recommended_action: PROCEED` (UNVERIFIED) with a blocker describing the inconsistency (e.g., MERGE but security_scan UNVERIFIED)
+  - `recommended_action: PROCEED`
+  - Missing recommended artifacts are noted as concerns, not blockers
+
+Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED if the merge verdict is MERGE. The merge-decider already considered the evidence; cleanup just records and passes through.
 
 **Routing rule:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`.
 For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.

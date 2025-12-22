@@ -42,12 +42,15 @@ Run root:
 
 Flow 4 artifacts under `.runs/<run-id>/review/`:
 
-Required (missing => UNVERIFIED):
-- `pr_feedback.md`
-- `review_worklist.md`
-- `review_worklist.json`
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
 
-Optional (missing => note, continue):
+Required (missing ⇒ UNVERIFIED):
+- `review_worklist.md` OR `review_worklist.json` (at least one worklist artifact)
+
+Recommended (missing ⇒ concern, not blocker):
+- `pr_feedback.md`
+
+Optional (missing ⇒ note, continue):
 - `flow_plan.md`
 - `review_actions.md`
 - `pr_feedback_raw.json`
@@ -83,14 +86,16 @@ If you cannot read/write these due to IO/permissions:
 
 Populate:
 - `missing_required` (repo-root-relative paths)
+- `missing_recommended` (repo-root-relative paths; note as concerns)
 - `missing_optional` (repo-root-relative paths)
 - `blockers` (strings describing what prevents VERIFIED)
 - `concerns` (non-gating issues)
 
-Required:
+Required (missing ⇒ UNVERIFIED):
+- `.runs/<run-id>/review/review_worklist.md` OR `.runs/<run-id>/review/review_worklist.json`
+
+Recommended (missing ⇒ concern, not blocker):
 - `.runs/<run-id>/review/pr_feedback.md`
-- `.runs/<run-id>/review/review_worklist.md`
-- `.runs/<run-id>/review/review_worklist.json`
 
 ### Step 2: Mechanical counts (null over guess)
 
@@ -138,18 +143,22 @@ Read worklist summary to determine completion:
 
 ### Step 4: Derive receipt status + routing (mechanical)
 
+**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+
 Derive `status`:
 - `CANNOT_PROCEED` only if Step 0 failed (IO/perms/tooling)
 - Else `UNVERIFIED` if ANY are true:
-  - `missing_required` non-empty
-  - `has_critical_pending` is true
+  - `missing_required` non-empty (no worklist at all)
+  - `has_critical_pending` is true (critical items still unresolved)
 - Else `VERIFIED`
 
+Note: Missing `pr_feedback.md` is a concern, not a blocker. Review can still be VERIFIED if the worklist exists and is resolved.
+
 Derive `recommended_action` (closed enum):
-- If receipt `status: CANNOT_PROCEED` => `FIX_ENV`
-- Else if `missing_required` non-empty => `RERUN` (stay in Flow 4)
-- Else if `has_critical_pending` => `RERUN` (more work needed)
-- Else => `PROCEED`
+- If receipt `status: CANNOT_PROCEED` ⇒ `FIX_ENV`
+- Else if `missing_required` non-empty ⇒ `RERUN` (stay in Flow 4)
+- Else if `has_critical_pending` ⇒ `RERUN` (more work needed)
+- Else ⇒ `PROCEED`
 
 ### Step 5: Write review_receipt.json
 

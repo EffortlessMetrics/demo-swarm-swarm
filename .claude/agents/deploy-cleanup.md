@@ -45,11 +45,15 @@ Run root:
 
 Flow 6 artifacts under `.runs/<run-id>/deploy/`:
 
-Required:
-- `deployment_decision.md`
+**Ops-First Philosophy:** Cleanup is permissive. If a step was skipped or optimized out, the cleanup doesn't scream—it records what exists and what doesn't. The receipt is a log, not a gatekeeper.
+
+Required (missing ⇒ UNVERIFIED):
+- `deployment_decision.md` (the deployment verdict)
+
+Recommended (missing ⇒ concern, not blocker):
 - `deployment_log.md`
 
-Optional:
+Optional (missing ⇒ note, continue):
 - `verification_report.md`
 - `flow_plan.md`
 
@@ -111,6 +115,8 @@ If you cannot read/write due to I/O/permissions:
 
 Required (missing ⇒ `UNVERIFIED`):
 - `deployment_decision.md`
+
+Recommended (missing ⇒ concern, not blocker):
 - `deployment_log.md`
 
 Optional (missing ⇒ warn, still continue):
@@ -119,6 +125,7 @@ Optional (missing ⇒ warn, still continue):
 
 Populate:
 - `missing_required` (filenames)
+- `missing_recommended` (filenames; note as concerns)
 - `missing_optional` (filenames)
 - `blockers` (what prevents VERIFIED)
 - `concerns` (non-gating)
@@ -198,11 +205,15 @@ Never coerce unknown to `0`.
 
 ### Step 5: Determine receipt status + recommended_action (tighten-only)
 
+**Ops-First Status Logic:** Be permissive. Missing recommended artifacts don't block. The receipt logs what happened; the deployment verdict drives the decision.
+
 Compute receipt `status`:
 
 - `CANNOT_PROCEED`: preflight I/O failure only
-- `VERIFIED`: `missing_required` empty AND `deployment_verdict == STABLE` AND `counts.failed_checks` is not null
+- `VERIFIED`: `missing_required` empty AND `deployment_verdict == STABLE`
 - `UNVERIFIED`: otherwise
+
+Note: Missing `deployment_log.md` is a concern, not a blocker. Deploy can still be VERIFIED if the decision says STABLE.
 
 Compute receipt routing:
 
