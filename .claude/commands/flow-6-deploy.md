@@ -212,20 +212,7 @@ route_to_agent: <agent-name | null>
 ```
 <!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
 
-6b. **Reseal If Modified** (conditional loop)
-   - If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(deploy-cleanup → secrets-sanitizer)` until either:
-     - the sanitizer reports `modified_files: false`, or
-     - the sanitizer indicates no reasonable path to fixing (non-convergent).
-   - If reseal cannot make progress (sanitizer signals no reasonable path):
-     - Append an evidence note to `secrets_scan.md`:
-       - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-     - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-       - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-     - GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-     - Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-       - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-6c. **Checkpoint Commit** (repo-operator)
+6b. **Checkpoint Commit** (repo-operator)
 
    Checkpoint the audit trail **before** any GitHub operations.
 
@@ -361,7 +348,6 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - `deploy-decider`
 - `deploy-cleanup`
 - `secrets-sanitizer`
-- `deploy-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
 - `repo-operator` (checkpoint; read Repo Operator Result)
 - `gh-issue-manager` (if allowed)
 - `gh-reporter` (if allowed)
@@ -377,7 +363,6 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - [ ] deploy-decider
 - [ ] deploy-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] deploy-cleanup ↔ secrets-sanitizer (reseal cycle; if modified_files: true)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)

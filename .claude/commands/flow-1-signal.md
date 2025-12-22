@@ -313,24 +313,7 @@ route_to_agent: <agent-name | null>
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub issue/comment updates still run in restricted mode when publish is blocked or `publish_surface: NOT_PUSHED`.
 
-### Step 11b: Reseal If Modified (Conditional Loop)
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(signal-cleanup → secrets-sanitizer)` until either:
-- the sanitizer reports `modified_files: false`, or
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-- Append an evidence note to `secrets_scan.md`:
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - Agent commits allowlist locally, does **not** push
-  - Agent returns `proceed_to_github_ops: false` (mechanically enforced) and `publish_surface: NOT_PUSHED`
-- GitHub ops will run in **restricted issue-publish mode** if `gh` auth and an issue exist (paths only, publish blocked reason).
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-- Exit cleanly
-
-### Step 11c: Checkpoint Commit
+### Step 11b: Checkpoint Commit
 
 Checkpoint the audit trail **before** any GitHub operations.
 
@@ -523,13 +506,11 @@ If yes, proceed to `/flow-2-plan`.
 
 13. `secrets-sanitizer`
 
-14. `signal-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+14. `repo-operator` (checkpoint; read Repo Operator Result)
 
-15. `repo-operator` (checkpoint; read Repo Operator Result)
+15. `gh-issue-manager` (if allowed)
 
-16. `gh-issue-manager` (if allowed)
-
-17. `gh-reporter` (if allowed)
+16. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -562,7 +543,6 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] risk-analyst
 - [ ] signal-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] signal-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)
 - [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
 - [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)

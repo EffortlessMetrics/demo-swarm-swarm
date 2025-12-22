@@ -78,8 +78,6 @@ Flow 3 uses **two complementary state machines**:
 - build-cleanup (finalize receipt; update index; update `flow_plan.md`)
 - repo-operator (stage + classify changes)
 - secrets-sanitizer (pre-publish sweep)
-- build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- repo-operator (restage intended changes; if reseal happened)
 - repo-operator (commit/push)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report to GitHub; gated)
@@ -199,7 +197,6 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
 - [ ] build-cleanup (write receipt, update index)
 - [ ] repo-operator (stage + classify)
 - [ ] secrets-sanitizer (pre-publish sweep)
-- [ ] build-cleanup reseal + repo-operator restage (if modified)
 - [ ] repo-operator (commit/push)
 - [ ] gh-issue-manager (update issue board)
 - [ ] gh-reporter (post summary)
@@ -511,33 +508,6 @@ route_to_agent: <agent-name | null>
   - Continue engineering locally while remediation routes
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
 
-### Step 11b: Reseal If Modified (Conditional Loop)
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(build-cleanup → secrets-sanitizer)` until either:
-- the sanitizer reports `modified_files: false`, or
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-- Append an evidence note to `secrets_scan.md`:
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-**Note:** `checkpoint_mode: local_only` mechanically enforces `proceed_to_github_ops: false`, ensuring safe-bail cannot accidentally push even if `safe_to_publish` is true.
-
-### Step 11c: Restage After Reseal (Conditional)
-
-**If any reseal occurred (Step 11b ran at least once), restage all changes.**
-
-This is critical: `secrets-sanitizer` may modify tracked files (code, config, `.runs/` artifacts) and `build-cleanup` reseal writes new receipt + updates `index.json`. These edits are **not staged** unless you stage again.
-
-**Call `repo-operator`** with task: "restage intended changes" — the agent handles staging per project layout.
-
-**Why this matters:** Without restage, "receipt says X, commit contains Y" — the committed receipt won't match the actual staged state.
-
 ### Step 12: Commit and Push (Only if Secrets Gate Passes)
 
 **Call `repo-operator`** to commit code/test changes + audit trail. The agent generates an appropriate commit message from `impl_changes_summary.md`.
@@ -734,15 +704,11 @@ Code/test changes in project-defined locations.
 
 16. `secrets-sanitizer` (pre-publish sweep)
 
-17. `build-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+17. `repo-operator` (commit/push)
 
-18. `repo-operator` (restage if reseal happened)
+18. `gh-issue-manager` (if allowed)
 
-19. `repo-operator` (commit/push)
-
-20. `gh-issue-manager` (if allowed)
-
-21. `gh-reporter` (if allowed)
+19. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -848,8 +814,6 @@ If `build/ac_status.json` exists (rerun):
 - [ ] build-cleanup
 - [ ] repo-operator (stage + classify; capture Repo Operator Result)
 - [ ] secrets-sanitizer (pre-publish sweep; capture Gate Result block)
-- [ ] build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
-- [ ] repo-operator (restage intended changes; if reseal occurred)
 - [ ] repo-operator (commit/push; return Repo Operator Result)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)

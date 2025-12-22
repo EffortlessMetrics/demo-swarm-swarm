@@ -114,7 +114,6 @@ Flow 7 uses **two complementary state machines**:
 - risk-analyst (compare predicted vs actual)
 - wisdom-cleanup (finalize receipt; update index; update `flow_plan.md`)
 - secrets-sanitizer (publish gate; capture Gate Result block)
-- wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - repo-operator (checkpoint commit; allowlist interlock)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report learnings; gated)
@@ -218,7 +217,7 @@ Read from all prior flow directories (if available):
 
 
 
-This is a **linear pipeline** except for the reseal convergence cycle (`wisdom-cleanup  secrets-sanitizer`) when `modified_files: true`.
+This is a **linear pipeline**. The sanitizer runs once before checkpoint — no reseal loop.
 
 
 
@@ -285,7 +284,6 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 - [ ] risk-analyst (compare predicted vs actual)
 - [ ] wisdom-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint commit with allowlist interlock)
 - [ ] gh-issue-manager (update issue board)
 - [ ] gh-reporter (post summary)
@@ -455,37 +453,7 @@ route_to_agent: <agent-name | null>
 
 
 
-### Step 9b: Reseal If Modified (Conditional Loop)
-
-
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(wisdom-cleanup  secrets-sanitizer)` until either:
-
-- the sanitizer reports `modified_files: false`, or
-
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-
-- Append an evidence note to `secrets_scan.md`:
-
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-
-  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-
-- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-
-
-### Step 9c: Checkpoint Commit
+### Step 9b: Checkpoint Commit
 
 
 
@@ -798,13 +766,11 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 
 11. `secrets-sanitizer`
 
-12. `wisdom-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+12. `repo-operator` (checkpoint commit)
 
-13. `repo-operator` (checkpoint commit)
+13. `gh-issue-manager` (if allowed)
 
-14. `gh-issue-manager` (if allowed)
-
-15. `gh-reporter` (if allowed)
+14. `gh-reporter` (if allowed)
 
 ### TodoWrite (copy exactly)
 
@@ -821,7 +787,6 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 - [ ] risk-analyst
 - [ ] wisdom-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 

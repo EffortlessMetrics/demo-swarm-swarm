@@ -317,6 +317,38 @@ gitc add ".runs/<run-id>/build/" ".runs/<run-id>/run_meta.json" ".runs/index.jso
 
 Then stage project files based on configured/manifest paths (only if they exist). If you cannot determine paths safely, do not guess; write `.runs/<run-id>/build/git_status.md` and return a reconcile recommendation.
 
+### Staging Strategy: Intent + Extras (Embrace Ad-Hoc Fixes)
+
+When the orchestrator requests a stage/commit, you must:
+
+1. **Stage the Intended Paths** (e.g., `.runs/`, `src/`, `tests/`).
+2. **Check for "Extras"** (Other changed files in the tree that are not part of the intended set).
+   - **Ad-Hoc Fixes:** If you see unrelated files changed (formatting, typos, config), **STAGE THEM**. Do not block. Assume the human or the tool did them for a reason.
+   - **Record:** Append a note to `.runs/<run-id>/<flow>/extra_changes.md` listing what extras were included and why.
+
+**Why this matters:** Developers jump in to fix typos or tweak config while the swarm is running. This is help, not harm. The old behavior treated them as hostile actors ("Anomaly detected! Block!"). The new behavior treats them as collaborators.
+
+**Exception:** Extras in `unexpected_staged_paths` or `unexpected_unstaged_paths` still trigger `COMPLETED_WITH_ANOMALY` for provenance tracking, but the commit proceeds with intended + extras. Only if provenance is truly uncertain (e.g., unknown file types, binary blobs) should extras be excluded.
+
+### Anti-Reward-Hacking Guard: Test Deletion Detection
+
+**Before committing, scan the staged diff for DELETED test files.**
+
+```bash
+deleted_tests=$(gitc diff --cached --name-status | grep "^D" | grep -E "(test|spec|_test\.|\.test\.)")
+```
+
+**If deleted tests are found:**
+- This is a **HIGH RISK ANOMALY**.
+- **Action:** Unstage these deletions. Do NOT include them in the commit.
+- **Reason:** "Test deletion detected. We do not delete tests to make the build green."
+- Write `.runs/<run-id>/<flow>/git_status.md` documenting the blocked deletions.
+- Set `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`.
+
+**Exception:** Commit message explicitly says "chore: remove deprecated tests" or similar intentional deletion phrase. In this case, allow the deletion with a warning note.
+
+**Why this matters:** Agents can "reward hack" by deleting failing tests to pass the test executor. This guard ensures that quality metrics cannot be gamed by removing the measuring stick.
+
 ### Dirty-tree interlock (Build)
 
 After staging intended changes, run:

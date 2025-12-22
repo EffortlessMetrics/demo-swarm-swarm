@@ -334,8 +334,7 @@ Every N items resolved (or after significant changes), apply the **Reseal → Ga
    - Call `build-cleanup` to reseal build_receipt.json (if code/tests changed)
    - Call `review-cleanup` to update worklist state
 2. **Secrets gate:**
-   - Call `secrets-sanitizer` on staged changes
-   - If `modified_files: true`: repeat reseal until stable
+   - Call `secrets-sanitizer` on staged changes (single pass)
 3. **Commit and push (gated):**
    - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push
    - If gates fail: record the blocker and proceed without push (bots won't have new code)
@@ -395,7 +394,7 @@ route_to_agent: <agent-name | null>
 
 **Gating logic (from Gate Result):**
 - If `safe_to_commit: false`: apply route-and-fix triage
-- If `modified_files: true`: reseal loop (review-cleanup → secrets-sanitizer)
+- `modified_files: true`: artifact files were changed (for audit purposes)
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
 
 ### Step 10: Commit and Push
@@ -484,13 +483,11 @@ MINOR and INFO items may remain pending without blocking.
 
 10. `secrets-sanitizer`
 
-11. `review-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+11. `repo-operator` (commit/push)
 
-12. `repo-operator` (commit/push)
+12. `gh-issue-manager` (if allowed)
 
-13. `gh-issue-manager` (if allowed)
-
-14. `gh-reporter` (if allowed)
+13. `gh-reporter` (if allowed)
 
 #### Worklist Loop Template (unbounded resolution)
 
@@ -564,7 +561,6 @@ Continue beyond default two passes only when critic returns `recommended_action:
 - [ ] pr-status-manager (flip Draft to Ready if review complete)
 - [ ] review-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (commit/push; return Repo Operator Result)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)

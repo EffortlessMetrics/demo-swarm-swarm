@@ -520,17 +520,15 @@ Anomaly handling:
 
 The sanitizer is a **fix-first pre-commit hook**, not a behavior throttle.
 
-Execution order in every flow (conceptual):
+Execution order in every flow (linear, no reseal loop):
 
-1. `<flow>-cleanup` writes receipt
-2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
-3. `repo-operator` checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
-4. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
+1. `<flow>-cleanup` writes receipt (captures engineering outcome)
+2. `repo-operator` stages intended + ad-hoc changes (embrace extras, block test deletion)
+3. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
+4. `repo-operator` checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
+5. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
 
-Reseal:
-
-- If `modified_files: true`, rerun `(cleanup ↔ secrets-sanitizer)` until it's false.
-- If reseal does not converge, safe-bail via repo-operator `checkpoint_mode: local_only` and end the flow UNVERIFIED with evidence.
+**No reseal loop:** The sanitizer runs once. If it redacts artifacts, the `secrets_scan.md` is the audit trail — the receipt does not need regeneration. This prevents "Compliance Recursion" where paperwork burns tokens instead of engineering.
 
 ---
 
