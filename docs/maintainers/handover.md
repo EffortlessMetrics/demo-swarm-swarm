@@ -4,6 +4,8 @@
 
 **What this repo is:** The DemoSwarm `.claude/` SDLC pack.
 
+**Core philosophy:** Ops-First. Engineering is default-allow; publishing is gated. See [why-ops-first.md](../explanation/why-ops-first.md).
+
 **What's canonical:**
 - `.claude/commands/flow-*.md` — Flow sequences and gating
 - `.claude/agents/*.md` — Agent behavior and outputs
@@ -105,6 +107,9 @@ See `CLAUDE.md` for full documentation of each.
 ## See also
 
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference + canonical contracts
+- [architecture.md](../explanation/architecture.md) — Ops-First philosophy, compressors, context affinity
+- [why-ops-first.md](../explanation/why-ops-first.md) — Work Plane vs Publish Plane
+- [ai-physics.md](../explanation/ai-physics.md) — LLM-specific design constraints
 - [pack-check.md](../reference/pack-check.md) — What pack-check enforces
 - [reference/contracts.md](../reference/contracts.md) — Control-plane blocks index
 - [tutorials/validation-run.md](../tutorials/validation-run.md) — Validation run
