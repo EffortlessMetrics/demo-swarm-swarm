@@ -66,6 +66,31 @@ An agent that reviews work but never fixes it. Critics produce harsh critiques w
 
 ---
 
+## Agent Configuration
+
+### model (agent YAML field)
+
+Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
+
+| Value | Model Used | Use Case |
+|-------|------------|----------|
+| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex reasoning, multi-file analysis, nuanced judgment, most agents |
+| `haiku` | Claude Haiku | Fast, simple tasks: mechanical counts, boilerplate, extraction |
+
+**Guidance:**
+- Most agents use `inherit` to leverage full reasoning capability.
+- Use `haiku` for high-volume, low-complexity tasks where speed and cost matter more than deep reasoning.
+- Critics and implementers should always use `inherit` (they need nuanced judgment).
+- Cleanup agents may use `haiku` when they're doing mechanical counting only.
+
+### color (agent YAML field)
+
+Visual category for the agent's role family. Used for quick identification in logs and documentation.
+
+See [Role Families](#role-families) above for color → role mappings.
+
+---
+
 ## Planes and Contracts
 
 ### Audit plane
