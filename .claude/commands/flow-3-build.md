@@ -65,8 +65,8 @@ Flow 3 uses **two complementary state machines**:
   - test-executor (fast confirm: AC-scoped tests only)
   - update build/ac_status.json
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
-  - (checkpoint push every 3-5 ACs)
+  - (after checkpoint push) feedback check (pr-feedback-harvester; route on blockers[])
+  - (checkpoint push every 3-5 ACs; feedback check after each)
 - lint-executor (format/lint; global)
 - test-executor (full suite; global)
 - flakiness-detector (if failures; apply Worklist Loop Template)
@@ -326,51 +326,60 @@ For each AC (e.g., AC-001):
 
 This turns "push at end" into "push early, push often" — continuous feedback, not post-hoc review.
 
-### Step 5c: Feedback Check (Full Harvest, Filtered Routing)
+### Step 5c: Feedback Check (Harvest → Route on Blockers)
 
-**After each checkpoint push, harvest full PR feedback and filter for blockers.**
+**After each checkpoint push (and after the first Draft PR exists), harvest full PR feedback and route on blockers.**
 
-This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse mode." If we're paying the compute cost to fetch PR data, we get **all of it**. The difference is how Flow 3 routes on the results.
+This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse mode." The difference is how Flow 3 consumes the Result block.
 
 **What it does:**
-1. **Call `pr-feedback-harvester`** (full harvest — CI status, all comments, all reviews)
-2. **Read the Machine Summary** from `pr_feedback.md`:
-   - `ci_status: PASSING | FAILING | PENDING`
-   - `counts.critical: <n>`
-   - `counts.major: <n>`
-3. **Route on blockers only** (critical/major items), ignore nits during build
+1. **Call `pr-feedback-harvester`** with output directory `build/` (full harvest — CI status, all comments, all reviews)
+2. **Route on the PR Feedback Harvester Result block** (not by re-parsing the file)
 
-**Routing logic (Filter for Blockers):**
+**Routing logic (Route on Result block's `blockers[]`):**
 
 ```yaml
-# From pr_feedback.md Machine Summary
-if ci_status == FAILING or counts.critical > 0:
-  # BLOCKER — fix immediately before more ACs pile up
-  route_to: fixer | test-author | code-implementer (based on failure type)
+# Route on PR Feedback Harvester Result — not counts, but actual blockers
+if ci_status == FAILING:
+  # CI red — interrupt immediately
+  for each failing_check in ci_failing_checks:
+    route by check name:
+      - tests failing → code-implementer then test-executor (fast confirm)
+      - lint/style failing → fixer then lint-executor
+      - build/setup failing → code-implementer
+    # fix one check at a time, then re-harvest
 
-elif counts.major > 0:
-  # MAJOR issues exist but not critical — note them, continue AC loop
-  # Flow 4 will pick these up for comprehensive resolution
-  continue_ac_loop: true
-  note_in_flow_plan: "Major items pending: {n}"
+elif blockers_count > 0:
+  # CRITICAL/MAJOR items from comments — interrupt and fix top 1-3 only
+  for blocker in blockers[:3]:  # bounded interrupt, not worklist drain
+    call blocker.route_to_agent with:
+      - blocker.id
+      - blocker.evidence
+      - blocker.title
+    run test-executor (fast confirm: relevant scope)
+  # do NOT drain the full list (Flow 4 owns that)
 
 else:
-  # GREEN or MINOR/INFO only — continue building
+  # GREEN or MINOR/INFO only — continue AC loop
   continue_ac_loop: true
 ```
 
-**Why full harvest instead of "pulse mode"?**
-- We pay the same latency/compute cost either way
-- Full harvest means Flow 3 catches CodeRabbit security warnings, not just CI red
-- The artifact (`pr_feedback.md`) is reused by Flow 4 — no redundant API calls
-- MINOR/INFO items are captured but ignored during build — Flow 4 drains them
+**Key shift:** Flow 3 now routes on **which** blockers to fix (from `blockers[]`), not just **whether** blockers exist (from `counts.critical`). This means:
+- CI failures route by check name
+- CodeRabbit security warnings route to code-implementer
+- "You deleted tests" comments route to test-author
+- Bot/human "must fix" items get immediate attention
 
-**Flow 3 vs Flow 4 filtering:**
-- **Flow 3 (Build):** Routes on CRITICAL/FAILING only. MAJOR items are noted but don't stop the AC loop. MINOR/INFO are ignored.
-- **Flow 4 (Review):** Drains the complete worklist including MINOR items.
+**Record unresolved blockers:**
+After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (FB-###). Flow 4 will harvest and drain everything systematically.
 
-**Optional station:** The orchestrator may skip this step if:
-- No PR exists yet (first push)
+**Why this matters:**
+- Flow 3 was blind to blocker **content** (only saw CI red + counts)
+- Now it sees "CodeRabbit says security issue at auth.ts:42" and routes to code-implementer
+- The point of early PR bootstrap is to catch these during build, not post-hoc
+
+**Optional station (skip conditions):**
+- No PR exists yet (first push hasn't happened)
 - GitHub access is unavailable
 - Time pressure requires continuing without the check
 
@@ -655,7 +664,8 @@ After this flow completes, `.runs/<run-id>/build/` should contain:
 - `github_report.md`
 - `git_status.md` (if anomaly detected)
 - `pr_creation_status.md` (from pr-creator)
-- `pr_feedback.md` (full PR feedback harvest; reused by Flow 4)
+- `pr_feedback.md` (full PR feedback harvest; Flow 3's own copy)
+- `feedback_blockers.md` (unresolved blocker IDs for Flow 4; optional)
 
 Also creates in `.runs/<run-id>/build/`:
 - `ac_status.json` (runtime AC completion tracker - created by Build, updated per AC)
@@ -682,7 +692,7 @@ Code/test changes in project-defined locations.
 
 6. **AC loop** (for each AC in `ac_matrix.md`; apply AC Loop Template below)
    - After first vertical slice: `repo-operator` (checkpoint push) + `pr-creator` (early; once)
-   - After checkpoint push: `pr-feedback-harvester` (full harvest; route on CRITICAL/FAILING only)
+   - After checkpoint push: `pr-feedback-harvester` (full harvest; route on `blockers[]`)
    - Checkpoint push every 3-5 ACs or when touching core modules (feedback check after each)
 
 7. `lint-executor` (global)
@@ -802,7 +812,7 @@ If `build/ac_status.json` exists (rerun):
 - [ ] test-strategist (if ac_matrix.md missing)
 - [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
+  - (after checkpoint push) feedback check (pr-feedback-harvester; route on `blockers[]`)
   - (checkpoint push every 3-5 ACs; feedback check after each)
 - [ ] lint-executor (global)
 - [ ] test-executor (full suite; global)

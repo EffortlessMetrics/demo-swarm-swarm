@@ -416,6 +416,48 @@ Notes:
 - `blocker_kind` is the machine-readable category: `NONE` (not blocked), `MECHANICAL` (IO/tooling failure), `SECRET_IN_CODE` (staged code needs fix), `SECRET_IN_ARTIFACT` (artifact can't be redacted).
 - `blocker_reason` is the human-readable explanation (if BLOCKED); otherwise null.
 
+### PR Feedback Harvester Result (emitted by `pr-feedback-harvester`)
+
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 START -->
+```yaml
+## PR Feedback Harvester Result
+status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+evidence_sha: <sha>                  # commit being evaluated
+pr_number: <int | null>
+
+ci_status: PASSING | FAILING | PENDING | NONE
+ci_failing_checks: [<check-name>]    # names of failing checks
+
+blockers_count: <int>                # actionable blockers (CRITICAL items from CI + comments)
+blockers:
+  - id: FB-001
+    source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
+    severity: CRITICAL | MAJOR
+    category: CORRECTNESS | TESTS | BUILD | SECURITY | DOCS | STYLE
+    title: <short summary>
+    route_to_agent: code-implementer | test-author | fixer | doc-writer
+    evidence: <check name | file:line | comment id>
+
+counts:
+  total: <n>
+  critical: <n>
+  major: <n>
+  minor: <n>
+  info: <n>
+  actionable: <n>
+
+sources_harvested: [reviews, review_comments, check_runs, ...]
+sources_unavailable: []
+```
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 END -->
+
+Notes:
+- `blockers[]` contains only CRITICAL and MAJOR items that need immediate attention
+- Flow 3 routes on `blockers[]` — fix top 1-3 blockers immediately (bounded interrupt)
+- Flow 4 drains the complete worklist (all severities)
+- The Result block is **returned in the response**, not just written to the file
+- Per-flow outputs: `build/pr_feedback.md` (Flow 3), `review/pr_feedback.md` (Flow 4)
+
 ### Repo Operator Result (emitted by `repo-operator`)
 
 <!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 START -->
