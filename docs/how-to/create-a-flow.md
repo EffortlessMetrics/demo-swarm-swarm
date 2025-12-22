@@ -17,6 +17,51 @@ Do NOT create a new flow for:
 
 ---
 
+## Flow Rhythm
+
+Every flow follows this rhythm:
+
+```
+dispatch → bounded work → compress → checkpoint → exit/resume
+```
+
+### The Pattern
+
+1. **Dispatch:** User runs `/flow-n-name` with a run-id
+2. **Bounded Work:** Domain agents do their jobs (microloops, harvesting)
+3. **Compress:** Cleanup agent derives counts and writes receipt
+4. **Checkpoint:** Sanitize → Commit → Push (if allowed)
+5. **Exit/Resume:** If context is exhausted, exit with `PARTIAL`; user reruns to continue
+
+### Compressor Stations
+
+Identify the "heavy read → light output" points in your flow. These are natural yield points:
+
+| Station Type | Input | Output | Example |
+|--------------|-------|--------|---------|
+| **Harvester** | API firehose, logs | `blockers[]`, counts | `pr-feedback-harvester` |
+| **Executor** | Test suite, lint rules | pass/fail summary | `test-executor` |
+| **Cleanup** | All flow artifacts | receipt JSON | `build-cleanup` |
+
+At each compressor station, it's natural to:
+- Change instructions
+- Cap work
+- Checkpoint/exit with `PARTIAL`
+- Resume cleanly later
+
+### Exit Semantics
+
+| Status | Meaning | Rerun Behavior |
+|--------|---------|----------------|
+| `VERIFIED` | Flow completed with executed evidence | No rerun needed |
+| `UNVERIFIED` | Gaps exist; verification incomplete | May rerun to resolve |
+| `PARTIAL` | Real progress made; context exhausted | Rerun continues from disk state |
+| `CANNOT_PROCEED` | Mechanical failure (IO/tooling) | Fix environment, then rerun |
+
+**Key invariant:** `PARTIAL` is valid for unbounded loops (Flow 4 Review). It means "made progress, didn't finish, safe to resume."
+
+---
+
 ## Flow Skeleton
 
 Every flow command lives at `.claude/commands/flow-<n>-<name>.md`.

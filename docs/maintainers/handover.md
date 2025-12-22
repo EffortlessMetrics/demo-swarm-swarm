@@ -104,6 +104,19 @@ See `CLAUDE.md` for full documentation of each.
 
 ---
 
+## The "Feel" Test
+
+When modifying this pack, verify the "Feel" remains Ops-First:
+
+1.  **The "Typo Fix" Test:** If a human edits a file while the swarm runs, `repo-operator` MUST include it ("Extras") without crashing.
+2.  **The "Lazy Agent" Test:** If an agent deletes a test to make the build pass, `repo-operator` MUST refuse to push.
+3.  **The "Broken Config" Test:** If Flow 3 pushes a bad config that fails CI, it MUST stop to fix it before building more features.
+4.  **The "Nits" Test:** Flow 3 MUST ignore "nits" (comments) to maintain velocity. Flow 4 MUST catch and fix them.
+
+These tests verify the Ops-First philosophy is intact: **velocity in the Work Plane, guardrails only at the Publish Plane boundary.**
+
+---
+
 ## See also
 
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference + canonical contracts

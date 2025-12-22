@@ -1,6 +1,64 @@
-# Architecture Overview
+# Architecture: The Ops-First Engine
 
 > How the pack is built and why.
+
+---
+
+## The Three Pillars
+
+DemoSwarm is built on three architectural pillars that separate it from standard LLM scripts.
+
+### 1. Thick Agents, Thin Flows
+
+To optimize token usage and context windows:
+
+*   **Thin Flows:** The Orchestrator follows a simple checklist (`flow-3-build.md`). It spends tokens on *routing*, not *instruction*.
+*   **Thick Agents:** Complex logic lives inside the Agent prompts (`repo-operator.md`). They spin up fresh contexts, perform heavy analysis (diff checks, log parsing), and return small **Result Blocks**.
+
+**Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
+
+### 2. The Compressor Pattern
+
+We use agents to "compress" reality into signal.
+
+```
+┌─────────────────────────────────────────┐
+│  pr-feedback-harvester                  │
+│                                         │
+│  IN:  100KB of GitHub API JSON          │
+│       (reviews, comments, checks)       │
+│                                         │
+│  OUT: pr_feedback.md (~2KB)             │
+│       + Result block (~200 bytes)       │
+└─────────────────────────────────────────┘
+```
+
+Examples:
+- `test-executor`: 10K lines of console logs → `test_execution.md` (status + top failures)
+- `pr-feedback-harvester`: GitHub API firehose → `pr_feedback.md` + normalized `blockers[]`
+- `build-cleanup`: All flow artifacts → `build_receipt.json` (mechanical counts)
+
+**Rule:** Workers may be heavy; their outputs must be light and stable.
+
+### 3. Receipts as Evidence (Not Gatekeepers)
+
+We don't use receipts as permission boundaries. We use them as **Logs**.
+
+*   The `*-cleanup` agents verify that the *logical outcome* (Test Report exists and is Green) is true.
+*   The `secrets-sanitizer` ensures the *package* is safe (Redacting logs).
+*   We accept divergence between the Receipt and the Commit to maintain velocity.
+
+**State-First Verification:** The repo's current state (HEAD + working tree + staged diff) is the thing you're building and shipping. Receipts help investigate what happened—but they're not the primary verification mechanism once the repo has moved.
+
+### 4. Mechanical Guardrails ("Physics")
+
+We enforce safety via tools, not prompts.
+
+| Guardrail | Implementation |
+| :--- | :--- |
+| **Anti-Reward Hacking** | `repo-operator` runs `git diff | grep ^D` on test paths. If tests are deleted, the push is **hard blocked**. |
+| **Intent + Extras** | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict. |
+| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks if manual remediation is required. |
 
 ---
 
@@ -55,34 +113,7 @@ If a gate blocks, **keep working locally**. Gates constrain publishing, not thin
 
 ## Key Design Patterns
 
-### 1. Agents as Compressors
-
-**The Problem:** Raw reality (logs, diffs, API responses) is heavy. Carrying it through flows exhausts context.
-
-**The Solution:** Specialized agents ingest massive context, perform work, and output a **small truth artifact**.
-
-```
-┌─────────────────────────────────────────┐
-│  pr-feedback-harvester                  │
-│                                         │
-│  IN:  100KB of GitHub API JSON          │
-│       (reviews, comments, checks)       │
-│                                         │
-│  OUT: pr_feedback.md (~2KB)             │
-│       + Result block (~200 bytes)       │
-└─────────────────────────────────────────┘
-```
-
-Examples:
-- `test-executor`: 10K lines of console logs → `test_execution.md` (status + top failures)
-- `pr-feedback-harvester`: GitHub API firehose → `pr_feedback.md` + normalized `blockers[]`
-- `build-cleanup`: All flow artifacts → `build_receipt.json` (mechanical counts)
-
-**Benefit:** The orchestrator reads the compressed output, not the raw inputs. This keeps flow context clean and prevents hallucination from context stuffing.
-
-**Rule:** Workers may be heavy; their outputs must be light and stable.
-
-### 2. Context Affinity
+### Context Affinity
 
 **Principle:** If an agent has a file open and the token budget to process it, it should do the related work.
 
@@ -99,19 +130,7 @@ Don't spin up a new agent (and pay the startup cost) just for bureaucratic purit
 - We don't have a separate "Anomaly Detector" agent—repo-operator sees anomalies while staging
 - We don't fetch data in one agent and analyze in another—harvester ingests and emits signal in one pass
 
-### 3. Receipts-First
-
-Every flow produces a receipt (`<flow>_receipt.json`).
-
-Receipts are:
-- **Mechanical:** Counts from grep/wc/parse, never estimated
-- **Sealed:** Once written, reporters read them—they don't recompute
-- **Canonical:** The source of truth for flow outcome
-- **Logs, not gatekeepers:** Receipts describe what happened; the repo's current state determines outcomes
-
-**State-First Verification:** The repo's current state (HEAD + working tree + staged diff) is the thing you're building and shipping. Receipts help investigate what happened—but they're not the primary verification mechanism once the repo has moved.
-
-### 4. Critics Never Fix
+### Critics Never Fix
 
 Critics write harsh assessments; implementers apply fixes.
 
@@ -121,7 +140,7 @@ author → artifact → critic → critique → author → improved artifact →
 
 **Why:** Separation prevents "critic fixes its own issues" loops and maintains clear accountability.
 
-### 5. Microloops
+### Microloops
 
 Writer ↔ Critic iteration until:
 - `status: VERIFIED`, OR
@@ -131,7 +150,7 @@ Default cadence: 2 passes (write → critique → write → critique → proceed
 
 **Why:** Bounded iteration prevents infinite loops while ensuring quality.
 
-### 6. Intent + Extras (Embrace Ad-Hoc Fixes)
+### Intent + Extras (Embrace Ad-Hoc Fixes)
 
 The orchestrator tells agents **what to produce** (intent). Agents figure out **what paths to touch** (execution).
 
@@ -141,19 +160,6 @@ When staging, expect "extras" (files changed outside the expected set):
 3. **Do not block** unless they trigger a hard guardrail (test deletion)
 
 **Why:** Developers jump in to fix typos or tweak config while the swarm runs. This is collaboration, not attack.
-
-### 7. Anti-Reward-Hacking Guard
-
-Agents can "reward hack" by deleting failing tests to pass the test executor.
-
-**Guard:** Before committing, `repo-operator` scans the staged diff for deleted test files:
-```bash
-git diff --cached --name-status | grep "^D" | grep -E "(test|spec|_test\.|\.test\.)"
-```
-
-If deleted tests are found without explicit justification, the commit is blocked.
-
-**Why:** Quality metrics cannot be gamed by removing the measuring stick.
 
 ---
 
