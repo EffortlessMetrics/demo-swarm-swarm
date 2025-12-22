@@ -291,46 +291,30 @@ This agent is a **publish gate** that ensures no secrets are accidentally commit
 
 **Gate Result block (returned by secrets-sanitizer):**
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
-**Gating logic (from Gate Result):**
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 11c)
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub issue/comment updates still run in restricted mode when publish is blocked or `publish_surface: NOT_PUSHED`.
+  - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
+  - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
+  - `blocker_kind: SECRET_IN_ARTIFACT` → investigate manually
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- GitHub issue/comment updates still run in restricted mode when publish is blocked or `publish_surface: NOT_PUSHED`
 
-### Step 11b: Reseal If Modified (Conditional Loop)
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(signal-cleanup → secrets-sanitizer)` until either:
-- the sanitizer reports `modified_files: false`, or
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-- Append an evidence note to `secrets_scan.md`:
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - Agent commits allowlist locally, does **not** push
-  - Agent returns `proceed_to_github_ops: false` (mechanically enforced) and `publish_surface: NOT_PUSHED`
-- GitHub ops will run in **restricted issue-publish mode** if `gh` auth and an issue exist (paths only, publish blocked reason).
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-- Exit cleanly
-
-### Step 11c: Checkpoint Commit
+### Step 11b: Checkpoint Commit
 
 Checkpoint the audit trail **before** any GitHub operations.
 
@@ -372,46 +356,16 @@ anomaly_paths: []
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
-### Step 12: Sync GitHub Issue
+### Step 12-13: GitHub Reporting
 
-**Call `gh-issue-manager`** -> sync/update issue metadata (and create/bind the issue if needed). If `run_meta.github_ops_allowed: false` (repo mismatch), the agent skips GitHub calls, writes a local status, and proceeds.
+**Call `gh-issue-manager`** (sync/update/bind issue) then **`gh-reporter`** (post summary).
 
-**Two-stage GitHub behavior:**
-- Issue updates run only when `github_ops_allowed: true` **and** `gh` is authenticated.
-  - `FULL` mode when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Status board uses blob links; Next Steps + Open Questions include real content.
-  - `RESTRICTED` mode otherwise: status board uses paths only (marked "not published") with a publish-blocked reason (secrets gate/anomaly/local-only/push failure/gh unavailable/publish_surface: NOT_PUSHED). Receipts may be read for counts/status rows; no human-authored markdown is quoted. Open Questions shows counts only with a withheld-content note. Next Steps still populate from control-plane facts.
-- No blob links when `publish_surface: NOT_PUSHED`, even if other gates are clear.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
-If `issue_number` is missing (e.g., deferred binding) and `gh` is available/authenticated, attempt a one-time create/bind; otherwise record SKIPPED and continue. Update `run_meta.json`, `.runs/index.json`, and write `gh_issue_status.md`.
-
-If `gh` CLI is not authenticated, record SKIPPED/UNVERIFIED (flow not blocked).
-
-### Step 13: Report to GitHub
-
-**Call `gh-reporter`** -> posts summary **to the GitHub issue** (not PR). If `run_meta.github_ops_allowed: false`, it writes local reports only and skips posting.
-
-**Posting prerequisites:** `issue_number` present, `github_ops_allowed: true`, and `gh` authenticated.
-
-**Content modes:**
-- `FULL` when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Uses receipts (and optionally `open_questions.md`) with blob links.
-- `RESTRICTED` otherwise (`safe_to_publish: false`, `needs_upstream_fix: true`, `proceed_to_github_ops: false`, or `publish_surface: NOT_PUSHED`). You may read receipts for machine-derived status/counts; do **not** quote human-authored markdown or raw signal. Post a minimal handoff with the block reason, next steps to rerun cleanup/sanitizer/checkpoint, and optional high-level counts. Use paths only.
-
-The reporter writes `.runs/<run-id>/signal/github_report.md` locally as a record. Posting failures are recorded and non-blocking.
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (critic findings, HIGH risks)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
-
-**Issue-first (hard):** All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
-
-Skip posting only when:
-- `run_meta.github_ops_allowed: false`, or
-- `issue_number` is missing, or
-- `gh` is not authenticated.
-Otherwise post in FULL or RESTRICTED mode.
+If `issue_number` is missing and `gh` is available, `gh-issue-manager` may attempt to create/bind.
 
 ### Step 14: Finalize Flow
 
@@ -553,13 +507,11 @@ If yes, proceed to `/flow-2-plan`.
 
 13. `secrets-sanitizer`
 
-14. `signal-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+14. `repo-operator` (checkpoint; read Repo Operator Result)
 
-15. `repo-operator` (checkpoint; read Repo Operator Result)
+15. `gh-issue-manager` (if allowed)
 
-16. `gh-issue-manager` (if allowed)
-
-17. `gh-reporter` (if allowed)
+16. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -592,7 +544,6 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] risk-analyst
 - [ ] signal-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] signal-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)
 - [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
 - [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)

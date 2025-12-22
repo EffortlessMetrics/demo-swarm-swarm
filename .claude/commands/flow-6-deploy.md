@@ -192,40 +192,25 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
    - Scan artifacts before GitHub posting
    - Write `.runs/<run-id>/deploy/secrets_scan.md`, `.runs/<run-id>/deploy/secrets_status.json`
    - **Returns a Gate Result block** for orchestrator routing (control plane)
-   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED_PUBLISH); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `needs_upstream_fix` + `route_to_agent` (and optionally `route_to_flow`) drive routing
+   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `blocker_kind` explains why blocked
    - The JSON file is an audit record; orchestrator routes on the Gate Result block, not by re-reading the file
 
    **Gate Result block (returned by secrets-sanitizer):**
 
-   <!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-   ```
+   <!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+   ```yaml
    ## Gate Result
-   status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+   status: CLEAN | FIXED | BLOCKED
+   safe_to_commit: true | false
+   safe_to_publish: true | false
+   modified_files: true | false
+   findings_count: <int>
+   blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+   blocker_reason: <string | null>
+   ```
+   <!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
-6b. **Reseal If Modified** (conditional loop)
-   - If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(deploy-cleanup → secrets-sanitizer)` until either:
-     - the sanitizer reports `modified_files: false`, or
-     - the sanitizer indicates no reasonable path to fixing (non-convergent).
-   - If reseal cannot make progress (sanitizer signals no reasonable path):
-     - Append an evidence note to `secrets_scan.md`:
-       - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-     - If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-       - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-     - GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-     - Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-       - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-6c. **Checkpoint Commit** (repo-operator)
+6b. **Checkpoint Commit** (repo-operator)
 
    Checkpoint the audit trail **before** any GitHub operations.
 
@@ -263,22 +248,13 @@ anomaly_paths: []
      - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
      - Otherwise → UNVERIFIED; commit locally but skip push; returns `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`.
 
-### GitHub Access + Content Mode (canonical)
+7. **GitHub Reporting** (gh-issue-manager → gh-reporter) - **Reporting Ops**
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
-
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-7. **Update Issue Board** (gh-issue-manager) - **Reporting Op**
-- Apply Access + Content Mode rules: skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED). Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-- This is a **Reporting Op**-distinct from Release Ops (merge/tag) above which are gated by Gate's decision.
-- If the issue is missing and gh is available, gh-issue-manager may create it (with a Signal-pending banner when created from Flow 6).
-
-8. **Report** (gh-reporter) - **Reporting Op**
-- Apply Access + Content Mode rules: skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED). Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown). Publish-blocked reason must be explicit.
-- Issue-first (hard): all flow logs go to the issue, even if a PR exists.
-- **Content expectations:** Decisions Needed, Concerns for Review (deployment issues), Agent Notes (friction, cross-cutting insights, pack improvements). These make the GitHub update actionable.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
+- Reporting Ops are distinct from Release Ops (merge/tag) above
 
 ### Path B: Gate Decision = BOUNCE (including human-review reasons)
 
@@ -370,7 +346,6 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - `deploy-decider`
 - `deploy-cleanup`
 - `secrets-sanitizer`
-- `deploy-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
 - `repo-operator` (checkpoint; read Repo Operator Result)
 - `gh-issue-manager` (if allowed)
 - `gh-reporter` (if allowed)
@@ -386,7 +361,6 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 - [ ] deploy-decider
 - [ ] deploy-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] deploy-cleanup ↔ secrets-sanitizer (reseal cycle; if modified_files: true)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)

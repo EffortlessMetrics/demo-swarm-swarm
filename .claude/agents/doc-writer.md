@@ -207,6 +207,35 @@ concerns: []
 output_file: .runs/<run-id>/build/doc_updates.md
 ```
 
+## Obstacle Protocol (When Stuck)
+
+If you encounter ambiguity about what to document or how, follow this hierarchy:
+
+1. **Self-Correction:** Re-read `impl_changes_summary.md`, ADR, and contracts. Often the correct terminology is already specified.
+
+2. **Assumption (Preferred):**
+   - Can you make a reasonable assumption based on code behavior + ADR intent?
+   - **Action:** Document it in `doc_updates.md` under `## Assumptions Made`. Write the docs.
+   - Example: "Assumption: Error response format matches api_contracts.yaml even though impl_changes_summary didn't confirm it."
+
+3. **Async Question (The "Sticky Note"):**
+   - Is the doc surface genuinely unclear (e.g., audience unclear, terminology conflicts)?
+   - **Action:** Append the question to `.runs/<run-id>/build/open_questions.md`:
+     ```
+     ## OQ-BUILD-### <short title>
+     - **Context:** <what doc you were writing>
+     - **Question:** <the specific question>
+     - **Impact:** <what docs depend on the answer>
+     - **Default assumption (if any):** <what you're documenting in the meantime>
+     ```
+   - **Then:** Mark that doc surface as `DOC_DEFERRED` and continue with other updates.
+
+4. **Peer Handoff:** If you discover a code/contract mismatch, use `BOUNCE` per the routing rules above.
+
+5. **Mechanical Failure:** Only use `CANNOT_PROCEED` for IO/permissions/tooling failures.
+
+**Goal:** Update as many docs as possible. Partial docs with assumptions logged are better than no docs.
+
 ## Philosophy
 
 Docs are part of the contract surface. They must match what we built and what we promised. Prefer small, surgical edits. If you can't verify a claim, don't write it—record the gap and route it.

@@ -26,6 +26,53 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 ---
 
+## Operating Philosophy: Ops-First
+
+**Core principle:** Engineering is default-allow. Publishing is gated.
+
+The pack is a **build pipeline with guardrails**, not a guardrail pipeline that sometimes builds. The default posture is:
+
+> explore → implement → test → push → harvest bot signal → iterate → verify → seal
+
+### Work Plane (default-allow)
+
+Everything up to staging runs without friction:
+- Explore aggressively (read any files, search code, run checks)
+- Write tests early, iterate on code freely
+- Run tests locally, fix issues as you find them
+- Push early to get bot feedback (CI, CodeRabbit, etc.)
+- Security findings are **advisory** here, not throttles
+
+### Publish Plane (gated)
+
+Gates engage only when crossing the boundary:
+- **Commit**: secrets-sanitizer scans staged changes
+- **Push**: repo-operator checks for anomalies
+- **GitHub post**: content mode restricts what gets posted (not what's analyzed)
+
+If a gate blocks, **keep working locally**. Gates constrain publishing, not thinking.
+
+### Intent Surfaces (Not Allowlists)
+
+Flows express **intent** (what outputs to expect). Agents derive **paths** (what to stage).
+
+This is a map, not a permission boundary:
+- "Flow 3 outputs to `.runs/<run-id>/build/` + project code" (intent)
+- repo-operator figures out what files to stage (execution)
+
+**Extras are normal:** Ad-hoc fixes (typos, config tweaks) get staged and recorded, not blocked.
+
+**Anomalies are rare:** Only tracked/staged changes outside the intent surface trigger push blocks—and even then, the commit proceeds locally.
+
+### Fix-Forward Default
+
+The sanitizer should behave like a good pre-commit hook:
+- Fast scan of staged diff + flow artifacts
+- Auto-redact obvious secret shapes
+- Only block when remediation requires human judgment
+
+---
+
 ## Operating Model: Swarm Repo
 
 Recommended: run flows in a dedicated `*-swarm` downstream repo.
@@ -82,6 +129,34 @@ These rules exist to prevent drift and "model invention":
    Identity changes happen via `canonical_key` + `aliases[]`, never via renaming directories.
 
 You'll see these repeated in the relevant sections on purpose.
+
+---
+
+## Flow Authoring Rule
+
+**Flows are routing tables. Agents are workers.**
+
+This separation is about **token economics**: Orchestrator context is expensive, Agent execution is cheap.
+
+### Flows contain:
+- Station order (which agents to call, in what sequence)
+- Routing logic (which Result block to read, what to do on PROCEED/RERUN/BOUNCE)
+- Artifact expectations (what outputs to expect from each station)
+- Termination conditions (when the flow is complete)
+
+### Flows must NOT contain:
+- Shell snippets (beyond illustrative examples)
+- File path lists to stage/check (move to agents)
+- Parsing logic or computation
+- If/else chains for file existence checks
+
+### Agents contain:
+- All procedural work (read files, run commands, write outputs)
+- Intent-to-paths mapping (the agent figures out what to stage)
+- Validation logic (the agent checks if things are correct)
+- Machine Summary + Result blocks for orchestrator routing
+
+**Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
 
 ---
 
@@ -220,6 +295,54 @@ Receipt guarantees:
 - `counts` are mechanical (grep/wc/parse), never estimated.
 - `quality_gates` are sourced from agent Machine Summaries (no recomputation).
 - Reporters summarize from receipts, not from raw artifacts.
+- `stations` tracks per-station execution:
+  - `executed: true|false` — whether the station ran (vs. SKIPPED stub)
+  - `result: PASS|FAIL|SKIPPED|UNKNOWN` — what the station produced
+- `evidence_sha` is the commit SHA when receipt was generated (for staleness detection)
+- `generated_at` is the ISO8601 timestamp for receipt creation
+
+### State-First Verification (Receipts as Logs, Not Gatekeepers)
+
+**Core principle:** The repo's current state (HEAD + working tree + staged diff + actual tool results) is the thing you're building and shipping. Receipts help you investigate what happened, why, and where to look next—but they are not the primary mechanism for verifying and determining outcomes once the repo has moved.
+
+**Trust hierarchy:**
+
+1. **Live repo state + executed evidence** (primary)
+   - `git rev-parse HEAD`, `git diff`, `git status`
+   - Test/lint/mutation outputs generated *now*
+   - CI check runs for the current SHA
+
+2. **Receipts** (cached evidence of prior state)
+   - What an agent ran earlier
+   - What it saw then
+   - Links/paths to logs and artifacts
+
+3. **Narrative summaries** (useful for humans, never a control input)
+
+**Agent invariant:** Validate against current repo state and executed evidence. Use receipts as historical breadcrumbs and summary inputs. Never use receipt presence or receipt fields as permission to proceed.
+
+**Drift rule:** If `receipt.evidence_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+
+**Evidence field convention:** Receipts should include these fields for staleness detection:
+- `evidence_sha`: The commit SHA when this evidence was generated
+- `generated_at`: ISO8601 timestamp
+
+When these fields mismatch current HEAD, the receipt is advisory, not authoritative.
+
+**Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
+
+### Evidence over Format
+
+If verification evidence exists but a receipt is malformed or missing fields:
+
+- Treat it as a **pack/tooling defect**, not an engineering failure.
+- Keep the line moving: ship based on the underlying evidence **if gates pass**.
+- Record the defect explicitly (e.g., `status: UNVERIFIED`, `blockers: ["receipt_tooling_error: <details>"]`) and open a maintenance issue.
+
+If the evidence itself is missing (tests didn't run, CI unknown, etc.), that's not paperwork drift — that's **unverified work**. Route back to run the missing verification.
+
+**Maintainer mantra:**
+> Build the asset. Capture the evidence. State the truth. Ship when the evidence is green.
 
 ---
 
@@ -287,41 +410,102 @@ Flows and agents should use these blocks **verbatim** (copy/paste) to avoid sche
 
 ### Gate Result (emitted by `secrets-sanitizer`)
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
 ```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+
+Notes:
+- The sanitizer is a **boolean gate**, not a router. It says yes/no.
+- If `safe_to_publish: false`, the flow doesn't push. The orchestrator decides next steps.
+- `blocker_kind` is the machine-readable category: `NONE` (not blocked), `MECHANICAL` (IO/tooling failure), `SECRET_IN_CODE` (staged code needs fix), `SECRET_IN_ARTIFACT` (artifact can't be redacted).
+- `blocker_reason` is the human-readable explanation (if BLOCKED); otherwise null.
+
+### PR Feedback Harvester Result (emitted by `pr-feedback-harvester`)
+
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 START -->
+```yaml
+## PR Feedback Harvester Result
+status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+evidence_sha: <sha>                  # commit being evaluated
+pr_number: <int | null>
+
+ci_status: PASSING | FAILING | PENDING | NONE
+ci_failing_checks: [<check-name>]    # names of failing checks (also appear as blockers)
+
+blockers_count: <int>                # CRITICAL items only (stop-the-line)
+blockers:                            # top N blockers (cap at 10)
+  - id: FB-CI-<check_run_id> | FB-RC-<review_comment_id> | FB-IC-<issue_comment_id> | FB-RV-<review_id>
+    source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
+    severity: CRITICAL               # blockers are CRITICAL-only
+    category: BUILD | TESTS | SECURITY | CORRECTNESS | DOCS | STYLE
+    title: <short title>
+    route_to_agent: code-implementer | test-author | fixer | doc-writer
+    evidence: <check name | file:line | comment id>
+    thoughts: <triage-level quick read>
+
+counts:
+  total: <n>
+  critical: <n>
+  major: <n>
+  minor: <n>
+  info: <n>
+
+sources_harvested: [reviews, review_comments, check_runs, ...]
+sources_unavailable: []
+```
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 END -->
+
+Notes:
+- **One routing surface**: CI failures, CodeRabbit, human reviews all become blockers with `source` tag — no separate CI path
+- **CRITICAL-only blockers**: Flow 3 interrupts only on stop-the-line issues. MAJOR stays in counts + full `pr_feedback.md`
+- **Stable IDs**: Derived from upstream IDs (check_run_id, review_comment_id, etc.) — reruns don't reshuffle
+- **Triage, not planning**: `thoughts` is one-line quick read ("valid issue", "outdated suggestion", "bot probably wrong")
+- Flow 3 routes on `blockers[]` — routed agent does deep investigation
+- Flow 4 drains the complete worklist from `pr_feedback.md` (all severities)
+- Per-flow outputs: `build/pr_feedback.md` (Flow 3), `review/pr_feedback.md` (Flow 4)
 
 ### Repo Operator Result (emitted by `repo-operator`)
 
-<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V1 START -->
+<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 START -->
 ```yaml
 ## Repo Operator Result
 operation: checkpoint | build | stage | merge | other
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
 anomaly_paths: []
 ```
-<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V1 END -->
+<!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 END -->
 
 Notes:
 
 - `commit_sha` is always populated (current HEAD on no-op).
 - `publish_surface` is always present:
   - `PUSHED` only when a push is attempted and succeeds.
-  - `NOT_PUSHED` for local-only checkpoints, anomalies, skipped pushes, and push failures.
+  - `NOT_PUSHED` for local-only checkpoints, tracked anomalies, skipped pushes, and push failures.
+- `status` values:
+  - `COMPLETED` - operation succeeded, no anomalies
+  - `COMPLETED_WITH_WARNING` - only untracked anomalies; push allowed
+  - `COMPLETED_WITH_ANOMALY` - tracked/staged anomalies; push blocked
+- `anomaly_classification` provides breakdown by risk level:
+  - `unexpected_staged_paths` - HIGH risk (blocks push)
+  - `unexpected_unstaged_paths` - HIGH risk (blocks push)
+  - `unexpected_untracked_paths` - LOW risk (warning only, allows push)
+- `anomaly_paths` - DEPRECATED; union of classification arrays for backward compatibility
 - Orchestrators route on these returned blocks, not by rereading files.
 
 ---
@@ -331,19 +515,43 @@ Notes:
 Do not conflate these domains:
 
 1. **Flow/Agent Status** (Machine Summary + receipts)
-   `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
+   `VERIFIED | UNVERIFIED | PARTIAL | CANNOT_PROCEED`
+
+   **VERIFIED requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default. Missing verification artifacts (test execution, critics) result in `UNVERIFIED`, not "concern only."
+
+   Status semantics:
+   - `VERIFIED`: Required artifacts exist AND verification stations ran AND passed (executed evidence present)
+   - `UNVERIFIED`: Verification incomplete, contradictions, critical failures, or missing core outputs
+   - `PARTIAL`: Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review)
+   - `CANNOT_PROCEED`: Mechanical failure only (IO/permissions/tooling)
+
+   **SKIPPED stubs:** Cleanup agents create explicit SKIPPED stubs for missing station artifacts:
+   ```markdown
+   # <Artifact Name>
+   status: SKIPPED
+   reason: <why it wasn't produced>
+   evidence_sha: <current HEAD>
+   generated_at: <iso8601>
+   ```
+   This ensures nothing is silently missing. Downstream and Flow 7 (Wisdom) can see what happened.
+
+   **Per-station tracking:** Receipts include a `stations` section with `executed: true|false` and `result: PASS|FAIL|SKIPPED|UNKNOWN` for each station. This is the machine-grade evidence of what ran.
 
 2. **Repo Operator Status** (Repo Operator Result)
-   `COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`
+   `COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`
 
 3. **Secrets Sanitizer Status** (Gate Result)
-   `CLEAN | FIXED | BLOCKED_PUBLISH`
+   `CLEAN | FIXED | BLOCKED`
 
 4. **Gate Merge Verdict** (`merge_decision.md`)
    `MERGE | BOUNCE` (use BOUNCE reason to signal human review)
 
-5. **Deploy Verdict** (`deployment_decision.md`)
-   `STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE`
+5. **Deploy Verdict** (`deployment_decision.md`) - Two-Axis Model
+   - `deploy_action`: `COMPLETED | SKIPPED | FAILED`
+   - `governance_enforcement`: `VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN`
+   - `deployment_verdict` (derived): `STABLE | NOT_DEPLOYED | GOVERNANCE_UNVERIFIABLE | BLOCKED_BY_GATE`
+
+   Note: `GOVERNANCE_UNVERIFIABLE` means deploy action succeeded but governance cannot be verified. This is distinct from `NOT_DEPLOYED` (deploy action failed).
 
 6. **Smoke Signal** (runtime signal inside `verification_report.md`)
    `smoke_signal: STABLE | INVESTIGATE | ROLLBACK`
@@ -374,20 +582,46 @@ Key invariant: secrets-sanitizer scans only the current flow's publish surface, 
 
 GitHub is an **observability pane**, not the work substrate. GitHub operations (`gh-issue-manager`, `gh-reporter`) are governed by:
 
-1) **Access gate (hard)**
+### 1) Access gate (hard)
+
 - If `run_meta.github_ops_allowed == false`: do **not** call GitHub (even read-only); flows proceed locally.
 - If `gh` is unauthenticated/unavailable: SKIP GitHub calls; record the limitation locally; proceed.
 - Prefer `run_meta.github_repo` (or `github_repo_actual_at_creation`) for repo scope; do **not** invent a repo when missing.
 
-2) **Content mode (soft)**
-- **FULL** only when all are true:
-  - secrets Gate Result `safe_to_publish: true`
-  - repo-operator Result `proceed_to_github_ops: true`
-  - repo-operator Result `publish_surface: PUSHED`
-- **RESTRICTED** otherwise (publish blocked, local-only/anomaly, push skipped/failed). Publish blocked **never** means skip when access is allowed.
-  - Allowed inputs: run identity (`run_meta`), control-plane blocks (Gate Result + Repo Operator Result), and receipt machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
-  - Disallowed: human-authored markdown/raw signal (`requirements.md`, `open_questions.md`, `*.feature`, ADR text), diffs, and blob links.
-  - Link style derives from `publish_surface`: `PUSHED` → links allowed in FULL; otherwise PATHS_ONLY.
+### 2) Content Mode Ladder (4 levels)
+
+Content mode is derived from **secrets safety** and **push surface**, NOT from workspace hygiene (`proceed_to_github_ops`).
+
+| Mode | Conditions | Allowed Content | Link Style |
+|------|------------|-----------------|------------|
+| **FULL** | `safe_to_publish: true` AND `publish_surface: PUSHED` | Narrative, links, quotes, open questions | Blob links |
+| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions | Paths only |
+| **SUMMARY_ONLY** | `safe_to_publish: true` AND tracked anomalies exist | Counts + concise narrative | Paths only |
+| **MACHINE_ONLY** | `safe_to_publish: false` | Counts and paths only | Paths only |
+
+**Key invariants:**
+- Secrets gate (`safe_to_publish`) drives MACHINE_ONLY. This is the security gate.
+- Push surface (`publish_surface`) drives link style. PUSHED = blob links allowed; NOT_PUSHED = paths only.
+- Workspace hygiene (`proceed_to_github_ops`) gates pushing, NOT content mode. Untracked anomalies do not degrade content.
+- Only tracked/staged anomalies force SUMMARY_ONLY (uncertain provenance) but NOT MACHINE_ONLY.
+
+**SUMMARY_ONLY semantics (output restriction only):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what the LLM can read or analyze.
+- The agent can read **any file** needed to do its job (receipts, requirements, features, ADR, code, etc.).
+- The agent must only **post**:
+  - Receipts and machine-derived fields (`status`, `counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from outside the committed surface
+  - Next steps and blockers
+- The restriction exists because tracked anomalies mean uncertain provenance for the publish surface — we gate what we expose, not what we think about.
+
+### 3) Anomaly classification
+
+Repo-operator classifies anomalies by type:
+- `unexpected_staged_paths` - HIGH risk: staged changes outside allowlist (blocks push, SUMMARY_ONLY)
+- `unexpected_unstaged_paths` - HIGH risk: tracked file modifications outside allowlist (blocks push, SUMMARY_ONLY)
+- `unexpected_untracked_paths` - LOW risk: new files not yet tracked (warning only, allows push, FULL_PATHS_ONLY)
+
+Only HIGH risk anomalies block `proceed_to_github_ops`. Untracked-only anomalies allow FULL/FULL_PATHS_ONLY.
 
 ---
 
@@ -397,9 +631,11 @@ GitHub is an **observability pane**, not the work substrate. GitHub operations (
 
 ### Commit Cadence
 
-- **Every flow checkpoints**: audit commit of the flow's publish surface on the run branch.
+- **Every flow checkpoints** (main checkpoint): audit commit of the flow's publish surface on the run branch.
 - **Flow 3 additionally commits code/tests**: the "work product" commit.
 - **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
+
+GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are **gitignored** — they are operational exhaust, not audit trail.
 
 ### Required Tasks (Conceptual)
 
@@ -417,26 +653,29 @@ Safe-bail:
 
 Anomaly handling:
 
-- If unexpected paths exist outside allowlist (or Build's cleanliness interlock fails), repo-operator:
+- If **tracked/staged** anomalies exist outside allowlist (or Build's cleanliness interlock fails), repo-operator:
   - commits only the allowlist when safe (`safe_to_commit: true`)
-  - sets `proceed_to_github_ops: false`
+  - sets `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`
   - writes `git_status.md` in the current flow directory
+- If **untracked-only** anomalies exist:
+  - sets `status: COMPLETED_WITH_WARNING`, `proceed_to_github_ops: true`
+  - writes `git_status.md` as a hygiene warning (does not block push)
 
 ---
 
 ## Secrets Sanitizer (Publish Gate)
 
-Execution order in every flow (conceptual):
+The sanitizer is a **fix-first pre-commit hook**, not a behavior throttle.
 
-1. `<flow>-cleanup` writes receipt
-2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
-3. `repo-operator` checkpoints (gated on `safe_to_commit`)
-4. `gh-issue-manager` + `gh-reporter` (when access allows; FULL vs RESTRICTED per GitHub Access + Content Mode above)
+Execution order in every flow (linear, no reseal loop):
 
-Reseal:
+1. `<flow>-cleanup` writes receipt (captures engineering outcome)
+2. `repo-operator` stages intended + ad-hoc changes (embrace extras, block test deletion)
+3. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
+4. `repo-operator` checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
+5. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
 
-- If `modified_files: true`, rerun `(cleanup ↔ secrets-sanitizer)` until it's false.
-- If reseal does not converge, safe-bail via repo-operator `checkpoint_mode: local_only` and end the flow UNVERIFIED with evidence.
+**No reseal loop:** The sanitizer runs once. If it redacts artifacts, the `secrets_scan.md` is the audit trail — the receipt does not need regeneration. This prevents "Compliance Recursion" where paperwork burns tokens instead of engineering.
 
 ---
 
@@ -447,7 +686,7 @@ Flow 6 has two categories with different gating:
 | Category | Operations | Gating |
 |----------|------------|--------|
 | Release Ops | merge PR, tag/release | Gate merge verdict = MERGE + repo-operator mechanics |
-| Reporting Ops | gh-issue-manager, gh-reporter | Access gate; FULL only when `safe_to_publish: true` + `proceed_to_github_ops: true` + `publish_surface: PUSHED` (else RESTRICTED) |
+| Reporting Ops | gh-issue-manager, gh-reporter | Access gate; content mode per ladder (FULL/FULL_PATHS_ONLY/SUMMARY_ONLY/MACHINE_ONLY) |
 
 This distinction prevents "can we post?" from affecting "can we merge?".
 

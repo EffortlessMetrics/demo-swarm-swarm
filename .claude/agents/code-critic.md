@@ -82,6 +82,7 @@ Everything else is "out of scope for this critique" and must be listed (IDs only
 1. **Changed surface**
    - Prefer `impl_changes_summary.md` and/or `subtask_context_manifest.json`.
    - Enumerate the reviewed files (paths only).
+   - **Anti-Reward-Hacking:** Check `git diff` for deleted tests. If existing tests were removed (not just updated) without clear justification, flag as `[CRITICAL]` — deleting tests to make code "pass" degrades quality.
 
 2. **Spec compliance**
    - Requirements: `requirements.md` (+ critique if present)

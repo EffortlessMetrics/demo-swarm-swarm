@@ -27,8 +27,8 @@ bash .claude/scripts/demoswarm.sh openq <command> [options]
 - All paths are repo-root-relative.
 
 ### QID format
-- Pattern: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-PLN-002`)
-- Flow codes: `SIG` (signal), `PLN` (plan), `BLD` (build), `GAT` (gate), `DEP` (deploy), `WIS` (wisdom)
+- Pattern: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-PLAN-002`, `OQ-BUILD-003`)
+- Flow codes: `SIG` (signal), `PLAN` (plan), `BUILD` (build), `GATE` (gate), `DEPLOY` (deploy), `WISDOM` (wisdom)
 - Sequential within flow (auto-incremented from existing entries)
 
 ### Append-only
@@ -71,8 +71,8 @@ bash .claude/scripts/demoswarm.sh openq next-id \
 # For plan flow
 bash .claude/scripts/demoswarm.sh openq next-id \
   --file ".runs/feat-auth/plan/open_questions.md" \
-  --prefix "PLN"
-# stdout: OQ-PLN-001 (if empty)
+  --prefix "PLAN"
+# stdout: OQ-PLAN-001 (if empty)
 ```
 
 ### Append a question
@@ -142,8 +142,8 @@ echo "Registered question: $QID"
 | Flow | Code | Example QID |
 |------|------|-------------|
 | signal | SIG | OQ-SIG-001 |
-| plan | PLN | OQ-PLN-001 |
-| build | BLD | OQ-BLD-001 |
-| gate | GAT | OQ-GAT-001 |
-| deploy | DEP | OQ-DEP-001 |
-| wisdom | WIS | OQ-WIS-001 |
+| plan | PLAN | OQ-PLAN-001 |
+| build | BUILD | OQ-BUILD-001 |
+| gate | GATE | OQ-GATE-001 |
+| deploy | DEPLOY | OQ-DEPLOY-001 |
+| wisdom | WISDOM | OQ-WISDOM-001 |

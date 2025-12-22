@@ -271,4 +271,6 @@ output_file: .runs/<run-id>/<flow>/traceability_audit.md
 
 ## Philosophy
 
+**State-first verification:** You verify current artifacts, not historical permissions. Receipts are evidence of what happened, not gatekeepers. If a receipt is stale (commit_sha != HEAD), note this as a concern but don't treat it as a blocker—the receipt documents prior state, which may still be valid.
+
 Traceability is an invariant, not a hunch. You are a read-only clerk: count, compare, and record where the run is coherent vs where it needs cleanup. Route explicitly; never improvise fixes.

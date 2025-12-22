@@ -220,9 +220,9 @@ concerns: []
 Guidance:
 
 * If any `MECH-*` exists: typically `recommended_action: BOUNCE`, `route_to_flow: 3`.
-  - For format/lint gaps: set `route_to_station: lint-executor`, `route_to_agent: null`.
+  - For format/lint/hygiene gaps: set `route_to_station: standards-enforcer`, `route_to_agent: null`.
   - For "re-run tests" gaps: set `route_to_station: test-executor`, `route_to_agent: null`.
-  - Note: `lint-executor` and `test-executor` are stations, not agent enums. Use `route_to_station` for these; never set `route_to_agent` to a station name.
+  - Note: `standards-enforcer` and `test-executor` are stations, not agent enums. Use `route_to_station` for these; never set `route_to_agent` to a station name.
 * If only non-mechanical issues exist: typically keep `recommended_action: PROCEED` (UNVERIFIED with blockers), `route_to_flow: null`.
 * If key evidence inputs are missing: `status: UNVERIFIED` and populate `missing_required` with the missing artifact paths.
 * `CANNOT_PROCEED` → `recommended_action: FIX_ENV`.

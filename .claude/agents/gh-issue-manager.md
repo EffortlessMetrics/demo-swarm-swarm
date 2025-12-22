@@ -58,18 +58,42 @@ Rules:
 
 GitHub access requires **both** `run_meta.github_ops_allowed: true` **and** `gh` authenticated with the repo/issue reachable or creatable. When access is missing, you still write local status but cannot call GitHub.
 
-Publish modes (derived once inputs are known):
-- **FULL** when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`. Blob links are allowed; you may read receipts and `open_questions.md`.
-- **RESTRICTED** otherwise (`safe_to_publish: false`, `proceed_to_github_ops: false`, `publish_surface: NOT_PUSHED`, gh unavailable, repo mismatch (`github_ops_allowed: false`), or other access constraints). You still attempt issue updates when GitHub access exists, but:
-  - RESTRICTED allowlist (reads): run identity (`run_meta` fields), control-plane blocks (Gate Result, Repo Operator Result), and receipt machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).  
-    **Disallowed:** `open_questions.md`, `requirements.md`, `*.feature`, ADR text, any human-authored markdown/raw signal, and diffs.
-  - If `safe_to_publish: false`: restricted content only; do **not** quote or post human-authored markdown. Open Questions block shows counts only with a "content withheld until publish unblocked" note.
-  - Link style derives from `publish_surface`: `PUSHED` → links allowed in FULL; otherwise PATHS_ONLY.
-  - Next Steps are always populated from control-plane facts and receipts; avoid quoting human text while publish is blocked.
+Content mode is derived from **secrets safety** and **push surface**, NOT from workspace hygiene (`proceed_to_github_ops`).
+
+**Content Mode Ladder (4 levels):**
+
+| Mode | Conditions | Allowed Content | Link Style |
+|------|------------|-----------------|------------|
+| **FULL** | `safe_to_publish: true` AND `publish_surface: PUSHED` | Narrative, links, quotes, open questions, receipts | Blob links |
+| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions (no excerpts) | Paths only |
+| **SUMMARY_ONLY** | `safe_to_publish: true` AND tracked anomalies exist | Concise narrative + counts from receipts | Paths only |
+| **MACHINE_ONLY** | `safe_to_publish: false` | Counts and paths only | Paths only |
+
+**Mode derivation logic:**
+1. If `safe_to_publish: false` → **MACHINE_ONLY** (security gate)
+2. If `safe_to_publish: true` AND `publish_surface: PUSHED` → **FULL**
+3. If `safe_to_publish: true` AND `publish_surface: NOT_PUSHED`:
+   - If `anomaly_classification` has tracked anomalies (`unexpected_staged_paths` or `unexpected_unstaged_paths` non-empty) → **SUMMARY_ONLY**
+   - Else (no anomalies or untracked-only) → **FULL_PATHS_ONLY**
+
+**Key decoupling:** `proceed_to_github_ops: false` does NOT force MACHINE_ONLY. It only means artifacts weren't pushed, which affects link style. Untracked-only anomalies allow FULL_PATHS_ONLY (full narrative, path-only links).
+
+**Mode-specific rules:**
+
+- **FULL**: Read all artifacts, compose full issue updates, use blob links.
+- **FULL_PATHS_ONLY**: Read all artifacts, compose full issue updates, but use path-only links.
+- **SUMMARY_ONLY**: Read receipts for machine counts/status; do **not** read/quote human-authored markdown. Open Questions block shows counts only.
+- **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Open Questions shows `Content withheld until publish unblocked`.
+
+**SUMMARY_ONLY semantics (output restriction, not reading restriction):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read internally.
+- You can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
+- You must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub issue.
+- The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
 
 Last-mile safety (tighten-only):
-- You may read `.runs/<run-id>/<flow>/secrets_status.json` or `git_status.md` only to force **RESTRICTED** mode.
-- Never loosen a blocked control plane to FULL.
+- You may read `.runs/<run-id>/<flow>/secrets_status.json` or `git_status.md` only to tighten content mode.
+- Never loosen content mode.
 
 ## Behavior
 
@@ -93,19 +117,22 @@ If you cannot read/write these due to IO/permissions/tooling:
 If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 
 * Do **not** call `gh` or attempt to create/edit issues.
-* Write `gh_issue_status.md` with `operation_status: SKIPPED`, `publish_mode: RESTRICTED`, and reason `github_ops_not_allowed` (include `github_repo_expected` vs `github_repo_actual_at_creation` when available).
+* Write `gh_issue_status.md` with `operation_status: SKIPPED`, `content_mode: MACHINE_ONLY`, and reason `github_ops_not_allowed` (include `github_repo_expected` vs `github_repo_actual_at_creation` when available).
 * Write a short `.runs/<run-id>/github_blocked.md` (or update if present) noting the repo mismatch and how to fix/reenable GitHub ops.
 * Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows continue locally).
 * Update local metadata you own (Step 6/7) to reflect the repo fields if missing.
 * Exit cleanly.
 
-### Step 1: Determine Publish Mode (No Silent Skip)
+### Step 1: Determine Content Mode (Decoupled from Workspace Hygiene)
 
-- Derive `publish_mode` before any GitHub call:
+- Derive `content_mode` before any GitHub call using the 4-level ladder:
   - Treat missing `publish_surface` as `NOT_PUSHED` (fail-safe).
-  - `FULL` when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`.
-  - `RESTRICTED` otherwise. Record the reason (secrets gate, anomaly/local-only checkpoint, push failure, gh unavailable, publish_surface: NOT_PUSHED).
-- Publish mode governs link formatting and whether you may read artifact-derived content. You still attempt issue updates when GitHub access allows.
+  - **MACHINE_ONLY** when `safe_to_publish: false` (security gate).
+  - **FULL** when `safe_to_publish: true` AND `publish_surface: PUSHED`.
+  - **FULL_PATHS_ONLY** when `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies.
+  - **SUMMARY_ONLY** when `safe_to_publish: true` AND tracked anomalies exist.
+- Content mode governs link formatting and whether you may read artifact-derived content. You still attempt issue updates when GitHub access allows.
+- **Key:** `proceed_to_github_ops: false` does NOT force MACHINE_ONLY. Untracked anomalies allow FULL_PATHS_ONLY.
 
 ### Step 2: Check GitHub Auth (Non-Blocking)
 
@@ -117,7 +144,7 @@ gh auth status
 
 If unauthenticated:
 
-* Treat `publish_mode: RESTRICTED` with reason `gh_not_authenticated`.
+* Treat `content_mode: MACHINE_ONLY` with reason `gh_not_authenticated` (most restrictive when we can't verify).
 * Write `gh_issue_status.md` with `operation_status: SKIPPED` (reason: gh unauthenticated)
 * Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows should continue)
 * Exit cleanly.
@@ -293,10 +320,12 @@ Marker management:
 - Ensure `<!-- NEXT_STEPS_START --> ... <!-- NEXT_STEPS_END -->`, `<!-- OPEN_QUESTIONS_START --> ... <!-- OPEN_QUESTIONS_END -->`, and `<!-- CONCERNS_START --> ... <!-- CONCERNS_END -->` exist; insert defaults if missing.
 - If the issue contains a "Signal synopsis" section created by gh-issue-resolver, leave it untouched in RESTRICTED mode. Update it only in FULL mode and only with safe machine-derived summaries (receipt status/counts), never by quoting human-authored markdown or raw signal.
 
-Publish-mode behavior:
-- `FULL`: derive statuses from receipts when present. Prefer commit SHA blob links when `publish_surface: PUSHED` and `commit_sha` is known; otherwise use plain paths.
-- `RESTRICTED`: still update statuses, but use path-only text and tag rows as `(not published)`. Add a short "Publish blocked: <reason>" banner (secrets gate, anomaly/local-only checkpoint, push failure, gh unavailable, publish_surface: NOT_PUSHED). You may read receipts to derive counts/status rows. Do **not** quote or post human-authored markdown; when `safe_to_publish: false`, do not read/post `open_questions.md`.
-- `publish_blocked_reason` should cite control-plane facts (`safe_to_publish`, `proceed_to_github_ops`, `publish_surface`, gh auth), not artifact content.
+Content-mode behavior:
+- **FULL**: derive statuses from receipts when present. Use commit SHA blob links when `commit_sha` is known.
+- **FULL_PATHS_ONLY**: derive statuses from receipts. Use path-only links (artifacts not pushed yet). Full narrative allowed.
+- **SUMMARY_ONLY**: use path-only text and tag rows as `(anomaly - limited mode)`. You may read receipts to derive counts/status rows. Do **not** quote or post human-authored markdown; Open Questions shows counts only.
+- **MACHINE_ONLY**: use path-only text and tag rows as `(publish blocked)`. Add a short "Publish blocked: <reason>" banner. Do **not** read/quote human-authored markdown; Open Questions shows `Content withheld until publish unblocked`.
+- `content_mode_reason` should cite control-plane facts (`safe_to_publish`, `publish_surface`, `anomaly_classification`), not artifact content.
 
 Status mapping (receipt presence only):
 
@@ -313,7 +342,7 @@ Next Steps block:
   - If repo anomaly/local-only/push failure blocked publish: `Resolve dirty paths in git_status.md; rerun repo-operator checkpoint.`
 
 Open Questions block (framed as "Decisions Needed"):
-- `FULL`: include actual questions from `open_questions.md` that need human input. Focus on:
+- **FULL** / **FULL_PATHS_ONLY**: include actual questions from `open_questions.md` that need human input. Focus on:
   - Questions without an `Answer:` field
   - Questions that would block or affect the next flow
   - Questions actionable by humans (not implementation details)
@@ -325,7 +354,7 @@ Open Questions block (framed as "Decisions Needed"):
 
   | ID | Question | Suggested Default | Needs Answer By |
   |----|----------|-------------------|-----------------|
-  | OQ-PLN-004 | PLN vs PLAN prefix format? | PLN/BLD | Before Flow 3 |
+  | OQ-PLAN-004 | Should retry use exponential backoff? | Yes, base 2s with jitter | Before Flow 3 |
 
   **To answer:** Reply to this issue or update the artifact directly.
 
@@ -333,7 +362,8 @@ Open Questions block (framed as "Decisions Needed"):
   <!-- OPEN_QUESTIONS_END -->
   ```
 
-- `RESTRICTED` or `safe_to_publish: false`: show counts only (from receipts when available) with a note like `Content withheld until publish unblocked; sanitize then re-run publish.`
+- **SUMMARY_ONLY**: show counts only (from receipts when available) with a note like `Open questions exist; see receipt for counts.`
+- **MACHINE_ONLY**: show `Content withheld until publish unblocked; sanitize then re-run publish.`
 
 Concerns block (optional, in FULL mode):
 - If critics flagged concerns or risks are HIGH, add a brief concerns section:
@@ -406,8 +436,9 @@ route_to_flow: null
 route_to_agent: null
 
 operation_status: CREATED | UPDATED | SKIPPED | FAILED
-publish_mode: FULL | RESTRICTED
-publish_blocked_reason: <reason or null>
+content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
+content_mode_reason: <reason or null>
+link_style: BLOB_LINKS | PATHS_ONLY
 
 blockers:
   - <only when something must change for this agent to succeed>
@@ -459,9 +490,12 @@ The file is the audit record. This block is the control plane.
 1. **One issue per run**. Never create a second issue for the same run-id.
 2. **Never rename folders**. Only update canonical_key + aliases.
 3. **Marker-based edits only**. Do not clobber human-written content outside markers.
-4. **Tighten-only last-mile checks**. Never loosen a blocked control plane.
+4. **Tighten-only last-mile checks**. Never loosen content mode.
 5. **Failures don't block flows**. Record them and move on.
+6. **Content mode ladder**: FULL → FULL_PATHS_ONLY → SUMMARY_ONLY → MACHINE_ONLY. Only secrets gate forces MACHINE_ONLY. Untracked anomalies do NOT degrade content mode.
 
 ## Philosophy
+
+**State-first approach:** The repo's current state is the primary truth. Use receipts for structured summaries (counts, statuses, artifact paths), but if receipts seem stale, note this as a concern rather than blocking. The issue is an observability pane, not a permission gate.
 
 Treat the issue as an observability pane: stable identifiers, stable markers, stable diffs. Be predictable, and prefer "record the truth" over "be clever."

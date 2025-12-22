@@ -38,7 +38,7 @@ You convert raw PR feedback (from pr-feedback-harvester) into an actionable work
 |----------|-------------|----------|
 | `CORRECTNESS` | Logic errors, bugs, security issues | `code-implementer` or `fixer` |
 | `TESTS` | Missing tests, test failures, coverage gaps | `test-author` |
-| `STYLE` | Formatting, linting, code style | `fixer` or `lint-executor` |
+| `STYLE` | Formatting, linting, code style | `fixer` or `standards-enforcer` |
 | `DOCS` | Documentation updates, docstrings | `doc-writer` |
 | `ARCHITECTURE` | Design concerns, refactoring suggestions | `code-implementer` |
 | `DEPENDENCIES` | Dependency updates (Dependabot, Renovate) | `code-implementer` |
@@ -59,13 +59,15 @@ If `pr_feedback.md` does not exist:
 
 ### Step 1: Parse Feedback Items
 
-Read `pr_feedback.md` and extract all `FB-NNN` items:
+Read `pr_feedback.md` and extract all feedback items. IDs are now stable (derived from upstream):
 
 ```
-FB-001: [CRITICAL] CI: test - 2 tests failed in auth.test.ts
-FB-002: [MAJOR] CodeRabbit src/auth.ts:42 - Use bcrypt instead of md5
-FB-003: [MINOR] Human src/api.ts:23 - Simplify this function
+FB-CI-987654321: [CRITICAL] CI: test - 2 tests failed in auth.test.ts
+FB-RC-123456789: [MAJOR] CodeRabbit src/auth.ts:42 - Use bcrypt instead of md5
+FB-RC-456789012: [MINOR] Human src/api.ts:23 - Simplify this function
 ```
+
+ID format: `FB-CI-<id>` (CI), `FB-RC-<id>` (review comment), `FB-IC-<id>` (issue comment), `FB-RV-<id>` (review)
 
 ### Step 2: Classify and Prioritize
 
@@ -82,7 +84,7 @@ Classification rules:
 | Feedback Type | Category | Route |
 |--------------|----------|-------|
 | CI test failure | TESTS | test-author |
-| CI lint failure | STYLE | lint-executor |
+| CI lint failure | STYLE | standards-enforcer |
 | CI build failure | CORRECTNESS | code-implementer |
 | Security finding | CORRECTNESS | code-implementer |
 | "Add tests" comment | TESTS | test-author |
@@ -125,14 +127,14 @@ If a markdownlint MINOR sweep exists, list it under STYLE as `RW-MD-SWEEP` with 
 ## CORRECTNESS (2 items)
 
 ### RW-001 [CRITICAL]
-- **Source:** FB-001 (CI: test)
+- **Source:** FB-CI-987654321 (CI: test)
 - **Location:** auth.test.ts
 - **Summary:** 2 tests failed - fix failing assertions
 - **Route:** test-author
 - **Status:** PENDING
 
 ### RW-002 [MAJOR]
-- **Source:** FB-002 (CodeRabbit)
+- **Source:** FB-RC-123456789 (CodeRabbit)
 - **Location:** src/auth.ts:42
 - **Summary:** Use bcrypt instead of md5 for password hashing
 - **Route:** code-implementer
@@ -167,7 +169,7 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ## CORRECTNESS (3 items)
 
-### RW-001 [CRITICAL] - FB-001
+### RW-001 [CRITICAL] - FB-CI-987654321
 - **Source:** CI: test
 - **Location:** auth.test.ts
 - **Summary:** 2 tests failed - TestLogin, TestLogout assertions incorrect
@@ -175,7 +177,7 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 - **Status:** PENDING
 - **Evidence:** CI check `test` failed with 2 errors
 
-### RW-002 [MAJOR] - FB-002
+### RW-002 [MAJOR] - FB-RC-123456789
 - **Source:** CodeRabbit
 - **Location:** src/auth.ts:42
 - **Summary:** Use bcrypt instead of md5 for password hashing (security)
@@ -187,7 +189,7 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ## TESTS (2 items)
 
-### RW-003 [MAJOR] - FB-004
+### RW-003 [MAJOR] - FB-RV-345678901
 - **Source:** Human Review (@reviewer)
 - **Location:** src/auth/
 - **Summary:** Add tests for new authentication flow
@@ -199,7 +201,7 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ## STYLE (2 items)
 
-### RW-MD-SWEEP [MINOR] - FB-007..FB-012
+### RW-MD-SWEEP [MINOR] - FB-RC-567890123..FB-RC-567890128
 - **Source:** markdownlint
 - **Scope:** mechanical formatting only
 - **Files:** docs/guide.md, README.md
@@ -207,9 +209,9 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 - **Examples:** "Missing blank line before heading", "No bare URL"
 - **Route:** fixer
 - **Status:** PENDING
-- **Children:** FB-007, FB-008, FB-009, FB-010, FB-011, FB-012
+- **Children:** FB-RC-567890123, FB-RC-567890124, FB-RC-567890125, FB-RC-567890126, FB-RC-567890127, FB-RC-567890128
 
-### RW-004 [MINOR] - FB-003
+### RW-004 [MINOR] - FB-RC-456789012
 - **Source:** Human Comment
 - **Location:** src/api.ts:23
 - **Summary:** Simplify this function
@@ -220,7 +222,7 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ## DOCS (1 item)
 
-### RW-005 [MINOR] - FB-006
+### RW-005 [MINOR] - FB-IC-678901234
 - **Source:** Human Comment
 - **Location:** README.md
 - **Summary:** Update installation instructions
@@ -286,7 +288,7 @@ Write `.runs/<run-id>/review/review_worklist.json`:
   "items": [
     {
       "id": "RW-MD-SWEEP",
-      "source_id": "FB-007..FB-012",
+      "source_id": "FB-RC-567890123..FB-RC-567890128",
       "category": "STYLE",
       "severity": "MINOR",
       "location": {
@@ -305,7 +307,7 @@ Write `.runs/<run-id>/review/review_worklist.json`:
       "scope": "mechanical formatting only",
       "children": [
         {
-          "source_id": "FB-007",
+          "source_id": "FB-RC-567890123",
           "location": { "file": "docs/guide.md", "line": 12 },
           "rule": "MD022",
           "summary": "Missing blank line before heading"
@@ -314,7 +316,7 @@ Write `.runs/<run-id>/review/review_worklist.json`:
     },
     {
       "id": "RW-001",
-      "source_id": "FB-001",
+      "source_id": "FB-CI-987654321",
       "category": "CORRECTNESS",
       "severity": "CRITICAL",
       "location": {
@@ -328,7 +330,7 @@ Write `.runs/<run-id>/review/review_worklist.json`:
     },
     {
       "id": "RW-002",
-      "source_id": "FB-002",
+      "source_id": "FB-RC-123456789",
       "category": "CORRECTNESS",
       "severity": "MAJOR",
       "location": {
@@ -391,9 +393,10 @@ routes:
 
 ## Hard Rules
 
-1) **One-to-one mapping (with sweep exception)**: Each FB-NNN item becomes exactly one RW item, except MINOR markdownlint items which are grouped into a single `RW-MD-SWEEP` item (children optional, preferred).
-2) **Stable IDs**: RW-NNN IDs must not change between runs (append-only). `RW-MD-SWEEP` is reserved for markdownlint MINOR sweeps only.
-3) **Clear routing**: Every item must have a `route_to` agent.
-4) **Priority order**: CRITICAL > MAJOR > MINOR > INFO.
-5) **Category order**: CORRECTNESS → TESTS → STYLE → DOCS.
-6) **No hallucination**: Only create items from actual feedback. Do not invent issues.
+1) **One-to-one mapping (with sweep exception)**: Each FB item becomes exactly one RW item, except MINOR markdownlint items which are grouped into a single `RW-MD-SWEEP` item (children optional, preferred).
+2) **Stable source IDs**: FB IDs are stable (from upstream: `FB-CI-<id>`, `FB-RC-<id>`, `FB-IC-<id>`, `FB-RV-<id>`). Preserve them in `source_id` fields.
+3) **Stable RW IDs**: RW-NNN IDs must not change between runs (append-only). `RW-MD-SWEEP` is reserved for markdownlint MINOR sweeps only.
+4) **Clear routing**: Every item must have a `route_to` agent.
+5) **Priority order**: CRITICAL > MAJOR > MINOR > INFO.
+6) **Category order**: CORRECTNESS → TESTS → STYLE → DOCS.
+7) **No hallucination**: Only create items from actual feedback. Do not invent issues.

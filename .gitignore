@@ -24,3 +24,9 @@ Thumbs.db
 # Windows device-name artifact (often from `2>nul` misuse in bash)
 nul
 **/nul
+
+# GitHub ops scratch files (operational exhaust, not audit trail)
+# These are written after checkpoint and overwritten each flow
+.runs/**/gh_comment_id.txt
+.runs/**/gh_issue_status.md
+.runs/**/gh_report_status.md

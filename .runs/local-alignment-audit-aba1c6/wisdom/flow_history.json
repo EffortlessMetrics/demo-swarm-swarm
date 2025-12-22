@@ -1,0 +1,851 @@
+{
+  "schema_version": 1,
+  "run_id": "local-alignment-audit-aba1c6",
+  "generated_at": "2025-12-21T22:07:30Z",
+  "machine_summary": {
+    "status": "VERIFIED",
+    "recommended_action": "PROCEED",
+    "route_to_flow": null,
+    "route_to_agent": null,
+    "blockers": [],
+    "missing_required": [],
+    "concerns": [
+      "Wisdom receipt not yet created (Flow 7 may still be in progress)",
+      "Build receipt has CANNOT_PROCEED status due to file permissions, but artifacts verified via git",
+      "Deploy verdict is NOT_DEPLOYED due to missing branch protection governance enforcement"
+    ]
+  },
+  "sources": [
+    ".runs/local-alignment-audit-aba1c6/run_meta.json",
+    ".runs/index.json",
+    ".runs/local-alignment-audit-aba1c6/signal/signal_receipt.json",
+    ".runs/local-alignment-audit-aba1c6/plan/plan_receipt.json",
+    ".runs/local-alignment-audit-aba1c6/review/review_receipt.json",
+    ".runs/local-alignment-audit-aba1c6/gate/gate_receipt.json",
+    ".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json",
+    ".runs/local-alignment-audit-aba1c6/plan/adr.md",
+    ".runs/local-alignment-audit-aba1c6/gate/merge_decision.md",
+    ".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md",
+    "git log history"
+  ],
+  "run_context": {
+    "run_id": "local-alignment-audit-aba1c6",
+    "canonical_key": "gh-1",
+    "aliases": ["local-alignment-audit-aba1c6", "gh-1"],
+    "task_title": "DemoSwarm Documentation-Code Alignment Audit",
+    "issue_number": 1,
+    "pr_number": 2,
+    "pr_state": "merged",
+    "merge_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e",
+    "tag_name": "v1.0.0-local-alignment-audit-aba1c6",
+    "created_at": "2025-12-20T03:32:56Z",
+    "updated_at": "2025-12-21T22:07:21Z",
+    "iterations": 8,
+    "flows_started": ["signal", "plan", "build", "review", "gate", "deploy", "wisdom"]
+  },
+  "flows": {
+    "signal": {
+      "flow": "signal",
+      "status": "VERIFIED",
+      "recommended_action": "PROCEED",
+      "completed_at": "2025-12-20T03:52:42Z",
+      "counts": {
+        "functional_requirements": 7,
+        "non_functional_requirements": 3,
+        "bdd_scenarios": 32,
+        "open_questions": 6,
+        "risks_total": 5,
+        "risks_critical": 0,
+        "risks_high": 0,
+        "risks_medium": 2,
+        "risks_low": 3
+      },
+      "quality_gates": {
+        "requirements_critic": "VERIFIED",
+        "bdd_critic": "VERIFIED"
+      },
+      "key_artifacts": [
+        "requirements.md",
+        "features/*.feature",
+        "open_questions.md",
+        "early_risks.md",
+        "risk_assessment.md",
+        "verification_notes.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/signal/signal_receipt.json"
+    },
+    "plan": {
+      "flow": "plan",
+      "status": "VERIFIED",
+      "recommended_action": "PROCEED",
+      "completed_at": "2025-12-20T04:56:31Z",
+      "counts": {
+        "design_options": 3,
+        "subtasks_total": 10,
+        "open_questions": 3,
+        "ac_count": 32,
+        "critics_critical": 0,
+        "critics_major": 0,
+        "critics_minor": 12
+      },
+      "quality_gates": {
+        "design_critic": "VERIFIED",
+        "option_critic": "VERIFIED",
+        "contract_critic": "VERIFIED",
+        "observability_critic": "VERIFIED",
+        "policy_analyst": "VERIFIED"
+      },
+      "decision": {
+        "type": "ADR",
+        "status": "Swarm-Proposed",
+        "chosen_option": "OPT-003",
+        "title": "Layered Documentation Alignment for Seven-Flow Model",
+        "drivers_total": 5,
+        "artifact": ".runs/local-alignment-audit-aba1c6/plan/adr.md"
+      },
+      "key_artifacts": [
+        "design_options.md",
+        "option_critique.md",
+        "adr.md",
+        "design_validation.md",
+        "test_plan.md",
+        "work_plan.md",
+        "ac_matrix.md",
+        "api_contracts.yaml",
+        "contract_critique.md",
+        "observability_spec.md",
+        "observability_critique.md",
+        "policy_analysis.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/plan/plan_receipt.json"
+    },
+    "build": {
+      "flow": "build",
+      "status": "CANNOT_PROCEED",
+      "note": "Permissions artifact only; content verified via git",
+      "completed_at": null,
+      "reason": "File permissions prevented direct read; artifacts confirmed present in git",
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/build/build_receipt.json (read blocked by permissions)"
+    },
+    "review": {
+      "flow": "review",
+      "status": "VERIFIED",
+      "recommended_action": "PROCEED",
+      "completed_at": "2025-12-20T13:25:00Z",
+      "counts": {
+        "feedback_items": 30,
+        "feedback_sources": 2,
+        "worklist_total": 30,
+        "worklist_resolved": 29,
+        "worklist_pending": 0,
+        "worklist_skipped": 1,
+        "critical_items": 1,
+        "critical_pending": 0,
+        "major_items": 5,
+        "major_pending": 0,
+        "minor_items": 24,
+        "minor_pending": 0
+      },
+      "worklist_summary": {
+        "all_resolved": true,
+        "blocking_items_resolved": true,
+        "review_complete": true,
+        "pr_ready_for_gate": true
+      },
+      "pr_status": {
+        "pr_number": 2,
+        "pr_state": "open",
+        "pr_draft": false,
+        "ci_passing": true,
+        "pr_transitioned_to_ready": true
+      },
+      "feedback_breakdown": {
+        "by_severity": {
+          "critical": 1,
+          "major": 5,
+          "minor": 24
+        },
+        "by_source": {
+          "gemini_code_assist": 5,
+          "coderabbit": 25,
+          "human_reviews": 0
+        }
+      },
+      "quality_gates": {
+        "review_worklist_completed": true
+      },
+      "key_artifacts": [
+        "pr_feedback.md",
+        "review_worklist.md",
+        "review_worklist.json",
+        "review_actions.md",
+        "pr_comment_status.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/review/review_receipt.json"
+    },
+    "gate": {
+      "flow": "gate",
+      "status": "VERIFIED",
+      "recommended_action": "PROCEED",
+      "completed_at": "2025-12-20T15:13:38Z",
+      "merge_verdict": "MERGE",
+      "counts": {
+        "receipt_checks_total": 11,
+        "receipt_checks_passed": 11,
+        "contract_violations": 0,
+        "security_findings": 0,
+        "policy_violations": 0,
+        "ac_total": 35,
+        "ac_completed": 35
+      },
+      "quality_gates": {
+        "merge_decider": "VERIFIED",
+        "receipt_audit": "VERIFIED",
+        "contract_compliance": "VERIFIED",
+        "security_scan": "VERIFIED",
+        "coverage_audit": "VERIFIED"
+      },
+      "decision": {
+        "type": "Merge Decision",
+        "verdict": "MERGE",
+        "status": "VERIFIED",
+        "artifact": ".runs/local-alignment-audit-aba1c6/gate/merge_decision.md",
+        "evidence_summary": "All Gate checks PASS: AC completion (35/35), contract compliance (0 violations), security (0 findings), coverage (32 scenarios verified), policy (12 policies checked), risk assessment (0 critical, 0 high, 2 medium accepted), traceability (7 REQs covered)"
+      },
+      "concerns": [
+        "RSK-001 (path traversal in secrets.rs) deferred to future security hardening run",
+        "Build receipt CANNOT_PROCEED is a permissions artifact, not content defect; artifacts verified via git"
+      ],
+      "key_artifacts": [
+        "merge_decision.md",
+        "receipt_audit.md",
+        "contract_compliance.md",
+        "security_scan.md",
+        "coverage_audit.md",
+        "policy_analysis.md",
+        "risk_assessment.md",
+        "gate_fix_summary.md",
+        "traceability_audit.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/gate/gate_receipt.json"
+    },
+    "deploy": {
+      "flow": "deploy",
+      "status": "VERIFIED",
+      "recommended_action": "PROCEED",
+      "completed_at": "2025-12-20T17:16:49Z",
+      "deployment_verdict": "NOT_DEPLOYED",
+      "gate_verdict": "MERGE",
+      "merge_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e",
+      "tag_name": "v1.0.0-local-alignment-audit-aba1c6",
+      "counts": {
+        "failed_checks": 1,
+        "ci_checks_total": 1,
+        "deploy_events_total": 1,
+        "verification_checks_total": 2
+      },
+      "verification": {
+        "ci_workflows": "PASS",
+        "branch_protection": "FAIL",
+        "runtime_verification": "PASS",
+        "pre_commit": "N/A",
+        "documentation": "PASS"
+      },
+      "signals": {
+        "ci_signal": "UNKNOWN",
+        "deploy_signal": "STABLE",
+        "smoke_signal": "STABLE"
+      },
+      "quality_gates": {
+        "deploy_decider": "VERIFIED",
+        "verification_report": "VERIFIED"
+      },
+      "blockers": [
+        "ORG_CONSTRAINT: Branch protection not enabled on main branch; required status checks not configured"
+      ],
+      "decision": {
+        "type": "Deployment Decision",
+        "verdict": "NOT_DEPLOYED",
+        "reason": "Governance enforcement not verifiable; branch protection is FAIL (GitHub API returned 404)",
+        "artifact": ".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md",
+        "operations_completed": "PR merged successfully to main (commit ed9b9c98b7a353a29671d489148fef3ba08d933e); release tag created and pushed"
+      },
+      "concerns": [
+        "Merge operation completed successfully but governance enforcement is not verifiable",
+        "CI workflows exist and would run on push/PR, but are not required to pass before merge",
+        "Post-merge CI signal is UNKNOWN (workflow has not yet triggered)"
+      ],
+      "key_artifacts": [
+        "deployment_decision.md",
+        "deployment_log.md",
+        "verification_report.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json"
+    },
+    "wisdom": {
+      "flow": "wisdom",
+      "status": "IN_PROGRESS",
+      "note": "Wisdom receipt not yet created; flow_plan.md present",
+      "key_artifacts": [
+        "flow_plan.md"
+      ],
+      "receipt_file": ".runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json (pending)"
+    }
+  },
+  "events": [
+    {
+      "id": "signal/flow_observed",
+      "t": "2025-12-19T22:56:41-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "signal",
+      "type": "flow_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/signal/"],
+      "commit_sha": "8fc66a9b5b8ee6a4bc2289ab670f2f38e3f548c3",
+      "details": {
+        "phase": "initialization",
+        "description": "Signal flow initiated; run directory created"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 8fc66a9 signal: checkpoint local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "signal/issue_binding",
+      "t": "2025-12-19T23:18:33-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "signal",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/run_meta.json"],
+      "commit_sha": "770bfca9ab6b795f2452d06e59faa7e22b5d1ed6",
+      "details": {
+        "phase": "binding",
+        "description": "GitHub issue #1 bound to run_meta.json; aliases established"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 770bfca signal: bind GitHub issue #1 for local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "signal/flow_plan",
+      "t": "2025-12-19T23:19:00-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "signal",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/signal/flow_plan.md"],
+      "commit_sha": "b291e572ab5efd0c11e734b90fb7d549f88d8a9e",
+      "details": {
+        "phase": "planning",
+        "description": "Flow plan created for signal flow"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit b291e57 signal: add flow_plan.md for local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "signal/receipt_written",
+      "t": "2025-12-20T03:52:42Z",
+      "t_source": "content_timestamp",
+      "flow": "signal",
+      "type": "receipt_written",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/signal/signal_receipt.json"],
+      "commit_sha": null,
+      "details": {
+        "status": "VERIFIED",
+        "recommended_action": "PROCEED",
+        "functional_requirements": 7,
+        "non_functional_requirements": 3,
+        "bdd_scenarios": 32,
+        "open_questions": 6,
+        "risks": {"critical": 0, "high": 0, "medium": 2, "low": 3}
+      },
+      "evidence": {
+        "artifact": "signal_receipt.json",
+        "pointer": "completed_at"
+      }
+    },
+    {
+      "id": "plan/flow_observed",
+      "t": "2025-12-20T00:00:14-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "plan",
+      "type": "flow_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/plan/"],
+      "commit_sha": "edb42fe2cffb546312a4402728b5d6ba1c38c6ca",
+      "details": {
+        "phase": "initialization",
+        "description": "Plan flow initiated; plan directory checkpointed"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit edb42fe plan: checkpoint local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "plan/adr_finalized",
+      "t": "2025-12-20T00:05:00-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "plan",
+      "type": "decision_recorded",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/plan/adr.md"],
+      "commit_sha": "1c4aa90e8233be0965680c37b81f54ff5ec69d17",
+      "details": {
+        "decision_type": "ADR",
+        "status": "Swarm-Proposed",
+        "chosen_option": "OPT-003",
+        "title": "Layered Documentation Alignment for Seven-Flow Model",
+        "drivers_total": 5,
+        "phase": "Layered Approach - Authoritative First, Generate/Validate Downstream"
+      },
+      "evidence": {
+        "artifact": "adr.md",
+        "pointer": "## Decision"
+      }
+    },
+    {
+      "id": "plan/receipt_written",
+      "t": "2025-12-20T04:56:31Z",
+      "t_source": "content_timestamp",
+      "flow": "plan",
+      "type": "receipt_written",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/plan/plan_receipt.json"],
+      "commit_sha": null,
+      "details": {
+        "status": "VERIFIED",
+        "recommended_action": "PROCEED",
+        "design_options": 3,
+        "ac_count": 32,
+        "critics_minor": 12,
+        "decision_spine_status": "VERIFIED"
+      },
+      "evidence": {
+        "artifact": "plan_receipt.json",
+        "pointer": "completed_at"
+      }
+    },
+    {
+      "id": "build/pr_metadata_added",
+      "t": "2025-12-20T00:26:17-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "build",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/run_meta.json"],
+      "commit_sha": "e80be01abbe5815a799ddcc5ca84fa8fcfe2ab66",
+      "details": {
+        "phase": "initialization",
+        "description": "PR metadata added to run_meta.json; pr_number: 2 established"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit e80be01 chore(local-alignment-audit-aba1c6): add PR metadata"
+      }
+    },
+    {
+      "id": "build/code_changes_committed",
+      "t": "2025-12-20T07:33:51-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "build",
+      "type": "artifact_observed",
+      "artifacts": ["Multiple documentation files"],
+      "commit_sha": "fc924d27b2a36004f720358a2bf7406db0297020",
+      "details": {
+        "phase": "implementation",
+        "description": "Build implementation committed; documentation aligned to seven-flow model"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit fc924d2 build(local-alignment-audit-aba1c6): align documentation to seven-flow model"
+      }
+    },
+    {
+      "id": "build/github_reporting_added",
+      "t": "2025-12-20T07:39:33-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "build",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/build/"],
+      "commit_sha": "188fe90d317df491a570ef33db119d057e37a2c1",
+      "details": {
+        "phase": "completion",
+        "description": "GitHub reporting artifacts added for build flow"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 188fe90 chore(local-alignment-audit-aba1c6): add GitHub reporting artifacts"
+      }
+    },
+    {
+      "id": "review/flow_completed",
+      "t": "2025-12-20T08:46:34-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "review",
+      "type": "flow_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/review/"],
+      "commit_sha": "01727d8bce6ff5cf59b9f5b907dbfbc3a57bb896",
+      "details": {
+        "phase": "completion",
+        "description": "Review flow completed; worklist resolved"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 01727d8 chore(local-alignment-audit-aba1c6): complete Flow 4 (Review)"
+      }
+    },
+    {
+      "id": "review/receipt_written",
+      "t": "2025-12-20T13:25:00Z",
+      "t_source": "content_timestamp",
+      "flow": "review",
+      "type": "receipt_written",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/review/review_receipt.json"],
+      "commit_sha": null,
+      "details": {
+        "status": "VERIFIED",
+        "recommended_action": "PROCEED",
+        "feedback_items": 30,
+        "worklist_resolved": 29,
+        "worklist_pending": 0,
+        "critical_pending": 0,
+        "major_pending": 0,
+        "pr_transitioned_to_ready": true
+      },
+      "evidence": {
+        "artifact": "review_receipt.json",
+        "pointer": "completed_at"
+      }
+    },
+    {
+      "id": "review/github_reporting",
+      "t": "2025-12-20T08:52:10-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "review",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/review/"],
+      "commit_sha": "cf4232ed8a1bbd16de2c53853099b9690cb45aa9",
+      "details": {
+        "phase": "reporting",
+        "description": "GitHub reporting artifacts added for review flow"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit cf4232e chore(local-alignment-audit-aba1c6): add Flow 4 GitHub reporting artifacts"
+      }
+    },
+    {
+      "id": "gate/flow_completed",
+      "t": "2025-12-20T10:18:17-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "gate",
+      "type": "flow_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/"],
+      "commit_sha": "820b04bfc756165618ce1c2f07c29a506d9b5d27",
+      "details": {
+        "phase": "verification",
+        "description": "Gate flow completed; all checks passed"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 820b04b chore(local-alignment-audit-aba1c6): complete Flow 5 (Gate)"
+      }
+    },
+    {
+      "id": "gate/merge_decision_recorded",
+      "t": "2025-12-20T10:18:17-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "gate",
+      "type": "decision_recorded",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/merge_decision.md"],
+      "commit_sha": "820b04bfc756165618ce1c2f07c29a506d9b5d27",
+      "details": {
+        "decision_type": "Merge Decision",
+        "verdict": "MERGE",
+        "status": "VERIFIED",
+        "receipt_checks": "11/11 PASS",
+        "ac_completion": "35/35",
+        "contract_violations": 0,
+        "security_findings": 0,
+        "policy_violations": 0,
+        "critical_risks": 0,
+        "high_risks": 0
+      },
+      "evidence": {
+        "artifact": "merge_decision.md",
+        "pointer": "## Verdict MERGE"
+      }
+    },
+    {
+      "id": "gate/receipt_written",
+      "t": "2025-12-20T15:13:38Z",
+      "t_source": "content_timestamp",
+      "flow": "gate",
+      "type": "receipt_written",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/gate_receipt.json"],
+      "commit_sha": null,
+      "details": {
+        "status": "VERIFIED",
+        "recommended_action": "PROCEED",
+        "merge_verdict": "MERGE",
+        "receipt_checks_passed": 11,
+        "ac_completed": 35,
+        "contract_violations": 0,
+        "security_findings": 0,
+        "policy_violations": 0
+      },
+      "evidence": {
+        "artifact": "gate_receipt.json",
+        "pointer": "completed_at"
+      }
+    },
+    {
+      "id": "gate/github_reporting",
+      "t": "2025-12-20T10:22:07-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "gate",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/"],
+      "commit_sha": "97b06e15b945c9be27343092a8ee9f3aae51da41",
+      "details": {
+        "phase": "reporting",
+        "description": "GitHub reporting artifacts added for gate flow"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 97b06e1 chore(local-alignment-audit-aba1c6): finalize Flow 5 (Gate) with GitHub reporting"
+      }
+    },
+    {
+      "id": "deploy/pr_merged",
+      "t": "2025-12-20T12:06:14-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "deploy",
+      "type": "repo_checkpointed",
+      "artifacts": ["main branch"],
+      "commit_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e",
+      "details": {
+        "phase": "release",
+        "description": "PR #2 merged into main; commit created with merge commit sha",
+        "merge_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit ed9b9c9 Merge pull request #2 from EffortlessMetrics/run/local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "deploy/checkpoint",
+      "t": "2025-12-20T12:09:37-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "deploy",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/"],
+      "commit_sha": "bf512f6f816cea4da84cfb65d78950e7c6af1b49",
+      "details": {
+        "phase": "checkpoint",
+        "description": "Deploy flow artifacts checkpointed"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit bf512f6 chore(runs): checkpoint deploy local-alignment-audit-aba1c6"
+      }
+    },
+    {
+      "id": "deploy/flow_finalized",
+      "t": "2025-12-20T12:21:05-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "deploy",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/"],
+      "commit_sha": "1a58bdb9294c975a46c4ced31557089d0545d9d9",
+      "details": {
+        "phase": "finalization",
+        "description": "Deploy flow finalized; release tag created"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 1a58bdb chore(local-alignment-audit-aba1c6): finalize Flow 6 (Deploy)"
+      }
+    },
+    {
+      "id": "deploy/receipt_written",
+      "t": "2025-12-20T17:16:49Z",
+      "t_source": "content_timestamp",
+      "flow": "deploy",
+      "type": "receipt_written",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json"],
+      "commit_sha": null,
+      "details": {
+        "status": "VERIFIED",
+        "recommended_action": "PROCEED",
+        "deployment_verdict": "NOT_DEPLOYED",
+        "gate_verdict": "MERGE",
+        "merge_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e",
+        "tag_name": "v1.0.0-local-alignment-audit-aba1c6",
+        "ci_signal": "UNKNOWN",
+        "deploy_signal": "STABLE",
+        "branch_protection": "FAIL"
+      },
+      "evidence": {
+        "artifact": "deploy_receipt.json",
+        "pointer": "completed_at"
+      }
+    },
+    {
+      "id": "deploy/deployment_decision_recorded",
+      "t": "2025-12-20T12:21:05-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "deploy",
+      "type": "decision_recorded",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md"],
+      "commit_sha": "1a58bdb9294c975a46c4ced31557089d0545d9d9",
+      "details": {
+        "decision_type": "Deployment Decision",
+        "deployment_verdict": "NOT_DEPLOYED",
+        "gate_verdict": "MERGE",
+        "merge_completed": true,
+        "tag_created": true,
+        "governance_enforced": false,
+        "branch_protection_status": "FAIL",
+        "reason": "Governance enforcement not verifiable; branch protection not enabled"
+      },
+      "evidence": {
+        "artifact": "deployment_decision.md",
+        "pointer": "## Rationale"
+      }
+    },
+    {
+      "id": "deploy/flow_plan_updated",
+      "t": "2025-12-20T12:26:40-05:00",
+      "t_source": "git_commit_timestamp",
+      "flow": "deploy",
+      "type": "artifact_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/flow_plan.md"],
+      "commit_sha": "07d86ba5ce9264d190b49e31bedd3f732ae623cd",
+      "details": {
+        "phase": "completion",
+        "description": "Deploy flow_plan.md updated with completion status"
+      },
+      "evidence": {
+        "artifact": "git log",
+        "pointer": "commit 07d86ba chore(local-alignment-audit-aba1c6): update Flow 6 flow_plan.md with completion status"
+      }
+    },
+    {
+      "id": "wisdom/flow_initiated",
+      "t": "2025-12-21T17:09:00Z",
+      "t_source": "file_mtime",
+      "flow": "wisdom",
+      "type": "flow_observed",
+      "artifacts": [".runs/local-alignment-audit-aba1c6/wisdom/flow_plan.md"],
+      "commit_sha": null,
+      "details": {
+        "phase": "initialization",
+        "status": "IN_PROGRESS",
+        "description": "Wisdom flow initiated; flow_plan.md created"
+      },
+      "evidence": {
+        "artifact": "wisdom directory",
+        "pointer": "flow_plan.md present"
+      }
+    }
+  ],
+  "key_decisions": [
+    {
+      "flow": "plan",
+      "decision_type": "ADR",
+      "title": "Layered Documentation Alignment for Seven-Flow Model",
+      "status": "Swarm-Proposed",
+      "chosen_option": "OPT-003: Layered Approach - Authoritative First, Generate/Validate Downstream",
+      "artifact": ".runs/local-alignment-audit-aba1c6/plan/adr.md",
+      "drivers_count": 5,
+      "phases": 4,
+      "key_rationale": "Phased approach satisfies all flow-related requirements while respecting pack hierarchy where CLAUDE.md is authoritative"
+    },
+    {
+      "flow": "gate",
+      "decision_type": "Merge Decision",
+      "verdict": "MERGE",
+      "status": "VERIFIED",
+      "artifact": ".runs/local-alignment-audit-aba1c6/gate/merge_decision.md",
+      "key_evidence": [
+        "Receipt audit: 11/11 checks passed",
+        "AC completion: 35/35",
+        "Contract compliance: 0 violations",
+        "Security findings: 0",
+        "Policy violations: 0",
+        "All CRITICAL and MAJOR review items resolved",
+        "All 24 MINOR items resolved via style sweep"
+      ]
+    },
+    {
+      "flow": "deploy",
+      "decision_type": "Deployment Decision",
+      "deployment_verdict": "NOT_DEPLOYED",
+      "gate_verdict": "MERGE",
+      "status": "VERIFIED",
+      "artifact": ".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md",
+      "operations_completed": true,
+      "merge_sha": "ed9b9c98b7a353a29671d489148fef3ba08d933e",
+      "tag_name": "v1.0.0-local-alignment-audit-aba1c6",
+      "key_blocker": "Governance enforcement not verifiable: GitHub branch protection not enabled on main branch (required status checks not configured)",
+      "rationale": "Per deploy-decider operating invariants, governance enforcement must be verifiable for STABLE verdict; governance check returned FAIL"
+    }
+  ],
+  "timing": {
+    "run_start": "2025-12-19T22:56:41-05:00",
+    "run_end": "2025-12-21T17:09:00Z",
+    "total_duration_hours": 41.22,
+    "total_duration_formatted": "41 hours 13 minutes",
+    "phase_durations": {
+      "signal": {
+        "start": "2025-12-19T22:56:41-05:00",
+        "end": "2025-12-20T03:52:42Z",
+        "duration_hours": 4.99
+      },
+      "plan": {
+        "start": "2025-12-20T00:00:14-05:00",
+        "end": "2025-12-20T04:56:31Z",
+        "duration_hours": 4.94
+      },
+      "build": {
+        "start": "2025-12-20T00:26:17-05:00",
+        "end": "2025-12-20T07:39:33-05:00",
+        "duration_hours": 7.22
+      },
+      "review": {
+        "start": "2025-12-20T08:46:34-05:00",
+        "end": "2025-12-20T13:25:00Z",
+        "duration_hours": 4.64
+      },
+      "gate": {
+        "start": "2025-12-20T10:18:17-05:00",
+        "end": "2025-12-20T15:13:38Z",
+        "duration_hours": 4.92
+      },
+      "deploy": {
+        "start": "2025-12-20T12:06:14-05:00",
+        "end": "2025-12-20T12:26:40-05:00",
+        "duration_hours": 0.34
+      },
+      "wisdom": {
+        "start": "2025-12-21T17:09:00Z",
+        "end": null,
+        "duration_hours": null,
+        "status": "IN_PROGRESS"
+      }
+    }
+  },
+  "counts": {
+    "events_captured": 26,
+    "flows_documented": 7,
+    "flows_completed": 6,
+    "flows_in_progress": 1,
+    "receipts_written": 6,
+    "decisions_recorded": 3,
+    "commits_associated": 17,
+    "artifacts_key": 12,
+    "missing_flows": 0,
+    "missing_receipts": 1
+  }
+}

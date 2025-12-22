@@ -1,36 +1,136 @@
-# Architecture Overview
+# Architecture: The Ops-First Engine
 
 > How the pack is built and why.
 
 ---
 
-## What the pack is
+## The Three Pillars
 
-The DemoSwarm pack is a **Claude Code definition layer**:
+DemoSwarm is built on three architectural pillars that separate it from standard LLM scripts.
 
-- 7 flows exposed as slash commands
-- 50+ agents as subagents
-- 7 skills as mechanical helpers
-- Validation via pack-check
+### 1. Thick Agents, Thin Flows
 
-The pack doesn't run code. It describes **how flows behave**; execution happens in Claude Code sessions.
+To optimize token usage and context windows:
+
+*   **Thin Flows:** The Orchestrator follows a simple checklist (`flow-3-build.md`). It spends tokens on *routing*, not *instruction*.
+*   **Thick Agents:** Complex logic lives inside the Agent prompts (`repo-operator.md`). They spin up fresh contexts, perform heavy analysis (diff checks, log parsing), and return small **Result Blocks**.
+
+**Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
+
+### 2. The Compressor Pattern
+
+We use agents to "compress" reality into signal.
+
+```
+┌─────────────────────────────────────────┐
+│  pr-feedback-harvester                  │
+│                                         │
+│  IN:  100KB of GitHub API JSON          │
+│       (reviews, comments, checks)       │
+│                                         │
+│  OUT: pr_feedback.md (~2KB)             │
+│       + Result block (~200 bytes)       │
+└─────────────────────────────────────────┘
+```
+
+Examples:
+- `test-executor`: 10K lines of console logs → `test_execution.md` (status + top failures)
+- `pr-feedback-harvester`: GitHub API firehose → `pr_feedback.md` + normalized `blockers[]`
+- `build-cleanup`: All flow artifacts → `build_receipt.json` (mechanical counts)
+
+**Rule:** Workers may be heavy; their outputs must be light and stable.
+
+### 3. Receipts as Evidence (Not Gatekeepers)
+
+We don't use receipts as permission boundaries. We use them as **Logs**.
+
+*   The `*-cleanup` agents verify that the *logical outcome* (Test Report exists and is Green) is true.
+*   The `secrets-sanitizer` ensures the *package* is safe (Redacting logs).
+*   We accept divergence between the Receipt and the Commit to maintain velocity.
+
+**State-First Verification:** The repo's current state (HEAD + working tree + staged diff) is the thing you're building and shipping. Receipts help investigate what happened—but they're not the primary verification mechanism once the repo has moved.
+
+### 4. Mechanical Guardrails ("Physics")
+
+We enforce safety via tools, not prompts.
+
+| Guardrail | Implementation |
+| :--- | :--- |
+| **Anti-Reward Hacking** | `repo-operator` runs `git diff | grep ^D` on test paths. If tests are deleted, the push is **hard blocked**. |
+| **Intent + Extras** | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict. |
+| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks if manual remediation is required. |
 
 ---
 
-## Key patterns
+## Core Philosophy: Ops-First
 
-### Receipts-first
+The DemoSwarm pack is a **build pipeline with guardrails**, not a guardrail pipeline that sometimes builds.
 
-Every flow produces a receipt (`<flow>_receipt.json`).
+**The shift:** From "Compliance Engine" (policing the robot) to "Code Conveyor Belt" (empowering the robot to ship).
 
-Receipts are:
-- **Mechanical:** Counts from grep/wc/parse, never estimated
-- **Sealed:** Once written, reporters read them—they don't recompute
-- **Canonical:** The source of truth for flow outcome
+### Objective
 
-Why: Receipts prevent "re-interpret the prose" failures and ensure consistent reporting.
+Optimize **Dev Lead Time**: minutes of human attention per trusted change.
 
-### Critics never fix
+### Core Constraint
+
+> Tokens are cheap. Context is finite. Attention is expensive.
+
+This constraint shapes every design decision. We maximize engineering output per context window while minimizing human review burden.
+
+---
+
+## The Two Execution Planes
+
+The pack separates **where work happens** from **where gates engage**:
+
+| Plane | Posture | Purpose | Example |
+|-------|---------|---------|---------|
+| **Work Plane** | Default-allow | Explore, implement, iterate | Reading files, writing code, running tests |
+| **Publish Plane** | Gated | Control what leaves the workspace | Commit, push, GitHub post |
+
+### Work Plane (Default-Allow)
+
+Everything up to staging runs without friction:
+- Read any files, search code, run checks
+- Write tests early, iterate on code freely
+- Run tests locally, fix issues as discovered
+- Push early to get bot feedback (CI, CodeRabbit)
+- Security findings here are **advisory**, not throttles
+
+### Publish Plane (Gated)
+
+Gates engage only when crossing the boundary:
+- **Commit**: secrets-sanitizer scans staged changes
+- **Push**: repo-operator checks for anomalies
+- **GitHub post**: content mode restricts what gets posted (not what's analyzed)
+
+If a gate blocks, **keep working locally**. Gates constrain publishing, not thinking.
+
+**Key insight:** This separation prevents "security theater" where agents spend more time proving they're allowed to act than actually acting.
+
+---
+
+## Key Design Patterns
+
+### Context Affinity
+
+**Principle:** If an agent has a file open and the token budget to process it, it should do the related work.
+
+Don't spin up a new agent (and pay the startup cost) just for bureaucratic purity.
+
+| Context Loaded | Owner | Combined Duties |
+|----------------|-------|-----------------|
+| `src/*.ts`, `ac_matrix.md` | `code-implementer` | Logic, docstrings, local refactor, debug removal |
+| `features/*.feature`, `tests/*.test.ts` | `test-author` | Test writing, fixture updates, spec feedback |
+| `git status`, `git diff` | `repo-operator` | Staging, extras detection, security guard, commit/push |
+| GitHub API JSON | `pr-feedback-harvester` | Harvesting, triage, summarizing |
+
+**Efficiency wins:**
+- We don't have a separate "Anomaly Detector" agent—repo-operator sees anomalies while staging
+- We don't fetch data in one agent and analyze in another—harvester ingests and emits signal in one pass
+
+### Critics Never Fix
 
 Critics write harsh assessments; implementers apply fixes.
 
@@ -38,7 +138,7 @@ Critics write harsh assessments; implementers apply fixes.
 author → artifact → critic → critique → author → improved artifact → ...
 ```
 
-Why: Separation prevents "critic fixes its own issues" loops and maintains clear accountability.
+**Why:** Separation prevents "critic fixes its own issues" loops and maintains clear accountability.
 
 ### Microloops
 
@@ -46,20 +146,47 @@ Writer ↔ Critic iteration until:
 - `status: VERIFIED`, OR
 - `can_further_iteration_help: no`
 
-Why: Bounded iteration prevents infinite loops while ensuring quality.
+Default cadence: 2 passes (write → critique → write → critique → proceed).
 
-### Two planes
+**Why:** Bounded iteration prevents infinite loops while ensuring quality.
 
-| Plane | Purpose | Example |
-|-------|---------|---------|
-| Audit | Durable artifacts for inspection/reruns | `.runs/<run-id>/<flow>/*` |
-| Control | Machine-readable routing blocks | `## Gate Result`, `## Machine Summary` |
+### Intent + Extras (Embrace Ad-Hoc Fixes)
 
-Why: Orchestrators route on control plane (fast, deterministic); humans inspect audit plane (rich, contextual).
+The orchestrator tells agents **what to produce** (intent). Agents figure out **what paths to touch** (execution).
+
+When staging, expect "extras" (files changed outside the expected set):
+1. **Stage them** by default (assume the developer did them for a reason)
+2. **Record them** in `extra_changes.md`
+3. **Do not block** unless they trigger a hard guardrail (test deletion)
+
+**Why:** Developers jump in to fix typos or tweak config while the swarm runs. This is collaboration, not attack.
 
 ---
 
-## The seven flows
+## The Data Model: Two Planes (Control vs Audit)
+
+Separate from Work/Publish planes, the pack has two **data planes**:
+
+| Plane | Artifacts | Purpose | Lifecycle |
+|-------|-----------|---------|-----------|
+| **Control** | `Gate Result`, `Machine Summary`, Result blocks | Routing decisions | Ephemeral (read once, route, discard) |
+| **Audit** | `*_receipt.json`, `*.md` artifacts, `index.json` | Record of what happened | Durable (committed to git) |
+
+**Crucial rule:** Orchestrators route on Control Plane blocks, not by re-parsing files.
+
+```
+Agent runs
+  ├─→ Writes audit artifacts (files)
+  └─→ Returns control block (response)
+
+Orchestrator
+  ├─→ Routes on control block
+  └─→ Does NOT reread files for routing
+```
+
+---
+
+## The Seven Flows
 
 | Flow | Input | Output | Purpose |
 |------|-------|--------|---------|
@@ -71,38 +198,38 @@ Why: Orchestrators route on control plane (fast, deterministic); humans inspect 
 | 6. Deploy | Gate outputs | Verification, deployment | Release to mainline |
 | 7. Wisdom | All outputs | Learnings, regressions | Close feedback loops |
 
-Flows can run out-of-order; missing inputs result in documented assumptions and UNVERIFIED outcomes.
+### Flow 3: Build (The Construction Site)
 
-### Flow commands
+**Vibe:** High Velocity. "Push early, fail fast."
 
-Each flow has exactly one slash command:
+Key stations:
+1. **AC Microloops:** Test ↔ Critic ↔ Code ↔ Critic (per acceptance criterion)
+2. **Early PR Bootstrap:** After first vertical slice, push + create Draft PR to get bots spinning
+3. **Feedback Check:** Harvest PR feedback, route on blockers (CRITICAL only during Build)
+4. **Global Hardening:** standards-enforcer (polish) → test-executor (verify)
+5. **Ship:** Seal receipt → sanitize → push
 
-| Command | Flow | Purpose |
-|---------|------|---------|
-| `/flow-1-signal` | Signal | Shape raw request into requirements |
-| `/flow-2-plan` | Plan | Design the solution |
-| `/flow-3-build` | Build | Implement code and tests |
-| `/flow-4-review` | Review | Harvest PR feedback |
-| `/flow-5-gate` | Gate | Pre-merge verification |
-| `/flow-6-deploy` | Deploy | Merge to mainline |
-| `/flow-7-wisdom` | Wisdom | Extract learnings |
+### Flow 4: Review (The Inspection Chamber)
 
-The recommended sequence is: `/flow-1-signal` → `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
+**Vibe:** High Rigor. "Drain the swamp."
 
-**Re-entry:** Any flow can be invoked at any point. Missing upstream artifacts result in documented assumptions and UNVERIFIED outcomes (see "out-of-order" note above).
+Key stations:
+1. **Harvest:** Full PR feedback (all severities, including nits)
+2. **Worklist Loop:** Unbounded iteration until complete or context exhausted
+3. **Context Checkpoint:** If context > 80%, checkpoint and exit with `PARTIAL` status
+4. **Re-Harvest Cadence:** Push → re-harvest after every N items (capture new bot comments)
 
-### Flow 7: Second-cycle wisdom
+### Flow 6: Deploy (Mainline Promotion)
 
-Flow 7 (`/flow-7-wisdom`) is for **second-cycle wisdom extraction**. Use it when:
-- Multiple runs have completed and you want to synthesize cross-run learnings.
-- An iteration has finished and you want to extract batch insights.
-- You've already run `/flow-6-deploy` and want a deeper retrospective.
+**Two-Axis Verdict:**
+- `deploy_action`: COMPLETED | SKIPPED | FAILED
+- `governance_enforcement`: VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN
 
-Flow 7 differs from the wisdom extraction in Flow 6 in that it's designed for **post-cycle reflection** rather than immediate run closure.
+This separates "what happened" (deploy action) from "can we verify protections" (governance enforcement).
 
 ---
 
-## Agent taxonomy
+## Agent Taxonomy
 
 | Family | Color | Behavior |
 |--------|-------|----------|
@@ -116,81 +243,72 @@ Flow 7 differs from the wisdom extraction in Flow 6 in that it's designed for **
 | Reporter | Pink | GitHub posting |
 | Cleanup | Various | Seal receipts, update index |
 
+### Key Agents and Their Contexts
+
+| Agent | Role | Context Strategy |
+|-------|------|------------------|
+| `repo-operator` | State Manager | Intent-based staging; embraces extras; guards test deletion |
+| `pr-feedback-harvester` | The Eyes | Compressor; ingests API JSON, outputs normalized blockers |
+| `secrets-sanitizer` | The Janitor | Fix-first pre-commit hook; redacts in-place; doesn't route |
+| `test-executor` | Verifier | Compressor; runs suite, outputs pass/fail summary |
+| `standards-enforcer` | Polisher | Runs formatters, strips debug artifacts |
+| `code-implementer` | Writer | Writes code + docstrings; focuses on correctness |
+| `*-cleanup` | Auditors | Verify logical outcomes; write SKIPPED stubs for missing steps |
+
 ---
 
-## Safety boundaries
+## Safety Boundaries
 
-### Two-gate rule
+### Two-Gate Rule
 
-GitHub operations require:
+GitHub operations require BOTH:
 1. `safe_to_publish: true` (secrets-sanitizer)
 2. `proceed_to_github_ops: true` (repo-operator)
 
-Why: No accidental exposure or push of unexpected content.
+**Why:** No accidental exposure or push of unexpected content.
 
-### Reseal pattern
+### Single-Pass Sanitization
 
-If secrets-sanitizer modifies files:
-```
-cleanup → sanitizer → modified → cleanup → sanitizer → stable
-```
+The sanitizer runs **once** before push:
+1. Scan staged files and allowlist artifacts
+2. Auto-fix: redact secrets in-place
+3. Do NOT trigger a reseal loop
 
-Why: Receipt reflects final tree, not intermediate state.
+**Why:** The old behavior created "Compliance Recursion" where redacting triggered receipt regeneration, burning tokens on paperwork instead of engineering.
 
-### Safe-bail
+### Safe-Bail
 
-When reseal doesn't converge:
+When publishing can't proceed safely:
 - `checkpoint_mode: local_only`
 - Never push
 - Flow completes UNVERIFIED with evidence
 
-Why: Prefer local completion over stuck or exposed state.
+**Why:** Prefer local completion over stuck or exposed state.
 
 ---
 
-## Security posture
+## Deterministic Tooling
 
-### Regex safety
+### Why Rust over Bash
 
-The secrets scanner uses the **Rust regex crate**, which implements finite automata (not backtracking). This makes it immune to ReDoS (Regular Expression Denial of Service) attacks. The regex engine has guaranteed linear time complexity relative to input size.
+We replaced ad-hoc bash pipelines with the `demoswarm` CLI because:
+- **The "Bash Tax":** `grep` behaves differently on GNU vs BSD. `sed` is a minefield.
+- **The Shim:** `.claude/scripts/demoswarm.sh` ensures consistent behavior across platforms.
 
-Reference: `tools/demoswarm-runs-tools/src/commands/secrets.rs` uses the `regex` crate.
+### The Shim Pattern
 
-### Known limitations
+Agents **always** invoke via shims:
+```bash
+# Never this:
+grep -c "pattern" file.md
 
-**Path traversal in secrets scanner**: The secrets scanner operates on provided paths without full canonicalization. This is a known limitation in the local execution context. Mitigation: The scanner runs within Claude Code sessions where filesystem access is already scoped. A formal threat assessment for production deployments is recommended.
-
----
-
-## Test status
-
-Test counts are **receipt-derived** (mechanical, from actual execution). Current baseline:
-- Unit tests: derived from `cargo test --workspace` execution
-- Test counts should be read from `test_summary.md` or receipt artifacts, not hard-coded in documentation
-
-This ensures documentation stays aligned with actual test results.
-
----
-
-## Agent metadata
-
-### Color coding
-
-Agent frontmatter includes a `color:` field for categorization:
-
-```yaml
----
-name: requirements-author
-description: Write functional + non-functional requirements
-color: purple
----
+# Always this:
+bash .claude/scripts/demoswarm.sh count pattern --file "file.md" --regex "pattern"
 ```
 
-Color coding is **advisory metadata** for human consumption and tooling visualization. It is not schema-enforced or used for routing decisions. The taxonomy table above shows color conventions by agent family.
-
 ---
 
-## What lives where
+## What Lives Where
 
 | Content | Location |
 |---------|----------|
@@ -203,9 +321,21 @@ Color coding is **advisory metadata** for human consumption and tooling visualiz
 
 ---
 
-## See also
+## The "Feel Test"
 
-- [why-two-planes.md](why-two-planes.md) — Control vs audit plane
+The system is working when:
+
+1. **You can fix a typo** in `README.md` while the swarm builds, and `repo-operator` just includes it ("Extras")
+2. **You delete a test**, and `repo-operator` refuses to push ("Anti-Reward Hacking")
+3. **CI fails** on AC-1, and Flow 3 stops immediately to fix it ("Pulse")
+4. **CodeRabbit suggests a nit**, and Flow 3 ignores it, but Flow 4 fixes it ("Triage")
+
+---
+
+## See Also
+
+- [why-ops-first.md](why-ops-first.md) — The philosophy behind default-allow engineering
+- [ai-physics.md](ai-physics.md) — LLM-specific design constraints
+- [why-two-planes.md](why-two-planes.md) — Control vs audit plane separation
 - [why-two-gates.md](why-two-gates.md) — GitHub ops gating
-- [why-reseal.md](why-reseal.md) — Receipt correctness
 - [CLAUDE.md](../../CLAUDE.md) — Full pack reference

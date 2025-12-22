@@ -285,55 +285,37 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 
 The agent returns a Gate Result block for orchestrator routing:
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 **Field semantics:**
 - `status` is **descriptive** (what happened). **Never infer permissions** from it.
 - `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
-- `modified_files` is the **reseal trigger** (if true, rerun cleanup ↔ sanitizer).
-- `needs_upstream_fix` means the sanitizer can't make it safe (code/config needs remediation).
-- `recommended_action` + `route_to_*` give you a closed-vocab routing signal.
+- `modified_files` signals that artifact files were changed (for audit purposes).
+- `blocker_kind` explains why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
 
 **Control plane vs audit plane:** The Gate Result block is the control plane for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the returned block, not by re-reading the file.
 
-**Gating logic (from Gate Result):**
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 13c)
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+  - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
+  - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
+  - `blocker_kind: SECRET_IN_ARTIFACT` → investigate manually
 - Publish mode gating: `FULL` only when `safe_to_publish: true`, Repo Operator Result `proceed_to_github_ops: true`, **and** `publish_surface: PUSHED`. Otherwise, GitHub ops (when access is allowed) run in `RESTRICTED` mode. Publish blocked implies RESTRICTED, **not skip**.
 
-### Step 13b: Reseal If Modified (Conditional Loop)
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(plan-cleanup → secrets-sanitizer)` until either:
-- the sanitizer reports `modified_files: false`, or
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-- Append an evidence note to `secrets_scan.md`:
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-**Note:** `checkpoint_mode: local_only` is a named parameter to `repo-operator` that mechanically enforces `proceed_to_github_ops: false` regardless of `safe_to_publish`. This ensures safe-bail cannot accidentally push.
-
-### Step 13c: Checkpoint Commit
+### Step 13b: Checkpoint Commit
 
 Checkpoint the audit trail **before** any GitHub operations.
 
@@ -375,35 +357,14 @@ anomaly_paths: []
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
-### GitHub Access + Content Mode (canonical)
+### Step 14-15: GitHub Reporting
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 14: Update GitHub issue status board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from `.runs/<run-id>/plan/plan_receipt.json`. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 2).
-
-### Step 15: Post Plan summary to issue
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
-
-`gh-reporter` writes `.runs/<run-id>/plan/github_report.md` locally and posts to the issue (never PR).
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (critic findings, HIGH risks)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 16: Finalize flow_plan.md
 
@@ -533,13 +494,11 @@ All written to `.runs/<run-id>/plan/`:
 
 13. `secrets-sanitizer`
 
-14. `plan-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+14. `repo-operator` (checkpoint; read Repo Operator Result)
 
-15. `repo-operator` (checkpoint; read Repo Operator Result)
+15. `gh-issue-manager` (if allowed)
 
-16. `gh-issue-manager` (if allowed)
-
-17. `gh-reporter` (if allowed)
+16. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -571,7 +530,6 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] policy-analyst
 - [ ] plan-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] plan-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)
 - [ ] gh-issue-manager (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)
 - [ ] gh-reporter (skip when github_ops_allowed: false; FULL/RESTRICTED based on gates/publish_surface)

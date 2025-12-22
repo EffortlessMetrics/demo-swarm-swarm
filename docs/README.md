@@ -2,6 +2,8 @@
 
 Pick docs by intent (Diataxis): **learn**, **do**, **look up**, **understand**, or **maintain**.
 
+**Core philosophy:** Ops-First. Engineering is default-allow; publishing is gated. See [why-ops-first.md](explanation/why-ops-first.md).
+
 **Guardrails:** Flow behavior and agent contracts live in `.claude/commands/*`, `.claude/agents/*`, and `CLAUDE.md`. Human docs explain and guide; they do not redefine behavior. If anything conflicts, treat `CLAUDE.md` as canonical.
 
 ---
@@ -12,6 +14,7 @@ Pick docs by intent (Diataxis): **learn**, **do**, **look up**, **understand**, 
 - [Toy Run](tutorials/toy-run.md) - see Flow 1 artifacts without GitHub
 - [Validation Run](tutorials/validation-run.md) - exercise Flows 1-4 in a sandbox
 - [Customize Pack](how-to/customize-pack.md) - point tests/lint/policy at your stack
+- [Architecture](explanation/architecture.md) - understand how the pack is built and why
 
 ---
 

@@ -64,7 +64,7 @@ The `demoswarm version` command is the canonical demo because:
 
 - **Self-referential**: It's a feature *for the pack's CLI tooling*, not an invented "product"
 - **Deterministic**: JSON output, no network calls, tests cleanly
-- **Exercises the pack**: Naturally touches Flows 1–4 (Signal → Plan → Build → Gate)
+- **Exercises the pack**: Naturally touches Flows 1–5 (Signal → Plan → Build → Review → Gate)
 - **Offline-friendly**: Works without GitHub, proves receipts + governance locally
 - **Proves the core value**: "prompt → structured artifacts → receipt"
 
@@ -270,21 +270,22 @@ These checks prove the Rust tooling is installed and working against real artifa
 
 ---
 
-## Continuing Through Flows 2–4
+## Continuing Through Flows 2–5
 
 After Flow 1 succeeds, continue the demo:
 
 ```text
 /flow-2-plan toy-run
 /flow-3-build toy-run
-/flow-4-gate toy-run
+/flow-4-review toy-run
+/flow-5-gate toy-run
 ```
 
 ### Full Demo Proof Points
 
-After Flows 1–4 complete:
+After Flows 1–5 complete:
 
-- `*_receipt.json` exists for each flow (signal, plan, build, gate)
+- `*_receipt.json` exists for each flow (signal, plan, build, review, gate)
 - Gate artifacts show tests/lint ran
 - If the feature was implemented: `demoswarm version` works via the shim and returns parseable JSON
 

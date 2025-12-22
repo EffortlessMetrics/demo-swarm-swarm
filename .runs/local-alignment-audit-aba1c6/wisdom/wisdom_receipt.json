@@ -1,0 +1,43 @@
+{
+  "run_id": "local-alignment-audit-aba1c6",
+  "flow": "wisdom",
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+  "missing_required": [],
+  "missing_optional": [],
+  "blockers": [],
+  "counts": {
+    "learnings_extracted": 3,
+    "feedback_actions_created": 4,
+    "suggestions_created": 6,
+    "regressions_found": 0,
+    "pack_observations": 6,
+    "flows_completed": 5
+  },
+  "flow_summary": {
+    "signal": "VERIFIED",
+    "plan": "VERIFIED",
+    "build": "CANNOT_PROCEED",
+    "review": "VERIFIED",
+    "gate": "VERIFIED",
+    "deploy": "VERIFIED"
+  },
+  "final_outcomes": {
+    "merge_decision": "MERGE",
+    "deployment_verdict": "NOT_DEPLOYED"
+  },
+  "quality_gates": {
+    "artifact_audit": "VERIFIED",
+    "regression_analyst": "VERIFIED",
+    "flow_historian": "VERIFIED",
+    "learning_synthesizer": "VERIFIED",
+    "feedback_applier": "VERIFIED",
+    "traceability_auditor": "VERIFIED",
+    "risk_analyst": "VERIFIED"
+  },
+  "github_reporting": "PENDING",
+  "completed_at": "2025-12-21T22:22:11Z",
+  "run_complete": true
+}
