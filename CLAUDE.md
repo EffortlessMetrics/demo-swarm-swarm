@@ -418,7 +418,7 @@ Notes:
 
 ### PR Feedback Harvester Result (emitted by `pr-feedback-harvester`)
 
-<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 START -->
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 START -->
 ```yaml
 ## PR Feedback Harvester Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
@@ -426,14 +426,14 @@ evidence_sha: <sha>                  # commit being evaluated
 pr_number: <int | null>
 
 ci_status: PASSING | FAILING | PENDING | NONE
-ci_failing_checks: [<check-name>]    # names of failing checks
+ci_failing_checks: [<check-name>]    # names of failing checks (also appear as blockers)
 
-blockers_count: <int>                # items needing action (CRITICAL + MAJOR)
-blockers:
-  - id: FB-001
+blockers_count: <int>                # CRITICAL items only (stop-the-line)
+blockers:                            # top N blockers (cap at 10)
+  - id: FB-CI-<check_run_id> | FB-RC-<review_comment_id> | FB-IC-<issue_comment_id> | FB-RV-<review_id>
     source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
-    severity: CRITICAL | MAJOR
-    category: CORRECTNESS | TESTS | BUILD | SECURITY | DOCS | STYLE
+    severity: CRITICAL               # blockers are CRITICAL-only
+    category: BUILD | TESTS | SECURITY | CORRECTNESS | DOCS | STYLE
     title: <short title>
     route_to_agent: code-implementer | test-author | fixer | doc-writer
     evidence: <check name | file:line | comment id>
@@ -449,13 +449,15 @@ counts:
 sources_harvested: [reviews, review_comments, check_runs, ...]
 sources_unavailable: []
 ```
-<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V1 END -->
+<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 END -->
 
 Notes:
-- The harvester **triages** feedback (quick read, categorize, route) — not deep analysis
-- `thoughts` is triage-level: "looks like real issue", "outdated suggestion", "bot probably wrong"
-- Flow 3 routes on `blockers[]` — the routed agent does deep investigation
-- Flow 4 drains the complete worklist (all severities)
+- **One routing surface**: CI failures, CodeRabbit, human reviews all become blockers with `source` tag — no separate CI path
+- **CRITICAL-only blockers**: Flow 3 interrupts only on stop-the-line issues. MAJOR stays in counts + full `pr_feedback.md`
+- **Stable IDs**: Derived from upstream IDs (check_run_id, review_comment_id, etc.) — reruns don't reshuffle
+- **Triage, not planning**: `thoughts` is one-line quick read ("valid issue", "outdated suggestion", "bot probably wrong")
+- Flow 3 routes on `blockers[]` — routed agent does deep investigation
+- Flow 4 drains the complete worklist from `pr_feedback.md` (all severities)
 - Per-flow outputs: `build/pr_feedback.md` (Flow 3), `review/pr_feedback.md` (Flow 4)
 
 ### Repo Operator Result (emitted by `repo-operator`)

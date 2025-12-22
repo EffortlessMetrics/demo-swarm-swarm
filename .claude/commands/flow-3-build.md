@@ -182,7 +182,7 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
 - [ ] AC loop (for each AC in ac_matrix.md):
   - [ ] AC-001: test-author → test-critic → code-implementer → code-critic → fast confirm
   - [ ] (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - [ ] (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
+  - [ ] (after checkpoint push) feedback check (pr-feedback-harvester; route on blockers[])
   - [ ] AC-002: ...
   - [ ] (add rows per AC from ac_matrix.md)
   - [ ] (checkpoint push every 3-5 ACs; feedback check after each)
@@ -339,29 +339,26 @@ This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse 
 **Routing logic (Route on Result block's `blockers[]`):**
 
 ```yaml
-# Route on PR Feedback Harvester Result — triaged blockers with quick-read thoughts
-if ci_status == FAILING:
-  # CI red — route to fix
-  for blocker in blockers where blocker.source == "CI":
-    call blocker.route_to_agent with:
-      - blocker.evidence          # "check:test → auth.test.ts:45"
-      - blocker.thoughts          # "Looks like hashPassword returns undefined for empty input"
-    run test-executor to confirm fix
-    # fix one at a time, then re-harvest
+# Route on PR Feedback Harvester Result — one routing surface (CI + comments all become blockers)
+# blockers[] is CRITICAL-only. MAJOR/MINOR/INFO stay in counts + full pr_feedback.md for Flow 4.
 
-elif blockers_count > 0:
-  # CRITICAL/MAJOR items — route top 1-3 for the agent to investigate and fix
+if blockers_count > 0:
+  # CRITICAL items — route top 1-3 for the agent to investigate and fix
   for blocker in blockers[:3]:
     call blocker.route_to_agent with:
-      - blocker.evidence          # "src/auth.ts:42"
-      - blocker.thoughts          # "Real security issue - md5 for passwords"
-    run relevant verification
+      - blocker.id                # "FB-CI-987654321" or "FB-RC-123456789" (stable)
+      - blocker.evidence          # "check:test → auth.test.ts:45" or "src/auth.ts:42"
+      - blocker.thoughts          # "Looks like hashPassword returns undefined for empty input"
+    run relevant verification (test-executor for CI, targeted tests for code fixes)
   # do NOT drain the full list (Flow 4 owns that)
 
 else:
-  # GREEN or MINOR/INFO only — continue AC loop
+  # No CRITICAL blockers — continue AC loop
+  # MAJOR/MINOR/INFO will be handled in Flow 4
   continue_ac_loop: true
 ```
+
+**Key invariant:** One routing surface. CI failures are blockers with `source: CI`. CodeRabbit/human CRITICAL items are blockers with their source. No separate CI vs comment path.
 
 **Key shift:** The harvester triaged and added quick-read thoughts. The routed agent:
 - Receives the evidence (file:line, check name)
@@ -371,7 +368,7 @@ else:
 The harvester gets feedback back fast. The routed agents do the deep work.
 
 **Record unresolved blockers:**
-After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (FB-###). Flow 4 will harvest and drain everything systematically.
+After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (e.g., `FB-CI-987654321`, `FB-RC-123456789`). Flow 4 will harvest and drain everything systematically.
 
 **Why this matters:**
 - Flow 3 was blind to blocker **content** (only saw CI red + counts)
