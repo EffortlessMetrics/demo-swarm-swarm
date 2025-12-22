@@ -334,35 +334,14 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
   - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
   - Otherwise → UNVERIFIED; skip push (`publish_surface: NOT_PUSHED`). Continue with GitHub Reporting Ops in RESTRICTED mode when access allows.
 
-### GitHub Access + Content Mode (canonical)
+### Step 14-15: GitHub Reporting
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 14: Update Issue Board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from receipt. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 5).
-
-### Step 15: Report Gate Verdict
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown). Publish-blocked reason must be explicit.
-
-`gh-reporter` writes `.runs/<run-id>/gate/github_report.md` locally and posts to the issue (never PR). Issue-first (hard): flow logs go to the issue even if a PR exists. PRs are for PR-review dynamics only.
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (gate findings, merge blockers, policy issues)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 16: Finalize Flow
 

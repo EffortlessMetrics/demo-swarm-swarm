@@ -96,14 +96,17 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 
 - **FULL**: Read all artifacts, compose full summaries, use blob links (artifacts are pushed).
 - **FULL_PATHS_ONLY**: Read all artifacts, compose full summaries, but use path-only links (artifacts not pushed yet).
-- **SUMMARY_ONLY**: Read receipts for machine counts/status; do **not** read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text, raw signal). Post a summary with counts and status.
-- **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Post a minimal handoff: why publish is blocked (no secret details), what to do next.
+- **SUMMARY_ONLY**: Read any files needed; post only safe summaries + machine counts (no verbatim quotes from uncommitted surfaces).
+- **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Post a minimal handoff.
 
-**SUMMARY_ONLY semantics (output restriction, not reading restriction):**
-- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read internally.
-- You can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
-- You must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub comment.
-- The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
+**SUMMARY_ONLY semantics (output restriction only):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read or analyze.
+- You can read **any file** needed to do your job (receipts, requirements, features, ADR, code, etc.).
+- You must only **post**:
+  - Receipts and machine-derived fields (`status`, `counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from outside the committed surface
+  - Next steps and blockers
+- The restriction exists because tracked anomalies mean uncertain provenance for the publish surface — we gate what we expose, not what we think about.
 
 **Tighten-only safety (optional):**
 - You may read `.runs/<run-id>/<flow>/secrets_status.json` and/or `git_status.md` only to tighten content mode.
@@ -156,14 +159,14 @@ Include the idempotency marker near the top (applies to all modes):
 - Use repo-relative paths instead of blob links.
 
 **Mode C: SUMMARY_ONLY** (`content_mode: SUMMARY_ONLY`)
-- Read receipts for machine-derived counts/statuses only.
-- Do **not** read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text, raw signal).
-- Compose a summary with:
-  - Flow status from receipt
-  - Counts from receipt (`counts.*`, `quality_gates.*`)
+- You may read **any file** needed to compose a useful summary (receipts, requirements, features, ADR, code, etc.).
+- You must only **post**:
+  - Flow status and counts from receipt (`counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from uncommitted surfaces
   - Reason for limited mode (tracked anomalies exist)
   - Next steps recommendation
 - Use plain paths only (no blob links).
+- **Key distinction:** SUMMARY_ONLY restricts what you post, not what you read. You can analyze anything; you just can't quote it verbatim in the GitHub comment.
 
 **Mode D: MACHINE_ONLY** (`content_mode: MACHINE_ONLY`)
 - Only counts and paths; no narrative content; no artifact quotes.

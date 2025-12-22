@@ -575,51 +575,16 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
 
 
 
-### GitHub Access + Content Mode (canonical)
+### Step 10-11: GitHub Reporting (Final)
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** (marks run complete) then **`gh-reporter`** (mini-postmortem).
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
-
-### Step 10: Update Issue Board (Final)
-
-
-
-Apply Access + Content Mode rules:
-
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-
-
-`gh-issue-manager` -> final update to issue body status board. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 7). Marks run as complete.
-
-
-
-### Step 11: Report Mini-Postmortem
-
-
-
-Apply Access + Content Mode rules:
-
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
-
-
-
-`gh-reporter` -> post mini-postmortem summary **to the GitHub issue** (not PR). Include regressions found, learnings extracted, feedback actions. Issue-first (hard): All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
-
-**Content expectations:** The gh-reporter comment should include:
-- Learnings summary (what worked, what didn't, recommendations)
-- Pack/Flow Observations (friction noticed across the run, improvement suggestions)
-- Feedback Actions (issue drafts, suggestions created)
-- Agent Notes (meta-observations about the wisdom synthesis itself)
-
-This is the final postmortem - make it actionable for future runs.
+**Content for postmortem:** Learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
 
 ### Step 12: Finalize Flow
 

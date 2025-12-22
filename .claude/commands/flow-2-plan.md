@@ -375,35 +375,14 @@ anomaly_paths: []
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
-### GitHub Access + Content Mode (canonical)
+### Step 14-15: GitHub Reporting
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 14: Update GitHub issue status board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from `.runs/<run-id>/plan/plan_receipt.json`. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 2).
-
-### Step 15: Post Plan summary to issue
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
-
-`gh-reporter` writes `.runs/<run-id>/plan/github_report.md` locally and posts to the issue (never PR).
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (critic findings, HIGH risks)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 16: Finalize flow_plan.md
 

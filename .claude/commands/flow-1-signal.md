@@ -372,46 +372,16 @@ anomaly_paths: []
 
 **Why checkpoint before GitHub ops:** The issue comment can reference a stable commit SHA. Also keeps local history clean if the flow is interrupted.
 
-### Step 12: Sync GitHub Issue
+### Step 12-13: GitHub Reporting
 
-**Call `gh-issue-manager`** -> sync/update issue metadata (and create/bind the issue if needed). If `run_meta.github_ops_allowed: false` (repo mismatch), the agent skips GitHub calls, writes a local status, and proceeds.
+**Call `gh-issue-manager`** (sync/update/bind issue) then **`gh-reporter`** (post summary).
 
-**Two-stage GitHub behavior:**
-- Issue updates run only when `github_ops_allowed: true` **and** `gh` is authenticated.
-  - `FULL` mode when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Status board uses blob links; Next Steps + Open Questions include real content.
-  - `RESTRICTED` mode otherwise: status board uses paths only (marked "not published") with a publish-blocked reason (secrets gate/anomaly/local-only/push failure/gh unavailable/publish_surface: NOT_PUSHED). Receipts may be read for counts/status rows; no human-authored markdown is quoted. Open Questions shows counts only with a withheld-content note. Next Steps still populate from control-plane facts.
-- No blob links when `publish_surface: NOT_PUSHED`, even if other gates are clear.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
-If `issue_number` is missing (e.g., deferred binding) and `gh` is available/authenticated, attempt a one-time create/bind; otherwise record SKIPPED and continue. Update `run_meta.json`, `.runs/index.json`, and write `gh_issue_status.md`.
-
-If `gh` CLI is not authenticated, record SKIPPED/UNVERIFIED (flow not blocked).
-
-### Step 13: Report to GitHub
-
-**Call `gh-reporter`** -> posts summary **to the GitHub issue** (not PR). If `run_meta.github_ops_allowed: false`, it writes local reports only and skips posting.
-
-**Posting prerequisites:** `issue_number` present, `github_ops_allowed: true`, and `gh` authenticated.
-
-**Content modes:**
-- `FULL` when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. Uses receipts (and optionally `open_questions.md`) with blob links.
-- `RESTRICTED` otherwise (`safe_to_publish: false`, `needs_upstream_fix: true`, `proceed_to_github_ops: false`, or `publish_surface: NOT_PUSHED`). You may read receipts for machine-derived status/counts; do **not** quote human-authored markdown or raw signal. Post a minimal handoff with the block reason, next steps to rerun cleanup/sanitizer/checkpoint, and optional high-level counts. Use paths only.
-
-The reporter writes `.runs/<run-id>/signal/github_report.md` locally as a record. Posting failures are recorded and non-blocking.
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (critic findings, HIGH risks)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
-
-**Issue-first (hard):** All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
-
-Skip posting only when:
-- `run_meta.github_ops_allowed: false`, or
-- `issue_number` is missing, or
-- `gh` is not authenticated.
-Otherwise post in FULL or RESTRICTED mode.
+If `issue_number` is missing and `gh` is available, `gh-issue-manager` may attempt to create/bind.
 
 ### Step 14: Finalize Flow
 

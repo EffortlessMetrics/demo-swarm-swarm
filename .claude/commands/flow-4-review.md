@@ -406,28 +406,14 @@ Same gating logic as Build:
 - Requires `safe_to_commit: true` and `safe_to_publish: true`
 - Returns Repo Operator Result block
 
-### GitHub Access + Content Mode (canonical)
+### Step 11-12: GitHub Reporting
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 11: Update Issue Board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from receipt.
-
-### Step 12: Report to GitHub
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases.
-
-`gh-reporter` writes `.runs/<run-id>/review/github_report.md` locally and posts to the issue (never PR). Issue-first (hard): flow logs go to the issue even if a PR exists.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 13: Finalize Flow
 

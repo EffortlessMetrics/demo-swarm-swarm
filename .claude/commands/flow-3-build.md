@@ -79,7 +79,6 @@ Flow 3 uses **two complementary state machines**:
 - repo-operator (restage intended changes; if reseal happened)
 - repo-operator (commit/push; only if secrets gate passes)
 - pr-creator (create Draft PR; gated on push)
-- secrets-sanitizer + repo-operator (commit PR metadata; if PR created)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report to GitHub; gated)
 ```
@@ -484,54 +483,22 @@ This gets bots (CodeRabbit, CI) spinning early before Flow 4 (Review) harvests t
 
 **Important:** PR creation failure does not block the flow. Flow 4 (Review) can create the PR if needed.
 
-### Step 12c: Commit PR Metadata (Conditional)
+### Step 12c: Stage PR Metadata (Conditional)
 
 **If PR was created or found (operation_status: CREATED or EXISTING):**
 
-The `run_meta.json` and `index.json` now contain `pr_number` but this isn't on the branch yet. Commit this metadata so the run state is complete.
+The `run_meta.json` and `index.json` now contain `pr_number`. The next checkpoint will include this metadata.
 
-1. **Stage metadata only:**
-   - `.runs/<run-id>/run_meta.json`
-   - `.runs/<run-id>/build/pr_creation_status.md`
-   - `.runs/index.json`
+**If PR was skipped or failed:** Nothing to stage.
 
-2. **Call `secrets-sanitizer`** on the staged surface (likely CLEAN, but required for gate consistency).
+### Step 13-14: GitHub Reporting
 
-3. **Call `repo-operator`** with task: "commit PR metadata"
-   - Commit message: "chore(<run-id>): add PR metadata"
-   - Push if `safe_to_publish: true`
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-**If PR was skipped or failed:** Skip this step (nothing to commit).
-
-### GitHub Access + Content Mode (canonical)
-
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
-
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 13: Update Issue Board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from receipt. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 3).
-
-### Step 14: Report to GitHub
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
-
-`gh-reporter` writes `.runs/<run-id>/build/github_report.md` locally and posts to the issue (never PR). Issue-first (hard): flow logs go to the issue even if a PR exists. PRs are for PR-review dynamics only.
-
-**Content expectations:** The gh-reporter comment should include:
-- Decisions Needed (unanswered open questions requiring human input)
-- Concerns for Review (critic findings, test failures, HIGH risks)
-- Agent Notes (substantive observations: friction noticed, cross-cutting insights, pack improvements)
-
-These make the GitHub update actionable - humans can make decisions without leaving GitHub.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 15: Finalize Flow
 
@@ -659,11 +626,9 @@ Code/test changes in project-defined locations.
 
 20. `pr-creator` (create Draft PR; gated on publish_surface: PUSHED)
 
-21. `secrets-sanitizer` + `repo-operator` (commit PR metadata; if PR created/found)
+21. `gh-issue-manager` (if allowed)
 
-22. `gh-issue-manager` (if allowed)
-
-23. `gh-reporter` (if allowed)
+22. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 

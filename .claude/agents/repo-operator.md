@@ -65,7 +65,7 @@ Return this block at the end of **commit operations** used for orchestration gat
 
 ```markdown
 ## Repo Operator Result
-operation: checkpoint | build | final_checkpoint
+operation: checkpoint | build | stage | merge | other
 status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
@@ -83,7 +83,11 @@ anomaly_paths: []
 
   * `checkpoint` = audit-trail-only commit of `.runs/...` (Flows 1,2,4,5,6,7)
   * `build` = code/test + audit commit (Flow 3)
-  * `final_checkpoint` = lightweight commit of GitHub status files after GH ops (all flows)
+  * `stage` = staging only (no commit)
+  * `merge` = merge/tag/release (Flow 6)
+  * `other` = any other git operation
+
+Note: GH status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are gitignored and never committed. They are operational exhaust written after checkpoint, overwritten each flow.
 * `commit_sha`:
 
   * Always populated.
@@ -418,7 +422,7 @@ For anomalies or reconciliations, write:
 # Git Status
 
 ## Status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
-## Operation: checkpoint | build_stage | build_commit | reconcile_anomaly | merge_tag_release | final_checkpoint
+## Operation: checkpoint | build_stage | build_commit | reconcile_anomaly | merge_tag_release
 
 ## Before
 - Branch: <name>

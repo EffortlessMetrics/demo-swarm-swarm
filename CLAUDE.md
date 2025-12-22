@@ -26,6 +26,50 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 ---
 
+## Operating Philosophy: Ops-First
+
+**Core principle:** Engineering is default-allow. Publishing is gated.
+
+The pack is a **build pipeline with guardrails**, not a guardrail pipeline that sometimes builds. The default posture is:
+
+> explore → implement → test → push → harvest bot signal → iterate → verify → seal
+
+### Work Plane (default-allow)
+
+Everything up to staging runs without friction:
+- Explore aggressively (read any files, search code, run checks)
+- Write tests early, iterate on code freely
+- Run tests locally, fix issues as you find them
+- Push early to get bot feedback (CI, CodeRabbit, etc.)
+- Security findings are **advisory** here, not throttles
+
+### Publish Plane (gated)
+
+Gates engage only when crossing the boundary:
+- **Commit**: secrets-sanitizer scans staged changes
+- **Push**: repo-operator checks for anomalies
+- **GitHub post**: content mode restricts what gets posted (not what's analyzed)
+
+If a gate blocks, **keep working locally**. Gates constrain publishing, not thinking.
+
+### Allowlists as Staging Guards
+
+Allowlists prevent `git add .` accidents. They do NOT:
+- Determine what the model can read or analyze
+- Force "read prohibitions" on human-authored files
+- Block engineering work
+
+If tracked anomalies exist outside the allowlist, push is blocked but work continues.
+
+### Fix-Forward Default
+
+The sanitizer should behave like a good pre-commit hook:
+- Fast scan of staged diff + flow artifacts
+- Auto-redact obvious secret shapes
+- Only block when remediation requires human judgment
+
+---
+
 ## Operating Model: Swarm Repo
 
 Recommended: run flows in a dedicated `*-swarm` downstream repo.
@@ -307,7 +351,7 @@ route_to_agent: <agent-name | null>
 <!-- PACK-CONTRACT: REPO_OPERATOR_RESULT_V2 START -->
 ```yaml
 ## Repo Operator Result
-operation: checkpoint | build | final_checkpoint | stage | merge | other
+operation: checkpoint | build | stage | merge | other
 status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
@@ -414,11 +458,14 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 - Workspace hygiene (`proceed_to_github_ops`) gates pushing, NOT content mode. Untracked anomalies do not degrade content.
 - Only tracked/staged anomalies force SUMMARY_ONLY (uncertain provenance) but NOT MACHINE_ONLY.
 
-**SUMMARY_ONLY semantics (output restriction, not reading restriction):**
-- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what the LLM can read internally.
-- The agent can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
-- The agent must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub comment.
-- The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
+**SUMMARY_ONLY semantics (output restriction only):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what the LLM can read or analyze.
+- The agent can read **any file** needed to do its job (receipts, requirements, features, ADR, code, etc.).
+- The agent must only **post**:
+  - Receipts and machine-derived fields (`status`, `counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from outside the committed surface
+  - Next steps and blockers
+- The restriction exists because tracked anomalies mean uncertain provenance for the publish surface — we gate what we expose, not what we think about.
 
 ### 3) Anomaly classification
 
@@ -438,9 +485,10 @@ Only HIGH risk anomalies block `proceed_to_github_ops`. Untracked-only anomalies
 ### Commit Cadence
 
 - **Every flow checkpoints** (main checkpoint): audit commit of the flow's publish surface on the run branch.
-- **Every flow final-checkpoints**: commits GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) after GH ops complete.
 - **Flow 3 additionally commits code/tests**: the "work product" commit.
 - **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
+
+GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are **gitignored** — they are operational exhaust, not audit trail.
 
 ### Required Tasks (Conceptual)
 
@@ -451,7 +499,6 @@ Exact phrasing is standardized in flow docs:
 - stage intended changes (Build): `task: "stage intended changes for build"`
 - commit/push build changes (Build): `task: "commit and push build changes"`
 - merge/tag/release (Deploy release ops): `task: "merge and tag release"`
-- final checkpoint: `task: "final checkpoint for flow <flow>"` (commits GH status files, no push)
 
 Safe-bail:
 
@@ -471,14 +518,14 @@ Anomaly handling:
 
 ## Secrets Sanitizer (Publish Gate)
 
+The sanitizer is a **fix-first pre-commit hook**, not a behavior throttle.
+
 Execution order in every flow (conceptual):
 
 1. `<flow>-cleanup` writes receipt
 2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
 3. `repo-operator` checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
 4. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
-
-Note: GH status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are operational metadata written after the checkpoint. They are **not committed** - they exist locally for debugging and are overwritten each flow. This is intentional: they are operational exhaust, not audit trail.
 
 Reseal:
 
