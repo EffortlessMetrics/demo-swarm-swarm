@@ -48,22 +48,18 @@ You are orchestrating Flow 7 of the SDLC swarm.
 
 ## Your Goals
 
+**Primary focus:**
+- **Improve the flows/agents:** What friction did we hit? What agents gave poor output? What routing decisions were wrong? Feed this back to improve the pack.
+- **Improve the codebase:** What architectural issues surfaced? What test gaps remain? What patterns should we adopt or avoid? Feed this into future work.
 
-
+**Supporting activities:**
 - Verify all flow artifacts exist
-
 - Analyze tests, coverage, and regressions
-
 - Correlate with GitHub issues and git blame
-
-- Compile flow timeline
-
+- Compile flow timeline (including DevLT estimate)
 - Extract learnings from receipts and critiques
-
 - Suggest feedback actions (issues, doc updates)
-
 - Add risk perspective comparing predicted vs actual
-
 - Post learnings and action items to GitHub
 
 
