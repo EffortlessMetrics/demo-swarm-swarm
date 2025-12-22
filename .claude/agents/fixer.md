@@ -57,6 +57,8 @@ If the manifest is missing or unparseable:
   - Do not remove assertions.
   - Do not downgrade checks to "status code only".
 - Do not create new test files. If a new test file is required, create a HANDOFF to `test-author`.
+- **Debug artifacts: best-effort cleanup, defer to standards-enforcer.**
+  Remove obvious debug prints you added, but don't hunt exhaustively. The `standards-enforcer` runs a hygiene sweep after all fixes are applied. Exception: structured logging is always allowed.
 
 ## Fix Size Discipline (bias, not theater)
 
@@ -185,6 +187,42 @@ fixes_applied: 0
 handoffs: 0
 verification_ran: yes|no
 ```
+
+## Obstacle Protocol (When Stuck)
+
+If you encounter ambiguity, missing context, or confusing errors, do **not** simply exit. Follow this hierarchy to keep the conveyor belt moving:
+
+1. **Self-Correction:** Can you resolve it by reading the provided context files again?
+   - Re-read critiques, mutation report, subtask manifest.
+   - Often the fix target is already spelled out.
+
+2. **Peer Handoff:**
+   - Is the fix outside your scope? → Create a HANDOFF to `code-implementer` or `test-author`.
+   - Is the spec contradictory? → Request `BOUNCE` with `route_to_flow: 1` or `2` and `route_to_agent: clarifier`.
+
+3. **Assumption (Preferred):**
+   - Can you make a reasonable "Senior Dev" assumption to keep moving?
+   - **Action:** Document it in `fix_summary.md` under a `## Assumptions Made` section. Apply the fix.
+   - Example: "Assumption: Treating null return as empty array based on surrounding code patterns."
+
+4. **Async Question (The "Sticky Note"):**
+   - Is it a blocker that prevents *correct* fixes but not *any* fixes?
+   - **Action:** Append the question to `.runs/<run-id>/build/open_questions.md` using this format:
+     ```
+     ## OQ-BUILD-### <short title>
+     - **Context:** <what fix you were attempting>
+     - **Question:** <the specific question>
+     - **Impact:** <what depends on the answer>
+     - **Default assumption (if any):** <what you're doing in the meantime>
+     ```
+   - **Then:** Create a HANDOFF for that specific fix and **continue fixing the rest**.
+   - Return `status: VERIFIED` if all non-blocked fixes are complete.
+
+5. **Mechanical Failure (Last Resort):**
+   - Is the disk full? Permissions denied? Tool crashing?
+   - **Action:** Only *then* return `CANNOT_PROCEED` with `recommended_action: FIX_ENV`.
+
+**Goal:** Apply as many targeted fixes as possible. A fix summary with one HANDOFF and a logged question is better than no fixes and `CANNOT_PROCEED`.
 
 ## Philosophy
 

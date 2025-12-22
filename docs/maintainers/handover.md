@@ -4,6 +4,8 @@
 
 **What this repo is:** The DemoSwarm `.claude/` SDLC pack.
 
+**Core philosophy:** Ops-First. Engineering is default-allow; publishing is gated. See [why-ops-first.md](../explanation/why-ops-first.md).
+
 **What's canonical:**
 - `.claude/commands/flow-*.md` — Flow sequences and gating
 - `.claude/agents/*.md` — Agent behavior and outputs
@@ -11,6 +13,25 @@
 - `.claude/scripts/pack-check.sh` — Drift guard
 
 Human docs **explain and guide**—they do not redefine behavior.
+
+---
+
+## Mental Model: The "Junior Team"
+
+When designing agents, think of them as **Junior Developers**:
+
+*   **High Energy:** They will generate infinite code if you let them.
+*   **Low Context:** They forget the "Big Picture" easily.
+*   **Need Guardrails:** They might delete tests to make the build pass (Reward Hacking) unless you physically stop them.
+*   **Need Specific Roles:** A "Generalist" junior gets lost. A "Test Writer" junior succeeds.
+
+Your job as a maintainer is to write the **Playbook** (Flows) and the **Guardrails** (Repo Operator) that keep this team productive.
+
+The **user** is the Tech Lead. They:
+*   Dispatch flows (delegate work)
+*   Skim phase-boundary outputs (supervise)
+*   Answer open questions (provide context)
+*   Merge when satisfied (approve)
 
 ---
 
@@ -102,9 +123,25 @@ See `CLAUDE.md` for full documentation of each.
 
 ---
 
+## The "Feel" Test
+
+When modifying this pack, verify the "Feel" remains Ops-First:
+
+1.  **The "Typo Fix" Test:** If a human edits a file while the swarm runs, `repo-operator` MUST include it ("Extras") without crashing.
+2.  **The "Lazy Agent" Test:** If an agent deletes a test to make the build pass, `repo-operator` MUST refuse to push.
+3.  **The "Broken Config" Test:** If Flow 3 pushes a bad config that fails CI, it MUST stop to fix it before building more features.
+4.  **The "Nits" Test:** Flow 3 MUST ignore "nits" (comments) to maintain velocity. Flow 4 MUST catch and fix them.
+
+These tests verify the Ops-First philosophy is intact: **velocity in the Work Plane, guardrails only at the Publish Plane boundary.**
+
+---
+
 ## See also
 
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference + canonical contracts
+- [architecture.md](../explanation/architecture.md) — Ops-First philosophy, compressors, context affinity
+- [why-ops-first.md](../explanation/why-ops-first.md) — Work Plane vs Publish Plane
+- [ai-physics.md](../explanation/ai-physics.md) — LLM-specific design constraints
 - [pack-check.md](../reference/pack-check.md) — What pack-check enforces
 - [reference/contracts.md](../reference/contracts.md) — Control-plane blocks index
 - [tutorials/validation-run.md](../tutorials/validation-run.md) — Validation run

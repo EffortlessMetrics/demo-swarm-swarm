@@ -1,112 +1,136 @@
 # DemoSwarm
 
-> SDLC pack for Claude Code: Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom  
-> Produces inspectable artifacts under `.runs/<run-id>/` and routes via returned result blocks.
+> **Stop Babysitting. Start Shipping.**
+> The Ops-First SDLC pack for Claude Code that trades tokens for trusted change.
 
-**Important:** Run DemoSwarm in a dedicated swarm clone. It creates `run/<run-id>` branches and commits `.runs/` artifacts as an audit trail. Flow 5 promotes to the swarm mainline. Open PRs back to your upstream repo when ready.
-
-[Documentation](docs/README.md) | [Quickstart](docs/tutorials/quickstart.md) | [Tutorials](docs/tutorials/README.md) | [Maintenance](docs/maintainers/README.md)
+[Documentation](docs/README.md) | [Quickstart](docs/tutorials/quickstart.md) | [Architecture](docs/explanation/architecture.md)
 
 ---
 
-DemoSwarm is a portable "pack" (Agents + Commands + Skills) that keeps Claude Code workflows structured and auditable.
+**Tokens are cheap. Senior Developer attention is expensive.**
 
-- **Receipts-first:** Every flow produces a JSON receipt; reporters summarize from receipts (no recomputation).
-- **Two-gate safety:** GitHub operations require both a Secrets Gate and a Repo Hygiene Gate.
-- **Deterministic tooling:** Counts and extractions are performed by shimmed tooling (Rust preferred for determinism/reliability; Python supported).
+Most AI coding tools are "Chatbots"—you type, watch them generate, fix their typos, and paste the code. You are the compiler.
+
+**DemoSwarm** is an **Agentic CI/CD Pipeline** that runs locally in your terminal. It uses adversarial multi-agent swarms to **manufacture trust** through evidence (tests, plans, critiques) before you ever see the PR.
+
+### The Promise: Buy Back Your Attention
+We optimize for **Dev Lead Time (DevLT)**—minimizing the minutes *you* spend verifying changes, even if the machine takes longer to generate them.
+
+*   **Copilot** is autocomplete. You watch it work.
+*   **DemoSwarm** is async (within a flow). You dispatch, walk away, and return to a receipt with a status: `VERIFIED`, `UNVERIFIED`, or `PARTIAL`.
 
 ---
 
-## Quick start (reference run)
+## How It Feels: You Are the Tech Lead
 
-Run this repository as a self-contained demo to see the agents in action. The first run bootstraps tooling; later runs are faster.
+It behaves like a **team of well-instructed Junior Developers** working from your playbook. You dispatch each flow; there's no always-on background daemon.
+
+1.  **Dispatch a flow:** You run `/flow-1-signal "Add user auth"`.
+2.  **It grinds inside that run:** Agents loop, write artifacts, and (where relevant) push checkpoint commits and harvest CI/bot feedback.
+3.  **Quick phase-boundary skim:** You review the receipt + key questions/summary (locally under `.runs/` and, if enabled, in GitHub issue/PR comments).
+4.  **Dispatch the next flow:** The pack tells you what to run next; you choose when.
+
+### What "walk away" actually means
+
+You can walk away **while a flow is executing** (especially Flow 3/4). If the run hits a context/time budget, it checkpoints to disk and exits `PARTIAL` with the next command to continue.
+
+### Typical loop
+
+*   **Flow 1** writes requirements + open questions → you skim/answer → run **Flow 2**
+*   **Flow 2** writes ADR + AC matrix → you skim/agree → run **Flow 3**
+*   **Flow 3** pushes early, harvests feedback, interrupts for CRITICAL blockers → ends with `build_receipt.json` (VERIFIED/UNVERIFIED/PARTIAL)
+*   **Flow 4** drains the worklist (may require reruns if PARTIAL) → ends with a Ready PR
+*   **You merge.**
+
+**The "extra wait" is a feature.** You trade machine time for attention. While the swarm grinds through the build loop or drains the review worklist, you are free.
+
 ---
-**Prerequisites:** Claude Code, Git (2.25+), Rust 1.89+ or Python 3.8+, and `bash` (Git Bash/WSL2 on Windows). `gh` is optional; GitHub ops skip if unauthenticated.
 
-### 1) Clone and bootstrap
+## The Philosophy: Ops-First
+
+We resolve the tension between "Velocity" and "Safety" by splitting the world in two:
+
+### 1. The Work Plane (Default: ALLOW)
+*   **High Velocity:** Agents explore, code, and test freely.
+*   **Ad-Hoc Reality:** If you fix a typo while the swarm runs, the swarm accepts it ("Extras") instead of crashing.
+*   **Advisory Security:** Findings during the build loop are suggestions, not blockers.
+
+### 2. The Publish Plane (Default: GATE)
+*   **Hard Boundaries:** We only gate at the border (`commit`, `push`, `gh post`).
+*   **Mechanical Safety:** We don't ask agents to "be good." We enforce it mechanically.
+    *   **Anti-Reward Hacking:** If an agent deletes a test to make the build pass, the push is **physically blocked** by the `repo-operator`.
+    *   **Fix-First Sanitization:** Secrets are redacted in-place automatically. No bureaucracy.
+
+---
+
+## Quick Start
+
+Run this repository as a self-contained demo to see the agents in action.
+
+**Prerequisites:** Claude Code (`claude`), Git, `bash`, `gh` CLI.
+
+### 1. Bootstrap
 ```bash
-gh repo clone EffortlessMetrics/demo-swarm
-cd demo-swarm
+# Clone the swarm repo (runs in isolation)
+gh repo clone EffortlessMetrics/demo-swarm my-feature-swarm
+cd my-feature-swarm
 
+# Install the shim (ensures deterministic counting)
 bash scripts/bootstrap.sh
 ```
 
-### 2) Run a toy Signal flow (GitHub-optional)
-Open Claude Code in this directory:
+### 2. Run a Flow
+Open Claude Code and give it a task.
+
 ```bash
 claude
 ```
 
-Run the canonical Signal:
 ```text
-/flow-1-signal toy-run "Add a 'demoswarm version' CLI command that prints JSON (version, git_sha, build_time)."
+/flow-1-signal "Add a CLI command 'demoswarm version' that prints the git sha."
 ```
 
-### 3) Inspect artifacts
-Look in `.runs/toy-run/signal/`:
-- `signal_receipt.json`
-- `requirements.md`
-- `open_questions.md`
-- `secrets_status.json`
-
-See `docs/tutorials/toy-run.md` for the full walkthrough.
+### 3. Inspect the Evidence
+Don't read the chat. Look at the **Artifacts** in `.runs/`:
+*   `.runs/<id>/signal/requirements.md` (The Contract)
+*   `.runs/<id>/plan/adr.md` (The Decision)
+*   `.runs/<id>/build/build_receipt.json` (The Proof)
 
 ---
 
-## Adopt DemoSwarm in your project
+## The Seven Flows
 
-Use a dedicated `<repo>-swarm` clone (the pack creates `run/<run-id>` branches and commits `.runs/`). Copy the pack, bootstrap, and customize for your stack.
+We map the software lifecycle to 7 stateful flows. Context is passed via **Artifacts** on disk.
 
-- Start with **`docs/tutorials/quickstart.md`** for installation steps.
-- Then run `/customize-pack` (see `docs/how-to/customize-pack.md`) to align tests/lint/policy with your repo.
-
----
-
-## Core concepts
-
-### The seven flows
-| Flow | Command | Input -> Output |
+| Flow | Vibe | Input -> Output |
 | :--- | :--- | :--- |
-| 1. Signal | `/flow-1-signal` | Intent -> requirements, BDD, risks, receipt |
-| 2. Plan | `/flow-2-plan` | Spec -> ADR, contracts, observability, plans, receipt |
-| 3. Build | `/flow-3-build` | Design -> code/tests + build receipt |
-| 4. Review | `/flow-4-review` | Draft PR -> PR feedback, worklist, receipt |
-| 5. Gate | `/flow-5-gate` | Review -> verdict (**MERGE/BOUNCE**) + gate receipt |
-| 6. Deploy | `/flow-6-deploy` | Verdict -> promote to swarm mainline (or NOT_DEPLOYED) + deploy receipt |
-| 7. Wisdom | `/flow-7-wisdom` | Run history -> regressions, learnings, feedback + terminal receipt |
-
-### The "sealed station" pattern
-Agents do not pass context via chat history (which drifts). They pass context via artifacts.
-- **Flow 1** writes `requirements.md`.
-- **Flow 2** reads `requirements.md` from disk.
-- If Flow 2 crashes, you can restart it anytime because the state is on disk.
-
-### The two planes
-1. **Audit plane (files):** Markdown files (`adr.md`) for humans to read.
-2. **Control plane (blocks):** Machine-parsable YAML blocks (`## Gate Result`) for the orchestrator to route logic (e.g., "If `safe_to_publish: false`, BOUNCE").
+| **1. Signal** | *Discovery* | Messy intent -> **Requirements**, BDD scenarios, Risk profile. |
+| **2. Plan** | *Architecture* | Requirements -> **ADR**, Contracts, Observability Spec. |
+| **3. Build** | *Velocity* | Spec -> **Draft PR**. *(Pushes early. Checks "Pulse" (CI status). Interrupts only for fires.)* |
+| **4. Review** | *Rigor* | Draft PR -> **Ready PR**. *(Unbounded loop. Harvests CodeRabbit/CI feedback. Drains worklist.)* |
+| **5. Gate** | *Audit* | PR -> **Merge Verdict**. *(Verifies evidence/receipts, not vibes.)* |
+| **6. Deploy** | *Reality* | Verdict -> **Production**. *(Distinguishes "Failed" from "Governance Invisible".)* |
+| **7. Wisdom** | *Learning* | History -> **Retrospective**. *(Feeds learnings back into the pack.)* |
 
 ---
 
-## Tooling and safety
+## Usage Guide
 
-This pack includes a lightweight CLI (`demoswarm`) to ensure agents cannot fabricate metrics.
+### Adopting in your Repo
+DemoSwarm is designed to run in a **downstream clone** (e.g., `my-app-swarm`). It creates `run/<run-id>` branches and commits `.runs/` artifacts as an audit trail.
 
-### Usage
-Agents call the shim. You do not need to manage paths.
-```bash
-bash .claude/scripts/demoswarm.sh <command>
-```
+1.  **Clone** your repo.
+2.  **Copy** the `.claude/` folder from this pack.
+3.  **Run** `/customize-pack` to auto-detect your stack (Rust/Python/Node) and align the test runners.
 
-### Validation
-Ensure your pack has not drifted (e.g., after editing prompts):
-```bash
-bash .claude/scripts/pack-check.sh
-```
-
-### GitHub ops
-- **Auth:** Requires `gh` CLI.
-- **Safety:** GitHub operations are skipped if `gh` is not authenticated.
-- **Gating:** Even with auth, the swarm refuses to push/post if the Secrets Gate or Repo Hygiene Gate fails.
+### The Dispatch Rhythm
+1.  `/flow-1-signal` → skim requirements, answer open questions
+2.  `/flow-2-plan` → approve ADR
+3.  `/flow-3-build` → Draft PR created; if `PARTIAL`, rerun
+4.  `/flow-4-review` → worklist drained; if `PARTIAL`, rerun
+5.  `/flow-5-gate` → MERGE or BOUNCE verdict
+6.  Review **receipts** (the evidence), not raw code
+7.  **Merge.**
 
 ---
 
@@ -116,6 +140,7 @@ bash .claude/scripts/pack-check.sh
 | :--- | :--- |
 | [**Quickstart**](docs/tutorials/quickstart.md) | Detailed first-run guide |
 | [**Walkthrough**](docs/tutorials/walkthrough.md) | Full demo script for presenters |
+| [**Architecture**](docs/explanation/architecture.md) | Ops-First philosophy and design patterns |
 | [**CLI Reference**](docs/reference/demoswarm-cli.md) | Full `demoswarm` command reference |
 | [**Contracts**](docs/reference/contracts.md) | Receipt schemas and stable markers |
 | [**Maintenance**](docs/maintainers/handover.md) | How to modify and release this pack |

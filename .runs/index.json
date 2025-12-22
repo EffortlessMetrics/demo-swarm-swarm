@@ -25,13 +25,13 @@
     {
       "canonical_key": "gh-1",
       "issue_number": 1,
-      "last_flow": "deploy",
+      "last_flow": "wisdom",
       "pr_number": 2,
       "run_id": "local-alignment-audit-aba1c6",
       "status": "VERIFIED",
       "task_key": "alignment-audit",
       "task_title": "DemoSwarm Documentation-Code Alignment Audit",
-      "updated_at": "2025-12-20T17:16:49Z"
+      "updated_at": "2025-12-21T22:22:11Z"
     }
   ],
   "version": 1

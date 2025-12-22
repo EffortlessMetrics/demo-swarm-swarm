@@ -36,14 +36,29 @@ Optional (use if present; missing => UNKNOWN, not mechanical failure):
 ## Status model (pack)
 
 Machine status (how grounded the decision is):
-- `VERIFIED`: decision is grounded in readable evidence (even if decision is "NOT_DEPLOYED")
-- `UNVERIFIED`: decision produced but at least one critical check is UNKNOWN due to missing/unparseable evidence
+- `VERIFIED`: decision is grounded in readable evidence (both axes resolved with clear evidence)
+- `UNVERIFIED`: decision produced but at least one axis is UNKNOWN due to missing/unparseable evidence
 - `CANNOT_PROCEED`: cannot read/write required paths (I/O/permissions)
 
-Domain verdict (deploy outcome):
-- `STABLE`: governance enforced and runtime verification (if present) is PASS
-- `NOT_DEPLOYED`: governance not enforced, or any critical check is FAIL/UNKNOWN, or runtime verification is FAIL/UNKNOWN (when present)
-- `BLOCKED_BY_GATE`: gate verdict is not MERGE
+### Two-Axis Model
+
+**Axis 1: Deploy Action** (what happened to the deployment):
+- `COMPLETED`: merge/tag/release succeeded
+- `SKIPPED`: gate said BOUNCE; deployment not attempted
+- `FAILED`: merge/tag/release attempted but failed (PR conflict, tag exists, etc.)
+
+**Axis 2: Governance Enforcement** (can we verify protections):
+- `VERIFIED`: classic branch protection with required status checks confirmed
+- `VERIFIED_RULESET`: no classic protection, but org/repo ruleset provides equivalent protection
+- `UNVERIFIED_PERMS`: 404 with permission limitation detected; cannot determine protection status
+- `NOT_CONFIGURED`: confirmed no protection exists (API access succeeded, no protection found)
+- `UNKNOWN`: cannot determine (unauthenticated, default_branch null, API failure)
+
+**Combined Verdict** (derived from axes):
+- `STABLE`: deploy action COMPLETED + governance VERIFIED or VERIFIED_RULESET
+- `NOT_DEPLOYED`: deploy action FAILED
+- `GOVERNANCE_UNVERIFIABLE`: deploy action COMPLETED but governance is UNVERIFIED_PERMS, NOT_CONFIGURED, or UNKNOWN
+- `BLOCKED_BY_GATE`: gate verdict is not MERGE (deploy action SKIPPED)
 
 ## Stable marker contract (required)
 
@@ -54,17 +69,20 @@ Your output must begin with a fenced YAML block:
 
 The YAML keys below are stable and must always appear (use `null`/`[]` where needed):
 
-- `schema_version: deployment_decision_v1`
-- `deployment_verdict:`
+- `schema_version: deployment_decision_v2`
+- `deploy_action:` (COMPLETED | SKIPPED | FAILED)
+- `governance_enforcement:` (VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN)
+- `deployment_verdict:` (STABLE | NOT_DEPLOYED | GOVERNANCE_UNVERIFIABLE | BLOCKED_BY_GATE)
 - `gate_verdict:`
 - `default_branch:`
 - `verification:`
+  - `branch_protection_source:` (classic | ruleset | none | unknown)
 - `failed_checks:` (list; items must include `check`, `status`, `reason`)
 - `recommended_actions:` (list)
 
 Each failed/unknown check must be represented as an item under `failed_checks` using:
 - `- check: <canonical_name>`
-  - canonical names: `ci_workflows`, `branch_protection`, `runtime_verification`, `pre_commit`, `documentation`, `gate_input`
+  - canonical names: `ci_workflows`, `branch_protection`, `branch_protection_ruleset`, `runtime_verification`, `pre_commit`, `documentation`, `gate_input`
 - `status: FAIL | UNKNOWN`
 - `reason: <short, specific reason>`
 
@@ -118,27 +136,77 @@ Record evidence as pointers only:
 - filenames examined
 - "file → job name" (no YAML paste)
 
-### Step 4: Verify branch protection (critical)
-Two strategies; choose the strongest available evidence.
+### Step 4: Verify branch protection (critical) + Governance Enforcement
 
-**A) GitHub API (preferred, read-only if available)**
-If `gh` appears authenticated, you may attempt:
+Three strategies; choose the strongest available evidence. This step determines the `governance_enforcement` axis.
+
+**A) GitHub API - Classic Branch Protection (preferred)**
+If `gh` appears authenticated:
 - `gh api repos/<owner>/<repo>/branches/<default_branch>/protection`
 
-Interpretation rule (concrete):
-- `PASS` if response indicates required status checks are enabled and non-empty:
-  - `required_status_checks` exists AND
-  - either `checks` or `contexts` is present and has length > 0
-- `FAIL` if protection is enabled but required status checks are absent/empty
-- `UNKNOWN` if cannot verify (not authenticated / permission denied / default_branch null / API unavailable)
+Response handling:
 
-Do not paste JSON. Summarize with: "required_status_checks present: yes/no; required checks count: N (if determinable)."
+**HTTP 200** with `required_status_checks.checks` or `required_status_checks.contexts` non-empty:
+- `branch_protection: PASS`
+- `governance_enforcement: VERIFIED`
+- `branch_protection_source: classic`
 
-**B) Manual snapshot**
-If `.runs/<run-id>/deploy/branch_protection.md` exists:
-- `PASS` if it explicitly asserts required status checks are enabled for the named default branch
-- `FAIL` if it explicitly asserts they are not
-- `UNKNOWN` if ambiguous/placeholder
+**HTTP 200** without required status checks:
+- `branch_protection: FAIL`
+- `governance_enforcement: NOT_CONFIGURED`
+- `branch_protection_source: classic`
+
+**HTTP 404** - requires disambiguation:
+- Parse response body for "Branch not protected" vs permission hints
+- If response indicates permission issue (e.g., "Must have admin access", 403 headers): proceed to Strategy B (Rulesets)
+- If response says "Branch not protected" with no permission issue: proceed to Strategy B (Rulesets)
+
+**HTTP 403 (Forbidden)**:
+- Proceed to Strategy B (Rulesets)
+
+Do not paste JSON. Summarize with: "protection source: classic/ruleset/none; required checks present: yes/no."
+
+**B) GitHub API - Rulesets (fallback)**
+If classic protection is unavailable or returned 404/403, check **both** repository AND organization rulesets:
+
+**B.1) Repository Rulesets:**
+- `gh api repos/<owner>/<repo>/rulesets`
+- Filter for rulesets with `target == "branch"`
+- Check if any ruleset applies to this branch:
+  - `conditions.ref_name.include` matches `refs/heads/<default_branch>` or `~DEFAULT_BRANCH`
+  - Verify `conditions.ref_name.exclude` does NOT exclude this branch
+  - Has `rules` containing `required_status_checks` or `pull_request`
+
+**B.2) Organization Rulesets (if repo rulesets don't match):**
+- `gh api orgs/<owner>/rulesets`
+- Filter for rulesets with `target == "branch"`
+- Check if any ruleset applies to this repo AND branch:
+  - `conditions.repository_name.include` matches this repo (or uses patterns like `*`)
+  - `conditions.ref_name.include` matches `refs/heads/<default_branch>` or `~DEFAULT_BRANCH`
+  - Has `rules` containing `required_status_checks` or `pull_request`
+
+**Applicability check (critical):** "Ruleset exists" does NOT mean "branch protected". You must verify the ruleset's conditions actually apply to the target branch. Evaluate `include`/`exclude` patterns against `refs/heads/<default_branch>`. Handle `~DEFAULT_BRANCH` as a match for the actual default branch.
+
+If matching ruleset found (repo or org):
+- `branch_protection: PASS`
+- `governance_enforcement: VERIFIED_RULESET`
+- `branch_protection_source: ruleset`
+
+If no matching ruleset and original 404 had permission hint:
+- `branch_protection: UNKNOWN`
+- `governance_enforcement: UNVERIFIED_PERMS`
+- `branch_protection_source: unknown`
+
+If no matching ruleset and original 404 said "Branch not protected":
+- `branch_protection: FAIL`
+- `governance_enforcement: NOT_CONFIGURED`
+- `branch_protection_source: none`
+
+**C) Manual snapshot (tertiary fallback)**
+If `.runs/<run-id>/deploy/branch_protection.md` exists and no API access:
+- `PASS` if it explicitly asserts required status checks are enabled for the named default branch → `governance_enforcement: VERIFIED`
+- `FAIL` if it explicitly asserts they are not → `governance_enforcement: NOT_CONFIGURED`
+- `UNKNOWN` if ambiguous/placeholder → `governance_enforcement: UNKNOWN`
 
 If API and snapshot disagree, treat as `FAIL` and add a concern.
 
@@ -161,32 +229,54 @@ If the report does not exist:
 
 These do not block `STABLE`, but should generate `recommended_actions` when FAIL/UNKNOWN.
 
-### Step 7: Decide domain verdict + pack routing
+### Step 7: Decide domain verdict + pack routing (Two-Axis Model)
 
-Critical checks:
-- `ci_workflows` (PASS/FAIL/UNKNOWN)
-- `branch_protection` (PASS/FAIL/UNKNOWN)
+#### Axis 1: deploy_action
+- If Gate verdict != MERGE: `deploy_action: SKIPPED`
+- Else if merge/tag succeeded (from deployment_log.md or context): `deploy_action: COMPLETED`
+- Else if merge/tag failed: `deploy_action: FAILED`
+- If this agent runs before repo-operator merge, treat as `COMPLETED` (pending actual deployment).
 
-Decision rules:
-- If any critical check is `FAIL` => `deployment_verdict: NOT_DEPLOYED`
-- If any critical check is `UNKNOWN` => `deployment_verdict: NOT_DEPLOYED`
-- If `runtime_verification` is present and not `PASS` (`FAIL` or `UNKNOWN`) => `deployment_verdict: NOT_DEPLOYED`
-- Else => `deployment_verdict: STABLE`
+#### Axis 2: governance_enforcement
+From Step 4 above.
 
-Routing (pack control plane):
+#### Combined verdict derivation
+
+| deploy_action | governance_enforcement | deployment_verdict |
+|---------------|------------------------|---------------------|
+| COMPLETED | VERIFIED | STABLE |
+| COMPLETED | VERIFIED_RULESET | STABLE |
+| COMPLETED | NOT_CONFIGURED | GOVERNANCE_UNVERIFIABLE |
+| COMPLETED | UNVERIFIED_PERMS | GOVERNANCE_UNVERIFIABLE |
+| COMPLETED | UNKNOWN | GOVERNANCE_UNVERIFIABLE |
+| SKIPPED | * | BLOCKED_BY_GATE |
+| FAILED | * | NOT_DEPLOYED |
+
+Additional tightening (runtime verification):
+- If `runtime_verification` is present and is FAIL/UNKNOWN: tighten `deployment_verdict` to NOT_DEPLOYED (unless already BLOCKED_BY_GATE)
+
+#### Routing (pack control plane)
+
 - `STABLE`:
   - `recommended_action: PROCEED`
   - routes null
+
+- `GOVERNANCE_UNVERIFIABLE`:
+  - If `UNVERIFIED_PERMS`: `recommended_action: PROCEED`, blocker: `GOVERNANCE_PERMS: Cannot verify protection (insufficient permissions)`
+  - If `NOT_CONFIGURED`: `recommended_action: PROCEED`, blocker: `GOVERNANCE_GAP: No branch protection configured`
+  - If `UNKNOWN`: `recommended_action: RERUN` (if auth fixable) or `PROCEED` with concern
+
 - `NOT_DEPLOYED`:
-  - If repo-owned (missing workflows, ambiguous CI config, missing verification report content): `recommended_action: BOUNCE`, `route_to_flow: 3`
-  - If missing evidence can be supplied without code changes (no gh auth + no manual snapshot): `recommended_action: RERUN`, routes null
-  - If org-level constraint (permission denied, cannot change protection): `recommended_action: PROCEED`, routes null, add blocker: "ORG_CONSTRAINT: <specific constraint>"
+  - If repo-owned (missing workflows, ambiguous CI config, merge failed): `recommended_action: BOUNCE`, `route_to_flow: 3`
+  - If missing evidence can be supplied without code changes: `recommended_action: RERUN`, routes null
+
 - `BLOCKED_BY_GATE`:
   - propagate gate routing if available; else `recommended_action: PROCEED`
 
-Machine `status`:
-- `VERIFIED` if both critical checks are PASS/FAIL (not UNKNOWN), and (if verification report exists) runtime_verification is PASS/FAIL (not UNKNOWN), OR blocked-by-gate with a readable gate verdict.
-- `UNVERIFIED` if any critical check is UNKNOWN, or runtime verification is UNKNOWN when present, or key inputs were unparseable.
+#### Machine `status`
+
+- `VERIFIED` if both axes resolved with clear evidence (even if verdict is GOVERNANCE_UNVERIFIABLE), OR blocked-by-gate with a readable gate verdict.
+- `UNVERIFIED` if either axis is UNKNOWN, or runtime verification is UNKNOWN when present, or key inputs were unparseable.
 - `CANNOT_PROCEED` only for I/O inability to write/read required paths.
 
 ## Write `deployment_decision.md`
@@ -195,14 +285,17 @@ Write the file exactly with this structure:
 
 ```markdown
 ```yaml
-schema_version: deployment_decision_v1
-deployment_verdict: STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE
+schema_version: deployment_decision_v2
+deploy_action: COMPLETED | SKIPPED | FAILED
+governance_enforcement: VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN
+deployment_verdict: STABLE | NOT_DEPLOYED | GOVERNANCE_UNVERIFIABLE | BLOCKED_BY_GATE
 gate_verdict: MERGE | BOUNCE | null
 default_branch: <name or null>
 
 verification:
   ci_workflows: PASS | FAIL | UNKNOWN
   branch_protection: PASS | FAIL | UNKNOWN
+  branch_protection_source: classic | ruleset | none | unknown
   runtime_verification: PASS | FAIL | UNKNOWN | N/A
   pre_commit: PASS | FAIL | UNKNOWN | N/A
   documentation: PASS | FAIL | UNKNOWN | N/A
@@ -219,6 +312,7 @@ recommended_actions: []  # explicit next steps; include remediations for FAIL/UN
 * Gate: `gate/merge_decision.md`
 * CI workflows: <filenames examined>
 * Branch protection: gh api (if used) OR `deploy/branch_protection.md`
+* Branch protection source: classic | ruleset | none | unknown
 * Runtime verification: `deploy/verification_report.md` (if present)
 
 ## Rationale
@@ -243,7 +337,9 @@ After writing the file, return:
 
 ```md
 ## Deploy Decider Result
-deployment_verdict: STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE
+deploy_action: COMPLETED | SKIPPED | FAILED
+governance_enforcement: VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN
+deployment_verdict: STABLE | NOT_DEPLOYED | GOVERNANCE_UNVERIFIABLE | BLOCKED_BY_GATE
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
@@ -256,4 +352,4 @@ concerns: []
 
 ## Philosophy
 
-Governance is part of the product. If we can't verify enforcement, we don't call it stable. Tighten on uncertainty; produce evidence-tied remediation.
+Governance is part of the product. If we can't verify enforcement, we label it `GOVERNANCE_UNVERIFIABLE` - distinct from `NOT_DEPLOYED` (which means the deployment action failed). This two-axis model separates "what happened" (deploy action) from "can we verify protections" (governance enforcement). Tighten on uncertainty; produce evidence-tied remediation.

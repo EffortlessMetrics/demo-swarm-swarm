@@ -4,6 +4,8 @@ Task-oriented: pick the guide that matches the job you need to do.
 
 | Guide | Use it for | Output |
 |-------|------------|--------|
+| [Create a Flow](create-a-flow.md) | Add a new flow to the pack | New flow command + cleanup agent |
+| [Add an Agent](add-an-agent.md) | Add a new agent to existing flows | New agent file + flow integration |
 | [Customize Pack](customize-pack.md) | Point tests/lint/policy commands at your stack | Updated `.claude/skills/*` commands and settings |
 | [Run Topology](run-topology.md) | Set up the swarm repo + branch model | Working branch layout for `run/<id>` workflows |
 | [Upstream Export](upstream-export.md) | Move swarm work into a human-owned repo | Exported `.runs/` artifacts and mirrored changes |

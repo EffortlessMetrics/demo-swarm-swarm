@@ -48,23 +48,19 @@ You are orchestrating Flow 7 of the SDLC swarm.
 
 ## Your Goals
 
+**Primary focus:**
+- **Improve the flows/agents:** What friction did we hit? What agents gave poor output? What routing decisions were wrong? Feed this back to improve the pack.
+- **Improve the codebase:** What architectural issues surfaced? What test gaps remain? What patterns should we adopt or avoid? Feed this into future work.
+- **Surface to developers:** Post learnings and action items to GitHub so they're visible and actionable.
 
-
+**Supporting activities:**
 - Verify all flow artifacts exist
-
 - Analyze tests, coverage, and regressions
-
 - Correlate with GitHub issues and git blame
-
-- Compile flow timeline
-
+- Compile flow timeline (including DevLT estimate)
 - Extract learnings from receipts and critiques
-
 - Suggest feedback actions (issues, doc updates)
-
 - Add risk perspective comparing predicted vs actual
-
-- Post learnings and action items to GitHub
 
 
 
@@ -118,7 +114,6 @@ Flow 7 uses **two complementary state machines**:
 - risk-analyst (compare predicted vs actual)
 - wisdom-cleanup (finalize receipt; update index; update `flow_plan.md`)
 - secrets-sanitizer (publish gate; capture Gate Result block)
-- wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - repo-operator (checkpoint commit; allowlist interlock)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report learnings; gated)
@@ -222,7 +217,7 @@ Read from all prior flow directories (if available):
 
 
 
-This is a **linear pipeline** except for the reseal convergence cycle (`wisdom-cleanup  secrets-sanitizer`) when `modified_files: true`.
+This is a **linear pipeline**. The sanitizer runs once before checkpoint — no reseal loop.
 
 
 
@@ -289,7 +284,6 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 - [ ] risk-analyst (compare predicted vs actual)
 - [ ] wisdom-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint commit with allowlist interlock)
 - [ ] gh-issue-manager (update issue board)
 - [ ] gh-reporter (post summary)
@@ -334,6 +328,8 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 - Compile `.runs/<run-id>/wisdom/flow_history.json` timeline linking signal -> spec -> design -> build -> gate -> deploy
 
 - Include timestamps, commits, decision points
+
+- **Calculate Dev Lead Time (DevLT):** Estimate developer time spent working on the change — researching, analyzing, writing, reviewing, iterating. This is manhours, not wall clock time. Excludes machine time and wait time.
 
 
 
@@ -415,79 +411,32 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 **Gate Result block (returned by secrets-sanitizer):**
 
-
-
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-
-```
-
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
-
 safe_to_publish: true | false
-
 modified_files: true | false
-
-needs_upstream_fix: true | false
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-
-route_to_station: <string | null>
-
-route_to_agent: <agent-name | null>
-
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
-
-
-
-**Gating logic (from Gate Result block):**
-
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 9c)
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
+  - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
+  - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
+  - `blocker_kind: SECRET_IN_ARTIFACT` → investigate manually
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`
 
 
 
-### Step 9b: Reseal If Modified (Conditional Loop)
-
-
-
-If the prior `secrets-sanitizer` reports `modified_files: true`, repeat `(wisdom-cleanup  secrets-sanitizer)` until either:
-
-- the sanitizer reports `modified_files: false`, or
-
-- the sanitizer indicates no reasonable path to fixing (non-convergent).
-
-
-
-If reseal cannot make progress (sanitizer signals no reasonable path):
-
-- Append an evidence note to `secrets_scan.md`:
-
-  - "modified_files remained true; sanitizer reports no viable path to fix; stopping to prevent receipt drift."
-
-- If Gate Result `safe_to_commit: true`: call `repo-operator` with `checkpoint_mode: local_only`
-
-  - it must return `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
-
-- GitHub ops: obey the access gate. If `github_ops_allowed: false` or `gh` is unauthenticated, **skip** and write local status. Otherwise run in **RESTRICTED** mode (paths only) and use only receipt-derived machine fields (`status`, `recommended_action`, `counts.*`, `quality_gates.*`). Publish block reason must be explicit.
-
-- Flow outcome: `status: UNVERIFIED`, `recommended_action: PROCEED`
-
-  - If Gate Result `needs_upstream_fix: true`, use `recommended_action: BOUNCE` and the provided `route_to_*`.
-
-
-
-### Step 9c: Checkpoint Commit
+### Step 9b: Checkpoint Commit
 
 
 
@@ -575,51 +524,16 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
 
 
 
-### GitHub Access + Content Mode (canonical)
+### Step 10-11: GitHub Reporting (Final)
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** (marks run complete) then **`gh-reporter`** (mini-postmortem).
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
-
-### Step 10: Update Issue Board (Final)
-
-
-
-Apply Access + Content Mode rules:
-
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-
-
-`gh-issue-manager` -> final update to issue body status board. If the issue is missing and gh is available, it may create it (with a Signal-pending banner when created from Flow 7). Marks run as complete.
-
-
-
-### Step 11: Report Mini-Postmortem
-
-
-
-Apply Access + Content Mode rules:
-
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases (paths only, receipt allowlist, no human-authored markdown).
-
-
-
-`gh-reporter` -> post mini-postmortem summary **to the GitHub issue** (not PR). Include regressions found, learnings extracted, feedback actions. Issue-first (hard): All flow logs go to the issue, even if a PR exists. PRs are for PR-review dynamics only.
-
-**Content expectations:** The gh-reporter comment should include:
-- Learnings summary (what worked, what didn't, recommendations)
-- Pack/Flow Observations (friction noticed across the run, improvement suggestions)
-- Feedback Actions (issue drafts, suggestions created)
-- Agent Notes (meta-observations about the wisdom synthesis itself)
-
-This is the final postmortem - make it actionable for future runs.
+**Content for postmortem:** Learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
 
 ### Step 12: Finalize Flow
 
@@ -722,7 +636,7 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 
 - `regression_report.md` - what got worse and where
 
-- `flow_history.json` - timeline linking all flow events
+- `flow_history.json` - timeline linking all flow events + DevLT metrics
 
 - `learnings.md` - narrative lessons extracted
 
@@ -790,6 +704,8 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 
 | feedback-applier | `^- ISSUE: ` | feedback_actions.md | `- ISSUE: Missing tests for REQ-004` |
 
+| flow-historian | `"devlt":` | flow_history.json | `"devlt": {"total_run_minutes": 45, "human_attention_minutes": 8}` |
+
 
 
 **Regression format rule:** Each regression MUST have exactly one `### REG-NNN:` heading section. (You may also include a register table, but headings are the source for counting.)
@@ -833,13 +749,11 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 
 11. `secrets-sanitizer`
 
-12. `wisdom-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+12. `repo-operator` (checkpoint commit)
 
-13. `repo-operator` (checkpoint commit)
+13. `gh-issue-manager` (if allowed)
 
-14. `gh-issue-manager` (if allowed)
-
-15. `gh-reporter` (if allowed)
+14. `gh-reporter` (if allowed)
 
 ### TodoWrite (copy exactly)
 
@@ -856,7 +770,6 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 - [ ] risk-analyst
 - [ ] wisdom-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] wisdom-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 

@@ -250,9 +250,18 @@ Sources:
 **This is the core of Flow 4: iteratively resolve worklist items until completion.**
 
 **Termination conditions** (any of):
-1. All worklist items resolved (`pending == 0`)
-2. Context window exhaustion (approaching limit)
-3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce)
+1. All worklist items resolved (`pending == 0`) → status: VERIFIED
+2. Context window exhaustion (approaching limit) → status: PARTIAL (checkpoint & exit)
+3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
+
+**Context checkpoint behavior (PARTIAL):**
+When context is approaching limits, checkpoint immediately:
+- Write current worklist state to `review_worklist.json`
+- Update `review_receipt.json` with `status: PARTIAL`, `items_resolved`, `items_remaining`
+- Commit and push (if gates allow)
+- Exit with message: "Resolved {N} items. {M} remain. Context full. Rerun `/flow-4-review` to continue."
+
+This is a **feature, not a failure**. It prevents hallucination from context stuffing and enables incremental progress. The next `/flow-4-review` invocation will resume from the checkpoint.
 
 **Loop structure:**
 
@@ -334,8 +343,7 @@ Every N items resolved (or after significant changes), apply the **Reseal → Ga
    - Call `build-cleanup` to reseal build_receipt.json (if code/tests changed)
    - Call `review-cleanup` to update worklist state
 2. **Secrets gate:**
-   - Call `secrets-sanitizer` on staged changes
-   - If `modified_files: true`: repeat reseal until stable
+   - Call `secrets-sanitizer` on staged changes (single pass)
 3. **Commit and push (gated):**
    - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push
    - If gates fail: record the blocker and proceed without push (bots won't have new code)
@@ -378,25 +386,26 @@ After worklist loop completes, manage PR status via dedicated agents.
 
 **secrets-sanitizer** returns a **Gate Result** block:
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 **Gating logic (from Gate Result):**
-- If `safe_to_commit: false`: apply route-and-fix triage
-- If `modified_files: true`: reseal loop (review-cleanup → secrets-sanitizer)
+- The sanitizer is a boolean gate — it says yes/no, not where to route
+- If `safe_to_commit: false`: skip commit (blocked by `blocker_kind`)
+- If `safe_to_commit: true` but `safe_to_publish: false`: commit locally, skip push
+- `modified_files: true`: artifact files were changed (for audit purposes)
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- `blocker_kind` explains why blocked: `MECHANICAL` (IO failure), `SECRET_IN_CODE` (needs fix), `SECRET_IN_ARTIFACT` (can't redact)
 
 ### Step 10: Commit and Push
 
@@ -406,28 +415,14 @@ Same gating logic as Build:
 - Requires `safe_to_commit: true` and `safe_to_publish: true`
 - Returns Repo Operator Result block
 
-### GitHub Access + Content Mode (canonical)
+### Step 11-12: GitHub Reporting
 
-See `CLAUDE.md` → **GitHub Access + Content Mode (Canonical)**.
+**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
-- Publish blocked → `RESTRICTED` (never skip when access is allowed)
-- `FULL` only when `safe_to_publish: true` AND `proceed_to_github_ops: true` AND `publish_surface: PUSHED`
-
-### Step 11: Update Issue Board
-
-Apply Access + Content Mode rules:
-- Skip GitHub calls if `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise derive `FULL` vs `RESTRICTED` from gates + publish surface. Publish blocked reasons must be explicit; RESTRICTED uses paths only and the receipt allowlist.
-
-`gh-issue-manager` updates issue body status board from receipt.
-
-### Step 12: Report to GitHub
-
-Apply Access + Content Mode rules:
-- Skip only when `github_ops_allowed: false` or `gh` unauthenticated (record SKIPPED/UNVERIFIED).
-- Otherwise post in `FULL` only when `safe_to_publish: true`, `proceed_to_github_ops: true`, and `publish_surface: PUSHED`; use `RESTRICTED` for all other cases.
-
-`gh-reporter` writes `.runs/<run-id>/review/github_report.md` locally and posts to the issue (never PR). Issue-first (hard): flow logs go to the issue even if a PR exists.
+See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+- Skip if `github_ops_allowed: false` or `gh` unauthenticated
+- Content mode is derived from secrets gate + push surface (not workspace hygiene)
+- Issue-first: flow summaries go to the issue, never the PR
 
 ### Step 13: Finalize Flow
 
@@ -498,13 +493,11 @@ MINOR and INFO items may remain pending without blocking.
 
 10. `secrets-sanitizer`
 
-11. `review-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
+11. `repo-operator` (commit/push)
 
-12. `repo-operator` (commit/push)
+12. `gh-issue-manager` (if allowed)
 
-13. `gh-issue-manager` (if allowed)
-
-14. `gh-reporter` (if allowed)
+13. `gh-reporter` (if allowed)
 
 #### Worklist Loop Template (unbounded resolution)
 
@@ -531,7 +524,7 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
 6) Route to agent:
    - TESTS items → test-author
    - CORRECTNESS items → code-implementer
-   - STYLE items → fixer or lint-executor
+   - STYLE items → fixer or standards-enforcer
    - DOCS items → doc-writer
    - ARCHITECTURE items → code-implementer
 
@@ -578,7 +571,6 @@ Continue beyond default two passes only when critic returns `recommended_action:
 - [ ] pr-status-manager (flip Draft to Ready if review complete)
 - [ ] review-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] review-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (commit/push; return Repo Operator Result)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)

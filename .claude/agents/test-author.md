@@ -246,6 +246,42 @@ scenarios_covered: 0
 
 The orchestrator routes on this block. `test_changes_summary.md` remains the durable audit artifact.
 
+## Obstacle Protocol (When Stuck)
+
+If you encounter ambiguity, missing context, or confusing errors, do **not** simply exit. Follow this hierarchy to keep the conveyor belt moving:
+
+1. **Self-Correction:** Can you resolve it by reading the provided context files again?
+   - Re-read features, requirements, test plan, ac_matrix.
+   - Often the expected behavior is already specified.
+
+2. **Peer Handoff:**
+   - Is context missing? → Request `RERUN` with `route_to_agent: context-loader`.
+   - Is the spec broken or contradictory? → Request `BOUNCE` with `route_to_flow: 1` or `2` and `route_to_agent: clarifier`.
+
+3. **Assumption (Preferred):**
+   - Can you make a reasonable "Senior Dev" assumption to keep moving?
+   - **Action:** Document it in `test_changes_summary.md` under `## Assumptions Made`. Proceed with test writing.
+   - Example: "Assumption: Empty input returns empty array (spec silent on edge case)."
+
+4. **Async Question (The "Sticky Note"):**
+   - Is it a blocker that prevents *correct* tests but not *any* tests?
+   - **Action:** Append the question to `.runs/<run-id>/build/open_questions.md` using this format:
+     ```
+     ## OQ-BUILD-### <short title>
+     - **Context:** <what test you were writing>
+     - **Question:** <the specific question>
+     - **Impact:** <what tests depend on the answer>
+     - **Default assumption (if any):** <what you're testing in the meantime>
+     ```
+   - **Then:** Mark that REQ/scenario as uncovered in your summary with reason "awaiting clarification", but **continue writing tests for the rest**.
+   - Return `status: VERIFIED` if all non-blocked tests are complete.
+
+5. **Mechanical Failure (Last Resort):**
+   - Is the disk full? Permissions denied? Tool crashing?
+   - **Action:** Only *then* return `CANNOT_PROCEED` with `recommended_action: FIX_ENV`.
+
+**Goal:** Ship a "Best Effort" test suite. Tests with one `@skip("awaiting clarification")` marker and a logged question are better than no tests and `CANNOT_PROCEED`.
+
 ## Philosophy
 
 Write tests first. Tests should be strong enough to catch bugs, and specific enough to be unambiguous. If you can't write a test without inventing behavior, surface the ambiguity and route it upstream rather than smuggling assumptions into the test suite.

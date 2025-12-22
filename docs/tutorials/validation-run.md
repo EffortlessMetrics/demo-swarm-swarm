@@ -49,7 +49,7 @@ This goal is self-referential (it's a feature for the pack's own CLI tooling), d
 
 ---
 
-## Validation Run A: Normal order (Flow 1 → 2 → 3 → 4)
+## Validation Run A: Normal order (Flow 1 → 2 → 3 → 4 → 5)
 
 Use a deterministic run-id so reruns are comparable:
 
@@ -120,13 +120,27 @@ Optional (if GH available and gates passed):
 
 ---
 
-Run Flow 4:
+Run Flow 4 (Review):
 
 ```text
-/flow-4-gate val-a
+/flow-4-review val-a
 ```
 
 ### A4) After Flow 4 completes, verify (local)
+
+* [ ] `.runs/val-a/review/review_receipt.json` exists
+* [ ] `.runs/val-a/review/review_worklist.md` exists (or documented as empty)
+* [ ] `.runs/index.json` updated for `val-a` with `last_flow: "review"`
+
+---
+
+Run Flow 5 (Gate):
+
+```text
+/flow-5-gate val-a
+```
+
+### A5) After Flow 5 completes, verify (local)
 
 * [ ] `.runs/val-a/gate/gate_receipt.json` exists
 * [ ] `.runs/val-a/gate/merge_decision.md` exists and contains MERGE/BOUNCE (with reason)
@@ -136,7 +150,7 @@ Run Flow 4:
 
 Optional (if GH available and gates passed):
 
-* [ ] Flow 4 comment exists/updated with verdict
+* [ ] Flow 5 comment exists/updated with verdict
 
 ---
 
@@ -328,7 +342,7 @@ After successful validation:
 ## Validation: <date>
 
 - pack-check: PASSED
-- Validation Run A (Flows 1–4): PASSED
+- Validation Run A (Flows 1–5): PASSED
 - Validation Run B (out-of-order Plan): PASSED
 - Reseal test: PASSED (optional)
 - GH idempotency: PASSED (optional)

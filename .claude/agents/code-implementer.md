@@ -74,6 +74,12 @@ If the manifest is missing/unparseable:
    - If tests appear to demand behavior that violates ADR/contracts, prefer contract-correct behavior and document the mismatch.
 5) **No secrets.**
    - Never paste tokens/keys. Keep logs/summaries high-level.
+6) **Debug artifacts: best-effort cleanup, defer to standards-enforcer.**
+   During implementation, focus on getting tests to pass. If you notice debug prints you added (`console.log`, `print()`), remove them before moving on. But don't spend cycles hunting every artifact—the `standards-enforcer` runs a hygiene sweep after the AC loop completes.
+
+   **Exception:** Proper structured logging (`logger.debug()`, `log.info()`) is always allowed.
+
+   **Why:** Implementer focuses on correctness. Standards-enforcer focuses on polish. Separation of concerns.
 
 ## Anchored parsing rule (important)
 
@@ -215,6 +221,42 @@ tests_run: yes | no
 tests_passed: yes | no | unknown
 output_file: .runs/<run-id>/build/impl_changes_summary.md
 ```
+
+## Obstacle Protocol (When Stuck)
+
+If you encounter ambiguity, missing context, or confusing errors, do **not** simply exit. Follow this hierarchy to keep the conveyor belt moving:
+
+1. **Self-Correction:** Can you resolve it by reading the provided context files again?
+   - Re-read `subtask_context_manifest.json`, ADR, contracts, requirements.
+   - Often the answer is already there.
+
+2. **Peer Handoff:**
+   - Is context missing? → Request `RERUN` with `route_to_agent: context-loader`.
+   - Is the spec broken or contradictory? → Request `BOUNCE` with `route_to_flow: 1` or `2` and `route_to_agent: clarifier`.
+
+3. **Assumption (Preferred):**
+   - Can you make a reasonable "Senior Dev" assumption to keep moving?
+   - **Action:** Document it in `impl_changes_summary.md` under `## Assumptions Made`. Proceed with implementation.
+   - Example: "Assumption: Retry limit defaulting to 3 (spec silent on exact value)."
+
+4. **Async Question (The "Sticky Note"):**
+   - Is it a blocker that prevents *correct* implementation but not *any* implementation?
+   - **Action:** Append the question to `.runs/<run-id>/build/open_questions.md` using this format:
+     ```
+     ## OQ-BUILD-### <short title>
+     - **Context:** <what you were implementing>
+     - **Question:** <the specific question>
+     - **Impact:** <what depends on the answer>
+     - **Default assumption (if any):** <what you're doing in the meantime>
+     ```
+   - **Then:** Mark that specific REQ/AC as `IMPL_REQ_DEFERRED: REQ-###` in your inventory, but **continue implementing the rest**.
+   - Return `status: VERIFIED` if all non-deferred work is complete.
+
+5. **Mechanical Failure (Last Resort):**
+   - Is the disk full? Permissions denied? Tool crashing?
+   - **Action:** Only *then* return `CANNOT_PROCEED` with `recommended_action: FIX_ENV`.
+
+**Goal:** Ship a "Best Effort" implementation. Code with one `TODO` comment and a logged question is better than no code and `CANNOT_PROCEED`.
 
 ## Philosophy
 

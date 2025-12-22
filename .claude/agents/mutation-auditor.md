@@ -12,6 +12,8 @@ Your job:
 2) Summarize results into a **small, prioritized survivor worklist**.
 3) Provide a control-plane result the orchestrator can route on.
 
+**Scope:** Focus mutation testing on changed files, not the entire repo. Use `git diff --name-only` or equivalent to identify the change surface. This keeps mutation runs tractable and focused on the current work.
+
 You do **not** modify code. You do **not** commit/push. You do **not** "fix" survivors.
 
 ## Inputs (best-effort)

@@ -68,26 +68,55 @@ This agent does NOT update `run_meta.json` or `.runs/index.json`.
 
 ## Behavior
 
-### Step 0: Choose Posting Mode (No Silent Skip)
+### Step 0: Choose Content Mode (Decoupled from Workspace Hygiene)
 
-Posting prerequisites (checked later): `issue_number` present, `run_meta.github_ops_allowed: true`, and `gh` authenticated. When those are true, attempt to post in some mode even if publish is blocked or artifacts were not pushed.
+Posting prerequisites (checked later): `issue_number` present, `run_meta.github_ops_allowed: true`, and `gh` authenticated. When those are true, attempt to post in some mode even if artifacts were not pushed.
 
-Content modes:
-- Treat missing `publish_surface` as `NOT_PUSHED` (fail-safe).
-- **FULL** when `safe_to_publish: true` **and** `proceed_to_github_ops: true` **and** `publish_surface: PUSHED`. You may read receipts and (optionally) `open_questions.md`. Link style: blob links allowed.
-- **RESTRICTED** otherwise (`safe_to_publish: false`, `needs_upstream_fix: true`, `proceed_to_github_ops: false`, or `publish_surface: NOT_PUSHED`). Link style: paths only. Inputs allowed: Gate Result + Repo Operator Result + run identity, plus receipts for machine-derived statuses/counts. Do **not** read/quote human-authored markdown (`requirements.md`, `open_questions.md`, raw signal). Post a minimal handoff: why publish is blocked (no secret details), what to do next, how to rerun cleanup/sanitizer/checkpoint, and (optionally) high-level receipt counts.
-  - RESTRICTED allowlist (reads): run identity (`run_meta` fields), control-plane blocks (Gate Result, Repo Operator Result), and receipt machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).  
-    **Disallowed:** `open_questions.md`, `requirements.md`, `*.feature`, ADR text, any human-authored markdown/raw signal, and diffs.
+Content mode is derived from **secrets safety** and **push surface**, NOT from workspace hygiene (`proceed_to_github_ops`).
+
+**Content Mode Ladder (4 levels):**
+
+| Mode | Conditions | Allowed Content | Link Style |
+|------|------------|-----------------|------------|
+| **FULL** | `safe_to_publish: true` AND `publish_surface: PUSHED` | Narrative, links, quotes, open questions, receipts | Blob links |
+| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions (no excerpts) | Paths only |
+| **SUMMARY_ONLY** | `safe_to_publish: true` AND tracked anomalies exist | Concise narrative + counts from receipts | Paths only |
+| **MACHINE_ONLY** | `safe_to_publish: false` | Counts and paths only | Paths only |
+
+**Mode derivation logic:**
+1. If `safe_to_publish: false` → **MACHINE_ONLY** (security gate)
+2. If `safe_to_publish: true` AND `publish_surface: PUSHED` → **FULL**
+3. If `safe_to_publish: true` AND `publish_surface: NOT_PUSHED`:
+   - If `anomaly_classification` has tracked anomalies (`unexpected_staged_paths` or `unexpected_unstaged_paths` non-empty) → **SUMMARY_ONLY**
+   - Else (no anomalies or untracked-only) → **FULL_PATHS_ONLY**
+
+**Key decoupling:** `proceed_to_github_ops: false` does NOT force MACHINE_ONLY. It only means artifacts weren't pushed, which affects link style. Untracked-only anomalies allow FULL_PATHS_ONLY (full narrative, path-only links).
+
+**Mode-specific rules:**
+
+- **FULL**: Read all artifacts, compose full summaries, use blob links (artifacts are pushed).
+- **FULL_PATHS_ONLY**: Read all artifacts, compose full summaries, but use path-only links (artifacts not pushed yet).
+- **SUMMARY_ONLY**: Read any files needed; post only safe summaries + machine counts (no verbatim quotes from uncommitted surfaces).
+- **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Post a minimal handoff.
+
+**SUMMARY_ONLY semantics (output restriction only):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read or analyze.
+- You can read **any file** needed to do your job (receipts, requirements, features, ADR, code, etc.).
+- You must only **post**:
+  - Receipts and machine-derived fields (`status`, `counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from outside the committed surface
+  - Next steps and blockers
+- The restriction exists because tracked anomalies mean uncertain provenance for the publish surface — we gate what we expose, not what we think about.
 
 **Tighten-only safety (optional):**
-- You may read `.runs/<run-id>/<flow>/secrets_status.json` and/or `git_status.md` only to force **RESTRICTED** mode.
-- You may never loosen to FULL.
+- You may read `.runs/<run-id>/<flow>/secrets_status.json` and/or `git_status.md` only to tighten content mode.
+- You may never loosen content mode.
 
 ### Step 0.5: Skip when GitHub Ops Are Disabled
 
 If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 - Do **not** call `gh`.
-- Write local outputs with `posting_status: SKIPPED`, `reason: github_ops_not_allowed`, `publish_mode: RESTRICTED`, `link_style: PATHS_ONLY`.
+- Write local outputs with `posting_status: SKIPPED`, `reason: github_ops_not_allowed`, `content_mode: MACHINE_ONLY`, `link_style: PATHS_ONLY`.
 - Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows continue locally).
 - Exit cleanly.
 
@@ -103,7 +132,7 @@ If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
   - Do not post
   - Write local outputs
   - `posting_status: SKIPPED` with reason `gh_not_authenticated`
-  - Treat `publish_mode: RESTRICTED`
+  - Treat `content_mode: MACHINE_ONLY` (most restrictive when we can't verify)
 
 ### Step 3: Build the comment body (mode-aware, schema-tolerant)
 
@@ -111,7 +140,7 @@ Include the idempotency marker near the top (applies to all modes):
 
 `<!-- DEMOSWARM_RUN:<run-id> FLOW:<flow> -->`
 
-Mode A: **FULL summary** (`publish_mode: FULL`)
+**Mode A: FULL** (`content_mode: FULL`)
 1) **Prefer pre-composed report:** If `.runs/<run-id>/<flow>/github_report.md` exists:
    - Read its contents
    - Verify the idempotency marker is present (`<!-- DEMOSWARM_RUN:... FLOW:... -->`)
@@ -122,16 +151,31 @@ Mode A: **FULL summary** (`publish_mode: FULL`)
    - Extract counts/statuses directly from the receipt; if a field is missing/unreadable, emit `null` and add a concern.
    - Do not recompute metrics.
 3) Link handling:
-   - Prefer commit SHA blob links (artifacts are pushed in FULL mode). If `commit_sha` is unknown, use repo-relative paths.
+   - Use commit SHA blob links (artifacts are pushed in FULL mode). If `commit_sha` is unknown, use repo-relative paths.
 
-Mode B: **RESTRICTED handoff** (`publish_mode: RESTRICTED`)
-- You may read receipts for machine-derived counts/statuses; do **not** read/quote `open_questions.md` or other human-authored markdown/raw signal.
-- Allowed inputs: Gate Result + Repo Operator Result + run identity (+ optional receipt counts/status).
-- Compose a short comment that covers:
-  - Why publish is blocked (secrets gate/needs_upstream_fix/anomaly/local-only/push failure/gh unavailable) without quoting artifacts.
-  - What to do next (e.g., rerun secrets-sanitizer remediation; rerun cleanup + checkpoint; rerun repo-operator).
-  - How to re-run the cleanup/sanitizer/checkpoint slice or Flow 1 when applicable.
-- Use plain paths only (no blob links) and keep it to paths + counts only (no excerpts, diffs, or artifact quotes).
+**Mode B: FULL_PATHS_ONLY** (`content_mode: FULL_PATHS_ONLY`)
+- Same as FULL but with path-only links (artifacts not pushed yet).
+- Full narrative, all artifacts readable, open questions included.
+- Use repo-relative paths instead of blob links.
+
+**Mode C: SUMMARY_ONLY** (`content_mode: SUMMARY_ONLY`)
+- You may read **any file** needed to compose a useful summary (receipts, requirements, features, ADR, code, etc.).
+- You must only **post**:
+  - Flow status and counts from receipt (`counts.*`, `quality_gates.*`)
+  - Safe summaries that don't quote verbatim from uncommitted surfaces
+  - Reason for limited mode (tracked anomalies exist)
+  - Next steps recommendation
+- Use plain paths only (no blob links).
+- **Key distinction:** SUMMARY_ONLY restricts what you post, not what you read. You can analyze anything; you just can't quote it verbatim in the GitHub comment.
+
+**Mode D: MACHINE_ONLY** (`content_mode: MACHINE_ONLY`)
+- Only counts and paths; no narrative content; no artifact quotes.
+- Allowed inputs: Gate Result + Repo Operator Result + run identity + receipt machine fields only.
+- Compose a minimal handoff that covers:
+  - Why publish is blocked (secrets gate/needs_upstream_fix) without quoting artifacts.
+  - What to do next (e.g., rerun secrets-sanitizer remediation; rerun cleanup + checkpoint).
+  - How to re-run the cleanup/sanitizer/checkpoint slice.
+- Use plain paths only; keep it to paths + counts only (no excerpts, diffs, or artifact quotes).
 
 ### Step 4: Post/update one comment per flow (robust idempotency)
 
@@ -184,11 +228,15 @@ Write a short status report including:
 
 Posting failures should not block the flow. Record and continue.
 
-## Receipt-First Approach
+## State-First Verification (Receipts as Summaries, Not Gatekeepers)
 
-Applies to **FULL** mode. In **RESTRICTED** mode, receipts may be read for machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
+**Core principle:** The repo's current state (HEAD + working tree + staged diff + actual tool results) is the thing you're building and shipping. Receipts help you summarize what happened and reference stable evidence—but they are not the primary mechanism for verifying outcomes when the repo has moved.
 
-Each flow has a receipt that is the single source of truth. Prefer these canonical receipts:
+**For reporting purposes:** Receipts are excellent structured summaries. Use them to populate counts, statuses, and artifact paths. But if a receipt seems stale (different commit_sha than current HEAD), note this as a concern rather than treating the receipt as blocking.
+
+Applies to **FULL** and **FULL_PATHS_ONLY** modes. In **SUMMARY_ONLY** and **MACHINE_ONLY** modes, receipts may be read for machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
+
+Prefer these canonical receipts for summary data:
 
 | Flow | Receipt File |
 |------|--------------|
@@ -248,7 +296,7 @@ The following questions were flagged during this flow and may need human input b
 
 | ID | Question | Suggested Default | Impact if Unanswered |
 |----|----------|-------------------|---------------------|
-| OQ-PLN-004 | Should OpenQ prefixes use PLN/BLD or PLAN/BUILD? | PLN/BLD (matches openq-tools) | Implementation may diverge from docs |
+| OQ-PLAN-004 | Should retry logic use exponential backoff? | Yes, base 2s with jitter | Error handling may be suboptimal |
 | OQ-SIG-002 | Is the 80% coverage threshold acceptable? | Yes | Tests may be under-scoped |
 
 To answer: Reply to this comment with your decision, or update the artifact directly.
@@ -267,7 +315,7 @@ Surface critic concerns and risk items that humans should be aware of:
 ## Concerns for Review
 
 **From design-critic:** 6 minor concerns documented in `design_validation.md`. None are blockers, but humans should review:
-- The PLN vs PLAN prefix discrepancy (OQ-PLN-004)
+- The retry backoff configuration (OQ-PLAN-004)
 - 4 agents missing Skills sections not yet enumerated
 
 **From risk-analyst:** 1 HIGH risk (RSK-001: Prior issue #49 bounced at Gate). Mitigation: warning-first mode allows escape valve.
@@ -297,7 +345,7 @@ Add an **Agent Notes** section when you have substantive observations that add v
 
 - **Potential gap:** REQ-004 (receipt validation) has no corresponding BDD scenario in Signal. Consider backfilling before Gate.
 - **Cross-cutting:** The 80% coverage threshold in NFR-PERF-001 may be aggressive given the fixture-heavy test strategy. Review during Build.
-- **Improvement opportunity:** The 4 agents missing Skills sections (per OQ-PLN-009) should be enumerated now rather than discovered during implementation.
+- **Improvement opportunity:** The 4 agents missing Skills sections (per OQ-PLAN-009) should be enumerated now rather than discovered during implementation.
 - **Risk flag:** RSK-001 (prior Gate bounce) has mitigation documented, but the --strict flag behavior isn't tested yet.
 ```
 
@@ -315,8 +363,8 @@ Guidelines:
 3) Link, don't duplicate. Use relative paths; avoid large pasted text.
 4) Never post to PRs. Only issues.
 5) Never create issues. If issue_number is missing, SKIP and bounce to gh-issue-manager.
-6) Tighten-only last-mile checks may block; they may never allow.
-7) Restricted mode: receipts are allowed for machine counts/status; no human-authored markdown or blob links; path-only handoff with block reason + next steps.
+6) Tighten-only last-mile checks may tighten content mode; they may never loosen.
+7) Content mode ladder: FULL → FULL_PATHS_ONLY → SUMMARY_ONLY → MACHINE_ONLY. Only secrets gate forces MACHINE_ONLY. Untracked anomalies do NOT degrade content mode.
 
 ## `gh_report_status.md` format
 
@@ -326,8 +374,8 @@ Guidelines:
 ## Posting
 posting_status: POSTED | FAILED | SKIPPED
 reason: <short reason or null>
-publish_mode: FULL | RESTRICTED
-link_style: LINKS | PATHS_ONLY
+content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
+link_style: BLOB_LINKS | PATHS_ONLY
 publish_surface: PUSHED | NOT_PUSHED
 
 ## Target
@@ -362,8 +410,8 @@ After writing outputs, return:
 ```md
 ## GitHub Reporter Result
 posting_status: POSTED | FAILED | SKIPPED
-publish_mode: FULL | RESTRICTED
-link_style: LINKS | PATHS_ONLY
+content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
+link_style: BLOB_LINKS | PATHS_ONLY
 publish_surface: PUSHED | NOT_PUSHED
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV

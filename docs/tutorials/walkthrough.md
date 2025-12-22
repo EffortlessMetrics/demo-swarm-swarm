@@ -124,13 +124,34 @@ bash .claude/scripts/demoswarm.sh version
 
 ---
 
-## 5. Run Flow 4: Gate
+## 5. Run Flow 4: Review
 
-**You say:** "Flow 4 verifies the build and recommends merge or bounce."
+**You say:** "Flow 4 drains all PR feedback—CodeRabbit, CI, human reviews—until the worklist is empty."
 
 **You run:**
 ```
-/flow-4-gate
+/flow-4-review
+```
+
+**What happens:**
+1. `pr-feedback-harvester` collects all feedback (full severity range)
+2. `review-worklist-writer` creates actionable worklist
+3. Worklist loop: fix items, push, re-harvest (may run multiple times if `PARTIAL`)
+4. `review-cleanup` computes the receipt
+
+**You show:**
+- `.runs/<run-id>/review/review_worklist.md`
+- `review_receipt.json` with status (VERIFIED/PARTIAL)
+
+---
+
+## 6. Run Flow 5: Gate
+
+**You say:** "Flow 5 verifies the build and recommends merge or bounce."
+
+**You run:**
+```
+/flow-5-gate
 ```
 
 **What happens:**
@@ -146,13 +167,13 @@ bash .claude/scripts/demoswarm.sh version
 
 ---
 
-## 6. Run Flow 5: Deploy
+## 7. Run Flow 6: Deploy
 
-**You say:** "Flow 5 executes deployment and verifies."
+**You say:** "Flow 6 merges to mainline and verifies."
 
 **You run:**
 ```
-/flow-5-deploy
+/flow-6-deploy
 ```
 
 **What happens:**
@@ -164,13 +185,13 @@ bash .claude/scripts/demoswarm.sh version
 
 ---
 
-## 7. Run Flow 6: Wisdom
+## 8. Run Flow 7: Wisdom
 
-**You say:** "Flow 6 extracts learnings and closes feedback loops."
+**You say:** "Flow 7 extracts learnings and closes feedback loops."
 
 **You run:**
 ```
-/flow-6-wisdom
+/flow-7-wisdom
 ```
 
 **What happens:**
@@ -205,6 +226,9 @@ After a complete run:
 │   ├── test_summary.md
 │   ├── self_review.md
 │   └── build_receipt.json
+├── review/
+│   ├── review_worklist.md
+│   └── review_receipt.json
 ├── gate/
 │   ├── merge_decision.md
 │   └── gate_receipt.json
