@@ -52,7 +52,7 @@ Required (missing ⇒ UNVERIFIED):
 Expected station artifacts (missing ⇒ create SKIPPED stub, status depends on content):
 - `self_review.md` — if missing, create SKIPPED stub, status = UNVERIFIED
 - `test_execution.md` (from test-executor) — if missing, create SKIPPED stub, status = UNVERIFIED
-- `lint_report.md` (from lint-executor) — if missing, create SKIPPED stub (advisory)
+- `standards_report.md` (from standards-enforcer) — if missing, create SKIPPED stub (advisory)
 
 Optional (missing ⇒ note, continue):
 - `flow_plan.md`

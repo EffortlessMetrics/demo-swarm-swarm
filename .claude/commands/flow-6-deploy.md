@@ -192,25 +192,23 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
    - Scan artifacts before GitHub posting
    - Write `.runs/<run-id>/deploy/secrets_scan.md`, `.runs/<run-id>/deploy/secrets_status.json`
    - **Returns a Gate Result block** for orchestrator routing (control plane)
-   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED_PUBLISH); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `needs_upstream_fix` + `route_to_agent` (and optionally `route_to_flow`) drive routing
+   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `blocker_kind` explains why blocked
    - The JSON file is an audit record; orchestrator routes on the Gate Result block, not by re-reading the file
 
    **Gate Result block (returned by secrets-sanitizer):**
 
-   <!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-   ```
+   <!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+   ```yaml
    ## Gate Result
-   status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+   status: CLEAN | FIXED | BLOCKED
+   safe_to_commit: true | false
+   safe_to_publish: true | false
+   modified_files: true | false
+   findings_count: <int>
+   blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+   blocker_reason: <string | null>
+   ```
+   <!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 6b. **Checkpoint Commit** (repo-operator)
 

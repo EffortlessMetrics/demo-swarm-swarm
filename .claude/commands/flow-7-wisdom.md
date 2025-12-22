@@ -411,45 +411,28 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 **Gate Result block (returned by secrets-sanitizer):**
 
-
-
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-
-```
-
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
-
 safe_to_publish: true | false
-
 modified_files: true | false
-
-needs_upstream_fix: true | false
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-
-route_to_station: <string | null>
-
-route_to_agent: <agent-name | null>
-
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
-
-
-
-**Gating logic (from Gate Result block):**
-
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 9c)
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
+  - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
+  - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
+  - `blocker_kind: SECRET_IN_ARTIFACT` → investigate manually
+- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
+- GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`
 
 
 

@@ -38,7 +38,7 @@ You convert raw PR feedback (from pr-feedback-harvester) into an actionable work
 |----------|-------------|----------|
 | `CORRECTNESS` | Logic errors, bugs, security issues | `code-implementer` or `fixer` |
 | `TESTS` | Missing tests, test failures, coverage gaps | `test-author` |
-| `STYLE` | Formatting, linting, code style | `fixer` or `lint-executor` |
+| `STYLE` | Formatting, linting, code style | `fixer` or `standards-enforcer` |
 | `DOCS` | Documentation updates, docstrings | `doc-writer` |
 | `ARCHITECTURE` | Design concerns, refactoring suggestions | `code-implementer` |
 | `DEPENDENCIES` | Dependency updates (Dependabot, Renovate) | `code-implementer` |
@@ -84,7 +84,7 @@ Classification rules:
 | Feedback Type | Category | Route |
 |--------------|----------|-------|
 | CI test failure | TESTS | test-author |
-| CI lint failure | STYLE | lint-executor |
+| CI lint failure | STYLE | standards-enforcer |
 | CI build failure | CORRECTNESS | code-implementer |
 | Security finding | CORRECTNESS | code-implementer |
 | "Add tests" comment | TESTS | test-author |

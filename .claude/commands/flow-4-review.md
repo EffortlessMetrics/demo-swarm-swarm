@@ -524,7 +524,7 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
 6) Route to agent:
    - TESTS items → test-author
    - CORRECTNESS items → code-implementer
-   - STYLE items → fixer or lint-executor
+   - STYLE items → fixer or standards-enforcer
    - DOCS items → doc-writer
    - ARCHITECTURE items → code-implementer
 

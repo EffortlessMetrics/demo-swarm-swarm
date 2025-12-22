@@ -67,7 +67,7 @@ Flow 3 uses **two complementary state machines**:
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
   - (after checkpoint push) feedback check (pr-feedback-harvester; route on blockers[])
   - (checkpoint push every 3-5 ACs; feedback check after each)
-- lint-executor (format/lint; global)
+- standards-enforcer (format/lint/hygiene; global)
 - test-executor (full suite; global)
 - flakiness-detector (if failures; apply Worklist Loop Template)
 - mutation-auditor (mutation worklist; apply Worklist Loop Template)
@@ -117,7 +117,7 @@ If you encounter ambiguity, **document it and continue**. Write assumptions in a
 - mutation-auditor -- bounded mutation run + prioritized survivor worklist (routes to test-author/fixer)
 - fuzz-triager -- optional fuzz run + crash triage (config-present ⇒ run)
 - fixer -- apply targeted fixes from critiques
-- lint-executor -- format/lint codebase
+- standards-enforcer -- format/lint/hygiene codebase
 - test-executor -- rerun tests to confirm clean state
 
 **Polish and wrap-up**:
@@ -186,7 +186,7 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
   - [ ] AC-002: ...
   - [ ] (add rows per AC from ac_matrix.md)
   - [ ] (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] lint-executor (format/lint; global)
+- [ ] standards-enforcer (format/lint/hygiene; global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
 - [ ] mutation-auditor (mutation worklist)
@@ -386,7 +386,7 @@ When skipped, continue the AC loop — Flow 4 will harvest feedback formally.
 
 After all ACs complete, run global hardening:
 
-- Run `lint-executor` to format/lint the codebase (capture a lint report).
+- Run `standards-enforcer` to format/lint the codebase and remove debug artifacts (capture a standards report).
 - Run `test-executor` to run the **full test suite** (not per-AC filtered; captures coverage).
 - If tests fail or look unstable, run `flakiness-detector` and route on its Result block.
 - If tests are green, run `mutation-auditor` (bounded, on changed files) to produce a prioritized survivor worklist (route to `test-author` or `fixer`).
@@ -640,7 +640,7 @@ After this flow completes, `.runs/<run-id>/build/` should contain:
 - `open_questions.md`
 - `test_changes_summary.md`
 - `test_critique.md`
-- `lint_report.md`
+- `standards_report.md`
 - `test_execution.md`
 - `flakiness_report.md` (if run)
 - `impl_changes_summary.md`
@@ -691,7 +691,7 @@ Code/test changes in project-defined locations.
    - After checkpoint push: `pr-feedback-harvester` (full harvest; route on `blockers[]`)
    - Checkpoint push every 3-5 ACs or when touching core modules (feedback check after each)
 
-7. `lint-executor` (global)
+7. `standards-enforcer` (global — format/lint + hygiene sweep)
 
 8. `test-executor` (full suite; global)
 
@@ -790,7 +790,7 @@ If `build/ac_status.json` exists (rerun):
 
 **Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
 
-**After all ACs:** Proceed to global hardening (lint-executor, full test-executor, mutation, etc.)
+**After all ACs:** Proceed to global hardening (standards-enforcer, full test-executor, mutation, etc.)
 
 #### Worklist Loop Template (producer → fix lane → confirm)
 

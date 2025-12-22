@@ -285,35 +285,34 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 
 The agent returns a Gate Result block for orchestrator routing:
 
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
+```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 **Field semantics:**
 - `status` is **descriptive** (what happened). **Never infer permissions** from it.
 - `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
 - `modified_files` signals that artifact files were changed (for audit purposes).
-- `needs_upstream_fix` means the sanitizer can't make it safe (code/config needs remediation).
-- `recommended_action` + `route_to_*` give you a closed-vocab routing signal.
+- `blocker_kind` explains why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
 
 **Control plane vs audit plane:** The Gate Result block is the control plane for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the returned block, not by re-reading the file.
 
-**Gating logic (from Gate Result):**
+**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+- The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 13c)
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+  - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
+  - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
+  - `blocker_kind: SECRET_IN_ARTIFACT` → investigate manually
 - Publish mode gating: `FULL` only when `safe_to_publish: true`, Repo Operator Result `proceed_to_github_ops: true`, **and** `publish_surface: PUSHED`. Otherwise, GitHub ops (when access is allowed) run in `RESTRICTED` mode. Publish blocked implies RESTRICTED, **not skip**.
 
 ### Step 13b: Checkpoint Commit
