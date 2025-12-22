@@ -27,11 +27,13 @@ You own `.runs/<run-id>/build/build_receipt.json` and updating the `.runs/index.
 ## Status Model (Pack Standard)
 
 Use:
-- `VERIFIED`
-- `UNVERIFIED`
-- `CANNOT_PROCEED` (mechanical failure only)
+- `VERIFIED` — Required artifacts exist AND verification stations ran AND passed (executed evidence present)
+- `UNVERIFIED` — Verification incomplete, contradictions, critical failures, or missing core outputs
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use `BLOCKED` as a status. If something feels blocked, record it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default. Missing `test_execution.md` or `null` critic gates result in `UNVERIFIED`, not "concerns only."
 
 ## Inputs (best-effort)
 
@@ -47,10 +49,10 @@ Flow 3 artifacts under `.runs/<run-id>/build/`:
 Required (missing ⇒ UNVERIFIED):
 - At least one change summary: `test_changes_summary.md` **OR** `impl_changes_summary.md`
 
-Recommended (missing ⇒ note as concern, not blocker):
-- `self_review.md`
-- `test_execution.md` (from test-executor)
-- `lint_report.md` (from lint-executor)
+Expected station artifacts (missing ⇒ create SKIPPED stub, status depends on content):
+- `self_review.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `test_execution.md` (from test-executor) — if missing, create SKIPPED stub, status = UNVERIFIED
+- `lint_report.md` (from lint-executor) — if missing, create SKIPPED stub (advisory)
 
 Optional (missing ⇒ note, continue):
 - `flow_plan.md`
@@ -218,7 +220,9 @@ If a gate file is missing or the field is not extractable:
 
 ### Step 4: Derive receipt status + routing (mechanical)
 
-**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+**State-First Status Logic:** Be honest. The receipt logs what happened; it does not manufacture confidence.
+
+**Core principle:** `VERIFIED` requires executed evidence. Missing verification artifacts mean the verification didn't happen — that's `UNVERIFIED`, not "concern only."
 
 Derive `status`:
 
@@ -226,9 +230,21 @@ Derive `status`:
 * Else `UNVERIFIED` if ANY are true:
   * `missing_required` non-empty (no change summary at all)
   * any quality gate is `CANNOT_PROCEED` (mechanical failure in that station)
+  * `test_execution.md` missing (tests not executed)
+  * quality gates like `test_critic` or `code_critic` are `null` or `UNVERIFIED` (verification incomplete)
 * Else `VERIFIED`
 
-Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If a step was skipped, that's a choice, not a failure.
+**SKIPPED stubs:** If a station artifact is missing (e.g., `lint_report.md`, `test_execution.md`), create an explicit SKIPPED stub before writing the receipt:
+
+```markdown
+# <Artifact Name>
+status: SKIPPED
+reason: <why it wasn't produced>   # e.g., "station not run", "tool unavailable"
+evidence_sha: <current HEAD>
+generated_at: <iso8601>
+```
+
+This ensures nothing is silently missing. Downstream can see what happened, and Flow 7 (Wisdom) can learn "why do we keep skipping X?"
 
 Derive `recommended_action` (closed enum):
 
@@ -303,6 +319,17 @@ Write `.runs/<run-id>/build/build_receipt.json`:
     "self_reviewer": null
   },
 
+  "stations": {
+    "test_executor": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "lint_executor": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "self_reviewer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "test_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "code_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" }
+  },
+
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
+
   "key_artifacts": [
     "self_review.md",
     "test_changes_summary.md",
@@ -330,6 +357,12 @@ Notes:
 * `tests.*` is bound to `build/test_execution.md`: extract `canonical_summary` from the canonical summary line and counts from the `test_summary.*` fields in its Machine Summary block.
 * `metrics_binding` must be explicit (e.g., `test_execution:test-runner`), not `unknown` or `hard_coded`.
 * `critic_verdicts` duplicate the gate statuses extracted in Step 3 so Gate can validate without rereading artifacts.
+* `stations` tracks per-station execution evidence:
+  * `executed: true` if artifact exists and has a Machine Summary
+  * `executed: false` if artifact is missing or a SKIPPED stub
+  * `result`: `PASS` if gate status is VERIFIED, `FAIL` if UNVERIFIED/CANNOT_PROCEED, `SKIPPED` if stub, `UNKNOWN` otherwise
+* `evidence_sha` is current HEAD when receipt is generated (for staleness detection)
+* `generated_at` is ISO8601 timestamp for receipt creation
 
 ### Step 6: Update .runs/index.json (minimal ownership)
 

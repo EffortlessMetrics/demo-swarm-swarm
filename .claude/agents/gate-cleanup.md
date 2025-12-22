@@ -28,13 +28,14 @@ You own `gate_receipt.json` and updating `.runs/index.json` fields you own.
 
 ## Status Model (Pack Standard)
 
-Use this boring machine axis:
-
-- `VERIFIED`: Gate is safe to proceed (merge verdict MERGE) AND required artifacts exist AND required quality gates are VERIFIED AND required counts were derived mechanically.
-- `UNVERIFIED`: Gate is not safe to proceed OR artifacts are missing/unparseable; still write receipt + report + index update.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths, permissions, filesystem errors).
+Use:
+- `VERIFIED` — Gate is safe to proceed (merge verdict MERGE) AND required artifacts exist AND required quality gates are VERIFIED AND required counts were derived mechanically (executed evidence present)
+- `UNVERIFIED` — Gate not safe to proceed OR artifacts missing/unparseable OR quality gates incomplete; still write receipt + report + index update
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use "BLOCKED" as a status. Put blockers in `blockers[]`.
+
+**VERIFIED requires executed evidence.** If quality gates are `null` or `UNVERIFIED`, the receipt status is `UNVERIFIED` — we don't elevate confidence without verification evidence.
 
 ## Inputs
 
@@ -49,11 +50,11 @@ Flow 5 artifacts under `.runs/<run-id>/gate/`:
 Required (missing ⇒ UNVERIFIED):
 - `merge_decision.md` (the final gate verdict)
 
-Recommended (missing ⇒ concern, not blocker):
-- `receipt_audit.md`
-- `contract_compliance.md`
-- `security_scan.md`
-- `coverage_audit.md`
+Expected station artifacts (missing ⇒ create SKIPPED stub, status depends on content):
+- `receipt_audit.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `contract_compliance.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `security_scan.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `coverage_audit.md` — if missing, create SKIPPED stub (advisory)
 
 Optional (missing ⇒ note, continue):
 - `policy_analysis.md`
@@ -236,9 +237,11 @@ Else if `merge_verdict: BOUNCE` ⇒
 
 Else (`merge_verdict: MERGE`) ⇒
   - `recommended_action: PROCEED`
-  - Missing recommended artifacts are noted as concerns, not blockers
 
-Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED if the merge verdict is MERGE. The merge-decider already considered the evidence; cleanup just records and passes through.
+**State-first verification:** The merge-decider considered live evidence when it made its decision. Cleanup records that decision honestly:
+- If `merge_verdict: MERGE` and all required gate statuses are `VERIFIED` ⇒ `status: VERIFIED`
+- If `merge_verdict: MERGE` but some gate statuses are `null` or `UNVERIFIED` ⇒ `status: UNVERIFIED` (the merge-decider decided to proceed despite gaps — record that honestly)
+- Missing recommended artifacts are noted as concerns
 
 **Routing rule:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`.
 For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.
@@ -284,6 +287,17 @@ Write `.runs/<run-id>/gate/gate_receipt.json`:
     "security_scan": "VERIFIED | UNVERIFIED | CANNOT_PROCEED | null",
     "coverage_audit": "VERIFIED | UNVERIFIED | CANNOT_PROCEED | null"
   },
+
+  "stations": {
+    "receipt_checker": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "contract_enforcer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "security_scanner": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "coverage_enforcer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "merge_decider": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" }
+  },
+
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
 
   "key_artifacts": [
     "merge_decision.md",

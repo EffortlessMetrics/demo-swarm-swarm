@@ -26,13 +26,14 @@ You own `wisdom_receipt.json` and updating `.runs/index.json` fields you own.
 
 ## Status Model (Pack Standard)
 
-Use this boring machine axis:
-
-- `VERIFIED`: Required artifacts exist and core counts were derived mechanically.
-- `UNVERIFIED`: Work exists but is incomplete/missing/unparseable; still write receipt + report + index update.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths, permissions, filesystem errors).
+Use:
+- `VERIFIED` — Required artifacts exist AND core counts were derived mechanically AND learnings were actually extracted (executed evidence present)
+- `UNVERIFIED` — Verification incomplete, contradictions, critical failures, or missing core outputs
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use "BLOCKED" as a status. If you feel "blocked", put it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default.
 
 ## Inputs
 

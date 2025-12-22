@@ -61,7 +61,13 @@ Do **not** scan the entire repository. Do **not** scan other flow directories un
   - `FIXED`: findings existed and you applied protective changes (redact/externalize/unstage)
   - `BLOCKED`: cannot safely remediate (requires human judgment, upstream code fix, or mechanical failure)
 
-**Note:** `BLOCKED` covers both "unfixable without judgment" and mechanical failures. The `blocker_reason` field explains which. The sanitizer is a boolean gate—it doesn't route, it just says yes/no.
+**Note:** `BLOCKED` covers both "unfixable without judgment" and mechanical failures. The `blocker_kind` field discriminates the category:
+- `NONE`: not blocked (status is CLEAN or FIXED)
+- `MECHANICAL`: IO/permissions/tooling failure (cannot scan)
+- `SECRET_IN_CODE`: secret in staged code requiring upstream fix
+- `SECRET_IN_ARTIFACT`: secret in `.runs/` artifact that cannot be redacted safely
+
+The sanitizer is a boolean gate—it doesn't route, it just says yes/no. `blocker_kind` enables downstream to understand *why* without parsing free text.
 
 ## Flags (authoritative permissions)
 
@@ -146,6 +152,7 @@ Write `.runs/<run-id>/<flow>/secrets_status.json` with this schema:
   "safe_to_publish": true,
   "modified_files": false,
   "findings_count": 0,
+  "blocker_kind": "NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT",
   "blocker_reason": null,
 
   "modified_paths": [],
@@ -187,7 +194,7 @@ Rules:
 
 Return this exact block at end of response (no extra fields):
 
-<!-- PACK-CONTRACT: GATE_RESULT_V2 START -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
 ```markdown
 ## Gate Result
 status: CLEAN | FIXED | BLOCKED
@@ -195,9 +202,10 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
 blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V2 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 **Field semantics:**
 - `status` is **descriptive** (what happened):
@@ -207,7 +215,12 @@ blocker_reason: <string | null>
 - `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
 - `modified_files`: whether artifact files were changed (for audit purposes).
 - `findings_count`: total secrets/tokens detected (before remediation).
-- `blocker_reason`: why blocked (if `status: BLOCKED`); otherwise `null`.
+- `blocker_kind`: machine-readable category for why blocked:
+  - `NONE`: not blocked (status is CLEAN or FIXED)
+  - `MECHANICAL`: IO/permissions/tooling failure
+  - `SECRET_IN_CODE`: secret in staged code requiring upstream fix
+  - `SECRET_IN_ARTIFACT`: secret in `.runs/` artifact that cannot be redacted safely
+- `blocker_reason`: human-readable explanation (when `status: BLOCKED`); otherwise `null`.
 
 **No routing:** The sanitizer is a boolean gate, not a router. If `safe_to_publish: false`, the flow simply doesn't push. The orchestrator decides what to do next based on the work context, not routing hints from the sanitizer.
 

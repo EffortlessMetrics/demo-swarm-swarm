@@ -33,11 +33,13 @@ You own:
 
 Use the boring machine axis:
 
-- `VERIFIED`: Required artifacts exist and core counts were derived mechanically.
-- `UNVERIFIED`: Work exists but is incomplete/missing/unparseable; still write receipt + report (and index update if possible).
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
+- `VERIFIED` — Required artifacts exist AND critic stations ran AND passed (executed evidence present)
+- `UNVERIFIED` — Verification incomplete, contradictions, critical failures, or missing core outputs
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use "BLOCKED" as a status. If you feel blocked, put it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** A critic being "skipped" means the plan is unverified, not verified by default.
 
 ## Closed action vocabulary (pack standard)
 
@@ -69,16 +71,16 @@ Flow 2 artifacts under `.runs/<run-id>/plan/`:
 Required (missing ⇒ UNVERIFIED):
 - `adr.md` OR `work_plan.md` (at least one actionable plan artifact)
 
-Recommended (missing ⇒ concern, not blocker):
-- `design_options.md`
-- `design_validation.md`
-- `test_plan.md`
-- `ac_matrix.md`
-- `impact_map.json`
-- `policy_analysis.md`
+Expected station artifacts (missing ⇒ create SKIPPED stub, status depends on content):
+- `design_options.md` — if missing, create SKIPPED stub (prerequisite for ADR)
+- `design_validation.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `option_critique.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `test_plan.md` — if missing, create SKIPPED stub (advisory)
+- `ac_matrix.md` — if missing, create SKIPPED stub (advisory)
 
-Optional (missing ⇒ warn only):
-- `option_critique.md`
+Optional (missing ⇒ note, continue):
+- `policy_analysis.md`
+- `impact_map.json`
 - `api_contracts.yaml`
 - `schema.md`
 - `contract_critique.md`
@@ -315,16 +317,29 @@ bash .claude/scripts/demoswarm.sh count pattern --file ".runs/<run-id>/plan/adr.
 
 ### Step 4: Derive receipt status + routing
 
-**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+**State-First Status Logic:** Be honest. The receipt logs what happened; it does not manufacture confidence.
+
+**Core principle:** `VERIFIED` requires executed evidence. Missing or incomplete verification means the verification didn't happen — that's `UNVERIFIED`, not "concern only."
 
 Derive `status`:
 
 - If Step 0 failed ⇒ `CANNOT_PROCEED`
 - Else if `missing_required` non-empty (neither `adr.md` nor `work_plan.md` exists) ⇒ `UNVERIFIED`
 - Else if any quality gate is `CANNOT_PROCEED` ⇒ `UNVERIFIED` (mechanical failure)
+- Else if required gates (`design_critic`, `option_critic`) are `null` or `UNVERIFIED` ⇒ `UNVERIFIED` (verification incomplete)
 - Else ⇒ `VERIFIED`
 
-Note: `null` or `UNVERIFIED` quality gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If a step was skipped, that's a choice, not a failure.
+**SKIPPED stubs:** If a station artifact is missing (e.g., `design_validation.md`, `option_critique.md`), create an explicit SKIPPED stub:
+
+```markdown
+# <Artifact Name>
+status: SKIPPED
+reason: <why it wasn't produced>   # e.g., "station not run", "context checkpoint"
+evidence_sha: <current HEAD>
+generated_at: <iso8601>
+```
+
+This ensures nothing is silently missing. Downstream and Flow 7 (Wisdom) can see what happened.
 
 Derive `recommended_action` (closed enum):
 
@@ -409,6 +424,18 @@ Schema (fields are required unless explicitly noted optional):
       "drivers_total": null
     }
   },
+
+  "stations": {
+    "design_optioneer": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "option_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "adr_author": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "design_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "test_strategist": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "work_planner": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" }
+  },
+
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
 
   "key_artifacts": [
     "design_options.md",

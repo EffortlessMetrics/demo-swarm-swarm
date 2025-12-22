@@ -29,13 +29,14 @@ You own `deploy_receipt.json` and updating `.runs/index.json` fields you own.
 
 ## Status Model (Pack Standard)
 
-Use this boring machine axis:
-
-- `VERIFIED`: Required artifacts exist, `deployment_verdict` is `STABLE`, and core counts were derived mechanically.
-- `UNVERIFIED`: Work exists but is incomplete/missing/unparseable OR `deployment_verdict != STABLE`; still write receipt + report + index update.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths, permissions, filesystem errors).
+Use:
+- `VERIFIED` — Required artifacts exist AND `deployment_verdict` is `STABLE` AND `deploy_decider` status is VERIFIED (executed evidence present)
+- `UNVERIFIED` — Work exists but incomplete OR `deployment_verdict != STABLE` OR verification evidence missing; still write receipt + report + index update
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use "BLOCKED" as a status. If you feel blocked, put it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** If the deploy_decider status is `null` or `UNVERIFIED`, the receipt status is `UNVERIFIED` — we don't elevate confidence without verification evidence.
 
 ## Inputs
 
@@ -205,15 +206,17 @@ Never coerce unknown to `0`.
 
 ### Step 5: Determine receipt status + recommended_action (tighten-only)
 
-**Ops-First Status Logic:** Be permissive. Missing recommended artifacts don't block. The receipt logs what happened; the deployment verdict drives the decision.
+**State-First Status Logic:** Be honest. The receipt logs what happened; it does not manufacture confidence.
+
+**Core principle:** `VERIFIED` requires executed evidence. The deployment verdict is the primary evidence for Flow 6.
 
 Compute receipt `status`:
 
 - `CANNOT_PROCEED`: preflight I/O failure only
-- `VERIFIED`: `missing_required` empty AND `deployment_verdict == STABLE`
-- `UNVERIFIED`: otherwise
+- `VERIFIED`: `missing_required` empty AND `deployment_verdict == STABLE` AND `deploy_decider` status is `VERIFIED`
+- `UNVERIFIED`: otherwise (including `deployment_verdict == NOT_DEPLOYED` or `BLOCKED_BY_GATE`)
 
-Note: Missing `deployment_log.md` is a concern, not a blocker. Deploy can still be VERIFIED if the decision says STABLE.
+**Honest reporting:** If `deployment_verdict == STABLE` but `deploy_decider` status is `null` or `UNVERIFIED`, the receipt status is `UNVERIFIED` — we don't elevate confidence without verification evidence.
 
 Compute receipt routing:
 

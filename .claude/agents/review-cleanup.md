@@ -27,11 +27,16 @@ You own `.runs/<run-id>/review/review_receipt.json` and updating the `.runs/inde
 ## Status Model (Pack Standard)
 
 Use:
-- `VERIFIED`
-- `UNVERIFIED`
-- `CANNOT_PROCEED` (mechanical failure only)
+- `VERIFIED` — All critical/major items resolved, worklist complete, and verification stations ran (executed evidence present)
+- `PARTIAL` — Real progress made (some items resolved) but worklist incomplete; enables incremental progress
+- `UNVERIFIED` — Verification incomplete, critical items pending, contradictions, or missing core outputs
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use `BLOCKED` as a status. If something feels blocked, record it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** Incomplete worklist processing means the review is `PARTIAL` or `UNVERIFIED`, not verified by default.
+
+**PARTIAL semantics:** Flow 4 has unbounded loops. When context is exhausted mid-worklist, `PARTIAL` means "real progress made, more to do, rerun to continue." This is honest reporting, not failure.
 
 ## Inputs (best-effort)
 
@@ -143,16 +148,24 @@ Read worklist summary to determine completion:
 
 ### Step 4: Derive receipt status + routing (mechanical)
 
-**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+**State-First Status Logic:** Be honest. The receipt logs what happened; it does not manufacture confidence.
+
+**Core principle:** `VERIFIED` requires executed evidence. For Flow 4, this means the worklist was actually processed.
 
 Derive `status`:
 - `CANNOT_PROCEED` only if Step 0 failed (IO/perms/tooling)
+- Else `PARTIAL` if:
+  - Worklist exists AND some items are resolved AND some items remain pending (context checkpoint, not failure)
+  - This is a **feature, not a failure** — it enables incremental progress
 - Else `UNVERIFIED` if ANY are true:
   - `missing_required` non-empty (no worklist at all)
   - `has_critical_pending` is true (critical items still unresolved)
-- Else `VERIFIED`
+  - No worklist items were resolved (no actual work done)
+- Else `VERIFIED` (all critical/major resolved, worklist complete)
 
-Note: Missing `pr_feedback.md` is a concern, not a blocker. Review can still be VERIFIED if the worklist exists and is resolved.
+**PARTIAL semantics:** Flow 4 has unbounded loops. When context is exhausted mid-worklist, `PARTIAL` means "real progress made, more to do, rerun to continue." This is honest reporting, not failure.
+
+**SKIPPED stubs:** If expected artifacts are missing (e.g., `pr_feedback.md`), create an explicit SKIPPED stub rather than silently ignoring.
 
 Derive `recommended_action` (closed enum):
 - If receipt `status: CANNOT_PROCEED` ⇒ `FIX_ENV`

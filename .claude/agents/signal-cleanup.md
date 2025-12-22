@@ -34,11 +34,13 @@ Secrets scanning is handled by `secrets-sanitizer` **after** you run.
 
 Use the boring machine axis:
 
-- `VERIFIED`: Required artifacts exist and core counts were derived mechanically.
-- `UNVERIFIED`: Work exists but is incomplete/missing/unparseable; still write receipt + report (and index update if possible).
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
+- `VERIFIED` — Required artifacts exist AND critic stations ran AND passed (executed evidence present)
+- `UNVERIFIED` — Verification incomplete, contradictions, critical failures, or missing core outputs
+- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
 
 Do **not** use "BLOCKED" as a status. If you feel "blocked", put it in `blockers[]`.
+
+**VERIFIED requires executed evidence.** A critic being "skipped" means the requirements are unverified, not verified by default.
 
 ## Closed action vocabulary (Pack Standard)
 
@@ -67,13 +69,13 @@ Flow 1 artifacts under `.runs/<run-id>/signal/`:
 Required (missing ⇒ UNVERIFIED):
 - `requirements.md` (core output of Signal)
 
-Recommended (missing ⇒ concern, not blocker):
-- `features/*.feature` (at least one BDD scenario)
-- `open_questions.md`
+Expected station artifacts (missing ⇒ create SKIPPED stub, status depends on content):
+- `requirements_critique.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `bdd_critique.md` — if missing, create SKIPPED stub, status = UNVERIFIED
+- `features/*.feature` (at least one BDD scenario) — if missing, create SKIPPED stub (advisory)
 
 Optional (missing ⇒ note, continue):
-- `requirements_critique.md`
-- `bdd_critique.md`
+- `open_questions.md`
 - `risk_assessment.md`
 - `early_risks.md`
 - `verification_notes.md` (expected when NFRs exist)
@@ -193,16 +195,29 @@ If file missing or status not found:
 
 ### Step 5: Derive receipt status + routing
 
-**Ops-First Status Logic:** Be permissive. Missing optional artifacts don't block. The receipt logs what happened; downstream decides whether it's good enough.
+**State-First Status Logic:** Be honest. The receipt logs what happened; it does not manufacture confidence.
+
+**Core principle:** `VERIFIED` requires executed evidence. Missing or incomplete verification means the verification didn't happen — that's `UNVERIFIED`, not "concern only."
 
 Derive `status`:
 
 * If Step 0 failed ⇒ `CANNOT_PROCEED`
 * Else if `missing_required` non-empty ⇒ `UNVERIFIED`
 * Else if a critic gate is `CANNOT_PROCEED` ⇒ `UNVERIFIED` (mechanical failure)
+* Else if both `requirements_critic` and `bdd_critic` are `null` or `UNVERIFIED` ⇒ `UNVERIFIED` (verification incomplete)
 * Else ⇒ `VERIFIED`
 
-Note: `null` or `UNVERIFIED` critic gates do NOT prevent VERIFIED. They're recorded as concerns, not blockers. If critics were skipped, that's a choice, not a failure.
+**SKIPPED stubs:** If a station artifact is missing (e.g., `requirements_critique.md`, `bdd_critique.md`), create an explicit SKIPPED stub:
+
+```markdown
+# <Artifact Name>
+status: SKIPPED
+reason: <why it wasn't produced>   # e.g., "station not run", "context checkpoint"
+evidence_sha: <current HEAD>
+generated_at: <iso8601>
+```
+
+This ensures nothing is silently missing. Downstream and Flow 7 (Wisdom) can see what happened.
 
 Derive `recommended_action` (closed enum):
 
@@ -251,6 +266,16 @@ Write `.runs/<run-id>/signal/signal_receipt.json`:
     "bdd_critic": "VERIFIED | UNVERIFIED | CANNOT_PROCEED | null"
   },
 
+  "stations": {
+    "requirements_author": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "bdd_author": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "requirements_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" },
+    "bdd_critic": { "executed": false, "result": "SKIPPED | PASS | FAIL | UNKNOWN" }
+  },
+
+  "evidence_sha": "<current HEAD when receipt was generated>",
+  "generated_at": "<ISO8601 timestamp>",
+
   "key_artifacts": [
     "requirements.md",
     "features/*.feature",
@@ -265,6 +290,14 @@ Write `.runs/<run-id>/signal/signal_receipt.json`:
 ```
 
 Set `github_reporting: "SKIPPED_LOCAL_ONLY"` when `run_meta.github_ops_allowed == false` (repo mismatch). Otherwise use `PENDING`.
+
+Notes:
+* `stations` tracks per-station execution evidence:
+  * `executed: true` if artifact exists and has a Machine Summary
+  * `executed: false` if artifact is missing or a SKIPPED stub
+  * `result`: `PASS` if gate status is VERIFIED, `FAIL` if UNVERIFIED/CANNOT_PROCEED, `SKIPPED` if stub, `UNKNOWN` otherwise
+* `evidence_sha` is current HEAD when receipt is generated (for staleness detection)
+* `generated_at` is ISO8601 timestamp for receipt creation
 
 ### Step 7: Update `.runs/index.json` (minimal ownership)
 

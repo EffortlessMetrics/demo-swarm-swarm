@@ -295,6 +295,11 @@ Receipt guarantees:
 - `counts` are mechanical (grep/wc/parse), never estimated.
 - `quality_gates` are sourced from agent Machine Summaries (no recomputation).
 - Reporters summarize from receipts, not from raw artifacts.
+- `stations` tracks per-station execution:
+  - `executed: true|false` — whether the station ran (vs. SKIPPED stub)
+  - `result: PASS|FAIL|SKIPPED|UNKNOWN` — what the station produced
+- `evidence_sha` is the commit SHA when receipt was generated (for staleness detection)
+- `generated_at` is the ISO8601 timestamp for receipt creation
 
 ### State-First Verification (Receipts as Logs, Not Gatekeepers)
 
@@ -392,7 +397,7 @@ Flows and agents should use these blocks **verbatim** (copy/paste) to avoid sche
 
 ### Gate Result (emitted by `secrets-sanitizer`)
 
-<!-- PACK-CONTRACT: GATE_RESULT_V2 START -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
 ```yaml
 ## Gate Result
 status: CLEAN | FIXED | BLOCKED
@@ -400,14 +405,16 @@ safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
 findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
 blocker_reason: <string | null>
 ```
-<!-- PACK-CONTRACT: GATE_RESULT_V2 END -->
+<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
 
 Notes:
 - The sanitizer is a **boolean gate**, not a router. It says yes/no.
 - If `safe_to_publish: false`, the flow doesn't push. The orchestrator decides next steps.
-- `blocker_reason` explains why (if BLOCKED); otherwise null.
+- `blocker_kind` is the machine-readable category: `NONE` (not blocked), `MECHANICAL` (IO/tooling failure), `SECRET_IN_CODE` (staged code needs fix), `SECRET_IN_ARTIFACT` (artifact can't be redacted).
+- `blocker_reason` is the human-readable explanation (if BLOCKED); otherwise null.
 
 ### Repo Operator Result (emitted by `repo-operator`)
 
@@ -453,7 +460,25 @@ Do not conflate these domains:
 1. **Flow/Agent Status** (Machine Summary + receipts)
    `VERIFIED | UNVERIFIED | PARTIAL | CANNOT_PROCEED`
 
-   Note: `PARTIAL` is valid for unbounded loops (Flow 4 Review) when context checkpoint occurs. It means "progress made, more to do, rerun to continue." This is a feature, not a failure—it prevents hallucination from context stuffing.
+   **VERIFIED requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default. Missing verification artifacts (test execution, critics) result in `UNVERIFIED`, not "concern only."
+
+   Status semantics:
+   - `VERIFIED`: Required artifacts exist AND verification stations ran AND passed (executed evidence present)
+   - `UNVERIFIED`: Verification incomplete, contradictions, critical failures, or missing core outputs
+   - `PARTIAL`: Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review)
+   - `CANNOT_PROCEED`: Mechanical failure only (IO/permissions/tooling)
+
+   **SKIPPED stubs:** Cleanup agents create explicit SKIPPED stubs for missing station artifacts:
+   ```markdown
+   # <Artifact Name>
+   status: SKIPPED
+   reason: <why it wasn't produced>
+   evidence_sha: <current HEAD>
+   generated_at: <iso8601>
+   ```
+   This ensures nothing is silently missing. Downstream and Flow 7 (Wisdom) can see what happened.
+
+   **Per-station tracking:** Receipts include a `stations` section with `executed: true|false` and `result: PASS|FAIL|SKIPPED|UNKNOWN` for each station. This is the machine-grade evidence of what ran.
 
 2. **Repo Operator Status** (Repo Operator Result)
    `COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED`

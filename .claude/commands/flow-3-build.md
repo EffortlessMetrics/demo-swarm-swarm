@@ -65,7 +65,7 @@ Flow 3 uses **two complementary state machines**:
   - test-executor (fast confirm: AC-scoped tests only)
   - update build/ac_status.json
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) ci-pulse check (optional; route if red)
+  - (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
   - (checkpoint push every 3-5 ACs)
 - lint-executor (format/lint; global)
 - test-executor (full suite; global)
@@ -182,10 +182,10 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
 - [ ] AC loop (for each AC in ac_matrix.md):
   - [ ] AC-001: test-author → test-critic → code-implementer → code-critic → fast confirm
   - [ ] (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - [ ] (after checkpoint push) ci-pulse check (optional; route if red)
+  - [ ] (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
   - [ ] AC-002: ...
   - [ ] (add rows per AC from ac_matrix.md)
-  - [ ] (checkpoint push every 3-5 ACs; ci-pulse after each)
+  - [ ] (checkpoint push every 3-5 ACs; feedback check after each)
 - [ ] lint-executor (format/lint; global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
@@ -326,47 +326,48 @@ For each AC (e.g., AC-001):
 
 This turns "push at end" into "push early, push often" — continuous feedback, not post-hoc review.
 
-### Step 5c: CI Pulse Check (Lightweight Feedback Ingestion)
+### Step 5c: Feedback Check (Full Harvest, Filtered Routing)
 
-**After each checkpoint push, run a quick CI pulse check.**
+**After each checkpoint push, harvest full PR feedback and filter for blockers.**
 
-This is a *thin* feedback ingestion — not the full Flow 4 harvest, just enough signal to catch deterministic failures early.
+This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse mode." If we're paying the compute cost to fetch PR data, we get **all of it**. The difference is how Flow 3 routes on the results.
 
 **What it does:**
-1. Check CI status: `gh api /repos/{owner}/{repo}/commits/{sha}/check-runs`
-2. Capture: overall conclusion (green/red), top failing check names
-3. Optionally: check for new CodeRabbit comments (count only, not content)
-4. Write: `.runs/<run-id>/build/ci_pulse.md`
+1. **Call `pr-feedback-harvester`** (full harvest — CI status, all comments, all reviews)
+2. **Read the Machine Summary** from `pr_feedback.md`:
+   - `ci_status: PASSING | FAILING | PENDING`
+   - `counts.critical: <n>`
+   - `counts.major: <n>`
+3. **Route on blockers only** (critical/major items), ignore nits during build
 
-**CI Pulse artifact format:**
-```markdown
-# CI Pulse - <timestamp>
+**Routing logic (Filter for Blockers):**
 
-## Status: GREEN | RED | PENDING
+```yaml
+# From pr_feedback.md Machine Summary
+if ci_status == FAILING or counts.critical > 0:
+  # BLOCKER — fix immediately before more ACs pile up
+  route_to: fixer | test-author | code-implementer (based on failure type)
 
-## Check Runs
-| Check | Status | Conclusion |
-|-------|--------|------------|
-| build | completed | success |
-| test | completed | failure |
+elif counts.major > 0:
+  # MAJOR issues exist but not critical — note them, continue AC loop
+  # Flow 4 will pick these up for comprehensive resolution
+  continue_ac_loop: true
+  note_in_flow_plan: "Major items pending: {n}"
 
-## Failing Checks
-- test: 2 tests failed
-
-## Bot Activity
-- CodeRabbit comments: 3 new since last pulse
-
-## Routing
-- If RED: route to fixer/test-author for current AC
-- If GREEN: continue AC loop
+else:
+  # GREEN or MINOR/INFO only — continue building
+  continue_ac_loop: true
 ```
 
-**Routing on pulse:**
-- If CI **red**: route back to the current AC's microloop or `fixer` immediately (cheap fix before more ACs pile up)
-- If CI **green** or **pending**: continue the AC loop
-- If CodeRabbit has new comments: note them, but defer deep harvest to Flow 4
+**Why full harvest instead of "pulse mode"?**
+- We pay the same latency/compute cost either way
+- Full harvest means Flow 3 catches CodeRabbit security warnings, not just CI red
+- The artifact (`pr_feedback.md`) is reused by Flow 4 — no redundant API calls
+- MINOR/INFO items are captured but ignored during build — Flow 4 drains them
 
-**Why this matters:** This prevents building 10 ACs while CI is red for a simple failure. Cheap check, fast routing.
+**Flow 3 vs Flow 4 filtering:**
+- **Flow 3 (Build):** Routes on CRITICAL/FAILING only. MAJOR items are noted but don't stop the AC loop. MINOR/INFO are ignored.
+- **Flow 4 (Review):** Drains the complete worklist including MINOR items.
 
 **Optional station:** The orchestrator may skip this step if:
 - No PR exists yet (first push)
@@ -654,7 +655,7 @@ After this flow completes, `.runs/<run-id>/build/` should contain:
 - `github_report.md`
 - `git_status.md` (if anomaly detected)
 - `pr_creation_status.md` (from pr-creator)
-- `ci_pulse.md` (lightweight CI/bot feedback snapshot; optional)
+- `pr_feedback.md` (full PR feedback harvest; reused by Flow 4)
 
 Also creates in `.runs/<run-id>/build/`:
 - `ac_status.json` (runtime AC completion tracker - created by Build, updated per AC)
@@ -681,8 +682,8 @@ Code/test changes in project-defined locations.
 
 6. **AC loop** (for each AC in `ac_matrix.md`; apply AC Loop Template below)
    - After first vertical slice: `repo-operator` (checkpoint push) + `pr-creator` (early; once)
-   - After checkpoint push: `ci-pulse` check (optional; route to fixer if red)
-   - Checkpoint push every 3-5 ACs or when touching core modules (ci-pulse after each)
+   - After checkpoint push: `pr-feedback-harvester` (full harvest; route on CRITICAL/FAILING only)
+   - Checkpoint push every 3-5 ACs or when touching core modules (feedback check after each)
 
 7. `lint-executor` (global)
 
@@ -801,8 +802,8 @@ If `build/ac_status.json` exists (rerun):
 - [ ] test-strategist (if ac_matrix.md missing)
 - [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) ci-pulse check (optional; route if red)
-  - (checkpoint push every 3-5 ACs; ci-pulse after each)
+  - (after checkpoint push) feedback check (pr-feedback-harvester; route on CRITICAL/FAILING)
+  - (checkpoint push every 3-5 ACs; feedback check after each)
 - [ ] lint-executor (global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
