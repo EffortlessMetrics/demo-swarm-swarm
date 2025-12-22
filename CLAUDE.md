@@ -52,14 +52,17 @@ Gates engage only when crossing the boundary:
 
 If a gate blocks, **keep working locally**. Gates constrain publishing, not thinking.
 
-### Allowlists as Staging Guards
+### Intent Surfaces (Not Allowlists)
 
-Allowlists prevent `git add .` accidents. They do NOT:
-- Determine what the model can read or analyze
-- Force "read prohibitions" on human-authored files
-- Block engineering work
+Flows express **intent** (what outputs to expect). Agents derive **paths** (what to stage).
 
-If tracked anomalies exist outside the allowlist, push is blocked but work continues.
+This is a map, not a permission boundary:
+- "Flow 3 outputs to `.runs/<run-id>/build/` + project code" (intent)
+- repo-operator figures out what files to stage (execution)
+
+**Extras are normal:** Ad-hoc fixes (typos, config tweaks) get staged and recorded, not blocked.
+
+**Anomalies are rare:** Only tracked/staged changes outside the intent surface trigger push blocks—and even then, the commit proceeds locally.
 
 ### Fix-Forward Default
 
@@ -126,6 +129,34 @@ These rules exist to prevent drift and "model invention":
    Identity changes happen via `canonical_key` + `aliases[]`, never via renaming directories.
 
 You'll see these repeated in the relevant sections on purpose.
+
+---
+
+## Flow Authoring Rule
+
+**Flows are routing tables. Agents are workers.**
+
+This separation is about **token economics**: Orchestrator context is expensive, Agent execution is cheap.
+
+### Flows contain:
+- Station order (which agents to call, in what sequence)
+- Routing logic (which Result block to read, what to do on PROCEED/RERUN/BOUNCE)
+- Artifact expectations (what outputs to expect from each station)
+- Termination conditions (when the flow is complete)
+
+### Flows must NOT contain:
+- Shell snippets (beyond illustrative examples)
+- File path lists to stage/check (move to agents)
+- Parsing logic or computation
+- If/else chains for file existence checks
+
+### Agents contain:
+- All procedural work (read files, run commands, write outputs)
+- Intent-to-paths mapping (the agent figures out what to stage)
+- Validation logic (the agent checks if things are correct)
+- Machine Summary + Result blocks for orchestrator routing
+
+**Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
 
 ---
 
@@ -285,7 +316,13 @@ Receipt guarantees:
 
 **Agent invariant:** Validate against current repo state and executed evidence. Use receipts as historical breadcrumbs and summary inputs. Never use receipt presence or receipt fields as permission to proceed.
 
-**Drift rule:** If `receipt.commit_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+**Drift rule:** If `receipt.evidence_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+
+**Evidence field convention:** Receipts should include these fields for staleness detection:
+- `evidence_sha`: The commit SHA when this evidence was generated
+- `generated_at`: ISO8601 timestamp
+
+When these fields mismatch current HEAD, the receipt is advisory, not authoritative.
 
 **Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
 
