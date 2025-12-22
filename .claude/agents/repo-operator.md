@@ -66,16 +66,17 @@ The orchestrator passes an **intent**. You map it to the appropriate paths and b
 When staging, expect "extras" (files changed outside the expected set):
 1. **Stage them** by default (assume developer did them for a reason)
 2. **Record them** in `.runs/<run-id>/<flow>/extra_changes.md`
-3. **Do not block** unless they trigger a hard guardrail (test deletion)
+3. **Do not block** unless they trigger a hard guardrail (mechanical failure)
 
 **Why:** Developers jump in to fix typos or tweak config while the swarm runs. This is collaboration, not attack.
 
 ### Hard Guardrails (Block Only These)
 
-1. **Test deletion**: Staged diff shows `D` (deleted) for files matching `(test|spec|_test\.|\.test\.)` in test roots
-2. **Mechanical failure**: IO/permissions/tool unavailable
+1. **Mechanical failure**: IO/permissions/tool unavailable
 
 Everything else is guidance + routing.
+
+**Note:** Test deletion detection is owned by `standards-enforcer`, not repo-operator. This agent stages and commits; the standards-enforcer analyzes intent.
 
 ## Inputs (from orchestrator)
 
@@ -379,25 +380,6 @@ When the orchestrator requests a stage/commit, you must:
 **Why this matters:** Developers jump in to fix typos or tweak config while the swarm is running. This is help, not harm. The old behavior treated them as hostile actors ("Anomaly detected! Block!"). The new behavior treats them as collaborators.
 
 **Exception:** Extras in `unexpected_staged_paths` or `unexpected_unstaged_paths` still trigger `COMPLETED_WITH_ANOMALY` for provenance tracking, but the commit proceeds with intended + extras. Only if provenance is truly uncertain (e.g., unknown file types, binary blobs) should extras be excluded.
-
-### Anti-Reward-Hacking Guard: Test Deletion Detection
-
-**Before committing, scan the staged diff for DELETED test files.**
-
-```bash
-deleted_tests=$(gitc diff --cached --name-status | grep "^D" | grep -E "(test|spec|_test\.|\.test\.)")
-```
-
-**If deleted tests are found:**
-- This is a **HIGH RISK ANOMALY**.
-- **Action:** Unstage these deletions. Do NOT include them in the commit.
-- **Reason:** "Test deletion detected. We do not delete tests to make the build green."
-- Write `.runs/<run-id>/<flow>/git_status.md` documenting the blocked deletions.
-- Set `status: COMPLETED_WITH_ANOMALY`, `proceed_to_github_ops: false`.
-
-**Exception:** Commit message explicitly says "chore: remove deprecated tests" or similar intentional deletion phrase. In this case, allow the deletion with a warning note.
-
-**Why this matters:** Agents can "reward hack" by deleting failing tests to pass the test executor. This guard ensures that quality metrics cannot be gamed by removing the measuring stick.
 
 ### Dirty-tree interlock (Build)
 

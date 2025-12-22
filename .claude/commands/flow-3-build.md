@@ -31,6 +31,22 @@ You are orchestrating Flow 3 of the SDLC swarm.
 - Update docs
 - Produce `build_receipt.json` and `self_review.md`
 
+## Orchestration Model: Agents Talk, You Listen
+
+**You are an orchestrator, not an investigator.** You direct agents and route on their responses.
+
+- **Call agents** - they do the work
+- **Listen to responses** - agents tell you what happened
+- **Route on response text** - the Result block in the agent's response is your control plane
+- **Do not re-read files** - artifacts are for future flows (e.g. Flow 5/7 audit) and for agent-to-agent communication, not for you to parse
+
+**The agent's response is the control plane.** When an agent returns, it tells you:
+- `status`: VERIFIED, UNVERIFIED, BLOCKED, CANNOT_PROCEED
+- `recommended_action`: PROCEED, RERUN, BOUNCE, FIX_ENV
+- `route_to_agent`: where to route if bouncing
+
+**You route on what agents tell you, not on file parsing.**
+
 ## Before You Begin (Required)
 
 ### Two State Machines
@@ -294,7 +310,7 @@ For each AC (e.g., AC-001):
 
 **Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
 
-**Anti-Reward-Hacking Guard:** After each code-implementer pass, check `git diff` for deleted tests. If existing tests were removed (not just updated), flag as **HIGH risk** in the code-critic review unless explicitly justified. Deleting tests to make code "pass" is a reward-hacking pattern that degrades quality.
+**Anti-Reward-Hacking Guard:** `standards-enforcer` (run in Step 6) analyzes the full diff and catches silent test deletion. The code-critic may flag suspicious deletions during review, but the authoritative safety check is `standards-enforcer`.
 
 **After all ACs complete:** Proceed to global hardening (Step 6).
 
@@ -386,7 +402,11 @@ When skipped, continue the AC loop — Flow 4 will harvest feedback formally.
 
 After all ACs complete, run global hardening:
 
-- Run `standards-enforcer` to format/lint the codebase and remove debug artifacts (capture a standards report).
+- **Run `standards-enforcer`**: Format/lint, remove debug artifacts, and **check for reward-hacking** (silent test deletion).
+  - **Route on response:**
+    - `VERIFIED` → proceed to test-executor
+    - `BLOCKED` (safety gate failed) → route to `code-implementer` to restore tests or justify deletion
+    - `UNVERIFIED` (coherence issues) → route to `code-implementer` to complete refactor
 - Run `test-executor` to run the **full test suite** (not per-AC filtered; captures coverage).
 - If tests fail or look unstable, run `flakiness-detector` and route on its Result block.
 - If tests are green, run `mutation-auditor` (bounded, on changed files) to produce a prioritized survivor worklist (route to `test-author` or `fixer`).
@@ -691,7 +711,7 @@ Code/test changes in project-defined locations.
    - After checkpoint push: `pr-feedback-harvester` (full harvest; route on `blockers[]`)
    - Checkpoint push every 3-5 ACs or when touching core modules (feedback check after each)
 
-7. `standards-enforcer` (global — format/lint + hygiene sweep)
+7. `standards-enforcer` (global — format/lint + hygiene + safety check; route on BLOCKED/UNVERIFIED)
 
 8. `test-executor` (full suite; global)
 
@@ -774,10 +794,10 @@ If `build/ac_status.json` exists (rerun):
 4. **code-implementer ↔ code-critic microloop** (scope: this AC only; apply Microloop Template):
    - code-implementer: Pass AC-ID, Description, Impl Hints, test file locations
    - code-critic: Reviews code for this AC against ADR/contracts
-   - **Anti-Reward-Hacking:** code-critic checks `git diff` for deleted tests; flags as HIGH risk if tests removed without justification
    - Apply pass if critic returns `recommended_action: RERUN`
    - Re-critique, then proceed (2 passes default)
    - Update `build/ac_status.json`: `"code_implemented": true`, `"code_reviewed": true`, `"files_touched": [...]`
+   - (Anti-reward-hacking check deferred to `standards-enforcer` in Step 6)
 
 5. **test-executor** (fast confirm: AC-scoped tests only)
    - Run filtered test subset (by AC-ID tag/name)
@@ -810,7 +830,7 @@ If `build/ac_status.json` exists (rerun):
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
   - (after checkpoint push) feedback check (pr-feedback-harvester; route on `blockers[]`)
   - (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] standards-enforcer (global)
+- [ ] standards-enforcer (global; route on BLOCKED/UNVERIFIED to code-implementer)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
 - [ ] mutation-auditor
