@@ -265,6 +265,30 @@ Receipt guarantees:
 - `quality_gates` are sourced from agent Machine Summaries (no recomputation).
 - Reporters summarize from receipts, not from raw artifacts.
 
+### State-First Verification (Receipts as Logs, Not Gatekeepers)
+
+**Core principle:** The repo's current state (HEAD + working tree + staged diff + actual tool results) is the thing you're building and shipping. Receipts help you investigate what happened, why, and where to look next—but they are not the primary mechanism for verifying and determining outcomes once the repo has moved.
+
+**Trust hierarchy:**
+
+1. **Live repo state + executed evidence** (primary)
+   - `git rev-parse HEAD`, `git diff`, `git status`
+   - Test/lint/mutation outputs generated *now*
+   - CI check runs for the current SHA
+
+2. **Receipts** (cached evidence of prior state)
+   - What an agent ran earlier
+   - What it saw then
+   - Links/paths to logs and artifacts
+
+3. **Narrative summaries** (useful for humans, never a control input)
+
+**Agent invariant:** Validate against current repo state and executed evidence. Use receipts as historical breadcrumbs and summary inputs. Never use receipt presence or receipt fields as permission to proceed.
+
+**Drift rule:** If `receipt.commit_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+
+**Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
+
 ---
 
 ## Machine Summary Contract

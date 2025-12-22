@@ -228,11 +228,15 @@ Write a short status report including:
 
 Posting failures should not block the flow. Record and continue.
 
-## Receipt-First Approach
+## State-First Verification (Receipts as Summaries, Not Gatekeepers)
+
+**Core principle:** The repo's current state (HEAD + working tree + staged diff + actual tool results) is the thing you're building and shipping. Receipts help you summarize what happened and reference stable evidence—but they are not the primary mechanism for verifying outcomes when the repo has moved.
+
+**For reporting purposes:** Receipts are excellent structured summaries. Use them to populate counts, statuses, and artifact paths. But if a receipt seems stale (different commit_sha than current HEAD), note this as a concern rather than treating the receipt as blocking.
 
 Applies to **FULL** and **FULL_PATHS_ONLY** modes. In **SUMMARY_ONLY** and **MACHINE_ONLY** modes, receipts may be read for machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
 
-Each flow has a receipt that is the single source of truth. Prefer these canonical receipts:
+Prefer these canonical receipts for summary data:
 
 | Flow | Receipt File |
 |------|--------------|

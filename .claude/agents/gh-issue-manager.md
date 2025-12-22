@@ -496,4 +496,6 @@ The file is the audit record. This block is the control plane.
 
 ## Philosophy
 
+**State-first approach:** The repo's current state is the primary truth. Use receipts for structured summaries (counts, statuses, artifact paths), but if receipts seem stale, note this as a concern rather than blocking. The issue is an observability pane, not a permission gate.
+
 Treat the issue as an observability pane: stable identifiers, stable markers, stable diffs. Be predictable, and prefer "record the truth" over "be clever."

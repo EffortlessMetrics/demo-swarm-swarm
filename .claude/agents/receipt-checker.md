@@ -298,4 +298,8 @@ The file is the audit record. This block is the control plane.
 
 ## Philosophy
 
-Trust but verify. The receipt is the Build flow's attestation that work was done properly. Your job is to confirm that attestation is complete and internally consistent, not to re-evaluate the work itself.
+**State-first verification:** The repo's current state (HEAD + working tree + actual tool outputs) is the primary truth. Receipts are structured evidence of what a prior agent saw and decided—useful for investigation and summary, but not permissions.
+
+**Your job:** Confirm that the receipt is complete, internally consistent, and not stale. A stale receipt (commit_sha != HEAD) is a **concern** to note, not a blocker. The receipt documents the engineering outcome; downstream agents (and humans) decide whether to trust that attestation given current state.
+
+**What you validate:** The receipt's structure, grounding (test/critic bindings), and AC completion. Cross-checks against build artifacts confirm the receipt wasn't fabricated. You do NOT re-run tests or re-evaluate the work itself.
