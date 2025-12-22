@@ -393,11 +393,33 @@ If `git push` fails due to remote divergence:
    - The orchestrator will route to `test-executor` or `code-implementer` to fix
 
 5. **If rebase still fails** (non-trivial semantic conflict):
-   - Do not attempt further resolution
+
+   **First, attempt semantic resolution if you can:**
+   - Read both sides of the conflict
+   - If you can understand the intent (e.g., "human added a helper function, bot modified the same area"):
+     - Apply the merge that preserves both intents
+     - Log the resolution in `git_status.md`
+     - Continue to verification step
+
+   **If you cannot resolve semantically:**
+   - Do not guess or force a bad merge
    - Set `status: COMPLETED_WITH_ANOMALY`
-   - Write `git_status.md` with conflict details
-   - Return `proceed_to_github_ops: false`
-   - The flow continues locally; conflict becomes a documented anomaly
+   - Write `git_status.md` with:
+     - Conflict file paths
+     - Both sides of the conflict (abbreviated)
+     - Why automatic resolution failed
+   - Return with escalation hint:
+     ```yaml
+     ## Repo Operator Result
+     operation: build
+     status: COMPLETED_WITH_ANOMALY
+     proceed_to_github_ops: false
+     conflict_escalation: true
+     conflict_files: [<paths>]
+     conflict_reason: <why auto-resolution failed>
+     ```
+   - The orchestrator may route to `code-implementer` or a human for semantic resolution
+   - The flow continues locally; conflict becomes a documented anomaly awaiting resolution
 
 **Why aggressive?** In the shadow repo model, the blast radius is contained. Human work in `upstream` is never at risk. The bot fights through conflicts to preserve both human extras and swarm progress.
 

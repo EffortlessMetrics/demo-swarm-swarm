@@ -344,6 +344,44 @@ If the evidence itself is missing (tests didn't run, CI unknown, etc.), that's n
 **Maintainer mantra:**
 > Build the asset. Capture the evidence. State the truth. Ship when the evidence is green.
 
+### DevLT Tracking (Developer Lead Time)
+
+Receipts may include a `devlt` section for retrospective analysis of human vs machine effort:
+
+```json
+{
+  "devlt": {
+    "flow_started_at": "2025-12-22T10:00:00Z",
+    "flow_completed_at": "2025-12-22T10:45:00Z",
+    "human_checkpoints": [
+      {"at": "2025-12-22T10:00:00Z", "action": "flow_start"},
+      {"at": "2025-12-22T10:30:00Z", "action": "question_answered"},
+      {"at": "2025-12-22T10:45:00Z", "action": "flow_approved"}
+    ],
+    "machine_duration_sec": 2700,
+    "human_checkpoint_count": 3,
+    "estimated_human_attention_min": 15,
+    "estimation_basis": "checkpoint_count * 5min average"
+  }
+}
+```
+
+**Field semantics:**
+
+- `flow_started_at` / `flow_completed_at`: Observable timestamps (wall clock)
+- `human_checkpoints`: Array of human interaction points with timestamps and action types
+- `machine_duration_sec`: Derived from timestamps (not execution time, just wall time)
+- `human_checkpoint_count`: Count of human interactions (observable)
+- `estimated_human_attention_min`: **Inference** - rough estimate based on checkpoint count and typical review times
+- `estimation_basis`: Explains how the estimate was derived (transparency)
+
+**Observable vs inferred:**
+- Timestamps and counts are **facts** (derived from logs/artifacts)
+- `estimated_human_attention_min` is an **inference** (labeled as such)
+- Token costs are **not tracked** here (unreliably available)
+
+**Purpose:** DevLT is for retrospective analysis in Flow 7 (Wisdom), not for gating or routing. It helps answer: "How much human attention did this run actually require?"
+
 ---
 
 ## Machine Summary Contract

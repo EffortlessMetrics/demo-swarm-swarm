@@ -402,24 +402,41 @@ When code/test changes are made (or the Style Sweep touches `.runs/<run-id>/buil
 2. Run build-cleanup to update build_receipt.json
 3. Periodically run full test suite (test-executor)
 
-**Re-harvest cadence (gated):**
+**Re-harvest cadence (gated) - MANDATORY after each push:**
 
-Every N items resolved (or after significant changes), apply the **Reseal → Gate → Push → Re-harvest** subroutine:
+The swarm does **not wait** for CI or bots. It pushes, then immediately re-harvests whatever feedback is available. This is the "Push → Re-harvest" pattern:
+
+**Trigger conditions (any of):**
+- After resolving 3-5 worklist items
+- After any CRITICAL item is resolved
+- After significant code changes (touching core modules)
+- When stuck counter increases (to get fresh signal)
+
+**The Reseal → Gate → Push → Re-harvest subroutine:**
 
 1. **Reseal receipts:**
    - Call `build-cleanup` to reseal build_receipt.json (if code/tests changed)
    - Call `review-cleanup` to update worklist state
+
 2. **Secrets gate:**
    - Call `secrets-sanitizer` on staged changes (single pass)
+
 3. **Commit and push (gated):**
    - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push
    - If gates fail: record the blocker and proceed without push (bots won't have new code)
-4. **Re-harvest:**
-   - Call `pr-feedback-harvester` (new bot comments may appear after push)
-   - Call `review-worklist-writer` to update worklist with new items
-   - If bots haven't posted yet: record "pending feedback" and proceed (can re-harvest on next iteration)
 
-**Note:** Agents cannot "wait" - they re-harvest and check. If new feedback appears, it gets added to the worklist for subsequent iterations.
+4. **Re-harvest (immediately after push):**
+   - Call `pr-feedback-harvester` - captures whatever CI/bot feedback exists *right now*
+   - Call `review-worklist-writer` to update worklist with new items
+   - **Do not wait** for bots to finish - take what's available and proceed
+   - If bots haven't posted yet: that's fine, next iteration will catch it
+
+**Why immediate re-harvest?** The swarm can't "sleep" for CI. By re-harvesting immediately after push, we capture:
+- Any CI that finished between iterations
+- CodeRabbit comments posted on new code
+- Human reviews that arrived while we were fixing
+
+If nothing new appears, the worklist stays the same and we continue. The pattern is: **push early, harvest often, never wait.**
 
 ### Step 7: PR Status Management
 

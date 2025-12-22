@@ -432,6 +432,29 @@ Loop between `doc-writer` and `doc-critic` (2 passes default):
 ### Step 8: Self-review
 - Use `self-reviewer` for final review.
 
+### Step 8b: Flow Boundary Harvest (GitHub Checkpoint)
+
+**After self-review and before cleanup, harvest final GitHub state.**
+
+This is the **flow boundary checkpoint** - the last chance to capture bot feedback before sealing the build receipt.
+
+1. **Call `pr-feedback-harvester`** (if PR exists):
+   - Captures any final CodeRabbit comments, CI status, human reviews
+   - Output: updates `build/pr_feedback.md` with final state
+
+2. **Route on blockers (bounded):**
+   - If `blockers_count > 0` and blockers are CRITICAL:
+     - Route top 1-2 to appropriate agent (same logic as Step 5c)
+     - Run quick fix cycle
+     - Do NOT enter unbounded loop (Flow 4 owns that)
+   - If no CRITICAL blockers: proceed to cleanup
+
+3. **Record unresolved items:**
+   - Any remaining blockers go to `build/feedback_blockers.md`
+   - Flow 4 will harvest and drain systematically
+
+**Why here?** Between self-review and cleanup, the code is "feature complete." This checkpoint captures the final bot assessment before we seal the receipt.
+
 ### Step 9: Finalize and Write Receipt
 - `build-cleanup` -> `build_receipt.json`, `cleanup_report.md`
 - Verifies all required artifacts exist
@@ -725,17 +748,19 @@ Code/test changes in project-defined locations.
 
 13. `self-reviewer`
 
-14. `build-cleanup`
+14. `pr-feedback-harvester` (flow boundary harvest; route on CRITICAL blockers only; bounded)
 
-15. `repo-operator` (stage + classify)
+15. `build-cleanup`
 
-16. `secrets-sanitizer` (pre-publish sweep)
+16. `repo-operator` (stage + classify)
 
-17. `repo-operator` (commit/push)
+17. `secrets-sanitizer` (pre-publish sweep)
 
-18. `gh-issue-manager` (if allowed)
+18. `repo-operator` (commit/push)
 
-19. `gh-reporter` (if allowed)
+19. `gh-issue-manager` (if allowed)
+
+20. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -838,6 +863,7 @@ If `build/ac_status.json` exists (rerun):
 - [ ] fixer (only if critiques/worklists require it)
 - [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
 - [ ] self-reviewer
+- [ ] pr-feedback-harvester (flow boundary; route on CRITICAL only; bounded)
 - [ ] build-cleanup
 - [ ] repo-operator (stage + classify; capture Repo Operator Result)
 - [ ] secrets-sanitizer (pre-publish sweep; capture Gate Result block)
