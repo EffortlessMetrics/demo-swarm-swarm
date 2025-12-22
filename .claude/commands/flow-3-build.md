@@ -64,6 +64,9 @@ Flow 3 uses **two complementary state machines**:
   - code-critic (scope: current AC)
   - test-executor (fast confirm: AC-scoped tests only)
   - update build/ac_status.json
+  - (after first vertical slice) checkpoint push + pr-creator (early; once)
+  - (after checkpoint push) ci-pulse check (optional; route if red)
+  - (checkpoint push every 3-5 ACs)
 - lint-executor (format/lint; global)
 - test-executor (full suite; global)
 - flakiness-detector (if failures; apply Worklist Loop Template)
@@ -73,12 +76,11 @@ Flow 3 uses **two complementary state machines**:
 - doc-writer ↔ doc-critic (microloop; 2 passes default)
 - self-reviewer (self-review)
 - build-cleanup (finalize receipt; update index; update `flow_plan.md`)
-- repo-operator (stage intended changes)
-- secrets-sanitizer (publish gate)
+- repo-operator (stage + classify changes)
+- secrets-sanitizer (pre-publish sweep)
 - build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - repo-operator (restage intended changes; if reseal happened)
-- repo-operator (commit/push; only if secrets gate passes)
-- pr-creator (create Draft PR; gated on push)
+- repo-operator (commit/push)
 - gh-issue-manager (update issue board; gated)
 - gh-reporter (report to GitHub; gated)
 ```
@@ -181,8 +183,11 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
 - [ ] test-strategist (if ac_matrix.md missing)
 - [ ] AC loop (for each AC in ac_matrix.md):
   - [ ] AC-001: test-author → test-critic → code-implementer → code-critic → fast confirm
+  - [ ] (after first vertical slice) checkpoint push + pr-creator (early; once)
+  - [ ] (after checkpoint push) ci-pulse check (optional; route if red)
   - [ ] AC-002: ...
   - [ ] (add rows per AC from ac_matrix.md)
+  - [ ] (checkpoint push every 3-5 ACs; ci-pulse after each)
 - [ ] lint-executor (format/lint; global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
@@ -192,10 +197,10 @@ Create or update `.runs/<run-id>/build/flow_plan.md`:
 - [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
 - [ ] self-reviewer (review)
 - [ ] build-cleanup (write receipt, update index)
-- [ ] repo-operator (stage changes)
-- [ ] secrets-sanitizer (publish gate)
+- [ ] repo-operator (stage + classify)
+- [ ] secrets-sanitizer (pre-publish sweep)
 - [ ] build-cleanup reseal + repo-operator restage (if modified)
-- [ ] repo-operator (commit - if gate passes)
+- [ ] repo-operator (commit/push)
 - [ ] gh-issue-manager (update issue board)
 - [ ] gh-reporter (post summary)
 
@@ -294,6 +299,83 @@ For each AC (e.g., AC-001):
 
 **After all ACs complete:** Proceed to global hardening (Step 6).
 
+### Step 5b: Early PR Bootstrap (Once, After First Vertical Slice)
+
+**After completing the first AC (or first meaningful vertical slice), bootstrap bot feedback:**
+
+1. **Call `repo-operator`** with task: "checkpoint push after first slice"
+   - Stage code/test changes + `.runs/<run-id>/build/` artifacts
+   - Run secrets-sanitizer (light sweep)
+   - Commit and push if clean
+
+2. **Call `pr-creator`** (once per run):
+   - Create Draft PR immediately
+   - Gets CodeRabbit + GitHub Actions spinning early
+   - CI feedback runs continuously in parallel while you continue the AC loop
+
+**Why early?** This is the cheapest way to find integration failures. Bots review while you implement. Flow 4 harvests their feedback formally, but you can iterate on findings during the AC loop.
+
+**Checkpoint cadence for remaining ACs:**
+- Push after every 3-5 ACs, or when you touch core modules
+- Each checkpoint: stage → sanitizer → commit/push (same pattern as Step 5b)
+- CI/bot feedback runs continuously; don't wait for it
+
+**If push fails or is blocked:**
+- Continue the AC loop locally
+- Note the blocker in `flow_plan.md`
+- Retry push after remediation
+
+This turns "push at end" into "push early, push often" — continuous feedback, not post-hoc review.
+
+### Step 5c: CI Pulse Check (Lightweight Feedback Ingestion)
+
+**After each checkpoint push, run a quick CI pulse check.**
+
+This is a *thin* feedback ingestion — not the full Flow 4 harvest, just enough signal to catch deterministic failures early.
+
+**What it does:**
+1. Check CI status: `gh api /repos/{owner}/{repo}/commits/{sha}/check-runs`
+2. Capture: overall conclusion (green/red), top failing check names
+3. Optionally: check for new CodeRabbit comments (count only, not content)
+4. Write: `.runs/<run-id>/build/ci_pulse.md`
+
+**CI Pulse artifact format:**
+```markdown
+# CI Pulse - <timestamp>
+
+## Status: GREEN | RED | PENDING
+
+## Check Runs
+| Check | Status | Conclusion |
+|-------|--------|------------|
+| build | completed | success |
+| test | completed | failure |
+
+## Failing Checks
+- test: 2 tests failed
+
+## Bot Activity
+- CodeRabbit comments: 3 new since last pulse
+
+## Routing
+- If RED: route to fixer/test-author for current AC
+- If GREEN: continue AC loop
+```
+
+**Routing on pulse:**
+- If CI **red**: route back to the current AC's microloop or `fixer` immediately (cheap fix before more ACs pile up)
+- If CI **green** or **pending**: continue the AC loop
+- If CodeRabbit has new comments: note them, but defer deep harvest to Flow 4
+
+**Why this matters:** This prevents building 10 ACs while CI is red for a simple failure. Cheap check, fast routing.
+
+**Optional station:** The orchestrator may skip this step if:
+- No PR exists yet (first push)
+- GitHub access is unavailable
+- Time pressure requires continuing without the check
+
+When skipped, continue the AC loop — Flow 4 will harvest feedback formally.
+
 ### Step 6: Global Hardening
 
 After all ACs complete, run global hardening:
@@ -330,42 +412,72 @@ Loop between `doc-writer` and `doc-critic` (2 passes default):
 - Computes counts mechanically (never estimates)
 - Updates `.runs/index.json` with status, last_flow, updated_at
 
-### Step 10: Stage Changes
+### Step 10: Stage + Classify Changes
 
 **Call `repo-operator`** with task: "stage intended changes for build"
 
-**Commit surface for Build:**
+**Intended commit surface for Build:**
 - Code/test/doc changes (project-defined locations)
 - `.runs/<run-id>/build/` (all flow artifacts)
 - `.runs/<run-id>/run_meta.json`
 - `.runs/index.json`
 
-The repo-operator handles staging; customize the intended changes set via the project customizer.
+The repo-operator stages the intended set and **classifies** any out-of-scope changes:
 
-**Dirty-tree interlock:** The repo-operator enforces "no unstaged + no untracked" after staging. If the interlock fails → **anomaly**:
-- **Call `repo-operator`** with task: "reconcile staging anomaly"
-  - Produces `.runs/<run-id>/build/git_status.md` listing unexpected paths
-  - Classifies each path: agent wrote outside lane | leftover from prior flow | temp/debug file | legitimate for this flow
-  - Applies safe mechanical actions only (delete temp files, add OS junk to .gitignore)
-  - Returns recommended action for paths it cannot safely handle
-- If safe actions resolve the anomaly → retry staging
-- If unsafe changes remain → flow ends UNVERIFIED with `proceed_to_github_ops: false`
-- Do **not** proceed to secrets-sanitizer, commit, push, or GitHub ops until clean
+**Anomaly classification:**
+- **HIGH risk (blocks push):** staged/tracked changes outside intended set
+  - Uncertain provenance → cannot safely publish
+  - Commit the intended set locally, skip push
+  - Write `.runs/<run-id>/build/extra_changes.md` with classification:
+    - Incidental (include next time) vs scope creep (split / new run)
+- **LOW risk (warning only):** untracked files outside intended set
+  - Allows push (new files haven't been `git add`ed, so provenance is clear)
+  - Write warning in `git_status.md`
 
-**IMPORTANT: Do NOT commit yet. Must pass secrets gate first.**
+**Repo Operator Result for staging:**
+```yaml
+## Repo Operator Result
+operation: stage
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY
+proceed_to_github_ops: true | false  # false if HIGH risk anomalies
+anomaly_classification:
+  unexpected_staged_paths: []    # HIGH risk
+  unexpected_unstaged_paths: []  # HIGH risk
+  unexpected_untracked_paths: [] # LOW risk (warning)
+```
 
-### Step 11: Sanitize Secrets (Commit Gate)
-- Use `secrets-sanitizer` to scan staged changes and audit artifacts.
-- Scans staged changes, .runs/ artifacts
-- Fixes what it can (redacts artifacts, externalizes secrets)
+**Key shift:** This replaces "stop the world until clean" with "stage, classify, proceed."
+- Engineering continues locally even when push is blocked
+- The system captures and labels extra changes rather than punishing them
+- Ad-hoc fixes happen; record them, don't fight them
+
+**IMPORTANT: Do NOT commit yet. Must pass pre-publish sweep first.**
+
+### Step 11: Pre-Publish Sweep (Secrets Sanitizer)
+
+**The sanitizer is a fix-first pre-publish hook, not a behavioral throttle.**
+
+Call `secrets-sanitizer` with publish surface:
+- Staged code/test changes
+- `.runs/<run-id>/build/` artifacts
+
+**What it does:**
+- Fast scan for obvious secret patterns
+- Auto-redact what it can (artifact secrets, placeholder tokens)
+- Report findings only when remediation requires human judgment
 
 **Status vs Flags:**
 - `status` = what happened:
   - `CLEAN`: No secrets found
-  - `FIXED`: Secrets found and remediated
-  - `BLOCKED_PUBLISH`: Mechanical failure (IO/permissions)
+  - `FIXED`: Secrets found and auto-remediated
+  - `BLOCKED_PUBLISH`: Mechanical failure only (IO/permissions/tool failure)
 - `safe_to_commit/safe_to_publish` = what you're allowed to do (authoritative)
-- `needs_upstream_fix` + `route_to_agent` (and optionally `route_to_flow`) = where to bounce
+- `needs_upstream_fix` + `route_to_agent` = where to bounce if code contains secrets
+
+**Key posture:** Publishing can be blocked, but work never stops.
+- If `safe_to_publish: false` with `needs_upstream_fix: true`: **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`)
+- If `BLOCKED_PUBLISH` (mechanical failure): **FIX_ENV** — tool/IO issue, not a code problem
+- Either way: continue engineering locally while remediation routes
 
 Typically `safe_to_*` are true for CLEAN/FIXED, but **the orchestrator must use the Gate Result booleans, not infer from status**.
 
@@ -388,9 +500,13 @@ route_to_agent: <agent-name | null>
 
 **Gating logic (route-and-fix triage):**
 - If `safe_to_commit: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`), usually `code-implementer`, with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`), with pointer to `secrets_scan.md`
+  - If `status: BLOCKED_PUBLISH` → **FIX_ENV** (mechanical failure — IO/permissions/tool issue)
   - Otherwise → UNVERIFIED; write evidence, do not commit/push
+- If `safe_to_commit: true` but `safe_to_publish: false`:
+  - Commit locally (audit trail preserved)
+  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` for remediation, then retry publish
+  - Continue engineering locally while remediation routes
 - Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`. GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`.
 
 ### Step 11b: Reseal If Modified (Conditional Loop)
@@ -448,30 +564,24 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
 **Push logic:**
 - If `safe_to_publish: true` AND `proceed_to_github_ops: true`: repo-operator pushes the branch
 - If `safe_to_publish: false`:
-  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`), usually `code-implementer`, with pointer to `secrets_scan.md`
-  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (usually `code-implementer` or `fixer`) for remediation
+  - If `status: BLOCKED_PUBLISH` → **FIX_ENV** (mechanical failure — IO/permissions/tool issue)
   - Otherwise → UNVERIFIED; skip push (`publish_surface: NOT_PUSHED`), write evidence
+- **Keep engineering locally** while remediation routes. Publishing is gated; work is not.
 
-### Step 12b: Create Draft PR
+### Step 12b: PR Status Check (Conditional)
 
-**Call `pr-creator`** to create a Draft PR after the branch is pushed.
+**Note:** PR creation now happens early (Step 5b) to get bots spinning during the AC loop.
 
-This gets bots (CodeRabbit, CI) spinning early before Flow 4 (Review) harvests their feedback.
-
-**Prerequisites (checked by pr-creator):**
-- `github_ops_allowed: true` in run_meta
-- `gh` authenticated
-- `publish_surface: PUSHED` (from Repo Operator Result)
-
-**Call `pr-creator`** with context:
-- run-id
-- github_repo from run_meta
-- Repo Operator Result (for commit_sha and publish_surface)
+This step handles edge cases where the early PR wasn't created:
+- If `pr_number` exists in run_meta: skip (PR already exists from Step 5b)
+- If `publish_surface: NOT_PUSHED`: skip (can't create PR without push)
+- Otherwise: call `pr-creator` as fallback
 
 **Route on PR Creator Result block:**
 - If `operation_status: CREATED`: PR created successfully, `pr_number` available
 - If `operation_status: EXISTING`: PR already existed, `pr_number` captured
-- If `operation_status: SKIPPED`: Prerequisites not met (branch not pushed, auth issue), note reason and continue
+- If `operation_status: SKIPPED`: Prerequisites not met, note reason and continue
 - If `operation_status: FAILED`: Creation failed, note in concerns and continue
 
 **Metadata updates (handled by pr-creator):**
@@ -572,6 +682,7 @@ After this flow completes, `.runs/<run-id>/build/` should contain:
 - `github_report.md`
 - `git_status.md` (if anomaly detected)
 - `pr_creation_status.md` (from pr-creator)
+- `ci_pulse.md` (lightweight CI/bot feedback snapshot; optional)
 
 Also creates in `.runs/<run-id>/build/`:
 - `ac_status.json` (runtime AC completion tracker - created by Build, updated per AC)
@@ -597,6 +708,9 @@ Code/test changes in project-defined locations.
 5. `test-strategist` (if `ac_matrix.md` missing; generate before proceeding)
 
 6. **AC loop** (for each AC in `ac_matrix.md`; apply AC Loop Template below)
+   - After first vertical slice: `repo-operator` (checkpoint push) + `pr-creator` (early; once)
+   - After checkpoint push: `ci-pulse` check (optional; route to fixer if red)
+   - Checkpoint push every 3-5 ACs or when touching core modules (ci-pulse after each)
 
 7. `lint-executor` (global)
 
@@ -614,9 +728,9 @@ Code/test changes in project-defined locations.
 
 14. `build-cleanup`
 
-15. `repo-operator` (stage)
+15. `repo-operator` (stage + classify)
 
-16. `secrets-sanitizer`
+16. `secrets-sanitizer` (pre-publish sweep)
 
 17. `build-cleanup` ↔ `secrets-sanitizer` (reseal cycle; if `modified_files: true`)
 
@@ -624,11 +738,9 @@ Code/test changes in project-defined locations.
 
 19. `repo-operator` (commit/push)
 
-20. `pr-creator` (create Draft PR; gated on publish_surface: PUSHED)
+20. `gh-issue-manager` (if allowed)
 
-21. `gh-issue-manager` (if allowed)
-
-22. `gh-reporter` (if allowed)
+21. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -719,6 +831,9 @@ If `build/ac_status.json` exists (rerun):
 - [ ] clarifier
 - [ ] test-strategist (if ac_matrix.md missing)
 - [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
+  - (after first vertical slice) checkpoint push + pr-creator (early; once)
+  - (after checkpoint push) ci-pulse check (optional; route if red)
+  - (checkpoint push every 3-5 ACs; ci-pulse after each)
 - [ ] lint-executor (global)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
@@ -728,13 +843,12 @@ If `build/ac_status.json` exists (rerun):
 - [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
 - [ ] self-reviewer
 - [ ] build-cleanup
-- [ ] repo-operator (stage intended changes; project-defined)
-- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] repo-operator (stage + classify; capture Repo Operator Result)
+- [ ] secrets-sanitizer (pre-publish sweep; capture Gate Result block)
 - [ ] build-cleanup ↔ secrets-sanitizer (reseal cycle; if `modified_files: true`)
 - [ ] repo-operator (restage intended changes; if reseal occurred)
 - [ ] repo-operator (commit/push; return Repo Operator Result)
-- [ ] pr-creator (create Draft PR; gated on publish_surface: PUSHED)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
