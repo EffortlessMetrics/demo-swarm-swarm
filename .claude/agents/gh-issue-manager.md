@@ -85,6 +85,12 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 - **SUMMARY_ONLY**: Read receipts for machine counts/status; do **not** read/quote human-authored markdown. Open Questions block shows counts only.
 - **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Open Questions shows `Content withheld until publish unblocked`.
 
+**SUMMARY_ONLY semantics (output restriction, not reading restriction):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read internally.
+- You can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
+- You must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub issue.
+- The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
+
 Last-mile safety (tighten-only):
 - You may read `.runs/<run-id>/<flow>/secrets_status.json` or `git_status.md` only to tighten content mode.
 - Never loosen content mode.

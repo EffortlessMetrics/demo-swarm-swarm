@@ -410,69 +410,6 @@ Always write `.runs/<run-id>/deploy/deployment_log.md` with:
 * decision, merge status, tag/release details, SHAs, timestamps
 * links when available (do not paste tokens)
 
-## Final Checkpoint (all flows)
-
-A lightweight checkpoint after GitHub operations complete. Used to commit GH status artifacts that are written by `gh-issue-manager` and `gh-reporter` **after** the main checkpoint.
-
-### When to use
-
-Orchestrator calls `repo-operator` with `operation: final_checkpoint` as the last station in a flow, after:
-1. Main checkpoint committed and pushed
-2. `gh-issue-manager` ran (wrote `gh_issue_status.md`)
-3. `gh-reporter` ran (wrote `gh_report_status.md`, `gh_comment_id.txt`, `github_report.md`)
-
-### Allowlist (fixed)
-
-* `.runs/<run-id>/<flow>/gh_issue_status.md`
-* `.runs/<run-id>/<flow>/gh_report_status.md`
-* `.runs/<run-id>/<flow>/gh_comment_id.txt`
-* `.runs/<run-id>/<flow>/github_report.md` (if exists)
-* `.runs/<run-id>/<flow>/gh_issue_body.md` (if exists)
-
-### Procedure (mechanical)
-
-1. Reset staging and stage only GH status files (skip if they don't exist):
-
-   ```bash
-   gitc reset HEAD
-   gitc add ".runs/<run-id>/<flow>/gh_issue_status.md" \
-            ".runs/<run-id>/<flow>/gh_report_status.md" \
-            ".runs/<run-id>/<flow>/gh_comment_id.txt" 2>/dev/null || true
-   gitc add ".runs/<run-id>/<flow>/github_report.md" \
-            ".runs/<run-id>/<flow>/gh_issue_body.md" 2>/dev/null || true
-   ```
-
-2. **No secrets scanning required** - these files are mechanical status reports with counts and IDs only.
-
-3. No-op handling: If nothing staged, skip commit (success).
-
-4. Commit message: `chore(runs): finalize <flow> <run-id> github ops`
-
-5. **No push** - the branch was already pushed in the main checkpoint; this is a local-only commit.
-
-### Control plane
-
-Return:
-
-```markdown
-## Repo Operator Result
-operation: final_checkpoint
-status: COMPLETED | FAILED | CANNOT_PROCEED
-proceed_to_github_ops: false
-commit_sha: <sha>
-publish_surface: NOT_PUSHED
-anomaly_classification:
-  unexpected_staged_paths: []
-  unexpected_unstaged_paths: []
-  unexpected_untracked_paths: []
-anomaly_paths: []
-```
-
-Notes:
-* `proceed_to_github_ops` is always `false` (GitHub ops already complete).
-* `publish_surface` is always `NOT_PUSHED` (no push attempt in final checkpoint).
-* Status is typically `COMPLETED` (mechanical operation).
-
 ## git_status.md (audit format)
 
 For anomalies or reconciliations, write:

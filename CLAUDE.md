@@ -414,6 +414,12 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 - Workspace hygiene (`proceed_to_github_ops`) gates pushing, NOT content mode. Untracked anomalies do not degrade content.
 - Only tracked/staged anomalies force SUMMARY_ONLY (uncertain provenance) but NOT MACHINE_ONLY.
 
+**SUMMARY_ONLY semantics (output restriction, not reading restriction):**
+- SUMMARY_ONLY restricts **what gets posted to GitHub**, not what the LLM can read internally.
+- The agent can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
+- The agent must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub comment.
+- The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
+
 ### 3) Anomaly classification
 
 Repo-operator classifies anomalies by type:
@@ -469,9 +475,10 @@ Execution order in every flow (conceptual):
 
 1. `<flow>-cleanup` writes receipt
 2. `secrets-sanitizer` scans publish surface; fixes what it can; returns Gate Result
-3. `repo-operator` main checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
+3. `repo-operator` checkpoint (gated on `safe_to_commit`; push gated on tracked anomalies)
 4. `gh-issue-manager` + `gh-reporter` (when access allows; content mode per ladder above)
-5. `repo-operator` final checkpoint (commits GH status files; no push; no secrets scan needed)
+
+Note: GH status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are operational metadata written after the checkpoint. They are **not committed** - they exist locally for debugging and are overwritten each flow. This is intentional: they are operational exhaust, not audit trail.
 
 Reseal:
 

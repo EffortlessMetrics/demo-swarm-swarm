@@ -166,15 +166,28 @@ Response handling:
 
 Do not paste JSON. Summarize with: "protection source: classic/ruleset/none; required checks present: yes/no."
 
-**B) GitHub API - Repository Rulesets (fallback)**
-If classic protection is unavailable or returned 404/403:
+**B) GitHub API - Rulesets (fallback)**
+If classic protection is unavailable or returned 404/403, check **both** repository AND organization rulesets:
+
+**B.1) Repository Rulesets:**
 - `gh api repos/<owner>/<repo>/rulesets`
 - Filter for rulesets with `target == "branch"`
-- Check if any ruleset:
-  - Has `conditions.ref_name.include` matching `refs/heads/<default_branch>` or `~DEFAULT_BRANCH`
+- Check if any ruleset applies to this branch:
+  - `conditions.ref_name.include` matches `refs/heads/<default_branch>` or `~DEFAULT_BRANCH`
+  - Verify `conditions.ref_name.exclude` does NOT exclude this branch
   - Has `rules` containing `required_status_checks` or `pull_request`
 
-If matching ruleset found:
+**B.2) Organization Rulesets (if repo rulesets don't match):**
+- `gh api orgs/<owner>/rulesets`
+- Filter for rulesets with `target == "branch"`
+- Check if any ruleset applies to this repo AND branch:
+  - `conditions.repository_name.include` matches this repo (or uses patterns like `*`)
+  - `conditions.ref_name.include` matches `refs/heads/<default_branch>` or `~DEFAULT_BRANCH`
+  - Has `rules` containing `required_status_checks` or `pull_request`
+
+**Applicability check (critical):** "Ruleset exists" does NOT mean "branch protected". You must verify the ruleset's conditions actually apply to the target branch. Evaluate `include`/`exclude` patterns against `refs/heads/<default_branch>`. Handle `~DEFAULT_BRANCH` as a match for the actual default branch.
+
+If matching ruleset found (repo or org):
 - `branch_protection: PASS`
 - `governance_enforcement: VERIFIED_RULESET`
 - `branch_protection_source: ruleset`
