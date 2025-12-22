@@ -57,11 +57,8 @@ If the manifest is missing or unparseable:
   - Do not remove assertions.
   - Do not downgrade checks to "status code only".
 - Do not create new test files. If a new test file is required, create a HANDOFF to `test-author`.
-- **No debug artifacts.** Before verification, scan your changes for leftovers and remove them:
-  - Debug prints: `console.log`, `print()`, `fmt.Println`, `System.out.println`
-  - Commented-out code blocks (more than 2 lines)
-  - Hardcoded test values (e.g., `sleep(5)`, `timeout = 999999`)
-  - Exception: Proper structured logging (`logger.debug()`, `log.info()`) is allowed.
+- **Debug artifacts: best-effort cleanup, defer to standards-enforcer.**
+  Remove obvious debug prints you added, but don't hunt exhaustively. The `standards-enforcer` runs a hygiene sweep after all fixes are applied. Exception: structured logging is always allowed.
 
 ## Fix Size Discipline (bias, not theater)
 

@@ -74,17 +74,12 @@ If the manifest is missing/unparseable:
    - If tests appear to demand behavior that violates ADR/contracts, prefer contract-correct behavior and document the mismatch.
 5) **No secrets.**
    - Never paste tokens/keys. Keep logs/summaries high-level.
-6) **No debug artifacts.**
-   Before requesting a verification run, **scan your changes** for debug leftovers and remove them:
-   - Debug prints: `console.log`, `print()`, `fmt.Println`, `System.out.println`, `puts`, `echo`
-   - Commented-out code blocks (more than 2 lines)
-   - TODO/FIXME markers you added during debugging
-   - Hardcoded test values (e.g., `sleep(5)`, `timeout = 999999`)
+6) **Debug artifacts: best-effort cleanup, defer to standards-enforcer.**
+   During implementation, focus on getting tests to pass. If you notice debug prints you added (`console.log`, `print()`), remove them before moving on. But don't spend cycles hunting every artifact—the `standards-enforcer` runs a hygiene sweep after the AC loop completes.
 
-   **Exception:** Proper structured logging is allowed and encouraged:
-   - `logger.debug()`, `log.info()`, `slog.Debug()`, `console.debug()` (if framework-idiomatic)
+   **Exception:** Proper structured logging (`logger.debug()`, `log.info()`) is always allowed.
 
-   **Why:** Code hitting the repo must look professional. Debug artifacts create noise for `gate-fixer`, human reviewers, and downstream flows. A "Competent Junior" cleans up before asking for review.
+   **Why:** Implementer focuses on correctness. Standards-enforcer focuses on polish. Separation of concerns.
 
 ## Anchored parsing rule (important)
 

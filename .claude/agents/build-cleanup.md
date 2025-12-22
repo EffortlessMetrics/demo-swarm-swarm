@@ -473,7 +473,7 @@ Write `.runs/<run-id>/build/github_report.md`. This file is the exact comment bo
 |------|--------|
 | self-reviewer | <status or "—"> |
 | test-executor | <status or "—"> |
-| lint-executor | <status or "—"> |
+| standards-enforcer | <status or "—"> |
 | code-critic | <status or "—"> |
 | test-critic | <status or "—"> |
 | doc-critic | <status or "—"> |
