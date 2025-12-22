@@ -74,14 +74,19 @@ Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
 
 | Value | Model Used | Use Case |
 |-------|------------|----------|
-| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex reasoning, multi-file analysis, nuanced judgment, most agents |
-| `haiku` | Claude Haiku | Fast, simple tasks: mechanical counts, boilerplate, extraction |
+| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file reasoning, architectural decisions, nuanced judgment across context |
+| `haiku` | Claude Haiku | Well-scoped tasks: single-file analysis, structured extraction, validation, cleanup operations |
 
 **Guidance:**
-- Most agents use `inherit` to leverage full reasoning capability.
-- Use `haiku` for high-volume, low-complexity tasks where speed and cost matter more than deep reasoning.
-- Critics and implementers should always use `inherit` (they need nuanced judgment).
-- Cleanup agents may use `haiku` when they're doing mechanical counting only.
+- Use `inherit` for agents that need to synthesize across multiple files or make architectural decisions.
+- Use `haiku` for agents with well-defined scope and clear input/output contracts — Haiku is quite capable for focused tasks.
+- Critics reviewing single artifacts can often use `haiku` effectively.
+- Cleanup agents, receipt generators, and validators are good `haiku` candidates.
+- Cross-flow agents that need broad context awareness should use `inherit`.
+
+**Trade-offs:**
+- `haiku`: Faster, cheaper, excellent for focused single-purpose work
+- `inherit`: Better for tasks requiring long context synthesis or multi-step reasoning
 
 ### color (agent YAML field)
 
