@@ -1,0 +1,54 @@
+{
+  "$schema": "./demo-swarm.config.schema.json",
+  "version": 1,
+  "customized_at": null,
+
+  "_comment_purpose": "This config contains ONLY repo-specific mechanics. Policies stay in agent prompts.",
+
+  "stack": {
+    "_comment": "Language detection - what tools to run, not how to judge quality",
+    "language": "rust | node | python | go | other",
+    "package_manager": "cargo | npm | pnpm | yarn | pip | poetry | go | other"
+  },
+
+  "commands": {
+    "_comment": "What commands to run - mechanics only, no judgment on results",
+    "test": null,
+    "lint": null,
+    "format": null
+  },
+
+  "layout": {
+    "_comment": "Where things live - no policies about what should be there",
+    "source_roots": ["src/"],
+    "test_roots": ["tests/"],
+    "feature_roots": ["features/"],
+    "doc_roots": ["docs/"],
+    "runs_dir": ".runs/"
+  },
+
+  "hardening": {
+    "_comment": "Optional hardening commands - budgets are mechanics, thresholds are policy (stay in agents)",
+    "mutation": {
+      "command": null,
+      "budget_seconds": 300
+    },
+    "fuzz": {
+      "command": null,
+      "budget_seconds": 300
+    },
+    "flakiness": {
+      "command": null,
+      "rerun_count": 3,
+      "budget_seconds": 180
+    }
+  },
+
+  "environment": {
+    "_comment": "Runtime environment - no policies",
+    "platform": "linux | macos | windows-wsl2 | windows-gitbash | windows-native",
+    "git_provider": "github | gitlab | bitbucket | azure-devops"
+  },
+
+  "_policy_reminder": "POLICIES STAY IN AGENT PROMPTS. This config is mechanics only. Coverage thresholds, quality gates, review requirements, merge criteria - all belong in agent prompts where the LLM can apply judgment."
+}

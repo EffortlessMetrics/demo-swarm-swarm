@@ -31,6 +31,28 @@ You are orchestrating Flow 5 of the SDLC swarm.
 - Decide: MERGE / BOUNCE (with reason for human-review vs fix-required)
 - **Runner-bounded fix-forward lane** for deterministic mechanical drift (fmt/import/whitespace/docs) when `gate-fixer` says it is safe and resealable
 
+## Role Clarification: Final Verification, Not Primary Detection
+
+Flow 5 Gate is the **last line of defense**, not the first.
+
+**Primary detection happens earlier:**
+- Flow 3 (Build): Critics catch issues per-AC, standards-enforcer catches reward hacking
+- Flow 4 (Review): Worklist drains all feedback items, stale check prevents wasted work
+
+**Gate's job is to VERIFY**, not DISCOVER:
+- Verify that receipts from earlier flows are complete and consistent
+- Verify that policy compliance was checked (not run the checks from scratch)
+- Verify that security findings were addressed (not scan for new ones)
+- Make the merge decision based on accumulated evidence
+
+**If Gate is catching issues that should have been caught earlier:**
+- That's a signal that earlier flows need improvement
+- Document the gap in `observations[]` for Flow 7 (Wisdom)
+- Fix-forward only for mechanical drift (formatting, imports)
+- BOUNCE for semantic issues (they should have been caught in Build/Review)
+
+**Anti-pattern:** Running full security scans, coverage checks, and lint sweeps in Gate that duplicate earlier flows. Gate should READ results, not RE-RUN analysis.
+
 ## Before You Begin (Required)
 
 ### Two State Machines
@@ -203,6 +225,8 @@ Create or update `.runs/<run-id>/gate/flow_plan.md`:
 ### Step 2: Verify receipts
 - `receipt-checker` -> `.runs/<run-id>/gate/receipt_audit.md`
 - Run this before contracts/security/coverage; route on its Result block.
+- **Evidence audit, not re-execution:** The receipt-checker verifies that earlier flows produced complete artifacts with passing gates. It does NOT re-run tests or re-scan for secrets—it reads the receipts.
+- If receipts are incomplete or stale (`evidence_sha != HEAD`), BOUNCE to the appropriate upstream flow rather than trying to re-verify from scratch.
 - **AC completion check:** Receipt-checker should verify `build_receipt.json.counts.ac_completed == build_receipt.json.counts.ac_total`. If either is null/missing, treat as UNVERIFIED with blocker. If not equal, BOUNCE to Flow 3 with blocker: "AC loop incomplete: {ac_completed}/{ac_total}".
 
 ### Step 3: Check contracts (can run in parallel with security/coverage)

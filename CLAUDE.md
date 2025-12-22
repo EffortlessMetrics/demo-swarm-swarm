@@ -73,6 +73,69 @@ The sanitizer should behave like a good pre-commit hook:
 
 ---
 
+## Agent Intelligence Philosophy
+
+### Agents Are Smart, Config Is Dumb
+
+This pack treats agents as intelligent actors, not script executors.
+
+**Config contains only mechanics:**
+- What command to run (`npm test`)
+- Where files live (`src/`, `tests/`)
+- Environment details (`github`, `windows-wsl2`)
+
+**Policies stay in agent prompts:**
+- Coverage thresholds
+- Quality gates
+- Review requirements
+- Merge criteria
+- What constitutes "good enough"
+
+**Why?** Policies require judgment. "Is 80% coverage acceptable?" depends on context—is this a critical auth module or a CLI helper? Agents can apply judgment; config files cannot.
+
+### Early Detection Over Late Gates
+
+Problems should be caught where the fix is cheapest:
+- **Per-AC**: Catch reward hacking during the microloop (before next AC starts)
+- **Per-checkpoint**: Catch CI failures during feedback harvest (before flow ends)
+- **Per-flow**: Catch format/lint issues in standards-enforcer (before Gate)
+- **Gate**: VERIFY earlier findings, don't DISCOVER new issues
+
+Gate is a **verification checkpoint**, not a quality filter. If Gate is catching issues that should have been caught earlier, that's a signal the upstream flows need improvement.
+
+### Fix-Forward Within Flows
+
+Small issues should be fixed where they're found:
+- Formatting drift: `standards-enforcer` fixes it, doesn't BOUNCE
+- Missing imports: `code-implementer` adds them on the next pass
+- Stale comments: `fixer` removes them during review worklist
+
+**BOUNCE only when:**
+- The fix requires design changes (BOUNCE to Plan)
+- The fix spans multiple ACs beyond current scope (BOUNCE to Build start)
+- The fix requires human judgment (BOUNCE with `reason: NEEDS_HUMAN_REVIEW`)
+
+### Intelligent Summarization
+
+When summarizing for reports or routing:
+- Explain what the issue IS, not just where it is
+- Provide your assessment of validity (is this a real issue or bot noise?)
+- Route to the agent best suited to fix it
+- Don't dump file paths—synthesize understanding
+
+**Agents are smart.** They can read context, understand intent, and make judgment calls. Trust them to summarize intelligently rather than mechanically dumping file pointers.
+
+### Intelligent Conflict Resolution
+
+When conflicts arise (git, semantic, or otherwise):
+- **Try to resolve first** - Read both sides, understand intent, merge if possible
+- **Only escalate when ambiguous** - When you genuinely cannot determine the right resolution
+- **Provide context when escalating** - Explain what you tried and why you couldn't resolve it
+
+Agents should behave like senior engineers who can solve most problems themselves and only escalate the genuinely difficult ones.
+
+---
+
 ## Operating Model: Swarm Repo
 
 Recommended: run flows in a dedicated `*-swarm` downstream repo.

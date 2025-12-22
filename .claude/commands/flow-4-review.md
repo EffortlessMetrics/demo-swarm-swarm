@@ -363,6 +363,30 @@ while not terminated:
 - Do not route markdownlint child items individually; resolve them via the `RW-MD-SWEEP` parent.
 - Guardrail: if the sweep touches anything under `.runs/<run-id>/build/`, call `build-cleanup` to reseal `build_receipt.json`.
 
+### Intelligent Summarization (Not File Pointers)
+
+When summarizing feedback for routing or reporting, use JUDGMENT:
+
+**Bad (file pointer dump):**
+```
+- RW-001: See pr_feedback.md line 45
+- RW-002: CodeRabbit comment at src/auth.ts:42
+- RW-003: CI failure in tests.yml
+```
+
+**Good (intelligent summary):**
+```
+- RW-001: CodeRabbit found a potential null pointer at auth.ts:42. The code assumes `user` is always defined but the function can be called before login completes. Route to code-implementer to add a guard.
+- RW-002: CI tests failing because hashPassword returns undefined for empty strings. This is a valid edge case not covered by current tests. Route to test-author first to add the test, then code-implementer to fix.
+- RW-003: Human reviewer asked about error handling strategy. This is a design question, not a code issue. Document in open_questions.md and proceed.
+```
+
+**The agent reading the feedback is SMART.** It should understand:
+- What the feedback actually means (not just where it is)
+- Whether the feedback is valid or a false positive
+- What agent is best suited to address it
+- Whether the issue is still relevant (stale check)
+
 **Per-item fix process:**
 
 For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
@@ -384,6 +408,13 @@ For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled
    - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
    - Log the skip in `review_actions.md` with evidence (what changed, when)
    - Move to the next item. Do not hallucinate fixes for missing code.
+
+   **Stale detection examples:**
+   - CodeRabbit said "add null check at line 45" but line 45 is now a comment → STALE
+   - CI failed on "auth.test.ts" but that file was renamed to "auth.spec.ts" and tests pass → STALE (ALREADY_FIXED)
+   - Human asked about error handling, but the code was refactored to use a different approach → OUTDATED (re-evaluate if concern still applies)
+
+   **DO NOT:** Attempt to fix code that no longer exists. This wastes cycles and can introduce regressions.
 
    **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Acting on stale feedback wastes cycles and risks regression.
 

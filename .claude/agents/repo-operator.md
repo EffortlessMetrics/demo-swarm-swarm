@@ -430,6 +430,53 @@ If `git push` fails due to remote divergence:
 
 **Why verify after?** Resolving conflicts mechanically (ours/theirs) can introduce semantic breaks even if git is happy. The quick verification step catches "merge succeeded but tests broke" before pushing bad code.
 
+### Escalation Ladder (Intelligence-First)
+
+Before escalating ANY conflict to the orchestrator, apply this ladder:
+
+**Level 1: Mechanical Resolution (Always Try First)**
+- Generated files (receipts, logs, indexes): `--ours` (keep bot work)
+- Human extras in tracked files: `--theirs` (keep human fixes)
+- OS junk (.DS_Store, Thumbs.db): `--ours` (ignore junk)
+- Whitespace-only conflicts: auto-merge with `git merge-file --quiet`
+- Lockfile conflicts: regenerate via package manager if possible
+
+**Level 2: Semantic Resolution (Read and Understand)**
+If Level 1 doesn't apply:
+1. Read both sides of the conflict
+2. Identify the intent of each change:
+   - Human added a helper function → preserve it
+   - Bot modified the same area for a different purpose → merge both
+   - Both made similar changes → pick the more complete version
+3. Apply the merge that preserves both intents
+4. Log the resolution rationale in `git_status.md`
+
+Example: "Human added logging to auth.ts:42-50, I modified auth.ts:45-48 for error handling. Both intents are valid. Merged: kept human's logging wrapper, inserted my error handling inside it."
+
+**Level 3: Escalation (Only When Genuinely Ambiguous)**
+Escalate only when you cannot determine intent with reasonable confidence:
+- Conflicting business logic (not formatting/structure)
+- Security-sensitive code with conflicting implementations
+- Test assertions that contradict each other
+- Architectural changes that conflict with each other
+
+When escalating, provide:
+- File paths with conflict
+- Both sides (abbreviated to key lines)
+- Your assessment of why you couldn't resolve it
+- Suggested resolution if you have one (even if uncertain)
+
+**Escalation result fields (added to Repo Operator Result when relevant):**
+```yaml
+resolution_attempted: true | false
+resolution_level: 1 | 2 | 3 | null  # which level of the ladder was reached
+resolution_rationale: <string | null>  # why this resolution was chosen
+conflict_files: [<paths>]  # if escalating
+conflict_reason: <string | null>  # why auto-resolution failed
+```
+
+**Key principle:** Try to resolve before escalating. Agents are smart enough to understand intent in most cases. Only escalate when the conflict is genuinely beyond your ability to judge correctly.
+
 ### Gitignore conflict: `.runs/`
 
 If `.runs/` is ignored such that allowlist staging produces an empty index **while artifacts exist**:

@@ -306,11 +306,17 @@ For each AC (e.g., AC-001):
 - If `status: CANNOT_PROCEED` -> **FIX_ENV**; stop AC loop
 - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`; stop AC loop
 - If `recommended_action: RERUN` -> apply pass within this AC's microloop
+- **If `concerns` includes "test deletion" or `reward_hacking_risk: HIGH`** -> route to `code-implementer` immediately with explicit fix request (do not proceed to next step)
 - If `recommended_action: PROCEED` -> proceed to next step/AC
 
 **Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
 
-**Anti-Reward-Hacking Guard:** `standards-enforcer` (run in Step 6) analyzes the full diff and catches silent test deletion. The code-critic may flag suspicious deletions during review, but the authoritative safety check is `standards-enforcer`.
+**Anti-Reward-Hacking Guard (Multi-Layer):**
+1. **Per-AC check (inline)**: After each code-critic pass, verify no tests were silently deleted for this AC. If `code-critic` returns `reward_hacking_risk: HIGH`, route back to `code-implementer` immediately with explicit blocker: "Possible reward hacking detected - restore or justify test deletion".
+2. **Per-checkpoint check (pr-feedback-harvester)**: When harvesting feedback, note any CodeRabbit/CI signals about removed tests.
+3. **Global check (standards-enforcer in Step 6)**: Full diff analysis for any reward-hacking patterns across all ACs.
+
+**The goal is early detection.** Catching reward hacking at Step 6 is better than catching it at Gate, but catching it per-AC is even better.
 
 **After all ACs complete:** Proceed to global hardening (Step 6).
 
