@@ -306,11 +306,17 @@ For each AC (e.g., AC-001):
 - If `status: CANNOT_PROCEED` -> **FIX_ENV**; stop AC loop
 - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`; stop AC loop
 - If `recommended_action: RERUN` -> apply pass within this AC's microloop
+- **If `concerns` includes "test deletion" or `reward_hacking_risk: HIGH`** -> route to `code-implementer` immediately with explicit fix request (do not proceed to next step)
 - If `recommended_action: PROCEED` -> proceed to next step/AC
 
 **Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
 
-**Anti-Reward-Hacking Guard:** `standards-enforcer` (run in Step 6) analyzes the full diff and catches silent test deletion. The code-critic may flag suspicious deletions during review, but the authoritative safety check is `standards-enforcer`.
+**Anti-Reward-Hacking Guard (Multi-Layer):**
+1. **Per-AC check (inline)**: After each code-critic pass, verify no tests were silently deleted for this AC. If `code-critic` returns `reward_hacking_risk: HIGH`, route back to `code-implementer` immediately with explicit blocker: "Possible reward hacking detected - restore or justify test deletion".
+2. **Per-checkpoint check (pr-feedback-harvester)**: When harvesting feedback, note any CodeRabbit/CI signals about removed tests.
+3. **Global check (standards-enforcer in Step 6)**: Full diff analysis for any reward-hacking patterns across all ACs.
+
+**The goal is early detection.** Catching reward hacking at Step 6 is better than catching it at Gate, but catching it per-AC is even better.
 
 **After all ACs complete:** Proceed to global hardening (Step 6).
 
@@ -432,6 +438,29 @@ Loop between `doc-writer` and `doc-critic` (2 passes default):
 ### Step 8: Self-review
 - Use `self-reviewer` for final review.
 
+### Step 8b: Flow Boundary Harvest (GitHub Checkpoint)
+
+**After self-review and before cleanup, harvest final GitHub state.**
+
+This is the **flow boundary checkpoint** - the last chance to capture bot feedback before sealing the build receipt.
+
+1. **Call `pr-feedback-harvester`** (if PR exists):
+   - Captures any final CodeRabbit comments, CI status, human reviews
+   - Output: updates `build/pr_feedback.md` with final state
+
+2. **Route on blockers (bounded):**
+   - If `blockers_count > 0` and blockers are CRITICAL:
+     - Route top 1-2 to appropriate agent (same logic as Step 5c)
+     - Run quick fix cycle
+     - Do NOT enter unbounded loop (Flow 4 owns that)
+   - If no CRITICAL blockers: proceed to cleanup
+
+3. **Record unresolved items:**
+   - Any remaining blockers go to `build/feedback_blockers.md`
+   - Flow 4 will harvest and drain systematically
+
+**Why here?** Between self-review and cleanup, the code is "feature complete." This checkpoint captures the final bot assessment before we seal the receipt.
+
 ### Step 9: Finalize and Write Receipt
 - `build-cleanup` -> `build_receipt.json`, `cleanup_report.md`
 - Verifies all required artifacts exist
@@ -536,9 +565,23 @@ blocker_reason: <string | null>
 
 ### Step 12: Commit and Push (Only if Secrets Gate Passes)
 
-**Call `repo-operator`** to commit code/test changes + audit trail. The agent generates an appropriate commit message from `impl_changes_summary.md`.
+**Two-step atomic commit strategy:**
 
-**No-op commit guard:** If `git diff --cached --quiet` → commit SKIPPED (not an error), do not push. `repo-operator` handles this gracefully.
+Flow 3 uses two sequential commits to preserve the audit trail even when code changes need to be reverted:
+
+1. **Step 12a: Commit `.runs/` artifacts**
+   - **Call `repo-operator`** with task: "commit build artifacts"
+   - Commits only `.runs/<run-id>/build/`, `run_meta.json`, `index.json`
+   - Preserves audit trail independently of code changes
+   - **Rationale:** This allows reverting code without losing the audit trail
+
+2. **Step 12b: Commit code/test changes**
+   - **Call `repo-operator`** with task: "commit and push build changes"
+   - Commits code/test/doc changes (project-defined locations)
+   - Generates commit message from `impl_changes_summary.md`
+   - Pushes both commits (gated by secrets + hygiene checks)
+
+**No-op commit guard:** If either commit has no staged changes (`git diff --cached --quiet` → empty), that commit is SKIPPED (not an error). `repo-operator` handles this gracefully.
 
 **Control plane:** `repo-operator` returns a Repo Operator Result block:
 ```
@@ -550,7 +593,7 @@ commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
-**Note:** `commit_sha` is always populated (current HEAD on no-op), never null. Flow 3 uses `operation: build` (not `checkpoint`) because it commits code/tests alongside audit artifacts.
+**Note:** `commit_sha` is always populated (current HEAD after both commits, or current HEAD on no-op), never null. Flow 3 uses `operation: build` (not `checkpoint`) because it commits code/tests alongside audit artifacts.
 
 Orchestrators route on this block, not by re-reading `git_status.md`.
 
@@ -725,17 +768,19 @@ Code/test changes in project-defined locations.
 
 13. `self-reviewer`
 
-14. `build-cleanup`
+14. `pr-feedback-harvester` (flow boundary harvest; route on CRITICAL blockers only; bounded)
 
-15. `repo-operator` (stage + classify)
+15. `build-cleanup`
 
-16. `secrets-sanitizer` (pre-publish sweep)
+16. `repo-operator` (stage + classify)
 
-17. `repo-operator` (commit/push)
+17. `secrets-sanitizer` (pre-publish sweep)
 
-18. `gh-issue-manager` (if allowed)
+18. `repo-operator` (commit/push)
 
-19. `gh-reporter` (if allowed)
+19. `gh-issue-manager` (if allowed)
+
+20. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -838,6 +883,7 @@ If `build/ac_status.json` exists (rerun):
 - [ ] fixer (only if critiques/worklists require it)
 - [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
 - [ ] self-reviewer
+- [ ] pr-feedback-harvester (flow boundary; route on CRITICAL only; bounded)
 - [ ] build-cleanup
 - [ ] repo-operator (stage + classify; capture Repo Operator Result)
 - [ ] secrets-sanitizer (pre-publish sweep; capture Gate Result block)

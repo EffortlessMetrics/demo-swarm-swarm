@@ -56,9 +56,9 @@ We enforce safety via tools, not prompts.
 
 | Guardrail | Implementation |
 | :--- | :--- |
-| **Anti-Reward Hacking** | `repo-operator` runs `git diff | grep ^D` on test paths. If tests are deleted, the push is **hard blocked**. |
+| **Anti-Reward Hacking** | Critics + `standards-enforcer` detect test deletions/weakened assertions during microloops. If detected, route to rework immediately—don't let it reach Gate as a surprise. |
 | **Intent + Extras** | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict. |
-| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks if manual remediation is required. |
+| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks publish when manual remediation is required—work never stops. |
 
 ---
 
@@ -226,6 +226,40 @@ Key stations:
 - `governance_enforcement`: VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN
 
 This separates "what happened" (deploy action) from "can we verify protections" (governance enforcement).
+
+### Flow 7: Wisdom (The One-Way Loop)
+
+**Design Philosophy:** Flow 7 extracts learnings and proposes actions, but it is **intentionally one-way** by design.
+
+The wisdom loop operates as follows:
+
+1. **Extraction:** Flow 7 analyzes all prior flow outputs and identifies patterns, regressions, and improvement opportunities
+2. **Proposal:** Generates `learnings.md` and `feedback_actions.md` with concrete, actionable recommendations
+3. **Human Decision:** Humans review the proposals and decide what to apply
+4. **No Automatic Injection:** There is **NO** automatic constraint injection back into Flow 1 or any other flow
+
+**Why this is intentional:**
+
+- **Safety:** Prevents the swarm from autonomously tightening constraints that could block legitimate work
+- **Auditability:** Every policy change has a human decision point with clear provenance
+- **Trust:** Maintains the human-in-the-loop for decisions that affect future runs
+- **Transparency:** Proposed changes are visible and reviewable before adoption
+
+**What Flow 7 does NOT do:**
+
+- It does NOT modify `.claude/agents/*.md` prompts
+- It does NOT update `CLAUDE.md` policies
+- It does NOT inject new verification rules into flows
+- It does NOT auto-apply learnings to future runs
+
+**What humans do with wisdom outputs:**
+
+- Review `learnings.md` for patterns worth adopting
+- Manually update pack configuration based on `feedback_actions.md`
+- Decide which suggestions improve the system vs. over-constrain it
+- Create explicit pack customizations via documented changes
+
+This one-way design prevents "learning drift" where the swarm autonomously evolves constraints that eventually make it impossible to ship.
 
 ---
 

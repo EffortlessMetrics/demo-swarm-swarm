@@ -73,6 +73,119 @@ The sanitizer should behave like a good pre-commit hook:
 
 ---
 
+## Agent Intelligence Philosophy
+
+### Agents Are Smart, Config Is Dumb
+
+This pack treats agents as intelligent actors, not script executors.
+
+**Config contains only mechanics:**
+- What command to run (`npm test`)
+- Where files live (`src/`, `tests/`)
+- Environment details (`github`, `windows-wsl2`)
+
+**Policies stay in agent prompts:**
+- Coverage thresholds
+- Quality gates
+- Review requirements
+- Merge criteria
+- What constitutes "good enough"
+
+**Why?** Policies require judgment. "Is 80% coverage acceptable?" depends on context—is this a critical auth module or a CLI helper? Agents can apply judgment; config files cannot.
+
+### Early Detection Over Late Gates
+
+Problems should be caught where the fix is cheapest:
+- **Per-AC**: Catch reward hacking during the microloop (before next AC starts)
+- **Per-checkpoint**: Catch CI failures during feedback harvest (before flow ends)
+- **Per-flow**: Catch format/lint issues in standards-enforcer (before Gate)
+- **Gate**: VERIFY earlier findings, don't DISCOVER new issues
+
+Gate is a **verification checkpoint**, not a quality filter. If Gate is catching issues that should have been caught earlier, that's a signal the upstream flows need improvement.
+
+### Fix-Forward Within Flows
+
+Small issues should be fixed where they're found:
+- Formatting drift: `standards-enforcer` fixes it, doesn't BOUNCE
+- Missing imports: `code-implementer` adds them on the next pass
+- Stale comments: `fixer` removes them during review worklist
+
+**BOUNCE only when:**
+- The fix requires design changes (BOUNCE to Plan)
+- The fix spans multiple ACs beyond current scope (BOUNCE to Build start)
+- The fix requires human judgment (BOUNCE with `reason: NEEDS_HUMAN_REVIEW`)
+
+### Intelligent Summarization
+
+When summarizing for reports or routing:
+- Explain what the issue IS, not just where it is
+- Provide your assessment of validity (is this a real issue or bot noise?)
+- Route to the agent best suited to fix it
+- Don't dump file paths—synthesize understanding
+
+**Agents are smart.** They can read context, understand intent, and make judgment calls. Trust them to summarize intelligently rather than mechanically dumping file pointers.
+
+### Intelligent Conflict Resolution
+
+When conflicts arise (git, semantic, or otherwise):
+- **Try to resolve first** - Read both sides, understand intent, merge if possible
+- **Only escalate when ambiguous** - When you genuinely cannot determine the right resolution
+- **Provide context when escalating** - Explain what you tried and why you couldn't resolve it
+
+Agents should behave like senior engineers who can solve most problems themselves and only escalate the genuinely difficult ones.
+
+---
+
+## Natural Resiliency Philosophy
+
+### Success Pressure → Guessing (PARTIAL is a Win)
+
+Agents under pressure to complete a task will **guess** to finish. The fix is giving them **multiple successful exits**.
+
+**`PARTIAL` is a successful completion** when:
+- State is written to disk (`.runs/<run-id>/…`)
+- Next steps are documented
+- Work is checkpointed so the flow can be rerun cleanly
+
+A `PARTIAL` exit is not failure. It's a save point.
+
+### Write Early, Write Often
+
+Flows are **naturally re-runnable**. Re-running a flow is not "failure recovery"—it's routine:
+- Double-check work
+- Tighten schema alignment
+- Clean up artifacts
+- Improve quality incrementally
+
+**Always room for improvement**, even if rerunning something that was already run.
+
+### Forensic Truth: Diff + Test Results
+
+We trust **git diffs and test results** as forensic evidence.
+- The diff is the best audit surface for what changed
+- Tests are the runtime truth for what works
+- Critics do forensic analysis of both
+
+No rigid "coverage ratio" gates—use judgment to assess honesty and risk.
+
+### Intelligence Everywhere
+
+Any agent is authorized to fix an obvious, safe error it sees (typo, lint nit, missing import). We don't silo "fixing" to a specific agent.
+
+If a researcher sees a typo in the README, they should fix it and move on.
+
+### Model Strategy
+
+We intentionally avoid hardcoding model tiers into the pack.
+
+- **Most agents:** `model: inherit` (lets users choose their default)
+- **Some operator/librarian agents:** may default to `haiku` for fast search
+- **Only force a heavier model** when the task truly needs it (rare)
+
+**Naming rule:** Use model *names* only (Haiku, Sonnet, Opus). No version numbers—they become stale.
+
+---
+
 ## Operating Model: Swarm Repo
 
 Recommended: run flows in a dedicated `*-swarm` downstream repo.
@@ -343,6 +456,44 @@ If the evidence itself is missing (tests didn't run, CI unknown, etc.), that's n
 
 **Maintainer mantra:**
 > Build the asset. Capture the evidence. State the truth. Ship when the evidence is green.
+
+### DevLT Tracking (Developer Lead Time)
+
+Receipts may include a `devlt` section for retrospective analysis of human vs machine effort:
+
+```json
+{
+  "devlt": {
+    "flow_started_at": "2025-12-22T10:00:00Z",
+    "flow_completed_at": "2025-12-22T10:45:00Z",
+    "human_checkpoints": [
+      {"at": "2025-12-22T10:00:00Z", "action": "flow_start"},
+      {"at": "2025-12-22T10:30:00Z", "action": "question_answered"},
+      {"at": "2025-12-22T10:45:00Z", "action": "flow_approved"}
+    ],
+    "machine_duration_sec": 2700,
+    "human_checkpoint_count": 3,
+    "estimated_human_attention_min": 15,
+    "estimation_basis": "checkpoint_count * 5min average"
+  }
+}
+```
+
+**Field semantics:**
+
+- `flow_started_at` / `flow_completed_at`: Observable timestamps (wall clock)
+- `human_checkpoints`: Array of human interaction points with timestamps and action types
+- `machine_duration_sec`: Derived from timestamps (not execution time, just wall time)
+- `human_checkpoint_count`: Count of human interactions (observable)
+- `estimated_human_attention_min`: **Inference** - rough estimate based on checkpoint count and typical review times
+- `estimation_basis`: Explains how the estimate was derived (transparency)
+
+**Observable vs inferred:**
+- Timestamps and counts are **facts** (derived from logs/artifacts)
+- `estimated_human_attention_min` is an **inference** (labeled as such)
+- Token costs are **not tracked** here (unreliably available)
+
+**Purpose:** DevLT is for retrospective analysis in Flow 7 (Wisdom), not for gating or routing. It helps answer: "How much human attention did this run actually require?"
 
 ---
 
@@ -629,10 +780,16 @@ Only HIGH risk anomalies block `proceed_to_github_ops`. Untracked-only anomalies
 
 **Rule (repeat):** do not embed raw git commands in flow commands or agent prompts. All git is executed via `repo-operator` using **task phrasing**.
 
+**Two-step atomic (Flow 3):** Artifacts first, code second. This ensures the audit trail persists even if code changes are reverted.
+
 ### Commit Cadence
 
 - **Every flow checkpoints** (main checkpoint): audit commit of the flow's publish surface on the run branch.
-- **Flow 3 additionally commits code/tests**: the "work product" commit.
+- **Flow 3 uses two-step atomic commits**:
+  1. Artifacts commit: `.runs/<run-id>/build/` + flow metadata (audit trail)
+  2. Code commit: staged code/test changes (work product)
+
+  This separation allows reverting code changes without losing the audit trail of what was attempted and why.
 - **Flow 6 additionally merges the PR into swarm mainline**: promotion, plus tags/releases if configured.
 
 GitHub status files (`gh_issue_status.md`, `gh_report_status.md`, `gh_comment_id.txt`) are **gitignored** — they are operational exhaust, not audit trail.
@@ -831,3 +988,29 @@ If either is false, GH ops must be skipped.
 ### "Can't find run by issue number"
 
 Alias resolution is via `.runs/index.json` (`issue_number`/`canonical_key`) and `run_meta.json.aliases[]`. Folder names do not change.
+
+### "The swarm is deleting tests / weakening assertions"
+
+This is a common failure mode (reward hacking), not "working as intended." We detect it early via:
+- Diff-audits in critic microloops (Flow 3)
+- PR feedback harvest (Flow 3/4)
+- Standards-enforcer checks (Flow 3)
+
+If detected, route to rework immediately—don't let it reach Gate as a surprise.
+
+### "Context is full"
+
+`PARTIAL` is a win. Checkpoint state + document next steps, then rerun the flow to continue.
+
+Write early, write often. The system uses disk-based state to pick up exactly where it left off.
+
+### "The branch is a mess / upstream moved"
+
+Nuke the **branch**, not the fork. Sync the fork from upstream in the GitHub UI to preserve history, then start a fresh branch/run.
+
+```bash
+git branch -D run/<run-id>
+rm -rf .runs/<run-id>/
+# Sync fork via GitHub UI
+# Start fresh run
+```
