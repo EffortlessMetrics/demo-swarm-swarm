@@ -146,22 +146,23 @@ We artificially induce critical distance by splitting the persona:
 
 **Rule:** Agents must not estimate or guess metrics.
 
-### The Problem: The Helpful Assistant
+### The Problem: Success Pressure → Guessing
 
-Agents love to be helpful. If a file is missing, they might try to infer what the count *should* be (e.g., "I see 0 tests, but maybe they are implied...").
+Agents under pressure to complete a task will **guess** to finish. If a file is missing, they might try to infer what the count *should* be (e.g., "I see 0 tests, but maybe they are implied...").
 
-This creates phantom confidence. A guessed `0` looks authoritative but is actually a lie.
+This creates phantom confidence. A guessed `0` looks authoritative but is actually misleading data.
 
 ### The Solution
 
 1. **Rust Tooling:** We use `demoswarm` CLI for counting (grep/regex), not LLM vibes.
 2. **Explicit Nulls:** We instruct agents to output `null` (not `0`) if a file is missing or unreadable.
+3. **Multiple Success Exits:** We give agents `PARTIAL` as a valid success state, so they don't feel forced to guess.
 
-A `null` in a receipt is a signal to the human (missing data). A guessed `0` is a lie.
+A `null` in a receipt is a signal to the human (missing data). A guessed `0` is misleading.
 
 ### The Rule
 
-> **Null over guess. Missing is information; fake is deception.**
+> **Null over guess. Missing is information; guessing creates phantom confidence.**
 
 ---
 
@@ -218,7 +219,7 @@ We replaced ad-hoc bash pipelines with the `demoswarm` CLI:
 3. **Respect the Planes:** Never let an agent route based on a file read; force it to route based on the Machine Summary block.
 4. **Design for Compression:** Heavy agents must emit light outputs.
 5. **Design for Affinity:** Group related work by context loaded, not by task purity.
-6. **Null Over Guess:** Missing is information. Fake is deception.
+6. **Null Over Guess:** Missing is information. Guessing creates phantom confidence.
 
 ---
 

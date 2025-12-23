@@ -136,6 +136,56 @@ Agents should behave like senior engineers who can solve most problems themselve
 
 ---
 
+## Natural Resiliency Philosophy
+
+### Success Pressure → Guessing (PARTIAL is a Win)
+
+Agents under pressure to complete a task will **guess** to finish. The fix is giving them **multiple successful exits**.
+
+**`PARTIAL` is a successful completion** when:
+- State is written to disk (`.runs/<run-id>/…`)
+- Next steps are documented
+- Work is checkpointed so the flow can be rerun cleanly
+
+A `PARTIAL` exit is not failure. It's a save point.
+
+### Write Early, Write Often
+
+Flows are **naturally re-runnable**. Re-running a flow is not "failure recovery"—it's routine:
+- Double-check work
+- Tighten schema alignment
+- Clean up artifacts
+- Improve quality incrementally
+
+**Always room for improvement**, even if rerunning something that was already run.
+
+### Forensic Truth: Diff + Test Results
+
+We trust **git diffs and test results** as forensic evidence.
+- The diff is the best audit surface for what changed
+- Tests are the runtime truth for what works
+- Critics do forensic analysis of both
+
+No rigid "coverage ratio" gates—use judgment to assess honesty and risk.
+
+### Intelligence Everywhere
+
+Any agent is authorized to fix an obvious, safe error it sees (typo, lint nit, missing import). We don't silo "fixing" to a specific agent.
+
+If a researcher sees a typo in the README, they should fix it and move on.
+
+### Model Strategy
+
+We intentionally avoid hardcoding model tiers into the pack.
+
+- **Most agents:** `model: inherit` (lets users choose their default)
+- **Some operator/librarian agents:** may default to `haiku` for fast search
+- **Only force a heavier model** when the task truly needs it (rare)
+
+**Naming rule:** Use model *names* only (Haiku, Sonnet, Opus). No version numbers—they become stale.
+
+---
+
 ## Operating Model: Swarm Repo
 
 Recommended: run flows in a dedicated `*-swarm` downstream repo.
@@ -938,3 +988,29 @@ If either is false, GH ops must be skipped.
 ### "Can't find run by issue number"
 
 Alias resolution is via `.runs/index.json` (`issue_number`/`canonical_key`) and `run_meta.json.aliases[]`. Folder names do not change.
+
+### "The swarm is deleting tests / weakening assertions"
+
+This is a common failure mode (reward hacking), not "working as intended." We detect it early via:
+- Diff-audits in critic microloops (Flow 3)
+- PR feedback harvest (Flow 3/4)
+- Standards-enforcer checks (Flow 3)
+
+If detected, route to rework immediately—don't let it reach Gate as a surprise.
+
+### "Context is full"
+
+`PARTIAL` is a win. Checkpoint state + document next steps, then rerun the flow to continue.
+
+Write early, write often. The system uses disk-based state to pick up exactly where it left off.
+
+### "The branch is a mess / upstream moved"
+
+Nuke the **branch**, not the fork. Sync the fork from upstream in the GitHub UI to preserve history, then start a fresh branch/run.
+
+```bash
+git branch -D run/<run-id>
+rm -rf .runs/<run-id>/
+# Sync fork via GitHub UI
+# Start fresh run
+```

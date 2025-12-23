@@ -56,9 +56,9 @@ We enforce safety via tools, not prompts.
 
 | Guardrail | Implementation |
 | :--- | :--- |
-| **Anti-Reward Hacking** | `repo-operator` runs `git diff | grep ^D` on test paths. If tests are deleted, the push is **hard blocked**. |
+| **Anti-Reward Hacking** | Critics + `standards-enforcer` detect test deletions/weakened assertions during microloops. If detected, route to rework immediately—don't let it reach Gate as a surprise. |
 | **Intent + Extras** | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict. |
-| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks if manual remediation is required. |
+| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks publish when manual remediation is required—work never stops. |
 
 ---
 

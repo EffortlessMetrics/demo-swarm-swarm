@@ -75,8 +75,8 @@ Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
 | Value | Model Used | Use Case |
 |-------|------------|----------|
 | `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
-| `sonnet` | Claude Sonnet 4.5 | Implementation, architectural decisions, complex reasoning |
-| `haiku` | Claude Haiku 4.5 | Research, analysis, cleanup, mechanical work, context distillation |
+| `sonnet` | Claude Sonnet | Implementation, architectural decisions, complex reasoning |
+| `haiku` | Claude Haiku | Research, analysis, cleanup, mechanical work, context distillation |
 
 **2025 Conveyor Belt Philosophy:**
 
@@ -84,8 +84,8 @@ The gap between Sonnet and Haiku is not about speed—both are fast. It's about 
 
 | Tier | Models | Role |
 |------|--------|------|
-| **Reasoning** | Sonnet 4.5, Opus 4.5 | Implementation, orchestration, design |
-| **Execution** | Haiku 4.5 | Research, cleanup, mechanical work |
+| **Reasoning** | Sonnet, Opus | Implementation, orchestration, design |
+| **Execution** | Haiku | Research, cleanup, mechanical work |
 
 **Haiku-tier agents** (high-speed execution, research, cleanup):
 - `context-loader` — RAG-style search and context distillation

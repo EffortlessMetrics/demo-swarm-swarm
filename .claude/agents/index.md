@@ -12,8 +12,8 @@ For detailed allocation strategy and percentages, see [Model Allocation](../../d
 
 | Tier | Models | Use For |
 |------|--------|---------|
-| **Reasoning** | Sonnet 4.5, Opus 4.5 | Implementation, orchestration, architectural decisions, complex reasoning |
-| **Execution** | Haiku 4.5 | Research, analysis, cleanup, mechanical work, context distillation |
+| **Reasoning** | Sonnet, Opus | Implementation, orchestration, architectural decisions, complex reasoning |
+| **Execution** | Haiku | Research, analysis, cleanup, mechanical work, context distillation |
 
 ### Agent Model Assignments
 
@@ -42,10 +42,12 @@ For detailed allocation strategy and percentages, see [Model Allocation](../../d
 ### Model Selection Principle
 
 The gap between Sonnet and Haiku is not about speed—both are fast. It's about cost-to-reasoning ratio:
-- **Haiku**: Cheaper, good enough for summarization, research, and mechanical tasks
+- **Haiku**: Cheaper, sufficient for summarization, research, and mechanical tasks
 - **Sonnet/Opus**: Better reasoning for implementation and design decisions
 
 Haiku distills context; Sonnet/Opus implements with that context.
+
+**Model naming rule:** Use model *names* only (Haiku, Sonnet, Opus). No version numbers—they become stale.
 
 ## Agent Categories
 
