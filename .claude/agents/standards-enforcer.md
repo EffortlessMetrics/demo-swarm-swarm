@@ -96,10 +96,8 @@ Helpful:
 
 - `VERIFIED` — tooling executed, hygiene sweep completed, no issues or only minor ones. Code is clean and ready to commit.
 - `UNVERIFIED` — issues found but could not be auto-fixed (logic-level lint errors, coherence issues, ambiguous hygiene).
-- `HIGH_RISK` — safety analysis found suspicious patterns (e.g., silent test deletion). Commit proceeds, but finding is elevated to Gate/merge-decider for human review. This is **not a block**—it's a documented risk.
+- `HIGH_RISK` — safety analysis found suspicious patterns (e.g., silent test deletion). Commit proceeds; finding is elevated to Gate/merge-decider for human review.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure).
-
-**Note:** `BLOCKED` is deprecated. We no longer stop the build for test deletion. Instead, we flag it as HIGH_RISK and let the merge boundary (Gate) enforce human review.
 
 ## Control-plane routing (closed enum)
 

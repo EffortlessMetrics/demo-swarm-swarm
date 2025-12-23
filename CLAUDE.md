@@ -99,7 +99,7 @@ Problems should be caught where the fix is cheapest:
 - **Per-AC**: Catch reward hacking during the microloop (before next AC starts)
 - **Per-checkpoint**: Catch CI failures during feedback harvest (before flow ends)
 - **Per-flow**: Catch format/lint issues in standards-enforcer (before Gate)
-- **Gate**: VERIFY earlier findings, don't DISCOVER new issues
+- **Gate**: VERIFY earlier findings (discovery belongs in upstream flows)
 
 Gate is a **verification checkpoint**, not a quality filter. If Gate is catching issues that should have been caught earlier, that's a signal the upstream flows need improvement.
 
@@ -121,7 +121,7 @@ When summarizing for reports or routing:
 - Explain what the issue IS, not just where it is
 - Provide your assessment of validity (is this a real issue or bot noise?)
 - Route to the agent best suited to fix it
-- Don't dump file paths—synthesize understanding
+- Synthesize understanding over file path lists
 
 **Agents are smart.** They can read context, understand intent, and make judgment calls. Trust them to summarize intelligently rather than mechanically dumping file pointers.
 

@@ -407,16 +407,16 @@ For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled
    **Action on stale/outdated:**
    - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
    - Log the skip in `review_actions.md` with evidence (what changed, when)
-   - Move to the next item. Do not hallucinate fixes for missing code.
+   - Move to the next item.
 
    **Stale detection examples:**
    - CodeRabbit said "add null check at line 45" but line 45 is now a comment → STALE
    - CI failed on "auth.test.ts" but that file was renamed to "auth.spec.ts" and tests pass → STALE (ALREADY_FIXED)
    - Human asked about error handling, but the code was refactored to use a different approach → OUTDATED (re-evaluate if concern still applies)
 
-   **DO NOT:** Attempt to fix code that no longer exists. This wastes cycles and can introduce regressions.
+   **Skip stale feedback.** When code has changed, mark the item SKIPPED with evidence and move to the next item.
 
-   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Acting on stale feedback wastes cycles and risks regression.
+   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Skipping stale feedback preserves cycles and avoids regressions.
 
 3. Call the routed agent with context:
    - Item ID and summary
