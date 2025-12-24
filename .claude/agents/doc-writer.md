@@ -85,6 +85,33 @@ If you extract machine fields from critic artifacts:
 
 ## Behavior
 
+### Review Mode: Stale Check Protocol (Flow 4)
+
+When invoked from **Flow 4 (Review)** with a worklist item (e.g., `RW-NNN`) targeting documentation:
+
+1. **Read the worklist item's location** (file path from `review_worklist.json`)
+2. **Verify the doc/code still exists at HEAD:**
+   - Does the file at the specified path still exist?
+   - Does the section/line referenced in the feedback still exist?
+   - Has the content changed significantly since the feedback was posted?
+
+3. **Classify staleness:**
+   - `CURRENT`: Content matches the feedback context → proceed with update
+   - `STALE`: File or section has been deleted or substantially rewritten → skip
+   - `OUTDATED`: Content exists but has been partially modified → verify if concern still applies
+   - `ALREADY_FIXED`: Issue was addressed by prior work → skip
+
+4. **If stale/already-fixed:**
+   - Do NOT attempt an update
+   - Return immediately with:
+     ```yaml
+     worklist_item_status: SKIPPED
+     skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED
+     skip_evidence: "<what changed, when>"
+     ```
+
+### Standard Mode (Flow 3 / Build)
+
 ### Step 0: Preflight
 - Verify you can write: `.runs/<run-id>/build/doc_updates.md`.
 - If you cannot write due to IO/permissions/tooling:
@@ -205,6 +232,12 @@ blockers: []
 missing_required: []
 concerns: []
 output_file: .runs/<run-id>/build/doc_updates.md
+
+# Flow 4 (Review Mode) additional fields - include when processing worklist items:
+worklist_item_id: RW-NNN | null         # the item being processed
+worklist_item_status: RESOLVED | SKIPPED | PENDING | null
+skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED | null
+skip_evidence: <string | null>          # what changed, when
 ```
 
 ## Obstacle Protocol (When Stuck)

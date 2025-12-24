@@ -255,34 +255,27 @@ Sources:
 3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
 4. **Stuck detection triggered** → status: PARTIAL (checkpoint & exit with documented stuck state)
 
-### Stuck Detection (prevents infinite loops)
+### Stuck Detection (delegated to review-worklist-writer)
 
-The loop is **stuck** when no meaningful progress is made across iterations. Track these signals:
+Stuck detection is handled by the `review-worklist-writer` agent, NOT by the orchestrator.
 
-**Progress indicators (reset stuck counter):**
-- Item moved from PENDING to RESOLVED
-- Item moved from PENDING to SKIPPED (with valid reason)
-- New items added to worklist (from re-harvest)
-- Git diff shows meaningful code changes
+**How it works:**
+- When the worklist is refreshed, `review-worklist-writer` compares the current worklist to the previous version
+- The agent detects if the same items keep failing repeatedly (3+ cycles with no status changes)
+- The agent emits a `stuck_signal: true | false` field in its Result block
+- The agent also emits `stuck_items: []` identifying which items are blocking progress
 
-**Stuck signals (increment stuck counter):**
-- Same item attempted twice with same failure mode
-- Fix agent returns UNVERIFIED with identical blockers
-- No worklist state change after a full iteration
-- No git diff after fix attempt
+**Orchestrator routing (pure routing, no computation):**
+- Route on Result block: `if stuck_signal == true: exit loop`
+- Do NOT maintain counters or compute hashes in the orchestrator
 
-**Stuck counter threshold:** 3 consecutive iterations without progress.
-
-**On stuck detection:**
+**On stuck detection (when `stuck_signal: true`):**
 1. Mark remaining PENDING items as `DEFERRED` with reason: `"STUCK: No progress after 3 iterations"`
-2. Write detailed stuck analysis to `review_actions.md`:
-   - Which items were attempted
-   - What failures occurred
-   - Why the loop couldn't make progress
+2. Write stuck analysis to `review_actions.md` using `stuck_items` from result
 3. Checkpoint with `status: PARTIAL`
-4. Exit with message: "Review loop stuck. {N} items deferred. See review_actions.md for analysis. Human intervention may be required."
+4. Exit with message: "Review loop stuck. {N} items deferred. Human intervention may be required."
 
-**Why this matters:** An unbounded loop without stuck detection can burn tokens indefinitely trying the same failed fix. Stuck detection ensures the swarm admits defeat gracefully rather than spinning.
+**Why delegated?** The orchestrator should be a pure router. The `review-worklist-writer` agent already has the worklist context and can detect stuck patterns efficiently without the orchestrator maintaining state or computing hashes.
 
 **Context checkpoint behavior (PARTIAL):**
 When context is approaching limits, checkpoint immediately:
@@ -293,18 +286,13 @@ When context is approaching limits, checkpoint immediately:
 
 This is a **feature, not a failure**. It prevents hallucination from context stuffing and enables incremental progress. The next `/flow-4-review` invocation will resume from the checkpoint.
 
-**Loop structure:**
+**Loop structure (pure routing, no computation):**
 
 ```
-stuck_counter = 0
-last_worklist_hash = null
-last_diff_hash = null
-
 while not terminated:
     1. Read current worklist status from review_worklist.json
     2. If pending == 0: break (complete)
     3. If context exhausted: break (can resume later)
-    3b. If stuck_counter >= 3: break (stuck detection triggered)
 
     4. Run Style Sweep station (always):
        - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
@@ -319,12 +307,15 @@ while not terminated:
        - doc-writer: for DOCS items
        - fixer: for STYLE items
 
-    7. Run test-executor to verify the fix (fast confirm)
+    7. Call fix agent with item context
+       - Agent performs stale check FIRST (see agent prompts)
+       - If agent returns `worklist_item_status: SKIPPED` with skip_reason: mark item SKIPPED and move to next
+       - If agent returns `worklist_item_status: RESOLVED`: run test-executor to verify
 
-    8. Update item status in review_worklist.json:
-       - RESOLVED: if fix verified
-       - PENDING: if fix failed (will retry)
-       - SKIPPED: if out of scope (document reason)
+    8. Route on agent Result block:
+       - If `worklist_item_status: RESOLVED` and tests pass: mark RESOLVED
+       - If `worklist_item_status: SKIPPED`: mark SKIPPED (agent already verified staleness)
+       - If fix failed: keep PENDING
 
     9. Append to review_actions.md what was done
 
@@ -338,21 +329,10 @@ while not terminated:
         - Human reviewers may add comments
 
     12. If new feedback items found:
-        - Run review-worklist-writer to update worklist
-        - New items get appended (IDs continue from last)
-
-    13. **Track progress for stuck detection:**
-        current_worklist_hash = hash(review_worklist.json pending items)
-        current_diff_hash = hash(git diff HEAD~1)
-
-        if (item resolved OR item skipped OR new items added OR diff changed):
-            stuck_counter = 0  # Progress made
-            last_worklist_hash = current_worklist_hash
-            last_diff_hash = current_diff_hash
-        else:
-            stuck_counter += 1  # No progress
-            if stuck_counter >= 3:
-                log "Stuck detection triggered after 3 iterations without progress"
+        - Run review-worklist-writer to refresh worklist
+        - **Route on stuck_signal from Result block:**
+          - If `stuck_signal: true`: break loop (stuck detection triggered)
+          - If `stuck_signal: false`: continue processing
 ```
 
 **Style Sweep station (standard, always run):**
@@ -387,44 +367,30 @@ When summarizing feedback for routing or reporting, use JUDGMENT:
 - What agent is best suited to address it
 - Whether the issue is still relevant (stale check)
 
-**Per-item fix process:**
+**Per-item fix process (stale check delegated to agents):**
 
 For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
 
 1. Read the item details (category, severity, location, summary)
 
-2. **Verify Relevance (Stale Check):**
-   Before routing to a fix agent, verify the referenced code still exists at HEAD:
-   - Does the file at the specified path still exist?
-   - Does the code/line referenced in the comment still exist and match the context?
-   - Has the code changed significantly since the feedback was posted?
-
-   **Stale classification:**
-   - **STALE**: Code has been refactored, deleted, or substantially changed. The feedback no longer applies.
-   - **OUTDATED**: Code exists but has been partially modified. May still apply but needs verification.
-   - **CURRENT**: Code matches the feedback context. Proceed with fix.
-
-   **Action on stale/outdated:**
-   - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
-   - Log the skip in `review_actions.md` with evidence (what changed, when)
-   - Move to the next item.
-
-   **Stale detection examples:**
-   - CodeRabbit said "add null check at line 45" but line 45 is now a comment → STALE
-   - CI failed on "auth.test.ts" but that file was renamed to "auth.spec.ts" and tests pass → STALE (ALREADY_FIXED)
-   - Human asked about error handling, but the code was refactored to use a different approach → OUTDATED (re-evaluate if concern still applies)
-
-   **Skip stale feedback.** When code has changed, mark the item SKIPPED with evidence and move to the next item.
-
-   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Skipping stale feedback preserves cycles and avoids regressions.
-
-3. Call the routed agent with context:
+2. **Route to fix agent with item context:**
    - Item ID and summary
    - File path and line number
    - Evidence from feedback
-4. If agent succeeds: mark RESOLVED
-5. If agent fails: keep PENDING (may need different approach)
-6. Log action in `review_actions.md`
+
+3. **The fix agent performs the stale check FIRST** (see agent prompts for `code-implementer`, `fixer`, `doc-writer`, `test-author`):
+   - Agent verifies the code still exists at HEAD
+   - If stale: agent returns `worklist_item_status: SKIPPED` with `skip_reason` and `skip_evidence`
+   - If current: agent proceeds with fix
+
+4. **Route on agent Result block:**
+   - If `worklist_item_status: SKIPPED`: mark item SKIPPED, log skip_evidence to `review_actions.md`, move to next item
+   - If `worklist_item_status: RESOLVED`: run test-executor to verify, then mark RESOLVED
+   - If fix failed: keep PENDING (may need different approach)
+
+5. Log action in `review_actions.md`
+
+**Why delegated?** The orchestrator should not read files to check code existence. The fix agent already needs to read the file to apply the fix — it can verify staleness as its first action and return immediately if stale. This keeps the orchestrator as a pure router.
 
 **Reseal after changes:**
 
@@ -614,13 +580,13 @@ MINOR and INFO items may remain pending without blocking.
 
 13. `gh-reporter` (if allowed)
 
-#### Worklist Loop Template (unbounded resolution)
+#### Worklist Loop Template (unbounded resolution, pure routing)
 
 This is the core review loop. Unlike Build's bounded microloops, this runs until completion.
 
 **Entry:** review_worklist.json exists with items
 
-**Loop:**
+**Loop (pure routing - no computation in orchestrator):**
 ```
 1) Read worklist status (total, pending, resolved)
 2) If pending == 0: exit loop (complete)
@@ -643,25 +609,28 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
    - DOCS items → doc-writer
    - ARCHITECTURE items → code-implementer
 
-7) Run fix agent with item context
+7) Call fix agent with item context
+   - Agent performs stale check FIRST
+   - Route on agent Result block (worklist_item_status field)
 
-8) Run test-executor (fast confirm: relevant tests)
-
-9) Update worklist item status:
-   - If fix verified: RESOLVED
+8) Route on Result block:
+   - If `worklist_item_status: SKIPPED`: mark SKIPPED, move to next (agent verified staleness)
+   - If `worklist_item_status: RESOLVED`: run test-executor, then mark RESOLVED
    - If fix failed: keep PENDING
-   - If out of scope: SKIPPED with reason
 
-10) Append to review_actions.md
+9) Append to review_actions.md
 
-11) Every N items or after major changes:
+10) Every N items or after major changes:
     - Apply Reseal → Gate → Push → Re-harvest subroutine (see Re-harvest cadence)
-    - This ensures proper gating before push and captures new bot feedback
+    - Route on review-worklist-writer Result block:
+      - If `stuck_signal: true`: exit loop (stuck detection triggered)
+      - If `stuck_signal: false`: continue processing
 ```
 
 **Exit conditions:**
 - `pending == 0` (all resolved)
 - Context window approaching limit
+- `stuck_signal: true` (from review-worklist-writer)
 - Unrecoverable blocker
 
 #### Microloop Template (writer ↔ critic)

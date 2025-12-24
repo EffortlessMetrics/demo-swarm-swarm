@@ -275,7 +275,31 @@ by_route:
 ```
 ```
 
-### Step 5: Write review_worklist.json
+### Step 5: Stuck Detection (Refresh Mode)
+
+When called to **refresh** an existing worklist (not initial creation), detect if the loop is stuck:
+
+1. **Read prior worklist**: `.runs/<run-id>/review/review_worklist.json` (previous version)
+2. **Compare pending items**:
+   - Count items that were PENDING in previous run and are still PENDING now
+   - Identify if the same items keep failing repeatedly
+
+3. **Stuck signal computation**:
+   - `stuck_signal: false` (default) - progress is being made
+   - `stuck_signal: true` - no meaningful progress in this refresh cycle
+
+4. **Stuck criteria** (any triggers `stuck_signal: true`):
+   - Same PENDING items exist after 3+ refresh cycles with no status changes
+   - An item has been attempted 3+ times and keeps returning to PENDING
+   - Zero items resolved in the last refresh cycle AND items were attempted
+
+5. **Track iteration count**:
+   - Increment `refresh_iteration` counter in `review_worklist.json`
+   - Record `last_refresh_at` timestamp
+
+**Why this matters:** The orchestrator needs to know when to break the loop. Rather than computing hashes and maintaining counters in the flow, the worklist-writer detects stuck patterns and signals the orchestrator to exit gracefully.
+
+### Step 6: Write review_worklist.json
 
 Write `.runs/<run-id>/review/review_worklist.json`:
 
@@ -406,9 +430,18 @@ concerns: []
 
 worklist_summary:
   total_items: <n>
+  pending: <n>
+  resolved: <n>
+  skipped: <n>
   critical: <n>
   major: <n>
   minor: <n>
+
+# Stuck detection (refresh mode only)
+stuck_signal: true | false              # true if loop is stuck, orchestrator should exit
+refresh_iteration: <n>                  # how many times worklist has been refreshed
+items_resolved_this_cycle: <n>          # items that moved from PENDING to RESOLVED/SKIPPED
+stuck_items: []                         # IDs of items that are blocking progress (if stuck)
 
 categories:
   CORRECTNESS: <n>

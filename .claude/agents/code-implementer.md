@@ -89,6 +89,36 @@ If you use machine fields from critic artifacts:
 
 ## Behavior
 
+### Review Mode: Stale Check Protocol (Flow 4)
+
+When invoked from **Flow 4 (Review)** with a worklist item (e.g., `RW-NNN`), you MUST perform a stale check **before** attempting any fix:
+
+1. **Read the worklist item's location** (file path, line number from `review_worklist.json`)
+2. **Verify the code still exists at HEAD:**
+   - Does the file at the specified path still exist?
+   - Does the code/line referenced in the feedback still exist?
+   - Has the code changed significantly since the feedback was posted?
+
+3. **Classify staleness:**
+   - `CURRENT`: Code matches the feedback context → proceed with fix
+   - `STALE`: Code has been deleted or substantially refactored → skip
+   - `OUTDATED`: Code exists but has been partially modified → verify if concern still applies
+   - `ALREADY_FIXED`: Issue was addressed by prior work → skip
+
+4. **If stale/already-fixed:**
+   - Do NOT attempt a fix
+   - Do NOT hallucinate changes
+   - Return immediately with:
+     ```yaml
+     worklist_item_status: SKIPPED
+     skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED
+     skip_evidence: "<what changed, when>"
+     ```
+
+**Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Skipping stale feedback preserves cycles and avoids regressions.
+
+### Standard Mode (Flow 3 / AC Loop)
+
 1) **Load context**
 - Read `subtask_context_manifest.json` first.
 - Read ADR + contracts + requirements relevant to the subtask.
@@ -220,6 +250,12 @@ concerns: []
 tests_run: yes | no
 tests_passed: yes | no | unknown
 output_file: .runs/<run-id>/build/impl_changes_summary.md
+
+# Flow 4 (Review Mode) additional fields - include when processing worklist items:
+worklist_item_id: RW-NNN | null         # the item being processed
+worklist_item_status: RESOLVED | SKIPPED | PENDING | null
+skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED | null
+skip_evidence: <string | null>          # what changed, when
 ```
 
 ## Obstacle Protocol (When Stuck)
