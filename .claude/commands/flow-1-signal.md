@@ -64,8 +64,8 @@ Flow 1 uses **two complementary state machines**:
 - signal-normalizer (normalize signal)
 - problem-framer (frame the problem; check for state/migration implications)
 - clarifier (capture open questions; non-blocking)
-- requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- bdd-author ↔ bdd-critic (microloop; 2 passes default; enforce sad paths)
+- requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- bdd-author ↔ bdd-critic (microloop; signal-based termination; enforce sad paths)
 - scope-assessor (assess scope + initial risks)
 - risk-analyst (deep risk analysis)
 - spec-auditor (integrative audit; may bounce for fixes)
@@ -103,8 +103,8 @@ If running `/flow-1-signal` on an existing run-id:
 
 - signal-normalizer
 - problem-framer
-- requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- bdd-author ↔ bdd-critic (microloop; signal-based termination)
 - scope-assessor
 
 ### Cross-Cutting Agents
@@ -171,8 +171,8 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 - [ ] signal-normalizer (parse input)
 - [ ] problem-framer (synthesize problem; check state/migration)
 - [ ] clarifier (document ambiguities)
-- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default; enforce sad paths)
+- [ ] requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- [ ] bdd-author ↔ bdd-critic (microloop; signal-based termination; enforce sad paths)
 - [ ] scope-assessor (stakeholders, risks, estimate)
 - [ ] risk-analyst (enrich risks)
 - [ ] spec-auditor (integrative audit; may bounce for fixes)
@@ -230,15 +230,14 @@ Alternate between `requirements-author` and `requirements-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `requirements-author` once with the critique worklist, then rerun `requirements-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance (The Stubborn Loop)**:
-- Default cadence is two passes (writer -> critic -> writer -> critic).
-- The second writer pass applies the critique worklist (when present).
-- **Stubbornness rule:** You (the orchestrator) must not accept "Good Enough." Loop until the Critic signs off (`status: VERIFIED`) or you hit the retry limit.
-- If the critic returns `recommended_action: RERUN` with `can_further_iteration_help: yes`, you **must** loop again.
-- Exit conditions:
-  1. `status: VERIFIED` → proceed
-  2. 3 full passes completed → proceed with `UNVERIFIED` + blockers (carry honestly)
+**Loop guidance (Signal-Based Termination)**:
+- Route on critic's Result block, not pass counts.
+- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
+- Exit conditions (in priority order):
+  1. `status: VERIFIED` → proceed (success)
+  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
   3. `can_further_iteration_help: no` → proceed (no improvement possible)
+  4. Context exhausted → checkpoint and exit `PARTIAL`
 - The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 7: BDD Scenarios (Microloop)
@@ -265,16 +264,15 @@ Alternate between `bdd-author` and `bdd-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `bdd-author` once with the critique worklist, then rerun `bdd-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance (The Stubborn Loop)**:
-- Default cadence is two passes (writer -> critic -> writer -> critic).
-- The second writer pass applies the critique worklist (when present).
-- **Stubbornness rule:** You (the orchestrator) must not accept "Good Enough." Loop until the Critic signs off (`status: VERIFIED`) or you hit the retry limit.
-- If the critic returns `recommended_action: RERUN` with `can_further_iteration_help: yes`, you **must** loop again.
+**Loop guidance (Signal-Based Termination)**:
+- Route on critic's Result block, not pass counts.
+- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
 - **Sad Path enforcement:** The critic will flag REQs missing negative scenarios. Ensure the author addresses these before proceeding.
-- Exit conditions:
-  1. `status: VERIFIED` → proceed
-  2. 3 full passes completed → proceed with `UNVERIFIED` + blockers (carry honestly)
+- Exit conditions (in priority order):
+  1. `status: VERIFIED` → proceed (success)
+  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
   3. `can_further_iteration_help: no` → proceed (no improvement possible)
+  4. Context exhausted → checkpoint and exit `PARTIAL`
 - The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 8: Assess Scope
@@ -570,15 +568,14 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 
 1) Writer pass: call `<writer>`
 2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
-4) Re-critique: call `<critic>` again
+3) Route on critic Result:
+   - If `recommended_action: PROCEED` → proceed (no apply pass needed)
+   - If `recommended_action: RERUN` AND `can_further_iteration_help: yes` → continue to step 4
+   - Otherwise → proceed with `UNVERIFIED` + blockers recorded
+4) Apply pass: call `<writer>` with the critique worklist
+5) Re-critique: call `<critic>` again, return to step 3
 
-Continue looping beyond the default two passes only when:
-- critic returns `recommended_action: RERUN`, and
-- `can_further_iteration_help: yes`, and
-- the critic's open items are specific, and the writer can change the artifact to address them.
-
-Otherwise proceed with `UNVERIFIED` + blockers recorded.
+**Termination:** Signal-based, not count-based. Loop continues while critic says RERUN + can_further_iteration_help: yes. Exit when signal says stop or context exhausted.
 
 ### TodoWrite (copy exactly)
 
@@ -589,8 +586,8 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] signal-normalizer
 - [ ] problem-framer
 - [ ] clarifier
-- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- [ ] requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- [ ] bdd-author ↔ bdd-critic (microloop; signal-based termination)
 - [ ] scope-assessor
 - [ ] risk-analyst
 - [ ] spec-auditor (integrative audit; may bounce for fixes)

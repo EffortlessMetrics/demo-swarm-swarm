@@ -232,9 +232,15 @@ while pending > 0 and not exhausted:
 
     5. Log action in review_actions.md
 
-    6. Periodically: push → re-harvest → refresh worklist
+    6. Periodically: Checkpoint Routine (explicit agent chain)
+       - secrets-sanitizer (capture Gate Result)
+       - repo-operator (commit/push; gated on Gate Result)
+       - pr-feedback-harvester (re-harvest CI/bot status)
+       - review-worklist-writer (refresh worklist; may add new items)
        - If stuck_signal: true → exit loop
 ```
+
+**Checkpoint Routine:** This is an explicit agent call chain, not a narrative step. Every push must be gated through secrets-sanitizer. The re-harvest immediately captures bot feedback on the new push.
 
 **Exit conditions:**
 - `pending == 0` → complete
@@ -372,9 +378,15 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 
 9) Log in review_actions.md
 
-10) Periodically: push → re-harvest → refresh worklist
+10) Periodically: Checkpoint Routine (explicit agent chain)
+    - secrets-sanitizer (capture Gate Result)
+    - repo-operator (commit/push; gated on Gate Result)
+    - pr-feedback-harvester (re-harvest CI/bot status)
+    - review-worklist-writer (refresh; may add new items)
     - If stuck_signal: true → exit loop
 ```
+
+**Checkpoint Routine:** Every push must be gated through secrets-sanitizer. This is an explicit agent call chain, not a narrative step.
 
 **Exit conditions:**
 - `pending == 0` (all resolved) → VERIFIED
