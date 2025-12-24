@@ -467,180 +467,54 @@ This is the **flow boundary checkpoint** - the last chance to capture bot feedba
 - Computes counts mechanically (never estimates)
 - Updates `.runs/index.json` with status, last_flow, updated_at
 
-### Step 10: Stage + Classify Changes
+### Step 10: Stage Changes
 
 **Call `repo-operator`** with task: "stage intended changes for build"
 
-**Intended commit surface for Build:**
-- Code/test/doc changes (project-defined locations)
-- `.runs/<run-id>/build/` (all flow artifacts)
-- `.runs/<run-id>/run_meta.json`
-- `.runs/index.json`
+The repo-operator will:
+- Stage the intended commit surface (code/tests + `.runs/<run-id>/build/` + metadata)
+- Classify any out-of-scope changes (ad-hoc fixes happen; record them, don't fight them)
+- Return a result telling you whether to proceed
 
-The repo-operator stages the intended set and **classifies** any out-of-scope changes:
-
-**Anomaly classification:**
-- **HIGH risk (blocks push):** staged/tracked changes outside intended set
-  - Uncertain provenance → cannot safely publish
-  - Commit the intended set locally, skip push
-  - Write `.runs/<run-id>/build/extra_changes.md` with classification:
-    - Incidental (include next time) vs scope creep (split / new run)
-- **LOW risk (warning only):** untracked files outside intended set
-  - Allows push (new files haven't been `git add`ed, so provenance is clear)
-  - Write warning in `git_status.md`
-
-**Repo Operator Result for staging:**
-```yaml
-## Repo Operator Result
-operation: stage
-status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY
-proceed_to_github_ops: true | false  # false if HIGH risk anomalies
-anomaly_classification:
-  unexpected_staged_paths: []    # HIGH risk
-  unexpected_unstaged_paths: []  # HIGH risk
-  unexpected_untracked_paths: [] # LOW risk (warning)
-```
-
-**Key shift:** This replaces "stop the world until clean" with "stage, classify, proceed."
-- Engineering continues locally even when push is blocked
-- The system captures and labels extra changes rather than punishing them
-- Ad-hoc fixes happen; record them, don't fight them
-
-**IMPORTANT: Do NOT commit yet. Must pass pre-publish sweep first.**
+**Route on its response.** You don't need to understand the git mechanics — that's repo-operator's job.
 
 ### Step 11: Pre-Publish Sweep (Secrets Sanitizer)
 
-**The sanitizer is a fix-first pre-publish hook, not a behavioral throttle.**
+**Call `secrets-sanitizer`** to scan staged changes before commit.
 
-Call `secrets-sanitizer` with publish surface:
-- Staged code/test changes
-- `.runs/<run-id>/build/` artifacts
+The sanitizer will:
+- Scan for secrets
+- Auto-redact what it can
+- Return `safe_to_commit` and `safe_to_publish` booleans
 
-**What it does:**
-- Fast scan for obvious secret patterns
-- Auto-redact what it can (artifact secrets, placeholder tokens)
-- Report findings only when remediation requires human judgment
+**Route on its response:**
+- If blocked due to secrets in code → route to `code-implementer` or `fixer`
+- If blocked due to mechanical failure → **FIX_ENV**
+- Publishing can be blocked, but work never stops locally
 
-**Status vs Flags:**
-- `status` = what happened:
-  - `CLEAN`: No secrets found
-  - `FIXED`: Secrets found and auto-remediated
-  - `BLOCKED`: Cannot safely remediate (requires human judgment or upstream fix)
-- `safe_to_commit/safe_to_publish` = what you're allowed to do (authoritative)
-- `blocker_kind` = why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
+### Step 12: Commit and Push
 
-**Key posture:** Publishing can be blocked, but work never stops.
-- If `blocker_kind: SECRET_IN_CODE`: route to `code-implementer` or `fixer` (orchestrator decides)
-- If `blocker_kind: MECHANICAL`: **FIX_ENV** — tool/IO issue, not a code problem
-- Either way: continue engineering locally while remediation proceeds
+**Call `repo-operator`** with task: "commit and push build changes"
 
-Typically `safe_to_*` are true for CLEAN/FIXED, but **the orchestrator must use the Gate Result booleans, not infer from status**.
+The repo-operator will:
+- Commit artifacts first (preserves audit trail)
+- Commit code/test changes second
+- Push if gates allow
+- Handle anomalies gracefully
 
-**Gate Result block (returned by secrets-sanitizer):**
+**Route on its response:**
+- If `proceed_to_github_ops: true` → proceed to GitHub reporting
+- If `proceed_to_github_ops: false` → continue locally, skip GitHub ops
+- Commit SHA is always available (for Flow 4/5 to reference)
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+### Step 12b: PR Fallback (Conditional)
 
-**Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
-- The sanitizer is a fix-first pre-commit hook, not a router
-- `blocker_kind` explains why blocked (machine-readable category):
-  - `NONE`: not blocked
-  - `MECHANICAL`: IO/permissions/tooling failure → **FIX_ENV**
-  - `SECRET_IN_CODE`: secret in staged code → route to `code-implementer` or `fixer` (orchestrator decides)
-  - `SECRET_IN_ARTIFACT`: secret in `.runs/` artifact that can't be redacted → investigate manually
-- If `safe_to_commit: false`: skip commit, continue engineering locally
-- If `safe_to_commit: true` but `safe_to_publish: false`: commit locally (audit trail preserved), skip push
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
-- GitHub reporting ops still run in RESTRICTED mode when publish is blocked or `publish_surface: NOT_PUSHED`
+PR creation happens early (Step 5b). This step is a fallback if the early PR wasn't created:
+- If `pr_number` exists: skip
+- If not pushed: skip
+- Otherwise: call `pr-creator`
 
-### Step 12: Commit and Push (Only if Secrets Gate Passes)
-
-**Two-step atomic commit strategy:**
-
-Flow 3 uses two sequential commits to preserve the audit trail even when code changes need to be reverted:
-
-1. **Step 12a: Commit `.runs/` artifacts**
-   - **Call `repo-operator`** with task: "commit build artifacts"
-   - Commits only `.runs/<run-id>/build/`, `run_meta.json`, `index.json`
-   - Preserves audit trail independently of code changes
-   - **Rationale:** This allows reverting code without losing the audit trail
-
-2. **Step 12b: Commit code/test changes**
-   - **Call `repo-operator`** with task: "commit and push build changes"
-   - Commits code/test/doc changes (project-defined locations)
-   - Generates commit message from `impl_changes_summary.md`
-   - Pushes both commits (gated by secrets + hygiene checks)
-
-**No-op commit guard:** If either commit has no staged changes (`git diff --cached --quiet` → empty), that commit is SKIPPED (not an error). `repo-operator` handles this gracefully.
-
-**Control plane:** `repo-operator` returns a Repo Operator Result block:
-```
-## Repo Operator Result
-operation: build
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
-proceed_to_github_ops: true | false
-commit_sha: <sha>
-publish_surface: PUSHED | NOT_PUSHED
-anomaly_paths: []
-```
-**Note:** `commit_sha` is always populated (current HEAD after both commits, or current HEAD on no-op), never null. Flow 3 uses `operation: build` (not `checkpoint`) because it commits code/tests alongside audit artifacts.
-
-Orchestrators route on this block, not by re-reading `git_status.md`.
-
-**Gating logic (from prior secrets-sanitizer Gate Result + repo-operator result):**
-- If `safe_to_commit: false` (from Gate Result): skip commit (apply route-and-fix triage from Step 11)
-- If `safe_to_commit: true`: commit
-- If anomaly detected (dirty tree after staging): commits staged changes, returns `proceed_to_github_ops: false`
-
-**Push logic:**
-- If `safe_to_publish: true` AND `proceed_to_github_ops: true`: repo-operator pushes the branch
-- If `safe_to_publish: false`:
-  - If `blocker_kind: SECRET_IN_CODE` → route to `code-implementer` or `fixer` (orchestrator decides)
-  - If `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO issue)
-  - Otherwise → skip push (`publish_surface: NOT_PUSHED`), write evidence
-- **Keep engineering locally** while remediation proceeds. Publishing is gated; work is not.
-
-### Step 12b: PR Status Check (Conditional)
-
-**Note:** PR creation now happens early (Step 5b) to get bots spinning during the AC loop.
-
-This step handles edge cases where the early PR wasn't created:
-- If `pr_number` exists in run_meta: skip (PR already exists from Step 5b)
-- If `publish_surface: NOT_PUSHED`: skip (can't create PR without push)
-- Otherwise: call `pr-creator` as fallback
-
-**Route on PR Creator Result block:**
-- If `operation_status: CREATED`: PR created successfully, `pr_number` available
-- If `operation_status: EXISTING`: PR already existed, `pr_number` captured
-- If `operation_status: SKIPPED`: Prerequisites not met, note reason and continue
-- If `operation_status: FAILED`: Creation failed, note in concerns and continue
-
-**Metadata updates (handled by pr-creator):**
-- `run_meta.json`: `pr_number`, `pr_url`
-- `index.json`: `pr_number`
-
-**Artifact output:**
-- `.runs/<run-id>/build/pr_creation_status.md`
-
-**Important:** PR creation failure does not block the flow. Flow 4 (Review) can create the PR if needed.
-
-### Step 12c: Stage PR Metadata (Conditional)
-
-**If PR was created or found (operation_status: CREATED or EXISTING):**
-
-The `run_meta.json` and `index.json` now contain `pr_number`. The next checkpoint will include this metadata.
-
-**If PR was skipped or failed:** Nothing to stage.
+PR creation failure does not block the flow.
 
 ### Step 13-14: GitHub Reporting
 

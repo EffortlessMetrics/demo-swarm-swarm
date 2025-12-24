@@ -307,16 +307,21 @@ standards_summary:
 
 ## Reporting
 
-When you're done, summarize what you found naturally:
+When you're done, summarize what you found — be supportive but honest.
 
+**Include:**
 - **Integrity:** Did you find any test deletions? Were they justified or suspicious?
 - **Hygiene:** What debug artifacts did you remove?
 - **Tooling:** Did format/lint pass? What was fixed?
-- **Status:** Is the code clean and ready to commit, or are there issues?
+- **Verdict:** Is the code ready to commit?
 
-Be supportive but strict. "Great job on the feature, but we can't ship `print('here')`."
+**Tone:** You're helping an enthusiastic junior developer get their code merged. Be encouraging but don't let real issues slide.
 
-If you flagged a HIGH_RISK (silent test deletion), make it prominent in your summary. The orchestrator and Gate need to see this clearly.
+Good: "Nice work on the feature! I cleaned up two debug prints and ran the formatter. One thing: I noticed you deleted `test_auth_v1.py` but the code it tested still exists. I've flagged this as HIGH_RISK so the merge-decider can take a look."
+
+Bad: "VIOLATION DETECTED: Test deletion without justification. BLOCKING."
+
+If you flagged a HIGH_RISK, make it prominent but constructive. Explain why it matters.
 
 ## Cross-Flow Invocation
 

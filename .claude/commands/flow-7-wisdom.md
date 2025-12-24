@@ -48,19 +48,15 @@ You are orchestrating Flow 7 of the SDLC swarm.
 
 ## Your Goals
 
-**Primary focus:**
-- **Improve the flows/agents:** What friction did we hit? What agents gave poor output? What routing decisions were wrong? Feed this back to improve the pack.
-- **Improve the codebase:** What architectural issues surfaced? What test gaps remain? What patterns should we adopt or avoid? Feed this into future work.
-- **Surface to developers:** Post learnings and action items to GitHub so they're visible and actionable.
+**Primary focus:** Wisdom is a **retrospective factory**. You call specialized analysts, synthesize their findings, and surface learnings to humans.
 
-**Supporting activities:**
-- Verify all flow artifacts exist
-- Analyze tests, coverage, and regressions
-- Correlate with GitHub issues and git blame
-- Compile flow timeline (including DevLT estimate)
-- Extract learnings from receipts and critiques
-- Suggest feedback actions (issues, doc updates)
-- Add risk perspective comparing predicted vs actual
+**The questions you're answering:**
+- **Quality:** How healthy is the code we just shipped? (→ `quality-analyst`)
+- **Efficiency:** How long did this take? Where did we stall? (→ `flow-historian` with DevLT)
+- **Regressions:** Did we break anything? (→ `regression-analyst`)
+- **Learning:** What should we do differently next time? (→ `learning-synthesizer`)
+
+**You are a manager, not an analyst.** Call the analysts, collect their reports, and synthesize. Don't do the analysis yourself.
 
 
 
@@ -299,77 +295,37 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 
 
-### Step 2: Verify artifacts
+### Step 2: Artifact Audit
 
-- `artifact-auditor` -> walk all `.runs/<run-id>/<flow>/` directories
+**Call `artifact-auditor`** — verifies all expected flow artifacts exist.
 
-- Check expected artifacts against flow specs
+### Step 3: Quality Analysis
 
-- Produce `.runs/<run-id>/wisdom/artifact_audit.md` with matrix of flows vs artifacts
+**Call `quality-analyst`** — analyzes code health, complexity, maintainability of the changed files.
 
+### Step 4: Regression Analysis
 
+**Call `regression-analyst`** — checks for test regressions, coverage changes, stability issues.
 
-### Step 3: Analyze regressions
+### Step 5: Timeline + DevLT
 
-- `regression-analyst` -> parse test outputs, coverage reports
+**Call `flow-historian`** — compiles the run timeline and calculates Developer Lead Time (DevLT): how much human attention did this run actually require?
 
-- Correlate with GitHub issues via `gh issue list`
+### Step 6: Synthesize Learnings
 
-- Run `git blame` on failing tests to link commits
+**Call `learning-synthesizer`** — extracts patterns from the analysis: what worked, what didn't, what to do differently.
 
-- Produce `.runs/<run-id>/wisdom/regression_report.md` with findings by type and severity
+### Step 7: Apply Feedback
 
+**Call `feedback-applier`** — turns learnings into concrete actions (issue drafts, doc suggestions). Does NOT create GitHub issues directly.
 
+### Step 7b: Traceability
 
-### Step 4: Build history
+**Call `traceability-auditor`** — verifies run identity, receipts, and GitHub markers are coherent.
 
-- `flow-historian` -> read all artifacts and git history
+### Step 7c: Risk Comparison
 
-- Compile `.runs/<run-id>/wisdom/flow_history.json` timeline linking signal -> spec -> design -> build -> gate -> deploy
-
-- Include timestamps, commits, decision points
-
-- **Calculate Dev Lead Time (DevLT):** Estimate developer time spent working on the change — researching, analyzing, writing, reviewing, iterating. This is manhours, not wall clock time. Excludes machine time and wait time.
-
-
-
-### Step 5: Synthesize learnings
-
-- `learning-synthesizer` -> read artifact audit, regression report, flow history
-
-- Extract patterns: what worked, what didn't, assumptions that broke
-
-- Produce `.runs/<run-id>/wisdom/learnings.md` narrative with feedback to Flows 1, 2, 3
-
-
-
-### Step 6: Apply feedback
-
-- `feedback-applier` -> turn learnings into concrete actions
-
-- Produce `.runs/<run-id>/wisdom/feedback_actions.md` with actionable items
-
-- **Write issue drafts to `feedback_actions.md`** - do NOT call `gh issue create` here
-
-- Actual GitHub issue creation happens **after** secrets gate passes (Step 10)
-
-
-
-### Step 6b: Traceability audit
-
-- `traceability-auditor` -> `.runs/<run-id>/wisdom/traceability_audit.md`
-
-- Verifies run identity + receipts + GitHub observability markers (read-only; gated on access + gh auth)
-
-
-
-### Step 7: Risk assessment
-
-- `risk-analyst` (cross-cutting) -> add risk perspective to learnings
-
-- Compare predicted risks (`.runs/<run-id>/signal/early_risks.md`) vs actual outcomes
-
-- Produce `.runs/<run-id>/wisdom/risk_assessment.md` or append to existing artifacts
+**Call `risk-analyst`** — compares predicted risks (from Signal) vs actual outcomes.
 
 
 

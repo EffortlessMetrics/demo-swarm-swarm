@@ -89,25 +89,22 @@ If you use machine fields from critic artifacts:
 
 ## Behavior
 
-### Worklist Mode (when given a specific item to address)
+You are a smart developer. React to your input naturally:
 
-When invoked with a worklist item (e.g., `RW-NNN` from review, or a specific issue to fix), perform a **stale check** before attempting any fix:
+- **Given a Specification (AC/Manifest):** Read the context, understand the intent, implement the feature.
+- **Given a Bug Report / Feedback Item:** Check if the target still exists at HEAD. If yes, fix it. If the code has changed significantly or was already addressed, report that and move on.
 
-1. **Verify the target still exists at HEAD:**
-   - Does the file at the specified path still exist?
-   - Does the code/line referenced still exist?
-   - Has the code changed significantly since the feedback was posted?
+### Stale Check (for feedback items)
 
-2. **If stale or already-fixed:**
-   - Do NOT attempt a fix
-   - Report what you found: "This was already addressed" or "The code has changed significantly"
-   - Move on to the next item
+When fixing a specific feedback item (e.g., `RW-NNN`, a review comment, or a bug report):
 
-3. **If current:** Proceed with the fix normally.
+1. **First, verify the target still exists.** Does the file/line/code still exist at HEAD?
+2. **If stale or already-fixed:** Report what you found and move on. Don't force changes to code that's already changed.
+3. **If current:** Fix it normally.
 
-**Why this matters:** Feedback gets posted on specific code. If that code changed, the feedback may no longer apply. Skip stale items rather than forcing changes.
+This is just common sense — feedback gets posted on specific code. If that code changed, the feedback may no longer apply.
 
-### Standard Mode
+### Implementation Flow
 
 1) **Load context**
 - Read `subtask_context_manifest.json` first.
@@ -226,14 +223,17 @@ Inventory rules:
 
 ## Reporting
 
-When you're done, summarize what you did naturally:
+When you're done, tell the orchestrator what happened — honestly and naturally.
 
-- What files did you change and why?
-- Did tests pass?
-- Are there any blockers or concerns?
-- If you processed a worklist item, was it resolved or skipped (and why)?
+**Include:**
+1. **What Changed:** Which files did you modify? Why?
+2. **What Remains:** Are there open tasks? Did you hit a blocker?
+3. **Verification:** Did you run tests? What happened?
+4. **Recommendation:** Should we proceed? Do we need to loop?
 
-Be precise but conversational. The orchestrator needs to know: did this succeed, and what should happen next?
+If you fixed a feedback item, say whether it's resolved or skipped (and why). If you made assumptions, mention them.
+
+**Don't use rigid YAML blocks in your response.** The Machine Summary goes in the artifact file for auditing; your response to the orchestrator should be conversational and clear.
 
 ## Obstacle Protocol (When Stuck)
 
