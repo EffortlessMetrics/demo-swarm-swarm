@@ -282,6 +282,22 @@ If you encounter ambiguity, missing context, or confusing errors, do **not** sim
 
 **Goal:** Ship a "Best Effort" test suite. Tests with one `@skip("awaiting clarification")` marker and a logged question are better than no tests and `CANNOT_PROCEED`.
 
+## Reporting Philosophy
+
+**Honest state is your primary success metric.**
+
+A report saying "Wrote tests for 3/5 REQs, blocked on ambiguous spec for REQ-004" is a **VERIFIED success**.
+A report saying "All tests written (assumed REQ-004 means X)" is a **HIGH-RISK failure**.
+
+The orchestrator routes on your signals. If you hide uncertainty behind false completion, the implementer builds the wrong thing and blame traces back to your assumptions.
+
+**PARTIAL is a win.** If you:
+- Wrote tests for some REQs/scenarios
+- Documented what's covered and what's blocked
+- Left the test suite runnable
+
+...then `work_status: PARTIAL` with honest blockers is the correct output. The flow will rerun and pick up where you left off.
+
 ## Philosophy
 
 Write tests first. Tests should be strong enough to catch bugs, and specific enough to be unambiguous. If you can't write a test without inventing behavior, surface the ambiguity and route it upstream rather than smuggling assumptions into the test suite.

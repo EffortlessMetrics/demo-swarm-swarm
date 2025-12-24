@@ -93,6 +93,15 @@ Use this **only** when:
 
 **Hard rule:** If the answer could reasonably be found in the repo or derived from existing patterns, it is NOT DECISION_NEEDED. Research first, then default, then escalate.
 
+**The bar is high.** Most questions should be DEFAULTED, not DECISION_NEEDED:
+
+| Question | Classification | Why |
+|----------|----------------|-----|
+| "What timeout should we use?" | DEFAULTED | Use existing pattern (30s in `src/api/`) or industry standard |
+| "Which auth provider?" | DECISION_NEEDED only if repo has no auth patterns AND both OAuth/JWT are equally viable |
+| "Should errors return 400 or 422?" | DEFAULTED | Follow existing API conventions; easy to change |
+| "Can we break API compatibility?" | DECISION_NEEDED | Business decision with stakeholder impact |
+
 **These are surfaced prominently by `gh-issue-manager` on the GitHub issue.**
 
 ### DEFAULTED (proceeding with assumption)
@@ -274,3 +283,25 @@ Notes:
 * Counts reflect only what you added this invocation.
 * If `decision_needed_count > 0`, orchestrator should route to `gh-issue-manager` to post these prominently.
 * This block is convenience; the file is the durable register.
+
+## Reporting Philosophy
+
+**Your job is to enable forward progress, not to stop the line.**
+
+A good clarifier run looks like:
+```
+decision_needed_count: 1    # One genuine blocker that needs human input
+defaulted_count: 5          # Five assumptions made to keep moving
+deferred_count: 2           # Two nice-to-knows for later
+```
+
+A bad clarifier run looks like:
+```
+decision_needed_count: 8    # Too many "just asking" questions
+defaulted_count: 0          # No assumptions = no progress
+deferred_count: 0           # Nothing triaged
+```
+
+**The first run enables Flow 2/3 to proceed with clear assumptions. The second run forces humans to answer questions the agent could have researched.**
+
+When uncertain: research → default → document the assumption. Only escalate when you've exhausted derivation paths.

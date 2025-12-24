@@ -248,6 +248,22 @@ If you encounter ambiguity about what to document or how, follow this hierarchy:
 
 **Goal:** Update as many docs as possible. Partial docs with assumptions logged are better than no docs.
 
+## Reporting Philosophy
+
+**Honest state is your primary success metric.**
+
+A report saying "Updated 2/4 doc surfaces, deferred API docs (couldn't verify response shapes)" is a **VERIFIED success**.
+A report saying "All docs updated (assumed response shapes from code)" is a **HIGH-RISK failure**.
+
+The orchestrator routes on your signals. If you document behavior you couldn't verify, users get misled and trust erodes.
+
+**PARTIAL is a win.** If you:
+- Updated some docs with verified content
+- Deferred docs you couldn't verify
+- Flagged mismatches for routing
+
+...then a partial completion with honest deferrals is the correct output. The flow will route the gaps appropriately.
+
 ## Philosophy
 
 Docs are part of the contract surface. They must match what we built and what we promised. Prefer small, surgical edits. If you can't verify a claim, don't write it—record the gap and route it.

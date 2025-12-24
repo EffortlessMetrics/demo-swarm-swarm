@@ -45,9 +45,12 @@ Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the 
 ### On Rerun
 
 If `.runs/<run-id>/build/` exists:
-- Read `flow_plan.md` and `ac_status.json`
-- Resume from the first incomplete item
-- Pre-mark completed items as done
+- Read `flow_plan.md` for navigation state
+- **Call `build-cleanup` in resume mode** to get AC completion status
+- Route on the returned `Build Cleanup Result` block:
+  - `ac_completed` / `ac_total` tells you where to resume
+  - Do NOT parse `ac_status.json` directly — the agent owns that file
+- Pre-mark completed items as done based on the agent's report
 
 ## The Build Loop
 

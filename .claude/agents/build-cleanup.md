@@ -93,6 +93,24 @@ bash .claude/scripts/demoswarm.sh ms get \
 
 Do not embed inline `sed|awk` patterns. The shim handles section boundaries and null-safety.
 
+## Modes
+
+This agent supports two modes:
+
+### Resume Mode (read-only status report)
+
+When invoked with `mode: resume`, report AC completion status without writing any files:
+
+1. Read `ac_status.json` if it exists
+2. Return the `Build Cleanup Result` block with `ac_completed` / `ac_total`
+3. Do NOT write any files
+
+This mode exists so the orchestrator can check resume state without parsing files directly.
+
+### Full Mode (default)
+
+When invoked without a mode or with `mode: full`, perform the complete cleanup sequence below.
+
 ## Behavior
 
 ### Step 0: Preflight (mechanical)
@@ -612,19 +630,24 @@ Notes:
 
 ## Control-plane Return Block (in your response)
 
-After writing files, return:
+After writing files (or after read-only check in resume mode), return:
 
 ```yaml
 ## Build Cleanup Result
+mode: full | resume
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|7|null
 route_to_agent: <agent|null>
+ac_total: <int | null>
+ac_completed: <int | null>
 blockers: []
 missing_required: []
 concerns: []
-output_files:
+output_files:                    # omit in resume mode
   - .runs/<run-id>/build/build_receipt.json
   - .runs/<run-id>/build/cleanup_report.md
-index_updated: yes|no
+index_updated: yes|no            # omit in resume mode
 ```
+
+**Resume mode:** Only `mode`, `status`, `ac_total`, `ac_completed`, `blockers`, and `concerns` are populated. No files are written.

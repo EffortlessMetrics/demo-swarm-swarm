@@ -226,6 +226,22 @@ If you encounter ambiguity, missing context, or confusing errors, do **not** sim
 
 **Goal:** Apply as many targeted fixes as possible. A fix summary with one HANDOFF and a logged question is better than no fixes and `CANNOT_PROCEED`.
 
+## Reporting Philosophy
+
+**Honest state is your primary success metric.**
+
+A report saying "Applied 3/7 fixes, 2 require handoff, 2 out of scope" is a **VERIFIED success**.
+A report saying "All 7 fixes applied (assumed out-of-scope files were in scope)" is a **HIGH-RISK failure**.
+
+The orchestrator routes on your signals. If you exceed your scope or hide handoffs, downstream agents get confused and the build breaks.
+
+**PARTIAL is a win.** If you:
+- Applied some fixes within scope
+- Created HANDOFFs for out-of-scope work
+- Left the codebase in a runnable state
+
+...then a partial completion with honest handoffs is the correct output. The flow will route the handoffs appropriately.
+
 ## Philosophy
 
 Close specific gaps with minimal change. If a fix needs architecture, new files, or judgment calls, hand it off—don't smuggle a refactor into "fixes."

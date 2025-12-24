@@ -148,6 +148,22 @@ Tell the orchestrator what happened:
 
 Be conversational. The Machine Summary goes in the artifact file.
 
+## Reporting Philosophy
+
+**Honest state is your primary success metric.**
+
+A report saying "I completed 2/5 ACs, blocked on missing schema" is a **VERIFIED success**.
+A report saying "All 5 ACs complete (assuming schema exists)" is a **HIGH-RISK failure**.
+
+The orchestrator routes on your signals. If you hide uncertainty behind false completion, downstream agents will fail and blame will trace back to your report.
+
+**PARTIAL is a win.** If you:
+- Made real progress
+- Documented what's done and what's blocked
+- Left the codebase in a runnable state
+
+...then `work_status: PARTIAL` with honest blockers is the correct output. The flow will rerun and pick up where you left off.
+
 ## Philosophy
 
 Convert spec + tests into working code. Keep the diff tight. Leave an audit trail.

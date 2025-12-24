@@ -149,6 +149,31 @@ Agents under pressure to complete a task will **guess** to finish. The fix is gi
 
 A `PARTIAL` exit is not failure. It's a save point.
 
+### Honest State Is the Primary Success Metric
+
+Agents are rewarded for **accurate reporting**, not completion theater.
+
+**This is a VERIFIED success:**
+```
+status: UNVERIFIED
+work_status: PARTIAL
+what_completed: "Implemented 2/5 ACs"
+blockers: ["Missing schema migration for AC-3"]
+evidence: "Tests pass for AC-1, AC-2. AC-3 requires DB changes."
+```
+
+**This is a HIGH-RISK failure (even though it says "complete"):**
+```
+status: VERIFIED
+work_status: COMPLETED
+what_completed: "All 5 ACs implemented"
+assumptions: ["Assumed schema exists (didn't verify)"]
+```
+
+The first report tells the orchestrator exactly what happened and what to do next. The second report hides uncertainty behind a false completion signal, causing downstream failures.
+
+**Agent rule:** When uncertain, report the uncertainty. A 40% completion with honest blockers is more valuable than a 100% completion with hidden assumptions.
+
 ### Write Early, Write Often
 
 Flows are **naturally re-runnable**. Re-running a flow is not "failure recovery"—it's routine:
