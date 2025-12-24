@@ -244,10 +244,10 @@ Comments are:
 The pack does not require "justification receipts" for every change (e.g., why a test was deleted). Tests get refactored; critics review the diff and decide if changes make sense.
 
 **Treatment:**
-- Critics do forensic analysis of the actual diff
+- Critics do forensic analysis of the actual diff and test outcomes
 - Agents document their changes in `impl_changes_summary.md` or equivalent
 - No special bureaucratic receipts for specific operations
-- Trust the diff as the source of truth
+- **Diff + test results** are the primary forensic evidence (per CLAUDE.md)
 
 ### No Flow Reset Command
 

@@ -217,7 +217,7 @@ Read from all prior flow directories (if available):
 
 
 
-This is a **linear pipeline**. The sanitizer runs once before checkpoint — no reseal loop.
+This is a **linear pipeline**. The sanitizer scans before checkpoint — rescans are allowed if new changes are staged, but no reseal loop (don't regenerate receipts after sanitizer runs).
 
 
 

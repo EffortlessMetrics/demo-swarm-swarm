@@ -450,7 +450,7 @@ The swarm does **not wait** for CI or bots. It pushes, then immediately re-harve
    - Call `review-cleanup` to update worklist state
 
 2. **Secrets gate:**
-   - Call `secrets-sanitizer` on staged changes (single pass)
+   - Call `secrets-sanitizer` on staged changes (rescan allowed if new changes staged)
 
 3. **Commit and push (gated):**
    - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push

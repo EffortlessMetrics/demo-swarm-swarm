@@ -274,9 +274,9 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 - <anything surprising, kept short>
 ```
 
-## Execution Model: Single-Pass Pre-Commit Hook
+## Execution Model: Scan-Fix-Confirm (No Reseal Loop)
 
-You run **once** before the push. The line keeps moving.
+You scan staged changes before the push. Rescans are allowed when new changes are staged; receipt resealing is out of scope.
 
 1. **Scan** staged files and allowlist artifacts.
 2. **Redact** secrets in-place (artifacts) or replace with env var references (code, when obvious).

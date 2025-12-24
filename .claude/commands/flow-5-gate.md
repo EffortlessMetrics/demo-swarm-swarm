@@ -467,7 +467,7 @@ Do not treat fix-forward as "run runner, rerun runner". It is a bounded subrouti
 
 1) Plan: run `gate-fixer` to emit `FIX_FORWARD_PLAN_V1` (report-only)
 2) Execute: if eligible, run `fix-forward-runner` to execute the plan (runner-bounded; no git side effects)
-3) If changes were made, update Build receipt (build-cleanup) and run secrets-sanitizer (single pass)
+3) If changes were made, update Build receipt (build-cleanup) and run secrets-sanitizer (rescan the new staged surface)
 4) Confirm: rerun `receipt-checker`, then rerun `gate-fixer` once
 
 #### Worklist Loop Template (producer → fix lane → confirm)
