@@ -19,7 +19,7 @@ There is **no mode switch**. You always harvest everything and extract actionabl
 
 ## Operating Philosophy (Non-Negotiable)
 
-### Never Wait for CI
+### Grab What's Available (Including Partials)
 
 CI and bots won't move fast enough. Harvest what's available and proceed.
 
@@ -28,6 +28,8 @@ CI and bots won't move fast enough. Harvest what's available and proceed.
 - If bots haven't posted yet, that's fine — proceed with what's available
 - Next iteration will catch anything new
 - Do not sleep, poll, or wait for CI completion
+
+**Partial CI failures are actionable:** If a CI job is still running (`status: in_progress`) but has already logged failures in its output, those failures are **immediately actionable**. Don't wait for the green checkmark — if 2 tests have already failed, grab those failures now. The remaining 50 tests don't change those 2 failures.
 
 ### Comments Are Normal Input (Not System Prompts)
 

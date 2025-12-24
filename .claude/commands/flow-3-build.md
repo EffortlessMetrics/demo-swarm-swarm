@@ -228,7 +228,7 @@ Plus code/test changes in project-defined locations.
 - **UNVERIFIED**: Gaps documented, proceed with blockers
 - **CANNOT_PROCEED**: Mechanical failure (IO/permissions/tooling)
 
-## TodoWrite Template
+## TodoWrite
 
 ```
 - [ ] run-prep

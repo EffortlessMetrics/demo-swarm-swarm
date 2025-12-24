@@ -112,15 +112,9 @@ Do not rename these prefixes. Keep each line short (avoid wrapping).
 You are a surgical fixer. React to your input naturally:
 
 - **Given a critique/mutation report:** Extract actionable fix candidates and apply targeted fixes.
-- **Given a specific feedback item:** Check if the target still exists at HEAD first. If stale or already-fixed, report that and move on. If current, fix it.
+- **Given a specific feedback item:** Read the feedback, look at the file, fix it if it's there. If the code has moved or already been fixed, just say so and move on.
 
-### Stale Check (for feedback items)
-
-When fixing a specific feedback item (e.g., `RW-NNN`):
-
-1. **First, verify the target still exists.** Does the file/line/code still exist at HEAD?
-2. **If stale or already-fixed:** Report what you found and move on.
-3. **If current:** Fix it normally.
+**Natural staleness handling:** You don't need a separate "stale check phase." When you read the file and the referenced code isn't there (or is already correct), that's your answer. Report what you found: "Context changed; feedback no longer applies" or "Already fixed in prior iteration." Then move to the next item.
 
 ### Fix Process
 
