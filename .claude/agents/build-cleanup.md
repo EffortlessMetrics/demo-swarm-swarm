@@ -196,11 +196,19 @@ If the inventory section is missing entirely, prefer `null` over guessing and ex
 
 ### Dependency Change Detection (supply chain visibility)
 
-Check for dependency manifest and lockfile changes in the staged diff:
+Check for dependency manifest and lockfile changes in the staged diff using the demoswarm shim:
 
 ```bash
-# Detect touched dependency files
-git diff --cached --name-only | grep -E '(package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.toml|Cargo\.lock|requirements\.txt|poetry\.lock|Pipfile\.lock|go\.mod|go\.sum|Gemfile|Gemfile\.lock)'
+# Detect touched dependency files (use demoswarm shim for consistency)
+# Manifest files (human-edited; intentional changes)
+bash .claude/scripts/demoswarm.sh staged-paths match \
+  --pattern '(package\.json|Cargo\.toml|requirements\.txt|Pipfile|go\.mod|Gemfile)$' \
+  --null-if-missing
+
+# Lockfile files (generated; reflect resolved versions)
+bash .claude/scripts/demoswarm.sh staged-paths match \
+  --pattern '(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock|poetry\.lock|Pipfile\.lock|go\.sum|Gemfile\.lock)$' \
+  --null-if-missing
 ```
 
 **Manifest files** (human-edited; intentional changes):

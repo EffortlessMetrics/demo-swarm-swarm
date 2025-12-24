@@ -349,7 +349,8 @@ Per-run metadata at `.runs/<run-id>/run_meta.json`:
   "issue_title": "<string | null>",
   "pr_number": null,
   "supersedes": "<previous-run-id | null>",
-  "related_runs": []
+  "related_runs": [],
+  "base_ref": "<branch-name | null>"
 }
 ```
 
@@ -357,6 +358,10 @@ Identity rules:
 
 - `run_id` is immutable. **No renames.**
 - When a GitHub issue/PR exists, set `canonical_key` and add aliases. Do not rename folders.
+
+Stacked run support:
+
+- `base_ref` (optional): The branch this run is based on. Used for diff computation in agents that audit changes (standards-enforcer, coverage-enforcer, etc.). If present, diffs are computed relative to `base_ref`; otherwise agents default to `origin/main`.
 
 ---
 

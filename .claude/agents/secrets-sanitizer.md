@@ -274,20 +274,19 @@ Write `.runs/<run-id>/<flow>/secrets_scan.md`:
 - <anything surprising, kept short>
 ```
 
-## Single-Pass Sweep (No Reseal Loop)
+## Execution Model: Single-Pass Pre-Commit Hook
 
-You are a **linear pre-commit hook**. You run **ONCE** before the push.
+You run **once** before the push. The line keeps moving.
 
-1. **Scan staged files and allowlist artifacts.**
-2. **Auto-fix:** If you find a secret/token, redact it in-place or replace with placeholder.
-3. **Do NOT trigger a reseal loop.** The receipt does not need to be regenerated because you redacted an artifact.
-   - The receipt describes the *engineering outcome* (tests passed, features built).
-   - The sanitizer describes the *packaging for publish* (what's safe to share).
-   - They can diverge. The `secrets_scan.md` is sufficient audit trail for redactions.
-4. **Set `modified_files: true`** only to signal that artifact files changed (for audit purposes), but this **does NOT** trigger a cleanup-sanitizer reseal loop.
-5. **Block publish** only if you find a secret you *cannot* redact (e.g., it's hardcoded in logic and redaction breaks compilation). In that case, return `safe_to_publish: false` and `needs_upstream_fix: true`.
+1. **Scan** staged files and allowlist artifacts.
+2. **Redact** secrets in-place (artifacts) or replace with env var references (code, when obvious).
+3. **Write** `secrets_scan.md` as the audit record of your actions.
+4. **Set flags** (`safe_to_commit`, `safe_to_publish`) based on what remains after remediation.
+5. **Block publish** only when remediation requires human judgment (hardcoded secret that breaks logic if redacted).
 
-**Why this matters:** The old behavior created a "Compliance Recursion" trap where redacting a log file would trigger receipt regeneration, which would trigger another sanitizer pass, burning tokens on paperwork instead of engineering.
+**Receipt independence:** The receipt describes the *engineering outcome* (tests passed, features built). The sanitizer describes *packaging for publish* (what's safe to share). These are separate concerns. When you redact an artifact, `secrets_scan.md` is the audit trail — the receipt stands as-is.
+
+**Audit signal:** Set `modified_files: true` when artifact contents changed. This is for audit visibility, not flow control.
 
 ## Philosophy
 

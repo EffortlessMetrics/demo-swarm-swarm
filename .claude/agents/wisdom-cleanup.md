@@ -67,6 +67,7 @@ Prior flow receipts (optional aggregation):
 - `.runs/<run-id>/wisdom/wisdom_receipt.json`
 - `.runs/<run-id>/wisdom/cleanup_report.md`
 - `.runs/<run-id>/wisdom/github_report.md` (pre-composed GitHub comment body for gh-reporter)
+- `.runs/_wisdom/latest.md` (broadcast: top learnings + pointer to run artifacts)
 - Update `.runs/index.json` for this run: `status`, `last_flow`, `updated_at` only
 
 ## Behavior
@@ -308,6 +309,40 @@ Notes:
 - Use counts from the receipt (no recomputation)
 - Use "—" for null/missing values
 - Aggregate prior flow statuses from their receipts
+
+### Step 8: Write `.runs/_wisdom/latest.md` (broadcast)
+
+Write (or overwrite) `.runs/_wisdom/latest.md`. This provides a **scent trail** for future runs—Flow 1 can check this file to see recent learnings without traversing the full run history.
+
+```markdown
+# Latest Wisdom: <run-id>
+
+**Run:** `<run-id>`
+**Completed:** <timestamp>
+**Status:** <status from receipt>
+
+## Top Learnings
+
+<Extract up to 5 key learnings from wisdom/learnings.md>
+
+1. **<Learning title>**: <one-line summary>
+2. ...
+
+## Key Observations
+
+<Extract 2-3 pack/process observations if present>
+
+## Artifacts
+
+- Full learnings: `.runs/<run-id>/wisdom/learnings.md`
+- Feedback actions: `.runs/<run-id>/wisdom/feedback_actions.md`
+- Regression report: `.runs/<run-id>/wisdom/regression_report.md` (if present)
+
+---
+_Updated by wisdom-cleanup at <timestamp>_
+```
+
+**Why this matters:** Wisdom artifacts are run-scoped. This broadcast file gives new runs a single place to check for recent learnings, enabling the pack to learn from itself without forcing every Flow 1 to scan all prior runs.
 
 ## Hard Rules
 

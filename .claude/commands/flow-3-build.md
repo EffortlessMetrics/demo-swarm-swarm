@@ -41,7 +41,7 @@ You are orchestrating Flow 3 of the SDLC swarm.
 - **Do not re-read files** - artifacts are for future flows (e.g. Flow 5/7 audit) and for agent-to-agent communication, not for you to parse
 
 **The agent's response is the control plane.** When an agent returns, it tells you:
-- `status`: VERIFIED, UNVERIFIED, BLOCKED, CANNOT_PROCEED
+- `status`: VERIFIED, UNVERIFIED, HIGH_RISK, CANNOT_PROCEED
 - `recommended_action`: PROCEED, RERUN, BOUNCE, FIX_ENV
 - `route_to_agent`: where to route if bouncing
 
@@ -411,7 +411,7 @@ After all ACs complete, run global hardening:
 - **Run `standards-enforcer`**: Format/lint, remove debug artifacts, and **check for reward-hacking** (silent test deletion).
   - **Route on response:**
     - `VERIFIED` → proceed to test-executor
-    - `BLOCKED` (safety gate failed) → route to `code-implementer` to restore tests or justify deletion
+    - `HIGH_RISK` (silent test deletion detected) → proceed to test-executor (commit allowed), but flag is elevated to Gate/merge-decider for human review
     - `UNVERIFIED` (coherence issues) → route to `code-implementer` to complete refactor
 - Run `test-executor` to run the **full test suite** (not per-AC filtered; captures coverage).
 - If tests fail or look unstable, run `flakiness-detector` and route on its Result block.
@@ -875,7 +875,7 @@ If `build/ac_status.json` exists (rerun):
   - (after first vertical slice) checkpoint push + pr-creator (early; once)
   - (after checkpoint push) feedback check (pr-feedback-harvester; route on `blockers[]`)
   - (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] standards-enforcer (global; route on BLOCKED/UNVERIFIED to code-implementer)
+- [ ] standards-enforcer (global; route on HIGH_RISK/UNVERIFIED per status semantics)
 - [ ] test-executor (full suite; global)
 - [ ] flakiness-detector (if failures)
 - [ ] mutation-auditor

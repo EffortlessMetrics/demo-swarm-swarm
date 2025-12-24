@@ -181,11 +181,15 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 <Update as each step completes>
 ```
 
-### Step 2: Research GitHub Context
+### Step 2: Research Context
 
-Use `gh-researcher` to gather related issues/PRs, prior decisions, and constraints.
+**a) GitHub context:** Use `gh-researcher` to gather related issues/PRs, prior decisions, and constraints.
 
 This context informs problem framing and requirements. If `gh` CLI is not available, proceed without this step (document as assumption).
+
+**b) Wisdom scent trail (optional):** Check `.runs/_wisdom/latest.md` if it exists. This file contains top learnings from the most recent wisdom flow — insights that may inform this run's approach.
+
+If present, extract relevant learnings (especially any that relate to similar feature areas or common pitfalls) and pass them to `problem-framer` as additional context. This enables the pack to learn from itself across runs.
 
 ### Step 3: Normalize Signal
 
