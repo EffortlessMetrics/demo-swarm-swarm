@@ -11,12 +11,11 @@ You are orchestrating Flow 3 of the SDLC swarm.
 
 ## Mental Model
 
-Flow 3 builds. Flow 4 polishes.
+**Flow 3 does not stop until the AC is verifiable and the code is clean.**
 
-- **Flow 3**: Create working code that satisfies the acceptance criteria
-- **Flow 4**: Handle PR feedback, refine maintainability, respond to reviewers
+This is the Stubborn Loop: implement → test → critique → fix → repeat until the critics are satisfied. The implementer says "I'm done" — the critics verify or reject that claim. If rejected, the implementer goes again.
 
-The implementer can decide "I'm done" - we verify that claim via tests and critics. This isn't paranoid supervision; it's normal engineering: build → verify → ship.
+Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the build. Route CRITICAL blockers immediately. Defer the full worklist to Flow 4.
 
 ## Working Directory + Paths
 
@@ -85,10 +84,18 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 5. **test-executor**: Confirm tests pass (AC-scoped)
 6. **Update `ac_status.json`**: Mark AC complete or blocked
 
-**Microloop pattern (writer ↔ critic):**
-- Writer pass → Critic pass → Apply pass (if critic says RERUN) → Re-critique
-- 2 passes default. Continue only if critic says `recommended_action: RERUN` and `can_further_iteration_help: yes`
-- Proceed with blockers documented if critic says PROCEED
+**Adversarial Microloop (writer ↔ critic):**
+
+The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is not friendly peer review — it's adversarial verification.
+
+```
+writer → critic → [if RERUN] → writer → critic → ... → [PROCEED]
+```
+
+Route on the critic's Result block:
+- `RERUN`: Send the worklist back to the writer
+- `PROCEED`: Move forward (even if `status: UNVERIFIED` — blockers are documented)
+- `can_further_iteration_help: no`: Stop iterating, proceed with blockers
 
 **After first vertical slice (AC-1 complete):**
 1. Call `repo-operator`: checkpoint push
@@ -120,7 +127,7 @@ After all ACs complete:
 
 ### Step 6: Documentation
 
-**doc-writer ↔ doc-critic** microloop (2 passes default)
+**doc-writer ↔ doc-critic** microloop
 
 ### Step 7: Self-Review
 
@@ -228,31 +235,41 @@ Plus code/test changes in project-defined locations.
 - **UNVERIFIED**: Gaps documented, proceed with blockers
 - **CANNOT_PROCEED**: Mechanical failure (IO/permissions/tooling)
 
-## TodoWrite
+## TodoWrite (copy exactly)
+
+**These are the agents you call, in order. Do not group. Do not summarize. Execute each line.**
 
 ```
 - [ ] run-prep
-- [ ] repo-operator (ensure run branch)
+- [ ] repo-operator (ensure run branch `run/<run-id>`)
 - [ ] context-loader
 - [ ] clarifier
 - [ ] test-strategist (if ac_matrix.md missing)
-- [ ] AC loop (for each AC)
-  - [ ] (after first slice) checkpoint + pr-creator + feedback check
-- [ ] standards-enforcer
+- [ ] AC-1: test-author ↔ test-critic microloop
+- [ ] AC-1: code-implementer ↔ code-critic microloop
+- [ ] AC-1: test-executor
+- [ ] AC-1: update ac_status.json
+- [ ] repo-operator (checkpoint push)
+- [ ] pr-creator (create Draft PR)
+- [ ] pr-feedback-harvester (check CRITICAL only, route blockers)
+- [ ] [repeat AC-2..N with same pattern]
+- [ ] standards-enforcer (format/lint + suspicious deletion check)
 - [ ] test-executor (full suite)
-- [ ] flakiness-detector (if failures)
+- [ ] flakiness-detector (if failures exist)
 - [ ] mutation-auditor
 - [ ] fuzz-triager (if configured)
-- [ ] fixer (if needed)
-- [ ] doc-writer ↔ doc-critic
+- [ ] fixer (if critiques/mutation have worklist)
+- [ ] doc-writer ↔ doc-critic microloop
 - [ ] self-reviewer
-- [ ] pr-feedback-harvester (boundary)
+- [ ] pr-feedback-harvester (flow boundary check)
 - [ ] build-cleanup
-- [ ] repo-operator (stage)
+- [ ] repo-operator (stage intended changes)
 - [ ] secrets-sanitizer
-- [ ] repo-operator (commit/push)
+- [ ] repo-operator (commit and push)
 - [ ] gh-issue-manager
 - [ ] gh-reporter
 ```
+
+**Why explicit?** The orchestrator (you) executes what's in the list. Grouped phases get skipped. Explicit agents get called.
 
 Use explore agents to answer immediate questions, then create the todo list and call agents.

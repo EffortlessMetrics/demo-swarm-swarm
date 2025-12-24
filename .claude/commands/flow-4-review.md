@@ -382,15 +382,27 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 - `stuck_signal: true` → PARTIAL
 - Unrecoverable blocker → UNVERIFIED
 
-### TodoWrite (3-phase model)
+### TodoWrite (copy exactly)
+
+**These are the agents you call, in order. Do not group. Do not summarize. Execute each line.**
 
 ```
-- [ ] Setup (run-prep, branch, pr-creator)
-- [ ] Harvest & Cluster (pr-feedback-harvester, review-worklist-writer)
-- [ ] Execute loop (resolve items until completion/context/stuck)
-- [ ] Close the Loop (pr-commenter, pr-status-manager)
-- [ ] Seal (review-cleanup, secrets-sanitizer, repo-operator, gh-issue-manager, gh-reporter)
+- [ ] run-prep
+- [ ] repo-operator (ensure run branch `run/<run-id>`)
+- [ ] pr-creator (create Draft PR if needed)
+- [ ] pr-feedback-harvester
+- [ ] review-worklist-writer
+- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
+- [ ] pr-commenter (post/update PR summary comment)
+- [ ] pr-status-manager (flip Draft to Ready if review complete)
+- [ ] review-cleanup
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] repo-operator (commit/push; return Repo Operator Result)
+- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
+- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
 ```
+
+**Why explicit?** The orchestrator (you) executes what's in the list. Grouped phases get skipped. Explicit agents get called.
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
 
