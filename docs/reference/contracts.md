@@ -52,15 +52,20 @@ These blocks are returned by agents and used for routing. Orchestrators route on
 
 ```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
+findings_count: <int>
+blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
+blocker_reason: <string | null>
 ```
+
+Notes:
+- The sanitizer is a **boolean gate**, not a router. It says yes/no.
+- If `safe_to_publish: false`, the flow doesn't push. The orchestrator decides next steps.
+- `blocker_kind` is the machine-readable category: `NONE` (not blocked), `MECHANICAL` (IO/tooling failure), `SECRET_IN_CODE` (staged code needs fix), `SECRET_IN_ARTIFACT` (artifact can't be redacted).
+- `blocker_reason` is the human-readable explanation (if BLOCKED); otherwise null.
 
 **Canonical location:** `CLAUDE.md` (with PACK-CONTRACT markers)
 
@@ -69,11 +74,26 @@ route_to_agent: <agent-name> | null
 ```yaml
 ## Repo Operator Result
 operation: checkpoint | build | stage | merge | other
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 commit_sha: <sha>
+publish_surface: PUSHED | NOT_PUSHED
+anomaly_classification:
+  unexpected_staged_paths: []
+  unexpected_unstaged_paths: []
+  unexpected_untracked_paths: []
 anomaly_paths: []
 ```
+
+Notes:
+- `commit_sha` is always populated (current HEAD on no-op).
+- `publish_surface` is always present: `PUSHED` only when push succeeds; `NOT_PUSHED` for local-only checkpoints.
+- `status` values:
+  - `COMPLETED` - operation succeeded, no anomalies
+  - `COMPLETED_WITH_WARNING` - only untracked anomalies; push allowed
+  - `COMPLETED_WITH_ANOMALY` - tracked/staged anomalies; push blocked
+- `anomaly_classification` breaks down by risk level (HIGH blocks push, LOW warns only).
+- `anomaly_paths` - DEPRECATED; union of classification arrays for backward compatibility.
 
 **Canonical location:** `CLAUDE.md` (with PACK-CONTRACT markers)
 
@@ -107,12 +127,14 @@ severity_summary:                      # critics/verifiers
 
 | Domain | Values | Used by |
 |--------|--------|---------|
-| Flow/Agent Status | `VERIFIED \| UNVERIFIED \| CANNOT_PROCEED` | Machine Summary, receipts |
-| Repo Operator Status | `COMPLETED \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED` | Repo Operator Result |
-| Secrets Sanitizer Status | `CLEAN \| FIXED \| BLOCKED_PUBLISH` | Gate Result |
+| Flow/Agent Status | `VERIFIED \| UNVERIFIED \| PARTIAL \| CANNOT_PROCEED` | Machine Summary, receipts |
+| Repo Operator Status | `COMPLETED \| COMPLETED_WITH_WARNING \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED` | Repo Operator Result |
+| Secrets Sanitizer Status | `CLEAN \| FIXED \| BLOCKED` | Gate Result |
 | Gate Merge Verdict | `MERGE \| BOUNCE` (include reason when bouncing) | `merge_decision.md` |
-| Deploy Verdict | `STABLE \| NOT_DEPLOYED \| BLOCKED_BY_GATE` | `deployment_decision.md` |
+| Deploy Verdict (two-axis) | `deploy_action`: `COMPLETED \| SKIPPED \| FAILED`; `governance_enforcement`: `VERIFIED \| VERIFIED_RULESET \| UNVERIFIED_PERMS \| NOT_CONFIGURED \| UNKNOWN`; `deployment_verdict` (derived): `STABLE \| NOT_DEPLOYED \| GOVERNANCE_UNVERIFIABLE \| BLOCKED_BY_GATE` | `deployment_decision.md` |
 | Smoke Signal | `STABLE \| INVESTIGATE \| ROLLBACK` | `verification_report.md` |
+
+Note: `GOVERNANCE_UNVERIFIABLE` means deploy action succeeded but governance cannot be verified. This is distinct from `NOT_DEPLOYED` (deploy action failed).
 
 ---
 

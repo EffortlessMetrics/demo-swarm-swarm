@@ -10,3 +10,4 @@ Understanding-oriented: explore the why behind the pack design.
 | [Two Planes](why-two-planes.md) | Control plane vs audit plane separation |
 | [Two Gates](why-two-gates.md) | Why GitHub ops need both gates |
 | [Reseal Pattern](why-reseal.md) | Receipt correctness and safe-bail |
+| [Stateless Execution](stateless-execution.md) | Fresh context per flow, state transfer via disk, manual handoffs |

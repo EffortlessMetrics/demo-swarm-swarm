@@ -126,6 +126,32 @@ Harsh, but constrained:
   - Verify `verification_notes.md` or `test_plan.md` includes an explicit strategy.
   - Do not demand unit tests for NFRs that are inherently non-behavioral; demand a verification strategy.
 
+### 8) Coverage Regression Analysis (Anti-Reward-Hacking)
+
+**Compare current coverage to prior checkpoint:**
+
+If `.runs/<run-id>/build/prior_coverage.json` exists (from last verified build):
+- Compare line coverage percentages per file
+- Flag any file where coverage dropped more than 5%
+
+If `test_execution.md` from prior runs exists:
+- Compare pass/fail counts
+- Flag if fewer tests are passing (net test removal)
+
+**Regression classifications:**
+- **CRITICAL**: Coverage dropped >10% on core modules (as defined in ac_matrix.md or impl_hints)
+- **MAJOR**: Coverage dropped 5-10% on any module
+- **MINOR**: Coverage dropped <5% (acceptable noise)
+
+**Suspicious patterns (use judgment):**
+- Test count decreased but coverage "improved" (likely removed failing tests) → FLAG AS [CRITICAL]
+- All tests pass but fewer tests exist than prior checkpoint → FLAG AS [MAJOR]
+- Coverage is 100% but only trivial assertions exist → FLAG AS [MAJOR]
+
+**Verdict:**
+- If coverage regression detected with suspicious pattern → `recommended_action: BOUNCE`, `route_to_agent: code-implementer`, `blockers: ["Coverage regression detected with fewer tests - possible reward hacking"]`
+- If coverage regression but tests are present → `recommended_action: RERUN`, `route_to_agent: test-author` (add more tests)
+
 ## Counting rules (no estimates)
 
 - Severity counts must equal the number of bullets you wrote with that tag.
@@ -176,6 +202,14 @@ coverage_summary:
   requirements_total: 0
   requirements_with_tests: 0
   requirements_missing_tests: []
+
+  # Coverage regression tracking (anti-reward-hacking)
+  coverage_regression_detected: true | false
+  coverage_delta_percent: <number | null>  # negative = regression
+  prior_test_count: <int | null>
+  current_test_count: <int>
+  test_count_delta: <int | null>  # negative = tests removed
+  reward_hacking_risk: NONE | LOW | HIGH
 
 plan_compliance:
   thresholds_present: true | false

@@ -248,6 +248,14 @@ worklist_counts:
   resolved: 0
   skipped: 0
 
+skipped_breakdown:
+  STALE_COMMENT: 0
+  OUTDATED_CONTEXT: 0
+  ALREADY_FIXED: 0
+  INCORRECT_SUGGESTION: 0
+  OUT_OF_SCOPE: 0
+  WONT_FIX: 0
+
 by_category:
   CORRECTNESS: 3
   TESTS: 2
@@ -353,8 +361,32 @@ Items can have these statuses:
 - `PENDING` - Not yet addressed
 - `IN_PROGRESS` - Currently being worked on
 - `RESOLVED` - Fixed and verified
-- `SKIPPED` - Intentionally not addressed (with reason)
+- `SKIPPED` - Intentionally not addressed (requires `skip_reason`)
 - `DEFERRED` - Postponed to later (out of scope for this run)
+
+### Skip Reasons (structured enum)
+
+When an item is `SKIPPED`, it must include a `skip_reason` from this closed enum:
+
+| Skip Reason | Description | When to Use |
+|-------------|-------------|-------------|
+| `STALE_COMMENT` | Code referenced by feedback has been deleted or substantially refactored | Feedback targets code that no longer exists |
+| `OUTDATED_CONTEXT` | Code exists but has changed enough that feedback may no longer apply | Code partially modified since feedback was posted |
+| `ALREADY_FIXED` | Issue was addressed by a prior fix in this run | Later AC iteration or earlier worklist item already fixed it |
+| `INCORRECT_SUGGESTION` | Feedback is technically wrong or based on misunderstanding | Bot suggested something that would break functionality |
+| `OUT_OF_SCOPE` | Valid feedback but not relevant to this change | Reviewer mentioned something unrelated to the PR |
+| `WONT_FIX` | Intentional design decision to not address | Acknowledged trade-off, documented reasoning |
+
+**JSON format for skipped items:**
+```json
+{
+  "id": "RW-003",
+  "status": "SKIPPED",
+  "skip_reason": "STALE_COMMENT",
+  "skip_evidence": "Code at src/auth.ts:42 was refactored in AC-003; original function no longer exists",
+  ...
+}
+```
 
 The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 

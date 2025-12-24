@@ -8,6 +8,17 @@
 
 ---
 
+## See Also
+
+**Related workflows:**
+- [run-topology.md](run-topology.md) — Swarm repo setup and branch model
+- [adopt-fork-workflow.md](adopt-fork-workflow.md) — Fork-based swarm workflow (coming soon)
+
+**Core reference:**
+- [CLAUDE.md](../../CLAUDE.md) — Full pack reference, Flow 6 (Deploy) semantics
+
+---
+
 ## Why this is separate
 
 The pack is designed for swarm autonomy:
@@ -17,6 +28,65 @@ The pack is designed for swarm autonomy:
 - `.runs/` artifacts stay in swarm repo
 
 Upstream export (moving code to human repo) is intentionally **not automated**. This keeps the human repo calm and gives you control over what lands.
+
+---
+
+## Decision tree: When to export
+
+Use this tree to decide if and how to export:
+
+```
+Should I export this run?
+│
+├─ Is Gate verdict = MERGE?
+│  ├─ No → Fix issues first, don't export yet
+│  └─ Yes → Continue ↓
+│
+├─ Do I need human repo integration?
+│  ├─ No → Keep in swarm only (experimentation, prototypes, learning runs)
+│  └─ Yes → Continue ↓
+│
+├─ What's my team's workflow?
+│  ├─ Solo/small team, direct commits → Cherry-pick (Option 1)
+│  ├─ Team review process required → PR from swarm (Option 2)
+│  └─ Selective/manual control needed → Diff and apply (Option 3)
+```
+
+**Keep in swarm only when:**
+- Experimenting with ideas
+- Building throwaway prototypes
+- Running learning exercises
+- Work is still in draft state
+
+**Export to human repo when:**
+- Production feature is complete and verified
+- Team needs to review and integrate
+- Work must be deployed from human repo
+- Traceability to human commit history is required
+
+---
+
+## Common export scenarios
+
+### Scenario A: Solo developer, clean feature
+- **Context:** You've completed a feature, Gate says MERGE, you want it in human repo
+- **Best approach:** Cherry-pick (Option 1)
+- **Why:** Direct, clean history, minimal overhead
+
+### Scenario B: Team review required
+- **Context:** Team uses GitHub PR review workflow
+- **Best approach:** PR from swarm branch (Option 2)
+- **Why:** Fits existing team process, visibility, discussion thread
+
+### Scenario C: Complex change, selective merge
+- **Context:** Swarm made extra changes you don't want, or you need to adapt the diff
+- **Best approach:** Diff and apply (Option 3)
+- **Why:** Manual control, selective application, adaptation as needed
+
+### Scenario D: Multiple small fixes
+- **Context:** Several independent runs completed, want to batch export
+- **Best approach:** Cherry-pick multiple commits (Option 1) or create a consolidation branch
+- **Why:** Efficient batching, clean history
 
 ---
 
@@ -109,7 +179,43 @@ Don't export:
 
 ---
 
-## See also
+## Next steps
 
-- [run-topology.md](run-topology.md) — Swarm repo setup
-- [CLAUDE.md](../../CLAUDE.md) — Full pack reference
+After exporting:
+
+1. **Test in human repo context**: The swarm's tests passed, but verify in your repo's environment
+2. **Update issue tracking**: Link the exported commit to your issue tracker
+3. **Clean up swarm branch** (optional): Keep or delete `run/<run-id>` based on your retention policy
+4. **Monitor production**: If deploying from human repo, watch for issues
+
+---
+
+## Troubleshooting
+
+### Cherry-pick conflicts
+
+If cherry-picking causes conflicts:
+
+```bash
+# Option A: Resolve manually
+git cherry-pick <sha>
+# Fix conflicts
+git cherry-pick --continue
+
+# Option B: Use diff strategy instead
+# (See Option 3 above)
+```
+
+### PR from swarm branch rejected by CI
+
+The swarm's tests passed, but human repo CI fails:
+
+- **Cause:** Different CI config, dependencies, or environment
+- **Fix:** Iterate in swarm (rerun Flow 3), then re-export
+
+### Lost traceability
+
+Can't remember which swarm run produced a commit:
+
+- **Prevention:** Always include run ID in commit messages
+- **Recovery:** Check `.runs/index.json` in swarm repo for timing correlation

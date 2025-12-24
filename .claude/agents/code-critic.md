@@ -82,7 +82,16 @@ Everything else is "out of scope for this critique" and must be listed (IDs only
 1. **Changed surface**
    - Prefer `impl_changes_summary.md` and/or `subtask_context_manifest.json`.
    - Enumerate the reviewed files (paths only).
-   - **Anti-Reward-Hacking:** Check `git diff` for deleted tests. If existing tests were removed (not just updated) without clear justification, flag as `[CRITICAL]` — deleting tests to make code "pass" degrades quality.
+   - **Anti-Reward-Hacking (CRITICAL):** Check `git diff` for:
+     - **Deleted test files**: `git diff --cached --name-status | grep "^D" | grep -E "(test|spec|_test\.|\.test\.)"`
+     - **Weakened assertions**: Look for changes like `assertEqual(x, 5)` → `assertIsNotNone(x)`
+     - **New skip decorators**: `@pytest.mark.skip`, `@Ignore`, `.skip()` added to previously-running tests
+     - **Mock explosion**: Real implementations replaced with mocks that always succeed
+
+     **Judgment call:**
+     - If tests were deleted because the corresponding code was also deleted → ALLOW (note in report)
+     - If tests were deleted but the code they tested still exists → FLAG AS [CRITICAL]
+     - If you're unsure → FLAG AS [MAJOR] with note: "Possible reward hacking - human review recommended"
 
 2. **Spec compliance**
    - Requirements: `requirements.md` (+ critique if present)
@@ -173,6 +182,23 @@ coverage_summary:
 ## Reviewed Surface
 - FILE: <path>
 - FILE: <path>
+
+## Test Deletion Analysis
+
+### Tests Removed in This Diff
+- D <path/to/test.py> — Status: JUSTIFIED | SUSPICIOUS — <reason>
+
+### Assertions Weakened
+- <path:line> — Changed `<old>` to `<new>` — Status: JUSTIFIED | SUSPICIOUS
+
+### Skip Decorators Added
+- <path:line> — Added `<decorator>` — Status: NEEDS_REVIEW | JUSTIFIED
+
+### Reward Hacking Verdict
+reward_hacking_risk: NONE | LOW | HIGH
+tests_deleted: <int>
+tests_justified: <int>
+tests_suspicious: <int>
 
 ## Coverage Table (REQ → impl → tests)
 | REQ | Implementation | Tests | Notes |

@@ -49,11 +49,16 @@ The orchestrator passes an **intent**. You map it to the appropriate paths and b
 |--------|------------------|----------|
 | `signal` | `.runs/<run-id>/signal/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `plan` | `.runs/<run-id>/plan/`, `run_meta.json`, `index.json` | Stage output locations only |
-| `build` | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, **plus** project code/tests | Stage output + project changes + extras |
+| `build` | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, **plus** project code/tests | **Two-step commit:** artifacts first, then code changes + extras |
 | `review` | `.runs/<run-id>/review/`, `run_meta.json`, `index.json`, **plus** project code/tests | Stage output + project changes + extras |
 | `gate` | `.runs/<run-id>/gate/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `deploy` | `.runs/<run-id>/deploy/`, `run_meta.json`, `index.json` | Stage output locations only |
 | `wisdom` | `.runs/<run-id>/wisdom/`, `run_meta.json`, `index.json` | Stage output locations only |
+
+**Build two-step commit pattern:**
+- Step 1: Commit `.runs/<run-id>/build/` + metadata (audit trail)
+- Step 2: Commit project code/tests (work product)
+- See "Two-Step Commit Strategy" section for details
 
 **Build/Review "plus project" behavior:**
 - Derive project paths from `demo-swarm.config.json` layout roots (if present)
@@ -337,6 +342,141 @@ Respect Gate Result + `checkpoint_mode` + **anomaly classification**:
 
 **Key distinction:** Untracked files cannot be accidentally pushed (they're not in the git index). They represent a hygiene warning, not a safety risk. Content mode should NOT be degraded for untracked-only anomalies.
 
+### Conflict Resolution Strategy (Aggressive)
+
+**Context:** The swarm operates in a downstream shadow repo where aggressive rebasing is safe. If a push fails due to remote divergence (e.g., human pushed a fix to the branch mid-flow), the bot resolves conflicts rather than stopping.
+
+If `git push` fails due to remote divergence:
+
+1. **Attempt rebase:**
+   ```bash
+   gitc pull --rebase origin "run/<run-id>"
+   ```
+
+2. **If conflicts occur, resolve by type:**
+   - **Generated files/receipts** (`.runs/`, `*.json` receipts): Use `git checkout --ours` (keep local/bot work)
+   - **Source/config/docs where "Extras" were detected**: Use `git checkout --theirs` (keep remote/human fixes)
+   - **Ambiguous conflicts**: Favor local state (the work we just did), but log the overwrite in `git_status.md`
+
+   ```bash
+   # Example resolution for receipts (keep ours)
+   gitc checkout --ours ".runs/<run-id>/build/build_receipt.json"
+   gitc add ".runs/<run-id>/build/build_receipt.json"
+
+   # Example resolution for human extras (keep theirs)
+   gitc checkout --theirs "README.md"
+   gitc add "README.md"
+   ```
+
+3. **Complete rebase and retry push:**
+   ```bash
+   gitc rebase --continue
+   gitc push -u origin "run/<run-id>"
+   ```
+
+4. **Post-conflict verification (required after any resolution):**
+   After resolving conflicts and before pushing, run a quick sanity check:
+
+   ```bash
+   # Verify the merge didn't break the build
+   # Use repo-specific test command if available, otherwise basic checks
+   if [ -f "package.json" ]; then
+     npm run build --if-present 2>/dev/null || echo "build check: SKIP"
+     npm test -- --passWithNoTests 2>/dev/null || echo "test check: SKIP"
+   elif [ -f "Cargo.toml" ]; then
+     cargo check 2>/dev/null || echo "cargo check: SKIP"
+   elif [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+     python -m pytest --collect-only 2>/dev/null || echo "pytest check: SKIP"
+   fi
+   ```
+
+   **If post-conflict verification fails:**
+   - Do NOT push (the merge introduced a regression)
+   - Set `status: COMPLETED_WITH_ANOMALY`
+   - Write `git_status.md` with verification failure details
+   - Return `proceed_to_github_ops: false`
+   - The orchestrator will route to `test-executor` or `code-implementer` to fix
+
+5. **If rebase still fails** (non-trivial semantic conflict):
+
+   **First, attempt semantic resolution if you can:**
+   - Read both sides of the conflict
+   - If you can understand the intent (e.g., "human added a helper function, bot modified the same area"):
+     - Apply the merge that preserves both intents
+     - Log the resolution in `git_status.md`
+     - Continue to verification step
+
+   **If you cannot resolve semantically:**
+   - Do not guess or force a bad merge
+   - Set `status: COMPLETED_WITH_ANOMALY`
+   - Write `git_status.md` with:
+     - Conflict file paths
+     - Both sides of the conflict (abbreviated)
+     - Why automatic resolution failed
+   - Return with escalation hint:
+     ```yaml
+     ## Repo Operator Result
+     operation: build
+     status: COMPLETED_WITH_ANOMALY
+     proceed_to_github_ops: false
+     conflict_escalation: true
+     conflict_files: [<paths>]
+     conflict_reason: <why auto-resolution failed>
+     ```
+   - The orchestrator may route to `code-implementer` or a human for semantic resolution
+   - The flow continues locally; conflict becomes a documented anomaly awaiting resolution
+
+**Why aggressive?** In the shadow repo model, the blast radius is contained. Human work in `upstream` is never at risk. The bot fights through conflicts to preserve both human extras and swarm progress.
+
+**Why verify after?** Resolving conflicts mechanically (ours/theirs) can introduce semantic breaks even if git is happy. The quick verification step catches "merge succeeded but tests broke" before pushing bad code.
+
+### Escalation Ladder (Intelligence-First)
+
+Before escalating ANY conflict to the orchestrator, apply this ladder:
+
+**Level 1: Mechanical Resolution (Always Try First)**
+- Generated files (receipts, logs, indexes): `--ours` (keep bot work)
+- Human extras in tracked files: `--theirs` (keep human fixes)
+- OS junk (.DS_Store, Thumbs.db): `--ours` (ignore junk)
+- Whitespace-only conflicts: auto-merge with `git merge-file --quiet`
+- Lockfile conflicts: regenerate via package manager if possible
+
+**Level 2: Semantic Resolution (Read and Understand)**
+If Level 1 doesn't apply:
+1. Read both sides of the conflict
+2. Identify the intent of each change:
+   - Human added a helper function → preserve it
+   - Bot modified the same area for a different purpose → merge both
+   - Both made similar changes → pick the more complete version
+3. Apply the merge that preserves both intents
+4. Log the resolution rationale in `git_status.md`
+
+Example: "Human added logging to auth.ts:42-50, I modified auth.ts:45-48 for error handling. Both intents are valid. Merged: kept human's logging wrapper, inserted my error handling inside it."
+
+**Level 3: Escalation (Only When Genuinely Ambiguous)**
+Escalate only when you cannot determine intent with reasonable confidence:
+- Conflicting business logic (not formatting/structure)
+- Security-sensitive code with conflicting implementations
+- Test assertions that contradict each other
+- Architectural changes that conflict with each other
+
+When escalating, provide:
+- File paths with conflict
+- Both sides (abbreviated to key lines)
+- Your assessment of why you couldn't resolve it
+- Suggested resolution if you have one (even if uncertain)
+
+**Escalation result fields (added to Repo Operator Result when relevant):**
+```yaml
+resolution_attempted: true | false
+resolution_level: 1 | 2 | 3 | null  # which level of the ladder was reached
+resolution_rationale: <string | null>  # why this resolution was chosen
+conflict_files: [<paths>]  # if escalating
+conflict_reason: <string | null>  # why auto-resolution failed
+```
+
+**Key principle:** Try to resolve before escalating. Agents are smart enough to understand intent in most cases. Only escalate when the conflict is genuinely beyond your ability to judge correctly.
+
 ### Gitignore conflict: `.runs/`
 
 If `.runs/` is ignored such that allowlist staging produces an empty index **while artifacts exist**:
@@ -346,6 +486,44 @@ If `.runs/` is ignored such that allowlist staging produces an empty index **whi
 - return proceed_to_github_ops: false
 
 ## Flow 3 (Build): staging and commit
+
+### Two-Step Commit Strategy
+
+Flow 3 Build checkpoints use a **two-step atomic commit pattern** to separate audit trail from work product.
+
+**Why:** Allows reverting code changes without losing the audit trail (receipts, Machine Summaries, verification evidence).
+
+**When:** Flow 3 (Build) checkpoints only. Other flows use single-step checkpoints (artifacts only).
+
+**How:**
+
+1. **Step 1: Checkpoint artifacts first**
+   ```bash
+   gitc reset HEAD
+   gitc add ".runs/<run-id>/build/" ".runs/<run-id>/run_meta.json" ".runs/index.json"
+   gitc commit -m "chore(.runs): checkpoint build artifacts [<run-id>]"
+   ```
+
+2. **Step 2: Commit code changes second**
+   ```bash
+   gitc reset HEAD
+   # Stage project files (src/, tests/, docs/, etc.) + extras
+   gitc add <project-paths>
+   # Generate Conventional Commit message (see Commit Message Policy)
+   gitc commit -m "<type>(<scope>): <subject>"
+   ```
+
+**Benefits:**
+- Audit trail is preserved even if code commit is reverted
+- Receipts reference the code SHA (linkage maintained)
+- Git history cleanly separates "what we verified" from "what we built"
+- Revert-safety: `git revert <code-sha>` does not lose `.runs/` evidence
+
+**Implementation notes:**
+- Both commits happen on the same branch (`run/<run-id>`)
+- Push happens after both commits (one push, two commits)
+- Secrets sanitizer scans the combined publish surface before push
+- Anomaly detection applies to the combined staged diff
 
 ### Build staging (no commit)
 
@@ -417,15 +595,37 @@ When `operation: build` or `checkpoint`, generate **Conventional Commit** messag
 ### Build commit (commit/push)
 
 * Only commit when the orchestrator indicates `safe_to_commit: true` from the prior Gate Result.
-* Commit message:
+* **Use the Two-Step Commit Strategy** (see above):
+
+  **Step 1 - Artifacts commit:**
+  ```bash
+  gitc reset HEAD
+  gitc add ".runs/<run-id>/build/" ".runs/<run-id>/run_meta.json" ".runs/index.json"
+  gitc commit -m "chore(.runs): checkpoint build artifacts [<run-id>]"
+  artifacts_sha=$(gitc rev-parse HEAD)
+  ```
+
+  **Step 2 - Code commit:**
+  ```bash
+  gitc reset HEAD
+  # Stage project files based on manifest/config (see Build staging section)
+  gitc add <project-paths>
+  # Generate Conventional Commit (analyze the diff)
+  gitc commit -m "<type>(<scope>): <subject>"
+  code_sha=$(gitc rev-parse HEAD)
+  ```
+
+* Commit message (Step 2):
 
   * Apply the Semantic Commit Policy above: analyze the diff and generate a Conventional Commit.
   * Use `.runs/<run-id>/build/impl_changes_summary.md` for context on what was implemented.
-  * Fallback (empty or trivial): `chore(<run-id>): checkpoint build artifacts`
+  * Fallback (empty or trivial): `chore(<run-id>): implement changes`
 
 No-op commit handling:
 
-* If nothing is staged, do not create an empty commit; return `commit_sha = HEAD`, `proceed_to_github_ops: false` (no new work to publish).
+* If nothing is staged for artifacts (Step 1), skip that commit; proceed to Step 2.
+* If nothing is staged for code (Step 2), skip that commit; return `commit_sha = artifacts_sha`.
+* If both are no-op, return `commit_sha = HEAD`, `proceed_to_github_ops: false` (no new work to publish).
 
 Push gating (Build):
 
@@ -445,7 +645,9 @@ Return control-plane block:
 operation: build
 status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
-commit_sha: <sha>
+commit_sha: <sha>                    # HEAD after both commits (code_sha if present, else artifacts_sha, else HEAD)
+artifacts_sha: <sha | null>          # Step 1 commit (null if skipped)
+code_sha: <sha | null>               # Step 2 commit (null if skipped)
 publish_surface: PUSHED | NOT_PUSHED
 anomaly_classification:
   unexpected_staged_paths: []
@@ -453,6 +655,12 @@ anomaly_classification:
   unexpected_untracked_paths: []
 anomaly_paths: []
 ```
+
+**Note:** For two-step Build commits:
+- `commit_sha` = final HEAD (the code commit SHA if code was committed, else artifacts commit SHA)
+- `artifacts_sha` = Step 1 commit SHA (or null if no artifacts to commit)
+- `code_sha` = Step 2 commit SHA (or null if no code changes to commit)
+- These fields allow receipts to reference the artifacts commit for audit trail stability
 
 ## Reconcile anomaly (orchestrator-invoked)
 

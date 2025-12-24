@@ -236,8 +236,20 @@ If you encounter ambiguity, missing context, or confusing errors, do **not** sim
 
 3. **Assumption (Preferred):**
    - Can you make a reasonable "Senior Dev" assumption to keep moving?
-   - **Action:** Document it in `impl_changes_summary.md` under `## Assumptions Made`. Proceed with implementation.
+   - **Action (dual-log):**
+     1. Document it in `impl_changes_summary.md` under `## Assumptions Made` (for audit trail with this implementation)
+     2. Append it to `.runs/<run-id>/build/open_questions.md` as a logged assumption (for cross-flow visibility):
+        ```
+        ## ASSUMP-BUILD-### <short title>
+        - **Context:** <what you were implementing>
+        - **Assumption:** <what you assumed>
+        - **Rationale:** <why this is reasonable>
+        - **Impact if wrong:** <what would need to change>
+        ```
+   - Proceed with implementation.
    - Example: "Assumption: Retry limit defaulting to 3 (spec silent on exact value)."
+
+   **Why dual-log?** `impl_changes_summary.md` ties the assumption to this specific implementation. `open_questions.md` makes it visible across flows so humans can validate or correct assumptions later.
 
 4. **Async Question (The "Sticky Note"):**
    - Is it a blocker that prevents *correct* implementation but not *any* implementation?

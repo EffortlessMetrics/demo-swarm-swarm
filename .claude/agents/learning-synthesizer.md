@@ -101,7 +101,24 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
         --null-if-missing
       ```
 
-4. **Extract patterns** that would have reduced iteration:
+4. **Aggregate DevLT from receipts:**
+   Read `devlt` sections from each flow's receipt (if present):
+   ```bash
+   bash .claude/scripts/demoswarm.sh receipt get \
+     --file ".runs/<run-id>/build/build_receipt.json" \
+     --key "devlt.machine_duration_sec" \
+     --null-if-missing
+   ```
+
+   For each flow that ran:
+   - Extract `devlt.flow_started_at`, `devlt.flow_completed_at`
+   - Extract `devlt.human_checkpoint_count`
+   - Extract `devlt.estimated_human_attention_min` (labeled as inference)
+   - Sum totals across flows
+
+   **If DevLT data is missing:** Note "DevLT not tracked" for that flow. This is expected for older runs or runs where cleanup agents didn't populate DevLT.
+
+5. **Extract patterns** that would have reduced iteration:
 
    * Requirements ambiguity → late rework
    * Missing/weak contracts → design/build thrash
@@ -109,7 +126,8 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
    * Gate/deploy surprises (policy ambiguity, security findings, coverage shortfalls)
    * Regressions (what escaped, why it escaped, what would have caught it earlier)
    * **Pack/flow friction** (things that were harder than they should be, missing automation, gaps in agent coverage)
-4. **Write lessons as actionable changes**:
+
+6. **Write lessons as actionable changes**:
 
    * Each lesson must include:
 
@@ -117,7 +135,8 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
      * **Impact** (rework/iterations/risk)
      * **Change** (what to do differently next time; phrased as an edit/checklist item)
      * **Evidence** (file + section pointer)
-5. **Set completion state**:
+
+7. **Set completion state**:
 
    * `VERIFIED`: all stage-expected artifacts present and mined
    * `UNVERIFIED`: learnings written, but some expected artifacts missing/unparseable
@@ -132,6 +151,26 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
 - Gate verdict: <from gate/merge_decision.md, if present>
 - Deploy outcome: <from deploy/deployment_decision.md, if present>
 - Regression count: <from wisdom/regression_report.md markers, if present>
+
+## DevLT Summary (Developer Lead Time)
+
+Aggregated from `devlt` sections in per-flow receipts.
+
+| Flow | Machine Duration | Human Checkpoints | Est. Human Attention |
+|------|------------------|-------------------|----------------------|
+| Signal | <Xm> | <N> | <~Ym> |
+| Plan | <Xm> | <N> | <~Ym> |
+| Build | <Xm> | <N> | <~Ym> |
+| Review | <Xm> | <N> | <~Ym> |
+| Gate | <Xm> | <N> | <~Ym> |
+| Deploy | <Xm> | <N> | <~Ym> |
+| **Total** | **<Xm>** | **<N>** | **<~Ym>** |
+
+**Notes:**
+- Machine duration: wall-clock time from flow start to completion (not CPU time)
+- Human checkpoints: times a human interacted (flow start, approvals, questions answered)
+- Est. human attention: inference based on checkpoint count (labeled as estimate)
+- <any caveats about missing data or unusual patterns>
 
 ## Learning: Requirements
 ### What Worked

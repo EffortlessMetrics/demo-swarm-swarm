@@ -54,6 +54,36 @@ An issue is **mechanical iff**:
 
 Everything else is **non-mechanical** and should be routed to Build (Flow 3) or Plan (Flow 2); you still only report.
 
+### Extended Allowlist (Option C)
+
+Beyond pure formatting/lint, Gate may fix-forward these **trivial build breaks** when they are clearly deterministic:
+
+| Category | Examples | Why Mechanical |
+|----------|----------|----------------|
+| `FORMAT` | Whitespace, indentation, trailing newlines | Formatter can fix |
+| `LINT_AUTOFIX` | Linter-fixable issues (unused imports, sorting) | Linter --fix can fix |
+| `IMPORT_ORDER` | Import sorting/grouping | Tool can fix |
+| `DOCS_TYPO` | Spelling typos in docs/comments | Obvious fix |
+| `LOCKFILE_REGEN` | Stale lockfile after deps change | `npm install` / `cargo update` |
+| `TRIVIAL_BUILD_BREAK` | Missing import, wrong file path, version mismatch causing compile error | **Clearly broken, obvious fix, no judgment required** |
+
+**`TRIVIAL_BUILD_BREAK` criteria (strict):**
+- Error message explicitly names the missing/wrong thing
+- Fix is adding one import, fixing one path, or bumping one version
+- No ambiguity about which module/path/version is correct
+- No design decision involved
+
+**Examples of TRIVIAL_BUILD_BREAK:**
+- `ModuleNotFoundError: No module named 'utils'` → Add `import utils` or fix the path
+- `Cannot find module './authService'` → File was renamed to `auth-service.ts`
+- `Type 'string' is not assignable to type 'number'` where the type annotation is clearly wrong
+
+**NOT fix-forwardable (routes to Build):**
+- Logic errors, even if they cause build failure
+- Missing function implementation
+- Wrong algorithm or approach
+- Anything requiring understanding of business requirements
+
 ## Required Output Structure
 
 `gate_fix_summary.md` must include:
@@ -72,7 +102,7 @@ Stable headings:
 - `### MECH-001: <short title>`
   - **Evidence:** pointer to the specific artifact section/finding ID (file path + short quote or identifier)
   - **Files/Paths:** list only what was referenced by evidence
-  - **Category:** `format | lint | imports | docs | typos | changelog | hygiene`
+  - **Category:** `FORMAT | LINT_AUTOFIX | IMPORT_ORDER | DOCS_TYPO | LOCKFILE_REGEN | TRIVIAL_BUILD_BREAK | hygiene`
   - **Suggested Command (optional, repo-specific):** include only if clearly implied by repo tooling; otherwise write `TBD`
   - **Why mechanical:** one sentence tying back to criteria
 
@@ -98,9 +128,11 @@ version: 1
 fix_forward_eligible: true|false
 scope:
   - FORMAT
-  - IMPORTS
-  - WHITESPACE
-  - DOCS
+  - LINT_AUTOFIX
+  - IMPORT_ORDER
+  - DOCS_TYPO
+  - LOCKFILE_REGEN
+  - TRIVIAL_BUILD_BREAK
 
 rationale: "<short>"
 
@@ -148,7 +180,7 @@ on_failure:
 ````
 
 Plan rules:
-- `fix_forward_eligible: true` **only if** every finding is deterministic mechanical drift (format/import/whitespace/docs hygiene) **and** there are **no CRITICAL/MAJOR contract or security blockers**.
+- `fix_forward_eligible: true` **only if** every finding falls within the Extended Allowlist (FORMAT, LINT_AUTOFIX, IMPORT_ORDER, DOCS_TYPO, LOCKFILE_REGEN, or TRIVIAL_BUILD_BREAK) **and** there are **no CRITICAL/MAJOR contract or security blockers**.
 - Commands must be deterministic and repo-specific (e.g., formatter/lint/test invocations). Do **not** invent tooling; prefer commands already surfaced in artifacts.
 - `scope` enumerates what types of drift are being addressed.
 - `rationale` is short and explicit (e.g., "Formatting-only drift (deterministic)").

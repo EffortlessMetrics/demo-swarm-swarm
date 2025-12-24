@@ -27,7 +27,22 @@ Why:
 
 ## Setting up the swarm repo
 
-### Option A: Fork or clone
+### Option A: Fork (recommended for GitHub workflows)
+
+For full GitHub PR integration, use the fork-based workflow. See [adopt-fork-workflow.md](adopt-fork-workflow.md) for detailed setup.
+
+Quick version:
+
+```bash
+# Fork on GitHub, then clone
+gh repo fork your-org/my-project --fork-name my-project-swarm
+cd my-project-swarm
+
+# Copy the pack
+cp -r /path/to/demo-swarm/.claude .
+```
+
+### Option B: Clone (simpler, local-first)
 
 ```bash
 # Clone your origin repo
@@ -38,7 +53,7 @@ cd my-project-swarm
 cp -r /path/to/demo-swarm/.claude .
 ```
 
-### Option B: Fresh repo with pack
+### Option C: Fresh repo with pack
 
 ```bash
 mkdir my-project-swarm && cd my-project-swarm
@@ -111,6 +126,7 @@ Upstream export is a separate concern (see [upstream-export.md](upstream-export.
 
 ## See also
 
+- [adopt-fork-workflow.md](adopt-fork-workflow.md) — Fork-based workflow with GitHub PR integration
 - [upstream-export.md](upstream-export.md) — Moving work to human repo
 - [work-without-github.md](work-without-github.md) — Running without `gh`
 - [CLAUDE.md](../../CLAUDE.md) — Full pack reference

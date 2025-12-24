@@ -253,6 +253,36 @@ Sources:
 1. All worklist items resolved (`pending == 0`) → status: VERIFIED
 2. Context window exhaustion (approaching limit) → status: PARTIAL (checkpoint & exit)
 3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
+4. **Stuck detection triggered** → status: PARTIAL (checkpoint & exit with documented stuck state)
+
+### Stuck Detection (prevents infinite loops)
+
+The loop is **stuck** when no meaningful progress is made across iterations. Track these signals:
+
+**Progress indicators (reset stuck counter):**
+- Item moved from PENDING to RESOLVED
+- Item moved from PENDING to SKIPPED (with valid reason)
+- New items added to worklist (from re-harvest)
+- Git diff shows meaningful code changes
+
+**Stuck signals (increment stuck counter):**
+- Same item attempted twice with same failure mode
+- Fix agent returns UNVERIFIED with identical blockers
+- No worklist state change after a full iteration
+- No git diff after fix attempt
+
+**Stuck counter threshold:** 3 consecutive iterations without progress.
+
+**On stuck detection:**
+1. Mark remaining PENDING items as `DEFERRED` with reason: `"STUCK: No progress after 3 iterations"`
+2. Write detailed stuck analysis to `review_actions.md`:
+   - Which items were attempted
+   - What failures occurred
+   - Why the loop couldn't make progress
+3. Checkpoint with `status: PARTIAL`
+4. Exit with message: "Review loop stuck. {N} items deferred. See review_actions.md for analysis. Human intervention may be required."
+
+**Why this matters:** An unbounded loop without stuck detection can burn tokens indefinitely trying the same failed fix. Stuck detection ensures the swarm admits defeat gracefully rather than spinning.
 
 **Context checkpoint behavior (PARTIAL):**
 When context is approaching limits, checkpoint immediately:
@@ -266,10 +296,15 @@ This is a **feature, not a failure**. It prevents hallucination from context stu
 **Loop structure:**
 
 ```
+stuck_counter = 0
+last_worklist_hash = null
+last_diff_hash = null
+
 while not terminated:
     1. Read current worklist status from review_worklist.json
     2. If pending == 0: break (complete)
     3. If context exhausted: break (can resume later)
+    3b. If stuck_counter >= 3: break (stuck detection triggered)
 
     4. Run Style Sweep station (always):
        - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
@@ -305,6 +340,19 @@ while not terminated:
     12. If new feedback items found:
         - Run review-worklist-writer to update worklist
         - New items get appended (IDs continue from last)
+
+    13. **Track progress for stuck detection:**
+        current_worklist_hash = hash(review_worklist.json pending items)
+        current_diff_hash = hash(git diff HEAD~1)
+
+        if (item resolved OR item skipped OR new items added OR diff changed):
+            stuck_counter = 0  # Progress made
+            last_worklist_hash = current_worklist_hash
+            last_diff_hash = current_diff_hash
+        else:
+            stuck_counter += 1  # No progress
+            if stuck_counter >= 3:
+                log "Stuck detection triggered after 3 iterations without progress"
 ```
 
 **Style Sweep station (standard, always run):**
@@ -315,18 +363,68 @@ while not terminated:
 - Do not route markdownlint child items individually; resolve them via the `RW-MD-SWEEP` parent.
 - Guardrail: if the sweep touches anything under `.runs/<run-id>/build/`, call `build-cleanup` to reseal `build_receipt.json`.
 
+### Intelligent Summarization (Not File Pointers)
+
+When summarizing feedback for routing or reporting, use JUDGMENT:
+
+**Bad (file pointer dump):**
+```
+- RW-001: See pr_feedback.md line 45
+- RW-002: CodeRabbit comment at src/auth.ts:42
+- RW-003: CI failure in tests.yml
+```
+
+**Good (intelligent summary):**
+```
+- RW-001: CodeRabbit found a potential null pointer at auth.ts:42. The code assumes `user` is always defined but the function can be called before login completes. Route to code-implementer to add a guard.
+- RW-002: CI tests failing because hashPassword returns undefined for empty strings. This is a valid edge case not covered by current tests. Route to test-author first to add the test, then code-implementer to fix.
+- RW-003: Human reviewer asked about error handling strategy. This is a design question, not a code issue. Document in open_questions.md and proceed.
+```
+
+**The agent reading the feedback is SMART.** It should understand:
+- What the feedback actually means (not just where it is)
+- Whether the feedback is valid or a false positive
+- What agent is best suited to address it
+- Whether the issue is still relevant (stale check)
+
 **Per-item fix process:**
 
 For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
 
 1. Read the item details (category, severity, location, summary)
-2. Call the routed agent with context:
+
+2. **Verify Relevance (Stale Check):**
+   Before routing to a fix agent, verify the referenced code still exists at HEAD:
+   - Does the file at the specified path still exist?
+   - Does the code/line referenced in the comment still exist and match the context?
+   - Has the code changed significantly since the feedback was posted?
+
+   **Stale classification:**
+   - **STALE**: Code has been refactored, deleted, or substantially changed. The feedback no longer applies.
+   - **OUTDATED**: Code exists but has been partially modified. May still apply but needs verification.
+   - **CURRENT**: Code matches the feedback context. Proceed with fix.
+
+   **Action on stale/outdated:**
+   - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
+   - Log the skip in `review_actions.md` with evidence (what changed, when)
+   - Move to the next item. Do not hallucinate fixes for missing code.
+
+   **Stale detection examples:**
+   - CodeRabbit said "add null check at line 45" but line 45 is now a comment → STALE
+   - CI failed on "auth.test.ts" but that file was renamed to "auth.spec.ts" and tests pass → STALE (ALREADY_FIXED)
+   - Human asked about error handling, but the code was refactored to use a different approach → OUTDATED (re-evaluate if concern still applies)
+
+   **DO NOT:** Attempt to fix code that no longer exists. This wastes cycles and can introduce regressions.
+
+   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Acting on stale feedback wastes cycles and risks regression.
+
+3. Call the routed agent with context:
    - Item ID and summary
    - File path and line number
    - Evidence from feedback
-3. If agent succeeds: mark RESOLVED
-4. If agent fails: keep PENDING (may need different approach)
-5. Log action in `review_actions.md`
+4. If agent succeeds: mark RESOLVED
+5. If agent fails: keep PENDING (may need different approach)
+6. Log action in `review_actions.md`
 
 **Reseal after changes:**
 
@@ -335,24 +433,41 @@ When code/test changes are made (or the Style Sweep touches `.runs/<run-id>/buil
 2. Run build-cleanup to update build_receipt.json
 3. Periodically run full test suite (test-executor)
 
-**Re-harvest cadence (gated):**
+**Re-harvest cadence (gated) - MANDATORY after each push:**
 
-Every N items resolved (or after significant changes), apply the **Reseal → Gate → Push → Re-harvest** subroutine:
+The swarm does **not wait** for CI or bots. It pushes, then immediately re-harvests whatever feedback is available. This is the "Push → Re-harvest" pattern:
+
+**Trigger conditions (any of):**
+- After resolving 3-5 worklist items
+- After any CRITICAL item is resolved
+- After significant code changes (touching core modules)
+- When stuck counter increases (to get fresh signal)
+
+**The Reseal → Gate → Push → Re-harvest subroutine:**
 
 1. **Reseal receipts:**
    - Call `build-cleanup` to reseal build_receipt.json (if code/tests changed)
    - Call `review-cleanup` to update worklist state
+
 2. **Secrets gate:**
    - Call `secrets-sanitizer` on staged changes (single pass)
+
 3. **Commit and push (gated):**
    - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push
    - If gates fail: record the blocker and proceed without push (bots won't have new code)
-4. **Re-harvest:**
-   - Call `pr-feedback-harvester` (new bot comments may appear after push)
-   - Call `review-worklist-writer` to update worklist with new items
-   - If bots haven't posted yet: record "pending feedback" and proceed (can re-harvest on next iteration)
 
-**Note:** Agents cannot "wait" - they re-harvest and check. If new feedback appears, it gets added to the worklist for subsequent iterations.
+4. **Re-harvest (immediately after push):**
+   - Call `pr-feedback-harvester` - captures whatever CI/bot feedback exists *right now*
+   - Call `review-worklist-writer` to update worklist with new items
+   - **Do not wait** for bots to finish - take what's available and proceed
+   - If bots haven't posted yet: that's fine, next iteration will catch it
+
+**Why immediate re-harvest?** The swarm can't "sleep" for CI. By re-harvesting immediately after push, we capture:
+- Any CI that finished between iterations
+- CodeRabbit comments posted on new code
+- Human reviews that arrived while we were fixing
+
+If nothing new appears, the worklist stays the same and we continue. The pattern is: **push early, harvest often, never wait.**
 
 ### Step 7: PR Status Management
 

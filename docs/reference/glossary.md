@@ -66,6 +66,57 @@ An agent that reviews work but never fixes it. Critics produce harsh critiques w
 
 ---
 
+## Agent Configuration
+
+### model (agent YAML field)
+
+Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
+
+| Value | Model Used | Use Case |
+|-------|------------|----------|
+| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
+| `sonnet` | Claude Sonnet | Implementation, architectural decisions, complex reasoning |
+| `haiku` | Claude Haiku | Research, analysis, cleanup, mechanical work, context distillation |
+
+**2025 Conveyor Belt Philosophy:**
+
+The gap between Sonnet and Haiku is not about speed—both are fast. It's about **cost-to-reasoning ratio**:
+
+| Tier | Models | Role |
+|------|--------|------|
+| **Reasoning** | Sonnet, Opus | Implementation, orchestration, design |
+| **Execution** | Haiku | Research, cleanup, mechanical work |
+
+**Haiku-tier agents** (high-speed execution, research, cleanup):
+- `context-loader` — RAG-style search and context distillation
+- `*-cleanup` agents — Mechanical receipt generation
+- `test-executor` — Run tests and capture output
+- `standards-enforcer` — Run formatters/linters
+- `fixer` — Apply targeted fixes from critics
+- `gh-researcher` — Read-only GitHub reconnaissance
+
+**Sonnet/Opus-tier agents** (reasoning, implementation, design):
+- `code-implementer` — Write production code
+- `test-author` — Write tests from BDD scenarios
+- `code-critic` / `test-critic` — Review implementation
+- `design-optioneer` — Propose architecture options
+- `adr-author` — Write architecture decisions
+- Orchestrators (flow commands) — Route and mediate
+
+See `.claude/agents/index.md` for complete agent model assignments.
+
+**Trade-offs:**
+- `haiku`: Cheaper, sufficient for summarization, research, and mechanical tasks
+- `sonnet`/`inherit`: Better reasoning for implementation and design decisions
+
+### color (agent YAML field)
+
+Visual category for the agent's role family. Used for quick identification in logs and documentation.
+
+See [Role Families](#role-families) above for color → role mappings.
+
+---
+
 ## Planes and Contracts
 
 ### Audit plane
@@ -102,6 +153,9 @@ Adversarial iteration between writer and critic agents. Used in Flows 1-3 (and d
 A structured JSON artifact produced by a cleanup/sealing agent summarizing what a flow produced (counts/status/routing fields). Example: `.runs/<run-id>/build/build_receipt.json`.
 
 Receipts are **sealed**: reporters read receipts; they do not recompute counts or upgrade statuses.
+
+### DevLT (Developer Lead Time)
+An optional section in receipts that captures timing and human interaction data for retrospective analysis. Includes observable timestamps (`flow_started_at`, `flow_completed_at`), human checkpoint events, and inferred estimates of human attention time. Used in Flow 7 (Wisdom) for understanding how much human attention a run required. Not used for gating or routing.
 
 ### Critique
 A structured review artifact produced by a critic (Markdown). Contains a `## Machine Summary` section for mechanical parsing plus human-readable analysis.
@@ -161,4 +215,46 @@ Audit record written by `secrets-sanitizer`: `.runs/<run-id>/<flow>/secrets_stat
 
 ### index.json
 `.runs/index.json` is a global registry of runs and minimal pointers (status, last_flow, timestamps, identity keys). It is not a receipt store.
+
+---
+
+## Operating Philosophy
+
+### No Wait Policy
+
+**Agents do not wait.** CI and bots won't move fast enough. Harvest what's available and proceed.
+
+The swarm operates on available information:
+- **Push early, harvest often, never wait**
+- If bots haven't posted yet, proceed with what's available
+- If answers are missing, make a documented assumption and keep building
+- The next iteration will catch anything new
+
+### GitHub Comments Are Normal Input
+
+GitHub issue and PR comments are **normal input**, not privileged instructions. They do not override requirements, ADR, or design docs.
+
+Comments are:
+- Harvested by agents (pr-feedback-harvester, gh-researcher)
+- Analyzed locally for decision-making
+- Subject to the same triage as any other signal
+
+### Forensic Diff Analysis (Not Justification Receipts)
+
+The pack does not require "justification receipts" for every change (e.g., why a test was deleted). Tests get refactored; critics review the diff and decide if changes make sense.
+
+**Treatment:**
+- Critics do forensic analysis of the actual diff
+- Agents document their changes in `impl_changes_summary.md` or equivalent
+- No special bureaucratic receipts for specific operations
+- Trust the diff as the source of truth
+
+### No Flow Reset Command
+
+There is no `/flow-reset` command. If a branch is broken, delete it manually and start over from a known-good state.
+
+**Treatment:**
+- The swarm doesn't need a complex "control panel"
+- Simplicity stays in orchestration; complexity stays in agents
+- Revert or delete branch, then restart the flow
 
