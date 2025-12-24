@@ -190,19 +190,6 @@ When you're done, tell the orchestrator what happened — honestly and naturally
 
 **Don't use rigid YAML blocks in your response.** The Machine Summary goes in the artifact file; your response should be conversational and clear.
 
-### Outcomes List (for Flow 4 worklist)
-
-When called from Flow 4 with a batch of worklist items, you MUST include an `Outcomes:` section in your response:
-
-```
-Outcomes:
-- RW-001: RESOLVED (fixed null check in auth.ts)
-- RW-002: SKIPPED (code already refactored, feedback stale)
-- RW-003: PENDING (requires upstream API change, handoff to code-implementer)
-```
-
-This allows `review-worklist-writer` to update the worklist status without the orchestrator parsing files. Each item in your batch MUST appear in the Outcomes list.
-
 ## Obstacle Protocol (When Stuck)
 
 If you encounter ambiguity, missing context, or confusing errors, do **not** simply exit. Follow this hierarchy to keep the conveyor belt moving:

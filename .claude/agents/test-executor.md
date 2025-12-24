@@ -200,9 +200,17 @@ missing_required: []
 mode: verify | verify_ac
 ac_id: <string|null>
 ac_filter_applied: <bool|null>
+ac_status: passed | failed | unknown   # for verify_ac mode: did this AC's tests pass?
 ```
 
 The file is the audit record. This block is the control plane.
+
+**AC status semantics (verify_ac mode only):**
+- `passed`: All tests for this AC passed (exit code 0)
+- `failed`: One or more tests failed
+- `unknown`: Could not determine (filter didn't work, no tests found, etc.)
+
+The `build-cleanup` agent uses this to update `ac_status.json`.
 
 ## Philosophy
 

@@ -69,33 +69,58 @@ Prioritize questions that would change design, scope, or tests:
 
 ## Question Taxonomy (Required)
 
-Every question MUST be classified into exactly one bucket:
+Every question MUST be classified into exactly one bucket.
 
-### DECISION_NEEDED
-Questions that **cannot be researched** — only a human stakeholder can answer.
+**Default posture:** Answer what you can, default what you can't, escalate only when boxed in.
+
+### DECISION_NEEDED (non-derivable from repo)
+
+Use this **only** when:
+1. You searched code/tests/docs/config/prior runs/issues and found NO answer, AND
+2. No safe reversible default exists that lets work proceed.
+
+**Triggers (after research fails):**
 - Business priorities or product direction (which users matter more?)
-- Legal/compliance constraints not in codebase or docs
-- Organizational decisions (who owns this? what's the approval process?)
+- Legal/compliance constraints not documented anywhere accessible
 - Stakeholder preferences with no technical right answer
-- Cost/resource tradeoffs that require budget authority
+- Requires explicit approval (security exception, breaking change)
+- Requires access to private systems you cannot reach
 
-**Before marking DECISION_NEEDED:** Did you search the codebase, docs, and prior issues? If the answer exists somewhere, research it instead.
+**PROOF OF RESEARCH REQUIRED.** For each DECISION_NEEDED item, you MUST include:
+- **Evidence searched:** Paths, files, patterns checked
+- **Why non-derivable:** Specific reason it can't be inferred
+- **Safest provisional default:** What you'd pick if forced (or "none safe")
+
+**Hard rule:** If the answer could reasonably be found in the repo or derived from existing patterns, it is NOT DECISION_NEEDED. Research first, then default, then escalate.
 
 **These are surfaced prominently by `gh-issue-manager` on the GitHub issue.**
 
-### DEFAULTED
+### DEFAULTED (proceeding with assumption)
+
 An assumption was made and implementation will proceed with it.
+
+**Requirements:**
 - Default is safe (failure mode is benign, not catastrophic)
 - Easy to change later if wrong
 - Industry-standard or codebase-convention applies
 - Must explain **why this default is safe**
+- Must explain **how to verify** the assumption is correct
+- Must explain **how to change** if the assumption is wrong
 
-### DEFERRED
+**Examples of valid defaults:**
+- "Assuming 30-second timeout (matches existing API patterns in `src/api/`)"
+- "Using bcrypt for password hashing (security best practice, easy to swap)"
+- "Returning 404 for missing resources (REST convention, existing endpoints do this)"
+
+### DEFERRED (valid but not blocking)
+
 Valid question but doesn't affect Flow 3 correctness.
 - UX polish that can be tuned post-merge
 - Performance optimization that doesn't affect correctness
 - Nice-to-have that doesn't block the feature
 - Can be revisited in a follow-up PR
+
+**Deferred is not "I don't want to answer."** It's "This genuinely doesn't affect whether the code works."
 
 ## Question Quality Bar
 
@@ -164,20 +189,24 @@ These questions MUST be answered before the work can proceed correctly.
 
 - QID: <OQ-...>
   - Q: <question> [DECISION_NEEDED]
+  - Evidence searched: <paths/files/patterns checked>
+  - Why non-derivable: <specific reason it can't be inferred from repo>
+  - Safest provisional default: <what you'd pick if forced, or "none safe">
   - Options: <option A> | <option B> | ...
   - Impact of each: <brief tradeoff summary>
   - Needs answer by: <Flow 2 | Flow 3 | Before merge | Before deploy>
-  - Evidence: <file> → <section/header>
 
 ### DEFAULTED (Proceeding With Assumption)
 
-Assumptions made to keep moving. Explain why each default is safe.
+Assumptions made to keep moving. Each default must explain: why it's safe, how to verify, how to change.
 
 - QID: <OQ-...>
   - Q: <original question> [DEFAULTED]
   - Default chosen: <the assumption>
-  - Why safe: <failure mode is benign / easy to change / matches convention>
-  - Evidence: <file> → <section/header> (optional)
+  - Why safe: <failure mode is benign / reversible / matches convention>
+  - How to verify: <what test/check confirms this is correct>
+  - How to change: <what to modify if assumption is wrong>
+  - Evidence: <file → section/header that supports this default> (optional)
 
 ### DEFERRED (Valid But Not Blocking)
 

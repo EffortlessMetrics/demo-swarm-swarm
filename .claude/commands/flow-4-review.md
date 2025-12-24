@@ -211,7 +211,7 @@ After setup, you have a run directory and a PR to harvest feedback from.
 
 ```
 while pending > 0 and not exhausted:
-    1. review-worklist-writer (refresh mode)
+    1. review-worklist-writer (mode: create or refresh)
        → returns: pending_blocking, stuck_signal, next_batch (IDs + route_to + batch_hint)
 
     2. Route next_batch to fix-lane agent:
@@ -221,31 +221,27 @@ while pending > 0 and not exhausted:
        - DOCS → doc-writer
 
        Agent receives: batch IDs + file paths + evidence
-       Agent returns: Outcomes list per item (RESOLVED | SKIPPED | PENDING + reason)
+       Agent reports naturally: what it fixed, what was stale, what it couldn't fix
 
-    3. review-worklist-writer (apply/refresh mode)
-       → Apply agent outcomes to review_worklist.json
-       → Check for stuck_signal
-       → Return updated pending count
+    3. review-worklist-writer (mode: apply)
+       → Receives: worker's natural language response + batch_ids
+       → Parses response to determine per-item status
+       → Updates review_worklist.json
+       → Appends to review_actions.md
+       → Returns updated pending count + next_batch
 
     4. Periodically: Checkpoint Routine (explicit agent chain)
        a. repo-operator (stage intended changes)
        b. secrets-sanitizer (gate staged surface; capture Gate Result)
        c. repo-operator (commit/push; gated on Gate Result)
        d. pr-feedback-harvester (re-harvest CI/bot status)
-       e. review-worklist-writer (refresh; may add new items)
+       e. review-worklist-writer (mode: refresh; may add new items)
        → If stuck_signal: true → exit loop
 ```
 
-**Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` again to apply outcomes.
+**Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` in apply mode to parse the worker's response and update state.
 
-**Fix-lane agent contract:** When an agent receives a batch, it MUST return an `Outcomes:` section:
-```
-Outcomes:
-- RW-001: RESOLVED (fixed null check)
-- RW-002: SKIPPED (code already refactored, feedback stale)
-- RW-003: PENDING (requires upstream API change)
-```
+**Workers report naturally:** Fix-lane agents (code-implementer, fixer, test-author, doc-writer) do their job and describe what happened. They don't need special output formats. The `review-worklist-writer` parses their natural language response to update item statuses.
 
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.
 
@@ -374,7 +370,7 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 
 5) Style Sweep (if next_batch contains `RW-MD-SWEEP`):
    - Call fixer once for all markdown fixes
-   - fixer returns: Outcomes list
+   - fixer reports naturally what it fixed
 
 6) Route next_batch to fix-lane agent:
    - TESTS → test-author
@@ -382,23 +378,23 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
    - STYLE → fixer
    - DOCS → doc-writer
 
-   Agent contract:
+   Agent behavior:
    - Receives: batch IDs + file paths + evidence
-   - Returns: Outcomes list (RESOLVED | SKIPPED | PENDING per item)
+   - Reports naturally: what it fixed, what was stale, what needs escalation
 
 7) Call review-worklist-writer (mode: apply)
-   → Receives: agent Outcomes list
+   → Receives: worker's natural language response + batch_ids
+   → Parses response to determine per-item status
    → Updates review_worklist.json
-   → Returns: updated pending count, stuck_signal
+   → Appends to review_actions.md (agent handles this, not orchestrator)
+   → Returns: updated pending count, next_batch
 
-8) Log action summary in review_actions.md
-
-9) Periodically: Checkpoint Routine (explicit agent chain)
+8) Periodically: Checkpoint Routine (explicit agent chain)
    a) repo-operator (stage intended changes)
    b) secrets-sanitizer (gate staged surface)
    c) repo-operator (commit/push; gated on Gate Result)
    d) pr-feedback-harvester (re-harvest)
-   e) review-worklist-writer (refresh; may add new items)
+   e) review-worklist-writer (mode: refresh; may add new items)
    → If stuck_signal: true → exit loop
 ```
 

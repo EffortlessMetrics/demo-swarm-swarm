@@ -67,8 +67,10 @@ Optional (missing ⇒ note, continue):
 - `doc_updates.md`
 - `doc_critique.md`
 
-AC status (created and updated by Build):
-- `.runs/<run-id>/build/ac_status.json` (AC completion tracker; best-effort verification)
+AC status (owned by build-cleanup):
+- `.runs/<run-id>/build/ac_status.json` (AC completion tracker)
+
+**Note:** This agent owns `ac_status.json`. On rerun or at end of Build, it reads test-executor results and updates the file. See Step 2b.
 
 ## Outputs
 
@@ -193,6 +195,45 @@ bash .claude/scripts/demoswarm.sh receipt get \
 **AC completion check:** If `ac_status.json` exists and `ac_completed < ac_total`, add a blocker: "AC loop incomplete: {ac_completed}/{ac_total} ACs completed". This prevents sealing a build with incomplete AC coverage.
 
 If the inventory section is missing entirely, prefer `null` over guessing and explain why in `cleanup_report.md`. If the section exists and markers are legitimately absent, `0` is acceptable.
+
+### Step 2b: Update AC Status (build-cleanup owns this)
+
+This agent owns `ac_status.json`. Create or update it based on test-executor results.
+
+**Schema:**
+```json
+{
+  "schema_version": "ac_status_v1",
+  "run_id": "<run-id>",
+  "ac_count": <int>,
+  "completed": <int>,
+  "acs": {
+    "AC-001": { "status": "passed | failed | pending | unknown", "updated_at": "<iso8601>" },
+    "AC-002": { "status": "passed | failed | pending | unknown", "updated_at": "<iso8601>" }
+  },
+  "updated_at": "<iso8601>"
+}
+```
+
+**Behavior:**
+1. If `ac_status.json` doesn't exist and `ac_matrix.md` exists:
+   - Read AC IDs from `ac_matrix.md`
+   - Initialize all as `pending`
+2. If `test_execution.md` exists with `mode: verify_ac`:
+   - Read `ac_id` and `ac_status` from test-executor's result
+   - Update that AC's status in `ac_status.json`
+3. Count `completed` = number of ACs with status `passed`
+
+**Example update command:**
+```bash
+# Read current status
+bash .claude/scripts/demoswarm.sh receipt get \
+  --file ".runs/<run-id>/build/ac_status.json" \
+  --key "acs.AC-001.status" \
+  --null-if-missing
+```
+
+**Why build-cleanup owns this:** The orchestrator should not parse files. It calls test-executor (which reports AC status in its result), then calls build-cleanup (which persists that status to disk).
 
 ### Dependency Change Detection (supply chain visibility)
 

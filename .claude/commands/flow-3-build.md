@@ -73,7 +73,7 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 
 **If `ac_matrix.md` is missing:** Call `test-strategist` to generate it first.
 
-**Initialize `ac_status.json`** before starting (or read existing on rerun).
+**Note:** `build-cleanup` owns `ac_status.json` — it will create/update it based on test-executor results. The orchestrator does not touch this file directly.
 
 **For each AC in order:**
 
@@ -81,8 +81,10 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 2. **test-critic**: Verify tests are solid
 3. **code-implementer**: Implement to pass tests
 4. **code-critic**: Verify implementation is honest
-5. **test-executor**: Confirm tests pass (AC-scoped)
-6. **Update `ac_status.json`**: Mark AC complete or blocked
+5. **test-executor**: Confirm tests pass (AC-scoped); emits `ac_status` in result block
+6. **build-cleanup** (or `ac-tracker` if added): Updates `ac_status.json` based on test-executor result
+
+**Note:** The orchestrator routes on `test-executor`'s result block. It does NOT parse `ac_status.json` directly. The cleanup agent owns state file updates.
 
 **Adversarial Microloop (writer ↔ critic):**
 
@@ -247,8 +249,7 @@ Plus code/test changes in project-defined locations.
 - [ ] test-strategist (if ac_matrix.md missing)
 - [ ] AC-1: test-author ↔ test-critic microloop
 - [ ] AC-1: code-implementer ↔ code-critic microloop
-- [ ] AC-1: test-executor
-- [ ] AC-1: update ac_status.json
+- [ ] AC-1: test-executor (emits ac_status in result)
 - [ ] repo-operator (checkpoint push)
 - [ ] pr-creator (create Draft PR)
 - [ ] pr-feedback-harvester (check CRITICAL only, route blockers)
@@ -262,7 +263,7 @@ Plus code/test changes in project-defined locations.
 - [ ] doc-writer ↔ doc-critic microloop
 - [ ] self-reviewer
 - [ ] pr-feedback-harvester (flow boundary check)
-- [ ] build-cleanup
+- [ ] build-cleanup (writes ac_status.json + build_receipt.json)
 - [ ] repo-operator (stage intended changes)
 - [ ] secrets-sanitizer
 - [ ] repo-operator (commit and push)
