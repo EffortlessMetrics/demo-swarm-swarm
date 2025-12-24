@@ -130,6 +130,27 @@ The mutator agent reads these fields to determine behavior:
 - If `mutation_required: false` and tool unavailable → mutator proceeds with concern
 - If `mutation_threshold` is set → mutator compares score against it
 
+### Step 4c: Check test data / fixture impact
+
+When schema changes are planned (check `schema.md` and `.runs/<run-id>/plan/migrations/`), assess whether test fixtures need updating:
+
+**Scan for existing test data:**
+- `**/fixtures/**`, `**/seeds/**`, `**/test_data/**`
+- `**/factories/**` (factory-based test data)
+- `**/*.seed.sql`, `**/*.fixtures.json`, `**/*.factory.ts`
+
+**If schema changes affect test data:**
+- New required columns → existing fixtures may fail constraint validation
+- Renamed/removed columns → existing fixtures reference stale fields
+- New relationships → seed data may need related records
+
+**Add to test plan:**
+- If fixtures likely need updates, include a "Update Test Fixtures" task in the Recommended Next section.
+- Add it to the AC matrix as a pre-implementation AC (e.g., `AC-000: Update fixtures for new schema`).
+- Document which fixture files are likely affected.
+
+This prevents the second most common Build failure: tests crashing with "constraint violation" or "column not found" because seed data doesn't match the new schema.
+
 ### Step 5: Write `test_plan.md` (required structure)
 
 Write the plan using this structure (includes the Scenario → Test Type Matrix that feeds ac_matrix.md):

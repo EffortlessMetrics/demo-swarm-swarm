@@ -64,7 +64,29 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
    - SLO/alert expectations
    - "signals of health" needed for rollout gates
 
-5. **Decompose into subtasks**:
+5. **Check for infrastructure prerequisites (migrations, config)**
+
+   Scan `.runs/<run-id>/plan/migrations/` and `schema.md` for planned migrations:
+
+   - If migration files exist, create **ST-000: Apply Infrastructure** as the first subtask.
+   - ST-000 depends on nothing. All code subtasks must depend on ST-000.
+   - ST-000's acceptance criteria: migrations applied successfully, DB schema matches expected state.
+   - Read `schema.md` for **Migration Infrastructure** section (target directory, command, dialect).
+   - If no migration infrastructure is documented, add a concern and include "scaffold migration tooling" in ST-000.
+
+   This prevents the most common Build failure mode: trying to query columns that don't exist yet.
+
+6. **Scope variance check**
+
+   Compare your planned work against `.runs/<run-id>/signal/scope_estimate.md` (if present):
+
+   - If scope_estimate says `S` or `M` but your plan looks like `L` or `XL`, add a **Variance Rationale** section explaining why complexity grew.
+   - Common reasons: discovered hidden dependencies, underestimated integration surface, risk mitigation added subtasks.
+   - If scope is justifiably larger, document the rationale. If unjustifiably larger, reconsider the breakdown.
+
+   This is a smell check, not a gate. Growth is often legitimate; it just needs to be explained.
+
+7. **Decompose into subtasks**:
    - Use IDs: `ST-001`, `ST-002`, …
    - Each subtask must be implementable independently (or clearly marked as "scaffold-only").
    - Each subtask must state:
@@ -77,16 +99,16 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
      - **Risk notes** + "blast radius"
      - **Estimate**: S / M / L / XL
 
-6. **Rollout strategy**:
+8. **Rollout strategy**:
    - Prefer feature flags / staged enablement if applicable.
    - Tie phase gates to **observability_spec** signals (what you watch and what "good" means).
    - Keep it GitHub-native: assume Flow 6 verifies via CI + smoke checks; don't require a bespoke platform.
 
-7. **Rollback strategy**:
+9. **Rollback strategy**:
    - Must be realistic.
    - Call out irreversible steps (schema drops, data migrations) and how you mitigate (expand/contract patterns, additive-only first).
 
-8. **If inputs are missing**:
+10. **If inputs are missing**:
    - Still write a best-effort plan.
    - Record missing paths in `missing_required`.
    - Use explicit assumptions.
@@ -113,6 +135,15 @@ missing_required:
 - **Primary impacts**: <1–5 bullets from impact_map.json>
 - **Key constraints**: <1–5 bullets>
 - **Verification posture**: <what must be true in tests + observability>
+
+## Variance Rationale (if scope grew)
+
+If the planned work is significantly larger than `scope_estimate.md` predicted (e.g., L/XL for an S/M estimate), explain why:
+
+- <reason 1>: <evidence>
+- <reason 2>: <evidence>
+
+If scope aligns with estimate, this section may be omitted.
 
 ## Subtask Index (parseable)
 

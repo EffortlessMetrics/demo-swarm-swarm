@@ -125,7 +125,27 @@ These prefixes must not be renamed.
    - If DB changes are required, write planned migrations under `.runs/<run-id>/plan/migrations/`.
    - If DB dialect/tooling is unknown, keep SQL conservative and mark assumptions.
 
-6. **Emit machine-countable inventory**
+6. **Discover migration infrastructure (required when migrations are planned)**
+
+   When writing migrations, scan the repo to identify how Flow 3 should apply them:
+
+   - **Target Directory**: Search for existing migrations (`.sql` files, `migrations/` dirs, `prisma/migrations/`, `db/migrate/`, `alembic/versions/`, etc.).
+   - **Migration Command**: Identify the tooling (e.g., `cargo sqlx migrate run`, `npx prisma migrate dev`, `alembic upgrade head`, `rails db:migrate`).
+   - **Dialect**: Infer the SQL dialect from existing files or config (`sqlite`, `postgres`, `mysql`).
+
+   Document these in `schema.md` under a `## Migration Infrastructure` section:
+
+   ```markdown
+   ## Migration Infrastructure
+   - **Target Directory**: `<path where Build should move migrations>`
+   - **Migration Command**: `<command to apply migrations>`
+   - **Dialect**: `<sql dialect>`
+   - **Naming Convention**: `<e.g., YYYYMMDDHHMMSS_name.sql, 001_name.sql>`
+   ```
+
+   If no existing migration infrastructure is found, document that explicitly so Flow 3 knows to scaffold it or use raw SQL.
+
+7. **Emit machine-countable inventory**
 
    - Populate the inventory header in `api_contracts.yaml`.
    - Populate the `## Inventory (machine countable)` section in `schema.md`.

@@ -101,6 +101,18 @@ If any handshake item fails, set `status: UNVERIFIED` and record a concrete bloc
 6) **Design → Work plan**
 - Work plan includes tasks for migrations/instrumentation/testing/rollout/rollback when implied by ADR/contracts/NFRs.
 
+7) **Migration → Code dependency (critical sequencing)**
+
+If migrations exist under `.runs/<run-id>/plan/migrations/`:
+
+- **Work plan must schedule DB update before API implementation.** Check that the work plan's Subtask Index includes an infrastructure/migration task (e.g., ST-000) that comes before code subtasks.
+- **Code subtasks must depend on the migration task.** If ST-001 (API code) doesn't depend on ST-000 (migrations), flag as MAJOR.
+- **Test plan should include fixture updates.** If schema changes but test fixtures aren't addressed, flag as MAJOR.
+
+This validation prevents the most common Build loop failure: trying to query a column that doesn't exist yet because the migration wasn't applied first.
+
+If no migration infrastructure is documented in `schema.md` but migration files exist, flag as MAJOR → route to `interface-designer`.
+
 ## Anchored parsing rule
 
 If you extract machine fields from markdown artifacts:
