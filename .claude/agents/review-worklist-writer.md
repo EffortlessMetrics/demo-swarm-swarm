@@ -91,6 +91,7 @@ Sometimes "3 unrelated tweaks in file A + 4 in file B" is better as two Work Ite
 3. **List evidence**: Which FB-* items this clusters
 4. **Set category and route**: Which agent handles this type of work
 5. **Set priority**: Based on severity of the underlying issues
+6. **Add batch hint**: File or theme for orchestrator batching (e.g., `batch_hint: auth.ts` or `batch_hint: error-handling`)
 
 **Classification guidance:**
 
@@ -367,7 +368,8 @@ Write `.runs/<run-id>/review/review_worklist.json`:
       "summary": "2 tests failed - TestLogin, TestLogout assertions incorrect",
       "route_to": "test-author",
       "status": "PENDING",
-      "evidence": "CI check `test` failed with 2 errors"
+      "evidence": "CI check `test` failed with 2 errors",
+      "batch_hint": "auth"
     },
     {
       "id": "RW-002",
@@ -381,7 +383,8 @@ Write `.runs/<run-id>/review/review_worklist.json`:
       "summary": "Use bcrypt instead of md5 for password hashing",
       "route_to": "code-implementer",
       "status": "PENDING",
-      "evidence": "CodeRabbit security concern"
+      "evidence": "CodeRabbit security concern",
+      "batch_hint": "auth"
     }
   ]
 }

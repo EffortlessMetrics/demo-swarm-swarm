@@ -455,13 +455,18 @@ This is the core review loop. Unlike Build's bounded microloops, this runs until
    - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
    - Update `review_worklist.json`, write `style_sweep.md`, and reseal build receipt if `.runs/<run-id>/build/` is touched
 
-5) Pick next pending item by priority:
-   - CRITICAL first
-   - Then MAJOR
-   - Then MINOR (optional; exclude `RW-MD-SWEEP` children)
-   - Skip INFO
+5) Pick next batch of pending items by priority and affinity:
+   - **Priority order**: CRITICAL first, then MAJOR, then MINOR (optional)
+   - **Batch by affinity** (route related items together for efficiency):
+     - Same file → one batch (e.g., 3 issues in `auth.ts` = one agent call)
+     - Same root cause → one batch (e.g., security issue + related test gap)
+     - Same agent, similar theme → one batch (up to 3-5 items)
+   - Exclude `RW-MD-SWEEP` children (handled by Style Sweep station)
+   - Skip INFO items
 
-6) Route to agent:
+   **Batching goal:** Reduce agent call overhead. A developer fixing `auth.ts` should see all `auth.ts` issues at once, not one at a time.
+
+6) Route batch to agent:
    - TESTS items → test-author
    - CORRECTNESS items → code-implementer
    - STYLE items → fixer or standards-enforcer

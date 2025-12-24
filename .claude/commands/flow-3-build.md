@@ -1,768 +1,258 @@
 ---
-description: Run Flow 3 (Design -> Code): implement via adversarial microloops, self-verify, produce receipts.
-# argument-hint: [subtask-id]
+description: Run Flow 3 (Design -> Code): build a working, codebase-aligned implementation.
+# argument-hint: [run-id]
 ---
 
-# Flow 3: Design -> Code
+# Flow 3: Build
 
 You are orchestrating Flow 3 of the SDLC swarm.
 
-## Working Directory + Paths (Invariant)
+**Goal:** Build a working, codebase-aligned implementation. Tests pass. Diff is honest.
 
-- All commands run from **repo root**.
-- All paths in this doc are **repo-root-relative**.
-- Run artifacts live under: `.runs/<run-id>/`
-- Flow artifacts live under: `.runs/<run-id>/build/`
-- Code/tests remain in project-defined locations (customize per repo layout).
-- Do **not** rely on `cd` into any folder to make relative paths work.
+## Mental Model
 
-**Important**: Step 0 (run-prep) establishes the run directory and ensures `.runs/<run-id>/build/` exists.
+Flow 3 builds. Flow 4 polishes.
 
-#### Artifact visibility rule
+- **Flow 3**: Create working code that satisfies the acceptance criteria
+- **Flow 4**: Handle PR feedback, refine maintainability, respond to reviewers
 
-* Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
-* Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
+The implementer can decide "I'm done" - we verify that claim via tests and critics. This isn't paranoid supervision; it's normal engineering: build → verify → ship.
 
-## Your Goals
+## Working Directory + Paths
 
-- Implement via adversarial microloops (test <-> critic, code <-> critic)
-- Strengthen tests (unit/integration/mutation)
-- Update docs
-- Produce `build_receipt.json` and `self_review.md`
+- All commands run from **repo root**
+- All paths are **repo-root-relative**
+- Run artifacts: `.runs/<run-id>/build/`
+- Code/tests: project-defined locations
 
-## Orchestration Model: Agents Talk, You Listen
+## Orchestration Model
 
-**You are an orchestrator, not an investigator.** You direct agents and route on their responses.
+**You direct agents and route on their responses.**
 
-- **Call agents** - they do the work
-- **Listen to responses** - agents tell you what happened
-- **Route on response text** - the Result block in the agent's response is your control plane
-- **Do not re-read files** - artifacts are for future flows (e.g. Flow 5/7 audit) and for agent-to-agent communication, not for you to parse
+- Call agents - they do the work
+- Listen to responses - agents tell you what happened via Result blocks
+- Route on `status`, `recommended_action`, `route_to_*`
+- Do not re-read files to make routing decisions
 
-**The agent's response is the control plane.** When an agent returns, it tells you:
-- `status`: VERIFIED, UNVERIFIED, HIGH_RISK, CANNOT_PROCEED
-- `recommended_action`: PROCEED, RERUN, BOUNCE, FIX_ENV
-- `route_to_agent`: where to route if bouncing
+## Before You Begin
 
-**You route on what agents tell you, not on file parsing.**
+### State Machines
 
-## Before You Begin (Required)
+1. **TodoWrite** = session navigation (ephemeral)
+2. **`flow_plan.md`** = durable on-disk state (enables reruns)
 
-### Two State Machines
-
-Flow 3 uses **two complementary state machines**:
-
-1. **TodoWrite** = session navigation (keeps the orchestrator on track during this run)
-2. **`flow_plan.md`** = durable on-disk state (enables reruns, handoffs, inspection)
-
-### Setup Steps
-
-1. Use Claude Code's **TodoWrite** tool to create a TODO list of **major stations**.
-   - Track at the behavioral/station level, NOT per agent call.
-   - Microloops (`test-author` ↔ `test-critic`, `code-implementer` ↔ `code-critic`, `doc-writer` ↔ `doc-critic`) are ONE todo each.
-
-2. Mirror the same list into `.runs/<run-id>/build/flow_plan.md` as checkboxes.
-   - As each station completes: mark TodoWrite done AND tick the checkbox.
-
-### Suggested TodoWrite Items
-
-```
-- run-prep (establish run infrastructure)
-- repo-operator (git prep; ensure run branch)
-- context-loader (load context)
-- clarifier (clarify ambiguities; non-blocking)
-- test-strategist (if ac_matrix.md missing; generate before proceeding)
-- AC loop: for each AC in ac_matrix.md (see AC Loop Template)
-  - test-author (scope: current AC)
-  - test-critic (scope: current AC)
-  - code-implementer (scope: current AC)
-  - code-critic (scope: current AC)
-  - test-executor (fast confirm: AC-scoped tests only)
-  - update build/ac_status.json
-  - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) feedback check (pr-feedback-harvester; route on blockers[])
-  - (checkpoint push every 3-5 ACs; feedback check after each)
-- standards-enforcer (format/lint/hygiene; global)
-- test-executor (full suite; global)
-- flakiness-detector (if failures; apply Worklist Loop Template)
-- mutation-auditor (mutation worklist; apply Worklist Loop Template)
-- fuzz-triager (if configured; apply Worklist Loop Template)
-- fixer (only if critiques/worklists require it)
-- doc-writer ↔ doc-critic (microloop; 2 passes default)
-- self-reviewer (self-review)
-- build-cleanup (finalize receipt; update index; update `flow_plan.md`)
-- repo-operator (stage + classify changes)
-- secrets-sanitizer (pre-publish sweep)
-- repo-operator (commit/push)
-- gh-issue-manager (update issue board; gated)
-- gh-reporter (report to GitHub; gated)
-```
+Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the run directory.
 
 ### On Rerun
 
-If running `/flow-3-build` on an existing run-id:
-- Read `.runs/<run-id>/build/flow_plan.md`
-- Create TodoWrite from the checklist
-- Pre-mark items done if artifacts exist and look current
-- Run remaining stations to refine
+If `.runs/<run-id>/build/` exists:
+- Read `flow_plan.md` and `ac_status.json`
+- Resume from the first incomplete item
+- Pre-mark completed items as done
 
-If you encounter ambiguity, **document it and continue**. Write assumptions in artifacts.
+## The Build Loop
 
-## Subagents to use
+### Step 0: Infrastructure
 
-**Infrastructure (Step 0)**:
-- **run-prep** -- MUST be called first to establish the run directory and `.runs/<run-id>/build/`
+**Call `run-prep`** to establish `.runs/<run-id>/build/`.
 
-**Git operations (cross-cutting)**:
-- repo-operator -- branch at start, commit at end
+### Step 1: Git Prep
 
-**Context loading**:
-- context-loader -- load relevant files for subtask
+**Call `repo-operator`**: "ensure run branch `run/<run-id>`"
 
-**Test microloop**:
-- test-author -- write/update tests
-- test-critic -- harsh review of tests (never fixes)
+### Step 2: Load Context
 
-**Code microloop**:
-- code-implementer -- implement code to pass tests
-- code-critic -- harsh review of code (never fixes)
+**Call `context-loader`** to assemble the working set.
 
-**Hardening**:
-- flakiness-detector -- rerun failing tests; tag deterministic vs flaky vs env/tooling (conditional)
-- mutation-auditor -- bounded mutation run + prioritized survivor worklist (routes to test-author/fixer)
-- fuzz-triager -- optional fuzz run + crash triage (config-present ⇒ run)
-- fixer -- apply targeted fixes from critiques
-- standards-enforcer -- format/lint/hygiene codebase
-- test-executor -- rerun tests to confirm clean state
+### Step 3: Clarify (Non-blocking)
 
-**Polish and wrap-up**:
-- doc-writer -- update documentation
-- doc-critic -- critique docs (no edits; routable worklist)
-- self-reviewer -- final review (`self_review.md`)
+**Call `clarifier`** to capture open questions. Document assumptions and continue.
 
-**Cross-cutting agents**:
-- clarifier -- detect ambiguities in specs/design, document assumptions
-- test-strategist -- generate AC matrix if missing (called before AC loop starts)
+### Step 4: AC Loop
 
-**Cleanup + Reporting (End of Flow)**:
-- build-cleanup -- writes build_receipt.json, updates index.json status
-- secrets-sanitizer -- publish gate (scans staged changes before commit)
-- repo-operator -- commit only after secrets gate passes
-- pr-creator -- create Draft PR after push (gets bots spinning early)
-- gh-issue-manager -- updates issue body status board
-- gh-reporter -- post summary to GitHub
+Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
+
+**If `ac_matrix.md` is missing:** Call `test-strategist` to generate it first.
+
+**Initialize `ac_status.json`** before starting (or read existing on rerun).
+
+**For each AC in order:**
+
+1. **test-author**: Write tests for this AC
+2. **test-critic**: Verify tests are solid
+3. **code-implementer**: Implement to pass tests
+4. **code-critic**: Verify implementation is honest
+5. **test-executor**: Confirm tests pass (AC-scoped)
+6. **Update `ac_status.json`**: Mark AC complete or blocked
+
+**Microloop pattern (writer ↔ critic):**
+- Writer pass → Critic pass → Apply pass (if critic says RERUN) → Re-critique
+- 2 passes default. Continue only if critic says `recommended_action: RERUN` and `can_further_iteration_help: yes`
+- Proceed with blockers documented if critic says PROCEED
+
+**After first vertical slice (AC-1 complete):**
+1. Call `repo-operator`: checkpoint push
+2. Call `pr-creator`: create Draft PR (gets bots spinning early)
+3. Call `pr-feedback-harvester`: check for CRITICAL blockers only
+   - Route top 1-3 blockers to appropriate agent
+   - Continue AC loop (don't drain the full list - Flow 4 owns that)
+
+**Checkpoint cadence:** Push after every 3-5 ACs. Feedback check after each push.
+
+### Step 5: Global Hardening
+
+After all ACs complete:
+
+1. **standards-enforcer**: Format/lint + honest diff check
+   - If `HIGH_RISK` (suspicious test deletion): proceed, but flag is visible to Gate
+   - If `UNVERIFIED` (coherence issues): route to `code-implementer`
+
+2. **test-executor**: Full suite (not AC-filtered)
+
+3. **flakiness-detector**: If failures, classify deterministic vs flaky
+
+4. **mutation-auditor**: Bounded mutation run on changed files
+   - Route survivors to `test-author` or `fixer`
+
+5. **fuzz-triager**: If configured, run bounded fuzz
+
+6. **fixer**: Apply targeted fixes if critiques/worklists require it
+
+### Step 6: Documentation
+
+**doc-writer ↔ doc-critic** microloop (2 passes default)
+
+### Step 7: Self-Review
+
+**Call `self-reviewer`** for final consistency check.
+
+### Step 8: Flow Boundary Harvest
+
+**Call `pr-feedback-harvester`** one last time (if PR exists):
+- Route CRITICAL blockers only (bounded)
+- Record unresolved items for Flow 4
+
+### Step 9: Cleanup + Commit
+
+1. **build-cleanup**: Write `build_receipt.json`, update index
+2. **repo-operator**: Stage intended changes
+3. **secrets-sanitizer**: Pre-publish sweep
+4. **repo-operator**: Commit and push (if gates allow)
+5. **gh-issue-manager** + **gh-reporter**: Update GitHub (if allowed)
+
+### Step 10: Finalize
+
+Update `flow_plan.md` with completion status.
+
+## Routing Rules
+
+Route on the Result block returned by each agent:
+
+| `status` | `recommended_action` | What to do |
+|----------|---------------------|------------|
+| VERIFIED | PROCEED | Continue to next station |
+| UNVERIFIED | PROCEED | Continue with blockers documented |
+| UNVERIFIED | RERUN | Rerun the producer/writer |
+| UNVERIFIED | BOUNCE | Route to `route_to_flow` / `route_to_agent` |
+| CANNOT_PROCEED | FIX_ENV | Stop - mechanical failure |
+
+If `recommended_action` is absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed).
+
+## Agents
+
+**Infrastructure:**
+- `run-prep` - establish run directory
+
+**Git:**
+- `repo-operator` - branch, stage, commit, push
+
+**Context:**
+- `context-loader` - curate working set
+- `clarifier` - document ambiguities (non-blocking)
+
+**Test loop:**
+- `test-author` - write tests
+- `test-critic` - verify tests
+
+**Code loop:**
+- `code-implementer` - implement code
+- `code-critic` - verify implementation
+
+**Hardening:**
+- `test-executor` - run tests
+- `standards-enforcer` - format/lint + honest diff check
+- `flakiness-detector` - classify test failures
+- `mutation-auditor` - mutation testing
+- `fuzz-triager` - fuzz testing (if configured)
+- `fixer` - targeted fixes
+
+**Polish:**
+- `doc-writer` - update docs
+- `doc-critic` - review docs
+- `self-reviewer` - final consistency check
+
+**Cleanup:**
+- `build-cleanup` - write receipt, update index
+- `secrets-sanitizer` - pre-publish sweep
+- `pr-creator` - create Draft PR
+- `pr-feedback-harvester` - harvest bot/human feedback
+- `gh-issue-manager` - update issue board
+- `gh-reporter` - post summary to GitHub
 
 ## Upstream Inputs
 
 Read from `.runs/<run-id>/plan/` (if available):
-- `adr.md`
-- `api_contracts.yaml`
-- `schema.md`
-- `test_plan.md`
-- `ac_matrix.md` (AC-driven build contract - Flow 3 iterates per AC; read-only)
-- `work_plan.md`
+- `adr.md`, `api_contracts.yaml`, `schema.md`
+- `test_plan.md`, `ac_matrix.md`, `work_plan.md`
 
-**If upstream artifacts are missing**: Flow 3 can start without Flows 1-2. Proceed best-effort: document assumptions, set status to UNVERIFIED, and continue. This enables flexibility for hotfixes or code-first workflows.
-
-**If `ac_matrix.md` is missing**: Investigate why. If Flow 2 ran but didn't produce it, call `test-strategist` directly to generate it from available inputs (requirements, BDD scenarios). If no upstream inputs exist, call `test-strategist` to produce a minimal AC matrix from the task description. Do not proceed without an AC matrix.
-
-## Orchestration outline
-
-### Step 0: Establish Run Infrastructure
-
-**Call `run-prep` first.**
-
-This agent will:
-- Derive or confirm the `<run-id>` from context, branch name, or user input
-- Create `.runs/<run-id>/build/` directory structure
-- Update `.runs/<run-id>/run_meta.json` with "build" in `flows_started`
-- Update `.runs/index.json`
-
-After this step, you will have a confirmed run directory. All subsequent agents write to `.runs/<run-id>/build/`.
-
-### Step 1: Initialize Flow Plan
-
-Create or update `.runs/<run-id>/build/flow_plan.md`:
-
-```markdown
-# Flow 3: Build for <run-id>
-
-## Planned Steps
-
-- [ ] run-prep (establish run directory)
-- [ ] repo-operator (git prep)
-- [ ] context-loader (load context)
-- [ ] clarifier (document ambiguities)
-- [ ] test-strategist (if ac_matrix.md missing)
-- [ ] AC loop (for each AC in ac_matrix.md):
-  - [ ] AC-001: test-author → test-critic → code-implementer → code-critic → fast confirm
-  - [ ] (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - [ ] (after checkpoint push) feedback check (pr-feedback-harvester; route on blockers[])
-  - [ ] AC-002: ...
-  - [ ] (add rows per AC from ac_matrix.md)
-  - [ ] (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] standards-enforcer (format/lint/hygiene; global)
-- [ ] test-executor (full suite; global)
-- [ ] flakiness-detector (if failures)
-- [ ] mutation-auditor (mutation worklist)
-- [ ] fuzz-triager (optional; config-present ⇒ run)
-- [ ] fixer (targeted; only if critiques/worklists require it)
-- [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
-- [ ] self-reviewer (review)
-- [ ] build-cleanup (write receipt, update index)
-- [ ] repo-operator (stage + classify)
-- [ ] secrets-sanitizer (pre-publish sweep)
-- [ ] repo-operator (commit/push)
-- [ ] gh-issue-manager (update issue board)
-- [ ] gh-reporter (post summary)
-
-## AC Progress
-
-| AC-ID | Tests Written | Tests Pass | Code Done | Code Reviewed | Status |
-|-------|---------------|------------|-----------|---------------|--------|
-| AC-001 | | | | | pending |
-| AC-002 | | | | | pending |
-
-## Progress Notes
-
-<Update as each step completes>
-```
-
-### Step 2: Git prep
-
-**Call `repo-operator`** with task: "ensure run branch `run/<run-id>`"
-
-The agent ensures clean tree and handles branch creation/switching safely. This keeps checkpoint commits off main.
-
-### Step 3: Load context
-- Use `context-loader` to assemble the working set.
-
-### Step 4: Clarify
-- Use `clarifier` to capture open questions (non-blocking).
-- Scan ADR, contracts, and loaded context for ambiguities.
-- Document assumptions being made to proceed.
-- Continue regardless of questions found.
-
-### Step 5: AC Loop (per-AC microloops)
-
-**Flow 3 executes test/code microloops per AC (within a single build run).**
-
-Read `.runs/<run-id>/plan/ac_matrix.md` to get the ordered list of ACs. Initialize `.runs/<run-id>/build/ac_status.json` before starting the loop.
-
-**If `ac_matrix.md` is missing:** Call `test-strategist` to generate it before proceeding (see Upstream Inputs).
-
-**Initialize `build/ac_status.json` (before first AC):**
-
-If `build/ac_status.json` does not exist, create it from `ac_matrix.md`:
-
-```json
-{
-  "schema_version": "ac_status_v1",
-  "run_id": "<run-id>",
-  "ac_count": <number of ACs in ac_matrix.md>,
-  "completed": 0,
-  "in_progress": null,
-  "items": [
-    {
-      "ac_id": "AC-001",
-      "status": "pending",
-      "tests_written": false,
-      "code_implemented": false,
-      "code_reviewed": false,
-      "tests_passing": false,
-      "files_touched": [],
-      "evidence": []
-    }
-  ]
-}
-```
-
-If `build/ac_status.json` exists (rerun scenario), read it and resume from the first non-completed AC.
-
-#### AC Loop Iteration (for each AC in order)
-
-For each AC (e.g., AC-001):
-
-1. **Scope context**: Pass the AC-ID, description, test types, and impl hints to each agent
-
-2. **test-author ↔ test-critic microloop** (scope: this AC only; apply Microloop Template):
-   - test-author writes tests tagged/named with AC-ID
-   - test-critic confirms tests exercise this AC
-   - Apply pass if critic returns `recommended_action: RERUN`
-   - Re-critique, then proceed (2 passes default)
-
-3. **code-implementer ↔ code-critic microloop** (scope: this AC only; apply Microloop Template):
-   - code-implementer implements for this AC
-   - code-critic reviews against ADR/contracts
-   - Apply pass if critic returns `recommended_action: RERUN`
-   - Re-critique, then proceed (2 passes default)
-
-4. **test-executor** (fast confirm: run only tests for this AC, not full suite)
-
-5. **Update build/ac_status.json**: Mark AC as `completed` if all checks pass, `blocked` if critic issues remain
-
-**Route on critic Result blocks** (same rules as Microloop Template):
-- If `status: CANNOT_PROCEED` -> **FIX_ENV**; stop AC loop
-- If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`; stop AC loop
-- If `recommended_action: RERUN` -> apply pass within this AC's microloop
-- **If `concerns` includes "test deletion" or `reward_hacking_risk: HIGH`** -> route to `code-implementer` immediately with explicit fix request (do not proceed to next step)
-- If `recommended_action: PROCEED` -> proceed to next step/AC
-
-**Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
-
-**Anti-Reward-Hacking Guard (Multi-Layer):**
-1. **Per-AC check (inline)**: After each code-critic pass, verify no tests were silently deleted for this AC. If `code-critic` returns `reward_hacking_risk: HIGH`, route back to `code-implementer` immediately with explicit blocker: "Possible reward hacking detected - restore or justify test deletion".
-2. **Per-checkpoint check (pr-feedback-harvester)**: When harvesting feedback, note any CodeRabbit/CI signals about removed tests.
-3. **Global check (standards-enforcer in Step 6)**: Full diff analysis for any reward-hacking patterns across all ACs.
-
-**The goal is early detection.** Catching reward hacking at Step 6 is better than catching it at Gate, but catching it per-AC is even better.
-
-**After all ACs complete:** Proceed to global hardening (Step 6).
-
-### Step 5b: Early PR Bootstrap (Once, After First Vertical Slice)
-
-**After completing the first AC (or first meaningful vertical slice), bootstrap bot feedback:**
-
-1. **Call `repo-operator`** with task: "checkpoint push after first slice"
-   - Stage code/test changes + `.runs/<run-id>/build/` artifacts
-   - Run secrets-sanitizer (light sweep)
-   - Commit and push if clean
-
-2. **Call `pr-creator`** (once per run):
-   - Create Draft PR immediately
-   - Gets CodeRabbit + GitHub Actions spinning early
-   - CI feedback runs continuously in parallel while you continue the AC loop
-
-**Why early?** This is the cheapest way to find integration failures. Bots review while you implement. Flow 4 harvests their feedback formally, but you can iterate on findings during the AC loop.
-
-**Checkpoint cadence for remaining ACs:**
-- Push after every 3-5 ACs, or when you touch core modules
-- Each checkpoint: stage → sanitizer → commit/push (same pattern as Step 5b)
-- CI/bot feedback runs continuously; don't wait for it
-
-**If push fails or is blocked:**
-- Continue the AC loop locally
-- Note the blocker in `flow_plan.md`
-- Retry push after remediation
-
-This turns "push at end" into "push early, push often" — continuous feedback, not post-hoc review.
-
-### Step 5c: Feedback Check (Harvest → Route on Blockers)
-
-**After each checkpoint push (and after the first Draft PR exists), harvest full PR feedback and route on blockers.**
-
-This uses the **same `pr-feedback-harvester`** as Flow 4 — no separate "pulse mode." The difference is how Flow 3 consumes the Result block.
-
-**What it does:**
-1. **Call `pr-feedback-harvester`** with output directory `build/` (full harvest — CI status, all comments, all reviews)
-2. **Route on the PR Feedback Harvester Result block** (not by re-parsing the file)
-
-**Routing logic (Route on Result block's `blockers[]`):**
-
-```yaml
-# Route on PR Feedback Harvester Result — one routing surface (CI + comments all become blockers)
-# blockers[] is CRITICAL-only. MAJOR/MINOR/INFO stay in counts + full pr_feedback.md for Flow 4.
-
-if blockers_count > 0:
-  # CRITICAL items — route top 1-3 for the agent to investigate and fix
-  for blocker in blockers[:3]:
-    call blocker.route_to_agent with:
-      - blocker.id                # "FB-CI-987654321" or "FB-RC-123456789" (stable)
-      - blocker.evidence          # "check:test → auth.test.ts:45" or "src/auth.ts:42"
-      - blocker.thoughts          # "Looks like hashPassword returns undefined for empty input"
-    run relevant verification (test-executor for CI, targeted tests for code fixes)
-  # do NOT drain the full list (Flow 4 owns that)
-
-else:
-  # No CRITICAL blockers — continue AC loop
-  # MAJOR/MINOR/INFO will be handled in Flow 4
-  continue_ac_loop: true
-```
-
-**Key invariant:** One routing surface. CI failures are blockers with `source: CI`. CodeRabbit/human CRITICAL items are blockers with their source. No separate CI vs comment path.
-
-**Key shift:** The harvester triaged and added quick-read thoughts. The routed agent:
-- Receives the evidence (file:line, check name)
-- Sees the harvester's triage thoughts ("looks like real issue", "bot probably wrong")
-- Does the deep investigation and fix
-
-The harvester gets feedback back fast. The routed agents do the deep work.
-
-**Record unresolved blockers:**
-After the bounded interrupt (top 1-3), record remaining blockers in `.runs/<run-id>/build/feedback_blockers.md` as IDs only (e.g., `FB-CI-987654321`, `FB-RC-123456789`). Flow 4 will harvest and drain everything systematically.
-
-**Why this matters:**
-- Flow 3 was blind to blocker **content** (only saw CI red + counts)
-- Now it sees "CodeRabbit says security issue at auth.ts:42" and routes to code-implementer
-- The point of early PR bootstrap is to catch these during build, not post-hoc
-
-**Optional station (skip conditions):**
-- No PR exists yet (first push hasn't happened)
-- GitHub access is unavailable
-- Time pressure requires continuing without the check
-
-When skipped, continue the AC loop — Flow 4 will harvest feedback formally.
-
-### Step 6: Global Hardening
-
-After all ACs complete, run global hardening:
-
-- **Run `standards-enforcer`**: Format/lint, remove debug artifacts, and **check for reward-hacking** (silent test deletion).
-  - **Route on response:**
-    - `VERIFIED` → proceed to test-executor
-    - `HIGH_RISK` (silent test deletion detected) → proceed to test-executor (commit allowed), but flag is elevated to Gate/merge-decider for human review
-    - `UNVERIFIED` (coherence issues) → route to `code-implementer` to complete refactor
-- Run `test-executor` to run the **full test suite** (not per-AC filtered; captures coverage).
-- If tests fail or look unstable, run `flakiness-detector` and route on its Result block.
-- If tests are green, run `mutation-auditor` (bounded, on changed files) to produce a prioritized survivor worklist (route to `test-author` or `fixer`).
-- If `demo-swarm.config.json` defines a fuzz harness, run `fuzz-triager` (bounded) and route crashes.
-- Apply targeted fixes with `fixer` only when a critique/worklist calls for it, then rerun `test-executor`.
-
-Treat each hardening station as a **bounded worklist loop**: hardener -> fix lane -> hardener (confirm once, budgeted).
-
-Gate may perform one fix-forward pass for deterministic mechanical hygiene; Build remains the owner of semantic fixes.
-
-### Step 7: doc-writer ↔ doc-critic (microloop)
-Loop between `doc-writer` and `doc-critic` (2 passes default):
-- Call `doc-writer` to update documentation/docstrings (no behavior changes)
-- Call `doc-critic` to critique docs for staleness and verification realism (no edits)
-
-**Route on the Doc Critic Result block** (not by re-reading the file):
-- If `status: CANNOT_PROCEED` -> **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
-- If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`
-- If `recommended_action: RERUN` -> do the apply pass: rerun `doc-writer` once with the critique worklist, then rerun `doc-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
-- If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
-- If `recommended_action` is absent: use `can_further_iteration_help` as a tie-breaker (`yes` -> rerun; `no` -> proceed)
-
-### Step 8: Self-review
-- Use `self-reviewer` for final review.
-
-### Step 8b: Flow Boundary Harvest (GitHub Checkpoint)
-
-**After self-review and before cleanup, harvest final GitHub state.**
-
-This is the **flow boundary checkpoint** - the last chance to capture bot feedback before sealing the build receipt.
-
-1. **Call `pr-feedback-harvester`** (if PR exists):
-   - Captures any final CodeRabbit comments, CI status, human reviews
-   - Output: updates `build/pr_feedback.md` with final state
-
-2. **Route on blockers (bounded):**
-   - If `blockers_count > 0` and blockers are CRITICAL:
-     - Route top 1-2 to appropriate agent (same logic as Step 5c)
-     - Run quick fix cycle
-     - Do NOT enter unbounded loop (Flow 4 owns that)
-   - If no CRITICAL blockers: proceed to cleanup
-
-3. **Record unresolved items:**
-   - Any remaining blockers go to `build/feedback_blockers.md`
-   - Flow 4 will harvest and drain systematically
-
-**Why here?** Between self-review and cleanup, the code is "feature complete." This checkpoint captures the final bot assessment before we seal the receipt.
-
-### Step 9: Finalize and Write Receipt
-- `build-cleanup` -> `build_receipt.json`, `cleanup_report.md`
-- Verifies all required artifacts exist
-- Computes counts mechanically (never estimates)
-- Updates `.runs/index.json` with status, last_flow, updated_at
-
-### Step 10: Stage Changes
-
-**Call `repo-operator`** with task: "stage intended changes for build"
-
-The repo-operator will:
-- Stage the intended commit surface (code/tests + `.runs/<run-id>/build/` + metadata)
-- Classify any out-of-scope changes (ad-hoc fixes happen; record them, don't fight them)
-- Return a result telling you whether to proceed
-
-**Route on its response.** You don't need to understand the git mechanics — that's repo-operator's job.
-
-### Step 11: Pre-Publish Sweep (Secrets Sanitizer)
-
-**Call `secrets-sanitizer`** to scan staged changes before commit.
-
-The sanitizer will:
-- Scan for secrets
-- Auto-redact what it can
-- Return `safe_to_commit` and `safe_to_publish` booleans
-
-**Route on its response:**
-- If blocked due to secrets in code → route to `code-implementer` or `fixer`
-- If blocked due to mechanical failure → **FIX_ENV**
-- Publishing can be blocked, but work never stops locally
-
-### Step 12: Commit and Push
-
-**Call `repo-operator`** with task: "commit and push build changes"
-
-The repo-operator will:
-- Commit artifacts first (preserves audit trail)
-- Commit code/test changes second
-- Push if gates allow
-- Handle anomalies gracefully
-
-**Route on its response:**
-- If `proceed_to_github_ops: true` → proceed to GitHub reporting
-- If `proceed_to_github_ops: false` → continue locally, skip GitHub ops
-- Commit SHA is always available (for Flow 4/5 to reference)
-
-### Step 12b: PR Fallback (Conditional)
-
-PR creation happens early (Step 5b). This step is a fallback if the early PR wasn't created:
-- If `pr_number` exists: skip
-- If not pushed: skip
-- Otherwise: call `pr-creator`
-
-PR creation failure does not block the flow.
-
-### Step 13-14: GitHub Reporting
-
-**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
-
-See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
-- Skip if `github_ops_allowed: false` or `gh` unauthenticated
-- Content mode is derived from secrets gate + push surface (not workspace hygiene)
-- Issue-first: flow summaries go to the issue, never the PR
-
-### Step 15: Finalize Flow
-
-Update `flow_plan.md`:
-- Mark all steps as complete
-- Add final summary section:
-
-```markdown
-## Summary
-
-- **Final Status**: VERIFIED | UNVERIFIED
-- **Tests**: <pass/fail counts from build_receipt.json>
-- **Mutation Score**: <score from mutation_report.md>
-- **Next Flow**: `/flow-4-review` (after human review)
-
-## Human Review Checklist
-
-Before proceeding to Flow 4, humans should review:
-- [ ] `test_critique.md` - Are test concerns addressed?
-- [ ] `code_critique.md` - Are code concerns addressed?
-- [ ] `self_review.md` - Is the implementation complete?
-- [ ] Git diff - Are the changes what you expected?
-```
-
-## Status States
-
-Agents report one of:
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and all quality gates passed; work is adequate for its purpose. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR any quality gate UNVERIFIED; concrete concerns documented. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read/write files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
-
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
-
-Use critic status to decide whether to loop or proceed.
-
-## Microloop Termination
-
-Termination is driven by the critic control plane:
-- `status: CANNOT_PROCEED` -> stop (FIX_ENV)
-- `recommended_action: BOUNCE` -> bounce to `route_to_*`
-- **Default cadence (2 passes):** producer -> critic -> producer -> critic
-- `recommended_action: RERUN` -> run the apply pass, then re-run the critic once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
-- `recommended_action: PROCEED` or no actionable rerun/bounce -> proceed (log blockers/assumptions if UNVERIFIED)
-- If no `recommended_action`, use `can_further_iteration_help` as tie-breaker (`no` -> proceed; `yes` -> rerun)
+**If upstream artifacts are missing:** Proceed best-effort, document assumptions, set status UNVERIFIED.
 
 ## Output Artifacts
 
-After this flow completes, `.runs/<run-id>/build/` should contain:
-- `flow_plan.md`
-- `subtask_context_manifest.json`
-- `open_questions.md`
-- `test_changes_summary.md`
-- `test_critique.md`
-- `standards_report.md`
-- `test_execution.md`
-- `flakiness_report.md` (if run)
-- `impl_changes_summary.md`
-- `code_critique.md`
-- `mutation_report.md`
-- `fuzz_report.md` (if run)
-- `fix_summary.md`
-- `doc_updates.md`
-- `doc_critique.md`
-- `self_review.md`
-- `build_receipt.json`
-- `cleanup_report.md`
-- `secrets_scan.md`
-- `secrets_status.json`
-- `gh_issue_status.md`
-- `gh_report_status.md`
-- `github_report.md`
-- `git_status.md` (if anomaly detected)
-- `pr_creation_status.md` (from pr-creator)
-- `pr_feedback.md` (full PR feedback harvest; Flow 3's own copy)
-- `feedback_blockers.md` (unresolved blocker IDs for Flow 4; optional)
+After completion, `.runs/<run-id>/build/` contains:
+- `flow_plan.md` - execution plan with checkboxes
+- `ac_status.json` - AC completion tracker
+- `test_changes_summary.md`, `test_critique.md`
+- `impl_changes_summary.md`, `code_critique.md`
+- `test_execution.md`, `standards_report.md`
+- `mutation_report.md`, `flakiness_report.md` (if run)
+- `doc_updates.md`, `doc_critique.md`
+- `self_review.md`, `build_receipt.json`
+- `pr_feedback.md`, `feedback_blockers.md` (if PR exists)
 
-Also creates in `.runs/<run-id>/build/`:
-- `ac_status.json` (runtime AC completion tracker - created by Build, updated per AC)
+Plus code/test changes in project-defined locations.
 
-Code/test changes in project-defined locations.
+## Status States
 
----
+- **VERIFIED**: Tests pass, diff is honest, ready for Flow 4
+- **UNVERIFIED**: Gaps documented, proceed with blockers
+- **CANNOT_PROCEED**: Mechanical failure (IO/permissions/tooling)
 
-## Orchestrator Kickoff
+## TodoWrite Template
 
-### Station order + templates
-
-#### Station order
-
-1. `run-prep`
-
-2. `repo-operator` (ensure run branch)
-
-3. `context-loader`
-
-4. `clarifier`
-
-5. `test-strategist` (if `ac_matrix.md` missing; generate before proceeding)
-
-6. **AC loop** (for each AC in `ac_matrix.md`; apply AC Loop Template below)
-   - After first vertical slice: `repo-operator` (checkpoint push) + `pr-creator` (early; once)
-   - After checkpoint push: `pr-feedback-harvester` (full harvest; route on `blockers[]`)
-   - Checkpoint push every 3-5 ACs or when touching core modules (feedback check after each)
-
-7. `standards-enforcer` (global — format/lint + hygiene + safety check; route on BLOCKED/UNVERIFIED)
-
-8. `test-executor` (full suite; global)
-
-9. `flakiness-detector` (if failures; routes to `test-author`/`code-implementer`/`fixer`; confirm via `test-executor`; apply Worklist Loop Template)
-
-10. `mutation-auditor` (if tests green; routes to `test-author`/`fixer`; confirm via `test-executor`; apply Worklist Loop Template)
-
-11. `fuzz-triager` (if configured; routes to `code-implementer`/`fixer`; confirm via `test-executor`; apply Worklist Loop Template)
-
-12. `doc-writer` ↔ `doc-critic` (microloop; apply Microloop Template)
-
-13. `self-reviewer`
-
-14. `pr-feedback-harvester` (flow boundary harvest; route on CRITICAL blockers only; bounded)
-
-15. `build-cleanup`
-
-16. `repo-operator` (stage + classify)
-
-17. `secrets-sanitizer` (pre-publish sweep)
-
-18. `repo-operator` (commit/push)
-
-19. `gh-issue-manager` (if allowed)
-
-20. `gh-reporter` (if allowed)
-
-#### Microloop Template (writer ↔ critic)
-
-Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
-
-1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
-4) Re-critique: call `<critic>` again
-
-Continue looping beyond the default two passes only when:
-- critic returns `recommended_action: RERUN`, and
-- `can_further_iteration_help: yes`, and
-- the remaining items are concrete and writer-addressable (a new writer pass can plausibly clear them).
-
-Otherwise proceed with `UNVERIFIED` + blockers recorded.
-
-#### AC Loop Template (per-AC microloops)
-
-**Purpose:** Execute test/code microloops scoped to each Acceptance Criterion, ensuring complete coverage.
-
-**Prerequisites:**
-- Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list
-- Initialize or read `.runs/<run-id>/build/ac_status.json`
-
-**Initialization (before first AC):**
-
-If `build/ac_status.json` does not exist:
-- Parse `ac_matrix.md` to extract AC count and AC IDs
-- Create `build/ac_status.json` with schema:
-  - `schema_version: "ac_status_v1"`
-  - `run_id`, `ac_count`, `completed: 0`, `in_progress: null`
-  - `items[]` with one entry per AC (all `status: "pending"`)
-
-If `build/ac_status.json` exists (rerun):
-- Load it and resume from the first non-completed AC
-- Preserve prior `completed` tally and item states
-
-**For each AC (in Implementation Order from ac_matrix.md):**
-
-1. **Mark in-progress:** Update `build/ac_status.json` with `"status": "in_progress"` and `"in_progress": "<AC-ID>"`
-
-2. **Scope context:** Extract from ac_matrix.md for this AC:
-   - AC-ID, Description, Priority
-   - Test Types (what kinds of tests to write)
-   - Impl Hints (which modules/files to modify)
-   - Verification (what assertions confirm success)
-
-3. **test-author ↔ test-critic microloop** (scope: this AC only; apply Microloop Template):
-   - test-author: Pass AC-ID, Description, Test Types, Verification; tests tagged with AC-ID
-   - test-critic: Confirms tests actually exercise this specific AC
-   - Apply pass if critic returns `recommended_action: RERUN`
-   - Re-critique, then proceed (2 passes default)
-   - Update `build/ac_status.json`: `"tests_written": true`
-
-4. **code-implementer ↔ code-critic microloop** (scope: this AC only; apply Microloop Template):
-   - code-implementer: Pass AC-ID, Description, Impl Hints, test file locations
-   - code-critic: Reviews code for this AC against ADR/contracts
-   - Apply pass if critic returns `recommended_action: RERUN`
-   - Re-critique, then proceed (2 passes default)
-   - Update `build/ac_status.json`: `"code_implemented": true`, `"code_reviewed": true`, `"files_touched": [...]`
-   - (Anti-reward-hacking check deferred to `standards-enforcer` in Step 6)
-
-5. **test-executor** (fast confirm: AC-scoped tests only)
-   - Run filtered test subset (by AC-ID tag/name)
-   - Update `build/ac_status.json`: `"tests_passing": true/false`
-
-6. **Finalize AC:**
-   - If all checks pass: `"status": "completed"`, increment `"completed"` count
-   - If critic issues remain: `"status": "blocked"`, document in `"evidence"`
-   - Clear `"in_progress": null`
-
-**Termination per AC:** Each microloop follows the 2-pass default. Continue beyond that only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
-
-**After all ACs:** Proceed to global hardening (standards-enforcer, full test-executor, mutation, etc.)
-
-#### Worklist Loop Template (producer → fix lane → confirm)
-
-1) Run the producer (`mutation-auditor` / `fuzz-triager` / `flakiness-detector`)
-2) If it returns `recommended_action: RERUN` or a worklist that routes to an agent:
-   - call the routed agent once (`test-author` / `code-implementer` / `fixer`)
-3) Confirm once: rerun the producer one time to verify the top items moved.
-4) If still UNVERIFIED, proceed with blockers unless the producer says another pass will help and the fix lane can actually address it.
-
-### TodoWrite (copy exactly)
+```
 - [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] repo-operator (ensure run branch)
 - [ ] context-loader
 - [ ] clarifier
 - [ ] test-strategist (if ac_matrix.md missing)
-- [ ] AC loop (for each AC in ac_matrix.md; apply AC Loop Template)
-  - (after first vertical slice) checkpoint push + pr-creator (early; once)
-  - (after checkpoint push) feedback check (pr-feedback-harvester; route on `blockers[]`)
-  - (checkpoint push every 3-5 ACs; feedback check after each)
-- [ ] standards-enforcer (global; route on HIGH_RISK/UNVERIFIED per status semantics)
-- [ ] test-executor (full suite; global)
+- [ ] AC loop (for each AC)
+  - [ ] (after first slice) checkpoint + pr-creator + feedback check
+- [ ] standards-enforcer
+- [ ] test-executor (full suite)
 - [ ] flakiness-detector (if failures)
 - [ ] mutation-auditor
 - [ ] fuzz-triager (if configured)
-- [ ] fixer (only if critiques/worklists require it)
-- [ ] doc-writer ↔ doc-critic (microloop; 2 passes default)
+- [ ] fixer (if needed)
+- [ ] doc-writer ↔ doc-critic
 - [ ] self-reviewer
-- [ ] pr-feedback-harvester (flow boundary; route on CRITICAL only; bounded)
+- [ ] pr-feedback-harvester (boundary)
 - [ ] build-cleanup
-- [ ] repo-operator (stage + classify; capture Repo Operator Result)
-- [ ] secrets-sanitizer (pre-publish sweep; capture Gate Result block)
-- [ ] repo-operator (commit/push; return Repo Operator Result)
-- [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
-- [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
+- [ ] repo-operator (stage)
+- [ ] secrets-sanitizer
+- [ ] repo-operator (commit/push)
+- [ ] gh-issue-manager
+- [ ] gh-reporter
+```
 
-Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
+Use explore agents to answer immediate questions, then create the todo list and call agents.

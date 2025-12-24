@@ -132,7 +132,7 @@ The mutator agent reads these fields to determine behavior:
 
 ### Step 4c: Check test data / fixture impact
 
-When schema changes are planned (check `schema.md` and `.runs/<run-id>/plan/migrations/`), assess whether test fixtures need updating:
+When state transitions are planned (check `schema.md` for **State Transition Infrastructure** and `.runs/<run-id>/plan/migrations/`), assess whether test fixtures need updating:
 
 **Scan for existing test data:**
 - `**/fixtures/**`, `**/seeds/**`, `**/test_data/**`

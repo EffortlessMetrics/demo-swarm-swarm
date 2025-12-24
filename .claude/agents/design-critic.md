@@ -101,17 +101,18 @@ If any handshake item fails, set `status: UNVERIFIED` and record a concrete bloc
 6) **Design → Work plan**
 - Work plan includes tasks for migrations/instrumentation/testing/rollout/rollback when implied by ADR/contracts/NFRs.
 
-7) **Migration → Code dependency (critical sequencing)**
+7) **State Transition → Code dependency (critical sequencing)**
 
-If migrations exist under `.runs/<run-id>/plan/migrations/`:
+If state transitions exist under `.runs/<run-id>/plan/migrations/` or are documented in `schema.md`:
 
-- **Work plan must schedule DB update before API implementation.** Check that the work plan's Subtask Index includes an infrastructure/migration task (e.g., ST-000) that comes before code subtasks.
-- **Code subtasks must depend on the migration task.** If ST-001 (API code) doesn't depend on ST-000 (migrations), flag as MAJOR.
-- **Test plan should include fixture updates.** If schema changes but test fixtures aren't addressed, flag as MAJOR.
+- **Work plan must schedule state transitions before dependent code.** Check that the work plan's Subtask Index includes an infrastructure milestone (commonly ST-000, but ID may vary) that comes before code subtasks that assume the new state.
+- **Code subtasks must depend on the infrastructure milestone.** If a code subtask uses new schema/config but doesn't depend on the milestone, flag as MAJOR.
+- **Phased transitions must have correct phase dependencies.** If expand/backfill/contract pattern is used, code subtasks should depend on the *relevant* phase, not just the first.
+- **Test plan should include fixture updates.** If schema/config changes but test fixtures aren't addressed, flag as MAJOR.
 
-This validation prevents the most common Build loop failure: trying to query a column that doesn't exist yet because the migration wasn't applied first.
+This validation prevents the most common Build loop failure: trying to use state that doesn't exist yet.
 
-If no migration infrastructure is documented in `schema.md` but migration files exist, flag as MAJOR → route to `interface-designer`.
+If no state transition infrastructure is documented in `schema.md` but migration files exist, flag as MAJOR → route to `interface-designer`.
 
 ## Anchored parsing rule
 

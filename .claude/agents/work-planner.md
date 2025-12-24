@@ -64,17 +64,22 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
    - SLO/alert expectations
    - "signals of health" needed for rollout gates
 
-5. **Check for infrastructure prerequisites (migrations, config)**
+5. **Check for infrastructure prerequisites (state transitions)**
 
-   Scan `.runs/<run-id>/plan/migrations/` and `schema.md` for planned migrations:
+   Scan `.runs/<run-id>/plan/migrations/` and `schema.md` for planned state transitions (DB migrations, config changes, etc.):
 
-   - If migration files exist, create **ST-000: Apply Infrastructure** as the first subtask.
-   - ST-000 depends on nothing. All code subtasks must depend on ST-000.
-   - ST-000's acceptance criteria: migrations applied successfully, DB schema matches expected state.
-   - Read `schema.md` for **Migration Infrastructure** section (target directory, command, dialect).
-   - If no migration infrastructure is documented, add a concern and include "scaffold migration tooling" in ST-000.
+   - If state transition files exist, create an **infrastructure milestone subtask** (commonly ST-000, but ID is not sacred).
+   - The infrastructure milestone depends on nothing. Code subtasks that assume the *new* state must depend on this milestone.
+   - Acceptance criteria: state transitions applied successfully, system state matches expected shape.
+   - Read `schema.md` for **State Transition Infrastructure** section (target directory, apply command, phasing).
+   - If no infrastructure is documented, add a concern and include "scaffold infrastructure tooling" in the milestone.
 
-   This prevents the most common Build failure mode: trying to query columns that don't exist yet.
+   **Phased patterns (expand/backfill/contract):** If state transitions require multiple phases:
+   - Create separate milestone subtasks per phase (e.g., ST-000a: Expand, ST-000b: Migrate, ST-000c: Contract)
+   - Code subtasks depend on the *relevant* phase, not necessarily all phases
+   - Document the phase dependency in each subtask's `depends_on` field
+
+   This prevents the most common Build failure mode: trying to use state that doesn't exist yet.
 
 6. **Scope variance check**
 

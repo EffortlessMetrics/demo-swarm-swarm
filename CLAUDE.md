@@ -539,7 +539,12 @@ Semantics:
 Routing:
 
 - Orchestrators route on `recommended_action` + `route_to_*`.
-- The summary is the control plane. The artifact body is the audit plane.
+- **Control plane vs audit plane:**
+  - The Machine Summary in the agent's **response** is the routing surface (control plane)
+  - The artifact **file** (e.g., `design_validation.md`, `test_critique.md`) is the durable audit record
+  - Orchestrators route on returned Result blocks, not by re-reading files
+  - Downstream agents read artifact files for detailed context
+  - Both exist and serve different purposes: fast routing vs durable forensics
 
 Recommended action semantics (closed enum):
 - `PROCEED` = default, even when human judgment is required; capture blockers/assumptions. Do **not** use PROCEED as a fallback for "can't name the target."

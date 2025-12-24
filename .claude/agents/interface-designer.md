@@ -125,25 +125,42 @@ These prefixes must not be renamed.
    - If DB changes are required, write planned migrations under `.runs/<run-id>/plan/migrations/`.
    - If DB dialect/tooling is unknown, keep SQL conservative and mark assumptions.
 
-6. **Discover migration infrastructure (required when migrations are planned)**
+6. **Discover state transition infrastructure (required when state changes are planned)**
 
-   When writing migrations, scan the repo to identify how Flow 3 should apply them:
+   "State transitions" are any changes to persistent state that code assumes will exist before running. This includes:
+   - **DB migrations** (most common)
+   - **Config format changes** (new required fields, renamed keys)
+   - **New enum values** persisted to storage
+   - **Feature flag defaults** that change behavior
+   - **Search index / cache schema** changes
 
-   - **Target Directory**: Search for existing migrations (`.sql` files, `migrations/` dirs, `prisma/migrations/`, `db/migrate/`, `alembic/versions/`, etc.).
-   - **Migration Command**: Identify the tooling (e.g., `cargo sqlx migrate run`, `npx prisma migrate dev`, `alembic upgrade head`, `rails db:migrate`).
-   - **Dialect**: Infer the SQL dialect from existing files or config (`sqlite`, `postgres`, `mysql`).
+   When writing state transitions, scan the repo to identify how Flow 3 should apply them:
 
-   Document these in `schema.md` under a `## Migration Infrastructure` section:
+   - **Target Directory**: Search for existing migrations (`.sql` files, `migrations/` dirs, `prisma/migrations/`, `db/migrate/`, `alembic/versions/`, etc.) or config schemas.
+   - **Apply Command**: Identify the tooling (e.g., `cargo sqlx migrate run`, `npx prisma migrate dev`, `alembic upgrade head`, `rails db:migrate`).
+   - **Dialect/Format**: Infer the SQL dialect or config format from existing files.
+
+   Document these in `schema.md` under a `## State Transition Infrastructure` section:
 
    ```markdown
-   ## Migration Infrastructure
-   - **Target Directory**: `<path where Build should move migrations>`
-   - **Migration Command**: `<command to apply migrations>`
-   - **Dialect**: `<sql dialect>`
+   ## State Transition Infrastructure
+
+   ### Location Split
+   - **Plan Drafts**: `.runs/<run-id>/plan/migrations/` (reviewed in Flow 2)
+   - **Build Target**: `<repo path where Build moves real migrations>`
+
+   ### Apply Details
+   - **Apply Command**: `<command to apply state transitions>`
+   - **Dialect/Format**: `<sql dialect or config format>`
    - **Naming Convention**: `<e.g., YYYYMMDDHHMMSS_name.sql, 001_name.sql>`
+
+   ### Phasing (if applicable)
+   - **Phase 1 (Expand)**: Add new columns/fields as nullable/optional
+   - **Phase 2 (Migrate)**: Backfill data, deploy tolerant code
+   - **Phase 3 (Contract)**: Remove old columns/fields, enforce new schema
    ```
 
-   If no existing migration infrastructure is found, document that explicitly so Flow 3 knows to scaffold it or use raw SQL.
+   If no existing infrastructure is found, document that explicitly so Flow 3 knows to scaffold it or use raw SQL/config.
 
 7. **Emit machine-countable inventory**
 
