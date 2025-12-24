@@ -54,6 +54,7 @@ You are orchestrating Flow 7 of the SDLC swarm.
 - **Solution Fit:** Did we solve the right problem? (→ `solution-analyst`)
 - **Code Quality:** How healthy is the code we just shipped? (→ `quality-analyst`)
 - **Maintainability:** Will this code be easy to work with? (→ `maintainability-analyst`)
+- **Friction:** Where did the swarm hit walls? (→ `friction_log.md`)
 - **Process:** Did we build it efficiently? (→ `process-analyst`)
 - **Regressions:** Did we break anything? (→ `regression-analyst`)
 - **Patterns:** Are we seeing the same issues across runs? (→ `pattern-analyst`)
@@ -62,6 +63,8 @@ You are orchestrating Flow 7 of the SDLC swarm.
 - **Learning:** What should we do differently next time? (→ `learning-synthesizer`)
 
 **You are a manager, not an analyst.** Call the analysts, collect their reports, and synthesize. Don't do the analysis yourself.
+
+**Fix-forward authority:** Wisdom can fix minor nits (typos, leftover console.logs, stale comments) discovered during retrospective. These become a checkpoint commit before the final seal. If the fixes are substantial enough, consider a follow-up PR.
 
 
 
@@ -340,9 +343,18 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 **Call `maintainability-analyst`** — deep dive on naming, modularity, DRY, coupling, documentation, test quality.
 
-### Step 6: Process Analysis
+### Step 6: Process Analysis + Friction Log
 
 **Call `process-analyst`** — analyzes flow efficiency: iterations, bounces, stalls, where we could improve.
+
+The process-analyst also writes `.runs/<run-id>/wisdom/friction_log.md`:
+- Where the swarm hit walls (stuck loops, CANNOT_PROCEED states)
+- Context exhaustion events (PARTIAL exits)
+- Tool/environment failures
+- Unclear prompts or missing context that caused rerun loops
+- Agent capabilities that were missing or underperforming
+
+This friction log informs pack improvements—the "Staff Engineer" whispers in the ear of the next run.
 
 ### Step 7: Regression Analysis
 
@@ -538,7 +550,14 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 - Content mode is derived from secrets gate + push surface (not workspace hygiene)
 - Issue-first: flow summaries go to the issue, never the PR
 
-**Content for postmortem:** Learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
+**Quality-first reporting:** The GitHub postmortem should lead with:
+1. **Solution Verdict** — Did we solve the right problem?
+2. **Maintainability Score** — Will this code be easy to work with?
+3. **Quality Summary** — Code health assessment
+
+DevLT and process metrics go in a **"Process Metrics" fold** at the bottom. We want humans to see the quality assessment first, not just how fast we worked.
+
+**Content for postmortem:** Quality/solution verdicts, learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
 
 ### Step 17: Finalize Flow
 
@@ -646,6 +665,8 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 - `maintainability_analysis.md` - naming, modularity, DRY, coupling deep dive
 
 - `process_analysis.md` - flow efficiency, iterations, bounces
+
+- `friction_log.md` - where the swarm hit walls (for pack improvement)
 
 - `regression_report.md` - what got worse and where
 

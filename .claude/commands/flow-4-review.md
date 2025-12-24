@@ -205,42 +205,49 @@ After setup, you have a run directory and a PR to harvest feedback from.
 
 **The core of Flow 4: iteratively resolve Work Items.**
 
-**Loop until done:**
+**This is an explicit agent call chain, not a narrative algorithm.**
+
+**The Worklist Microloop:**
 
 ```
 while pending > 0 and not exhausted:
-    1. Pick next batch by priority + affinity:
-       - CRITICAL first, then MAJOR, then MINOR
-       - Batch by file (3 issues in auth.ts = one agent call)
-       - Batch by theme (security issue + related test gap)
+    1. review-worklist-writer (refresh mode)
+       → returns: pending_blocking, stuck_signal, next_batch (IDs + route_to + batch_hint)
 
-    2. Route batch to agent:
+    2. Route next_batch to fix-lane agent:
        - TESTS → test-author
        - CORRECTNESS → code-implementer
        - STYLE → fixer
        - DOCS → doc-writer
 
-    3. Agent fixes naturally:
-       - Reads the file, sees what's there
-       - Fixes if current, reports "context changed" if stale
-       - No separate stale-check ceremony
+       Agent receives: batch IDs + file paths + evidence
+       Agent returns: Outcomes list per item (RESOLVED | SKIPPED | PENDING + reason)
 
-    4. Update worklist:
-       - Fixed → RESOLVED
-       - Stale/moved → SKIPPED
-       - Failed → PENDING (retry later)
+    3. review-worklist-writer (apply/refresh mode)
+       → Apply agent outcomes to review_worklist.json
+       → Check for stuck_signal
+       → Return updated pending count
 
-    5. Log action in review_actions.md
-
-    6. Periodically: Checkpoint Routine (explicit agent chain)
-       - secrets-sanitizer (capture Gate Result)
-       - repo-operator (commit/push; gated on Gate Result)
-       - pr-feedback-harvester (re-harvest CI/bot status)
-       - review-worklist-writer (refresh worklist; may add new items)
-       - If stuck_signal: true → exit loop
+    4. Periodically: Checkpoint Routine (explicit agent chain)
+       a. repo-operator (stage intended changes)
+       b. secrets-sanitizer (gate staged surface; capture Gate Result)
+       c. repo-operator (commit/push; gated on Gate Result)
+       d. pr-feedback-harvester (re-harvest CI/bot status)
+       e. review-worklist-writer (refresh; may add new items)
+       → If stuck_signal: true → exit loop
 ```
 
-**Checkpoint Routine:** This is an explicit agent call chain, not a narrative step. Every push must be gated through secrets-sanitizer. The re-harvest immediately captures bot feedback on the new push.
+**Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` again to apply outcomes.
+
+**Fix-lane agent contract:** When an agent receives a batch, it MUST return an `Outcomes:` section:
+```
+Outcomes:
+- RW-001: RESOLVED (fixed null check)
+- RW-002: SKIPPED (code already refactored, feedback stale)
+- RW-003: PENDING (requires upstream API change)
+```
+
+**Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.
 
 **Exit conditions:**
 - `pending == 0` → complete
@@ -287,13 +294,21 @@ while pending > 0 and not exhausted:
 ```markdown
 # Flow 4: Review for <run-id>
 
-## Phases
+## Agents (explicit checklist)
 
-- [ ] Setup (run-prep, branch, PR)
-- [ ] Harvest & Cluster
-- [ ] Execute (worklist loop)
-- [ ] Close the Loop (comment, status)
-- [ ] Seal (receipt, publish)
+- [ ] run-prep
+- [ ] repo-operator (ensure run branch)
+- [ ] pr-creator (create Draft PR if needed)
+- [ ] pr-feedback-harvester
+- [ ] review-worklist-writer
+- [ ] worklist loop (unbounded)
+- [ ] pr-commenter
+- [ ] pr-status-manager
+- [ ] review-cleanup
+- [ ] secrets-sanitizer
+- [ ] repo-operator (commit/push)
+- [ ] gh-issue-manager
+- [ ] gh-reporter
 
 ## Worklist Progress
 
@@ -308,6 +323,8 @@ while pending > 0 and not exhausted:
 - **PR State**: draft | ready
 - **Next Flow**: `/flow-5-gate`
 ```
+
+**Important:** Do NOT use phase checkboxes ("Setup", "Harvest & Cluster", etc.). Use the explicit agent checklist above. Phases are explanatory prose, not TodoWrite items.
 
 ## Status States
 
@@ -344,52 +361,51 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 
 **Entry:** `review_worklist.json` exists with pending items
 
+**This is an explicit agent call chain. The orchestrator routes on returned fields, not by parsing JSON.**
+
 **Loop:**
 ```
-1) Check worklist: pending count
-2) If pending == 0: exit (complete)
+1) Call review-worklist-writer (mode: refresh)
+   → Returns: pending_blocking, stuck_signal, next_batch
+
+2) If pending_blocking == 0: exit (complete)
 3) If context exhausted: checkpoint and exit (PARTIAL)
+4) If stuck_signal: true: checkpoint and exit (PARTIAL)
 
-4) Style Sweep (if `RW-MD-SWEEP` pending):
+5) Style Sweep (if next_batch contains `RW-MD-SWEEP`):
    - Call fixer once for all markdown fixes
-   - Re-harvest feedback
+   - fixer returns: Outcomes list
 
-5) Pick next batch by priority + affinity:
-   - CRITICAL → MAJOR → MINOR (skip INFO)
-   - Batch by file (3 issues in auth.ts = one call)
-   - Batch by theme (security + related test gap)
-   - Up to 3-5 items per batch
-
-6) Route to agent:
+6) Route next_batch to fix-lane agent:
    - TESTS → test-author
    - CORRECTNESS → code-implementer
    - STYLE → fixer
    - DOCS → doc-writer
 
-7) Agent fixes naturally:
-   - Reads file, fixes what's there
-   - Reports "context changed" if stale
-   - No separate stale-check step
+   Agent contract:
+   - Receives: batch IDs + file paths + evidence
+   - Returns: Outcomes list (RESOLVED | SKIPPED | PENDING per item)
 
-8) Update worklist:
-   - Fixed → RESOLVED
-   - Stale → SKIPPED
-   - Failed → PENDING
+7) Call review-worklist-writer (mode: apply)
+   → Receives: agent Outcomes list
+   → Updates review_worklist.json
+   → Returns: updated pending count, stuck_signal
 
-9) Log in review_actions.md
+8) Log action summary in review_actions.md
 
-10) Periodically: Checkpoint Routine (explicit agent chain)
-    - secrets-sanitizer (capture Gate Result)
-    - repo-operator (commit/push; gated on Gate Result)
-    - pr-feedback-harvester (re-harvest CI/bot status)
-    - review-worklist-writer (refresh; may add new items)
-    - If stuck_signal: true → exit loop
+9) Periodically: Checkpoint Routine (explicit agent chain)
+   a) repo-operator (stage intended changes)
+   b) secrets-sanitizer (gate staged surface)
+   c) repo-operator (commit/push; gated on Gate Result)
+   d) pr-feedback-harvester (re-harvest)
+   e) review-worklist-writer (refresh; may add new items)
+   → If stuck_signal: true → exit loop
 ```
 
-**Checkpoint Routine:** Every push must be gated through secrets-sanitizer. This is an explicit agent call chain, not a narrative step.
+**Checkpoint Routine:** Sanitizer gates the **staged surface**. Stage first, then scan. Every push must be gated.
 
 **Exit conditions:**
-- `pending == 0` (all resolved) → VERIFIED
+- `pending_blocking == 0` (all resolved) → VERIFIED
 - Context exhausted → PARTIAL
 - `stuck_signal: true` → PARTIAL
 - Unrecoverable blocker → UNVERIFIED

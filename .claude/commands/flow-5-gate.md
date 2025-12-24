@@ -226,7 +226,7 @@ Create or update `.runs/<run-id>/gate/flow_plan.md`:
 - `receipt-checker` -> `.runs/<run-id>/gate/receipt_audit.md`
 - Run this before contracts/security/coverage; route on its Result block.
 - **Evidence audit, not re-execution:** The receipt-checker verifies that earlier flows produced complete artifacts with passing gates. It does NOT re-run tests or re-scan for secrets—it reads the receipts.
-- If receipts are incomplete or stale (`evidence_sha != HEAD`), BOUNCE to the appropriate upstream flow rather than trying to re-verify from scratch.
+- **Receipts are logs, not locks:** The git log is the audit trail. If code was modified after a receipt was written (ad-hoc fixes, fix-forward), the receipt is still valid as historical evidence of what happened at that station. Don't BOUNCE just because `evidence_sha != HEAD`.
 - **AC completion check:** Receipt-checker should verify `build_receipt.json.counts.ac_completed == build_receipt.json.counts.ac_total`. If either is null/missing, treat as UNVERIFIED with blocker. If not equal, BOUNCE to Flow 3 with blocker: "AC loop incomplete: {ac_completed}/{ac_total}".
 
 ### Step 3: Check contracts (can run in parallel with security/coverage)

@@ -148,6 +148,19 @@ Tell the orchestrator what happened:
 
 Be conversational. The Machine Summary goes in the artifact file.
 
+### Outcomes List (for Flow 4 worklist)
+
+When called from Flow 4 with a batch of worklist items, you MUST include an `Outcomes:` section in your response:
+
+```
+Outcomes:
+- RW-001: RESOLVED (implemented missing validation)
+- RW-002: SKIPPED (logic already refactored, feedback stale)
+- RW-003: PENDING (requires design change, handoff to design-optioneer)
+```
+
+This allows `review-worklist-writer` to update the worklist status without the orchestrator parsing files. Each item in your batch MUST appear in the Outcomes list.
+
 ## Philosophy
 
 Convert spec + tests into working code. Keep the diff tight. Leave an audit trail.

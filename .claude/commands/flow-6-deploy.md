@@ -24,11 +24,13 @@ You are orchestrating Flow 6 of the SDLC swarm.
 
 ## Your Goals
 
-Move an approved artifact from "ready to merge" to "deployed"—execute deployment, verify health, create audit trail.
+Execute the merge of the feature branch into swarm mainline (`origin/main`). Handle simple rebases if needed. Verify health. Create audit trail.
 
 **Flow 6 is always callable.** Its behavior depends on Gate's decision:
-- If Gate said MERGE: merge, verify, report.
+- If Gate said MERGE: sanity check → handle rebase if needed → merge → verify → report.
 - If Gate said BOUNCE (including NEEDS_HUMAN_REVIEW): don't merge, write receipts explaining why.
+
+**Scope:** Flow 6 merges the run's feature branch into swarm `origin/main`. It does NOT merge into upstream. Upstream integration is a separate, post-Wisdom concern.
 
 ## Before You Begin (Required)
 
@@ -170,15 +172,22 @@ Call `deploy-decider` BEFORE any merge operations. This agent:
 | **Release Ops** | Merge PR, create tag, create release | Gate decision = MERGE + repo-operator mechanics |
 | **Reporting Ops** | `gh-issue-manager`, `gh-reporter` | Two-gate prerequisites (secrets + repo hygiene) |
 
-Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are gated by the Gate flow's decision, not by the two-gate prerequisites. Reporting Ops use the same two-gate system as all other flows.
+Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting Ops use the same two-gate system as all other flows.
 
-**Note on secrets governance:** The code being merged was already sanitized in Build (Flow 3). Deploy's secrets-sanitizer (Step 6) is specifically for `.runs/deploy/` artifacts and GitHub posting—not for code merge governance.
+**Note on secrets governance:** The code being merged was already sanitized in Build (Flow 3). Deploy's secrets-sanitizer is for `.runs/deploy/` artifacts and GitHub posting—not code merge governance.
+
+0. **Pre-merge Sanity Check + Rebase** (repo-operator)
+   - Check if `origin/main` has diverged from the feature branch
+   - If diverged: attempt automatic rebase
+   - If rebase conflicts: write `deployment_log.md` noting conflict, set NOT_DEPLOYED with blockers
+   - Simple conflicts (different files) are resolved automatically
+   - This mirrors how developers actually work: rebase, then merge
 
 1. **Merge & Tag** (repo-operator) - **Release Op**
-   - **Prerequisite:** Gate decision = MERGE
+   - **Prerequisite:** Gate decision = MERGE, rebase clean (if needed)
    - Execute `gh pr merge`, create git tag + GitHub release
    - Write `.runs/<run-id>/deploy/deployment_log.md` with merge details
-   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: RERUN` (deterministic fix: auth/PR ref). Do not silently skip-this is a failed release op, not a skipped reporting op.
+   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: RERUN`. Do not silently skip—this is a failed release op.
 
 2. **Monitor CI** (deploy-monitor)
    - Watch GitHub Actions status on main branch
@@ -191,8 +200,8 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
 4. **Decide** (deploy-decider)
    - Synthesize CI + smoke results
    - Write `.runs/<run-id>/deploy/deployment_decision.md` with `verdict`:
-     - STABLE: Governance enforced and runtime verification passes
-     - NOT_DEPLOYED: Governance not enforced or verification failed
+     - STABLE: Merge succeeded, CI passing, smoke checks green
+     - NOT_DEPLOYED: Merge failed, CI failing, or verification issues
      - BLOCKED_BY_GATE: Gate verdict was not MERGE
 
 5. **Finalize Receipt** (deploy-cleanup)
@@ -310,9 +319,11 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 
 | `Verdict` | Meaning |
 |---------|---------|
-| STABLE | Governance enforced and runtime verification (if present) passes |
-| NOT_DEPLOYED | Governance not enforced, or critical check FAIL/UNKNOWN, or runtime verification failed |
+| STABLE | Merge succeeded and CI/smoke verification passes |
+| NOT_DEPLOYED | Merge failed, or CI failing, or smoke tests indicate issues |
 | BLOCKED_BY_GATE | Gate verdict was not MERGE; no deployment attempted |
+
+**Note:** We trust the GitHub merge flow handles branch protection. Flow 6 doesn't re-verify governance—it executes the merge and verifies the result.
 
 ### Finalize Flow
 

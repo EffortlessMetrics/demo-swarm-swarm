@@ -439,13 +439,18 @@ Receipt guarantees:
 
 **Agent invariant:** Validate against current repo state and executed evidence. Use receipts as historical breadcrumbs and summary inputs. Never use receipt presence or receipt fields as permission to proceed.
 
-**Drift rule:** If `receipt.evidence_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+**Receipts are logs, not locks:** A receipt is a "flight recorder" entry of what happened at a specific station. It is NOT a cryptographic permission slip that must be re-sealed when code changes.
 
-**Evidence field convention:** Receipts should include these fields for staleness detection:
+- If `receipt.evidence_sha != git HEAD`, that's normal—ad-hoc fixes, fix-forward, and mid-flow improvements are expected.
+- The receipt is still valid as historical evidence of what happened at that station.
+- Don't BOUNCE or require regeneration just because the SHA drifted.
+- The git log is the audit trail. The receipt is a summary.
+
+**Evidence field convention:** Receipts include these fields for context:
 - `evidence_sha`: The commit SHA when this evidence was generated
 - `generated_at`: ISO8601 timestamp
 
-When these fields mismatch current HEAD, the receipt is advisory, not authoritative.
+These are informational, not gating. If SHA differs from HEAD, the receipt tells you what the world looked like then—not that the work is invalid now.
 
 **Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
 

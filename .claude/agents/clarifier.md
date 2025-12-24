@@ -67,11 +67,42 @@ Prioritize questions that would change design, scope, or tests:
 - Undefined domain terms/acronyms
 - External dependencies/ownership unclear (source of truth, integration owners)
 
-## Question quality bar
+## Question Taxonomy (Required)
+
+Every question MUST be classified into exactly one bucket:
+
+### DECISION_NEEDED
+Questions that **cannot be researched** — only a human stakeholder can answer.
+- Business priorities or product direction (which users matter more?)
+- Legal/compliance constraints not in codebase or docs
+- Organizational decisions (who owns this? what's the approval process?)
+- Stakeholder preferences with no technical right answer
+- Cost/resource tradeoffs that require budget authority
+
+**Before marking DECISION_NEEDED:** Did you search the codebase, docs, and prior issues? If the answer exists somewhere, research it instead.
+
+**These are surfaced prominently by `gh-issue-manager` on the GitHub issue.**
+
+### DEFAULTED
+An assumption was made and implementation will proceed with it.
+- Default is safe (failure mode is benign, not catastrophic)
+- Easy to change later if wrong
+- Industry-standard or codebase-convention applies
+- Must explain **why this default is safe**
+
+### DEFERRED
+Valid question but doesn't affect Flow 3 correctness.
+- UX polish that can be tuned post-merge
+- Performance optimization that doesn't affect correctness
+- Nice-to-have that doesn't block the feature
+- Can be revisited in a follow-up PR
+
+## Question Quality Bar
 
 Each question must be:
 - Specific and answerable
-- Paired with a **Suggested default** you will proceed with
+- Classified into one of the three buckets above
+- Paired with a **Suggested default** (for DEFAULTED and DEFERRED)
 - Include **Impact if different** (what changes in spec/design/tests)
 - Include **Needs answer by** (Flow boundary where changing it would be hardest / create the most rework)
 
@@ -126,31 +157,36 @@ Then, for every run (including the first), append an Update block at the end:
 ```markdown
 ## Update: run <run-id>
 
-### Questions That Would Change the Spec
+### DECISION_NEEDED (Human Must Answer)
 
-#### Category: Product
+These questions MUST be answered before the work can proceed correctly.
+`gh-issue-manager` will post these prominently to the GitHub issue.
+
 - QID: <OQ-...>
-  - Q: <question> [OPEN]
-  - Suggested default: <default we will assume>
-  - Impact if different: <what changes>
+  - Q: <question> [DECISION_NEEDED]
+  - Options: <option A> | <option B> | ...
+  - Impact of each: <brief tradeoff summary>
   - Needs answer by: <Flow 2 | Flow 3 | Before merge | Before deploy>
+  - Evidence: <file> → <section/header>
+
+### DEFAULTED (Proceeding With Assumption)
+
+Assumptions made to keep moving. Explain why each default is safe.
+
+- QID: <OQ-...>
+  - Q: <original question> [DEFAULTED]
+  - Default chosen: <the assumption>
+  - Why safe: <failure mode is benign / easy to change / matches convention>
   - Evidence: <file> → <section/header> (optional)
 
-#### Category: Technical
-- QID: ...
-  - Q: ...
+### DEFERRED (Valid But Not Blocking)
 
-#### Category: Data
-- QID: ...
-  - Q: ...
+Questions that don't affect Flow 3 correctness. Revisit later.
 
-#### Category: Ops
-- QID: ...
-  - Q: ...
-
-#### Category: Policy/Compliance (optional)
-- QID: ...
-  - Q: ...
+- QID: <OQ-...>
+  - Q: <question> [DEFERRED]
+  - Why deferred: <doesn't affect correctness / UX polish / follow-up PR>
+  - Revisit in: <Flow N | follow-up PR | never>
 
 ### Assumptions Made to Proceed
 - Assumption: <assumption>.
@@ -167,12 +203,15 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 output_path: .runs/<run-id>/<flow>/open_questions.md
-questions_added: <int>
-assumptions_added: <int>
+decision_needed_count: <int>
+defaulted_count: <int>
+deferred_count: <int>
 missing_required: []
 blockers: []
 concerns: []
 ```
+
+**Routing note:** If `decision_needed_count > 0`, the orchestrator should ensure `gh-issue-manager` posts these prominently.
 
 ## Completion States
 
@@ -193,8 +232,9 @@ At the end of your response, include:
 ## Clarifier Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 output_path: .runs/<run-id>/<flow>/open_questions.md
-questions_added: <int>
-assumptions_added: <int>
+decision_needed_count: <int>
+defaulted_count: <int>
+deferred_count: <int>
 missing_required: []
 blockers: []
 concerns: []
@@ -202,5 +242,6 @@ concerns: []
 
 Notes:
 
-* `questions_added` / `assumptions_added` count only what you added this invocation.
+* Counts reflect only what you added this invocation.
+* If `decision_needed_count > 0`, orchestrator should route to `gh-issue-manager` to post these prominently.
 * This block is convenience; the file is the durable register.

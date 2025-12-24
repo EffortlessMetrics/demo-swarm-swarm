@@ -72,10 +72,15 @@ Answer, plainly:
 
 Ask yourself: **"Does this request imply a change to how data is stored or structured?"**
 
-- If **YES**: You **MUST** list "Data Migration Strategy" as a **Constraint** in your output.
+- If **YES**: You **MUST** include a `## State Transitions` section in your output.
   - Examples: adding a field to a user record, changing config format, renaming a database column, new enum values.
-  - The constraint should note: "Changes to stored data require migration consideration."
+  - The section should document:
+    - What state is changing (schema, config, cache, etc.)
+    - Safe rollout pattern (expand-backfill-contract, feature flag, etc.)
+    - Migration considerations (backwards compatibility, default values)
 - If **NO**: Explicitly state "No schema/storage changes required" in **Success Looks Like**.
+
+**Flow 2 carry-forward:** The `## State Transitions` section is a required input for `interface-designer` in Flow 2. This ensures data migration is treated as materials-first (before business logic).
 
 *Rationale:* Juniors often forget that changing code is easy, but changing data is hard. This heuristic prevents the swarm from assuming data changes are free.
 
@@ -140,6 +145,15 @@ confidence: High | Medium | Low
 - <observable outcome>
 - <non-regression requirement>
 
+## State Transitions (if applicable)
+<!-- Include this section only if the request implies data/schema changes -->
+- **What changes:** <schema | config | cache | state store>
+- **Rollout pattern:** <expand-backfill-contract | feature flag | breaking with migration>
+- **Backwards compatibility:** <yes: default values | no: migration required>
+- **Migration notes:** <brief notes on what Flow 2 should design>
+
+<!-- If no state changes, omit this section entirely -->
+
 ## Known Context
 - <relevant modules/files mentioned in inputs>
 - <prior art / related issues (if github_research exists)>
@@ -171,11 +185,14 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 confidence: <High | Medium | Low>
+state_transitions_detected: yes | no
 missing_required: []
 blockers: []
 assumptions_count: <N>
 questions_count: <N>
 ```
+
+**Note:** If `state_transitions_detected: yes`, Flow 2's `interface-designer` will consume the State Transitions section as materials-first input.
 
 ## Philosophy
 
