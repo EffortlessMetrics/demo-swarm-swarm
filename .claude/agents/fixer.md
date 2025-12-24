@@ -109,35 +109,23 @@ Do not rename these prefixes. Keep each line short (avoid wrapping).
 
 ## Behavior
 
-### Review Mode: Stale Check Protocol (Flow 4)
+### Worklist Mode (when given a specific item to address)
 
-When invoked from **Flow 4 (Review)** with a worklist item (e.g., `RW-NNN`), you MUST perform a stale check **before** attempting any fix:
+When invoked with a worklist item (e.g., `RW-NNN`), perform a **stale check** before attempting any fix:
 
-1. **Read the worklist item's location** (file path, line number from `review_worklist.json`)
-2. **Verify the code still exists at HEAD:**
+1. **Verify the target still exists at HEAD:**
    - Does the file at the specified path still exist?
-   - Does the code/line referenced in the feedback still exist?
+   - Does the code/line referenced still exist?
    - Has the code changed significantly since the feedback was posted?
 
-3. **Classify staleness:**
-   - `CURRENT`: Code matches the feedback context → proceed with fix
-   - `STALE`: Code has been deleted or substantially refactored → skip
-   - `OUTDATED`: Code exists but has been partially modified → verify if concern still applies
-   - `ALREADY_FIXED`: Issue was addressed by prior work → skip
-
-4. **If stale/already-fixed:**
+2. **If stale or already-fixed:**
    - Do NOT attempt a fix
-   - Do NOT hallucinate changes
-   - Return immediately with:
-     ```yaml
-     worklist_item_status: SKIPPED
-     skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED
-     skip_evidence: "<what changed, when>"
-     ```
+   - Report what you found: "This was already addressed" or "The code has changed significantly"
+   - Move on to the next item
 
-**Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Skipping stale feedback preserves cycles and avoids regressions.
+3. **If current:** Proceed with the fix normally.
 
-### Standard Mode (Flow 3 / Build)
+### Standard Mode
 
 1) **Read evidence; don't improvise**
 - Read critiques and mutation report.
@@ -199,30 +187,16 @@ Routing guidance:
   * spec ambiguity → `BOUNCE` + `route_to_flow: 1|2` + `route_to_agent: clarifier`
 * Mechanical failure ⇒ `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
 
-## Control-plane Return Block (in your response)
+## Reporting
 
-After writing the file, return:
+When you're done, summarize what you did naturally:
 
-```yaml
-## Fixer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-output_file: .runs/<run-id>/build/fix_summary.md
-fixes_applied: 0
-handoffs: 0
-verification_ran: yes|no
+- How many fixes did you apply? From which sources (critique, mutation)?
+- Did verification pass?
+- Are there handoffs for work outside your scope?
+- If you processed a worklist item, was it resolved or skipped (and why)?
 
-# Flow 4 (Review Mode) additional fields - include when processing worklist items:
-worklist_item_id: RW-NNN | null         # the item being processed
-worklist_item_status: RESOLVED | SKIPPED | PENDING | null
-skip_reason: STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED | null
-skip_evidence: <string | null>          # what changed, when
-```
+Be precise but conversational. The orchestrator needs to know: did this succeed, and what should happen next?
 
 ## Obstacle Protocol (When Stuck)
 
