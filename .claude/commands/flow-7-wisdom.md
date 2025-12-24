@@ -51,9 +51,14 @@ You are orchestrating Flow 7 of the SDLC swarm.
 **Primary focus:** Wisdom is a **retrospective factory**. You call specialized analysts, synthesize their findings, and surface learnings to humans.
 
 **The questions you're answering:**
-- **Quality:** How healthy is the code we just shipped? (→ `quality-analyst`)
-- **Efficiency:** How long did this take? Where did we stall? (→ `flow-historian` with DevLT)
+- **Solution Fit:** Did we solve the right problem? (→ `solution-analyst`)
+- **Code Quality:** How healthy is the code we just shipped? (→ `quality-analyst`)
+- **Maintainability:** Will this code be easy to work with? (→ `maintainability-analyst`)
+- **Process:** Did we build it efficiently? (→ `process-analyst`)
 - **Regressions:** Did we break anything? (→ `regression-analyst`)
+- **Patterns:** Are we seeing the same issues across runs? (→ `pattern-analyst`)
+- **Signal Quality:** Which feedback sources were accurate? (→ `signal-quality-analyst`)
+- **Timeline:** How long did this take? Where did we stall? (→ `flow-historian` with DevLT)
 - **Learning:** What should we do differently next time? (→ `learning-synthesizer`)
 
 **You are a manager, not an analyst.** Call the analysts, collect their reports, and synthesize. Don't do the analysis yourself.
@@ -102,8 +107,14 @@ Flow 7 uses **two complementary state machines**:
 - run-prep (establish run infrastructure)
 - repo-operator (ensure run branch)
 - artifact-auditor (verify artifacts)
+- solution-analyst (requirement/implementation alignment)
+- quality-analyst (code health/complexity)
+- maintainability-analyst (naming, modularity, DRY, coupling)
+- process-analyst (flow efficiency, iterations, bounces)
 - regression-analyst (analyze regressions)
-- flow-historian (build history)
+- pattern-analyst (cross-run patterns)
+- signal-quality-analyst (feedback accuracy)
+- flow-historian (build history + DevLT)
 - learning-synthesizer (synthesize learnings)
 - feedback-applier (draft actions only; no gh issue create before secrets gate)
 - traceability-auditor (run-level coherence + spec traceability)
@@ -155,7 +166,19 @@ Domain agents (Flow 7):
 
 - artifact-auditor
 
+- solution-analyst
+
+- quality-analyst
+
+- maintainability-analyst
+
+- process-analyst
+
 - regression-analyst
+
+- pattern-analyst
+
+- signal-quality-analyst
 
 - flow-historian
 
@@ -272,8 +295,14 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 - [ ] run-prep (establish run directory)
 - [ ] repo-operator (ensure run branch)
 - [ ] artifact-auditor (verify all flow artifacts)
+- [ ] solution-analyst (requirement/implementation alignment)
+- [ ] quality-analyst (code health/complexity)
+- [ ] maintainability-analyst (naming, modularity, DRY, coupling)
+- [ ] process-analyst (flow efficiency, iterations, bounces)
 - [ ] regression-analyst (analyze test/coverage regressions)
-- [ ] flow-historian (build timeline)
+- [ ] pattern-analyst (cross-run patterns)
+- [ ] signal-quality-analyst (feedback accuracy)
+- [ ] flow-historian (build timeline + DevLT)
 - [ ] learning-synthesizer (extract learnings)
 - [ ] feedback-applier (draft actions; no gh issue create before secrets gate)
 - [ ] traceability-auditor (run-level coherence + spec traceability)
@@ -299,37 +328,57 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 **Call `artifact-auditor`** — verifies all expected flow artifacts exist.
 
-### Step 3: Quality Analysis
+### Step 3: Solution Analysis
 
-**Call `quality-analyst`** — analyzes code health, complexity, maintainability of the changed files.
+**Call `solution-analyst`** — traces requirements → BDD → implementation → tests. Verifies we built the right thing.
 
-### Step 4: Regression Analysis
+### Step 4: Quality Analysis
+
+**Call `quality-analyst`** — analyzes code health, complexity of the changed files.
+
+### Step 5: Maintainability Analysis
+
+**Call `maintainability-analyst`** — deep dive on naming, modularity, DRY, coupling, documentation, test quality.
+
+### Step 6: Process Analysis
+
+**Call `process-analyst`** — analyzes flow efficiency: iterations, bounces, stalls, where we could improve.
+
+### Step 7: Regression Analysis
 
 **Call `regression-analyst`** — checks for test regressions, coverage changes, stability issues.
 
-### Step 5: Timeline + DevLT
+### Step 8: Pattern Analysis
+
+**Call `pattern-analyst`** — looks across historical runs to find recurring issues, repeated failures, and trends.
+
+### Step 9: Signal Quality Analysis
+
+**Call `signal-quality-analyst`** — analyzes accuracy of feedback sources (CI, bots, humans). Tracks which signals were valid vs noise.
+
+### Step 10: Timeline + DevLT
 
 **Call `flow-historian`** — compiles the run timeline and calculates Developer Lead Time (DevLT): how much human attention did this run actually require?
 
-### Step 6: Synthesize Learnings
+### Step 11: Synthesize Learnings
 
 **Call `learning-synthesizer`** — extracts patterns from the analysis: what worked, what didn't, what to do differently.
 
-### Step 7: Apply Feedback
+### Step 12: Apply Feedback
 
 **Call `feedback-applier`** — turns learnings into concrete actions (issue drafts, doc suggestions). Does NOT create GitHub issues directly.
 
-### Step 7b: Traceability
+### Step 12b: Traceability
 
 **Call `traceability-auditor`** — verifies run identity, receipts, and GitHub markers are coherent.
 
-### Step 7c: Risk Comparison
+### Step 12c: Risk Comparison
 
 **Call `risk-analyst`** — compares predicted risks (from Signal) vs actual outcomes.
 
 
 
-### Step 8: Finalize and Write Receipt
+### Step 13: Finalize and Write Receipt
 
 - `wisdom-cleanup` -> `.runs/<run-id>/wisdom/wisdom_receipt.json`, `.runs/<run-id>/wisdom/cleanup_report.md`
 
@@ -343,7 +392,7 @@ Create or update `.runs/<run-id>/wisdom/flow_plan.md`:
 
 
 
-### Step 9: Sanitize Secrets (Publish Gate)
+### Step 14: Sanitize Secrets (Publish Gate)
 
 - `secrets-sanitizer` -> `.runs/<run-id>/wisdom/secrets_scan.md`, `.runs/<run-id>/wisdom/secrets_status.json`
 
@@ -382,7 +431,7 @@ blocker_reason: <string | null>
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router
-- If `safe_to_commit: true` → proceed to checkpoint commit (Step 9c)
+- If `safe_to_commit: true` → proceed to checkpoint commit (Step 14b)
 - If `safe_to_commit: false`:
   - `blocker_kind: MECHANICAL` → **FIX_ENV** (tool/IO failure)
   - `blocker_kind: SECRET_IN_CODE` → route to appropriate agent (orchestrator decides)
@@ -392,7 +441,7 @@ blocker_reason: <string | null>
 
 
 
-### Step 9b: Checkpoint Commit
+### Step 14b: Checkpoint Commit
 
 
 
@@ -480,7 +529,7 @@ Orchestrators route on this block, not by re-reading `git_status.md`.
 
 
 
-### Step 10-11: GitHub Reporting (Final)
+### Step 15-16: GitHub Reporting (Final)
 
 **Call `gh-issue-manager`** (marks run complete) then **`gh-reporter`** (mini-postmortem).
 
@@ -491,7 +540,7 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 
 **Content for postmortem:** Learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
 
-### Step 12: Finalize Flow
+### Step 17: Finalize Flow
 
 
 
@@ -590,7 +639,19 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 
 - `artifact_audit.md` - structural sanity check of all flows
 
+- `solution_analysis.md` - requirement/implementation alignment
+
+- `quality_report.md` - code health, complexity
+
+- `maintainability_analysis.md` - naming, modularity, DRY, coupling deep dive
+
+- `process_analysis.md` - flow efficiency, iterations, bounces
+
 - `regression_report.md` - what got worse and where
+
+- `pattern_report.md` - cross-run recurring issues and trends
+
+- `signal_quality_report.md` - feedback source accuracy analysis
 
 - `flow_history.json` - timeline linking all flow events + DevLT metrics
 
@@ -654,7 +715,19 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 
 |-------|----------------|----------|---------|
 
+| solution-analyst | `^### SOL-[0-9]{3}:` | solution_analysis.md | `### SOL-001: Missing OAuth implementation` |
+
+| quality-analyst | `^- QUALITY_ISSUE_` | quality_report.md | `- QUALITY_ISSUE_HIGH: 3` |
+
+| maintainability-analyst | `^- \*\*MAINT-[0-9]{3}\*\*:` | maintainability_analysis.md | `- **MAINT-001**: Auth handler too large` |
+
+| process-analyst | `^### PROC-[0-9]{3}:` | process_analysis.md | `### PROC-001: AC-002 took 4 iterations` |
+
 | regression-analyst | `^### REG-[0-9]{3}:` | regression_report.md | `### REG-001: test_foo::bar  assertion failed` |
+
+| pattern-analyst | `^### PAT-[0-9]{3}:` | pattern_report.md | `### PAT-001: Flaky auth tests` |
+
+| signal-quality-analyst | `^### SQ-FP-[0-9]{3}:` | signal_quality_report.md | `### SQ-FP-001: FB-RC-123456789` |
 
 | learning-synthesizer | `^## Learning: ` | learnings.md | `## Learning: Requirements` |
 
@@ -681,45 +754,59 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 
 ### Station order
 
-#### Station order
-
 1. `run-prep`
 
 2. `repo-operator` (ensure run branch)
 
 3. `artifact-auditor`
 
-4. `regression-analyst`
+4. `solution-analyst`
 
-5. `flow-historian`
+5. `quality-analyst`
 
-6. `learning-synthesizer`
+6. `maintainability-analyst`
 
-7. `feedback-applier`
+7. `process-analyst`
 
-8. `traceability-auditor`
+8. `regression-analyst`
 
-9. `risk-analyst`
+9. `pattern-analyst`
 
-10. `wisdom-cleanup`
+10. `signal-quality-analyst`
 
-11. `secrets-sanitizer`
+11. `flow-historian`
 
-12. `repo-operator` (checkpoint commit)
+12. `learning-synthesizer`
 
-13. `gh-issue-manager` (if allowed)
+13. `feedback-applier`
 
-14. `gh-reporter` (if allowed)
+14. `traceability-auditor`
+
+15. `risk-analyst`
+
+16. `wisdom-cleanup`
+
+17. `secrets-sanitizer`
+
+18. `repo-operator` (checkpoint commit)
+
+19. `gh-issue-manager` (if allowed)
+
+20. `gh-reporter` (if allowed)
 
 ### TodoWrite (copy exactly)
 
 - [ ] run-prep
-
 - [ ] repo-operator (ensure `run/<run-id>` branch)
-
 - [ ] artifact-auditor
-- [ ] regression-analyst
-- [ ] flow-historian
+- [ ] solution-analyst (requirement/implementation alignment)
+- [ ] quality-analyst (code health/complexity)
+- [ ] maintainability-analyst (naming, modularity, DRY, coupling)
+- [ ] process-analyst (flow efficiency, iterations, bounces)
+- [ ] regression-analyst (test/coverage regressions)
+- [ ] pattern-analyst (cross-run patterns)
+- [ ] signal-quality-analyst (feedback accuracy)
+- [ ] flow-historian (timeline + DevLT)
 - [ ] learning-synthesizer
 - [ ] feedback-applier (draft actions only; no gh issue create before secrets gate)
 - [ ] traceability-auditor (run-level coherence + spec traceability)
@@ -728,7 +815,6 @@ Flow 7 producers must use these stable markers so `wisdom-cleanup` can derive co
 - [ ] secrets-sanitizer (capture Gate Result block)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
-
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth; FULL/RESTRICTED from gates + publish_surface)
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.

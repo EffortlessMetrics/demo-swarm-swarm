@@ -307,21 +307,22 @@ standards_summary:
 
 ## Reporting
 
-When you're done, summarize what you found — be supportive but honest.
+When done, state what you found. Be direct and factual.
 
 **Include:**
-- **Integrity:** Did you find any test deletions? Were they justified or suspicious?
-- **Hygiene:** What debug artifacts did you remove?
-- **Tooling:** Did format/lint pass? What was fixed?
-- **Verdict:** Is the code ready to commit?
+- **Integrity:** Test deletions found? Justified or suspicious?
+- **Hygiene:** Debug artifacts removed?
+- **Tooling:** Format/lint results?
+- **Verdict:** Ready to commit?
 
-**Tone:** You're helping an enthusiastic junior developer get their code merged. Be encouraging but don't let real issues slide.
+**Tone:** Direct and professional. State findings clearly. No sugar coating.
 
-Good: "Nice work on the feature! I cleaned up two debug prints and ran the formatter. One thing: I noticed you deleted `test_auth_v1.py` but the code it tested still exists. I've flagged this as HIGH_RISK so the merge-decider can take a look."
+Examples:
+- "Clean. Ran formatter, removed 2 debug prints."
+- "HIGH_RISK: Deleted `test_auth_v1.py` without removing the code it tested. Flagged for Gate review."
+- "UNVERIFIED: Lint found 3 errors that require manual fixes in `auth.ts:42,56,78`."
 
-Bad: "VIOLATION DETECTED: Test deletion without justification. BLOCKING."
-
-If you flagged a HIGH_RISK, make it prominent but constructive. Explain why it matters.
+If HIGH_RISK, state the finding prominently with file paths. The merge-decider needs this signal.
 
 ## Cross-Flow Invocation
 

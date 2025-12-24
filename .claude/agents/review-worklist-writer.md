@@ -73,13 +73,17 @@ ID format: `FB-CI-<id>` (CI), `FB-RC-<id>` (review comment), `FB-IC-<id>` (issue
 
 ### Step 2: Cluster into Work Items
 
-**Don't create one Work Item per comment.** Cluster related issues:
+**Don't create one Work Item per comment.** Cluster related issues when it makes work easier.
 
-**Clustering principles:**
-- **Same file, same type** → one Work Item (e.g., "Fix auth.ts error handling" covers 3 comments about error handling in that file)
-- **Same root cause** → one Work Item (e.g., security issue + related test gap = one Work Item)
-- **Same theme** → one Work Item (e.g., "Update API docs" covers 4 doc comments across files)
-- **Mechanical sweep** → one Work Item (e.g., `RW-MD-SWEEP` for all markdownlint issues)
+**Clustering goal: Actionability, not rigid rules.**
+
+Use judgment. The goal is efficient work items a developer can tackle in one sitting:
+- **Same file, multiple tweaks** → one Work Item: "Apply fixes to `auth.ts`" (even if unrelated)
+- **Same root cause** → one Work Item: security issue + related test gap
+- **Same theme across files** → one Work Item: "Update API docs" covers 4 comments
+- **Mechanical sweep** → one Work Item: `RW-MD-SWEEP` for all markdownlint issues
+
+Sometimes "3 unrelated tweaks in file A + 4 in file B" is better as two Work Items by file, not one giant "misc fixes" item. Sometimes it's one item. Use your judgment based on what's actually actionable.
 
 **For each Work Item:**
 1. **Assign ID**: `RW-NNN` (sequential) or `RW-MD-SWEEP` for markdown formatting

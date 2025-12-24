@@ -68,6 +68,17 @@ Answer, plainly:
 - What behavior is missing/incorrect?
 - What is the observable symptom vs likely underlying cause? (You may separate them, but don't "solve".)
 
+### Step 1b: The "State" Heuristic (Critical)
+
+Ask yourself: **"Does this request imply a change to how data is stored or structured?"**
+
+- If **YES**: You **MUST** list "Data Migration Strategy" as a **Constraint** in your output.
+  - Examples: adding a field to a user record, changing config format, renaming a database column, new enum values.
+  - The constraint should note: "Changes to stored data require migration consideration."
+- If **NO**: Explicitly state "No schema/storage changes required" in **Success Looks Like**.
+
+*Rationale:* Juniors often forget that changing code is easy, but changing data is hard. This heuristic prevents the swarm from assuming data changes are free.
+
 ### Step 2: Who is affected + blast radius
 - Identify primary/secondary stakeholders and downstream systems.
 - Describe impact in observable terms (errors, latency, revenue risk, compliance exposure).

@@ -60,14 +60,15 @@ Flow 1 uses **two complementary state machines**:
 - gh-issue-resolver (resolve/bind GitHub issue; may defer when GH unavailable)
 - repo-operator (ensure run branch)
 - signal-run-prep (establish run infrastructure)
-- gh-researcher (research GitHub context)
+- gh-researcher (research GitHub context + wisdom scent trail)
 - signal-normalizer (normalize signal)
-- problem-framer (frame the problem)
+- problem-framer (frame the problem; check for state/migration implications)
 - clarifier (capture open questions; non-blocking)
 - requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- bdd-author ↔ bdd-critic (microloop; 2 passes default; enforce sad paths)
 - scope-assessor (assess scope + initial risks)
 - risk-analyst (deep risk analysis)
+- spec-auditor (integrative audit; may bounce for fixes)
 - signal-cleanup (finalize receipt; update index; update `flow_plan.md`)
 - secrets-sanitizer (publish gate)
 - repo-operator (checkpoint commit)
@@ -110,6 +111,10 @@ If running `/flow-1-signal` on an existing run-id:
 
 - clarifier
 - risk-analyst
+
+### Integrative Audit (Before Cleanup)
+
+- spec-auditor - final holistic audit of all Flow 1 artifacts; routes back if critical gaps
 
 ### Cleanup + Reporting (End of Flow)
 
@@ -162,14 +167,15 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 - [ ] gh-issue-resolver (resolve/create issue, emit run_id)
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
 - [ ] signal-run-prep (establish run directory)
-- [ ] gh-researcher (GitHub context)
+- [ ] gh-researcher (GitHub context + wisdom scent trail)
 - [ ] signal-normalizer (parse input)
-- [ ] problem-framer (synthesize problem)
+- [ ] problem-framer (synthesize problem; check state/migration)
 - [ ] clarifier (document ambiguities)
 - [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default; enforce sad paths)
 - [ ] scope-assessor (stakeholders, risks, estimate)
 - [ ] risk-analyst (enrich risks)
+- [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
@@ -224,7 +230,16 @@ Alternate between `requirements-author` and `requirements-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `requirements-author` once with the critique worklist, then rerun `requirements-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
+**Loop guidance (The Stubborn Loop)**:
+- Default cadence is two passes (writer -> critic -> writer -> critic).
+- The second writer pass applies the critique worklist (when present).
+- **Stubbornness rule:** You (the orchestrator) must not accept "Good Enough." Loop until the Critic signs off (`status: VERIFIED`) or you hit the retry limit.
+- If the critic returns `recommended_action: RERUN` with `can_further_iteration_help: yes`, you **must** loop again.
+- Exit conditions:
+  1. `status: VERIFIED` → proceed
+  2. 3 full passes completed → proceed with `UNVERIFIED` + blockers (carry honestly)
+  3. `can_further_iteration_help: no` → proceed (no improvement possible)
+- The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 7: BDD Scenarios (Microloop)
 
@@ -250,7 +265,17 @@ Alternate between `bdd-author` and `bdd-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `bdd-author` once with the critique worklist, then rerun `bdd-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
+**Loop guidance (The Stubborn Loop)**:
+- Default cadence is two passes (writer -> critic -> writer -> critic).
+- The second writer pass applies the critique worklist (when present).
+- **Stubbornness rule:** You (the orchestrator) must not accept "Good Enough." Loop until the Critic signs off (`status: VERIFIED`) or you hit the retry limit.
+- If the critic returns `recommended_action: RERUN` with `can_further_iteration_help: yes`, you **must** loop again.
+- **Sad Path enforcement:** The critic will flag REQs missing negative scenarios. Ensure the author addresses these before proceeding.
+- Exit conditions:
+  1. `status: VERIFIED` → proceed
+  2. 3 full passes completed → proceed with `UNVERIFIED` + blockers (carry honestly)
+  3. `can_further_iteration_help: no` → proceed (no improvement possible)
+- The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 8: Assess Scope
 
@@ -263,6 +288,25 @@ Identify stakeholders, flag early risks by category, and estimate scope (S/M/L/X
 Use `risk-analyst` for deeper risk assessment.
 
 Add risk patterns (security, compliance, data, performance) and severity ratings. This supplements `.runs/<run-id>/signal/early_risks.md` with deeper analysis.
+
+### Step 9b: Final Spec Audit (Integrative)
+
+**Call `spec-auditor`** to perform an integrative audit of all Flow 1 artifacts.
+
+This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews:
+- Problem → Requirements alignment
+- Requirements → BDD coverage
+- Risk coverage completeness
+- Cross-artifact consistency
+- Unresolved critic findings
+
+**Route on its Result block:**
+- If `status: VERIFIED` → proceed to cleanup
+- If `status: UNVERIFIED` with `recommended_action: BOUNCE` → route back to the specified agent (e.g., `requirements-author`, `bdd-author`) for rework, then re-run the auditor
+- If `status: UNVERIFIED` with `recommended_action: PROCEED` → proceed with blockers documented (human judgment needed)
+- If `status: CANNOT_PROCEED` → `FIX_ENV` (mechanical failure)
+
+**Loop limit:** Re-run the auditor at most twice after routing to fix agents. If still UNVERIFIED after 2 fix attempts, proceed with blockers and let Flow 2/human handle.
 
 ### Step 10: Finalize and Write Receipt
 
@@ -420,6 +464,7 @@ All written to `.runs/<run-id>/signal/`:
 | `early_risks.md` | scope-assessor | Initial risk identification by category |
 | `risk_assessment.md` | risk-analyst | Deep risk analysis with severity ratings |
 | `scope_estimate.md` | scope-assessor | S/M/L/XL estimate with rationale |
+| `spec_audit.md` | spec-auditor | Integrative audit verdict and cross-artifact consistency |
 | `signal_receipt.json` | signal-cleanup | Structured summary for downstream flows |
 | `cleanup_report.md` | signal-cleanup | Artifact verification and count derivation |
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings and actions taken |
@@ -507,15 +552,17 @@ If yes, proceed to `/flow-2-plan`.
 
 11. `risk-analyst`
 
-12. `signal-cleanup`
+12. `spec-auditor` (integrative audit; may route back for fixes)
 
-13. `secrets-sanitizer`
+13. `signal-cleanup`
 
-14. `repo-operator` (checkpoint; read Repo Operator Result)
+14. `secrets-sanitizer`
 
-15. `gh-issue-manager` (if allowed)
+15. `repo-operator` (checkpoint; read Repo Operator Result)
 
-16. `gh-reporter` (if allowed)
+16. `gh-issue-manager` (if allowed)
+
+17. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -546,6 +593,7 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
 - [ ] scope-assessor
 - [ ] risk-analyst
+- [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)

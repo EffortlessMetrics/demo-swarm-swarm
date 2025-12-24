@@ -37,6 +37,7 @@ Write exactly:
 Your markdown must include:
 
 - Title: `# GitHub Research for <run-id>`
+- `## Wisdom Context (Scent Trail)` (learnings from `.runs/_wisdom/latest.md` if present; "No prior wisdom available" if not)
 - `## Search Inputs` (what terms you used and why)
 - `## Access & Limitations` (gh available/authenticated? rate limits? repo unknown?)
 - `## Related Issues` (table + short details bullets)
@@ -44,7 +45,7 @@ Your markdown must include:
 - `## Related Discussions` (optional; only if you can access them)
 - `## Decisions / Constraints Extracted` (bullet list with refs)
 - `## Prior Art Pointers (Local Codebase)` (best-effort pointers: paths/modules; no huge dumps)
-- `## Implications for Flow 1` (actionable constraints for requirements/risk)
+- `## Implications for Flow 1` (actionable constraints for requirements/risk; **include wisdom constraints here**)
 - `## Assumptions Made to Proceed`
 - `## Questions / Clarifications Needed`
 - `## Inventory (machine countable)` (stable markers; see below)
@@ -62,6 +63,19 @@ Include an `## Inventory (machine countable)` section containing only lines star
 These prefixes are contract infrastructure. Do not rename them.
 
 ## Behavior
+
+### 0) Establish Wisdom Context (The "Scent Trail" - Mandatory)
+
+**Before any other work**, check for and read `.runs/_wisdom/latest.md` (if present).
+
+This file contains the top learnings from the most recent wisdom flow — insights that inform this run's approach. Extract:
+- **Negative Constraints**: Things to avoid (e.g., "Do not use Library X", "Avoid pattern Y")
+- **Positive Patterns**: What worked well previously
+- **Known Pitfalls**: Common failure modes in this codebase
+
+Include these in your `## Implications for Flow 1` section. The scent trail closes the learning loop from Flow 7 — the pack gets smarter with every run.
+
+*If the file doesn't exist, note "No prior wisdom available" and continue. This is not a blocker.*
 
 ### 1) Establish run context + deterministic search terms
 

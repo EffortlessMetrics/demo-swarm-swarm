@@ -67,7 +67,13 @@ Missing inputs are **UNVERIFIED** (not mechanical failure) unless you cannot rea
 - Happy path per REQ where applicable.
 - Edge/error scenarios when an error mode exists; if not applicable, say so explicitly (don't silently omit).
 
-### 5) Ambiguity handling
+### 5) The "Sad Path" Rule (major)
+- Every Requirement (`REQ-###`) must have at least one **Negative Scenario** (Error, Edge Case, or Failure Mode).
+- If a Feature File contains only Happy Paths for a given REQ, mark as **MAJOR** issue.
+- The only exception: an explicit note in `verification_notes.md` explaining why negative scenarios are impossible or nonsensical for that REQ.
+- *Rationale:* We do not ship code that only works when things go right. Agents are people-pleasers and will write passing tests unless forced to consider failure modes.
+
+### 6) Ambiguity handling
 - If ambiguity blocks testability, ask a question with a suggested default.
 - If the ambiguity is upstream (requirements unclear/contradictory), you may set `can_further_iteration_help: no` (because bdd-author cannot fix it).
 
@@ -149,6 +155,8 @@ coverage_summary:
   - `- [MAJOR] BDD-MAJ-001: ...`
 - `## Coverage Gaps`
   - `- [MAJOR] BDD-MAJ-002: ...`
+- `## Sad Path Gaps` (REQs missing negative scenarios)
+  - `- [MAJOR] BDD-MAJ-003: REQ-### has only happy path scenarios; needs error/edge case coverage`
 - `## Minor Issues`
   - `- [MINOR] BDD-MIN-001: ...`
 
@@ -168,6 +176,7 @@ Include an inventory section containing only lines starting with:
 - `- BDD_MAJOR: BDD-MAJ-###`
 - `- BDD_MINOR: BDD-MIN-###`
 - `- BDD_GAP: REQ-###`
+- `- BDD_SADPATH_MISSING: REQ-###` (for REQs with only happy paths)
 - `- BDD_ORPHAN: <featurefile>#<scenario>`
 
 Do not rename these prefixes.

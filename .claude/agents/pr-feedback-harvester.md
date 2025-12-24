@@ -201,7 +201,7 @@ Use your **judgment** to assign severity. Don't blindly follow rules — think a
 | **INFO** | Approvals, neutral comments, questions, discussion. | → `pr_feedback.md` only |
 
 **Apply judgment:**
-- **CI PENDING** is a warning, not a blocker — checks haven't completed yet
+- **CI PENDING** is not a finding. Record it as a status update, not a severity. The absence of failure is the current truth — keep working.
 - **CI FAILING** — look at *what* failed. A flaky test is MAJOR. A security check failing is CRITICAL.
 - **Bot suggestions** — bots are often wrong. If a suggestion looks incorrect, downgrade it and note your reasoning.
 - **Human comments** — read the tone. "Please consider" is MINOR. "This will break production" is CRITICAL.
@@ -397,7 +397,7 @@ sources_unavailable: []
 
 1) **Speed over depth**: Get the feedback back quickly. Don't spend 10 minutes reading code for 20 items.
 2) **Triage, don't plan**: Your thoughts are quick reads, not fix plans. "Looks like a real security issue" not "Replace X with Y on line Z".
-3) **Judgment, not rules**: CI pending is a warning. Flaky tests are MAJOR, not CRITICAL. Bot suggestions might be wrong — say so if you think so.
+3) **Judgment, not rules**: CI pending is not a finding (no signal yet). Flaky tests are MAJOR, not CRITICAL. Bot suggestions might be wrong — say so if you think so.
 4) **Read-only on GitHub**: Do not modify the PR, post comments, or change review status.
 5) **Stable IDs from upstream**: Use `FB-CI-<id>`, `FB-RC-<id>`, `FB-IC-<id>`, `FB-RV-<id>` — never sequential `FB-001`.
 6) **Genuine blockers only**: Only real stop-the-line issues go into `blockers[]`. Be conservative — false positives waste time.
