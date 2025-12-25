@@ -152,6 +152,15 @@ In `## Prior Art Pointers (Local Codebase)`:
 - list paths/modules with 1-line notes ("similar endpoint shape", "existing retry policy", etc.)
 - do not paste large code blocks.
 
+**Evidence-Based Pointers (Non-negotiable):**
+
+A pointer is only valid if you actually read the file. Do not point to `auth.ts` based on its filename; point to it because you found `validate_session()` inside it.
+
+**Good pointer:** "`src/auth/session.rs` — contains `validate_session()` which handles token verification"
+**Bad pointer:** "`src/auth/` — probably has auth stuff"
+
+Your summary must be a map of **Evidence**, not a list of **Guesses**. If you searched for a pattern and found nothing, say so. If you found something, cite the symbol/function/class you actually observed.
+
 ### 7) Synthesize implications for Flow 1
 
 Write actionable guidance:

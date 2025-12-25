@@ -168,15 +168,17 @@ The orchestrator routes on your signals. If you hide uncertainty behind false co
 
 **You are the scribe for your own work.** Before reporting back to the orchestrator:
 
-1. **Update AC status:** If working on an AC, update `.runs/<run-id>/build/ac_status.json`:
+1. **Update AC implementation status:** If working on an AC, update `.runs/<run-id>/build/ac_status.json`:
    ```json
    {
      "acs": {
-       "AC-001": { "status": "passed", "updated_at": "<iso8601>" }
+       "AC-001": { "impl_status": "done", "updated_at": "<iso8601>" }
      }
    }
    ```
    Use the Edit tool to update the specific AC entry in-place.
+
+   **Scoped ownership:** You set `impl_status` (what you did). The `verify_status` (pass/fail) is owned by `test-executor`. Do not set verification bits — that's not your truth to claim.
 
 2. **Record assumptions:** Any assumptions you made go in the summary AND append to `open_questions.md` if they're significant.
 

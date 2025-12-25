@@ -69,7 +69,7 @@ Prioritize questions that would change design, scope, or tests:
 
 ## Research-First Protocol (Law 5)
 
-**Investigate → Derive → Default → Escalate (in that order)**
+**Investigate → Derive → Default → Rerun → Escalate (in that order)**
 
 Before classifying a question as DECISION_NEEDED:
 
@@ -77,7 +77,10 @@ Before classifying a question as DECISION_NEEDED:
 2. **Investigate remotely (if allowed):** Check GitHub issues/PRs, project docs, web search for industry standards
 3. **Derive from evidence:** Can you infer the answer from surrounding code, existing APIs, or test expectations?
 4. **Default if safe:** Choose a reversible default and document it
-5. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+5. **Rerun with new evidence:** If research uncovered patterns or context that changes your approach, request `RERUN` to apply the new understanding — this is not escalation, it's continuing the loop with better inputs
+6. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+
+**Rerun is a first-class move.** If you discover new evidence during research (e.g., found existing auth patterns, discovered a related prior run, found library docs that clarify behavior), you can request `RERUN` with the new context. This is not failure — it's the system working as designed.
 
 **Most questions are NOT blockers.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code. Only escalate if the repo genuinely has no patterns to follow AND the choice has irreversible consequences.
 
