@@ -1,149 +1,210 @@
 # DemoSwarm
 
-> **Stop Babysitting. Start Shipping.**
-> The Ops-First SDLC pack for Claude Code that trades tokens for trusted change.
+Ops-first SDLC pack for Claude Code. Trades machine iteration for lower human verification time.
 
-[Documentation](docs/README.md) | [Quickstart](docs/tutorials/quickstart.md) | [Architecture](docs/explanation/architecture.md)
-
----
-
-**Tokens are cheap. Senior Developer attention is expensive.**
-
-Most AI coding tools are "Chatbots"—you type, watch them generate, fix their typos, and paste the code. You are the compiler.
-
-**DemoSwarm** is an **Agentic CI/CD Pipeline** that runs locally in your terminal. It uses adversarial multi-agent swarms to **manufacture trust** through evidence (tests, plans, critiques) before you ever see the PR.
-
-### The Promise: Buy Back Your Attention
-We optimize for **Dev Lead Time (DevLT)**—minimizing the minutes *you* spend verifying changes, even if the machine takes longer to generate them.
-
-*   **Copilot** is autocomplete. You watch it work.
-*   **DemoSwarm** is async (within a flow). You dispatch, walk away, and return to a receipt with a status: `VERIFIED`, `UNVERIFIED`, or `PARTIAL`.
+**Docs:** [docs/README.md](docs/README.md) | [Architecture](docs/explanation/architecture.md) | [Quickstart](docs/tutorials/quickstart.md)
 
 ---
 
-## How It Feels: You Are the Tech Lead
+## What This Is
 
-It behaves like a **team of well-instructed Junior Developers** working from your playbook. You dispatch each flow; there's no always-on background daemon.
+DemoSwarm is a `.claude/` pack (agents, flows, skills) plus deterministic tooling for receipts and counts.
 
-1.  **Dispatch a flow:** You run `/flow-1-signal "Add user auth"`.
-2.  **It grinds inside that run:** Agents loop, write artifacts, and (where relevant) push checkpoint commits and harvest CI/bot feedback.
-3.  **Quick phase-boundary skim:** You review the receipt + key questions/summary (locally under `.runs/` and, if enabled, in GitHub issue/PR comments).
-4.  **Dispatch the next flow:** The pack tells you what to run next; you choose when.
+You run flows explicitly (no daemon). Each flow produces on-disk artifacts under `.runs/` that become the handoff between agents and your review surface.
 
-### What "walk away" actually means
+**Primary metric:** DevLT (Developer Lead Time) — minutes a human spends verifying the change.
 
-You can walk away **while a flow is executing** (especially Flow 3/4). If the run hits a context/time budget, it checkpoints to disk and exits `PARTIAL` with the next command to continue.
+## What This Is Not
 
-### Typical loop
-
-*   **Flow 1** writes requirements + open questions → you skim/answer → run **Flow 2**
-*   **Flow 2** writes ADR + AC matrix → you skim/agree → run **Flow 3**
-*   **Flow 3** pushes early, harvests feedback, interrupts for CRITICAL blockers → ends with `build_receipt.json` (VERIFIED/UNVERIFIED/PARTIAL)
-*   **Flow 4** drains the worklist (may require reruns if PARTIAL) → ends with a Ready PR
-*   **You merge.**
-
-**The "extra wait" is a feature.** You trade machine time for attention. While the swarm grinds through the build loop or drains the review worklist, you are free.
+- Not a hosted service
+- Not "always-on" automation
+- Not a replacement for code review — it produces better evidence to make review cheaper
 
 ---
 
-## The Philosophy: Ops-First
+## How It Works
 
-We resolve the tension between "Velocity" and "Safety" by splitting the world in two:
+Dispatch a flow (e.g., `/flow-1-signal "Add user auth"`). The swarm grinds, checkpoints, writes artifacts.
 
-### 1. The Work Plane (Default: ALLOW)
-*   **High Velocity:** Agents explore, code, and test freely.
-*   **Ad-Hoc Reality:** If you fix a typo while the swarm runs, the swarm accepts it ("Extras") instead of crashing.
-*   **Advisory Security:** Findings during the build loop are suggestions, not blockers.
+When a flow ends, you skim the artifacts (and optionally GitHub updates), then decide what to run next.
 
-### 2. The Publish Plane (Default: GATE)
-*   **Hard Boundaries:** We only gate at the border (`commit`, `push`, `gh post`).
-*   **Mechanical Safety:** We don't ask agents to "be good." We enforce it mechanically.
-    *   **Anti-Reward Hacking:** If an agent deletes a test to make the build pass, the push is **physically blocked** by the `repo-operator`.
-    *   **Fix-First Sanitization:** Secrets are redacted in-place automatically. No bureaucracy.
+**Artifacts are the handoff.** Chat is transient; `.runs/<run-id>/` is the record.
+
+### If Something Is Incomplete
+
+Flows are rerunnable. If a flow exits `PARTIAL`, rerun the same command. It resumes from disk state.
 
 ---
 
-## Quick Start
+## Planes and Gates
 
-Run this repository as a self-contained demo to see the agents in action.
+### Work Plane (default: allow)
 
-**Prerequisites:** Claude Code (`claude`), Git, `bash`, `gh` CLI.
+Agents explore, build, and test freely:
+- Read any files, search code, run checks
+- Write tests early, iterate on code
+- Push early to get bot feedback (CI, CodeRabbit)
+- Ad-hoc human edits ("extras") are accepted and recorded, not treated as failure
+- Security findings here are advisory, not throttles
 
-### 1. Bootstrap
+### Publish Plane (default: gate)
+
+Gates engage only at the boundary: **commit / push / GitHub posting**.
+
+- **Secrets**: Sanitized in-place before publishing. Only blocks when manual remediation required.
+- **Anomalies**: Suspicious changes (test deletions, unexpected staged files) are detected, surfaced, and gated at publish boundary — not "physically blocked" but flagged and routed to rework.
+- **Mechanical failures** (missing tools, auth issues, IO errors) block publish, not work.
+
+If a gate blocks, keep working locally. Gates constrain publishing, not thinking.
+
+---
+
+## Status Semantics
+
+These statuses describe **evidence quality**, not "permission to merge."
+
+| Status | Meaning |
+|--------|---------|
+| **VERIFIED** | Artifacts exist, verification stations ran and passed, evidence is consistent |
+| **UNVERIFIED** | Verification incomplete, contradictions, critical failures, or missing core outputs |
+| **PARTIAL** | Real progress made, but flow checkpointed (context/time limit). Rerun to continue |
+
+**Receipts are logs, not locks.** The git log is the audit trail; receipts summarize what happened at stations.
+
+---
+
+## The Flows
+
+| Flow | Purpose | Key Outputs |
+|------|---------|-------------|
+| **0. Setup** | Detect stack, configure skills | `demo-swarm.config.json`, customized skills |
+| **1. Signal** | Turn messy intent into a contract | Requirements, BDD scenarios, risks, open questions |
+| **2. Plan** | Turn contract into buildable work | ADR, interfaces/contracts, AC matrix, work plan |
+| **3. Build** | Implement AC-by-AC, push early | Code + tests, build receipt, Draft PR |
+| **4. Review** | Harvest feedback, batch fixes | Drained worklist, Ready PR |
+| **5. Gate** | Forensic audit, merge verdict | MERGE or BOUNCE decision, gate receipt |
+| **6. Deploy** | Merge to swarm mainline | Merge + CI/smoke verification, deploy receipt |
+| **7. Wisdom** | Extract learnings, close loops | Learnings, feedback actions, scent trail |
+
+**Flow 6 scope:** Merges the run's feature branch into swarm `origin/main`. Does NOT merge to upstream. Upstream integration is a separate, post-Wisdom step.
+
+---
+
+## Quickstart
+
+**Prerequisites:** Claude Code (`claude`), Git, bash. `gh` CLI recommended for PR/issue integration.
+
+### 1. Set Up the Swarm Repo
+
+Work in a downstream clone or fork (recommended):
+
 ```bash
-# Clone the swarm repo (runs in isolation)
-gh repo clone EffortlessMetrics/demo-swarm my-feature-swarm
-cd my-feature-swarm
+# Fork approach (GitHub PR integration)
+gh repo fork <org>/<repo> --fork-name <repo>-swarm --clone
+cd <repo>-swarm
 
-# Install the shim (ensures deterministic counting)
-bash scripts/bootstrap.sh
+# Or clone approach (simpler, local-only)
+git clone <repo-url> <repo>-swarm
+cd <repo>-swarm
 ```
 
-### 2. Run a Flow
-Open Claude Code and give it a task.
+### 2. Install the Pack
+
+If you don't have it yet:
 
 ```bash
-claude
+# Copy from demo-swarm or install per your org's method
+cp -r /path/to/demo-swarm/.claude .
+git add .claude/ && git commit -m "feat: Add DemoSwarm pack"
 ```
+
+### 3. Customize for Your Stack
 
 ```text
-/flow-1-signal "Add a CLI command 'demoswarm version' that prints the git sha."
+/customize-pack
 ```
 
-### 3. Inspect the Evidence
-Don't read the chat. Look at the **Artifacts** in `.runs/`:
-*   `.runs/<id>/signal/requirements.md` (The Contract)
-*   `.runs/<id>/plan/adr.md` (The Decision)
-*   `.runs/<id>/build/build_receipt.json` (The Proof)
+This detects your stack (Rust/Python/Node/Go), configures test/lint commands, and writes a config receipt.
+
+### 4. Run a Flow
+
+```text
+/flow-1-signal "Add a health check endpoint"
+```
+
+### 5. Inspect the Evidence
+
+Look at artifacts in `.runs/<run-id>/`:
+
+| Artifact | What It Is |
+|----------|------------|
+| `signal/requirements.md` | The contract |
+| `plan/adr.md` | The architecture decision |
+| `build/build_receipt.json` | The evidence |
+| `build/ac_status.json` | Progress checkpoint |
 
 ---
 
-## The Seven Flows
+## The Dispatch Rhythm
 
-We map the software lifecycle to 7 stateful flows. Context is passed via **Artifacts** on disk.
+```text
+/customize-pack           # Once per repo
+/flow-1-signal "..."      # Shape the work → skim requirements, answer questions
+/flow-2-plan              # Design → approve ADR
+/flow-3-build             # Build → Draft PR; if PARTIAL, rerun
+/flow-4-review            # Drain worklist → Ready PR; if PARTIAL, rerun
+/flow-5-gate              # Audit → MERGE or BOUNCE verdict
+/flow-6-deploy            # Merge to swarm main, verify
+/flow-7-wisdom            # Extract learnings
+```
 
-| Flow | Vibe | Input -> Output |
-| :--- | :--- | :--- |
-| **1. Signal** | *Discovery* | Messy intent -> **Requirements**, BDD scenarios, Risk profile. |
-| **2. Plan** | *Architecture* | Requirements -> **ADR**, Contracts, Observability Spec. |
-| **3. Build** | *Velocity* | Spec -> **Draft PR**. *(Pushes early. Checks "Pulse" (CI status). Interrupts only for fires.)* |
-| **4. Review** | *Rigor* | Draft PR -> **Ready PR**. *(Unbounded loop. Harvests CodeRabbit/CI feedback. Drains worklist.)* |
-| **5. Gate** | *Audit* | PR -> **Merge Verdict**. *(Verifies evidence/receipts, not vibes.)* |
-| **6. Deploy** | *Reality* | Verdict -> **Production**. *(Distinguishes "Failed" from "Governance Invisible".)* |
-| **7. Wisdom** | *Learning* | History -> **Retrospective**. *(Feeds learnings back into the pack.)* |
+After Flow 7: Review wisdom outputs, then integrate to upstream when ready.
 
 ---
 
-## Usage Guide
+## Repo Topology
 
-### Adopting in your Repo
-DemoSwarm is designed to run in a **downstream clone** (e.g., `my-app-swarm`). It creates `run/<run-id>` branches and commits `.runs/` artifacts as an audit trail.
+Recommended: run in a downstream swarm clone/fork.
 
-1.  **Clone** your repo.
-2.  **Copy** the `.claude/` folder from this pack.
-3.  **Run** `/customize-pack` to auto-detect your stack (Rust/Python/Node) and align the test runners.
+```
+my-project/              # Human workspace (stays calm)
+my-project-swarm/        # Swarm workspace (commits freely)
+```
 
-### The Dispatch Rhythm
-1.  `/flow-1-signal` → skim requirements, answer open questions
-2.  `/flow-2-plan` → approve ADR
-3.  `/flow-3-build` → Draft PR created; if `PARTIAL`, rerun
-4.  `/flow-4-review` → worklist drained; if `PARTIAL`, rerun
-5.  `/flow-5-gate` → MERGE or BOUNCE verdict
-6.  Review **receipts** (the evidence), not raw code
-7.  **Merge.**
+Benefits:
+- **Inspectability**: `.runs/` artifacts committed and reviewable
+- **Isolation**: Swarm activity doesn't disrupt human development
+- **Clean export**: Open PR from swarm to origin when ready
+
+See: [adopt-fork-workflow.md](docs/how-to/adopt-fork-workflow.md)
+
+---
+
+## Upstream Integration
+
+DemoSwarm does NOT automatically merge to upstream.
+
+After Wisdom, you can:
+1. Ensure feature branch is clean against swarm `origin/main`
+2. Sync swarm `origin/main` with upstream `main`
+3. Rebase feature branch onto updated swarm main
+4. Rerun Flows 4–7 if needed to re-stabilize
+5. Open PR from swarm to upstream when ready
+
+This keeps the human-in-the-loop for cross-repo integration.
 
 ---
 
 ## Documentation
 
 | Guide | Content |
-| :--- | :--- |
-| [**Quickstart**](docs/tutorials/quickstart.md) | Detailed first-run guide |
-| [**Walkthrough**](docs/tutorials/walkthrough.md) | Full demo script for presenters |
-| [**Architecture**](docs/explanation/architecture.md) | Ops-First philosophy and design patterns |
-| [**CLI Reference**](docs/reference/demoswarm-cli.md) | Full `demoswarm` command reference |
-| [**Contracts**](docs/reference/contracts.md) | Receipt schemas and stable markers |
-| [**Maintenance**](docs/maintainers/handover.md) | How to modify and release this pack |
+|-------|---------|
+| [Quickstart](docs/tutorials/quickstart.md) | First-run guide |
+| [Architecture](docs/explanation/architecture.md) | Ops-First philosophy and design |
+| [Contracts](docs/reference/contracts.md) | Receipt schemas and stable markers |
+| [CLI Reference](docs/reference/demoswarm-cli.md) | `demoswarm` command reference |
+| [Fork Workflow](docs/how-to/adopt-fork-workflow.md) | Setting up swarm repo |
+| [Failure Recovery](docs/how-to/failure-recovery.md) | Handling stuck flows |
 
 ---
 
