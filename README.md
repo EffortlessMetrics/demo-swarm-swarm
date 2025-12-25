@@ -4,6 +4,8 @@ Ops-first SDLC pack for Claude Code.
 
 **Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
 
+**What it produces:** A PR with evidence (tests, receipts, critiques) you can review in minutes, not hours.
+
 ---
 
 ## Start Here

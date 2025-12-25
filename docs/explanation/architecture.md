@@ -4,6 +4,55 @@
 
 ---
 
+## Context
+
+DemoSwarm exists because the bottleneck in AI-assisted development isn't writing code—it's verifying it.
+
+### The Economic Constraint
+
+Model iteration is cheap relative to reviewer attention. So the goal is not "generate code." The goal is to produce **review-ready evidence**:
+
+- Contracts and decisions (`signal/`, `plan/`)
+- Tests and diffs (`build/`)
+- Feedback closure (`review/`)
+- Audit + merge decision (`gate/`)
+- Merge + verification on swarm mainline (`deploy/`)
+- Learnings that feed the next run (`wisdom/`)
+
+**What we optimize:** DevLT (Developer Lead Time)—the human minutes required to verify a change. The system is allowed to "grind" if it produces better evidence and fewer review surprises.
+
+### The Trust Model
+
+The pack treats generated code as draft until it's backed by evidence (tests, diffs, critiques). Receipts summarize what happened; the git log is the audit trail.
+
+We don't enforce hard coverage ratios or test-to-code formulas. Instead, critics reason about whether the test *strategy* matches the code's *risk surface*. See [trust-model.md](../reference/trust-model.md) for details.
+
+### The Topology
+
+Runs execute in a **swarm clone/fork** and converge against swarm `origin/main`. Upstream integration happens after the run is stable, and is handled explicitly (sync/rebase → rerun Flows 4–7 if needed → PR upstream).
+
+This isolates high-churn iteration from human development and keeps `.runs/` artifacts in a reviewable audit trail. See [run-topology.md](../how-to/run-topology.md) and [adopt-fork-workflow.md](../how-to/adopt-fork-workflow.md) for setup.
+
+---
+
+## What DemoSwarm Is
+
+- A **Claude Code pack** (`.claude/`) plus deterministic tooling
+- A set of **flows** you dispatch manually—no daemon, no always-on agent
+- A system where **artifacts are the handoff** and the chat log is not a source of truth
+- A **pre-CI manufacturing line** for changes: turns intent into a PR you can skim
+
+## What DemoSwarm Is Not
+
+- Not an autonomous "ship to prod" agent
+- Not a replacement for code review—it produces the *input* to review
+- Not a promise that code is "correct because AI said so"
+- Not a repo that merges into upstream automatically (by design)
+
+**In one sentence:** DemoSwarm is an artifact-first, rerunnable SDLC workflow for LLM-driven changes that trades machine iteration for lower human verification time—without hiding the evidence.
+
+---
+
 ## Core Patterns
 
 Four patterns that separate DemoSwarm from standard LLM scripts.
