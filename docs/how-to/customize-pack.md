@@ -22,7 +22,7 @@ The pack is designed to be **layout-neutral**:
 3) **GitHub integration** (optional)
 - If `gh` is missing/unauthenticated, the pack still produces local artifacts.
 - Reporting ops (`gh-issue-manager`, `gh-reporter`) are designed to **SKIP** when GH tooling/auth isn't available.
-- Release ops in Flow 5 (merge/tag/release) require working GitHub integration if you want automation.
+- Release ops in Flow 6 (merge/tag/release) require working GitHub integration if you want automation.
 
 ---
 
@@ -44,8 +44,8 @@ Notes:
 | Tool | Purpose | Fallback |
 |------|---------|----------|
 | `jq` | JSON pretty-printing | `python -m json.tool` |
-| `gh` | GitHub issues/comments + (Flow 5) GitHub-native release ops | Reporting ops SKIPPED; release ops require human handling |
-| `curl` | Smoke/health checks (Flow 5 smoke-verifier) | Smoke checks become artifact-only / N/A |
+| `gh` | GitHub issues/comments + (Flow 6) GitHub-native release ops | Reporting ops SKIPPED; release ops require human handling |
+| `curl` | Smoke/health checks (Flow 6 smoke-verifier) | Smoke checks become artifact-only / N/A |
 
 ---
 
@@ -175,7 +175,7 @@ If you need different counts:
 
 ## Git provider adaptation (advanced)
 
-The pack ships with GitHub-oriented agents (`gh-*`) and Flow 5 release ops that assume GitHub.
+The pack ships with GitHub-oriented agents (`gh-*`) and Flow 6 release ops that assume GitHub.
 
 If you're on GitLab/Azure/Bitbucket, you have two sane options:
 
@@ -199,7 +199,7 @@ Treat "swap commands in place" as insufficient unless you also update contracts,
 
 Default:
 
-* Flow 5 `deploy-monitor` is written for GitHub Actions (via `gh`).
+* Flow 6 `deploy-monitor` is written for GitHub Actions (via `gh`).
 
 If you use another CI system:
 
@@ -281,7 +281,7 @@ Avoid `sed -i` assumptions. Prefer portable patterns or handle macOS/Linux diffe
 ### `gh: command not found` / `gh: not authenticated`
 
 * Reporting ops will be SKIPPED and local artifacts still written.
-* Flow 5 release ops won't run automatically without working GitHub tooling/auth.
+* Flow 6 release ops won't run automatically without working GitHub tooling/auth.
 
 Install/auth (GitHub CLI docs):
 

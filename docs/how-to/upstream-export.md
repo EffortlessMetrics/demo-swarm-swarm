@@ -24,7 +24,7 @@
 The pack is designed for swarm autonomy:
 
 - Swarm repo runs flows end-to-end
-- Flow 5 merges into swarm's `main`
+- Flow 6 merges into swarm's `main`
 - `.runs/` artifacts stay in swarm repo
 
 Upstream export (moving code to human repo) is intentionally **not automated**. This keeps the human repo calm and gives you control over what lands.

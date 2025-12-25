@@ -478,7 +478,7 @@ name: test-agent
             ".runs/<run-id>",
             "run_meta.json",
             "index.json",
-            "Six Flows",
+            "Seven Flows",
             "Receipt",
             "secrets-sanitizer",
         ];
@@ -614,7 +614,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md (required)
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create only ONE agent (not all required agents)
         create_agent(&repo_root, "test-agent", "---\nname: test-agent\n---\n# Test Agent\n");
@@ -642,7 +642,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create flow commands for only flows 1-3 (missing 4-6)
         for i in 1..=3 {
@@ -662,7 +662,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create agent WITHOUT name in frontmatter
         create_agent(&repo_root, "no-name-agent", "---\ndescription: Agent without name\n---\n# No Name Agent\n");
@@ -685,7 +685,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create agent with NAME that doesn't match FILENAME
         create_agent(&repo_root, "wrong-name-agent", "---\nname: different-name\n---\n# Agent with wrong name\n");
@@ -708,7 +708,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create two agents with the SAME frontmatter name
         create_agent(&repo_root, "agent-one", "---\nname: duplicate-name\n---\n# Agent One\n");
@@ -732,7 +732,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create agents with correct names
         create_agent(&repo_root, "agent-one", "---\nname: agent-one\n---\n# Agent One\n");
@@ -759,7 +759,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create only SOME skills (not all required)
         create_skill(&repo_root, "test-runner", "# Test Runner\n");
@@ -802,7 +802,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create flow commands (but NOT customize-pack)
         for i in 1..=6 {
@@ -824,7 +824,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create flow commands AND customize-pack command
         for i in 1..=6 {
@@ -847,7 +847,7 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer");
 
         // Create flow commands AND customize-pack command
         for i in 1..=6 {

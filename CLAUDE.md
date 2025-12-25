@@ -11,7 +11,7 @@ This repository contains an SDLC swarm pack under `.claude/`.
 This pack provides:
 
 - **7 flows**: Signal → Plan → Build → Review → Gate → Deploy → Wisdom
-- **50+ agents**: narrow specialists (requirements-author, code-critic, test-author, *-cleanup, etc.)
+- **Narrow specialist agents**: requirements-author, code-critic, test-author, *-cleanup, etc. (see `.claude/agents/`)
 - **7 skills**: test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 
 Start here:

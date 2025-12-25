@@ -40,7 +40,7 @@ The portable pack that gets copied into target repos.
 
 ```
 .claude/
-|-- agents/                     # Subagent definitions (73 agents)
+|-- agents/                     # Subagent definitions
 |   `-- <agent-name>.md         # YAML frontmatter + prompt
 |
 |-- commands/                   # Slash command orchestrators
@@ -121,7 +121,7 @@ docs/
 
 ---
 
-## Agent Categories (73 total)
+## Agent Categories
 
 | Category | Color | Role |
 |----------|-------|------|

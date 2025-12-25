@@ -2,7 +2,7 @@
 
 > Master listing of all domain agents in the DemoSwarm pack.
 
-This index lists all 73 agents organized by role family. For behavior details, see individual agent files in `.claude/agents/`.
+This index lists agents organized by role family. For behavior details, see individual agent files in `.claude/agents/`.
 
 ---
 
@@ -18,7 +18,7 @@ This index lists all 73 agents organized by role family. For behavior details, s
 | [Analytics](#analytics-agents-orange) | Orange | 11 | Analysis, learning, and insights |
 | [Infra](#infra-agents-cyan) | Cyan | 2 | Repo and run infrastructure |
 | [Reporter](#reporter-agents-pink) | Pink | 1 | GitHub posting |
-| **Total** | | **61** | |
+| **Listed** | | **61** | (see `.claude/agents/` for full set) |
 
 Note: Some agents appear in multiple categories based on their color/role.
 

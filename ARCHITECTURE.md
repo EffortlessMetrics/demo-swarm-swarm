@@ -10,8 +10,8 @@ This stub exists so that top-level discovery finds the architecture doc. The can
 
 DemoSwarm is a Claude Code pack providing:
 
-- **Six SDLC flows** (Signal → Plan → Build → Gate → Deploy → Wisdom)
-- **50+ narrow agents** (authors, critics, infra, reporters)
+- **Seven SDLC flows** (Signal → Plan → Build → Review → Gate → Deploy → Wisdom)
+- **Narrow agents** (authors, critics, infra, reporters)
 - **7 skills** (test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools)
 
 The pack defines the **control plane** (agents + commands). Runtimes and UIs are adapters on top.

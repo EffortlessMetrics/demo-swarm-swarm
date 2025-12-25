@@ -4,10 +4,10 @@ Thanks for contributing to the demo-swarm pack. This is a **pack-only repository
 
 ## What lives here
 
-- `.claude/agents/` — Subagent definitions (50+ agents)
+- `.claude/agents/` — Subagent definitions
 - `.claude/commands/` — Slash command orchestrators (7 flows + customize)
 - `.claude/skills/` — Skills (test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools)
-- `docs/` — Documentation (CUSTOMIZATION.md, TOY_RUN.md)
+- `docs/` — Documentation (Diataxis structure)
 - `scripts/` — Validation scripts
 
 ## What does NOT live here

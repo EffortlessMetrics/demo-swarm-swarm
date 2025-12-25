@@ -35,7 +35,7 @@
 
 ```
 .claude/
-|- agents/               # Subagent definitions (50+)
+|- agents/               # Subagent definitions
 |- commands/             # Slash-command orchestrators (/flow-*, /customize-pack)
 |- skills/               # test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 |- scripts/              # pack-check.sh + demoswarm.sh entrypoints

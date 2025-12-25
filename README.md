@@ -2,6 +2,8 @@
 
 Ops-first SDLC pack for Claude Code. Trades machine iteration for lower human verification time.
 
+**Core constraint:** Tokens are cheap; reviewer attention is the bottleneck. Spend machine cycles to produce evidence humans can skim.
+
 ---
 
 ## Start Here
@@ -11,7 +13,11 @@ Ops-first SDLC pack for Claude Code. Trades machine iteration for lower human ve
 /flow-1-signal "Add a health check endpoint" # Your first run
 ```
 
-Then open `.runs/<run-id>/signal/requirements.md` — that's the contract the swarm built from your one-liner.
+Then open:
+- `.runs/<run-id>/signal/requirements.md` — the contract
+- `.runs/<run-id>/signal/open_questions.md` — assumptions needing validation
+
+If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a bad build.
 
 **Full setup:** [Quickstart](docs/tutorials/quickstart.md) · **Reference:** [CLAUDE.md](CLAUDE.md)
 
@@ -56,7 +62,7 @@ Each flow writes to `.runs/<run-id>/<flow>/`. These artifacts are the record —
 Work freely (read files, write code, run tests). Gates only engage at **commit / push / GitHub posting**:
 
 - **Secrets**: Sanitized in-place; blocks only when manual remediation required
-- **Anomalies**: Test deletions block push; extras (typo fixes) are staged automatically
+- **Anomalies**: Surfaced at publish time; test deletions may block push; extras (typo fixes) are staged automatically
 - **Mechanical failures**: Block publish, not work
 
 If a gate blocks, keep working locally. Gates constrain publishing, not thinking.

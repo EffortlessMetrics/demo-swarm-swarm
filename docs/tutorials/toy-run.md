@@ -327,7 +327,7 @@ After seeing Flow 1 work:
 1. **Continue the flow sequence**: `/flow-2-plan toy-run` (uses Signal outputs)
 2. **Enable GitHub**: `gh auth login` then rerun to see GH integration
 3. **Customize for your stack**: `/customize-pack` to set test/lint commands
-4. **See full validation guide**: [tutorials/validation-run.md](tutorials/validation-run.md)
+4. **See full validation guide**: [validation-run.md](validation-run.md)
 
 ---
 
