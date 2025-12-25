@@ -304,16 +304,18 @@ These are invariants that prevent execution drift. Violating them creates subtle
 
 ### Law 1: PM/IC Boundary
 
-**Orchestrators route. Agents work. State-owners track.**
+**Orchestrators route. Agents work. Cleanup agents audit.**
 
 | Role | Responsibility | Example |
 |------|----------------|---------|
 | **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite | "If gate_verdict is MERGE, proceed to merge ops" |
-| **Worker** (agent) | Do the work, report honestly | `code-implementer`, `test-author`, `fixer` |
-| **State-Owner** (agent) | Own a state file, update it by reading worker responses | `review-worklist-writer`, `build-cleanup` |
+| **Worker** (agent) | Do the work, update tracking artifacts, report honestly | `code-implementer`, `test-author`, `fixer` |
+| **Auditor** (cleanup agent) | Verify on-disk state matches evidence (tests/diffs), seal receipts | `build-cleanup`, `review-cleanup` |
 
-**Violation:** Orchestrator editing `ac_status.json` or `review_worklist.json` directly.
-**Correct:** Orchestrator calls `build-cleanup` to update AC status based on worker results.
+Workers own their progress updates. Cleanup agents verify that claims match reality.
+
+**Violation:** Orchestrator parsing `ac_status.json` to determine routing.
+**Correct:** Orchestrator routes on the Result block returned by `build-cleanup`.
 
 ### Law 2: Every Call Is an Implicit Resume
 
@@ -329,19 +331,20 @@ When an agent starts:
 
 **Corollary:** If an agent needs genuinely different behavior (not just "resume vs fresh"), that's a signal for two separate agents, not a `mode:` parameter.
 
-### Law 3: Agents Own State Files
+### Law 3: Workers Update, Auditors Verify
 
-Each state file has exactly one owner agent. Only that agent writes to it.
+**Workers own their progress. Cleanup agents verify claims against evidence.**
 
-| State File | Owner Agent | Other Agents |
-|------------|-------------|--------------|
-| `ac_status.json` | `build-cleanup` | Workers report completion; cleanup updates the file |
-| `review_worklist.json` | `review-worklist-writer` | Workers report what they did; writer updates status |
-| `run_meta.json` | `run-prep`, `*-cleanup`, `gh-issue-manager` | Others may read but not write |
-| `index.json` | `*-cleanup`, `run-prep`, `gh-issue-manager` | Others may read but not write |
+| Artifact Type | Who Updates | Who Audits |
+|--------------|-------------|------------|
+| **Progress state** (`ac_status.json`, `review_worklist.json`) | Worker completing the work | Cleanup agent cross-checks against test results |
+| **Receipts** (`*_receipt.json`) | Cleanup agent (mechanical derivation) | Downstream flows |
+| **Index** (`.runs/index.json`) | Cleanup agents, `run-prep`, `gh-issue-manager` | — |
 
-**Violation:** `code-implementer` updating `ac_status.json` after finishing an AC.
-**Correct:** `code-implementer` reports completion in its Result block. Orchestrator calls `build-cleanup` to update `ac_status.json`.
+**Key insight:** Cross-agent coordination happens through artifacts, not prose parsing. The cleanup agent reads `ac_status.json` and cross-references it with `test_execution.md`. If they disagree, it reports a **Forensic Mismatch** — status becomes UNVERIFIED.
+
+**Violation:** `build-cleanup` parsing the orchestrator's chat history to determine AC status.
+**Correct:** `build-cleanup` reads `ac_status.json` (written by workers) and verifies against test evidence.
 
 ### Law 4: AC Termination = Green + Orchestrator Agreement
 
@@ -373,17 +376,16 @@ Don't batch these into end-of-flow reporting. The line stops until humans respon
 
 **Most questions are not blockers.** DEFAULTED (safe reversible default chosen) is the common case. NON_DERIVABLE is rare and requires proof-of-research.
 
-### Law 6: Infrastructure Before Logic
+### Law 6: Foundation-First Sequencing
 
-**State-transition work must complete before tasks that assume the new state.**
+**Infrastructure subtasks are the root of the dependency tree.**
 
-This is enforced in `work-planner`:
-- Infrastructure/migration subtasks (ST-000, etc.) depend on nothing
-- Logic subtasks that assume new state must list infrastructure in `depends_on`
-- You cannot schedule logic before the state it depends on exists
+This is structural, not a constraint. The `work-planner` designs dependency graphs where:
+- Infrastructure/migration subtasks (ST-000, etc.) have no dependencies
+- Logic subtasks that consume new state list infrastructure in `depends_on`
+- Critics validate that dependencies flow downward (foundations → walls → roof)
 
-**Violation:** `ST-002: Implement login flow` with no dependency, when login requires a new `sessions` table from `ST-001`.
-**Correct:** `ST-002` has `depends_on: ["ST-001"]`.
+**Example:** `ST-001: Create sessions table` has no dependencies. `ST-002: Implement login flow` has `depends_on: ["ST-001"]`.
 
 ---
 
