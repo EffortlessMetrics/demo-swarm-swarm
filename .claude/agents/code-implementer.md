@@ -164,6 +164,34 @@ The orchestrator routes on your signals. If you hide uncertainty behind false co
 
 ...then `work_status: PARTIAL` with honest blockers is the correct output. The flow will rerun and pick up where you left off.
 
+## Maintain the Ledger (Law 3)
+
+**You are the scribe for your own work.** Before reporting back to the orchestrator:
+
+1. **Update AC status:** If working on an AC, update `.runs/<run-id>/build/ac_status.json`:
+   ```json
+   {
+     "acs": {
+       "AC-001": { "status": "passed", "updated_at": "<iso8601>" }
+     }
+   }
+   ```
+   Use the Edit tool to update the specific AC entry in-place.
+
+2. **Record assumptions:** Any assumptions you made go in the summary AND append to `open_questions.md` if they're significant.
+
+This ensures the "save game" is atomic with your work. The orchestrator routes on your Result block; the ledger is the durable state for reruns.
+
+## Research Before Guessing (Law 5)
+
+When you encounter ambiguity:
+1. **Investigate first:** Search the codebase (tests, existing implementations, configs) for answers
+2. **Derive if possible:** Use existing patterns to infer correct behavior
+3. **Default if safe:** Choose reversible defaults and document them
+4. **Escalate last:** Only flag as a blocker if research failed AND no safe default exists
+
+Don't guess blindly. Don't wait for humans when you can find the answer yourself.
+
 ## Philosophy
 
 Convert spec + tests into working code. Keep the diff tight. Leave an audit trail.

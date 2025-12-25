@@ -67,6 +67,20 @@ Prioritize questions that would change design, scope, or tests:
 - Undefined domain terms/acronyms
 - External dependencies/ownership unclear (source of truth, integration owners)
 
+## Research-First Protocol (Law 5)
+
+**Investigate → Derive → Default → Escalate (in that order)**
+
+Before classifying a question as DECISION_NEEDED:
+
+1. **Investigate locally:** Search the repo for existing patterns, configs, prior runs, tests
+2. **Investigate remotely (if allowed):** Check GitHub issues/PRs, project docs, web search for industry standards
+3. **Derive from evidence:** Can you infer the answer from surrounding code, existing APIs, or test expectations?
+4. **Default if safe:** Choose a reversible default and document it
+5. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+
+**Most questions are NOT blockers.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code. Only escalate if the repo genuinely has no patterns to follow AND the choice has irreversible consequences.
+
 ## Question Taxonomy (Required)
 
 Every question MUST be classified into exactly one bucket.

@@ -44,8 +44,20 @@ Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot wri
 
 ## Outputs
 
+**Audience-Segmented Outputs:**
+
+| Output | Audience | Content |
+|--------|----------|---------|
+| `feedback_actions.md` | Project (Both) | Issue drafts, doc suggestions, follow-up work items |
+| `pack_improvements.md` | Pack (Machine) | Ready-to-apply diffs for agent prompts, flow docs, skills |
+| `codebase_wisdom.md` | Repo (Human) | Structural hotspots, brittle patterns, architectural observations |
+| `.runs/_wisdom/latest.md` | Future (Scent Trail) | Top 3-5 learnings for the next run's researcher |
+
+**Files to write:**
 - `.runs/<run-id>/wisdom/feedback_actions.md` — issue drafts and minor suggestions
 - `.runs/<run-id>/wisdom/pack_improvements.md` — ready-to-apply diffs for pack/agent prompts
+- `.runs/<run-id>/wisdom/codebase_wisdom.md` — structural insights for humans
+- `.runs/_wisdom/latest.md` — scent trail for future runs (cross-run persistence)
 
 ## Non-negotiables
 
@@ -190,6 +202,84 @@ concerns: []
 ```
 ```
 
+## Output Format: `codebase_wisdom.md` (required)
+
+```md
+# Codebase Wisdom (Run <run-id>)
+
+## Structural Hotspots
+
+Files/modules that showed high friction or complexity during this run:
+
+- `<path>` — <why it's a hotspot, what makes it risky>
+- `<path>` — <friction observed, coupling issues, etc.>
+
+## Brittle Patterns
+
+Code patterns that broke or nearly broke during this run:
+
+- **Pattern:** <description>
+  - **Evidence:** <where it appeared>
+  - **Risk:** <what could go wrong>
+  - **Suggested refactor:** <if obvious>
+
+## Architectural Observations
+
+Cross-cutting insights about the codebase structure:
+
+- <observation + evidence>
+- <observation + evidence>
+
+## Test Health Notes
+
+Quality observations about the test suite:
+
+- **Coverage gaps:** <areas with weak coverage>
+- **Flaky zones:** <areas with unstable tests>
+- **Missing test types:** <e.g., integration tests for X>
+
+## Recommendations for Humans
+
+Prioritized list of improvements (not issue drafts—these are for discussion):
+
+1. <recommendation + rationale>
+2. <recommendation + rationale>
+```
+
+## Output Format: `.runs/_wisdom/latest.md` (Scent Trail)
+
+This file persists across runs. It contains the top 3-5 learnings that should inform the NEXT run's researcher.
+
+```md
+# Wisdom Scent Trail
+
+Last updated: <run-id> at <timestamp>
+
+## Negative Constraints (Things to Avoid)
+
+- **Do not:** <pattern or approach that failed>
+  - **Evidence:** <run-id where it failed>
+- **Do not:** <pattern or approach that failed>
+  - **Evidence:** <run-id where it failed>
+
+## Positive Patterns (What Worked)
+
+- **Do:** <pattern or approach that succeeded>
+  - **Evidence:** <run-id where it worked>
+
+## Known Pitfalls
+
+- `<module/area>` — <pitfall and why it matters>
+- `<module/area>` — <pitfall and why it matters>
+
+## Active Wisdom (carries forward until superseded)
+
+- <learning that applies to future runs>
+- <learning that applies to future runs>
+```
+
+**Cross-run persistence:** This file lives at `.runs/_wisdom/latest.md` (not under a run-id). Each Wisdom run updates it, replacing the previous version. The `gh-researcher` reads this file before starting research.
+
 ## Stable Marker Contract (for wisdom-cleanup)
 
 For mechanical counting, preserve these exact line prefixes:
@@ -226,9 +316,13 @@ concerns: []
 output_files:
   - .runs/<run-id>/wisdom/feedback_actions.md
   - .runs/<run-id>/wisdom/pack_improvements.md
+  - .runs/<run-id>/wisdom/codebase_wisdom.md
+  - .runs/_wisdom/latest.md
 issue_drafts: 0
 suggestions: 0
 pack_improvements: 0
+codebase_insights: 0
+scent_trail_updated: yes|no
 ```
 
 ## Philosophy

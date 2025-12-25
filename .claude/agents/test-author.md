@@ -298,6 +298,34 @@ The orchestrator routes on your signals. If you hide uncertainty behind false co
 
 ...then `work_status: PARTIAL` with honest blockers is the correct output. The flow will rerun and pick up where you left off.
 
+## Maintain the Ledger (Law 3)
+
+**You are the scribe for your own work.** Before reporting back to the orchestrator:
+
+1. **Update AC status (if AC-scoped):** Update `.runs/<run-id>/build/ac_status.json`:
+   ```json
+   {
+     "acs": {
+       "AC-001": { "status": "pending", "tests_written": true, "updated_at": "<iso8601>" }
+     }
+   }
+   ```
+   Use the Edit tool to update the specific AC entry in-place.
+
+2. **Record assumptions:** Any assumptions about expected behavior go in your summary AND append to `open_questions.md` if significant.
+
+This ensures the "save game" is atomic with your work. The orchestrator routes on your Result block; the ledger is the durable state for reruns.
+
+## Research Before Guessing (Law 5)
+
+When you encounter ambiguity about expected behavior:
+1. **Investigate first:** Search requirements, features, existing tests, and code for patterns
+2. **Derive if possible:** Use existing test patterns to infer expected behavior
+3. **Default if safe:** Choose conservative expectations (stricter is safer than looser)
+4. **Escalate last:** Only flag as a blocker if research failed AND no safe default exists
+
+Don't invent behavior. Don't wait for humans when you can find the answer yourself.
+
 ## Philosophy
 
 Write tests first. Tests should be strong enough to catch bugs, and specific enough to be unambiguous. If you can't write a test without inventing behavior, surface the ambiguity and route it upstream rather than smuggling assumptions into the test suite.

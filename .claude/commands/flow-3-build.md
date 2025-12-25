@@ -108,10 +108,28 @@ An AC is complete when BOTH conditions are met:
 1. **test-executor returns Green** for that AC's scope
 2. **Orchestrator agrees** there's nothing left worth fixing
 
-"Green tests" alone is not sufficient. If `code-critic` identifies maintainability risks or clear technical debt, authorize one improvement pass. Use judgment:
-- If the critic's worklist is minor polish: proceed, defer to Flow 4
-- If the critic found a real issue: send back to implementer
-- If `can_further_iteration_help: no`: stop, document, proceed
+**"Green is a floor, not a ceiling."** Passing tests prove functional correctness. But professional code also needs maintainability.
+
+**Post-Green Polish Pass Protocol:**
+
+When `test-executor` returns Green, **read the latest `code-critic` report** before marking the AC complete:
+
+1. **Check `code_critique.md`:** Does the critic identify:
+   - Logic debt (fragile patterns, hidden coupling)
+   - Maintainability risks (unclear naming, duplicated code)
+   - Obvious improvements (missing error handling, unsafe patterns)
+
+2. **Authorize one polish pass** if:
+   - Critic identified concrete, fixable issues (not just stylistic preferences)
+   - `can_further_iteration_help: yes`
+   - The fix is scoped to the current AC (not architectural)
+
+3. **Proceed without polish** if:
+   - Critic says `can_further_iteration_help: no`
+   - Issues are minor/stylistic (defer to Flow 4)
+   - Issues require architectural changes (defer to Flow 4 or future work)
+
+**The single polish pass rule:** One extra iteration to clean up what the critic found. Not an infinite loop of gold-plating. One pass, then proceed.
 
 **After first vertical slice (AC-1 complete):**
 1. Call `repo-operator`: checkpoint push

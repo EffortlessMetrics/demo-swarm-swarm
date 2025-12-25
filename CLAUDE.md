@@ -331,9 +331,14 @@ When an agent starts:
 
 **Corollary:** If an agent needs genuinely different behavior (not just "resume vs fresh"), that's a signal for two separate agents, not a `mode:` parameter.
 
-### Law 3: Workers Update, Auditors Verify
+### Law 3: Workers Maintain the Ledger (Every Agent is a Scribe)
 
-**Workers own their progress. Cleanup agents verify claims against evidence.**
+**The worker who touches the code is the worker who updates the status.**
+
+Workers (`code-implementer`, `test-author`, `fixer`, `doc-writer`) update their tracking artifacts (`ac_status.json`, `review_worklist.json`) **before** reporting back to the orchestrator. This ensures:
+- The "save game" is atomic with the work
+- The orchestrator routes on Result blocks, not prose parsing
+- State survives context exhaustion
 
 | Artifact Type | Who Updates | Who Audits |
 |--------------|-------------|------------|
@@ -343,8 +348,8 @@ When an agent starts:
 
 **Key insight:** Cross-agent coordination happens through artifacts, not prose parsing. The cleanup agent reads `ac_status.json` and cross-references it with `test_execution.md`. If they disagree, it reports a **Forensic Mismatch** — status becomes UNVERIFIED.
 
-**Violation:** `build-cleanup` parsing the orchestrator's chat history to determine AC status.
-**Correct:** `build-cleanup` reads `ac_status.json` (written by workers) and verifies against test evidence.
+**Violation:** Orchestrator asks "what's the AC status?" and parses the response.
+**Correct:** Worker updated `ac_status.json`; cleanup agent verifies against test evidence and returns Result block.
 
 ### Law 4: AC Termination = Green + Orchestrator Agreement
 
@@ -358,23 +363,25 @@ An AC is done when:
 
 Even with green tests, if `code-critic` identifies a maintainability risk or clear technical debt, the orchestrator should authorize one improvement pass. The critic's `can_further_iteration_help: no` signal (or orchestrator judgment) terminates the loop.
 
-### Law 5: True Blockers Surface Immediately
+### Law 5: Research-First Autonomy (Investigate → Derive → Default → Escalate)
 
-**Non-derivable blockers don't wait for end-of-flow.**
+**If an agent can't derive an answer, it investigates first, then defaults, then escalates.**
 
-If an agent (especially `clarifier`) hits a genuine NON_DERIVABLE blocker:
-- It cannot make a recommendation
-- No safe default exists
-- Human decision is required
+The escalation ladder (in order):
+1. **Investigate locally:** Search code, tests, configs, prior runs, existing docs
+2. **Investigate remotely (if allowed):** GitHub issues/PRs, web search, library docs
+3. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
+4. **Default if safe:** Choose a reversible default, document it, continue
+5. **Escalate only when boxed in:** All of the above failed AND no safe default exists
 
-The orchestrator should immediately call `gh-issue-manager` to post a comment with:
+**The bar for human escalation is high.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code.
+
+**When escalation IS required:** Non-derivable blockers don't wait for end-of-flow. The orchestrator should immediately call `gh-issue-manager` to post:
 - The blocker description
-- Evidence searched
+- Evidence searched (proof of research)
 - The decision needed
 
-Don't batch these into end-of-flow reporting. The line stops until humans respond.
-
-**Most questions are not blockers.** DEFAULTED (safe reversible default chosen) is the common case. NON_DERIVABLE is rare and requires proof-of-research.
+**Most questions are NOT blockers.** DEFAULTED (safe reversible default chosen) is the common case. NON_DERIVABLE is rare and requires proof-of-research.
 
 ### Law 6: Foundation-First Sequencing
 

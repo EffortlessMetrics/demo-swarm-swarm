@@ -378,7 +378,20 @@ This friction log informs pack improvements—the "Staff Engineer" whispers in t
 
 ### Step 12: Apply Feedback
 
-**Call `feedback-applier`** — turns learnings into concrete actions (issue drafts, doc suggestions). Does NOT create GitHub issues directly.
+**Call `feedback-applier`** — turns learnings into concrete actions. Does NOT create GitHub issues directly.
+
+**Audience-Segmented Outputs:**
+
+Wisdom learnings are only valuable if they reach the right consumer:
+
+| Output | Audience | Content |
+|--------|----------|---------|
+| `pack_improvements.md` | **Pack (Machine)** | Ready-to-apply diffs for agent prompts, flow docs, skills |
+| `codebase_wisdom.md` | **Repo (Human)** | Structural hotspots, brittle patterns, architectural observations |
+| `feedback_actions.md` | **Project (Both)** | Issue drafts, doc suggestions, follow-up work items |
+| `.runs/_wisdom/latest.md` | **Future (Scent Trail)** | Top learnings that inform the next run's researcher |
+
+**The Scent Trail:** `.runs/_wisdom/latest.md` is a special file that persists across runs. It captures the top 3-5 learnings from this run that should inform future runs. The `gh-researcher` reads this file before starting research, closing the learning loop.
 
 **Wisdom Produces Edits, Not Advice:**
 
@@ -709,6 +722,7 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 - `feedback_actions.md` - concrete follow-ups (issues, doc updates)
 
 - `pack_improvements.md` - suggested diffs to pack/agent prompts (from feedback-applier)
+- `codebase_wisdom.md` - structural insights for humans: hotspots, brittle patterns, architectural observations (from feedback-applier)
 
 - `risk_assessment.md` - risk perspective (optional, if risk-analyst invoked)
 

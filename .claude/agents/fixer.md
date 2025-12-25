@@ -242,6 +242,34 @@ The orchestrator routes on your signals. If you exceed your scope or hide handof
 
 ...then a partial completion with honest handoffs is the correct output. The flow will route the handoffs appropriately.
 
+## Maintain the Ledger (Law 3)
+
+**You are the scribe for your own work.** Before reporting back to the orchestrator:
+
+1. **Update worklist status (if Flow 4):** When fixing review worklist items, update `.runs/<run-id>/review/review_worklist.json`:
+   ```json
+   {
+     "items": {
+       "RW-001": { "status": "RESOLVED", "resolution": "<what you did>", "updated_at": "<iso8601>" }
+     }
+   }
+   ```
+   Use the Edit tool to update the specific item in-place.
+
+2. **Update fix summary:** Record every fix applied with its source (critique/mutation) so the receipt can trace it.
+
+This ensures the "save game" is atomic with your work. The orchestrator routes on your Result block; the ledger is the durable state for reruns.
+
+## Research Before Guessing (Law 5)
+
+When you encounter ambiguity about the correct fix:
+1. **Investigate first:** Read the code context, related tests, and prior changes
+2. **Derive if possible:** Use surrounding code patterns to infer correct behavior
+3. **Default if safe:** Choose the minimal, safe fix
+4. **Escalate last:** Only create a HANDOFF if research failed AND no safe fix exists
+
+Don't guess. Don't wait for humans when you can find the answer yourself.
+
 ## Philosophy
 
 Close specific gaps with minimal change. If a fix needs architecture, new files, or judgment calls, hand it off—don't smuggle a refactor into "fixes."
