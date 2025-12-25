@@ -52,7 +52,7 @@ Agents explore, build, and test freely:
 Gates engage only at the boundary: **commit / push / GitHub posting**.
 
 - **Secrets**: Sanitized in-place before publishing. Only blocks when manual remediation required.
-- **Anomalies**: Suspicious changes (test deletions, unexpected staged files) are detected, surfaced, and gated at publish boundary — not "physically blocked" but flagged and routed to rework.
+- **Anomalies**: Suspicious changes (test deletions, unexpected staged files) may block publish depending on policy; always surfaced, never blocks local work.
 - **Mechanical failures** (missing tools, auth issues, IO errors) block publish, not work.
 
 If a gate blocks, keep working locally. Gates constrain publishing, not thinking.
@@ -69,15 +69,28 @@ These statuses describe **evidence quality**, not "permission to merge."
 | **UNVERIFIED** | Verification incomplete, contradictions, critical failures, or missing core outputs |
 | **PARTIAL** | Real progress made, but flow checkpointed (context/time limit). Rerun to continue |
 
+**Merge permission comes from Flow 5 (Gate), not from a per-flow status label.**
+
 **Receipts are logs, not locks.** The git log is the audit trail; receipts summarize what happened at stations.
 
 ---
 
-## The Flows
+## Setup (Once Per Repo)
+
+Run `/customize-pack` to detect your stack and configure skills:
+
+```text
+/customize-pack
+```
+
+This writes `demo-swarm.config.json` with test/lint commands for your stack. Rerun when commands change.
+
+---
+
+## The Seven Flows
 
 | Flow | Purpose | Key Outputs |
 |------|---------|-------------|
-| **0. Setup** | Detect stack, configure skills | `demo-swarm.config.json`, customized skills |
 | **1. Signal** | Turn messy intent into a contract | Requirements, BDD scenarios, risks, open questions |
 | **2. Plan** | Turn contract into buildable work | ADR, interfaces/contracts, AC matrix, work plan |
 | **3. Build** | Implement AC-by-AC, push early | Code + tests, build receipt, Draft PR |
@@ -120,11 +133,7 @@ git add .claude/ && git commit -m "feat: Add DemoSwarm pack"
 
 ### 3. Customize for Your Stack
 
-```text
-/customize-pack
-```
-
-This detects your stack (Rust/Python/Node/Go), configures test/lint commands, and writes a config receipt.
+See [Setup](#setup-once-per-repo) above. Run `/customize-pack` to configure for your stack.
 
 ### 4. Run a Flow
 
@@ -182,14 +191,23 @@ See: [adopt-fork-workflow.md](docs/how-to/adopt-fork-workflow.md)
 
 ## Upstream Integration
 
-DemoSwarm does NOT automatically merge to upstream.
+DemoSwarm does NOT automatically merge to upstream. After Wisdom, integration depends on how much upstream has moved.
 
-After Wisdom, you can:
-1. Ensure feature branch is clean against swarm `origin/main`
-2. Sync swarm `origin/main` with upstream `main`
-3. Rebase feature branch onto updated swarm main
-4. Rerun Flows 4–7 if needed to re-stabilize
-5. Open PR from swarm to upstream when ready
+### If upstream barely moved
+
+Feature branch applies cleanly:
+
+1. Open PR from swarm feature branch to upstream `main`
+2. Done
+
+### If upstream moved materially
+
+Requires restabilization:
+
+1. Sync swarm `origin/main` with upstream `main`
+2. Rebase feature branch onto updated swarm main
+3. Rerun Flows 4–7 to restabilize
+4. Open PR from swarm to upstream when ready
 
 This keeps the human-in-the-loop for cross-repo integration.
 
