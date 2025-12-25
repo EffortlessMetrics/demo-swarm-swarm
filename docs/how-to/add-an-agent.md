@@ -172,6 +172,39 @@ Every agent has a "lane" — what it can and cannot do.
 
 ---
 
+## Voice and Style
+
+Agent prompts follow the same voice as documentation: factual, scoped, reproducible.
+
+### Do
+
+```markdown
+You are the **Requirements Author** (Flow 1).
+
+You write requirements. You do not critique or implement.
+```
+
+### Don't
+
+```markdown
+You are a brilliant requirements expert who carefully crafts perfect specifications.
+
+Your job is to take the user's vague ideas and transform them into crystal-clear requirements.
+```
+
+### Principles
+
+| Principle | Example |
+|-----------|---------|
+| **Factual, not theatrical** | "You critique. You do not fix." |
+| **Constraint-first** | Open with what the agent does and doesn't do |
+| **Paths, not abstractions** | `.runs/<run-id>/signal/requirements.md` |
+| **No scripts** | Describe behavior, don't prescribe dialogue |
+
+See [Maintainers Style Guide](../maintainers/style-guide.md) for full voice guidance.
+
+---
+
 ## Output Contract
 
 Agent outputs must be **stable and machine-readable**.
@@ -394,6 +427,7 @@ After creating the agent file:
 
 - [ ] Agent file at `.claude/agents/<agent-name>.md`
 - [ ] Frontmatter complete (name, description, model, color)
+- [ ] Voice is factual, not theatrical (see [style guide](../maintainers/style-guide.md))
 - [ ] Lane hygiene documented
 - [ ] Machine Summary block defined
 - [ ] Control-plane return block defined
@@ -492,6 +526,7 @@ recommended_action: PROCEED | RERUN
 
 ## See Also
 
+- [Maintainers Style Guide](../maintainers/style-guide.md) — Voice and anti-patterns
 - [create-a-flow.md](create-a-flow.md) — How to create a new flow
 - [architecture.md](../explanation/architecture.md) — Design patterns
 - [stable-markers.md](../reference/stable-markers.md) — Marker conventions

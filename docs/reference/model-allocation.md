@@ -131,7 +131,7 @@ echo "Sonnet: $(grep -l '^model: sonnet' .claude/agents/*.md | wc -l)"
 grep -l '^model: sonnet' .claude/agents/*.md
 ```
 
-The Sonnet tier should remain small (currently 3 agents). If you find more, verify they genuinely need high-judgment routing.
+The Sonnet tier should remain small. These are agents that need slightly more reasoning than Haiku can reliably handle today — candidates for demotion to Haiku as model capabilities improve.
 
 ## See Also
 
