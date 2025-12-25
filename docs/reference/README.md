@@ -14,3 +14,4 @@ Information-oriented: look up facts, schemas, and commands. `CLAUDE.md` in repo 
 | [Agent Data Flows](agent-data-flows.md) | Producer/consumer relationships between agents |
 | [Model Allocation](model-allocation.md) | How work is distributed across Claude model tiers |
 | [Trust Model](trust-model.md) | Evidence hierarchy and trust boundaries |
+| [Documentation Conventions](documentation-conventions.md) | Terminology, Diataxis, evidence rules for docs |

@@ -6,13 +6,13 @@ This document describes how DemoSwarm allocates work across Claude model tiers.
 
 DemoSwarm uses a three-tier allocation strategy:
 
-| Tier | Allocation | Use Case |
-|------|-----------|----------|
-| **Haiku** | 41% (31/74 agents) | Research, cleanup, mechanical work |
-| **Sonnet** | 4% (3/74 agents) | High-judgment routing and triage |
-| **Inherit** | 54% (40/74 agents) | Core creation/review (user-configurable) |
+| Tier | Use Case |
+|------|----------|
+| **Haiku** | Research, cleanup, mechanical work |
+| **Sonnet** | High-judgment routing and triage (few agents) |
+| **Inherit** | Core creation/review (user-configurable, majority of agents) |
 
-Total agent count: **74**
+Run the verification commands below for current counts.
 
 ## Allocation Philosophy
 
@@ -22,7 +22,7 @@ The gap between Sonnet and Haiku is not about speed—both are fast. It's about 
 
 ## Tier Definitions
 
-### Haiku Tier (41%)
+### Haiku Tier
 
 **Use for:** High-speed execution, research, cleanup, mechanical work
 
@@ -44,7 +44,7 @@ Haiku agents handle:
 - `flow-historian` — Timeline compilation (mechanical)
 - `gh-researcher` — Read-only GitHub reconnaissance
 
-### Sonnet Tier (4%)
+### Sonnet Tier
 
 **Use for:** High-judgment routing and triage
 
@@ -56,7 +56,7 @@ Sonnet is reserved for agents that make **complex routing decisions** with high 
 
 These agents are **routing specialists** that shape what other agents work on. Poor routing decisions cascade into wasted work.
 
-### Inherit Tier (54%)
+### Inherit Tier (majority)
 
 **Use for:** Core creation and review work (user-configurable)
 
@@ -106,15 +106,15 @@ When considering model allocation for new agents:
 
 ## Cost Impact
 
-Based on current pricing (as of 2025-01):
+Relative cost (check [Anthropic pricing](https://www.anthropic.com/pricing) for current rates):
 
-- **Haiku:** ~$0.25 per million input tokens
-- **Sonnet:** ~$3.00 per million input tokens (12x Haiku)
-- **Opus:** ~$15.00 per million input tokens (60x Haiku)
+- **Haiku:** Baseline
+- **Sonnet:** ~10-15x Haiku
+- **Opus:** ~50-60x Haiku
 
-The 4% Sonnet allocation means:
-- 96% of agents run at Haiku or user-controlled cost
-- High-judgment routing gets 12x reasoning budget
+The minimal Sonnet allocation means:
+- Most agents run at Haiku or user-controlled cost
+- High-judgment routing gets proportionally more reasoning budget
 - Users control the cost-to-quality tradeoff for creative work
 
 ## Verification
@@ -127,20 +127,11 @@ echo "Total: $(ls .claude/agents/*.md | wc -l)"
 echo "Haiku: $(grep -l '^model: haiku' .claude/agents/*.md | wc -l)"
 echo "Sonnet: $(grep -l '^model: sonnet' .claude/agents/*.md | wc -l)"
 
-# List Sonnet agents (should be exactly 3)
+# List Sonnet agents
 grep -l '^model: sonnet' .claude/agents/*.md
 ```
 
-Expected output:
-```
-Total: 74
-Haiku: 31
-Sonnet: 3
-
-.claude/agents/option-critic.md
-.claude/agents/pr-feedback-harvester.md
-.claude/agents/review-worklist-writer.md
-```
+The Sonnet tier should remain small (currently 3 agents). If you find more, verify they genuinely need high-judgment routing.
 
 ## See Also
 

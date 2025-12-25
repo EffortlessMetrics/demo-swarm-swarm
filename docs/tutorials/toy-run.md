@@ -58,20 +58,6 @@ The flow will:
 
 ---
 
-## Why This Demo Goal?
-
-The `demoswarm version` command is the canonical demo because:
-
-- **Self-referential**: It's a feature *for the pack's CLI tooling*, not an invented "product"
-- **Deterministic**: JSON output, no network calls, tests cleanly
-- **Exercises the pack**: Naturally touches Flows 1–5 (Signal → Plan → Build → Review → Gate)
-- **Offline-friendly**: Works without GitHub, proves receipts + governance locally
-- **Proves the core value**: "prompt → structured artifacts → receipt"
-
-The pack's core primitives (receipts, mechanical derivation, gating, shimmed tooling) are all exercised by implementing this feature.
-
----
-
 ## Expected Artifacts
 
 After Flow 1 completes, you should see artifacts in `.runs/toy-run/signal/`.

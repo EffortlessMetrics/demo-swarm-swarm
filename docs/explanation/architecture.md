@@ -1,12 +1,12 @@
-# Architecture: The Ops-First Engine
+# Architecture
 
 > How the pack is built and why.
 
 ---
 
-## The Three Pillars
+## Core Patterns
 
-DemoSwarm is built on three architectural pillars that separate it from standard LLM scripts.
+Four patterns that separate DemoSwarm from standard LLM scripts.
 
 ### 1. Thick Agents, Thin Flows
 
@@ -200,7 +200,7 @@ Orchestrator
 
 ### Flow 3: Build (The Construction Site)
 
-**Vibe:** High Velocity. "Push early, fail fast."
+**Posture:** High velocity. Push early, fail fast.
 
 Key stations:
 1. **AC Microloops:** Test ↔ Critic ↔ Code ↔ Critic (per acceptance criterion)
@@ -211,7 +211,7 @@ Key stations:
 
 ### Flow 4: Review (The Inspection Chamber)
 
-**Vibe:** High Rigor. "Drain the swamp."
+**Posture:** High rigor. Drain the worklist.
 
 Key stations:
 1. **Harvest:** Full PR feedback (all severities, including nits)
@@ -227,39 +227,15 @@ Key stations:
 
 This separates "what happened" (deploy action) from "can we verify protections" (governance enforcement).
 
-### Flow 7: Wisdom (The One-Way Loop)
+### Flow 7: Wisdom (One-Way by Design)
 
-**Design Philosophy:** Flow 7 extracts learnings and proposes actions, but it is **intentionally one-way** by design.
+Flow 7 extracts learnings and proposes actions, but **does not auto-apply** them.
 
-The wisdom loop operates as follows:
+- Outputs `learnings.md` and `feedback_actions.md` with recommendations
+- Humans review and decide what to adopt
+- No automatic injection into future flows
 
-1. **Extraction:** Flow 7 analyzes all prior flow outputs and identifies patterns, regressions, and improvement opportunities
-2. **Proposal:** Generates `learnings.md` and `feedback_actions.md` with concrete, actionable recommendations
-3. **Human Decision:** Humans review the proposals and decide what to apply
-4. **No Automatic Injection:** There is **NO** automatic constraint injection back into Flow 1 or any other flow
-
-**Why this is intentional:**
-
-- **Safety:** Prevents the swarm from autonomously tightening constraints that could block legitimate work
-- **Auditability:** Every policy change has a human decision point with clear provenance
-- **Trust:** Maintains the human-in-the-loop for decisions that affect future runs
-- **Transparency:** Proposed changes are visible and reviewable before adoption
-
-**What Flow 7 does NOT do:**
-
-- It does NOT modify `.claude/agents/*.md` prompts
-- It does NOT update `CLAUDE.md` policies
-- It does NOT inject new verification rules into flows
-- It does NOT auto-apply learnings to future runs
-
-**What humans do with wisdom outputs:**
-
-- Review `learnings.md` for patterns worth adopting
-- Manually update pack configuration based on `feedback_actions.md`
-- Decide which suggestions improve the system vs. over-constrain it
-- Create explicit pack customizations via documented changes
-
-This one-way design prevents "learning drift" where the swarm autonomously evolves constraints that eventually make it impossible to ship.
+**Why:** Prevents "learning drift" where the swarm autonomously tightens constraints until shipping becomes impossible. Every policy change has a human decision point.
 
 ---
 
