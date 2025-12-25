@@ -64,7 +64,9 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
    - SLO/alert expectations
    - "signals of health" needed for rollout gates
 
-5. **Check for infrastructure prerequisites (state transitions)**
+5. **Check for infrastructure prerequisites (state transitions) — INVARIANT**
+
+   **This is Architecture Law 6: Infrastructure Before Logic.** You are forbidden from scheduling logic before the state it depends on exists.
 
    Scan `.runs/<run-id>/plan/migrations/` and `schema.md` for planned state transitions (DB migrations, config changes, etc.):
 
@@ -78,6 +80,8 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
    - Create separate milestone subtasks per phase (e.g., ST-000a: Expand, ST-000b: Migrate, ST-000c: Contract)
    - Code subtasks depend on the *relevant* phase, not necessarily all phases
    - Document the phase dependency in each subtask's `depends_on` field
+
+   **Hard constraint:** All logic subtasks (`ST-###`) that assume new state **MUST** list the corresponding infrastructure subtask in their `depends_on` array. You are forbidden from scheduling logic before the state it depends on exists.
 
    This prevents the most common Build failure mode: trying to use state that doesn't exist yet.
 

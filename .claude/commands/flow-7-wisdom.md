@@ -380,6 +380,34 @@ This friction log informs pack improvements—the "Staff Engineer" whispers in t
 
 **Call `feedback-applier`** — turns learnings into concrete actions (issue drafts, doc suggestions). Does NOT create GitHub issues directly.
 
+**Wisdom Produces Edits, Not Advice:**
+
+When Flow 7 identifies pack/flow improvements (from friction log, process analysis, or pattern analysis):
+- `feedback-applier` should produce **suggested diffs** to agent prompts, not just prose advice
+- Example: If `bdd-critic` keeps missing edge cases, propose a specific edit to `.claude/agents/bdd-critic.md` with the new guidance
+- The diff goes in `.runs/<run-id>/wisdom/pack_improvements.md` as fenced code blocks
+- Humans review and apply the diffs (or reject them)
+
+This is the "Staff Engineer whisper" — concrete improvements to the factory, not vague recommendations.
+
+**Pack improvement output format:**
+```markdown
+## Pack Improvement: <title>
+
+**Pattern observed:** <what friction/failure was seen>
+**Evidence:** <which runs, which agents, which artifacts>
+**Suggested edit:**
+
+File: `.claude/agents/<agent>.md`
+```diff
+- <old line>
++ <new line>
+```
+
+**Risk:** <Low/Medium/High>
+**Rationale:** <why this fix addresses the pattern>
+```
+
 ### Step 12b: Traceability
 
 **Call `traceability-auditor`** — verifies run identity, receipts, and GitHub markers are coherent.
@@ -679,6 +707,8 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 - `learnings.md` - narrative lessons extracted
 
 - `feedback_actions.md` - concrete follow-ups (issues, doc updates)
+
+- `pack_improvements.md` - suggested diffs to pack/agent prompts (from feedback-applier)
 
 - `risk_assessment.md` - risk perspective (optional, if risk-analyst invoked)
 

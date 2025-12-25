@@ -46,7 +46,7 @@ Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the 
 
 If `.runs/<run-id>/build/` exists:
 - Read `flow_plan.md` for navigation state
-- **Call `build-cleanup` in resume mode** to get AC completion status
+- **Call `build-cleanup`** to get AC completion status (every call is an implicit resume — the agent checks disk state)
 - Route on the returned `Build Cleanup Result` block:
   - `ac_completed` / `ac_total` tells you where to resume
   - Do NOT parse `ac_status.json` directly — the agent owns that file
@@ -101,6 +101,17 @@ Route on the critic's Result block:
 - `RERUN`: Send the worklist back to the writer
 - `PROCEED`: Move forward (even if `status: UNVERIFIED` — blockers are documented)
 - `can_further_iteration_help: no`: Stop iterating, proceed with blockers
+
+**AC Termination (Law 4: Green + Orchestrator Agreement):**
+
+An AC is complete when BOTH conditions are met:
+1. **test-executor returns Green** for that AC's scope
+2. **Orchestrator agrees** there's nothing left worth fixing
+
+"Green tests" alone is not sufficient. If `code-critic` identifies maintainability risks or clear technical debt, authorize one improvement pass. Use judgment:
+- If the critic's worklist is minor polish: proceed, defer to Flow 4
+- If the critic found a real issue: send back to implementer
+- If `can_further_iteration_help: no`: stop, document, proceed
 
 **After first vertical slice (AC-1 complete):**
 1. Call `repo-operator`: checkpoint push

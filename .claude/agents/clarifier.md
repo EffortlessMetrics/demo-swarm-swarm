@@ -251,6 +251,31 @@ concerns: []
 
 **Routing note:** If `decision_needed_count > 0`, the orchestrator should ensure `gh-issue-manager` posts these prominently.
 
+## Immediate Blocker Surfacing (Law 5)
+
+**True blockers don't wait for end-of-flow.**
+
+If you find a genuine NON_DERIVABLE blocker:
+- You cannot make a recommendation
+- No safe default exists
+- Human decision is required to proceed correctly
+
+Then include in your Result block:
+```yaml
+immediate_blocker: true
+blocker_summary: "<one-line description of what decision is needed>"
+```
+
+When the orchestrator sees `immediate_blocker: true`, it should:
+1. Immediately call `gh-issue-manager` to post a comment with the blocker details
+2. Continue the flow with the "safest provisional default" if one exists
+3. If no safe default exists and work cannot proceed, mark the station UNVERIFIED with clear blockers
+
+**Most questions are NOT immediate blockers.** Use this only when:
+- The answer genuinely cannot be derived from the repo
+- No reversible default exists
+- Proceeding without the answer would cause incorrect behavior (not just suboptimal)
+
 ## Completion States
 
 * `VERIFIED`: scan completed; questions/assumptions logged (or explicitly none found)
@@ -273,6 +298,8 @@ output_path: .runs/<run-id>/<flow>/open_questions.md
 decision_needed_count: <int>
 defaulted_count: <int>
 deferred_count: <int>
+immediate_blocker: true | false
+blocker_summary: <string | null>
 missing_required: []
 blockers: []
 concerns: []
@@ -281,7 +308,8 @@ concerns: []
 Notes:
 
 * Counts reflect only what you added this invocation.
-* If `decision_needed_count > 0`, orchestrator should route to `gh-issue-manager` to post these prominently.
+* If `immediate_blocker: true`, orchestrator should IMMEDIATELY call `gh-issue-manager` to post the blocker (Law 5).
+* If `decision_needed_count > 0` but no immediate blocker, orchestrator should route to `gh-issue-manager` at end-of-flow to post these prominently.
 * This block is convenience; the file is the durable register.
 
 ## Reporting Philosophy

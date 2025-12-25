@@ -298,6 +298,95 @@ This separation is about **token economics**: Orchestrator context is expensive,
 
 ---
 
+## Architecture Laws
+
+These are invariants that prevent execution drift. Violating them creates subtle failures.
+
+### Law 1: PM/IC Boundary
+
+**Orchestrators route. Agents work. State-owners track.**
+
+| Role | Responsibility | Example |
+|------|----------------|---------|
+| **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite | "If gate_verdict is MERGE, proceed to merge ops" |
+| **Worker** (agent) | Do the work, report honestly | `code-implementer`, `test-author`, `fixer` |
+| **State-Owner** (agent) | Own a state file, update it by reading worker responses | `review-worklist-writer`, `build-cleanup` |
+
+**Violation:** Orchestrator editing `ac_status.json` or `review_worklist.json` directly.
+**Correct:** Orchestrator calls `build-cleanup` to update AC status based on worker results.
+
+### Law 2: Every Call Is an Implicit Resume
+
+**Agents don't need "resume mode" flags.** They check disk state and determine what's left.
+
+When an agent starts:
+1. Check if its tracking artifact exists (e.g., `ac_status.json`, `review_worklist.json`)
+2. If yes: read it, determine what's PENDING, continue from there
+3. If no: initialize fresh
+
+**Violation:** Flow says "call build-cleanup in resume mode."
+**Correct:** Flow says "call build-cleanup." The agent checks disk state and behaves appropriately.
+
+**Corollary:** If an agent needs genuinely different behavior (not just "resume vs fresh"), that's a signal for two separate agents, not a `mode:` parameter.
+
+### Law 3: Agents Own State Files
+
+Each state file has exactly one owner agent. Only that agent writes to it.
+
+| State File | Owner Agent | Other Agents |
+|------------|-------------|--------------|
+| `ac_status.json` | `build-cleanup` | Workers report completion; cleanup updates the file |
+| `review_worklist.json` | `review-worklist-writer` | Workers report what they did; writer updates status |
+| `run_meta.json` | `run-prep`, `*-cleanup`, `gh-issue-manager` | Others may read but not write |
+| `index.json` | `*-cleanup`, `run-prep`, `gh-issue-manager` | Others may read but not write |
+
+**Violation:** `code-implementer` updating `ac_status.json` after finishing an AC.
+**Correct:** `code-implementer` reports completion in its Result block. Orchestrator calls `build-cleanup` to update `ac_status.json`.
+
+### Law 4: AC Termination = Green + Orchestrator Agreement
+
+**"Green tests" is necessary but not sufficient for AC completion.**
+
+An AC is done when:
+1. `test-executor` returns Green for that AC's scope
+2. The orchestrator agrees there's nothing left worth fixing based on critic feedback
+
+**The loop:** implement → test → critique → (if critic has actionable items) → improve → test again
+
+Even with green tests, if `code-critic` identifies a maintainability risk or clear technical debt, the orchestrator should authorize one improvement pass. The critic's `can_further_iteration_help: no` signal (or orchestrator judgment) terminates the loop.
+
+### Law 5: True Blockers Surface Immediately
+
+**Non-derivable blockers don't wait for end-of-flow.**
+
+If an agent (especially `clarifier`) hits a genuine NON_DERIVABLE blocker:
+- It cannot make a recommendation
+- No safe default exists
+- Human decision is required
+
+The orchestrator should immediately call `gh-issue-manager` to post a comment with:
+- The blocker description
+- Evidence searched
+- The decision needed
+
+Don't batch these into end-of-flow reporting. The line stops until humans respond.
+
+**Most questions are not blockers.** DEFAULTED (safe reversible default chosen) is the common case. NON_DERIVABLE is rare and requires proof-of-research.
+
+### Law 6: Infrastructure Before Logic
+
+**State-transition work must complete before tasks that assume the new state.**
+
+This is enforced in `work-planner`:
+- Infrastructure/migration subtasks (ST-000, etc.) depend on nothing
+- Logic subtasks that assume new state must list infrastructure in `depends_on`
+- You cannot schedule logic before the state it depends on exists
+
+**Violation:** `ST-002: Implement login flow` with no dependency, when login requires a new `sessions` table from `ST-001`.
+**Correct:** `ST-002` has `depends_on: ["ST-001"]`.
+
+---
+
 ## Run Identity + State
 
 ### Working Directory + Paths Invariant

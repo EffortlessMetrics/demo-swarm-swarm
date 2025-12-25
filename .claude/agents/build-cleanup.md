@@ -93,25 +93,17 @@ bash .claude/scripts/demoswarm.sh ms get \
 
 Do not embed inline `sed|awk` patterns. The shim handles section boundaries and null-safety.
 
-## Modes
+## Behavior (Every Call Is an Implicit Resume)
 
-This agent supports two modes:
+**This agent checks disk state and determines what's left to do.** There is no separate "resume mode" — every invocation:
 
-### Resume Mode (read-only status report)
+1. Reads `ac_status.json` (if it exists) to understand current AC state
+2. Reports AC completion status in the Result block (`ac_completed` / `ac_total`)
+3. Proceeds with the cleanup sequence as appropriate
 
-When invoked with `mode: resume`, report AC completion status without writing any files:
+The orchestrator routes on the returned Result block. It does NOT parse `ac_status.json` directly.
 
-1. Read `ac_status.json` if it exists
-2. Return the `Build Cleanup Result` block with `ac_completed` / `ac_total`
-3. Do NOT write any files
-
-This mode exists so the orchestrator can check resume state without parsing files directly.
-
-### Full Mode (default)
-
-When invoked without a mode or with `mode: full`, perform the complete cleanup sequence below.
-
-## Behavior
+**Idempotency:** Re-running build-cleanup on a completed build produces the same receipt (timestamps aside). Re-running on an incomplete build updates counts based on current state.
 
 ### Step 0: Preflight (mechanical)
 
@@ -630,11 +622,10 @@ Notes:
 
 ## Control-plane Return Block (in your response)
 
-After writing files (or after read-only check in resume mode), return:
+After the cleanup sequence, return:
 
 ```yaml
 ## Build Cleanup Result
-mode: full | resume
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1|2|3|4|5|6|7|null
@@ -644,10 +635,10 @@ ac_completed: <int | null>
 blockers: []
 missing_required: []
 concerns: []
-output_files:                    # omit in resume mode
+output_files:
   - .runs/<run-id>/build/build_receipt.json
   - .runs/<run-id>/build/cleanup_report.md
-index_updated: yes|no            # omit in resume mode
+index_updated: yes|no
 ```
 
-**Resume mode:** Only `mode`, `status`, `ac_total`, `ac_completed`, `blockers`, and `concerns` are populated. No files are written.
+The orchestrator uses `ac_total` and `ac_completed` to understand resume state. All other fields inform downstream routing.
