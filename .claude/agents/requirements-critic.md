@@ -126,44 +126,40 @@ Use exactly this structure:
 ```markdown
 # Requirements Critique
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Issue Summary
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+| Severity | Count |
+|----------|-------|
+| Critical | <int> |
+| Major | <int> |
+| Minor | <int> |
 
-blockers:
-  - <must change to reach VERIFIED>
+**Blockers:**
+- <must change to reach VERIFIED>
 
-missing_required:
-  - <path>
+**Missing:**
+- <path>
 
-concerns:
-  - <non-gating issues>
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
+**Concerns:**
+- <non-gating issues>
 
-can_further_iteration_help: yes | no
+**Observations:**
+- <cross-cutting insights, friction noticed, improvements>
 
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+## Coverage Summary
 
-coverage_summary:
-  functional_requirements_total: <N|null>
-  requirements_with_ac: <N|null>
-  requirements_missing_ac: <N|null>
-  requirements_missing_ac_ids: []
-  nfr_total: <N|null>
-  nfr_with_met: <N|null>
-  nfr_missing_met: <N|null>
-  nfr_missing_met_ids: []
-  nfr_typed: <N|null>
-  nfr_untyped: <N|null>
-  nfr_untyped_ids: []
-  assumptions_count: <N|null>
-  questions_count: <N|null>
+| Metric | Value |
+|--------|-------|
+| Total REQs | <N or null> |
+| REQs with AC markers | <N or null> |
+| REQs missing AC | <N or null> (IDs: [...]) |
+| Total NFRs | <N or null> |
+| NFRs with MET markers | <N or null> |
+| NFRs missing MET | <N or null> (IDs: [...]) |
+| Typed NFRs | <N or null> |
+| Untyped NFRs | <N or null> (IDs: [...]) |
+| Assumptions | <N or null> |
+| Questions | <N or null> |
 
 ## Summary
 - <1–3 bullets describing overall state>
@@ -220,41 +216,21 @@ coverage_summary:
 - `CANNOT_PROCEED` only for IO/permissions failures.
   - `recommended_action: FIX_ENV`
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, include TWO routing blocks:
-
-### 1. Explicit Routing Signal (first)
-
-This is the orchestrator's quick-read surface. Not YAML, just bullets:
+After completing your critique, provide a clear handoff:
 
 ```markdown
-## Routing Signal
-- **Next:** RERUN | PROCEED | BOUNCE | FIX_ENV
-- **Why:** <1–3 bullets explaining the decision>
-- **Focus:** <what needs attention if RERUN>
+## Handoff
+
+**What I did:** Critiqued N requirements for testability, consistency, and completeness. Found M critical issues, P major issues, Q minor issues. All REQs have AC markers: yes/no. All NFRs have MET markers: yes/no.
+
+**What's left:** Nothing (critique complete, requirements verified) OR Requirements have M critical/major issues that need fixing.
+
+**Can further iteration help:** Yes (requirements-author can fix testability/format issues) OR No (issues require human judgment/design decisions).
+
+**Recommendation:** Requirements are testable and complete - proceed to next phase. OR Found 3 critical issues (duplicate IDs, untestable requirements) - rerun requirements-author to fix. OR Requirements missing AC markers for REQ-002, REQ-005 - rerun requirements-author to atomize acceptance criteria.
 ```
-
-### 2. Machine-Readable Result (second)
-
-This must match what you wrote in the artifact file:
-
-```markdown
-## Requirements Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-can_further_iteration_help: yes | no
-missing_required: []
-blockers: []
-severity_summary:
-  critical: <N>
-  major: <N>
-  minor: <N>
-```
-
-The orchestrator routes on the Routing Signal; the Result block is for logging/traceability.
 
 ## Philosophy
 

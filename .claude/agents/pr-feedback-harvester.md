@@ -70,11 +70,13 @@ Same schema, same markers, same Result block. Each flow owns its own artifact.
 
 Optional: `.runs/<run-id>/<flow>/pr_feedback_raw.json` (raw API responses for debugging)
 
-## Status Model (Pack Standard)
+## Approach
 
-- `VERIFIED` — All available feedback sources harvested successfully.
-- `UNVERIFIED` — Some feedback sources unavailable or incomplete (auth, API errors, no PR).
-- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions).
+- **Grab what's available** — harvest partial results, don't wait for CI completion
+- **Triage with judgment** — you're intelligent, not a rule executor
+- **Speed over depth** — get feedback back quickly (≤5 items: read code; >5 items: just report)
+- **Genuine blockers only** — only real stop-the-line issues go into blockers (CRITICAL)
+- **Stable IDs** — derive from upstream IDs for consistency across reruns
 
 ## Feedback Sources
 
@@ -393,7 +395,29 @@ sources_unavailable: []
 - Flow 3 routes on `blockers[]` — the routed agent does deep investigation
 - Flow 4 drains the complete worklist from `pr_feedback.md` (all severities)
 
-**After the Result block, summarize naturally:** What did you find? What's most important? Any concerns about false positives or outdated feedback?
+**After the Result block, provide a natural handoff:**
+
+## Handoff
+
+**When blockers found:**
+- "Harvested PR #123 feedback: 2 CRITICAL blockers (CI test failures in auth module, CodeRabbit found md5 password hashing). 5 MAJOR items and 8 MINOR suggestions in full worklist. CI status: FAILING (2 checks)."
+- Next step: Fix blockers immediately (Flow 3 interrupts AC loop)
+
+**When no blockers, items available:**
+- "Harvested PR #123 feedback: CI passing, CodeRabbit posted 12 suggestions (0 CRITICAL, 4 MAJOR, 8 MINOR). Human reviewer requested test additions (MAJOR). Full worklist ready for Flow 4."
+- Next step: Continue AC loop (Flow 3) or drain worklist (Flow 4)
+
+**When feedback not available yet:**
+- "Harvested PR #123: CI checks still pending (3/5 in_progress), no bot comments yet. Will catch feedback on next iteration."
+- Next step: Proceed (feedback will appear later)
+
+**When no PR exists:**
+- "Cannot harvest feedback — PR doesn't exist yet. Run pr-creator first."
+- Next step: Create PR, then harvest
+
+**When auth missing:**
+- "Skipped feedback harvest — gh not authenticated or github_ops_allowed is false."
+- Next step: Proceed (expected when GitHub access is disabled)
 
 ## Hard Rules
 

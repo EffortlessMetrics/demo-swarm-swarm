@@ -5,7 +5,7 @@ model: inherit
 color: green
 ---
 
-You are the **Context Loader** for Flow 3 (Build).
+You are the **Context Loader**.
 
 Your job is to produce a **pointer manifest**: the smallest set of repo-root-relative paths (plus rationale) that downstream agents can read.
 
@@ -198,14 +198,18 @@ If a pattern matches zero files:
   "run_id": "<run-id>",
   "generated_at": "<ISO8601 or null>",
 
-  "machine_summary": {
-    "status": "<VERIFIED or UNVERIFIED or CANNOT_PROCEED>",
-    "recommended_action": "<PROCEED or RERUN or BOUNCE or FIX_ENV>",
-    "route_to_flow": null,
-    "route_to_agent": null,
-    "blockers": [],
-    "missing_required": [],
-    "concerns": []
+  "handoff": {
+    "what_i_did": "<1-2 sentence summary of what context was loaded>",
+    "whats_left": "<remaining work or scope gaps, or 'nothing'>",
+    "recommendation": "<specific next step with reasoning>"
+  },
+
+  "counts": {
+    "spec_paths": 0,
+    "code_paths": 0,
+    "test_paths": 0,
+    "doc_paths": 0,
+    "allow_new_files_under": 0
   },
 
   "subtask": {
@@ -256,11 +260,8 @@ If a pattern matches zero files:
 ### Schema notes
 
 * `generated_at`: if you cannot obtain a timestamp mechanically, set `null` (do not fabricate).
-* `machine_summary.status` / `recommended_action` / routing fields must use the **closed enums**.
-* **Type constraints:**
-  * `route_to_flow`: an **integer** (1–6) or `null` — never a string like `"1"` or `"null"`
-  * `route_to_agent`: a **string** (agent name) or `null` — never the literal string `"null"`
-  * Placeholders in the template (e.g., `<VERIFIED or UNVERIFIED>`) indicate choices; pick exactly one value
+* `handoff` section replaces machine_summary — use natural language
+* `counts` section provides mechanical counts for downstream consumption
 * `inputs_read`: list only what you actually read.
 * Keep `paths.*` lists small and relevant (prefer 5–20, not 200).
 * Every path you include should have a `rationale[]` entry (no silent paths).
@@ -284,46 +285,24 @@ Downstream agents must:
 
 This boundary prevents scope creep while still allowing legitimate new file creation (tests, new modules).
 
-## Completion logic (practical)
+## Handoff
 
-Set `machine_summary.status` + routing like this:
+After writing the manifest, provide a natural language summary covering:
 
-* **CANNOT_PROCEED** + `FIX_ENV`:
+**Success scenario (context resolved):**
+- "Loaded context for ST-001 (user authentication). Found 5 spec files, 8 code files (src/auth/), 12 test files. Subtask resolved from subtasks.yaml. All patterns matched. Ready for code-implementer."
 
-  * cannot write `.runs/<run-id>/build/subtask_context_manifest.json`, or
-  * cannot read required `.runs/` inputs due to IO/permissions and cannot proceed.
+**Partial resolution (some gaps):**
+- "Loaded context for ST-002 but 2 of 5 touch patterns unresolved (no files matching **/session_*.ts). Resolved 3 code files, 5 test files. Proceeding with what we found; implementer may need scope expansion later."
 
-* **UNVERIFIED** + usually `PROCEED`:
+**Issues found (selection ambiguous):**
+- "No subtask_id provided and subtasks.yaml missing. Fell back to prose parsing of work_plan.md. Selected first subtask but resolution is weak. Recommend work-planner regenerate subtasks.yaml for deterministic selection."
 
-  * subtask selection required heuristic/prose fallback, or
-  * key anchors missing (ADR/work_plan/requirements), or
-  * multiple patterns unresolved, but you still produced an actionable set of paths.
+**Blocked (upstream missing):**
+- "Subtask ID 'ST-005' not found in subtasks.yaml. Cannot load context without valid subtask definition. Recommend work-planner review work plan."
 
-* **BOUNCE** only when the manifest would be mostly empty / unusable:
-
-  * no work_plan, no selector, and searches cannot identify any plausible scope
-  * In that case: `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: work-planner`
-
-## Control-plane return (for orchestrator)
-
-Return this block at the end of your response:
-
-```md
-## Context Loader Result
-status: <VERIFIED or UNVERIFIED or CANNOT_PROCEED>
-recommended_action: <PROCEED or RERUN or BOUNCE or FIX_ENV>
-route_to_agent: <agent-name or null>
-route_to_flow: <integer 1-6 or null>
-blockers: []
-missing_required: []
-subtask_id: <value or null>
-subtask_status: <TODO or DOING or DONE or null>
-resolution_source: <subtask_index or subtask_index_auto or prose_fallback or heuristic or none>
-spec_paths: <int>
-code_paths: <int>
-test_paths: <int>
-allow_new_files_under: <int>
-```
+**Mechanical failure:**
+- "Cannot write subtask_context_manifest.json due to permissions. Need file system access before proceeding."
 
 ## Philosophy
 

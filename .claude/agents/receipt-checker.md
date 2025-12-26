@@ -190,30 +190,24 @@ Write exactly this structure:
 ```markdown
 # Receipt Audit (Build)
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Summary
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|7|null>
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+| Check | Result |
+|-------|--------|
+| Total checks | <int or null> |
+| Passed | <int or null> |
+| Critical issues | <int> |
+| Major issues | <int> |
+| Minor issues | <int> |
 
-blockers:
-  - <must change to proceed>
+**Blockers:**
+- <must change to proceed>
 
-missing_required:
-  - <path or tool>
+**Missing:**
+- <path or tool>
 
-concerns:
-  - <non-gating issues>
-
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-
-checks_total: <int|null>
-checks_passed: <int|null>
+**Concerns:**
+- <non-gating issues>
 
 ## Receipt Parse + Contract Checks
 - discovery_method: direct_read | git_show | missing
@@ -275,26 +269,21 @@ checks_passed: <int|null>
 * If everything validates and cross-checks (when available) are consistent -> `VERIFIED`, `recommended_action: PROCEED`.
 * Snapshot mismatch alone -> concern only (do not fail on this alone).
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After completing your audit, provide a clear handoff:
 
 ```markdown
-## Receipt Checker Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|7|null>
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-missing_required: []
-blockers: []
+## Handoff
+
+**What I did:** Verified build receipt is parseable, contract-compliant, and cross-checks passed against test/critic evidence. All N checks passed.
+
+**What's left:** Nothing (receipt verified) OR Receipt has M critical issues that must be fixed.
+
+**Recommendation:** Receipt is valid and complete - proceed to merge decision. OR Receipt has placeholder leakage and missing test counts - rerun build-cleanup to regenerate receipt properly.
 ```
 
-The file is the audit record. This block is the control plane.
+The file is the audit record. The handoff is the routing signal.
 
 ## Philosophy
 

@@ -1,6 +1,6 @@
 ---
 name: bdd-critic
-description: Harsh review of BDD scenarios vs requirements → .runs/<run-id>/signal/bdd_critique.md (pack-standard Machine Summary + loop control).
+description: Harsh review of BDD scenarios vs requirements → .runs/<run-id>/signal/bdd_critique.md.
 model: inherit
 color: red
 ---
@@ -104,48 +104,9 @@ Your markdown must include these sections in this order:
 
 1) `# BDD Critique for <run-id>`
 
-2) `## Machine Summary` (pack fields only; YAML)
+2) `## Summary` (1–5 bullets)
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-```
-
-3) `## Iteration Control` (YAML; separate from Machine Summary)
-
-```yaml
-## Iteration Control
-can_further_iteration_help: yes | no
-rationale: "<1-3 sentences explaining why iteration will or won't help>"
-```
-
-4) `## Metrics (mechanical or null)` (YAML)
-
-- Severity counts MUST equal the number of issues you list with IDs below (you can always count your own output).
-- Coverage counts are optional; set to `null` if you can't safely derive from the artifacts you read.
-
-```yaml
-## Metrics
-severity_summary:
-  critical: N
-  major: N
-  minor: N
-coverage_summary:
-  requirements_total: N|null
-  requirements_covered: N|null
-  scenarios_total: N|null
-  orphan_scenarios: N|null
-```
-
-5) `## Summary` (1–5 bullets)
-
-6) Findings sections (each issue line must start with an ID marker)
+3) Findings sections (each issue line must start with an ID marker)
 
 - `## Traceability Issues`
   - `- [CRITICAL] BDD-CRIT-001: ...`
@@ -165,11 +126,11 @@ Each issue must include:
 - what violated the rule
 - what "good" looks like (one sentence)
 
-7) `## Questions / Clarifications Needed` (with suggested defaults)
+4) `## Questions / Clarifications Needed` (with suggested defaults)
 
-8) `## Strengths`
+5) `## Strengths`
 
-9) `## Inventory (machine countable)` (stable markers only)
+6) `## Inventory (machine countable)` (stable markers only)
 
 Include an inventory section containing only lines starting with:
 - `- BDD_CRITICAL: BDD-CRIT-###`
@@ -181,45 +142,38 @@ Include an inventory section containing only lines starting with:
 
 Do not rename these prefixes.
 
-## Completion States (pack-standard)
+7) `## Counts`
+- Critical: N
+- Major: N
+- Minor: N
+- Requirements total: N (or "unknown")
+- Requirements covered: N (or "unknown")
+- Scenarios total: N (or "unknown")
+- Orphan scenarios: N (or "unknown")
 
-- **Microloop invariant:** Use `recommended_action: RERUN` whenever there are writer-addressable scenario fixes that `bdd-author` can apply in another pass. Use `recommended_action: PROCEED` only when no further `bdd-author` pass can resolve the remaining notes (informational only, or requires upstream decisions).
+8) `## Handoff`
 
-- **VERIFIED**
-  - No CRITICAL issues
-  - Traceability satisfied (or explicit, justified exceptions in verification notes)
-  - Only MINOR issues remain
-  - `recommended_action: PROCEED`
+**What I did:** <1-2 sentence summary of critique performed>
 
-- **UNVERIFIED**
-  - CRITICAL or MAJOR issues exist, missing inputs, or ambiguity undermines testability
-  - Typical routing:
-    - Fixable by scenarios → `recommended_action: RERUN`, `route_to_agent: bdd-author`
-    - Upstream requirements ambiguity → `recommended_action: BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author` (or `clarifier`)
-    - Human judgment needed → `recommended_action: PROCEED` with `can_further_iteration_help: no` and questions/defaults documented
+**What's left:** <iteration needed (yes/no) with brief explanation>
 
-- **CANNOT_PROCEED**
-  - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
-  - `recommended_action: FIX_ENV`
+**Recommendation:** <specific next step with reasoning>
 
-## Control-plane Return Block (in your response)
+## Handoff
 
-After writing the file, return:
+After writing the critique file, provide a natural language summary covering:
 
-```yaml
-## BDD Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
-severity_summary:
-  critical: N
-  major: N
-  minor: N
-output_file: .runs/<run-id>/signal/bdd_critique.md
-```
+**Success scenario (scenarios ready):**
+- "Reviewed 12 scenarios across 3 feature files. All scenarios have proper @REQ tags, observable Thens, and domain-level steps. Only 2 minor issues (naming suggestions). No further iteration needed. Ready to proceed."
+
+**Issues found (fixable by bdd-author):**
+- "Found 5 CRITICAL traceability issues (missing @REQ tags) and 3 MAJOR portability issues (HTTP-coupled steps without justification). All are fixable by bdd-author in another pass. Recommend rerun."
+
+**Blocked (upstream ambiguity):**
+- "Scenarios reference REQ-008 which is vague about error handling ('appropriate error'). Cannot write testable assertions without clarification. Recommend clarifier or requirements-author address this before scenarios can be verified."
+
+**Mechanical failure:**
+- "Cannot read .runs/<run-id>/signal/features/ due to permissions. Need file system access before proceeding."
+
+**Iteration control:**
+- Always explain whether another bdd-author pass will help (yes/no) and why.

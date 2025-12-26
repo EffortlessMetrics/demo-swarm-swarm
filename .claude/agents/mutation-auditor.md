@@ -122,21 +122,17 @@ Write `.runs/<run-id>/build/mutation_report.md` in exactly this structure:
 ```md
 # Mutation Report
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_agent: test-author | fixer | null
-blockers: []
-missing_required: []
-counts:
-  killed: <int|null>
-  survived: <int|null>
-  errors: <int|null>
-  timeouts: <int|null>
-budget_seconds: <int|null>
-duration_seconds: <int|null>
-mutation_command: "<string|null>"
+## Run Metrics
+
+Mutation command: "<string|null>"
+Budget: <int|null> seconds
+Duration: <int|null> seconds
+
+Results:
+- Killed: <int|null>
+- Survived: <int|null>
+- Errors: <int|null>
+- Timeouts: <int|null>
 
 ## Run Notes
 - Tool/config selection: <what you used or why skipped>
@@ -155,20 +151,27 @@ mutation_command: "<string|null>"
 ## Inventory (machine countable)
 - MUT_SURVIVOR: MUT-SURV-001
 - MUT_SURVIVOR: MUT-SURV-002
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of mutation testing run>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-## Control-plane return block (in your response)
+## Handoff Guidelines (in your response)
 
-After writing the file, return:
+After writing the mutation report, provide a natural language handoff:
 
-```md
-## Mutation Auditor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_agent: test-author | fixer | null
-counts:
-  killed: <int|null>
-  survived: <int|null>
-output_file: .runs/<run-id>/build/mutation_report.md
-```
+**What I did:** Summarize mutation testing scope and results (include killed/survived counts, budget used).
+
+**What's left:** Note any survivors or configuration issues.
+
+**Recommendation:** Explain the specific next step:
+- If mutation not configured → "Mutation testing skipped; no mutation runner configured; Build can proceed without mutation coverage"
+- If survivors within threshold → "Mutation testing passed; [N] killed, [M] survived (within threshold); Build can proceed"
+- If survivors exceed threshold → "Mutation testing found [M] survivors exceeding threshold; recommend test-author address worklist items"
+- If mutation run failed → "Mutation run failed due to [specific issue]; recommend fixing configuration then rerunning"
+- If mechanical failure → "Fix [specific issue] then rerun"

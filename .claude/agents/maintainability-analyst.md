@@ -164,29 +164,24 @@ Write `.runs/<run-id>/wisdom/maintainability_analysis.md`:
 ```markdown
 # Maintainability Analysis for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
+## Summary Metrics
 
-maintainability_summary:
-  files_analyzed: <int>
-  overall_score: GOOD | FAIR | POOR | CRITICAL
-  dimensions:
-    naming: GOOD | FAIR | POOR | CRITICAL
-    modularity: GOOD | FAIR | POOR | CRITICAL
-    dry: GOOD | FAIR | POOR | CRITICAL
-    coupling: GOOD | FAIR | POOR | CRITICAL
-    documentation: GOOD | FAIR | POOR | CRITICAL
-    test_quality: GOOD | FAIR | POOR | CRITICAL
-    error_handling: GOOD | FAIR | POOR | CRITICAL
-  issues_by_severity:
-    critical: <int>
-    major: <int>
-    minor: <int>
+Files analyzed: <int>
+Overall score: GOOD | FAIR | POOR | CRITICAL
+
+Dimension scores:
+- Naming: GOOD | FAIR | POOR | CRITICAL
+- Modularity: GOOD | FAIR | POOR | CRITICAL
+- DRY: GOOD | FAIR | POOR | CRITICAL
+- Coupling: GOOD | FAIR | POOR | CRITICAL
+- Documentation: GOOD | FAIR | POOR | CRITICAL
+- Test Quality: GOOD | FAIR | POOR | CRITICAL
+- Error Handling: GOOD | FAIR | POOR | CRITICAL
+
+Issues by severity:
+- Critical: <int>
+- Major: <int>
+- Minor: <int>
 
 ## Executive Summary
 
@@ -302,6 +297,14 @@ Files with multiple issues (prioritize refactoring):
 - MAINT_MAJOR: <count>
 - MAINT_MINOR: <count>
 - MAINT_FILES_ANALYZED: <count>
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of maintainability analysis>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ## Status Model
@@ -317,6 +320,20 @@ Use `- **MAINT-NNN**:` for issue markers:
 - **MAINT-001**: Auth handler too large
 - **MAINT-002**: Email validation duplicated
 ```
+
+## Handoff
+
+After writing the analysis report, provide a natural language handoff:
+
+**What I did:** Summarize analysis scope and key findings (include files analyzed and issue counts by severity).
+
+**What's left:** Note any files that couldn't be analyzed or dimensions that need human review.
+
+**Recommendation:** Explain the specific next step:
+- If critical issues found → "Address CRITICAL issues [list IDs] before merge; these block maintainability"
+- If major issues only → "Flow can proceed; recommend addressing MAJOR issues [list IDs] soon after merge"
+- If minor issues only → "Maintainability is good; minor improvements [list IDs] can be backlogged"
+- If analysis incomplete → "Rerun after [specific condition]; partial analysis completed"
 
 ## Philosophy
 

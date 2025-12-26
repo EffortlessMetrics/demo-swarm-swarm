@@ -233,23 +233,46 @@ issues_minor: <int>
   - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
   - `recommended_action: FIX_ENV`
 
-## Control-plane Return Block (for orchestrator)
+## Handoff
 
-At the end of your response, return this block (must match the Machine Summary you wrote to the file):
+After writing the spec audit report, provide a natural language handoff:
 
-```yaml
-## Spec Auditor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-audit_verdict: PASS | FAIL | INCONCLUSIVE
-issues_critical: <int>
-issues_major: <int>
-issues_minor: <int>
-missing_required: []
-blockers: []
-output_file: .runs/<run-id>/signal/spec_audit.md
+```markdown
+## Handoff
+
+**What I did:** Audited complete Flow 1 spec for coherence and completeness. Found <critical>/<major>/<minor> issues.
+
+**What's left:** <"Ready for Flow 2" | "Issues require resolution">
+
+**Recommendation:** <PROCEED to Flow 2 | BOUNCE to requirements-author to fix <critical issues>>
+
+**Reasoning:** <1-2 sentences explaining audit verdict and next steps>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Audited complete Flow 1 spec for coherence and completeness. Found 0/0/2 issues.
+
+**What's left:** Ready for Flow 2.
+
+**Recommendation:** PROCEED to Flow 2.
+
+**Reasoning:** All core artifacts present, problem-to-requirements alignment verified, BDD coverage complete, no unaddressed critic findings. Minor issues documented but non-blocking. Audit verdict: PASS.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Audited complete Flow 1 spec. Found 2 CRITICAL issues: missing example_matrix.md and 3 orphan scenarios with no @REQ tags.
+
+**What's left:** Critical gaps must be addressed.
+
+**Recommendation:** BOUNCE to bdd-author to tag orphan scenarios and generate example matrix.
+
+**Reasoning:** Cannot proceed to planning without BDD traceability. Orphan scenarios prevent work decomposition. Audit verdict: FAIL.
 ```
 
 ## Philosophy

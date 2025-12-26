@@ -96,37 +96,16 @@ Write these sections in this order.
 
 `# Observability Critique for <run-id>`
 
-## Machine Summary
-
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-```
-
-## Iteration Control
-
-```yaml
-can_further_iteration_help: yes | no
-rationale: "<1-3 sentences>"
-```
-
 ## Metrics
 
-Rules:
+Issue counts (derived from markers in Inventory section):
+- Critical: <N|null>
+- Major: <N|null>
+- Minor: <N|null>
 
-- `severity_summary` must be derived by counting the issue markers you wrote (see the `## Inventory (machine countable)` section). If you cannot derive mechanically, set the value(s) to `null` and add a concern.
-
-```yaml
-severity_summary:
-  critical: N|null
-  major: N|null
-  minor: N|null
-```
+Iteration assessment:
+- Can further iteration help: yes | no
+- Rationale: <1-3 sentences>
 
 ## Summary (1-5 bullets)
 
@@ -160,34 +139,29 @@ Include only these line prefixes (one per line):
 - `- OC_MINOR: OC-MIN-###`
 - `- OC_GAP: <REQ/NFR identifier>`
 
-## Routing guidance
+## Handoff
 
-- Observability spec fixes → `recommended_action: RERUN`, `route_to_agent: observability-designer`
-- Verification hooks missing → `recommended_action: RERUN`, `route_to_agent: test-strategist`
-- Requirements/targets unknown → `recommended_action: BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author`
-- Mechanical IO/perms failure → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`
+**What I did:** <1-2 sentence summary of observability critique>
 
-## Control-plane return block (in your response)
+**What's left:** <remaining work or "nothing">
 
-After writing the file, end your response with:
+**Recommendation:** <specific next step with reasoning>
 
-```yaml
-## Observability Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
-severity_summary:
-  critical: N|null
-  major: N|null
-  minor: N|null
-output_file: .runs/<run-id>/plan/observability_critique.md
-```
+## Handoff Guidelines (in your response)
+
+After writing the critique file, provide a natural language handoff:
+
+**What I did:** Summarize critique scope and findings (include issue counts by severity).
+
+**What's left:** Note any missing inputs or gaps in the observability spec.
+
+**Recommendation:** Explain the specific next step with reasoning:
+- If VERIFIED with no critical issues → "Observability spec is ready for Build; [counts] issues documented (no blockers)"
+- If critical issues found (spec fixes needed) → "Observability spec needs fixes; recommend observability-designer address [specific issues]"
+- If critical issues found (verification missing) → "Test plan lacks observability verification hooks; recommend test-strategist add verification steps"
+- If upstream requirements missing → "Requirements/targets unknown; recommend requirements-author clarify [specific gaps] in Flow 1"
+- If can help further → "Iteration recommended; spec can be improved by addressing [specific issues]"
+- If mechanical failure → "Fix [specific issue] then rerun"
 
 ## Philosophy
 

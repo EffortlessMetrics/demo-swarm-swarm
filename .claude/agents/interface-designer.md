@@ -179,43 +179,40 @@ These prefixes must not be renamed.
 - **CANNOT_PROCEED**
   - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
 
-## Required Machine Summary (inside `schema.md`)
+## Required Handoff Section (inside `schema.md`)
 
 At the end of `.runs/<run-id>/plan/schema.md`, include:
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
+```markdown
+## Handoff
+
+**What I did:** Summarize contract scope and data model decisions in 1-2 sentences.
+
+**What's left:** Note any missing inputs, breaking changes, or migration needs.
+
+**Recommendation:** Explain the specific next step with reasoning.
 ```
 
-- Put missing *input* paths (repo-root-relative) in `missing_required`.
-- Put design risks / breaking-change concerns in `concerns`.
-- If `status: CANNOT_PROCEED`, set `recommended_action: FIX_ENV`.
+Guidance:
+- If contracts are complete → "Contracts ready for Build; [N] endpoints, [M] schemas, [K] migrations defined"
+- If breaking changes required → "Breaking changes documented; review versioning strategy before Build"
+- If missing ADR/requirements → "Design gaps exist; recommend [specific agent] review in Flow 1/2"
+- If mechanical failure → "Fix [specific issue] then rerun"
 
-## Control-plane Return Block (in your response)
+## Handoff Guidelines (in your response)
 
-After writing outputs, return a block mirroring the Machine Summary:
+After writing outputs, provide a natural language handoff:
 
-```yaml
-## Interface Designer Result
-status: ...
-recommended_action: ...
-route_to_flow: ...
-route_to_agent: ...
-blockers: [...]
-missing_required: [...]
-concerns: [...]
-outputs:
-  - .runs/<run-id>/plan/api_contracts.yaml
-  - .runs/<run-id>/plan/schema.md
-  - .runs/<run-id>/plan/migrations/<files...>   # only if written
-```
+**What I did:** Summarize contracts, schemas, and migrations produced.
+
+**What's left:** Note missing inputs and any compatibility concerns.
+
+**Recommendation:** Provide specific guidance for next steps based on contract completeness.
+
+Outputs written:
+- `.runs/<run-id>/plan/api_contracts.yaml`
+- `.runs/<run-id>/plan/schema.md`
+- `.runs/<run-id>/plan/migrations/<files...>` (only if migrations were needed)
 
 ## Philosophy
 

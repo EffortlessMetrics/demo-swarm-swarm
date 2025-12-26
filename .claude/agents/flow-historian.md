@@ -71,16 +71,15 @@ Your JSON must include:
 - `events` (ordered list)
 - `counts` (events_captured, flows_documented, missing_flows)
 
-### machine_summary (pack-standard)
+### handoff (pack-standard)
 
 Embed exactly this shape:
 
 ```json
-"machine_summary": {
-  "status": "VERIFIED|UNVERIFIED|CANNOT_PROCEED",
-  "recommended_action": "PROCEED|RERUN|BOUNCE|FIX_ENV",
-  "route_to_flow": 1,
-  "route_to_agent": null,
+"handoff": {
+  "what_completed": "<1-2 sentence summary>",
+  "what_remains": "<remaining work or 'nothing'>",
+  "recommendation": "<specific next step with reasoning>",
   "blockers": [],
   "missing_required": [],
   "concerns": []
@@ -88,7 +87,7 @@ Embed exactly this shape:
 ```
 
 * `CANNOT_PROCEED` is mechanical failure only (cannot read/write required paths).
-* Missing upstream artifacts ⇒ `UNVERIFIED` with `missing_required` populated.
+* Missing upstream artifacts ⇒ populate `missing_required` with list of missing paths.
 
 ## Event model (bounded vocabulary)
 
@@ -203,23 +202,27 @@ Recommended action guidance:
 * If timeline is usable but incomplete due to environment/tooling: `recommended_action: PROCEED` or `RERUN` (choose based on whether rerun could plausibly fill gaps)
 * If mechanical failure: `recommended_action: FIX_ENV`
 
-## Control-plane Return Block (in your response)
+## Handoff
 
-After writing the JSON, return:
+When you're done, tell the orchestrator what happened in natural language:
 
-```yaml
-## Flow Historian Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-output_file: .runs/<run-id>/wisdom/flow_history.json
-events_captured: 0
-flows_documented: 0
-```
+**Examples:**
+
+*Complete timeline:*
+> "Captured complete timeline: 5 flows, 18 events, DevLT calculated (3 human checkpoints, ~15min estimated attention). All receipts present. History written to wisdom/flow_history.json."
+
+*Partial timeline:*
+> "Documented 3/5 flows; Plan and Deploy receipts missing. Captured 12 events with best-effort timestamps. DevLT incomplete (missing checkpoint data). Timeline usable but recommend rerunning after missing flows complete."
+
+*Blocked:*
+> "Cannot write flow_history.json due to permissions error. Need environment fix."
+
+**Include counts:**
+- How many flows documented
+- How many events captured
+- Whether DevLT was calculated
+- Which receipts/artifacts were missing
+- Timestamp coverage (complete vs partial)
 
 ## Philosophy
 

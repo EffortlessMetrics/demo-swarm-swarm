@@ -181,18 +181,34 @@ notes:
 - <bullet list of risks implied by the signal, labeled as inference>
 ```
 
-### Step 5: Control-plane return (for orchestrator)
+### Step 5: Handoff
 
-After writing files, return this in your response:
+After writing files, provide a natural language handoff:
 
 ```markdown
-## Signal Normalizer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: problem-framer
-route_to_flow: 1
-blockers: []
-missing_required: []
+## Handoff
+
+**What I did:** Normalized raw signal into structured facts (issue_normalized.md) and repo context (context_brief.md).
+
+**What's left:** <"Ready for problem framing" | "Sparse signal, assumptions made">
+
+**Recommendation:** PROCEED to problem-framer.
+
+**Reasoning:** <1-2 sentences about signal quality and context found>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Normalized raw signal into structured facts (issue_normalized.md) and repo context (context_brief.md).
+
+**What's left:** Ready for problem framing.
+
+**Recommendation:** PROCEED to problem-framer.
+
+**Reasoning:** Extracted clear request type (feature), impact (user login), and constraints. Found 3 related prior runs and likely touchpoints in src/auth/*. No redaction needed.
 ```
 
 ## Completion rules

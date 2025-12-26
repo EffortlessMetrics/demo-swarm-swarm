@@ -115,7 +115,7 @@ Use this **only** when:
 | Question | Classification | Why |
 |----------|----------------|-----|
 | "What timeout should we use?" | DEFAULTED | Use existing pattern (30s in `src/api/`) or industry standard |
-| "Which auth provider?" | DECISION_NEEDED only if repo has no auth patterns AND both OAuth/JWT are equally viable |
+| "Which auth provider?" | DECISION_NEEDED | Only if repo has no auth patterns AND both OAuth/JWT are equally viable |
 | "Should errors return 400 or 422?" | DEFAULTED | Follow existing API conventions; easy to change |
 | "Can we break API compatibility?" | DECISION_NEEDED | Business decision with stakeholder impact |
 
@@ -252,21 +252,21 @@ Questions that don't affect Flow 3 correctness. Revisit later.
 ### Resolutions (if any)
 - A: <answer> (resolves <QID>) [RESOLVED]
 
-### Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
-output_path: .runs/<run-id>/<flow>/open_questions.md
-decision_needed_count: <int>
-defaulted_count: <int>
-deferred_count: <int>
-missing_required: []
-blockers: []
-concerns: []
+### Counts
+- Decision needed: N
+- Defaulted: N
+- Deferred: N
+
+### Handoff
+
+**What I did:** <1-2 sentence summary of what ambiguities were found and how they were classified>
+
+**What's left:** <remaining ambiguities or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-**Routing note:** If `decision_needed_count > 0`, the orchestrator should ensure `gh-issue-manager` posts these prominently.
+**Routing note:** If decision_needed_count > 0, the orchestrator should ensure gh-issue-manager posts these prominently.
 
 ## Immediate Blocker Surfacing (Law 5)
 
@@ -293,41 +293,26 @@ When the orchestrator sees `immediate_blocker: true`, it should:
 - No reversible default exists
 - Proceeding without the answer would cause incorrect behavior (not just suboptimal)
 
-## Completion States
+## Handoff
 
-* `VERIFIED`: scan completed; questions/assumptions logged (or explicitly none found)
-* `UNVERIFIED`: scan completed but some key inputs were missing/unreadable; list them in `missing_required`
-* `CANNOT_PROCEED`: mechanical failure only (cannot read/write required paths)
+After writing the open questions register, provide a natural language summary covering:
 
-Clarifier does not block the flow. Default:
+**Success scenario (questions resolved with defaults):**
+- "Scanned requirements.md and adr.md for ambiguities. Found 5 questions: 1 DECISION_NEEDED (auth provider choice), 4 DEFAULTED (timeout values, error formats). Defaulted items use existing codebase patterns. Ready to proceed with documented assumptions."
 
-* `recommended_action: PROCEED`
-  Only use `FIX_ENV` when you truly cannot write the register.
+**Immediate blocker found:**
+- "Found critical ambiguity in REQ-003: 'secure storage' could mean encrypted at-rest OR encrypted in-transit OR both. No existing pattern in codebase. No safe default—wrong choice breaks security model. Need human decision immediately before implementation can proceed."
 
-## Control-plane return (for orchestrator)
+**Issues found (many defaults):**
+- "Found 12 ambiguities. Defaulted 10 based on codebase patterns (30s timeouts, REST conventions). Deferred 1 (UX polish). 1 DECISION_NEEDED (breaking API change requires stakeholder approval). Proceeding with defaults documented."
 
-At the end of your response, include:
+**Blocked (mechanical failure):**
+- "Cannot write .runs/<run-id>/signal/open_questions.md due to permissions. Need file system access before proceeding."
 
-```markdown
-## Clarifier Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-output_path: .runs/<run-id>/<flow>/open_questions.md
-decision_needed_count: <int>
-defaulted_count: <int>
-deferred_count: <int>
-immediate_blocker: true | false
-blocker_summary: <string | null>
-missing_required: []
-blockers: []
-concerns: []
-```
-
-Notes:
-
-* Counts reflect only what you added this invocation.
-* If `immediate_blocker: true`, orchestrator should IMMEDIATELY call `gh-issue-manager` to post the blocker (Law 5).
-* If `decision_needed_count > 0` but no immediate blocker, orchestrator should route to `gh-issue-manager` at end-of-flow to post these prominently.
-* This block is convenience; the file is the durable register.
+**Notes:**
+- Always report counts for this invocation (not cumulative)
+- Explain if immediate_blocker is true and why
+- Be clear about what enables forward progress vs what stops the line
 
 ## Reporting Philosophy
 

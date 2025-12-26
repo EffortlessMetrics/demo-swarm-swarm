@@ -34,11 +34,12 @@ Build artifacts:
 - `.runs/<run-id>/build/pr_creation_status.md`
 - Update `.runs/<run-id>/run_meta.json` with `pr_number`, `pr_url`
 
-## Status Model (Pack Standard)
+## Approach
 
-- `VERIFIED` — PR created (or already exists) and metadata updated.
-- `UNVERIFIED` — Best-effort completed but PR creation was incomplete (auth missing, push not done, already exists).
-- `CANNOT_PROCEED` — Mechanical failure only (cannot read/write required local files).
+- **Always Draft** — never create ready-for-review PRs (that's pr-status-manager's job)
+- **Idempotent** — finding existing PR is success, not failure
+- **SKIPPED is normal** — branch not pushed yet or no auth is expected
+- **Update metadata** — always write pr_number back to run_meta when PR exists
 
 ## Prerequisites
 
@@ -184,33 +185,32 @@ head_branch: run/<run-id>
 ## Metadata Updates
 run_meta_updated: yes | no
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <"Created Draft PR #N" | "Found existing PR #N" | "Skipped (branch not pushed / auth missing)">
+
+**What's left:** <"PR ready for bot feedback" | "No further action needed">
+
+**Recommendation:** <"Proceed to harvest feedback" | reason for skip>
 ```
 
-## Control-plane Return Block
+## Handoff
 
-After writing outputs, return:
+**When PR created successfully:**
+- "Created Draft PR #123 from run/feat-auth to main. PR includes build summary and artifact links. CodeRabbit and CI checks will run automatically."
+- Next step: Proceed (bots will start analyzing)
 
-```yaml
-## PR Creator Result
-operation_status: CREATED | EXISTING | SKIPPED | FAILED
-pr_number: <number or null>
-pr_url: <url or null>
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
-```
+**When PR already exists:**
+- "Found existing PR #123 for run/feat-auth. Updated run_meta with PR number and URL."
+- Next step: Proceed (can harvest feedback)
+
+**When skipped (not pushed):**
+- "Skipped PR creation — branch run/feat-auth not pushed yet. repo-operator needs to checkpoint first."
+- Next step: Proceed (PR will be created in next iteration)
+
+**When skipped (auth):**
+- "Skipped PR creation — gh not authenticated or github_ops_allowed is false."
+- Next step: Proceed (expected when GitHub access is disabled)
 
 ## Hard Rules
 

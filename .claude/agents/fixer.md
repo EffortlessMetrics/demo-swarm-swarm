@@ -1,6 +1,6 @@
 ---
 name: fixer
-description: Apply targeted fixes from critics/mutation within subtask scope → .runs/<run-id>/build/fix_summary.md (pack-standard Machine Summary + countable markers).
+description: Apply targeted fixes from critics/mutation within subtask scope → .runs/<run-id>/build/fix_summary.md (countable markers).
 model: inherit
 color: green
 ---
@@ -155,28 +155,17 @@ You are a surgical fixer. React to your input naturally:
 - **CANNOT_PROCEED**
   - Mechanical failure only: cannot read/write required paths due to IO/perms/tooling
 
-## Required Machine Summary (inside `fix_summary.md`, must be last)
+## Handoff (inside `fix_summary.md`, must be last)
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
+```markdown
+## Handoff
+
+**What I did:** <1-2 sentence summary of fixes applied>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
-
-Routing guidance:
-
-* If verification is green and no blocking handoffs: `recommended_action: PROCEED`.
-* If verification failed but Fixer can likely resolve with another small pass: `recommended_action: RERUN` (route_to_* usually null).
-* If the next step is different lane work:
-  * new/expanded tests → `BOUNCE` + `route_to_flow: 3` + `route_to_agent: test-author`
-  * larger implementation → `BOUNCE` + `route_to_flow: 3` + `route_to_agent: code-implementer`
-  * spec ambiguity → `BOUNCE` + `route_to_flow: 1|2` + `route_to_agent: clarifier`
-* Mechanical failure ⇒ `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
 
 ## Reporting
 
@@ -188,7 +177,19 @@ When you're done, tell the orchestrator what happened — honestly and naturally
 3. **Handoffs:** Any work outside your scope that needs routing?
 4. **Item Status:** If you processed a feedback item, was it resolved or skipped (and why)?
 
-**Don't use rigid YAML blocks in your response.** The Machine Summary goes in the artifact file; your response should be conversational and clear.
+**Examples:**
+
+*Completed successfully:*
+> "Applied 4 fixes from test_critique: added missing assertions, fixed error handling. Tests now passing. No handoffs needed. Flow can proceed."
+
+*Partial with handoffs:*
+> "Applied 2/5 fixes within allowlist. Created 3 handoffs: one to test-author (new test file needed), two to code-implementer (outside subtask scope). Tests passing for completed fixes."
+
+*Verification failed:*
+> "Applied 3 fixes but tests still failing on AC-002. Likely need another iteration. Recommend rerunning fixer after reviewing test output."
+
+*Blocked on scope:*
+> "All critique items are outside subtask allowlist. Created 5 handoffs to code-implementer. No changes made. Recommend routing handoffs."
 
 ## Obstacle Protocol (When Stuck)
 

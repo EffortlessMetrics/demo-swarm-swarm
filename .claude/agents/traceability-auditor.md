@@ -219,24 +219,46 @@ concerns: []
 - TRS_AC_SCENARIO_UNLINKED: ...
 ```
 
-## Control-Plane Return Block
+## Handoff
 
-End your response with:
+After writing the traceability audit, provide a natural language handoff:
 
-```yaml
-## Traceability Auditor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string|null>
-route_to_agent: <agent-name|null>
-req_missing: []
-nfr_missing: []
-orphan_scenarios: <int|null>
-ac_total: <int|null>
-ac_completed: <int|null>
-ac_blocked: <int|null>
-output_file: .runs/<run-id>/<flow>/traceability_audit.md
+```markdown
+## Handoff
+
+**What I did:** Audited run identity, receipts, GitHub markers, and spec traceability. Found <issues summary>.
+
+**What's left:** <"Traceability verified" | "Gaps require resolution">
+
+**Recommendation:** <PROCEED | BOUNCE to <station/agent> to fix <gaps>>
+
+**Reasoning:** <1-2 sentences explaining coherence status and what needs fixing>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Audited run identity, receipts, GitHub markers, and spec traceability. All checks passed.
+
+**What's left:** Traceability verified.
+
+**Recommendation:** PROCEED.
+
+**Reasoning:** Run identity coherent (gh-456 matches issue #456), all receipts present and valid, GitHub markers in place, all REQs covered by BDD scenarios, no orphans, AC loop complete (5/5).
+```
+
+```markdown
+## Handoff
+
+**What I did:** Audited spec traceability. Found 3 orphan scenarios and 2 REQs with no BDD coverage.
+
+**What's left:** BDD traceability gaps.
+
+**Recommendation:** BOUNCE to bdd-author to tag orphan scenarios and add scenarios for REQ-004, REQ-005.
+
+**Reasoning:** Cannot verify end-to-end traceability with orphan scenarios (login.feature:12, :25, :38) and uncovered requirements. AC matrix will be incomplete without these links.
 ```
 
 ## Behavior (step-by-step)

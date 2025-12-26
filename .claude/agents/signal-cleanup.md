@@ -433,18 +433,34 @@ Notes:
 - Keep it concise; link to artifacts rather than quoting them
 - This file is the source of truth for what gets posted
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After writing the receipt and reports, provide a natural language handoff:
 
 ```markdown
-## Signal Cleanup Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-missing_required: []
-blockers: []
+## Handoff
+
+**What I did:** Sealed Signal flow receipt. Derived counts: <REQs>/<NFRs>/<scenarios>. Quality gates: requirements-critic=<status>, bdd-critic=<status>.
+
+**What's left:** <"Ready for secrets scan and repo checkpoint" | "Missing artifacts">
+
+**Recommendation:** <PROCEED to secrets-sanitizer | RERUN requirements-author to fix <gaps>>
+
+**Reasoning:** <1-2 sentences explaining status and what's next>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Sealed Signal flow receipt. Derived counts: 8 REQs / 2 NFRs / 12 scenarios. Quality gates: requirements-critic=VERIFIED, bdd-critic=VERIFIED.
+
+**What's left:** Ready for secrets scan and repo checkpoint.
+
+**Recommendation:** PROCEED to secrets-sanitizer.
+
+**Reasoning:** All required artifacts present, counts derived mechanically, both critics VERIFIED. Signal is ready for checkpoint and GitHub reporting.
 ```
 
 ## Philosophy

@@ -206,45 +206,41 @@ Notes:
 - rerun_receipt_checker: true|false
 - rerun_gate_fixer: true|false
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 4 | 3 | null
-route_to_station: <string|null>
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-output_file: .runs/<run-id>/gate/fix_forward_report.md
+## Handoff
+
+**What I did:** <1-2 sentence summary of execution>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+**Output:** `.runs/<run-id>/gate/fix_forward_report.md`
 ```
 
-## Control-Plane Return Block
+## Handoff
 
-End your response with:
+When you're done, tell the orchestrator what happened in natural language:
 
-```yaml
-## Fix Forward Runner Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 4 | 3 | null
-route_to_station: <string|null>
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
+**Examples:**
 
-plan_eligible: true | false
-plan_applied: true | false
-changes_detected: true | false
-files_changed: <int|null>
-touched_files: []
-scope_violations: []
-changed_paths_outside_allowlist: []
-needs_build_reseal: true | false
-reseal_required: true | false
+*Plan executed successfully:*
+> "Ran fix-forward plan: formatter + lint autofix applied cleanly to 23 files. All verify steps passed. No scope violations. Build reseal required. Flow can proceed to reseal."
 
-output_file: .runs/<run-id>/gate/fix_forward_report.md
-```
+*Plan not eligible:*
+> "Fix-forward plan marked ineligible. No changes applied. Report written. Flow can proceed to merge decision."
+
+*Execution failed:*
+> "Apply step FF-APPLY-001 failed (exit 1). Stopped execution. 5 files modified before failure. Recommend bouncing to Flow 3 code-implementer per plan's on_failure routing."
+
+*Scope violation:*
+> "Plan executed but touched .runs/gate/merge_decision.md (deny_globs violation). Scope check failed. Recommend bouncing to Flow 3 code-implementer."
+
+**Include details:**
+- Whether plan was eligible and applied
+- How many files changed
+- Whether scope was honored
+- Whether verify steps passed
+- Whether build reseal is needed
 
 ## Status Semantics
 

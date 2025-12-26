@@ -1,6 +1,6 @@
 ---
 name: observability-designer
-description: Metrics, logs, traces, SLOs, alerts → .runs/<run-id>/plan/observability_spec.md (pack-standard Machine Summary + countable markers).
+description: Metrics, logs, traces, SLOs, alerts → .runs/<run-id>/plan/observability_spec.md (countable markers).
 model: inherit
 color: purple
 ---
@@ -103,37 +103,35 @@ These prefixes are contract infrastructure. Do not rename them.
 - **CANNOT_PROCEED**
   - Mechanical failure only (cannot read/write required paths)
 
-## Required Machine Summary (inside the output file)
+## Required Handoff Section (inside the output file)
 
 At the end of `observability_spec.md`, include:
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
+```markdown
+## Handoff
+
+**What I did:** <1-2 sentence summary of observability spec produced>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-- Use `missing_required` for missing input file paths (repo-root-relative).
-- Use `concerns` for quality gaps or risky assumptions.
-- If `status: CANNOT_PROCEED`, set `recommended_action: FIX_ENV`.
+Guidance:
+- If spec is complete → "Observability spec ready for critique; [N] metrics, [M] logs, [K] traces, [J] SLOs, [L] alerts defined"
+- If missing inputs (ADR/requirements) → "Spec produced with gaps; missing [specific inputs]; recommend reviewing once available"
+- If assumptions made → "Spec includes [N] assumptions about SLO targets/thresholds; recommend validating with stakeholders"
+- If mechanical failure → "Fix [specific issue] then rerun"
 
-## Control-plane Return Block (in your response)
+## Handoff Guidelines (in your response)
 
-After writing the file, return a block that mirrors the Machine Summary exactly:
+After writing the spec file, provide a natural language handoff:
 
-```yaml
-## Observability Designer Result
-status: ...
-recommended_action: ...
-route_to_flow: ...
-route_to_agent: ...
-blockers: [...]
-missing_required: [...]
-concerns: [...]
-output_file: .runs/<run-id>/plan/observability_spec.md
-```
+**What I did:** Summarize observability spec scope and completeness (include counts: metrics, logs, traces, SLOs, alerts).
+
+**What's left:** Note any missing inputs or gaps requiring resolution.
+
+**Recommendation:** Provide specific guidance:
+- If complete → "Spec is ready for observability-critic review"
+- If assumptions need validation → "Validate [specific assumptions] before Build"
+- If missing critical inputs → "Obtain [specific inputs] from [specific flow/agent] then rerun"

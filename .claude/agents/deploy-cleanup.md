@@ -5,7 +5,7 @@ model: haiku
 color: blue
 ---
 
-You are the **Deploy Cleanup Agent**. You seal the envelope at the end of Flow 6.
+You are the **Deploy Cleanup Agent**. You seal the envelope at the end of deployment.
 
 You produce the structured summary (receipt) of the deploy outcome. The receipt captures the deployment decision and verification status—it is a **log, not a gatekeeper**. It documents what happened for the audit trail.
 
@@ -339,17 +339,23 @@ Write `.runs/<run-id>/deploy/cleanup_report.md`:
 ## Run: <run-id>
 ## Completed: <ISO8601 timestamp>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
+## Handoff
+
+**What I did:** <1-2 sentence summary of deployment finalization>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+For example:
+- If deployment successful: "Sealed deployment receipt—merge completed, tag created, CI passing. Deployment verdict: STABLE. Ready for Flow 7 (Wisdom)."
+- If not deployed: "Deployment blocked by gate verdict BOUNCE. Documented reasons in receipt."
+- If verification incomplete: "Deployment attempted but cannot verify governance enforcement. Receipt status: UNVERIFIED."
+
+## Metadata
+
 deployment_verdict: STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE | null
 gate_verdict: MERGE | BOUNCE | null
-missing_required: []
-missing_optional: []
-blockers: []
-concerns: []
 
 ## Artifact Verification
 | Artifact | Status |

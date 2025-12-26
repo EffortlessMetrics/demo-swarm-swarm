@@ -115,16 +115,19 @@ If CI is clearly in progress and you can re-check:
 ```markdown
 # Verification Report for <run-id>
 
-## Machine Summary
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
-```
+## Handoff
+
+**What I did:** <1-2 sentence summary of monitoring results>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+For example:
+- If CI passing: "Monitored CI for merge commit abc123—all workflows passed. CI signal: PASS. Ready for smoke verification."
+- If CI failing: "CI monitoring shows 2 failed workflows: tests and lint. CI signal: FAIL. Evidence captured in verification report."
+- If not deployed: "Gate verdict was BOUNCE—no deployment to monitor. Documented in report."
+- If auth unavailable: "Cannot access CI status (gh unauthenticated). Report written with limitations noted."
 
 ## Signals
 
@@ -194,21 +197,28 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 - If MERGE and you have concrete CI URLs/results ⇒ status can be VERIFIED (even if CI failed; that's still evidence).
 - If CI/deploy evidence cannot be obtained due to tooling/auth/unknown identifiers ⇒ UNVERIFIED with explicit concerns.
 
-## Control-plane Return Block (in your response)
+## Handoff
 
-After writing the file, return:
+After writing the file, provide a natural language summary:
 
-```yaml
-## Deploy Monitor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
-output_file: .runs/<run-id>/deploy/verification_report.md
-```
+**Success (evidence gathered):**
+"Monitored CI for merge commit abc123: 3 workflows completed (tests, lint, build) with status=success. CI signal: PASS. Deployment evidence: production environment shows state=success. Ready for smoke verification."
+
+**CI failing:**
+"CI monitoring detected failures: 'tests' workflow failed with 2 test failures. CI signal: FAIL. Full evidence in verification_report.md."
+
+**Not deployed:**
+"Gate decision was BOUNCE—deployment not attempted. Documented gate context in verification report. Status: VERIFIED (NOT_DEPLOYED is the correct state)."
+
+**Limited evidence:**
+"Cannot access CI evidence (gh unavailable). Verification report written with limitations documented. Status: UNVERIFIED."
+
+Always mention:
+- Whether deployment was attempted
+- CI signal (PASS/FAIL/UNKNOWN/N/A)
+- Deploy signal if applicable (PASS/FAIL/UNKNOWN/N/A)
+- What evidence was gathered
+- Next step (proceed to smoke-verifier, or note limitations)
 
 ## Philosophy
 

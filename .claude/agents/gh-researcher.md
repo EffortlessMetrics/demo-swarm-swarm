@@ -1,6 +1,6 @@
 ---
 name: gh-researcher
-description: Read-only GitHub reconnaissance (issues/PRs/discussions + local prior art pointers) → .runs/<run-id>/signal/github_research.md (pack-standard Machine Summary).
+description: Read-only GitHub reconnaissance (issues/PRs/discussions + local prior art pointers) → .runs/<run-id>/signal/github_research.md.
 model: haiku
 color: yellow
 ---
@@ -180,42 +180,36 @@ Write actionable guidance:
 - **CANNOT_PROCEED**
   - Mechanical failure only: cannot read required inputs due to IO/perms/tooling, or cannot write the output file
 
-## Required Machine Summary (inside the output file)
+## Required Handoff Section (inside the output file)
 
 At the end of `github_research.md`, include:
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
+```markdown
+## Handoff
+
+**What I did:** Summarize research scope and what was found (or not found) in 1-2 sentences.
+
+**What's left:** Note any GitHub access limitations or missing context.
+
+**Recommendation:** Explain the specific next step with reasoning based on findings.
 ```
 
 Guidance:
 
-- Put missing input file paths in `missing_required`.
-- Put gh auth/tooling limitations in `concerns` (not `missing_required`).
-- If status is `CANNOT_PROCEED`, set `recommended_action: FIX_ENV`.
+- If found relevant items → "Flow 1 can use these constraints/patterns; no blockers"
+- If GitHub unavailable → "Flow 1 should proceed with local pointers only; GitHub context missing but not blocking"
+- If repo identity unclear → "Bind GitHub repo in run_meta for future research"
+- If mechanical failure → "Fix [specific IO/tooling issue] then rerun"
 
-## Control-plane Return Block (in your response)
+## Handoff Guidelines (in your response)
 
-After writing the file, return:
+After writing the file, provide a natural language handoff:
 
-```yaml
-## GitHub Researcher Result
-status: ...
-recommended_action: ...
-route_to_flow: ...
-route_to_agent: ...
-blockers: [...]
-missing_required: [...]
-concerns: [...]
-output_file: .runs/<run-id>/signal/github_research.md
-```
+**What I did:** Summarize what research was performed and key findings.
+
+**What's left:** Note GitHub access state and any missing inputs.
+
+**Recommendation:** Provide specific guidance for Flow 1 based on research outcomes.
 
 ## Research-First Protocol (Law 5)
 

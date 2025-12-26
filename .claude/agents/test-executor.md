@@ -185,32 +185,56 @@ test_summary:
 
 If you cannot extract counts safely, keep them `null`. Do not estimate.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After executing tests and writing the report, provide a natural language handoff:
 
 ```markdown
-## Test Executor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-mode: verify | verify_ac
-ac_id: <string|null>
-ac_filter_applied: <bool|null>
-ac_status: passed | failed | unknown   # for verify_ac mode: did this AC's tests pass?
+## Handoff
+
+**What I did:** Executed <mode> tests. Result: <passed>/<failed>/<skipped> (exit code: <N>).
+
+**What's left:** <"Tests complete" | "Failures require fixes">
+
+**Recommendation:** <PROCEED to test-critic | RERUN code-implementer to fix failing tests>
+
+**Reasoning:** <1-2 sentences explaining test outcome>
 ```
 
-The file is the audit record. This block is the control plane.
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Executed verify tests. Result: 12 passed / 0 failed / 2 skipped (exit code: 0).
+
+**What's left:** Tests complete.
+
+**Recommendation:** PROCEED to test-critic.
+
+**Reasoning:** All tests passed. Canonical summary: "passed=12 failed=0 skipped=2 xfailed=0 xpassed=0". Green build.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Executed verify_ac tests for AC-001. Result: 3 passed / 2 failed / 0 skipped (exit code: 1).
+
+**What's left:** Failures require fixes.
+
+**Recommendation:** RERUN code-implementer to fix test_login_invalid_password and test_login_rate_limit.
+
+**Reasoning:** AC filter worked (ran 5 tests for AC-001). Two tests failing with assertion errors. Implementation incomplete.
+```
+
+The file is the audit record. This handoff is the control plane.
 
 **AC status semantics (verify_ac mode only):**
 - `passed`: All tests for this AC passed (exit code 0)
 - `failed`: One or more tests failed
 - `unknown`: Could not determine (filter didn't work, no tests found, etc.)
 
-The `build-cleanup` agent uses this to update `ac_status.json`.
+The `build-cleanup` agent uses the handoff to update `ac_status.json`.
 
 ## Philosophy
 

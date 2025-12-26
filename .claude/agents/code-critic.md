@@ -77,34 +77,6 @@ Everything else is out of scope for this critique.
 ```markdown
 # Code Critique
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name | null>
-
-blockers: []
-missing_required: []
-concerns: []
-observations: []
-
-can_further_iteration_help: yes | no
-
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-
-coverage_summary:
-  reqs_in_scope_total: 0
-  reqs_with_impl: 0
-  reqs_with_tests: 0
-  reqs_missing_impl: []
-  reqs_missing_tests: []
-  adr_violations: 0
-  contract_violations: 0
-
 ## Scope
 
 ### In-scope Requirements
@@ -146,11 +118,17 @@ reward_hacking_risk: NONE | LOW | HIGH
 - [MAJOR] Missing handling for <edge case>
 - (or "Key cases covered")
 
-## Iteration Guidance
-**Rationale:** <why yes/no>
+## Counts
+- Critical: N, Major: N, Minor: N
+- REQs in scope: N, with impl: N, with tests: N
 
-## Recommended Next
-- <concrete next step>
+## Handoff
+
+**What I found:** <1-2 sentence summary of critique findings>
+
+**What's left:** <remaining issues or "nothing — implementation is solid">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ## Severity Definitions
@@ -159,55 +137,47 @@ reward_hacking_risk: NONE | LOW | HIGH
 - **MAJOR**: ADR drift, contract violations, missing edge cases
 - **MINOR**: Style, observability gaps
 
-## Status Rules
+## Handoff
 
-### VERIFIED
+Your handoff tells the orchestrator what happened and what to do next.
 
-- No CRITICAL issues
-- In-scope REQs have implementation evidence
-- Scope is explicit
+### When implementation is solid
 
-Set: `recommended_action: PROCEED`
+No CRITICAL issues, in-scope REQs have evidence, scope is explicit.
 
-### UNVERIFIED
+**Example:**
+> **What I found:** Implementation covers all 5 in-scope REQs. No ADR violations, contracts match, security looks good.
+>
+> **What's left:** Nothing blocking — ready for next station.
+>
+> **Recommendation:** Proceed to test-critic or the next AC.
 
-- Any CRITICAL exists
-- In-scope REQs lack implementation
-- Core spec artifacts missing
+### When issues need fixing
 
-**Routing (you know your microloop partner):**
-- Implementation gaps → `RERUN` (back to code-implementer — your microloop partner)
-- Design issues → `BOUNCE`, `route_to_flow: 2`, explain in blockers
-- Product decisions open → `PROCEED` with blockers (orchestrator will escalate)
+CRITICAL issues exist, REQs lack implementation, or spec violations found.
 
-Set `can_further_iteration_help`:
-- `yes`: the microloop partner can fix it
-- `no`: needs upstream work (design, spec) or human judgment
+**Routing guidance (you know your microloop partner):**
+- Implementation gaps → "Run code-implementer to fix X"
+- Design issues → "This needs to go back to Plan — the ADR doesn't cover Y"
+- Product decisions open → "Proceed, but someone needs to decide Z"
 
-### CANNOT_PROCEED
+**Example:**
+> **What I found:** REQ-003 has no implementation. The session timeout uses 30m but ADR specifies 15m.
+>
+> **What's left:** Two fixes needed: implement REQ-003, correct the timeout value.
+>
+> **Recommendation:** Run code-implementer to address these issues, then re-run me to verify.
 
-Mechanical failure only (IO/permissions).
+### When mechanically blocked
 
-Set: `recommended_action: FIX_ENV`
+IO/permissions failure — can't do the work.
 
-## Control-Plane Return
-
-At end of response:
-
-```markdown
-## Code Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name | null>
-can_further_iteration_help: yes | no
-blockers: []
-missing_required: []
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-```
+**Example:**
+> **What I found:** Cannot read impl_changes_summary.md — file doesn't exist.
+>
+> **What's left:** Need the implementation summary to review.
+>
+> **Recommendation:** Fix the environment or run the prior station first.
 
 ## Philosophy
 

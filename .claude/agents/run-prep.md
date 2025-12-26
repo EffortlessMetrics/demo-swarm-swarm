@@ -236,35 +236,23 @@ This is advisory (for humans/orchestrator), not a blocker.
 
 After finishing, output both a human summary and a machine block.
 
-Human summary:
+## Handoff
 
-```md
-## Run Infrastructure Established
-run_id: <run-id>
-run_dir: .runs/<run-id>/
-flow: <flow>
-flow_dir: .runs/<run-id>/<flow>/
-mode: NEW | EXISTING | SUPERSEDING
-```
+After establishing run infrastructure, provide a clear handoff:
 
-Machine block (for routing):
+```markdown
+## Handoff
 
-```md
-## Run Prep Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: null
-route_to_flow: null
+**What I did:** Established run infrastructure for <run-id> flow <flow>. Mode: NEW/EXISTING/SUPERSEDING. Created directories and merged run_meta.json. Updated index.json with run entry.
 
-run_id: <run-id>
-flow: <flow>
-supersedes: <prior-run-id | null>
-missing_upstream_flows: [<flow-name>, ...]
+**What's left:** Nothing (infrastructure ready) OR Missing upstream flows: [signal, plan] (out-of-order execution).
 
-blockers: []
-missing_required: []
-notes:
-  - <e.g., "resolved #456 → feat-auth via index", "sanitized run-id X → Y", "fallback run-id used: run-plan-v2">
+**Notes:**
+- Resolved #456 → feat-auth via index lookup
+- Sanitized run-id "feat/auth" → "feat-auth"
+- Missing upstream flows are advisory only, not blocking
+
+**Recommendation:** Infrastructure is ready - proceed to domain work for this flow. OR Run identity used fallback (run-plan-v2) due to ambiguous input - verify this is the intended run before proceeding.
 ```
 
 ## Error handling

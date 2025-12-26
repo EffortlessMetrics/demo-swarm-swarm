@@ -94,18 +94,20 @@ Write `.runs/<run-id>/build/fuzz_report.md` in exactly this structure:
 ```md
 # Fuzz Report
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_agent: code-implementer | test-author | pack-customizer | null
-blockers: []
-missing_required: []
-counts:
-  crashes: <int|null>
-budget_seconds: <int|null>
-duration_seconds: <int|null>
-fuzz_command: "<string|null>"
+## Summary
+
+**Crashes found:** <int>
+**Budget:** <int> seconds
+**Duration:** <int> seconds
+**Command:** `<string>`
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of fuzzing results>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 
 ## Run Notes
 - Tool/config selection: <what you used or why skipped>
@@ -125,18 +127,27 @@ fuzz_command: "<string|null>"
 - FUZZ_CRASH: FUZZ-CRASH-001
 ```
 
-## Control-plane return block (in your response)
+## Handoff
 
-After writing the file, return:
+When you're done, tell the orchestrator what happened in natural language:
 
-```md
-## Fuzz Triager Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_agent: code-implementer | test-author | pack-customizer | null
-counts:
-  crashes: <int|null>
-output_file: .runs/<run-id>/build/fuzz_report.md
-```
+**Examples:**
+
+*Fuzz ran clean:*
+> "Ran fuzzing for 300 seconds, no crashes detected. Report written. Flow can proceed."
+
+*Crashes found:*
+> "Found 2 distinct crash signatures during fuzzing. Created worklist with FUZZ-CRASH-001, FUZZ-CRASH-002. Recommend bouncing to code-implementer for fixes."
+
+*Skipped (no harness):*
+> "No fuzz harness configured in demo-swarm.config.json. Skipped fuzzing. Report written noting skip reason. Flow can proceed."
+
+*Tool unavailable:*
+> "Cannot execute fuzz command - tool not found. Need pack-customizer to configure fuzzing setup."
+
+**Include counts:**
+- How many crashes found
+- Budget and duration
+- What command was used (or why skipped)
+- Whether worklist was created
 

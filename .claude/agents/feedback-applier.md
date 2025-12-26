@@ -190,16 +190,13 @@ None. (Drafts only; no GitHub side effects.)
 - SUGGESTION: SUG-001 target_flow=1
 - SUGGESTION: SUG-002 target_flow=3
 
-## Machine Summary
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
-```
+## Handoff
+
+**What I did:** <1-2 sentence summary of feedback actions produced>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ## Output Format: `codebase_wisdom.md` (required)
@@ -292,38 +289,27 @@ For mechanical counting, preserve these exact line prefixes:
 
 Do not vary these prefixes.
 
-## Routing guidance
+## Handoff
 
-Typical defaults:
-- If you produced usable drafts/suggestions ⇒ `recommended_action: PROCEED`, routes null.
-- If inputs were missing but drafts are still reasonable ⇒ `status: UNVERIFIED`, `recommended_action: PROCEED` (Flow 7 can continue).
-- If rerunning later would likely improve fidelity (e.g., regressions missing) ⇒ `recommended_action: RERUN`.
-- Mechanical failure writing output ⇒ `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+When you're done, tell the orchestrator what happened in natural language:
 
-## Control-plane return block (in your response)
+**Examples:**
 
-After writing the file, return:
+*Completed successfully:*
+> "Created 3 issue drafts and 5 suggestions from mutation survivors and learnings. All outputs written to wisdom/. Flow can proceed."
 
-```yaml
-## Feedback Applier Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
-output_files:
-  - .runs/<run-id>/wisdom/feedback_actions.md
-  - .runs/<run-id>/wisdom/pack_improvements.md
-  - .runs/<run-id>/wisdom/codebase_wisdom.md
-  - .runs/_wisdom/latest.md
-issue_drafts: 0
-suggestions: 0
-pack_improvements: 0
-codebase_insights: 0
-scent_trail_updated: yes|no
-```
+*Partial completion:*
+> "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Recommend rerunning after artifact audit if more precision needed."
+
+*Blocked:*
+> "Cannot write output files due to permissions error on .runs/ directory. Need environment fix before proceeding."
+
+**Include counts:**
+- How many issue drafts created
+- How many suggestions produced
+- How many pack improvements (diffs)
+- Which input files were present vs missing
+- Whether scent trail was updated
 
 ## Philosophy
 

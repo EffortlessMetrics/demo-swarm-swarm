@@ -391,34 +391,28 @@ comment_id: <id or null>
 - [ ] Comment visible on GitHub
 - [ ] Links resolve correctly
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <1-2 sentence summary of posting outcome>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-## Control-plane return block (in your response)
+## Handoff
 
-After writing outputs, return:
+After writing outputs, provide a natural language handoff:
 
-```md
-## GitHub Reporter Result
-posting_status: POSTED | FAILED | SKIPPED
-content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
-link_style: BLOB_LINKS | PATHS_ONLY
-publish_surface: PUSHED | NOT_PUSHED
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
-```
+**What I did:** Summarize posting outcome and content mode used in 1-2 sentences.
+
+**What's left:** Note any missing issue bindings or auth issues if posting was skipped.
+
+**Recommendation:** Explain the specific next step:
+- If posted successfully → "Flow can continue; GitHub is updated with FULL/PATHS_ONLY/SUMMARY content"
+- If skipped (GitHub ops disabled) → "Flow should continue locally; issue binding needed for future GitHub posting"
+- If skipped (auth issue) → "Flow should continue; authenticate gh CLI for future posting"
+- If failed → "Retry posting after fixing [specific issue]"
 
 ## Philosophy
 

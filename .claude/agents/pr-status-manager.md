@@ -34,11 +34,12 @@ Review artifacts:
 - `.runs/<run-id>/review/pr_status_update.md`
 - Update `.runs/<run-id>/run_meta.json` with `pr_state`
 
-## Status Model (Pack Standard)
+## Approach
 
-- `VERIFIED` — PR state updated successfully (or correctly left unchanged).
-- `UNVERIFIED` — Best-effort completed but state update was incomplete (auth missing, no PR, skipped).
-- `CANNOT_PROCEED` — Mechanical failure only (cannot read required local files).
+- **Conservative transition** — only Draft → Ready when review is genuinely complete
+- **Respect publish gates** — don't transition if safe_to_publish or proceed_to_github_ops is false
+- **CRITICAL items block** — keep as Draft if any CRITICAL worklist items pending
+- **Idempotent** — running again with same state does nothing harmful
 
 ## Prerequisites
 
@@ -132,34 +133,36 @@ review_complete: yes | no
 worklist_pending: <n>
 critical_pending: <n>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <"Transitioned PR #N from Draft to Ready" | "Kept PR as Draft" | "Skipped (no PR / auth missing)">
+
+**What's left:** <"PR ready for human review" | "Review incomplete, kept as Draft">
+
+**Recommendation:** <"Proceed" | reason for keeping Draft>
 ```
 
-## Control-plane Return Block
+## Handoff
 
-After writing outputs, return:
+**When transitioned to Ready:**
+- "Transitioned PR #123 from Draft to Ready for Review. All worklist items resolved (0 CRITICAL, 0 MAJOR pending). Review is complete."
+- Next step: Proceed to Gate
 
-```yaml
-## PR Status Manager Result
-operation_status: TRANSITIONED | UNCHANGED | SKIPPED | FAILED
-previous_state: draft | open | closed | merged | null
-current_state: draft | open | closed | merged | null
-pr_number: <number or null>
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
-```
+**When kept as Draft (review incomplete):**
+- "Kept PR #123 as Draft — 2 CRITICAL items still pending in review worklist. Review is not complete."
+- Next step: Continue resolving worklist items
+
+**When kept as Draft (publish blocked):**
+- "Kept PR #123 as Draft — publish gate blocked (safe_to_publish: false or proceed_to_github_ops: false)."
+- Next step: Resolve publish blockers first
+
+**When unchanged (already Ready):**
+- "PR #123 is already in 'open' state (ready for review). No state change needed."
+- Next step: Proceed
+
+**When skipped:**
+- "Skipped PR state management — no PR exists or gh not authenticated."
+- Next step: Proceed (expected when PR doesn't exist or GitHub access disabled)
 
 ## Hard Rules
 

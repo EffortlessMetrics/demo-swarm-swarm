@@ -57,27 +57,6 @@ If you can't verify (because files missing), record as note and set UNVERIFIED (
 ```markdown
 # Artifact Audit
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5 | null>
-
-blockers:
-  - <must change to proceed>
-
-missing_required:
-  - <path> (reason)
-
-concerns:
-  - <non-gating issues>
-
-severity_summary:
-  critical: N
-  major: N
-  minor: N
-
 ## Summary
 - Present: <key wins>
 - Missing / weak: <top gaps>
@@ -94,12 +73,32 @@ severity_summary:
 | REQ tags resolve | OK/BROKEN/UNKNOWN | <file:line or "missing requirements.md"> |
 ...
 
+## Counts
+- Critical issues: N
+- Major issues: N
+- Minor issues: N
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of what was audited>
+
+**What's left:** <what flows/artifacts are missing or weak>
+
+**Recommendation:** <specific next step with reasoning>
+
 ## Recommendations
 - <highest leverage next actions>
 ```
 
-## Completion States
+## Handoff
 
-- **VERIFIED**: All minimum-contract artifacts exist and spot-checks are OK. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: Anything missing/empty or spot-checks fail/unknown due to gaps. Set `blockers` with missing items. Use `recommended_action: BOUNCE` + `route_to_flow` pointing to the flow with gaps.
-- **CANNOT_PROCEED**: Mechanical failure only (cannot read/write required paths). Set `missing_required` with paths. Use `recommended_action: FIX_ENV`.
+After writing the audit, provide a natural language summary covering:
+
+**Success scenario (all artifacts present):**
+- "Audited artifacts across flows 1-5. All minimum-contract artifacts present. REQ tag spot-checks passed. No blockers. Ready to proceed to synthesis."
+
+**Issues found (gaps detected):**
+- "Signal flow missing verification_notes.md. Plan flow has adr.md but no api_contracts.yaml. 3 REQ tags in features don't resolve to requirements.md. Recommend bouncing to requirements-author and contract-writer."
+
+**Blocked (mechanical failure):**
+- "Cannot read .runs/<run-id>/ directory due to permissions. Need file system access before proceeding."

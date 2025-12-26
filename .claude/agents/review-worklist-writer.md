@@ -254,48 +254,39 @@ _Process categories in this order: CORRECTNESS → TESTS → STYLE → DOCS_
 
 ---
 
-## Machine Summary
+## Worklist Summary
 
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
+| Metric | Count |
+|--------|-------|
+| Total items | 8 |
+| Pending | 8 |
+| Resolved | 0 |
+| Skipped | 0 |
 
-worklist_counts:
-  total: 8
-  pending: 8
-  resolved: 0
-  skipped: 0
+**By Category:**
+- CORRECTNESS: 3
+- TESTS: 2
+- STYLE: 2
+- DOCS: 1
 
-skipped_breakdown:
-  STALE_COMMENT: 0
-  OUTDATED_CONTEXT: 0
-  ALREADY_FIXED: 0
-  INCORRECT_SUGGESTION: 0
-  OUT_OF_SCOPE: 0
-  WONT_FIX: 0
+**By Severity:**
+- Critical: 2
+- Major: 3
+- Minor: 3
 
-by_category:
-  CORRECTNESS: 3
-  TESTS: 2
-  STYLE: 2
-  DOCS: 1
+**By Route:**
+- test-author: 3
+- code-implementer: 3
+- doc-writer: 1
+- fixer: 1
 
-by_severity:
-  critical: 2
-  major: 3
-  minor: 3
-
-by_route:
-  test-author: 3
-  code-implementer: 3
-  doc-writer: 1
-  fixer: 1
-```
+**Skipped Breakdown:**
+- STALE_COMMENT: 0
+- OUTDATED_CONTEXT: 0
+- ALREADY_FIXED: 0
+- INCORRECT_SUGGESTION: 0
+- OUT_OF_SCOPE: 0
+- WONT_FIX: 0
 ```
 
 ### Step 5: Apply Mode (after worker finishes)
@@ -505,106 +496,55 @@ When an item is `SKIPPED`, it must include a `skip_reason` from this closed enum
 
 The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 
-## Reporting
+## Handoff
 
-When done, summarize what you produced:
-- How many Work Items? How did you cluster them?
-- What's the breakdown by category and severity?
-- Is the loop stuck? (if refreshing an existing worklist)
-- Any concerns about false positives or items that might be outdated?
+After completing your work, provide a clear handoff. The format varies by mode:
 
-Be conversational. The orchestrator needs to understand the shape of the work ahead.
+### Create Mode Handoff
 
-## Result Block
+```markdown
+## Handoff
 
-After writing outputs, include this block for routing. The block varies by mode:
+**What I did:** Converted N raw feedback items into M actionable Work Items. Clustered related issues by file/theme. Breakdown: P CORRECTNESS, Q TESTS, R STYLE, S DOCS items.
 
-### Create Mode Result
+**What's left:** All M items are pending and ready for routing.
 
-```yaml
-## Review Worklist Writer Result
-mode: create
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
+**Next batch:** Route RW-001, RW-002 to code-implementer (batch_hint: auth) - these are CRITICAL auth security issues.
 
-worklist_summary:
-  total_items: <n>
-  pending: <n>
-  resolved: 0
-  skipped: 0
-  critical: <n>
-  major: <n>
-  minor: <n>
-
-next_batch:
-  ids: [RW-001, RW-002]
-  route_to: code-implementer
-  batch_hint: auth
-
-categories:
-  CORRECTNESS: <n>
-  TESTS: <n>
-  STYLE: <n>
-  DOCS: <n>
+**Recommendation:** Worklist created successfully - proceed to dispatch first batch. OR No feedback items found - review may not be needed.
 ```
 
-### Apply Mode Result
+### Apply Mode Handoff
 
-```yaml
-## Review Worklist Writer Result
-mode: apply
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED
+```markdown
+## Handoff
 
-batch_processed:
-  ids: [RW-001, RW-002, RW-003]
-  resolved: 2
-  skipped: 1
-  still_pending: 0
+**What I did:** Updated worklist based on worker response for batch [RW-001, RW-002, RW-003]. Resolved: 2, Skipped: 1, Still pending: 0.
 
-worklist_summary:
-  total_items: <n>
-  pending: <n>
-  resolved: <n>
-  skipped: <n>
+**What's left:** N items still pending in worklist (M critical, P major).
 
-next_batch:
-  ids: [RW-004, RW-005]
-  route_to: test-author
-  batch_hint: tests
+**Next batch:** Route RW-004, RW-005 to test-author (batch_hint: tests) - missing test coverage.
+
+**Recommendation:** Progress made on this batch - continue with next batch. OR All items now resolved - review complete.
 ```
 
-### Refresh Mode Result
+### Refresh Mode Handoff
 
-```yaml
-## Review Worklist Writer Result
-mode: refresh
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED
+```markdown
+## Handoff
 
-stuck_signal: true | false
-refresh_iteration: <n>
-items_resolved_this_cycle: <n>
-stuck_items: []
+**What I did:** Refreshed worklist state, iteration N. Resolved M items this cycle. Stuck detection: yes/no.
 
-worklist_summary:
-  total_items: <n>
-  pending: <n>
-  resolved: <n>
-  skipped: <n>
+**What's left:** P items still pending.
 
-next_batch:
-  ids: [RW-001, RW-002]
-  route_to: code-implementer
-  batch_hint: auth
+**Stuck signal:** True (same items failing for 3+ cycles, loop is stuck) OR False (progress is being made).
+
+**Next batch:** Route RW-001, RW-002 to code-implementer OR No next batch (loop stuck, recommend escalation).
+
+**Recommendation:** Continue processing OR Loop stuck with same items failing repeatedly - recommend human review/escalation.
 ```
 
-**Routing:** The orchestrator reads `next_batch` to dispatch work. After the worker finishes, the orchestrator calls this agent in `apply` mode with the worker's response.
+Be conversational. The orchestrator needs to understand the shape of the work ahead and what to do next.
 
 ## Hard Rules
 

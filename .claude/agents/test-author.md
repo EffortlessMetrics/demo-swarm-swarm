@@ -226,25 +226,49 @@ Set:
 - `recommended_action: FIX_ENV`
 - `route_to_*: null`
 
-## Control-Plane Return (For Orchestrator)
+## Handoff
 
-At the end of your response, return this block (must match the Machine Summary you wrote):
+After writing tests and the summary, provide a natural language handoff:
 
 ```markdown
-## Test Author Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-tests_run: yes | no
-tests_passed: yes | no | unknown | expected_failures
-missing_required: []
-tests_added: 0
-reqs_covered: 0
-scenarios_covered: 0
+## Handoff
+
+**What I did:** Wrote tests for <scope>. Added <N> tests covering <M> REQs / <K> scenarios. Tests: <passed|failed|expected_failures>.
+
+**What's left:** <"Ready for test critic" | "Coverage gaps">
+
+**Recommendation:** <PROCEED to test-critic | RERUN test-author after <fixes> | BOUNCE to clarifier for <ambiguity>>
+
+**Reasoning:** <1-2 sentences explaining coverage and test status>
 ```
 
-The orchestrator routes on this block. `test_changes_summary.md` remains the durable audit artifact.
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Wrote tests for AC-001 (user login). Added 5 tests covering 2 REQs / 3 scenarios. Tests: expected_failures (awaiting implementation).
+
+**What's left:** Ready for test critic.
+
+**Recommendation:** PROCEED to test-critic.
+
+**Reasoning:** Complete test coverage for login happy path and error cases. Tests fail as expected (no implementation yet). All scenarios from login.feature have corresponding tests.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Wrote tests for AC-002 but REQ-003 spec is ambiguous (expected behavior for null input unclear).
+
+**What's left:** Coverage gap for REQ-003 edge case.
+
+**Recommendation:** BOUNCE to clarifier to resolve REQ-003 null handling behavior.
+
+**Reasoning:** Cannot write correct test without knowing if null input should return empty or throw. Documented assumption in open_questions.md but blocked on REQ-003 coverage.
+```
+
+The orchestrator routes on this handoff. `test_changes_summary.md` remains the durable audit artifact.
 
 ## Obstacle Protocol (When Stuck)
 

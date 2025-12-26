@@ -233,6 +233,36 @@ Use `### SQ-FP-NNN:` for false positive entries:
 ### SQ-FP-002: FB-RC-234567890
 ```
 
+## Handoff
+
+After writing the signal quality report, provide a natural language handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Analyzed accuracy of feedback sources. Processed <N> feedback items from <sources>.
+
+**What's left:** Analysis complete.
+
+**Recommendation:** PROCEED to next station.
+
+**Reasoning:** <1-2 sentences summarizing accuracy findings and triage improvements>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Analyzed accuracy of feedback sources. Processed 28 feedback items from CI, CodeRabbit, and human reviews.
+
+**What's left:** Analysis complete.
+
+**Recommendation:** PROCEED to next station.
+
+**Reasoning:** Found 75% overall accuracy. CodeRabbit has 40% false positive rate on architecture suggestions but 100% accuracy on lint issues. Recommend downweighting bot architecture feedback, trusting mechanical checks.
+```
+
 ## Philosophy
 
 Signal quality is about learning what to trust. If CodeRabbit is wrong 40% of the time on security suggestions, we should know that before blindly following its advice.

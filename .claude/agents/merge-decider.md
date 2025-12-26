@@ -1,6 +1,6 @@
 ---
 name: merge-decider
-description: Synthesize Gate evidence into a merge decision (MERGE | BOUNCE) with pack-standard Machine Summary + routing.
+description: Synthesize Gate evidence into a merge decision (MERGE | BOUNCE).
 model: inherit
 color: blue
 ---
@@ -187,35 +187,29 @@ MERGE | BOUNCE
 ## Next Steps
 - ...
 
-## Machine Summary
-verdict: MERGE | BOUNCE
-reason: FIX_REQUIRED | NEEDS_HUMAN_REVIEW | POLICY_BLOCK | UNKNOWN | null
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <1-2 sentence summary of Gate decision and evidence reviewed>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-## Control-plane return block (in your response)
+## Handoff Guidelines (in your response)
 
-After writing the file, return this block verbatim (control plane):
+After writing the merge decision file, provide a natural language handoff:
 
-```md
-## Merge Decider Result
-verdict: MERGE | BOUNCE
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_station: <string | null>
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
-```
+**What I did:** Summarize the Gate verdict and key evidence (include check outcomes: contracts, security, coverage, receipts).
+
+**What's left:** Note any missing inputs or unresolved concerns.
+
+**Recommendation:** Explain the specific next step with reasoning:
+- If verdict is MERGE → "All Gate checks passed; Flow 6 can proceed with deployment to mainline"
+- If verdict is BOUNCE (implementation issues) → "Gate found [specific issues]; route back to Build for [specific fixes]"
+- If verdict is BOUNCE (design issues) → "Gate found design flaws; route back to Plan for [specific redesign]"
+- If verdict is BOUNCE (human review needed) → "Gate cannot determine verdict; human review needed for [specific decision]"
+- If mechanical failure → "Fix [specific issue] then rerun Gate"
 
 ## Notes
 

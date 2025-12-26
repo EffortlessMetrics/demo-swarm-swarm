@@ -233,49 +233,47 @@ Do not rename these prefixes.
 - **CANNOT_PROCEED**
   - Mechanical failure only: cannot read required paths due to IO/perms/tooling, or cannot write output file
 
-## Required Machine Summary (inside the output file)
+## Handoff Section (inside the output file)
 
 At the end of `gate_fix_summary.md`, include:
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_station: <string|null>
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
+```markdown
+## Handoff
+
+**What I did:** <1-2 sentence summary of mechanical fix assessment>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+**Fix-forward eligible:** <true|false>
+**Mechanical fixes:** <count>
+**Non-mechanical findings:** <count>
 ```
 
-Guidance:
+## Handoff
 
-* If any `MECH-*` exists: typically `recommended_action: BOUNCE`, `route_to_flow: 3`.
-  - For format/lint/hygiene gaps: set `route_to_station: standards-enforcer`, `route_to_agent: null`.
-  - For "re-run tests" gaps: set `route_to_station: test-executor`, `route_to_agent: null`.
-  - Note: `standards-enforcer` and `test-executor` are stations, not agent enums. Use `route_to_station` for these; never set `route_to_agent` to a station name.
-* If only non-mechanical issues exist: typically keep `recommended_action: PROCEED` (UNVERIFIED with blockers), `route_to_flow: null`.
-* If key evidence inputs are missing: `status: UNVERIFIED` and populate `missing_required` with the missing artifact paths.
-* `CANNOT_PROCEED` → `recommended_action: FIX_ENV`.
+When you're done, tell the orchestrator what happened in natural language:
 
-## Control-plane Return Block (in your response)
+**Examples:**
 
-After writing the file, return:
+*Fix-forward eligible:*
+> "Found 12 mechanical formatting issues. Created fix-forward plan with formatter + lint autofix commands. Plan eligible, scope limited to src/ and tests/. Recommend running fix-forward-runner."
 
-```yaml
-## Gate Fixer Result
-status: ...
-recommended_action: ...
-route_to_flow: ...
-route_to_station: ...
-route_to_agent: ...
-blockers: [...]
-missing_required: [...]
-concerns: [...]
-output_file: .runs/<run-id>/gate/gate_fix_summary.md
-fix_forward_eligible: true|false
-```
+*Not eligible (non-mechanical):*
+> "Found 3 contract violations (non-mechanical) and 2 format issues. Fix-forward not eligible due to contract blockers. Recommend bouncing to Flow 3 (standards-enforcer for format, contract-enforcer for contracts)."
+
+*No issues:*
+> "No mechanical or non-mechanical issues found. Fix-forward plan emitted as not eligible. Gate is clean. Flow can proceed."
+
+*Evidence missing:*
+> "receipt_audit.md missing; cannot assess mechanical drift. Created best-effort plan but marked unverified. Recommend rerunning receipt-checker."
+
+**Include details:**
+- Whether fix-forward is eligible
+- How many mechanical vs non-mechanical issues
+- What categories of drift detected
+- Whether plan has commands or is empty
 
 ## Philosophy
 

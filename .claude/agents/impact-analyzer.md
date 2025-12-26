@@ -188,26 +188,21 @@ Your affected register must be a map of **Evidence**, not a list of **Guesses**.
 
 Use sequential `IMP-NNN` IDs starting at `IMP-001` in `affected`.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After writing the impact map JSON, provide a natural language handoff:
 
-```markdown
-## Impact Analyzer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-impact_summary:
-  total_files: 0
-  high_risk: 0
-  medium_risk: 0
-  low_risk: 0
-blockers: []
-missing_required: []
-```
+**What I did:** Summarize impact analysis scope and findings in 1-2 sentences (include total files, high/medium/low risk counts).
 
-The JSON file is the audit record. This block is the control plane.
+**What's left:** Note any missing inputs or low-confidence areas.
+
+**Recommendation:** Explain the specific next step with reasoning:
+- If scope looks larger than spec → "Blast radius suggests scope creep; recommend scope-assessor review before continuing to Plan"
+- If design gaps found → "Missing interface decisions; recommend design-optioneer review in Flow 2"
+- If impact is clear and bounded → "Impact map is complete; Flow 2 can proceed with these affected surfaces"
+- If mechanical failure → "Fix [specific issue] then rerun"
+
+The JSON file is the audit record. Your handoff is the routing surface.
 
 ## Philosophy
 

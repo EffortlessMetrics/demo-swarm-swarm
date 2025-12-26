@@ -146,7 +146,7 @@ Each risk MUST use stable markers (`RSK-###`) and severity/category tags so coun
 - <risk you intentionally did not include and why>
 ```
 
-### Step 4: Write scope_estimate.md (machine summary + rationale)
+### Step 4: Write scope_estimate.md (counts + rationale)
 
 Use heuristics, but be explicit about what drives size and confidence.
 
@@ -160,29 +160,21 @@ Heuristic guidance (use if counts are available):
 ```markdown
 # Scope Estimate
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Summary
+- T-shirt size: S | M | L | XL | null
+- Confidence: High | Medium | Low | null
+- Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6|null>
+## Gaps
+- Missing required: <paths or "none">
+- Blockers: <what prevents VERIFIED or "none">
 
-blockers:
-  - <what prevents VERIFIED (missing inputs, unclear severity, etc.)>
-
-missing_required:
-  - <path>
-
-counts:
-  functional_requirements: <N|null>
-  non_functional_requirements: <N|null>
-  bdd_scenarios: <N|null>
-  open_questions: <N|null>
-  integration_points: <N|null>
-
-scope:
-  tshirt_size: S | M | L | XL | null
-  confidence: High | Medium | Low | null
+## Counts
+- Functional requirements: <N|null>
+- Non-functional requirements: <N|null>
+- BDD scenarios: <N|null>
+- Open questions: <N|null>
+- Integration points: <N|null>
 
 ## Rationale (why this size)
 - Requirements: <summary + count if known>
@@ -210,20 +202,48 @@ scope:
 * `UNVERIFIED`: missing inputs, markers absent, or estimate is driven by assumptions/unknowns.
 * `CANNOT_PROCEED`: IO/permissions prevents writing outputs.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, return this block (must match scope_estimate.md):
+After writing all outputs, provide a natural language handoff:
 
 ```markdown
-## Scope Assessor Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6|null>
-tshirt_size: <S|M|L|XL|null>
-confidence: <High|Medium|Low|null>
-missing_required: []
-blockers: []
+## Handoff
+
+**What I did:** Analyzed stakeholders, risks, and scope for <run-id>. Produced stakeholders.md, early_risks.md, and scope_estimate.md with size estimate: <size> (confidence: <level>).
+
+**What's left:** <"Ready for next station" | "Missing: <items>">
+
+**Recommendation:** <PROCEED to next station | RERUN scope-assessor after fixing <items> | BOUNCE to requirements-author to resolve <gaps>>
+
+**Reasoning:** <1-2 sentences explaining the recommendation based on what you found>
+```
+
+Examples:
+
+**Clean path:**
+```markdown
+## Handoff
+
+**What I did:** Analyzed stakeholders, risks, and scope for feat-auth. Produced stakeholders.md, early_risks.md, and scope_estimate.md with size estimate: M (confidence: High).
+
+**What's left:** Ready for next station.
+
+**Recommendation:** PROCEED to next station.
+
+**Reasoning:** All required inputs were present, derived counts mechanically (8 REQs, 12 scenarios, 2 integration points, 1 HIGH risk). Estimate is M based on moderate integration surface and manageable NFRs.
+```
+
+**Missing inputs:**
+```markdown
+## Handoff
+
+**What I did:** Attempted scope assessment for feat-auth but requirements.md is missing.
+
+**What's left:** Cannot derive REQ counts or risk profile without requirements.
+
+**Recommendation:** RERUN scope-assessor after requirements-author completes.
+
+**Reasoning:** Scope estimate depends on REQ/NFR counts which cannot be derived mechanically without the requirements artifact.
 ```
 
 ## Philosophy

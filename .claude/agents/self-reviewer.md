@@ -169,18 +169,46 @@ Rationale: <1 short paragraph grounded in critic statuses + mismatch check>
 * If remaining issues require design/spec answers → `recommended_action: BOUNCE`, set `route_to_flow: 2` (Plan) or `1` (Signal).
 * If everything is clean → `status: VERIFIED`, `recommended_action: PROCEED`.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo this block (must match the Machine Summary you wrote):
+After writing the self review, provide a natural language handoff:
 
 ```markdown
-## Self Reviewer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
+## Handoff
+
+**What I did:** Reviewed Flow 3 build artifacts for internal consistency. <Summary of findings>.
+
+**What's left:** <"Ready for Gate" | "Issues require attention">
+
+**Recommendation:** <PROCEED to build-cleanup | RERUN test-author to address <gaps> | BOUNCE to code-implementer for <issues>>
+
+**Reasoning:** <1-2 sentences explaining coherence status and readiness>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Reviewed Flow 3 build artifacts for internal consistency. Critics are consistent, no canonical mismatches, AC loop complete (5/5 ACs).
+
+**What's left:** Ready for Gate.
+
+**Recommendation:** PROCEED to build-cleanup.
+
+**Reasoning:** Test-critic and code-critic both VERIFIED, canonical pytest summary matches across artifacts, all 5 ACs completed with green tests.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Reviewed Flow 3 build artifacts. Found canonical mismatch between test_critique.md and test_summary.md pytest counts.
+
+**What's left:** Canonical conflict must be resolved.
+
+**Recommendation:** RERUN test-executor to regenerate canonical summary.
+
+**Reasoning:** test_critique.md says "5 passed, 1 failed" but test_summary.md says "6 passed, 0 failed". Cannot proceed with conflicting evidence.
 ```
 
 ## Philosophy
