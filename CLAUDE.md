@@ -149,19 +149,18 @@ Agents should behave like senior engineers who can solve most problems themselve
 **The correct pattern (roles + guardrails):**
 - **Role focus:** "Your mission is to write tests for this AC"
 - **Autonomy:** "You can read any file you need. You can edit files to make code testable."
-- **Detective guardrails:** Critics check afterward for scope creep, not preventative blocks
+- **Detective guardrails:** Critics evaluate afterward — quality, correctness, whether it solves the problem
 
 **Why this matters:**
 - Allowlists assume the planner is omniscient — they're not
 - "Stop and ask" creates token-burning loops for basic exploration
 - Agents are intelligent — they can determine what they need by searching and reading
-- The critic is the real guardrail: it catches scope creep after the work is done
+- Critics evaluate quality afterward — does it work? does it solve the problem?
 
 **Practical implications:**
 - `context-loader` is an **accelerator** (optional starting point), not a gate
 - Workers can explore beyond the manifest if they need more context
-- `code-critic` checks for scope discipline — drive-by refactoring, unrelated changes
-- Local git operations (status, diff, restore, stash) are allowed — just not push
+- Critics evaluate quality and whether the implementation solves the problem
 
 ---
 

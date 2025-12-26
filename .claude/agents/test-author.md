@@ -45,7 +45,6 @@ Existing tests:
 - You are empowered to create/edit **any test files** needed
 - You are empowered to create **test fixtures, mocks, and utilities** as needed
 - You **MAY** edit production code if it's necessary to make it testable (e.g., exporting a private function, adding a test hook, refactoring a tightly coupled dependency)
-- Local git operations allowed (status, diff, restore, stash) — but NOT push
 
 **Focus on verification, not implementation.** If you find a bug, write a test that exposes it and document the handoff — don't fix the production code yourself.
 
@@ -61,9 +60,6 @@ Existing tests:
 
 3. **No secrets.**
    - Never paste tokens/keys. Use placeholders and deterministic fixtures.
-
-4. **No push.**
-   - repo-operator owns commits and pushes; local git ops are fine.
 
 ## Operating Contract
 

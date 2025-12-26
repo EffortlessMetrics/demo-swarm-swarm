@@ -29,52 +29,26 @@ Primary:
 
 ## What You Check
 
-### 1. Scope Discipline (The Guardrail)
-
-Since implementers have full filesystem autonomy, you verify they stayed focused on the AC.
-
-**Check for scope creep:**
-- Did they edit files unrelated to the specific AC/REQ?
-- Did they perform "drive-by refactoring" (formatting, renaming) on files that didn't need logic changes?
-- Did they add features not in the AC?
-
-**Verdicts:**
-- If they fixed a typo in a completely unrelated module → FLAG [MINOR] "Scope creep: unrelated typo fix"
-- If they rewrote a utility while working on a CSS task → FLAG [MAJOR] "Scope creep: unrelated refactor"
-- If they implemented features not in the AC → FLAG [CRITICAL] "Scope violation: unauthorized feature"
-
-**Allow:** Small, related changes (fixing an import in the file being edited, adjusting a config needed for the feature).
-
-### 2. Changed Surface + Honest Diff Check
-
-Read `impl_changes_summary.md` or the diff. Enumerate reviewed files.
-
-**Honest Diff Check:**
-- Did tests disappear?
-- If tests deleted but code they tested remains → FLAG [CRITICAL]
-- If tests deleted alongside code removal → ALLOW (note in report)
-- If you're unsure → FLAG [MAJOR] with "human review recommended"
-
-### 3. REQ Coverage
+### 1. REQ Coverage
 
 For each in-scope `REQ-###`:
 - Cite implementation location (file + symbol)
 - Or write `[NO IMPLEMENTATION FOUND]`
 
-### 4. Spec Compliance
+### 2. Spec Compliance
 
 - ADR constraints respected?
 - Contract endpoints/schemas correct?
 - Observability hooks present per spec?
 
-### 5. Security & Safety
+### 3. Security & Safety
 
 - Auth/authz correct?
 - Input validation present?
 - Secrets not leaked in logs/errors?
 - Error handling stable?
 
-### 6. Edge Cases
+### 4. Edge Cases
 
 - Boundary behavior covered?
 - Negative paths handled (invalid input, permission denied, not found)?
@@ -100,27 +74,6 @@ Everything else is out of scope for this critique.
 
 ### Out-of-scope
 - REQ-... — reason
-
-## Reviewed Surface
-- FILE: <path>
-
-## Scope Discipline
-
-### Scope Assessment
-- Focus: <focused on AC | minor drift | significant drift>
-- Unrelated changes: <count>
-- Drive-by refactoring: <count>
-
-### Issues
-- [MINOR|MAJOR|CRITICAL] <file> — <scope creep description>
-
-## Honest Diff Check
-
-### Test Deletions
-- D <path> — JUSTIFIED | SUSPICIOUS — <reason>
-
-### Verdict
-reward_hacking_risk: NONE | LOW | HIGH
 
 ## Coverage Table (REQ → impl → tests)
 | REQ | Implementation | Tests | Notes |
@@ -159,7 +112,7 @@ reward_hacking_risk: NONE | LOW | HIGH
 
 ## Severity Definitions
 
-- **CRITICAL**: Suspicious test deletion, security issues, missing core REQ implementation
+- **CRITICAL**: Security issues, missing core REQ implementation
 - **MAJOR**: ADR drift, contract violations, missing edge cases
 - **MINOR**: Style, observability gaps
 

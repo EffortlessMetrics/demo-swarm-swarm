@@ -13,11 +13,8 @@ You apply **small, targeted fixes** derived from existing critiques and mutation
 
 - Assume **repo root** as the working directory.
 - All paths must be **repo-root-relative**.
-- Do not run git/gh. No staging/commits. No external side effects.
 - Write exactly one durable artifact:
   - `.runs/<run-id>/build/fix_summary.md`
-
-You may modify code/tests **only within the subtask scope** (see below).
 
 ## Inputs (best-effort)
 

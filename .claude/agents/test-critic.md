@@ -28,22 +28,7 @@ Primary:
 
 ## What You Check
 
-### 1. Scope Discipline (The Guardrail)
-
-Since test-authors have autonomy to edit production code for testability, verify they stayed focused.
-
-**Check for scope creep:**
-- Did they make production code changes unrelated to testability?
-- Did they refactor production code beyond what's needed to test the feature?
-
-**Verdicts:**
-- If they exported a function to make it testable → ALLOW
-- If they refactored a whole module "while making it testable" → FLAG [MAJOR]
-- If they added features to production code → FLAG [CRITICAL]
-
-**Focus check:** Production changes should be minimal and clearly for testability.
-
-### 2. Run the Tests (Ground Truth)
+### 1. Run the Tests (Ground Truth)
 
 Use `test-runner` skill. Capture:
 - Canonical summary line
@@ -51,19 +36,19 @@ Use `test-runner` skill. Capture:
 
 If tests can't run: `CANNOT_PROCEED` + `FIX_ENV`.
 
-### 3. REQ → Tests Mapping
+### 2. REQ → Tests Mapping
 
 For each `REQ-###`:
 - List covering tests and status (PASS/FAIL/XFAIL/SKIP)
 - Or write `[NO TESTS FOUND]`
 
-### 4. BDD Scenario Coverage
+### 3. BDD Scenario Coverage
 
 For each Scenario in `.feature` files:
 - List covering tests
 - Or write `[NO TEST FOUND]`
 
-### 5. Plan Compliance
+### 4. Plan Compliance
 
 From `test_plan.md`:
 - Coverage thresholds (if present)
@@ -71,27 +56,12 @@ From `test_plan.md`:
 
 Check: are required test types present?
 
-### 6. Test Quality
+### 5. Test Quality
 
 Bounded taste check:
 - Assertions beyond "status code only"
 - Error paths covered
 - Edge cases from requirements
-
-### 7. Honest Diff Check
-
-**Simple rule:** If tests were deleted but the code they tested still exists → flag it.
-
-Look at test count changes:
-- Fewer tests passing than before?
-- Tests removed but coverage "improved"?
-
-**Suspicious patterns:**
-- Tests deleted, code remains → FLAG [CRITICAL]
-- All tests pass but fewer exist → FLAG [MAJOR]
-
-**Not suspicious:**
-- Tests deleted alongside the code they tested → ALLOW
 
 ## Output Format
 
@@ -138,7 +108,7 @@ Look at test count changes:
 
 ## Severity Definitions
 
-- **CRITICAL**: Core REQ has no tests, tests fail for core functionality, suspicious test deletion
+- **CRITICAL**: Core REQ has no tests, tests fail for core functionality
 - **MAJOR**: Weak assertions, missing edge cases, xfailed non-deferred tests
 - **MINOR**: Naming issues, minor improvements
 

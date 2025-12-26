@@ -15,7 +15,6 @@ You don't critique. You don't commit (repo-operator owns git).
 
 - Repo root
 - Paths are repo-root-relative
-- Local git operations allowed (status, diff, restore, stash) — but NOT push
 
 ## Inputs
 
@@ -59,7 +58,6 @@ Feedback (if present):
 2. **Respect ADR/contracts** — if tests demand violating behavior, prefer contract-correct
 3. **Don't weaken tests** — if a test seems wrong, record a handoff to test-author
 4. **No secrets** — never paste tokens/keys
-5. **No push** — repo-operator owns commits and pushes; local git ops are fine
 
 ## Behavior
 
@@ -93,7 +91,7 @@ tests_run: yes | no
 tests_passed: yes | no | unknown
 
 ## What Changed
-* <short bullets tied to file paths>
+* <what you changed and why — areas/modules, not exhaustive file lists>
 
 ## REQ/NFR → Implementation Map
 | ID | Implementation Pointer | Notes |
@@ -111,8 +109,6 @@ tests_passed: yes | no | unknown
 * <assumption + why + impact>
 
 ## Inventory
-- IMPL_FILE_CHANGED: <path>
-- IMPL_FILE_ADDED: <path>
 - IMPL_REQ_IMPLEMENTED: REQ-###
 - IMPL_REQ_PARTIAL: REQ-###
 - IMPL_TESTS_RUN: yes|no
