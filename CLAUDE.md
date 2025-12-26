@@ -60,6 +60,8 @@ This is a map, not a permission boundary:
 - "Flow 3 outputs to `.runs/<run-id>/build/` + project code" (intent)
 - repo-operator figures out what files to stage (execution)
 
+**Agents are not restricted to the intent surface.** If a code-implementer needs to edit a utility file not mentioned in the manifest, they edit it. The critic checks for scope discipline afterward — that's the guardrail, not preventative file restrictions.
+
 **Extras are normal:** Ad-hoc fixes (typos, config tweaks) get staged and recorded, not blocked.
 
 **Anomalies are rare:** Only tracked/staged changes outside the intent surface trigger push blocks—and even then, the commit proceeds locally.
@@ -133,6 +135,33 @@ When conflicts arise (git, semantic, or otherwise):
 - **Provide context when escalating** - Explain what you tried and why you couldn't resolve it
 
 Agents should behave like senior engineers who can solve most problems themselves and only escalate the genuinely difficult ones.
+
+### Autonomy Philosophy: Roles + Guardrails (Not Permissions + Handcuffs)
+
+**Core principle:** Tell agents what TO DO, not what NOT to do. Trust them to figure out what they need.
+
+**The anti-pattern (handcuffs):**
+- Allowlists that restrict which files an agent can touch
+- Manifests that define "permitted" file paths
+- "Stop and ask permission" protocols for reading context
+- Denylists that forbid certain operations
+
+**The correct pattern (roles + guardrails):**
+- **Role focus:** "Your mission is to write tests for this AC"
+- **Autonomy:** "You can read any file you need. You can edit files to make code testable."
+- **Detective guardrails:** Critics check afterward for scope creep, not preventative blocks
+
+**Why this matters:**
+- Allowlists assume the planner is omniscient — they're not
+- "Stop and ask" creates token-burning loops for basic exploration
+- Agents are intelligent — they can determine what they need by searching and reading
+- The critic is the real guardrail: it catches scope creep after the work is done
+
+**Practical implications:**
+- `context-loader` is an **accelerator** (optional starting point), not a gate
+- Workers can explore beyond the manifest if they need more context
+- `code-critic` checks for scope discipline — drive-by refactoring, unrelated changes
+- Local git operations (status, diff, restore, stash) are allowed — just not push
 
 ---
 

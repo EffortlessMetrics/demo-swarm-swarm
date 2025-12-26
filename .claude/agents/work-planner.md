@@ -220,7 +220,7 @@ subtasks:
 | `code_roots` | Directories where implementation code lives. |
 | `test_roots` | Directories where tests live. |
 | `doc_paths` | Specific doc files that may need updates. |
-| `allow_new_files_under` | Directories where Build agents may create new files. Files outside require `context-loader` re-scoping. |
+| `allow_new_files_under` | Suggested directories where Build agents may create new files. (Agents can create files elsewhere if needed — critic checks scope.) |
 
 ### Status lifecycle
 
