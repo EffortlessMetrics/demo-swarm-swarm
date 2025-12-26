@@ -478,7 +478,7 @@ name: test-agent
             ".runs/<run-id>",
             "run_meta.json",
             "index.json",
-            "Six Flows",
+            "Seven Flows",
             "Receipt",
             "secrets-sanitizer",
         ];
@@ -556,13 +556,17 @@ name: different-name
 
     /// Helper: create an agent file with specified content.
     fn create_agent(repo_root: &std::path::Path, name: &str, content: &str) {
-        let path = repo_root.join(".claude/agents").join(format!("{}.md", name));
+        let path = repo_root
+            .join(".claude/agents")
+            .join(format!("{}.md", name));
         std::fs::write(path, content).unwrap();
     }
 
     /// Helper: create a command file.
     fn create_command(repo_root: &std::path::Path, name: &str, content: &str) {
-        let path = repo_root.join(".claude/commands").join(format!("{}.md", name));
+        let path = repo_root
+            .join(".claude/commands")
+            .join(format!("{}.md", name));
         std::fs::write(path, content).unwrap();
     }
 
@@ -574,9 +578,7 @@ name: different-name
     }
 
     /// Helper: run structure checks and collect diagnostics.
-    fn run_structure_checks(
-        repo_root: &std::path::Path,
-    ) -> (usize, usize, Vec<String>) {
+    fn run_structure_checks(repo_root: &std::path::Path) -> (usize, usize, Vec<String>) {
         use crate::cli::OutputFormat;
         use crate::contracts::{Contracts, Regexes};
         use crate::ctx::Ctx;
@@ -614,18 +616,37 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md (required)
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create only ONE agent (not all required agents)
-        create_agent(&repo_root, "test-agent", "---\nname: test-agent\n---\n# Test Agent\n");
+        create_agent(
+            &repo_root,
+            "test-agent",
+            "---\nname: test-agent\n---\n# Test Agent\n",
+        );
 
         // Create minimal flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         // Create all required skills
-        for skill in ["test-runner", "auto-linter", "policy-runner", "runs-derive", "runs-index", "openq-tools", "secrets-tools"] {
+        for skill in [
+            "test-runner",
+            "auto-linter",
+            "policy-runner",
+            "runs-derive",
+            "runs-index",
+            "openq-tools",
+            "secrets-tools",
+        ] {
             create_skill(&repo_root, skill, &format!("# {}\n", skill));
         }
 
@@ -642,11 +663,18 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create flow commands for only flows 1-3 (missing 4-6)
         for i in 1..=3 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -662,14 +690,25 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create agent WITHOUT name in frontmatter
-        create_agent(&repo_root, "no-name-agent", "---\ndescription: Agent without name\n---\n# No Name Agent\n");
+        create_agent(
+            &repo_root,
+            "no-name-agent",
+            "---\ndescription: Agent without name\n---\n# No Name Agent\n",
+        );
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -685,14 +724,25 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create agent with NAME that doesn't match FILENAME
-        create_agent(&repo_root, "wrong-name-agent", "---\nname: different-name\n---\n# Agent with wrong name\n");
+        create_agent(
+            &repo_root,
+            "wrong-name-agent",
+            "---\nname: different-name\n---\n# Agent with wrong name\n",
+        );
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -708,15 +758,30 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create two agents with the SAME frontmatter name
-        create_agent(&repo_root, "agent-one", "---\nname: duplicate-name\n---\n# Agent One\n");
-        create_agent(&repo_root, "agent-two", "---\nname: duplicate-name\n---\n# Agent Two\n");
+        create_agent(
+            &repo_root,
+            "agent-one",
+            "---\nname: duplicate-name\n---\n# Agent One\n",
+        );
+        create_agent(
+            &repo_root,
+            "agent-two",
+            "---\nname: duplicate-name\n---\n# Agent Two\n",
+        );
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -732,15 +797,30 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create agents with correct names
-        create_agent(&repo_root, "agent-one", "---\nname: agent-one\n---\n# Agent One\n");
-        create_agent(&repo_root, "agent-two", "---\nname: agent-two\n---\n# Agent Two\n");
+        create_agent(
+            &repo_root,
+            "agent-one",
+            "---\nname: agent-one\n---\n# Agent One\n",
+        );
+        create_agent(
+            &repo_root,
+            "agent-two",
+            "---\nname: agent-two\n---\n# Agent Two\n",
+        );
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         // This should pass the duplicate check (no errors from duplicate detection itself)
@@ -749,7 +829,10 @@ name: different-name
 
         // Errors will be present (missing required agents) but not from duplicates
         // The test validates the pass path is exercised
-        assert!(errors > 0, "Should have errors from missing required agents");
+        assert!(
+            errors > 0,
+            "Should have errors from missing required agents"
+        );
     }
 
     /// Test: Missing required skill is detected (covers lines 129, 133).
@@ -759,7 +842,10 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create only SOME skills (not all required)
         create_skill(&repo_root, "test-runner", "# Test Runner\n");
@@ -767,7 +853,11 @@ name: different-name
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -786,7 +876,11 @@ name: different-name
 
         // Create flow commands
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
@@ -802,11 +896,18 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create flow commands (but NOT customize-pack)
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
 
         // DO NOT create customize-pack command
@@ -814,7 +915,10 @@ name: different-name
         let (_errors, warnings, _) = run_structure_checks(&repo_root);
 
         // Should have warning for missing customize-pack
-        assert!(warnings > 0, "Should warn about missing customize-pack command");
+        assert!(
+            warnings > 0,
+            "Should warn about missing customize-pack command"
+        );
     }
 
     /// Test: Missing pack-customizer agent triggers warning (covers line 174).
@@ -824,11 +928,18 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create flow commands AND customize-pack command
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
         create_command(&repo_root, "customize-pack", "# Customize Pack\n");
 
@@ -837,7 +948,10 @@ name: different-name
         let (_errors, warnings, _) = run_structure_checks(&repo_root);
 
         // Should have warning for missing pack-customizer agent
-        assert!(warnings > 0, "Should warn about missing pack-customizer agent");
+        assert!(
+            warnings > 0,
+            "Should warn about missing pack-customizer agent"
+        );
     }
 
     /// Test: Complete customizer setup passes (both command and agent present).
@@ -847,22 +961,36 @@ name: different-name
         let repo_root = create_test_pack(&temp_dir);
 
         // Create CLAUDE.md
-        create_claude_md(&repo_root, "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSix Flows\nReceipt\nsecrets-sanitizer");
+        create_claude_md(
+            &repo_root,
+            "# CLAUDE.md\n.runs/<run-id>\nrun_meta.json\nindex.json\nSeven Flows\nReceipt\nsecrets-sanitizer",
+        );
 
         // Create flow commands AND customize-pack command
         for i in 1..=6 {
-            create_command(&repo_root, &format!("flow-{}-test", i), &format!("# Flow {}\n", i));
+            create_command(
+                &repo_root,
+                &format!("flow-{}-test", i),
+                &format!("# Flow {}\n", i),
+            );
         }
         create_command(&repo_root, "customize-pack", "# Customize Pack\n");
 
         // Create pack-customizer agent
-        create_agent(&repo_root, "pack-customizer", "---\nname: pack-customizer\n---\n# Pack Customizer\n");
+        create_agent(
+            &repo_root,
+            "pack-customizer",
+            "---\nname: pack-customizer\n---\n# Pack Customizer\n",
+        );
 
         // Run checks - customizer warnings should be 0 (but other warnings may exist)
         let (errors, _warnings, _) = run_structure_checks(&repo_root);
 
         // Will still have errors from missing required agents, but no customizer warnings
-        assert!(errors > 0, "Should have errors from missing required agents");
+        assert!(
+            errors > 0,
+            "Should have errors from missing required agents"
+        );
     }
 
     // -------------------------------------------------------------------------
@@ -877,9 +1005,10 @@ name: different-name
         let path = PathBuf::from(".claude/agents/test-agent.md");
 
         assert!(path.extension().is_some_and(|e| e == "md"));
-        assert!(path
-            .parent()
-            .is_some_and(|p| p.file_name().is_some_and(|n| n == "agents")));
+        assert!(
+            path.parent()
+                .is_some_and(|p| p.file_name().is_some_and(|n| n == "agents"))
+        );
     }
 
     /// Skill file paths follow expected pattern.
@@ -890,9 +1019,10 @@ name: different-name
         let path = PathBuf::from(".claude/skills/test-runner/SKILL.md");
 
         assert!(path.file_name().is_some_and(|n| n == "SKILL.md"));
-        assert!(path
-            .parent()
-            .and_then(|p| p.parent())
-            .is_some_and(|p| p.file_name().is_some_and(|n| n == "skills")));
+        assert!(
+            path.parent()
+                .and_then(|p| p.parent())
+                .is_some_and(|p| p.file_name().is_some_and(|n| n == "skills"))
+        );
     }
 }

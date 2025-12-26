@@ -11,7 +11,7 @@ This repository contains an SDLC swarm pack under `.claude/`.
 This pack provides:
 
 - **7 flows**: Signal → Plan → Build → Review → Gate → Deploy → Wisdom
-- **50+ agents**: narrow specialists (requirements-author, code-critic, test-author, *-cleanup, etc.)
+- **Narrow specialist agents**: requirements-author, code-critic, test-author, *-cleanup, etc. (see `.claude/agents/`)
 - **7 skills**: test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 
 Start here:
@@ -99,7 +99,7 @@ Problems should be caught where the fix is cheapest:
 - **Per-AC**: Catch reward hacking during the microloop (before next AC starts)
 - **Per-checkpoint**: Catch CI failures during feedback harvest (before flow ends)
 - **Per-flow**: Catch format/lint issues in standards-enforcer (before Gate)
-- **Gate**: VERIFY earlier findings, don't DISCOVER new issues
+- **Gate**: VERIFY earlier findings (discovery belongs in upstream flows)
 
 Gate is a **verification checkpoint**, not a quality filter. If Gate is catching issues that should have been caught earlier, that's a signal the upstream flows need improvement.
 
@@ -121,7 +121,7 @@ When summarizing for reports or routing:
 - Explain what the issue IS, not just where it is
 - Provide your assessment of validity (is this a real issue or bot noise?)
 - Route to the agent best suited to fix it
-- Don't dump file paths—synthesize understanding
+- Synthesize understanding over file path lists
 
 **Agents are smart.** They can read context, understand intent, and make judgment calls. Trust them to summarize intelligently rather than mechanically dumping file pointers.
 
@@ -148,6 +148,31 @@ Agents under pressure to complete a task will **guess** to finish. The fix is gi
 - Work is checkpointed so the flow can be rerun cleanly
 
 A `PARTIAL` exit is not failure. It's a save point.
+
+### Honest State Is the Primary Success Metric
+
+Agents are rewarded for **accurate reporting**, not completion theater.
+
+**This is a VERIFIED success:**
+```
+status: UNVERIFIED
+work_status: PARTIAL
+what_completed: "Implemented 2/5 ACs"
+blockers: ["Missing schema migration for AC-3"]
+evidence: "Tests pass for AC-1, AC-2. AC-3 requires DB changes."
+```
+
+**This is a HIGH-RISK failure (even though it says "complete"):**
+```
+status: VERIFIED
+work_status: COMPLETED
+what_completed: "All 5 ACs implemented"
+assumptions: ["Assumed schema exists (didn't verify)"]
+```
+
+The first report tells the orchestrator exactly what happened and what to do next. The second report hides uncertainty behind a false completion signal, causing downstream failures.
+
+**Agent rule:** When uncertain, report the uncertainty. A 40% completion with honest blockers is more valuable than a 100% completion with hidden assumptions.
 
 ### Write Early, Write Often
 
@@ -273,6 +298,104 @@ This separation is about **token economics**: Orchestrator context is expensive,
 
 ---
 
+## Architecture Laws
+
+These are invariants that prevent execution drift. Violating them creates subtle failures.
+
+### Law 1: PM/IC Boundary
+
+**Orchestrators route. Agents work. Cleanup agents audit.**
+
+| Role | Responsibility | Example |
+|------|----------------|---------|
+| **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite | "If gate_verdict is MERGE, proceed to merge ops" |
+| **Worker** (agent) | Do the work, update tracking artifacts, report honestly | `code-implementer`, `test-author`, `fixer` |
+| **Auditor** (cleanup agent) | Verify on-disk state matches evidence (tests/diffs), seal receipts | `build-cleanup`, `review-cleanup` |
+
+Workers own their progress updates. Cleanup agents verify that claims match reality.
+
+**Violation:** Orchestrator parsing `ac_status.json` to determine routing.
+**Correct:** Orchestrator routes on the Result block returned by `build-cleanup`.
+
+### Law 2: Every Call Is an Implicit Resume
+
+**Agents don't need "resume mode" flags.** They check disk state and determine what's left.
+
+When an agent starts:
+1. Check if its tracking artifact exists (e.g., `ac_status.json`, `review_worklist.json`)
+2. If yes: read it, determine what's PENDING, continue from there
+3. If no: initialize fresh
+
+**Violation:** Flow says "call build-cleanup in resume mode."
+**Correct:** Flow says "call build-cleanup." The agent checks disk state and behaves appropriately.
+
+**Corollary:** If an agent needs genuinely different behavior (not just "resume vs fresh"), that's a signal for two separate agents, not a `mode:` parameter.
+
+### Law 3: Workers Maintain the Ledger (Every Agent is a Scribe)
+
+**The worker who touches the code is the worker who updates the status.**
+
+Workers (`code-implementer`, `test-author`, `fixer`, `doc-writer`) update their tracking artifacts (`ac_status.json`, `review_worklist.json`) **before** reporting back to the orchestrator. This ensures:
+- The "save game" is atomic with the work
+- The orchestrator routes on Result blocks, not prose parsing
+- State survives context exhaustion
+
+| Artifact Type | Who Updates | Who Audits |
+|--------------|-------------|------------|
+| **Progress state** (`ac_status.json`, `review_worklist.json`) | Worker completing the work | Cleanup agent cross-checks against test results |
+| **Receipts** (`*_receipt.json`) | Cleanup agent (mechanical derivation) | Downstream flows |
+| **Index** (`.runs/index.json`) | Cleanup agents, `run-prep`, `gh-issue-manager` | — |
+
+**Key insight:** Cross-agent coordination happens through artifacts, not prose parsing. The cleanup agent reads `ac_status.json` and cross-references it with `test_execution.md`. If they disagree, it reports a **Forensic Mismatch** — status becomes UNVERIFIED.
+
+**Violation:** Orchestrator asks "what's the AC status?" and parses the response.
+**Correct:** Worker updated `ac_status.json`; cleanup agent verifies against test evidence and returns Result block.
+
+### Law 4: AC Termination = Green + Orchestrator Agreement
+
+**"Green tests" is necessary but not sufficient for AC completion.**
+
+An AC is done when:
+1. `test-executor` returns Green for that AC's scope
+2. The orchestrator agrees there's nothing left worth fixing based on critic feedback
+
+**The loop:** implement → test → critique → (if critic has actionable items) → improve → test again
+
+Even with green tests, if `code-critic` identifies a maintainability risk or clear technical debt, the orchestrator should authorize one improvement pass. The critic's `can_further_iteration_help: no` signal (or orchestrator judgment) terminates the loop.
+
+### Law 5: Research-First Autonomy (Investigate → Derive → Default → Escalate)
+
+**If an agent can't derive an answer, it investigates first, then defaults, then escalates.**
+
+The escalation ladder (in order):
+1. **Investigate locally:** Search code, tests, configs, prior runs, existing docs
+2. **Investigate remotely (if allowed):** GitHub issues/PRs, web search, library docs
+3. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
+4. **Default if safe:** Choose a reversible default, document it, continue
+5. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+
+**The bar for human escalation is high.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code.
+
+**When escalation IS required:** Non-derivable blockers don't wait for end-of-flow. The orchestrator should immediately call `gh-issue-manager` to post:
+- The blocker description
+- Evidence searched (proof of research)
+- The decision needed
+
+**Most questions are NOT blockers.** DEFAULTED (safe reversible default chosen) is the common case. NON_DERIVABLE is rare and requires proof-of-research.
+
+### Law 6: Foundation-First Sequencing
+
+**Infrastructure subtasks are the root of the dependency tree.**
+
+This is structural, not a constraint. The `work-planner` designs dependency graphs where:
+- Infrastructure/migration subtasks (ST-000, etc.) have no dependencies
+- Logic subtasks that consume new state list infrastructure in `depends_on`
+- Critics validate that dependencies flow downward (foundations → walls → roof)
+
+**Example:** `ST-001: Create sessions table` has no dependencies. `ST-002: Implement login flow` has `depends_on: ["ST-001"]`.
+
+---
+
 ## Run Identity + State
 
 ### Working Directory + Paths Invariant
@@ -349,7 +472,8 @@ Per-run metadata at `.runs/<run-id>/run_meta.json`:
   "issue_title": "<string | null>",
   "pr_number": null,
   "supersedes": "<previous-run-id | null>",
-  "related_runs": []
+  "related_runs": [],
+  "base_ref": "<branch-name | null>"
 }
 ```
 
@@ -357,6 +481,10 @@ Identity rules:
 
 - `run_id` is immutable. **No renames.**
 - When a GitHub issue/PR exists, set `canonical_key` and add aliases. Do not rename folders.
+
+Stacked run support:
+
+- `base_ref` (optional): The branch this run is based on. Used for diff computation in agents that audit changes (standards-enforcer, coverage-enforcer, etc.). If present, diffs are computed relative to `base_ref`; otherwise agents default to `origin/main`.
 
 ---
 
@@ -434,13 +562,18 @@ Receipt guarantees:
 
 **Agent invariant:** Validate against current repo state and executed evidence. Use receipts as historical breadcrumbs and summary inputs. Never use receipt presence or receipt fields as permission to proceed.
 
-**Drift rule:** If `receipt.evidence_sha != git HEAD`, treat the receipt as **stale**—use it for investigation, do not use it to determine pass/fail for the current run.
+**Receipts are logs, not locks:** A receipt is a "flight recorder" entry of what happened at a specific station. It is NOT a cryptographic permission slip that must be re-sealed when code changes.
 
-**Evidence field convention:** Receipts should include these fields for staleness detection:
+- If `receipt.evidence_sha != git HEAD`, that's normal—ad-hoc fixes, fix-forward, and mid-flow improvements are expected.
+- The receipt is still valid as historical evidence of what happened at that station.
+- Don't BOUNCE or require regeneration just because the SHA drifted.
+- The git log is the audit trail. The receipt is a summary.
+
+**Evidence field convention:** Receipts include these fields for context:
 - `evidence_sha`: The commit SHA when this evidence was generated
 - `generated_at`: ISO8601 timestamp
 
-When these fields mismatch current HEAD, the receipt is advisory, not authoritative.
+These are informational, not gating. If SHA differs from HEAD, the receipt tells you what the world looked like then—not that the work is invalid now.
 
 **Why this matters:** When a developer fixes a typo mid-flow, agents see it (live state). Receipts don't become "paperwork that must be re-sealed." The system adapts forward instead of trying to re-litigate the past.
 
@@ -507,7 +640,7 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|7 | null>
-route_to_station: <string | null>      # e.g. "test-executor", "lint-executor" — hint, not strict enum
+route_to_station: <string | null>      # e.g. "test-executor", "standards-enforcer" — hint, not strict enum
 route_to_agent: <agent-name | null>    # strict enum — only when certain the name is valid
 
 blockers: []
@@ -534,7 +667,12 @@ Semantics:
 Routing:
 
 - Orchestrators route on `recommended_action` + `route_to_*`.
-- The summary is the control plane. The artifact body is the audit plane.
+- **Control plane vs audit plane:**
+  - The Machine Summary in the agent's **response** is the routing surface (control plane)
+  - The artifact **file** (e.g., `design_validation.md`, `test_critique.md`) is the durable audit record
+  - Orchestrators route on returned Result blocks, not by re-reading files
+  - Downstream agents read artifact files for detailed context
+  - Both exist and serve different purposes: fast routing vs durable forensics
 
 Recommended action semantics (closed enum):
 - `PROCEED` = default, even when human judgment is required; capture blockers/assumptions. Do **not** use PROCEED as a fallback for "can't name the target."

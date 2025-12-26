@@ -4,10 +4,10 @@ Thanks for contributing to the demo-swarm pack. This is a **pack-only repository
 
 ## What lives here
 
-- `.claude/agents/` — Subagent definitions (50+ agents)
+- `.claude/agents/` — Subagent definitions
 - `.claude/commands/` — Slash command orchestrators (7 flows + customize)
 - `.claude/skills/` — Skills (test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools)
-- `docs/` — Documentation (CUSTOMIZATION.md, TOY_RUN.md)
+- `docs/` — Documentation (Diataxis structure)
 - `scripts/` — Validation scripts
 
 ## What does NOT live here
@@ -123,9 +123,21 @@ ruff check scripts/
 
 ---
 
+## Documentation Changes
+
+When editing docs, follow [Documentation Conventions](docs/reference/documentation-conventions.md):
+
+- Use correct Diataxis categories (tutorials, how-tos, reference, explanation)
+- Point to file paths, not abstractions
+- Use stable terminology (swarm mainline, upstream, deploy)
+- Avoid hardcoded counts and absolute claims
+
+---
+
 ## Questions?
 
 - **Pack usage**: See `README.md` and `CLAUDE.md`
 - **Adapting to your stack**: See `docs/how-to/customize-pack.md`
 - **Architecture**: See `ARCHITECTURE.md` or `docs/explanation/architecture.md`
+- **Documentation conventions**: See `docs/reference/documentation-conventions.md`
 - **Full docs index**: See `docs/README.md`

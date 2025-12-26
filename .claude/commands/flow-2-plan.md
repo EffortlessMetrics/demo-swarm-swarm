@@ -55,11 +55,11 @@ Flow 2 uses **two complementary state machines**:
 - repo-operator (ensure run branch)
 - clarifier (plan open questions)
 - impact-analyzer (map impact)
-- design-optioneer ↔ option-critic (microloop; 2 passes default)
+- design-optioneer ↔ option-critic (microloop; signal-based termination)
 - adr-author (write ADR)
 - interface-designer / observability-designer / test-strategist / work-planner (lanes; parallel)
-- interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
-- observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
+- interface-designer ↔ contract-critic (microloop; signal-based termination; recommended)
+- observability-designer ↔ observability-critic (microloop; signal-based termination; recommended)
 - design-critic (integrative validation; may return worklist)
 - policy-analyst (policy compliance)
 - plan-cleanup (finalize receipt; update index; update `flow_plan.md`)
@@ -73,8 +73,8 @@ Flow 2 uses **two complementary state machines**:
 
 Think in **worklists**, not "who wins".
 
-- **Default microloop cadence (bounded):** writer -> critic -> writer (apply critique worklist if any; may be a no-op) -> critic. Continue beyond that only when the critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
-- **Option critique (early):** Use the default microloop cadence between `design-optioneer` and `option-critic` (second `design-optioneer` pass applies the critique worklist when present).
+- **Signal-based microloop:** writer → critic → route on Result. If critic returns `RERUN` AND `can_further_iteration_help: yes`: call writer with critique worklist, then call critic again. Otherwise proceed (carry blockers honestly).
+- **Option critique (early):** Apply microloop pattern between `design-optioneer` and `option-critic`.
 - **Lane worklists:** If `contract-critic` or `observability-critic` returns `recommended_action: RERUN | BOUNCE | FIX_ENV`, treat that as the active worklist for its lane unless you resolve it or explicitly defer it (Decision Log entry).
 - **Integration read (late):** `design-critic` is integrative across artifacts. Run it after lane worklists are resolved/deferred. A later `design-critic` `PROCEED` does not clear an open lane worklist.
 
@@ -506,26 +506,25 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 
 1) Writer pass: call `<writer>`
 2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
-4) Re-critique: call `<critic>` again
+3) Route on critic Result:
+   - If `recommended_action: PROCEED` → proceed (no apply pass needed)
+   - If `recommended_action: RERUN` AND `can_further_iteration_help: yes` → continue to step 4
+   - Otherwise → proceed with `UNVERIFIED` + blockers recorded
+4) Apply pass: call `<writer>` with the critique worklist
+5) Re-critique: call `<critic>` again, return to step 3
 
-Continue looping beyond the default two passes only when:
-- critic returns `recommended_action: RERUN`, and
-- `can_further_iteration_help: yes`, and
-- the remaining items are concrete and writer-addressable (a new writer pass can plausibly clear them).
-
-Otherwise proceed with `UNVERIFIED` + blockers recorded.
+**Termination:** Signal-based, not count-based. Loop continues while critic says RERUN + can_further_iteration_help: yes. Exit when signal says stop or context exhausted.
 
 ### TodoWrite (copy exactly)
 - [ ] run-prep
 - [ ] repo-operator (ensure `run/<run-id>` branch)
 - [ ] clarifier (plan open questions)
 - [ ] impact-analyzer
-- [ ] design-optioneer ↔ option-critic (microloop; 2 passes default)
+- [ ] design-optioneer ↔ option-critic (microloop; signal-based termination)
 - [ ] adr-author
 - [ ] interface-designer / observability-designer / test-strategist / work-planner (parallel)
-- [ ] interface-designer ↔ contract-critic (microloop; 2 passes default; recommended)
-- [ ] observability-designer ↔ observability-critic (microloop; 2 passes default; recommended)
+- [ ] interface-designer ↔ contract-critic (microloop; signal-based termination; recommended)
+- [ ] observability-designer ↔ observability-critic (microloop; signal-based termination; recommended)
 - [ ] design-critic (microloop if needed)
 - [ ] policy-analyst
 - [ ] plan-cleanup

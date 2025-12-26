@@ -377,7 +377,7 @@ Concerns block (optional, in FULL mode):
   ```
 - Keep it brief (counts + top items). Link to artifacts for details.
 
-Edit issue body with heredoc (CRITICAL: do NOT use temp files or `--body-file` - Windows paths will be misinterpreted):
+Edit issue body with heredoc (works reliably across Windows and Unix):
 
 ```bash
 gh issue edit <issue_number> --body "$(cat <<'EOF'

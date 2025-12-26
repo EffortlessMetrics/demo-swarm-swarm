@@ -24,11 +24,13 @@ You are orchestrating Flow 6 of the SDLC swarm.
 
 ## Your Goals
 
-Move an approved artifact from "ready to merge" to "deployed"—execute deployment, verify health, create audit trail.
+Execute the merge of the feature branch into swarm mainline (`origin/main`). Handle simple rebases if needed. Verify health. Create audit trail.
 
 **Flow 6 is always callable.** Its behavior depends on Gate's decision:
-- If Gate said MERGE: merge, verify, report.
+- If Gate said MERGE: sanity check → handle rebase if needed → merge → verify → report.
 - If Gate said BOUNCE (including NEEDS_HUMAN_REVIEW): don't merge, write receipts explaining why.
+
+**Scope:** Flow 6 merges the run's feature branch into swarm `origin/main`. It does NOT merge into upstream. Upstream integration is a separate, post-Wisdom concern.
 
 ## Before You Begin (Required)
 
@@ -52,10 +54,11 @@ Flow 6 uses **two complementary state machines**:
 ```
 - run-prep (establish run infrastructure)
 - repo-operator (ensure run branch)
-- repo-operator (merge + tag + release; only if Gate verdict MERGE)
-- deploy-monitor (monitor CI; only if Gate verdict MERGE)
-- smoke-verifier (smoke tests; only if Gate verdict MERGE)
-- deploy-decider (deployment decision)
+- deploy-decider (EARLY: read gate_verdict for routing)
+- repo-operator (merge + tag + release; only if gate_verdict == MERGE)
+- deploy-monitor (monitor CI; only if gate_verdict == MERGE)
+- smoke-verifier (smoke tests; only if gate_verdict == MERGE)
+- deploy-decider (FINAL: synthesize verification into deployment decision)
 - deploy-cleanup (finalize receipt)
 - secrets-sanitizer (publish gate)
 - repo-operator (checkpoint commit)
@@ -128,10 +131,11 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 
 - [ ] run-prep (establish run directory)
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
-- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
-- [ ] deploy-monitor (only if Gate verdict MERGE)
-- [ ] smoke-verifier (only if Gate verdict MERGE)
-- [ ] deploy-decider (deployment decision)
+- [ ] deploy-decider (EARLY: read gate_verdict for routing)
+- [ ] repo-operator (merge + tag + release; only if gate_verdict == MERGE)
+- [ ] deploy-monitor (only if gate_verdict == MERGE)
+- [ ] smoke-verifier (only if gate_verdict == MERGE)
+- [ ] deploy-decider (FINAL: synthesize verification into deployment decision)
 - [ ] deploy-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
@@ -143,12 +147,21 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 <Update as each step completes>
 ```
 
-### Step 2: Read Gate Decision
+### Step 2: Determine Gate Decision (delegated to deploy-decider)
 
-Read `.runs/<run-id>/gate/merge_decision.md` (if available):
-- Parse the `verdict:` field from `## Machine Summary` (preferred) or `## Verdict` section (MERGE or BOUNCE (with reason))
-- This determines the entire flow path
-- If missing, default to Path B (NOT_DEPLOYED)
+**Do NOT parse `merge_decision.md` in the orchestrator.** The gate decision is read by `deploy-decider`.
+
+**Early call to deploy-decider:**
+Call `deploy-decider` BEFORE any merge operations. This agent:
+- Reads `.runs/<run-id>/gate/merge_decision.md`
+- Parses the `verdict:` field from `## Machine Summary`
+- Returns a Result block with `gate_verdict: MERGE | BOUNCE | null`
+
+**Orchestrator routing (pure routing, no parsing):**
+- If `gate_verdict: MERGE`: proceed to Path A (merge + verify)
+- If `gate_verdict: BOUNCE` or `null`: proceed to Path B (NOT_DEPLOYED)
+
+**Why delegated?** The orchestrator should not parse files. The `deploy-decider` agent already needs to read the gate decision for its governance checks — it can return the verdict for routing.
 
 ### Path A: Gate Decision = MERGE
 
@@ -159,15 +172,22 @@ Read `.runs/<run-id>/gate/merge_decision.md` (if available):
 | **Release Ops** | Merge PR, create tag, create release | Gate decision = MERGE + repo-operator mechanics |
 | **Reporting Ops** | `gh-issue-manager`, `gh-reporter` | Two-gate prerequisites (secrets + repo hygiene) |
 
-Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are gated by the Gate flow's decision, not by the two-gate prerequisites. Reporting Ops use the same two-gate system as all other flows.
+Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting Ops use the same two-gate system as all other flows.
 
-**Note on secrets governance:** The code being merged was already sanitized in Build (Flow 3). Deploy's secrets-sanitizer (Step 6) is specifically for `.runs/deploy/` artifacts and GitHub posting—not for code merge governance.
+**Note on secrets governance:** The code being merged was already sanitized in Build (Flow 3). Deploy's secrets-sanitizer is for `.runs/deploy/` artifacts and GitHub posting—not code merge governance.
+
+0. **Pre-merge Sanity Check + Rebase** (repo-operator)
+   - Check if `origin/main` has diverged from the feature branch
+   - If diverged: attempt automatic rebase
+   - If rebase conflicts: write `deployment_log.md` noting conflict, set NOT_DEPLOYED with blockers
+   - Simple conflicts (different files) are resolved automatically
+   - This mirrors how developers actually work: rebase, then merge
 
 1. **Merge & Tag** (repo-operator) - **Release Op**
-   - **Prerequisite:** Gate decision = MERGE
+   - **Prerequisite:** Gate decision = MERGE, rebase clean (if needed)
    - Execute `gh pr merge`, create git tag + GitHub release
    - Write `.runs/<run-id>/deploy/deployment_log.md` with merge details
-   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: RERUN` (deterministic fix: auth/PR ref). Do not silently skip-this is a failed release op, not a skipped reporting op.
+   - **If `gh` CLI not authenticated or PR not found:** Write `deployment_log.md` noting failure, set status NOT_DEPLOYED, `recommended_action: RERUN`. Do not silently skip—this is a failed release op.
 
 2. **Monitor CI** (deploy-monitor)
    - Watch GitHub Actions status on main branch
@@ -180,8 +200,8 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. They are ga
 4. **Decide** (deploy-decider)
    - Synthesize CI + smoke results
    - Write `.runs/<run-id>/deploy/deployment_decision.md` with `verdict`:
-     - STABLE: Governance enforced and runtime verification passes
-     - NOT_DEPLOYED: Governance not enforced or verification failed
+     - STABLE: Merge succeeded, CI passing, smoke checks green
+     - NOT_DEPLOYED: Merge failed, CI failing, or verification issues
      - BLOCKED_BY_GATE: Gate verdict was not MERGE
 
 5. **Finalize Receipt** (deploy-cleanup)
@@ -299,9 +319,11 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 
 | `Verdict` | Meaning |
 |---------|---------|
-| STABLE | Governance enforced and runtime verification (if present) passes |
-| NOT_DEPLOYED | Governance not enforced, or critical check FAIL/UNKNOWN, or runtime verification failed |
+| STABLE | Merge succeeded and CI/smoke verification passes |
+| NOT_DEPLOYED | Merge failed, or CI failing, or smoke tests indicate issues |
 | BLOCKED_BY_GATE | Gate verdict was not MERGE; no deployment attempted |
+
+**Note:** We trust the GitHub merge flow handles branch protection. Flow 6 doesn't re-verify governance—it executes the merge and verifies the result.
 
 ### Finalize Flow
 
@@ -340,10 +362,14 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 
 - `run-prep`
 - `repo-operator` (ensure run branch)
-- `repo-operator` (merge + tag + release; only if Gate verdict MERGE)
-- `deploy-monitor` (only if Gate verdict MERGE)
-- `smoke-verifier` (only if Gate verdict MERGE)
-- `deploy-decider`
+- `deploy-decider` (EARLY CALL: read gate verdict for routing; returns `gate_verdict` in Result block)
+- **Route on `gate_verdict`:**
+  - If `MERGE`: proceed with merge operations
+  - If `BOUNCE` or `null`: skip to deploy-cleanup (Path B)
+- `repo-operator` (merge + tag + release; only if gate_verdict == MERGE)
+- `deploy-monitor` (only if gate_verdict == MERGE)
+- `smoke-verifier` (only if gate_verdict == MERGE)
+- `deploy-decider` (FINAL CALL: synthesize verification into deployment decision)
 - `deploy-cleanup`
 - `secrets-sanitizer`
 - `repo-operator` (checkpoint; read Repo Operator Result)
@@ -355,10 +381,11 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 ```
 - [ ] run-prep
 - [ ] repo-operator (ensure run/<run-id> branch)
-- [ ] repo-operator (merge + tag + release; only if Gate verdict MERGE)
-- [ ] deploy-monitor (only if Gate verdict MERGE)
-- [ ] smoke-verifier (only if Gate verdict MERGE)
-- [ ] deploy-decider
+- [ ] deploy-decider (EARLY: read gate_verdict for routing)
+- [ ] repo-operator (merge + tag + release; only if gate_verdict == MERGE)
+- [ ] deploy-monitor (only if gate_verdict == MERGE)
+- [ ] smoke-verifier (only if gate_verdict == MERGE)
+- [ ] deploy-decider (FINAL: synthesize verification into deployment decision)
 - [ ] deploy-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
 - [ ] repo-operator (checkpoint commit; allowlist interlock + no-op handling)

@@ -63,6 +63,15 @@ If some inputs are missing, continue best-effort and record them.
   - `notes` explaining the inference
 - Do not present inferred items as certain.
 
+**Evidence-Based Pointers:**
+
+A pointer is only valid if you actually read the file. Do not point to `auth.ts` based on its filename; point to it because you found `validate_session()` inside it.
+
+**Good evidence:** `"evidence": ["grep:validate_session hit in src/auth/session.rs:42"]`
+**Bad evidence:** `"evidence": ["probably used for auth based on folder name"]`
+
+Your affected register must be a map of **Evidence**, not a list of **Guesses**. Use stable identifiers (function names, class names, struct names) not line numbers (which drift). If you searched for a pattern and found nothing, say so. If you found something, cite the symbol you actually observed.
+
 ## Behavior
 
 1. **Preflight writeability**

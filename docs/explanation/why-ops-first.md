@@ -43,7 +43,9 @@ The insight: **Gate the boundary, not the interior.**
 
 ---
 
-## The Solution: Two Planes
+## The Solution: Work Plane vs Publish Plane
+
+> **Terminology note:** This is about *where gates engage* (Work vs Publish). For *how routing works* (Control vs Audit), see [Why Two Planes](why-two-planes.md).
 
 ### Work Plane (Default-Allow)
 

@@ -56,7 +56,7 @@ Rules:
 - Prefer **continuing** with `UNVERIFIED + PROCEED` when you can make a reasonable, documented choice.
 - Use `BOUNCE` only when the manifest cannot be made meaningfully actionable.
 
-## Subtask resolution (deterministic, leaves a scar)
+## Subtask resolution (deterministic, leaves a trace)
 
 ### Primary source: `.runs/<run-id>/plan/subtasks.yaml`
 

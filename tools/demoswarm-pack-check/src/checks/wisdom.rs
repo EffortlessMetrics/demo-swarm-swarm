@@ -382,7 +382,10 @@ smoke_signal: STABLE | INVESTIGATE | ROLLBACK
         let marker = contracts.reg_marker_literal;
 
         // Should be a regex for heading-based format
-        assert!(marker.starts_with("^### "), "Marker should be heading-based");
+        assert!(
+            marker.starts_with("^### "),
+            "Marker should be heading-based"
+        );
         assert!(marker.contains("REG-"), "Marker should contain REG prefix");
     }
 
@@ -481,8 +484,7 @@ smoke_signal: STABLE
     fn test_smoke_verifier_canon_action() {
         let re = Regexes::compile().expect("Failed to compile regexes");
 
-        let with_canon_action =
-            "recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
+        let with_canon_action = "recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
         assert!(re.canon_action.is_match(with_canon_action));
 
         // Should NOT use domain-specific actions in recommended_action

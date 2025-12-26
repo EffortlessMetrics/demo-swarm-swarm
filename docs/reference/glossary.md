@@ -72,42 +72,13 @@ An agent that reviews work but never fixes it. Critics produce harsh critiques w
 
 Specifies which Claude model the agent uses. Defined in agent YAML frontmatter.
 
-| Value | Model Used | Use Case |
-|-------|------------|----------|
-| `inherit` | Orchestrator's model (Sonnet/Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
-| `sonnet` | Claude Sonnet | Implementation, architectural decisions, complex reasoning |
-| `haiku` | Claude Haiku | Research, analysis, cleanup, mechanical work, context distillation |
+| Value | Meaning |
+|-------|---------|
+| `haiku` | Research, cleanup, mechanical work |
+| `sonnet` | Almost-Haiku tasks needing slightly more reasoning |
+| `inherit` | Core creative work (user chooses Sonnet or Opus) |
 
-**2025 Conveyor Belt Philosophy:**
-
-The gap between Sonnet and Haiku is not about speed—both are fast. It's about **cost-to-reasoning ratio**:
-
-| Tier | Models | Role |
-|------|--------|------|
-| **Reasoning** | Sonnet, Opus | Implementation, orchestration, design |
-| **Execution** | Haiku | Research, cleanup, mechanical work |
-
-**Haiku-tier agents** (high-speed execution, research, cleanup):
-- `context-loader` — RAG-style search and context distillation
-- `*-cleanup` agents — Mechanical receipt generation
-- `test-executor` — Run tests and capture output
-- `standards-enforcer` — Run formatters/linters
-- `fixer` — Apply targeted fixes from critics
-- `gh-researcher` — Read-only GitHub reconnaissance
-
-**Sonnet/Opus-tier agents** (reasoning, implementation, design):
-- `code-implementer` — Write production code
-- `test-author` — Write tests from BDD scenarios
-- `code-critic` / `test-critic` — Review implementation
-- `design-optioneer` — Propose architecture options
-- `adr-author` — Write architecture decisions
-- Orchestrators (flow commands) — Route and mediate
-
-See `.claude/agents/index.md` for complete agent model assignments.
-
-**Trade-offs:**
-- `haiku`: Cheaper, sufficient for summarization, research, and mechanical tasks
-- `sonnet`/`inherit`: Better reasoning for implementation and design decisions
+See [Model Allocation](model-allocation.md) for the full strategy and agent-to-tier mapping.
 
 ### color (agent YAML field)
 
@@ -244,10 +215,10 @@ Comments are:
 The pack does not require "justification receipts" for every change (e.g., why a test was deleted). Tests get refactored; critics review the diff and decide if changes make sense.
 
 **Treatment:**
-- Critics do forensic analysis of the actual diff
+- Critics do forensic analysis of the actual diff and test outcomes
 - Agents document their changes in `impl_changes_summary.md` or equivalent
 - No special bureaucratic receipts for specific operations
-- Trust the diff as the source of truth
+- **Diff + test results** are the primary forensic evidence (per CLAUDE.md)
 
 ### No Flow Reset Command
 

@@ -18,10 +18,6 @@ pub fn contains_ignore_ascii_case(haystack: &str, needle: &str) -> bool {
         .contains(&needle.to_ascii_lowercase())
 }
 
-pub fn has_exact_line(content: &str, exact: &str) -> bool {
-    content.lines().any(|l| l.trim_end() == exact)
-}
-
 pub fn has_line_starting_with(content: &str, prefix: &str) -> bool {
     content.lines().any(|l| l.starts_with(prefix))
 }
@@ -211,63 +207,6 @@ mod tests {
     #[test]
     fn test_contains_ignore_case_both_empty() {
         assert!(contains_ignore_ascii_case("", ""));
-    }
-
-    // -------------------------------------------------------------------------
-    // has_exact_line tests
-    // -------------------------------------------------------------------------
-
-    #[test]
-    fn test_has_exact_line_found() {
-        let content = "line1\nline2\nline3";
-        assert!(has_exact_line(content, "line2"));
-    }
-
-    #[test]
-    fn test_has_exact_line_not_found() {
-        let content = "line1\nline2\nline3";
-        assert!(!has_exact_line(content, "line4"));
-    }
-
-    #[test]
-    fn test_has_exact_line_with_trailing_whitespace() {
-        let content = "line1  \nline2\nline3\t";
-        assert!(has_exact_line(content, "line1"));
-        assert!(has_exact_line(content, "line3"));
-    }
-
-    #[test]
-    fn test_has_exact_line_partial_match_fails() {
-        let content = "line123\nline2\nline3";
-        assert!(!has_exact_line(content, "line1"));
-    }
-
-    #[test]
-    fn test_has_exact_line_empty_content() {
-        assert!(!has_exact_line("", "line"));
-    }
-
-    #[test]
-    fn test_has_exact_line_empty_target() {
-        let content = "line1\n\nline3";
-        assert!(has_exact_line(content, ""));
-    }
-
-    #[test]
-    fn test_has_exact_line_single_line() {
-        assert!(has_exact_line("only line", "only line"));
-    }
-
-    #[test]
-    fn test_has_exact_line_first_line() {
-        let content = "target\nother\nstuff";
-        assert!(has_exact_line(content, "target"));
-    }
-
-    #[test]
-    fn test_has_exact_line_last_line() {
-        let content = "other\nstuff\ntarget";
-        assert!(has_exact_line(content, "target"));
     }
 
     // -------------------------------------------------------------------------
@@ -510,7 +449,10 @@ mod tests {
         let nonexistent = PathBuf::from("/definitely/not/a/real/path/abc123");
         let result = find_files_containing_recursive(&ctx, &nonexistent, "needle", &[]).unwrap();
 
-        assert!(result.is_empty(), "Should return empty vec for nonexistent root");
+        assert!(
+            result.is_empty(),
+            "Should return empty vec for nonexistent root"
+        );
     }
 
     /// Test find_files_containing_recursive finds files with matching content.
@@ -527,7 +469,11 @@ mod tests {
         let search_dir = tmp.path().join("search");
         std::fs::create_dir(&search_dir).unwrap();
 
-        std::fs::write(search_dir.join("has_needle.txt"), "This file has needle in it").unwrap();
+        std::fs::write(
+            search_dir.join("has_needle.txt"),
+            "This file has needle in it",
+        )
+        .unwrap();
         std::fs::write(search_dir.join("no_match.txt"), "This file does not match").unwrap();
 
         let ctx = Ctx::discover(Some(tmp.path().to_path_buf())).unwrap();
@@ -535,7 +481,14 @@ mod tests {
         let result = find_files_containing_recursive(&ctx, &search_dir, "needle", &[]).unwrap();
 
         assert_eq!(result.len(), 1);
-        assert!(result[0].file_name().unwrap().to_str().unwrap().contains("has_needle"));
+        assert!(
+            result[0]
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .contains("has_needle")
+        );
     }
 
     /// Test find_files_containing_recursive ignores specified files.
@@ -613,7 +566,10 @@ mod tests {
 
         let result = find_matches_regex_recursive(&ctx, &[nonexistent], &re, &[]).unwrap();
 
-        assert!(result.is_empty(), "Should return empty for nonexistent roots");
+        assert!(
+            result.is_empty(),
+            "Should return empty for nonexistent roots"
+        );
     }
 
     /// Test find_matches_regex_recursive finds matching lines.
@@ -719,6 +675,11 @@ mod tests {
         // Results should be sorted by path
         let path0 = ctx.rel(&result[0].path);
         let path1 = ctx.rel(&result[1].path);
-        assert!(path0 < path1, "Results should be sorted: {} < {}", path0, path1);
+        assert!(
+            path0 < path1,
+            "Results should be sorted: {} < {}",
+            path0,
+            path1
+        );
     }
 }

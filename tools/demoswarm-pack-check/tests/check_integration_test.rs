@@ -317,8 +317,8 @@ mod flow_boundary_enforcement {
         ]);
 
         // Verify JSON output is valid
-        let json: serde_json::Value = serde_json::from_str(&stdout)
-            .expect("pack-check should produce valid JSON");
+        let json: serde_json::Value =
+            serde_json::from_str(&stdout).expect("pack-check should produce valid JSON");
 
         // The pack should validate without crashing
         assert!(
@@ -523,8 +523,8 @@ mod openq_prefix_validation {
         ]);
 
         // Verify JSON output is valid
-        let json: serde_json::Value = serde_json::from_str(&stdout)
-            .expect("pack-check should produce valid JSON");
+        let json: serde_json::Value =
+            serde_json::from_str(&stdout).expect("pack-check should produce valid JSON");
 
         // The pack should validate without crashing
         assert!(
@@ -547,7 +547,9 @@ mod openq_prefix_validation {
         let valid_content = read_fixture("open_questions_valid.md");
 
         // Should contain canonical flow codes
-        let canonical_codes = ["OQ-SIG-", "OQ-PLN-", "OQ-BLD-", "OQ-GAT-", "OQ-DEP-", "OQ-WIS-"];
+        let canonical_codes = [
+            "OQ-SIG-", "OQ-PLN-", "OQ-BLD-", "OQ-GAT-", "OQ-DEP-", "OQ-WIS-",
+        ];
         for code in canonical_codes {
             assert!(
                 valid_content.contains(code),
@@ -575,8 +577,8 @@ mod openq_prefix_validation {
         ]);
 
         // Verify JSON output is valid
-        let json: serde_json::Value = serde_json::from_str(&stdout)
-            .expect("pack-check should produce valid JSON");
+        let json: serde_json::Value =
+            serde_json::from_str(&stdout).expect("pack-check should produce valid JSON");
 
         // Check schema version exists
         assert!(

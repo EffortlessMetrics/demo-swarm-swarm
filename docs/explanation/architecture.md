@@ -1,12 +1,61 @@
-# Architecture: The Ops-First Engine
+# Architecture
 
 > How the pack is built and why.
 
 ---
 
-## The Three Pillars
+## Context
 
-DemoSwarm is built on three architectural pillars that separate it from standard LLM scripts.
+DemoSwarm exists because the bottleneck in AI-assisted development isn't writing code—it's verifying it.
+
+### The Economic Constraint
+
+Model iteration is cheap relative to reviewer attention. So the goal is not "generate code." The goal is to produce **review-ready evidence**:
+
+- Contracts and decisions (`signal/`, `plan/`)
+- Tests and diffs (`build/`)
+- Feedback closure (`review/`)
+- Audit + merge decision (`gate/`)
+- Merge + verification on swarm mainline (`deploy/`)
+- Learnings that feed the next run (`wisdom/`)
+
+**What we optimize:** DevLT (Developer Lead Time)—the human minutes required to verify a change. The system is allowed to "grind" if it produces better evidence and fewer review surprises.
+
+### The Trust Model
+
+The pack treats generated code as draft until it's backed by evidence (tests, diffs, critiques). Receipts summarize what happened; the git log is the audit trail.
+
+We don't enforce hard coverage ratios or test-to-code formulas. Instead, critics reason about whether the test *strategy* matches the code's *risk surface*. See [trust-model.md](../reference/trust-model.md) for details.
+
+### The Topology
+
+Runs execute in a **swarm clone/fork** and converge against swarm `origin/main`. Upstream integration happens after the run is stable, and is handled explicitly (sync/rebase → rerun Flows 4–7 if needed → PR upstream).
+
+This isolates high-churn iteration from human development and keeps `.runs/` artifacts in a reviewable audit trail. See [run-topology.md](../how-to/run-topology.md) and [adopt-fork-workflow.md](../how-to/adopt-fork-workflow.md) for setup.
+
+---
+
+## What DemoSwarm Is
+
+- A **Claude Code pack** (`.claude/`) plus deterministic tooling
+- A set of **flows** you dispatch manually—no daemon, no always-on agent
+- A system where **artifacts are the handoff** and the chat log is not a source of truth
+- A **pre-CI manufacturing line** for changes: turns intent into a PR you can skim
+
+## What DemoSwarm Is Not
+
+- Not an autonomous "ship to prod" agent
+- Not a replacement for code review—it produces the *input* to review
+- Not a promise that code is "correct because AI said so"
+- Not a repo that merges into upstream automatically (by design)
+
+**In one sentence:** DemoSwarm is an artifact-first, rerunnable SDLC workflow for LLM-driven changes that trades machine iteration for lower human verification time—without hiding the evidence.
+
+---
+
+## Core Patterns
+
+Four patterns that separate DemoSwarm from standard LLM scripts.
 
 ### 1. Thick Agents, Thin Flows
 
@@ -200,7 +249,7 @@ Orchestrator
 
 ### Flow 3: Build (The Construction Site)
 
-**Vibe:** High Velocity. "Push early, fail fast."
+**Posture:** High velocity. Push early, fail fast.
 
 Key stations:
 1. **AC Microloops:** Test ↔ Critic ↔ Code ↔ Critic (per acceptance criterion)
@@ -211,7 +260,7 @@ Key stations:
 
 ### Flow 4: Review (The Inspection Chamber)
 
-**Vibe:** High Rigor. "Drain the swamp."
+**Posture:** High rigor. Drain the worklist.
 
 Key stations:
 1. **Harvest:** Full PR feedback (all severities, including nits)
@@ -227,39 +276,15 @@ Key stations:
 
 This separates "what happened" (deploy action) from "can we verify protections" (governance enforcement).
 
-### Flow 7: Wisdom (The One-Way Loop)
+### Flow 7: Wisdom (One-Way by Design)
 
-**Design Philosophy:** Flow 7 extracts learnings and proposes actions, but it is **intentionally one-way** by design.
+Flow 7 extracts learnings and proposes actions, but **does not auto-apply** them.
 
-The wisdom loop operates as follows:
+- Outputs `learnings.md` and `feedback_actions.md` with recommendations
+- Humans review and decide what to adopt
+- No automatic injection into future flows
 
-1. **Extraction:** Flow 7 analyzes all prior flow outputs and identifies patterns, regressions, and improvement opportunities
-2. **Proposal:** Generates `learnings.md` and `feedback_actions.md` with concrete, actionable recommendations
-3. **Human Decision:** Humans review the proposals and decide what to apply
-4. **No Automatic Injection:** There is **NO** automatic constraint injection back into Flow 1 or any other flow
-
-**Why this is intentional:**
-
-- **Safety:** Prevents the swarm from autonomously tightening constraints that could block legitimate work
-- **Auditability:** Every policy change has a human decision point with clear provenance
-- **Trust:** Maintains the human-in-the-loop for decisions that affect future runs
-- **Transparency:** Proposed changes are visible and reviewable before adoption
-
-**What Flow 7 does NOT do:**
-
-- It does NOT modify `.claude/agents/*.md` prompts
-- It does NOT update `CLAUDE.md` policies
-- It does NOT inject new verification rules into flows
-- It does NOT auto-apply learnings to future runs
-
-**What humans do with wisdom outputs:**
-
-- Review `learnings.md` for patterns worth adopting
-- Manually update pack configuration based on `feedback_actions.md`
-- Decide which suggestions improve the system vs. over-constrain it
-- Create explicit pack customizations via documented changes
-
-This one-way design prevents "learning drift" where the swarm autonomously evolves constraints that eventually make it impossible to ship.
+**Why:** Prevents "learning drift" where the swarm autonomously tightens constraints until shipping becomes impossible. Every policy change has a human decision point.
 
 ---
 

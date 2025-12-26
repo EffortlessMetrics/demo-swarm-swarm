@@ -256,34 +256,19 @@ This demonstrates the core value: **"prompt → structured artifacts → receipt
 
 ## Troubleshooting
 
-### "No run found"
+See [Quickstart troubleshooting](quickstart.md#troubleshooting) for common issues.
 
-Run `/flow-1-signal` first to establish the run, or specify an explicit run-id.
-
-### "GitHub operations skipped"
-
-This can happen for multiple reasons. Diagnose in order:
-
-1. **Gates blocked?** Check `.runs/<run-id>/<flow>/secrets_status.json`:
-   - `safe_to_publish: false` → secrets detected
-   - `proceed_to_github_ops: false` → repo hygiene issue
-
-2. **Auth missing?** Run `gh auth status`:
-   - If not authenticated, GH agents skip gracefully
-
-Flows still run locally—GitHub posting is optional. Local artifacts are always written.
-
-### "Critic keeps bouncing"
-
-Route on the critic's `recommended_action`:
+**Critic keeps bouncing?** Route on `recommended_action`:
 - `BOUNCE` → follow `route_to_flow/route_to_agent`
-- `RERUN` → loop once more; if fixes are impossible, proceed with blockers/limitations documented (no separate escalate lane)
-- If no `recommended_action`, use `can_further_iteration_help` as a tie-breaker (`no` → proceed)
+- `RERUN` → loop once more
+- No action set → use `can_further_iteration_help` as tie-breaker
 
 ---
 
 ## Next Steps
 
-- **Customization**: See [customize-pack.md](../how-to/customize-pack.md) for adapting to your stack
-- **Full reference**: See [CLAUDE.md](../../CLAUDE.md) for complete documentation
-- **Validation**: See [validation-run.md](validation-run.md) for pack validation
+| Goal | Doc |
+|------|-----|
+| Customize for your stack | [customize-pack.md](../how-to/customize-pack.md) |
+| Full reference | [CLAUDE.md](../../CLAUDE.md) |
+| Validate pack contracts | [validation-run.md](validation-run.md) |

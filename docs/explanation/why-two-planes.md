@@ -1,6 +1,8 @@
-# Why Two Planes
+# Why Two Planes (Control vs Audit)
 
 > Control plane vs audit plane: what they are and why they're separate.
+
+**Note:** This doc is about **Control Plane vs Audit Plane** (how routing works). For **Work Plane vs Publish Plane** (where gates engage), see [Why Ops-First](why-ops-first.md).
 
 ---
 

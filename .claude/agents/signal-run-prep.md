@@ -143,7 +143,8 @@ Create or update `.runs/<run-id>/run_meta.json`:
   "pr_number": null,
 
   "supersedes": null,
-  "related_runs": []
+  "related_runs": [],
+  "base_ref": "<branch-name | null>"
 }
 ```
 
@@ -156,6 +157,7 @@ Rules:
 * Always update `updated_at`.
 * Increment `iterations` on each invocation.
 * Ensure `"signal"` is present in `flows_started` (do not remove other flows).
+* If `base_ref` is provided (e.g., for stacked runs), preserve it. If absent and the current branch is not the default branch (`main`/`master`), infer `base_ref` from the current branch's upstream tracking if available; otherwise leave null.
 
 ## Step 5: Upsert .runs/index.json (minimal ownership)
 

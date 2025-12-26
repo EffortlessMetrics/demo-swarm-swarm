@@ -64,14 +64,14 @@ Keep the block schemas:
 
 ```yaml
 ## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
+status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 ...
 
 ## Repo Operator Result
 operation: checkpoint | build | stage | merge | other
-status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | BLOCKED
+status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
 ...
 ```

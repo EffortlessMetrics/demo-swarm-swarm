@@ -2,20 +2,23 @@
 
 > Debug common failures and unexpected behavior.
 
-**Goal:** Fix problems when flows don't work as expected.
-
 ---
 
-## Quick diagnosis
+## Quick Diagnosis Ladder
 
-Before diving in:
+| Symptom | First Check | Likely Cause |
+|---------|-------------|--------------|
+| Nothing posted to GitHub | `gh auth status` + check gates | Auth missing OR `safe_to_publish: false` OR `proceed_to_github_ops: false` |
+| `CANNOT_PROCEED` | Check tooling (`jq`, `gh`, etc.) | Mechanical failure (IO/perms/missing tool) |
+| Counts are `null` | Check `cleanup_report.md` | Stable markers missing in producer artifact |
+| Microloop won't stop | Check critic's `recommended_action` | Route on PROCEED/BOUNCE/RERUN, not just status |
+| Anomaly detected | Check `anomaly_paths` | Unexpected files outside allowlist |
+| Command not found | Check `.claude/` exists at repo root | Pack not discovered |
+
+**Always start with:**
 
 ```bash
-# Run canonical validation
 bash .claude/scripts/pack-check.sh
-
-# Check GitHub auth (if expecting GH ops)
-gh auth status
 ```
 
 ---

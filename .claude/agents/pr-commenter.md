@@ -92,9 +92,21 @@ Build a comment summarizing the current state:
 | Pending | <n> |
 | Critical Pending | <n> |
 
-### Recent Changes
+### Resolved Items
 
-<Summary from review_actions.md (last N items)>
+<Checklist showing what was addressed — provides closure signal to human reviewers>
+
+- [x] Fixed MD5 hash for password hashing (CodeRabbit)
+- [x] Added error handling for null user (CodeRabbit)
+- [x] Fixed typo in README (Human)
+- [~] Skipped: Function renamed in prior iteration (Human)
+
+### Pending Items
+
+<If any remain>
+
+- [ ] Add tests for authentication flow (Human) — MAJOR
+- [ ] Update API documentation (CodeRabbit) — MINOR
 
 ### Next Steps
 
@@ -104,6 +116,13 @@ Build a comment summarizing the current state:
 _Updated by pr-commenter at <timestamp>_
 <!-- DEMOSWARM_PR_COMMENT:<run-id> -->
 ```
+
+**Checklist semantics:**
+- `[x]` = Resolved (fixed)
+- `[~]` = Skipped (with reason: stale, already fixed, out of scope)
+- `[ ]` = Pending (still needs work)
+
+This provides the "closure signal" — humans can see that feedback was heard and handled, not just processed.
 
 **RESTRICTED mode:**
 ```markdown

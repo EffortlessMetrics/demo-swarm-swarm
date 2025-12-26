@@ -263,18 +263,9 @@ mod tests {
 
     #[test]
     fn test_level_serialize() {
-        assert_eq!(
-            serde_json::to_string(&Level::Pass).unwrap(),
-            "\"pass\""
-        );
-        assert_eq!(
-            serde_json::to_string(&Level::Warn).unwrap(),
-            "\"warn\""
-        );
-        assert_eq!(
-            serde_json::to_string(&Level::Fail).unwrap(),
-            "\"fail\""
-        );
+        assert_eq!(serde_json::to_string(&Level::Pass).unwrap(), "\"pass\"");
+        assert_eq!(serde_json::to_string(&Level::Warn).unwrap(), "\"warn\"");
+        assert_eq!(serde_json::to_string(&Level::Fail).unwrap(), "\"fail\"");
     }
 
     // -------------------------------------------------------------------------
