@@ -223,58 +223,20 @@ When Flow N+1 starts:
 
 **Rule:** Agents do not talk to each other via chat history. They read from disk and write to disk.
 
-### The Pattern
-
-```
-┌────────────────────────────────────────────┐
-│  Station: adr-author                       │
-│                                            │
-│  1. Read Fresh                             │
-│     - requirements.md                      │
-│     - features/*.feature                   │
-│     - No prior context                     │
-│                                            │
-│  2. Do Work                                │
-│     - Analyze requirements                 │
-│     - Draft architecture decision          │
-│                                            │
-│  3. Write State                            │
-│     - adr.md (to disk)                     │
-│                                            │
-│  4. Die                                    │
-│     - Context discarded                    │
-│     - Next agent starts fresh              │
-└────────────────────────────────────────────┘
-```
-
-### Why "Sealed"?
-
 Each station is **hermetically sealed**:
+
+```
+Read Fresh → Do Work → Write State → Die
+```
+
 - **No shared memory** with other stations
-- **No context inheritance** from prior stations in this flow
-- **No assumptions** about what happened before
+- **No context inheritance** from prior stations
+- **File system is the only communication channel**
 
-The only communication channel is **the file system**.
-
-### Benefits
-
-1. **Zero context entropy**: No degradation as we move through stations
-2. **Parallel safety**: Stations could run in parallel (future optimization)
-3. **Reproducibility**: Rerun a station by just reading the same inputs
-4. **Testability**: Mock inputs are just files on disk
-
-### Example: Build Flow Station Isolation
-
-```
-code-implementer (writes code)
-  ↓ (file: src/auth.ts written to disk)
-code-critic (reads code fresh, no context from implementer)
-  ↓ (file: code_critique.md written to disk)
-code-implementer (reads critique fresh, no context from first run)
-  ↓ (file: src/auth.ts updated)
-```
-
-Each invocation is **stateless**. The implementer doesn't "remember" what it wrote last time—it reads the file fresh.
+**Benefits:**
+- Zero context entropy (no degradation through stations)
+- Reproducibility (rerun by reading same inputs)
+- Testability (mock inputs are just files)
 
 ---
 
@@ -332,47 +294,12 @@ Repeat for Flow 3, 4, 5, 6, 7.
 
 ## What This Enables
 
-### 1. Resilience
-
-Flow crashes? Rerun it. The inputs are on disk.
-
-```bash
-# Flow 2 crashed halfway through
-/flow-2-plan
-```
-
-The orchestrator resumes (or restarts) using `flow_plan.md` to figure out where it was.
-
-### 2. Cherry-Picking
-
-Want just the plan, not the implementation?
-
-```bash
-/flow-1-signal "feature idea"
-/flow-2-plan
-# Stop here. Review plan. Implement manually.
-```
-
-You get the design without committing to the full build.
-
-### 3. Human Collaboration
-
-Developer fixes a typo in `requirements.md` after Flow 1 completes? Flow 2 sees the fixed version when it reads from disk.
-
-The pack **adapts** to mid-flight changes because it's reading live state, not frozen context.
-
-### 4. Debugging
-
-Something wrong in Flow 3?
-
-```bash
-# Read the inputs Flow 3 saw
-cat .runs/feat-auth/plan/adr.md
-cat .runs/feat-auth/plan/test_plan.md
-
-# Check what Flow 3 produced
-cat .runs/feat-auth/build/build_receipt.json
-```
+| Capability | How |
+|------------|-----|
+| **Resilience** | Flow crashes? Rerun it. Inputs are on disk. |
+| **Cherry-picking** | Run Flow 1+2 only, review plan, implement manually. |
+| **Human collaboration** | Edit `requirements.md` after Flow 1? Flow 2 sees the fix. |
+| **Debugging** | Read `.runs/` artifacts to see exactly what each flow saw and produced. |
 
 The entire state machine is **inspectable**.
 

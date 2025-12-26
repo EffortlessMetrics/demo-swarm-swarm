@@ -101,7 +101,6 @@ Haiku distills context; Sonnet/Opus implements with that context.
 | `fixer` | Apply targeted fixes from critics/mutation |
 | `doc-writer` | Update documentation to match implementation |
 | `doc-critic` | Review documentation freshness |
-| `mutator` | Run mutation testing, write mutation_report.md |
 | `mutation-auditor` | Run bounded mutation testing, produce worklist |
 | `flakiness-detector` | Re-run failures, classify deterministic vs flaky |
 | `fuzz-triager` | Run configured fuzzing, triage crashes |

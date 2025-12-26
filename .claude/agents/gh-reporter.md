@@ -190,9 +190,7 @@ All `gh` comment operations must include `-R <github_repo>`.
 
 **CRITICAL: How to pass comment body (cross-platform safe)**
 
-Do NOT use temp files or `--body-file` with file paths. Windows paths like `C:\Users\...` will be misinterpreted.
-
-Instead, use heredoc to pass the body inline:
+Use heredoc to pass the body inline (works reliably across Windows and Unix):
 
 ```bash
 # Create a new comment

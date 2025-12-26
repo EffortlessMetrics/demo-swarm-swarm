@@ -67,11 +67,93 @@ Prioritize questions that would change design, scope, or tests:
 - Undefined domain terms/acronyms
 - External dependencies/ownership unclear (source of truth, integration owners)
 
-## Question quality bar
+## Research-First Protocol (Law 5)
+
+**Investigate → Derive → Default → Rerun → Escalate (in that order)**
+
+Before classifying a question as DECISION_NEEDED:
+
+1. **Investigate locally:** Search the repo for existing patterns, configs, prior runs, tests
+2. **Investigate remotely (if allowed):** Check GitHub issues/PRs, project docs, web search for industry standards
+3. **Derive from evidence:** Can you infer the answer from surrounding code, existing APIs, or test expectations?
+4. **Default if safe:** Choose a reversible default and document it
+5. **Rerun with new evidence:** If research uncovered patterns or context that changes your approach, request `RERUN` to apply the new understanding — this is not escalation, it's continuing the loop with better inputs
+6. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+
+**Rerun is a first-class move.** If you discover new evidence during research (e.g., found existing auth patterns, discovered a related prior run, found library docs that clarify behavior), you can request `RERUN` with the new context. This is not failure — it's the system working as designed.
+
+**Most questions are NOT blockers.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code. Only escalate if the repo genuinely has no patterns to follow AND the choice has irreversible consequences.
+
+## Question Taxonomy (Required)
+
+Every question MUST be classified into exactly one bucket.
+
+**Default posture:** Answer what you can, default what you can't, escalate only when boxed in.
+
+### DECISION_NEEDED (non-derivable from repo)
+
+Use this **only** when:
+1. You searched code/tests/docs/config/prior runs/issues and found NO answer, AND
+2. No safe reversible default exists that lets work proceed.
+
+**Triggers (after research fails):**
+- Business priorities or product direction (which users matter more?)
+- Legal/compliance constraints not documented anywhere accessible
+- Stakeholder preferences with no technical right answer
+- Requires explicit approval (security exception, breaking change)
+- Requires access to private systems you cannot reach
+
+**PROOF OF RESEARCH REQUIRED.** For each DECISION_NEEDED item, you MUST include:
+- **Evidence searched:** Paths, files, patterns checked
+- **Why non-derivable:** Specific reason it can't be inferred
+- **Safest provisional default:** What you'd pick if forced (or "none safe")
+
+**Hard rule:** If the answer could reasonably be found in the repo or derived from existing patterns, it is NOT DECISION_NEEDED. Research first, then default, then escalate.
+
+**The bar is high.** Most questions should be DEFAULTED, not DECISION_NEEDED:
+
+| Question | Classification | Why |
+|----------|----------------|-----|
+| "What timeout should we use?" | DEFAULTED | Use existing pattern (30s in `src/api/`) or industry standard |
+| "Which auth provider?" | DECISION_NEEDED only if repo has no auth patterns AND both OAuth/JWT are equally viable |
+| "Should errors return 400 or 422?" | DEFAULTED | Follow existing API conventions; easy to change |
+| "Can we break API compatibility?" | DECISION_NEEDED | Business decision with stakeholder impact |
+
+**These are surfaced prominently by `gh-issue-manager` on the GitHub issue.**
+
+### DEFAULTED (proceeding with assumption)
+
+An assumption was made and implementation will proceed with it.
+
+**Requirements:**
+- Default is safe (failure mode is benign, not catastrophic)
+- Easy to change later if wrong
+- Industry-standard or codebase-convention applies
+- Must explain **why this default is safe**
+- Must explain **how to verify** the assumption is correct
+- Must explain **how to change** if the assumption is wrong
+
+**Examples of valid defaults:**
+- "Assuming 30-second timeout (matches existing API patterns in `src/api/`)"
+- "Using bcrypt for password hashing (security best practice, easy to swap)"
+- "Returning 404 for missing resources (REST convention, existing endpoints do this)"
+
+### DEFERRED (valid but not blocking)
+
+Valid question but doesn't affect Flow 3 correctness.
+- UX polish that can be tuned post-merge
+- Performance optimization that doesn't affect correctness
+- Nice-to-have that doesn't block the feature
+- Can be revisited in a follow-up PR
+
+**Deferred is not "I don't want to answer."** It's "This genuinely doesn't affect whether the code works."
+
+## Question Quality Bar
 
 Each question must be:
 - Specific and answerable
-- Paired with a **Suggested default** you will proceed with
+- Classified into one of the three buckets above
+- Paired with a **Suggested default** (for DEFAULTED and DEFERRED)
 - Include **Impact if different** (what changes in spec/design/tests)
 - Include **Needs answer by** (Flow boundary where changing it would be hardest / create the most rework)
 
@@ -126,31 +208,40 @@ Then, for every run (including the first), append an Update block at the end:
 ```markdown
 ## Update: run <run-id>
 
-### Questions That Would Change the Spec
+### DECISION_NEEDED (Human Must Answer)
 
-#### Category: Product
+These questions MUST be answered before the work can proceed correctly.
+`gh-issue-manager` will post these prominently to the GitHub issue.
+
 - QID: <OQ-...>
-  - Q: <question> [OPEN]
-  - Suggested default: <default we will assume>
-  - Impact if different: <what changes>
+  - Q: <question> [DECISION_NEEDED]
+  - Evidence searched: <paths/files/patterns checked>
+  - Why non-derivable: <specific reason it can't be inferred from repo>
+  - Safest provisional default: <what you'd pick if forced, or "none safe">
+  - Options: <option A> | <option B> | ...
+  - Impact of each: <brief tradeoff summary>
   - Needs answer by: <Flow 2 | Flow 3 | Before merge | Before deploy>
-  - Evidence: <file> → <section/header> (optional)
 
-#### Category: Technical
-- QID: ...
-  - Q: ...
+### DEFAULTED (Proceeding With Assumption)
 
-#### Category: Data
-- QID: ...
-  - Q: ...
+Assumptions made to keep moving. Each default must explain: why it's safe, how to verify, how to change.
 
-#### Category: Ops
-- QID: ...
-  - Q: ...
+- QID: <OQ-...>
+  - Q: <original question> [DEFAULTED]
+  - Default chosen: <the assumption>
+  - Why safe: <failure mode is benign / reversible / matches convention>
+  - How to verify: <what test/check confirms this is correct>
+  - How to change: <what to modify if assumption is wrong>
+  - Evidence: <file → section/header that supports this default> (optional)
 
-#### Category: Policy/Compliance (optional)
-- QID: ...
-  - Q: ...
+### DEFERRED (Valid But Not Blocking)
+
+Questions that don't affect Flow 3 correctness. Revisit later.
+
+- QID: <OQ-...>
+  - Q: <question> [DEFERRED]
+  - Why deferred: <doesn't affect correctness / UX polish / follow-up PR>
+  - Revisit in: <Flow N | follow-up PR | never>
 
 ### Assumptions Made to Proceed
 - Assumption: <assumption>.
@@ -167,12 +258,40 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
 route_to_agent: <agent-name> | null
 output_path: .runs/<run-id>/<flow>/open_questions.md
-questions_added: <int>
-assumptions_added: <int>
+decision_needed_count: <int>
+defaulted_count: <int>
+deferred_count: <int>
 missing_required: []
 blockers: []
 concerns: []
 ```
+
+**Routing note:** If `decision_needed_count > 0`, the orchestrator should ensure `gh-issue-manager` posts these prominently.
+
+## Immediate Blocker Surfacing (Law 5)
+
+**True blockers don't wait for end-of-flow.**
+
+If you find a genuine NON_DERIVABLE blocker:
+- You cannot make a recommendation
+- No safe default exists
+- Human decision is required to proceed correctly
+
+Then include in your Result block:
+```yaml
+immediate_blocker: true
+blocker_summary: "<one-line description of what decision is needed>"
+```
+
+When the orchestrator sees `immediate_blocker: true`, it should:
+1. Immediately call `gh-issue-manager` to post a comment with the blocker details
+2. Continue the flow with the "safest provisional default" if one exists
+3. If no safe default exists and work cannot proceed, mark the station UNVERIFIED with clear blockers
+
+**Most questions are NOT immediate blockers.** Use this only when:
+- The answer genuinely cannot be derived from the repo
+- No reversible default exists
+- Proceeding without the answer would cause incorrect behavior (not just suboptimal)
 
 ## Completion States
 
@@ -193,8 +312,11 @@ At the end of your response, include:
 ## Clarifier Result
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 output_path: .runs/<run-id>/<flow>/open_questions.md
-questions_added: <int>
-assumptions_added: <int>
+decision_needed_count: <int>
+defaulted_count: <int>
+deferred_count: <int>
+immediate_blocker: true | false
+blocker_summary: <string | null>
 missing_required: []
 blockers: []
 concerns: []
@@ -202,5 +324,29 @@ concerns: []
 
 Notes:
 
-* `questions_added` / `assumptions_added` count only what you added this invocation.
+* Counts reflect only what you added this invocation.
+* If `immediate_blocker: true`, orchestrator should IMMEDIATELY call `gh-issue-manager` to post the blocker (Law 5).
+* If `decision_needed_count > 0` but no immediate blocker, orchestrator should route to `gh-issue-manager` at end-of-flow to post these prominently.
 * This block is convenience; the file is the durable register.
+
+## Reporting Philosophy
+
+**Your job is to enable forward progress, not to stop the line.**
+
+A good clarifier run looks like:
+```
+decision_needed_count: 1    # One genuine blocker that needs human input
+defaulted_count: 5          # Five assumptions made to keep moving
+deferred_count: 2           # Two nice-to-knows for later
+```
+
+A bad clarifier run looks like:
+```
+decision_needed_count: 8    # Too many "just asking" questions
+defaulted_count: 0          # No assumptions = no progress
+deferred_count: 0           # Nothing triaged
+```
+
+**The first run enables Flow 2/3 to proceed with clear assumptions. The second run forces humans to answer questions the agent could have researched.**
+
+When uncertain: research → default → document the assumption. Only escalate when you've exhausted derivation paths.

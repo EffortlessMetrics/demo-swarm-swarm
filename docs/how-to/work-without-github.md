@@ -57,7 +57,8 @@ Same commands, same behavior:
 /flow-1-signal "Add health endpoint"
 /flow-2-plan
 /flow-3-build
-/flow-4-gate
+/flow-4-review
+/flow-5-gate
 ```
 
 You'll see messages like:

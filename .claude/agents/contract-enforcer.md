@@ -148,7 +148,7 @@ Routing rules:
   - ambiguous intent ⇒ `PROCEED` (UNVERIFIED with blockers documented; routes null)
 - If only MINOR findings and verification is complete enough ⇒ `PROCEED`
 
-Never use `MERGE` here (that's `merge-decider`).
+The merge decision is owned by `merge-decider`.
 
 ## Required Output Format (`contract_compliance.md`)
 

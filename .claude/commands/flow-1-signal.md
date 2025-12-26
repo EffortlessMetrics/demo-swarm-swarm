@@ -60,14 +60,15 @@ Flow 1 uses **two complementary state machines**:
 - gh-issue-resolver (resolve/bind GitHub issue; may defer when GH unavailable)
 - repo-operator (ensure run branch)
 - signal-run-prep (establish run infrastructure)
-- gh-researcher (research GitHub context)
+- gh-researcher (research GitHub context + wisdom scent trail)
 - signal-normalizer (normalize signal)
-- problem-framer (frame the problem)
+- problem-framer (frame the problem; check for state/migration implications)
 - clarifier (capture open questions; non-blocking)
-- requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- bdd-author ↔ bdd-critic (microloop; signal-based termination; enforce sad paths)
 - scope-assessor (assess scope + initial risks)
 - risk-analyst (deep risk analysis)
+- spec-auditor (integrative audit; may bounce for fixes)
 - signal-cleanup (finalize receipt; update index; update `flow_plan.md`)
 - secrets-sanitizer (publish gate)
 - repo-operator (checkpoint commit)
@@ -102,14 +103,18 @@ If running `/flow-1-signal` on an existing run-id:
 
 - signal-normalizer
 - problem-framer
-- requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- bdd-author ↔ bdd-critic (microloop; signal-based termination)
 - scope-assessor
 
 ### Cross-Cutting Agents
 
 - clarifier
 - risk-analyst
+
+### Integrative Audit (Before Cleanup)
+
+- spec-auditor - final holistic audit of all Flow 1 artifacts; routes back if critical gaps
 
 ### Cleanup + Reporting (End of Flow)
 
@@ -162,14 +167,15 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 - [ ] gh-issue-resolver (resolve/create issue, emit run_id)
 - [ ] repo-operator (ensure run branch `run/<run-id>`)
 - [ ] signal-run-prep (establish run directory)
-- [ ] gh-researcher (GitHub context)
+- [ ] gh-researcher (GitHub context + wisdom scent trail)
 - [ ] signal-normalizer (parse input)
-- [ ] problem-framer (synthesize problem)
+- [ ] problem-framer (synthesize problem; check state/migration)
 - [ ] clarifier (document ambiguities)
-- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- [ ] requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- [ ] bdd-author ↔ bdd-critic (microloop; signal-based termination; enforce sad paths)
 - [ ] scope-assessor (stakeholders, risks, estimate)
 - [ ] risk-analyst (enrich risks)
+- [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup (write receipt, update index)
 - [ ] secrets-sanitizer (publish gate)
 - [ ] repo-operator (checkpoint commit)
@@ -181,11 +187,15 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 <Update as each step completes>
 ```
 
-### Step 2: Research GitHub Context
+### Step 2: Research Context
 
-Use `gh-researcher` to gather related issues/PRs, prior decisions, and constraints.
+**a) GitHub context:** Use `gh-researcher` to gather related issues/PRs, prior decisions, and constraints.
 
 This context informs problem framing and requirements. If `gh` CLI is not available, proceed without this step (document as assumption).
+
+**b) Wisdom scent trail (optional):** Check `.runs/_wisdom/latest.md` if it exists. This file contains top learnings from the most recent wisdom flow — insights that may inform this run's approach.
+
+If present, extract relevant learnings (especially any that relate to similar feature areas or common pitfalls) and pass them to `problem-framer` as additional context. This enables the pack to learn from itself across runs.
 
 ### Step 3: Normalize Signal
 
@@ -220,7 +230,15 @@ Alternate between `requirements-author` and `requirements-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `requirements-author` once with the critique worklist, then rerun `requirements-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
+**Loop guidance (Signal-Based Termination)**:
+- Route on critic's Result block, not pass counts.
+- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
+- Exit conditions (in priority order):
+  1. `status: VERIFIED` → proceed (success)
+  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
+  3. `can_further_iteration_help: no` → proceed (no improvement possible)
+  4. Context exhausted → checkpoint and exit `PARTIAL`
+- The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 7: BDD Scenarios (Microloop)
 
@@ -246,7 +264,16 @@ Alternate between `bdd-author` and `bdd-critic`:
     - If `recommended_action: RERUN` -> do the apply pass: rerun `bdd-author` once with the critique worklist, then rerun `bdd-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
     - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
 
-**Loop guidance**: Default cadence is two passes (writer -> critic -> writer -> critic). The second writer pass applies the critique worklist (when present). If the critic doesn't provide a usable `recommended_action`, use `can_further_iteration_help` as the tie-breaker (`yes` -> rerun; `no` -> proceed). The Result block is the control plane; the critique file is the audit artifact.
+**Loop guidance (Signal-Based Termination)**:
+- Route on critic's Result block, not pass counts.
+- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
+- **Sad Path enforcement:** The critic will flag REQs missing negative scenarios. Ensure the author addresses these before proceeding.
+- Exit conditions (in priority order):
+  1. `status: VERIFIED` → proceed (success)
+  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
+  3. `can_further_iteration_help: no` → proceed (no improvement possible)
+  4. Context exhausted → checkpoint and exit `PARTIAL`
+- The Result block is the control plane; the critique file is the audit artifact.
 
 ### Step 8: Assess Scope
 
@@ -259,6 +286,25 @@ Identify stakeholders, flag early risks by category, and estimate scope (S/M/L/X
 Use `risk-analyst` for deeper risk assessment.
 
 Add risk patterns (security, compliance, data, performance) and severity ratings. This supplements `.runs/<run-id>/signal/early_risks.md` with deeper analysis.
+
+### Step 9b: Final Spec Audit (Integrative)
+
+**Call `spec-auditor`** to perform an integrative audit of all Flow 1 artifacts.
+
+This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews:
+- Problem → Requirements alignment
+- Requirements → BDD coverage
+- Risk coverage completeness
+- Cross-artifact consistency
+- Unresolved critic findings
+
+**Route on its Result block:**
+- If `status: VERIFIED` → proceed to cleanup
+- If `status: UNVERIFIED` with `recommended_action: BOUNCE` → route back to the specified agent (e.g., `requirements-author`, `bdd-author`) for rework, then re-run the auditor
+- If `status: UNVERIFIED` with `recommended_action: PROCEED` → proceed with blockers documented (human judgment needed)
+- If `status: CANNOT_PROCEED` → `FIX_ENV` (mechanical failure)
+
+**Loop limit:** Re-run the auditor at most twice after routing to fix agents. If still UNVERIFIED after 2 fix attempts, proceed with blockers and let Flow 2/human handle.
 
 ### Step 10: Finalize and Write Receipt
 
@@ -416,6 +462,7 @@ All written to `.runs/<run-id>/signal/`:
 | `early_risks.md` | scope-assessor | Initial risk identification by category |
 | `risk_assessment.md` | risk-analyst | Deep risk analysis with severity ratings |
 | `scope_estimate.md` | scope-assessor | S/M/L/XL estimate with rationale |
+| `spec_audit.md` | spec-auditor | Integrative audit verdict and cross-artifact consistency |
 | `signal_receipt.json` | signal-cleanup | Structured summary for downstream flows |
 | `cleanup_report.md` | signal-cleanup | Artifact verification and count derivation |
 | `secrets_scan.md` | secrets-sanitizer | Secrets scan findings and actions taken |
@@ -503,15 +550,17 @@ If yes, proceed to `/flow-2-plan`.
 
 11. `risk-analyst`
 
-12. `signal-cleanup`
+12. `spec-auditor` (integrative audit; may route back for fixes)
 
-13. `secrets-sanitizer`
+13. `signal-cleanup`
 
-14. `repo-operator` (checkpoint; read Repo Operator Result)
+14. `secrets-sanitizer`
 
-15. `gh-issue-manager` (if allowed)
+15. `repo-operator` (checkpoint; read Repo Operator Result)
 
-16. `gh-reporter` (if allowed)
+16. `gh-issue-manager` (if allowed)
+
+17. `gh-reporter` (if allowed)
 
 #### Microloop Template (writer ↔ critic)
 
@@ -519,15 +568,14 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 
 1) Writer pass: call `<writer>`
 2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass (default second writer pass): call `<writer>` once using the critic's worklist (no-op if the critic returned `recommended_action: PROCEED`)
-4) Re-critique: call `<critic>` again
+3) Route on critic Result:
+   - If `recommended_action: PROCEED` → proceed (no apply pass needed)
+   - If `recommended_action: RERUN` AND `can_further_iteration_help: yes` → continue to step 4
+   - Otherwise → proceed with `UNVERIFIED` + blockers recorded
+4) Apply pass: call `<writer>` with the critique worklist
+5) Re-critique: call `<critic>` again, return to step 3
 
-Continue looping beyond the default two passes only when:
-- critic returns `recommended_action: RERUN`, and
-- `can_further_iteration_help: yes`, and
-- the critic's open items are specific, and the writer can change the artifact to address them.
-
-Otherwise proceed with `UNVERIFIED` + blockers recorded.
+**Termination:** Signal-based, not count-based. Loop continues while critic says RERUN + can_further_iteration_help: yes. Exit when signal says stop or context exhausted.
 
 ### TodoWrite (copy exactly)
 
@@ -538,10 +586,11 @@ Otherwise proceed with `UNVERIFIED` + blockers recorded.
 - [ ] signal-normalizer
 - [ ] problem-framer
 - [ ] clarifier
-- [ ] requirements-author ↔ requirements-critic (microloop; 2 passes default)
-- [ ] bdd-author ↔ bdd-critic (microloop; 2 passes default)
+- [ ] requirements-author ↔ requirements-critic (microloop; signal-based termination)
+- [ ] bdd-author ↔ bdd-critic (microloop; signal-based termination)
 - [ ] scope-assessor
 - [ ] risk-analyst
+- [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup
 - [ ] secrets-sanitizer (capture Gate Result block)
 - [ ] repo-operator (checkpoint; capture Repo Operator Result)

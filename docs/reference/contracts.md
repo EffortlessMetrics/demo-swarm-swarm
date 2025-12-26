@@ -166,83 +166,20 @@ Receipt writers may include a `schema_version` field for compatibility (e.g., `b
 
 ## Stable Marker Contracts
 
-Stable markers enable mechanical counting without parsing prose. Agents emit these prefixes; cleanup agents count them.
+Stable markers enable mechanical counting without parsing prose. Agents emit these prefixes; cleanup agents count them via the `demoswarm` CLI.
 
-### Severity markers
+**Key marker families:**
 
-Used in critiques and audits:
+| Family | Pattern | Used in |
+|--------|---------|---------|
+| Requirements | `^### REQ-`, `^### NFR-` | `requirements.md` |
+| Risks | `^- RSK-[0-9]+ \[SEVERITY\]` | `early_risks.md`, `risk_assessment.md` |
+| Questions | `^- QID: OQ-<FLOW>-[0-9]{3}` | `open_questions.md` |
+| Severity | `^- \[CRITICAL\]`, `^- \[MAJOR\]`, `^- \[MINOR\]` | Critiques |
+| Build | `^- IMPL_FILE_*:`, `^- TEST_FILE_*:` | `*_changes_summary.md` |
+| Wisdom | `^## Learning:`, `^### REG-[0-9]{3}:` | `learnings.md`, `regression_report.md` |
 
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Critical finding | `^- \[CRITICAL\]` | `- [CRITICAL] Missing auth check` |
-| Major finding | `^- \[MAJOR\]` | `- [MAJOR] No input validation` |
-| Minor finding | `^- \[MINOR\]` | `- [MINOR] Style inconsistency` |
-
-### Requirement markers
-
-Used in `requirements.md`:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Functional requirement | `^### REQ-` | `### REQ-001` |
-| Non-functional requirement | `^### NFR-` | `### NFR-SECURITY-001` |
-
-### Risk markers
-
-Used in `early_risks.md`, `risk_assessment.md`:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Risk item | `^- RSK-[0-9]+ \[(CRITICAL\|HIGH\|MEDIUM\|LOW)\]` | `- RSK-001 [HIGH] Data exposure risk` |
-
-### Open question markers
-
-Used in `open_questions.md`:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Question ID | `^- QID: OQ-.*-[0-9]{3}` | `- QID: OQ-SIG-001` |
-
-Flow prefixes: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS`
-
-### Test markers
-
-Used in `test_changes_summary.md`:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Test file changed | `^- TEST_FILE_CHANGED:` | `- TEST_FILE_CHANGED: tests/auth_test.py` |
-| Test file added | `^- TEST_FILE_ADDED:` | `- TEST_FILE_ADDED: tests/test_auth_flow.py` |
-
-### File markers
-
-Used in `impl_changes_summary.md`:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| File changed | `^- IMPL_FILE_CHANGED:` | `- IMPL_FILE_CHANGED: src/auth.rs` |
-| File added | `^- IMPL_FILE_ADDED:` | `- IMPL_FILE_ADDED: src/new_module.rs` |
-
-### Inventory markers
-
-Used in various flow artifacts:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Issue draft | `^- ISSUE_DRAFT:` | `- ISSUE_DRAFT: Add rate limiting` |
-| Suggestion | `^- SUGGESTION:` | `- SUGGESTION: Consider caching` |
-| Issue (feedback) | `^- ISSUE:` | `- ISSUE: Create follow-up ticket` |
-
-### Wisdom markers
-
-Used in Flow 6 artifacts:
-
-| Pattern | Regex | Example |
-|---------|-------|---------|
-| Learning | `^## Learning: ` | `## Learning: Caching improves latency` |
-| Regression | `^### REG-[0-9]{3}:` | `### REG-001: Performance degradation` |
-
-See also: [stable-markers.md](stable-markers.md) for complete reference.
+See [stable-markers.md](stable-markers.md) for complete patterns, examples, and counting commands.
 
 ---
 

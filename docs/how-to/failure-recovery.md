@@ -16,7 +16,7 @@ When a run fails or produces conflicts, the correct response is:
 2. **Optionally delete `.runs/<run-id>/`** (if artifacts are corrupted)
 3. **Start fresh** with `/flow-1-signal` or the appropriate flow
 
-**Why?** Salvaging broken runs costs more human time than re-running. Each run costs $5-$10 in API calls. Spending 2 hours debugging a merge conflict is irrational when you can delete and restart in 5 minutes.
+**Why?** Salvaging broken runs costs more human time than re-running. Spending hours debugging a merge conflict is irrational when you can delete and restart in minutes.
 
 ---
 
@@ -140,7 +140,7 @@ To link a restart to the original run:
 
 Runs are **disposable assets**:
 
-- **Cheap to create**: API costs are low ($5-$10 per run)
+- **Cheap to create**: Re-running is faster than debugging
 - **Expensive to salvage**: Human debugging time is precious
 - **Easy to reproduce**: Flows are deterministic given same inputs
 - **Audit trail survives**: Git history preserves everything
@@ -153,11 +153,11 @@ When in doubt: **delete and restart**.
 
 | Scenario | Salvage Cost | Restart Cost | Recommended |
 |----------|--------------|--------------|-------------|
-| Simple typo | 2 min (edit + amend) | 5 min (rerun signal) | Repair |
-| Single file conflict | 10-30 min (resolve + test) | 5-15 min (restart) | Delete |
-| Multiple conflicts | 1-2 hours (resolve + verify) | 15-30 min (restart) | Delete |
-| Corrupted artifacts | Unknown (investigation) | 15-30 min (restart) | Delete |
-| Stale base (>50 commits) | 2+ hours (rebase + test) | 30-60 min (restart) | Delete |
+| Simple typo | Trivial | Quick | Repair |
+| Single file conflict | Moderate | Quick | Delete |
+| Multiple conflicts | High | Moderate | Delete |
+| Corrupted artifacts | Unknown | Moderate | Delete |
+| Stale base | Very high | Moderate | Delete |
 
 **Rule of thumb:** If salvage takes more than 3x restart time, delete.
 
@@ -217,12 +217,12 @@ git commit -m "Fix corrupted receipt JSON"
 
 ## Quick Reference
 
-| Problem | Command | Time Cost |
-|---------|---------|-----------|
-| Crashed flow | `/flow-<N>-<name>` (resume) | 5-15 min |
-| Merge conflict | `git checkout main && git branch -D run/<id>` + restart | 15-30 min |
-| Corrupted artifacts | `rm -rf .runs/<id>` + restart | 15-30 min |
-| Stale base | Delete branch + restart | 30-60 min |
-| Multiple failures | Clean slate + restart | 30-60 min |
+| Problem | Command |
+|---------|---------|
+| Crashed flow | `/flow-<N>-<name>` (resume) |
+| Merge conflict | `git checkout main && git branch -D run/<id>` + restart |
+| Corrupted artifacts | `rm -rf .runs/<id>` + restart |
+| Stale base | Delete branch + restart |
+| Multiple failures | Clean slate + restart |
 
 **Default action:** Delete and restart.

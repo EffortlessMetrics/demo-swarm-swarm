@@ -71,14 +71,14 @@ The pack uses this branch convention:
 
 | Branch | Purpose |
 |--------|---------|
-| `main` | Swarm mainline (what Flow 5 merges into) |
+| `main` | Swarm mainline (what Flow 6 merges into) |
 | `run/<run-id>` | Per-run working branch |
 
 ### How it works
 
 1. `run-prep` / `signal-run-prep` ensures `run/<run-id>` exists
 2. Flows checkpoint artifacts to this branch
-3. Flow 5 merges `run/<run-id>` → `main` (if Gate verdict is MERGE)
+3. Flow 6 merges `run/<run-id>` → `main` (if Gate verdict is MERGE)
 
 ---
 
@@ -91,9 +91,10 @@ Every flow commits to preserve the audit trail:
 | 1 (Signal) | `.runs/<run-id>/signal/` + index + meta |
 | 2 (Plan) | `.runs/<run-id>/plan/` + index + meta |
 | 3 (Build) | `.runs/<run-id>/build/` + staged code/tests + index + meta |
-| 4 (Gate) | `.runs/<run-id>/gate/` + index + meta |
-| 5 (Deploy) | `.runs/<run-id>/deploy/` + merge to main + tags |
-| 6 (Wisdom) | `.runs/<run-id>/wisdom/` + index + meta |
+| 4 (Review) | `.runs/<run-id>/review/` + staged code/tests + index + meta |
+| 5 (Gate) | `.runs/<run-id>/gate/` + index + meta |
+| 6 (Deploy) | `.runs/<run-id>/deploy/` + merge to main + tags |
+| 7 (Wisdom) | `.runs/<run-id>/wisdom/` + index + meta |
 
 Flow 3 has two commit types:
 - Checkpoint commit (audit artifacts only)
@@ -117,7 +118,7 @@ Size discipline:
 Key invariant: **the swarm repo is autonomous**.
 
 - Flows run end-to-end in the swarm repo
-- Flow 5 merges into `*-swarm/main` (the swarm's mainline)
+- Flow 6 merges into `*-swarm/main` (the swarm's mainline)
 - The pack does **not** merge into the upstream human repo by default
 
 Upstream export is a separate concern (see [upstream-export.md](upstream-export.md)).

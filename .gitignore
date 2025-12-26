@@ -25,6 +25,10 @@ Thumbs.db
 nul
 **/nul
 
+# Test output logs (build artifacts)
+test_output*.log
+**/test_output*.log
+
 # GitHub ops scratch files (operational exhaust, not audit trail)
 # These are written after checkpoint and overwritten each flow
 .runs/**/gh_comment_id.txt

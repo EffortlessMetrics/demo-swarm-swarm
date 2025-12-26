@@ -6,6 +6,19 @@ description: "Run Flow 4 (Review): harvest PR feedback, apply fixes, flip Draft 
 
 You are orchestrating Flow 4 of the SDLC swarm.
 
+## The Mental Model: "The Finishing School"
+
+Flow 3 built the house. Flow 4 does the punch list.
+
+**Mentality:** Feedback is noisy, time is linear, code rots instantly. Grab what's available, fix it, report it, move on. Don't wait for perfect signal.
+
+**Three Phases:**
+1. **Harvest & Cluster** — Pull all feedback, cluster into actionable Work Items
+2. **Execute** — Route Work Items to agents, fix what's current, skip what's stale
+3. **Close the Loop** — Update the PR, show humans what was addressed
+
+**Key principle:** Agents are smart. They read the file, see if the code is there, fix it or report "context changed." No separate stale-check ceremony.
+
 ## Working Directory + Paths (Invariant)
 
 - All commands run from **repo root**.
@@ -14,7 +27,7 @@ You are orchestrating Flow 4 of the SDLC swarm.
 - Flow artifacts live under: `.runs/<run-id>/review/`
 - Do **not** rely on `cd` into any folder to make relative paths work.
 
-**Important**: Step 0 (run-prep) establishes the run directory and ensures `.runs/<run-id>/review/` exists.
+**Important**: Setup (run-prep) establishes the run directory and ensures `.runs/<run-id>/review/` exists.
 
 #### Artifact visibility rule
 
@@ -25,12 +38,11 @@ You are orchestrating Flow 4 of the SDLC swarm.
 ## Your Goals
 
 - Ensure a PR exists (create Draft if missing)
-- Harvest all available PR feedback (CodeRabbit, GitHub Actions, Dependabot, human reviews)
-- Convert feedback into an actionable worklist
-- Apply fixes until completion (unbounded loop)
-- Reseal build receipt after changes
+- Harvest all available PR feedback (grab partials from CI if already failing)
+- Convert feedback into clustered Work Items (by file/theme, not individual comments)
+- Apply fixes until completion (agents handle staleness naturally)
 - Flip Draft PR to Ready when review is complete
-- Update issue and PR with progress
+- Post a closure checklist so humans see feedback was addressed
 
 ## Before You Begin (Required)
 
@@ -148,41 +160,151 @@ Read from `.runs/<run-id>/run_meta.json`:
 
 All artifacts live under `.runs/<run-id>/review/`.
 
-## Orchestration outline
+## Orchestration Outline
 
-### Step 0: Establish Run Infrastructure
+Flow 4 follows the 3-phase model with setup and seal bookends:
 
-**Call `run-prep` first.**
+```
+[Setup] → [Phase 1: Harvest & Cluster] → [Phase 2: Execute] → [Phase 3: Close] → [Seal]
+```
 
-This agent will:
-- Derive or confirm the `<run-id>` from context, branch name, or user input
-- Create `.runs/<run-id>/review/` directory structure
-- Update `.runs/<run-id>/run_meta.json` with "review" in `flows_started`
-- Update `.runs/index.json`
+---
 
-After this step, you will have a confirmed run directory. All subsequent agents write to `.runs/<run-id>/review/`.
+### Setup: Infrastructure
 
-### Step 1: Initialize Flow Plan
+**run-prep** → **repo-operator** (branch) → **pr-creator** (if needed)
 
-Create or update `.runs/<run-id>/review/flow_plan.md`:
+1. **Call `run-prep`** to establish `.runs/<run-id>/review/`
+2. **Call `repo-operator`** with task: "ensure run branch `run/<run-id>`"
+3. **Call `pr-creator`** to ensure a Draft PR exists
+
+After setup, you have a run directory and a PR to harvest feedback from.
+
+---
+
+### Phase 1: Harvest & Cluster
+
+**pr-feedback-harvester** → **review-worklist-writer**
+
+**Call `pr-feedback-harvester`:**
+- Grabs all available feedback (bots, humans, CI)
+- Grabs partial CI failures if jobs are still running but already failing
+- Doesn't wait for pending checks
+
+**Call `review-worklist-writer`:**
+- Clusters feedback into Work Items (by file/theme, not individual comments)
+- 50 comments → 5-10 Work Items
+- Items get stable `RW-NNN` IDs
+- Markdown nits grouped into single `RW-MD-SWEEP`
+
+**Route on worklist:** If no items, proceed to Close. Otherwise, enter Execute loop.
+
+---
+
+### Phase 2: Execute (Unbounded Loop)
+
+**The core of Flow 4: iteratively resolve Work Items.**
+
+**This is an explicit agent call chain, not a narrative algorithm.**
+
+**The Worklist Microloop:**
+
+```
+while pending > 0 and not exhausted:
+    1. review-worklist-writer (mode: create or refresh)
+       → returns: pending_blocking, stuck_signal, next_batch (IDs + route_to + batch_hint)
+
+    2. Route next_batch to fix-lane agent:
+       - TESTS → test-author
+       - CORRECTNESS → code-implementer
+       - STYLE → fixer
+       - DOCS → doc-writer
+
+       Agent receives: batch IDs + file paths + evidence
+       Agent reports naturally: what it fixed, what was stale, what it couldn't fix
+
+    3. review-worklist-writer (mode: apply)
+       → Receives: worker's natural language response + batch_ids
+       → Parses response to determine per-item status
+       → Updates review_worklist.json
+       → Appends to review_actions.md
+       → Returns updated pending count + next_batch
+
+    4. Periodically: Checkpoint Routine (explicit agent chain)
+       a. repo-operator (stage intended changes)
+       b. secrets-sanitizer (gate staged surface; capture Gate Result)
+       c. repo-operator (commit/push; gated on Gate Result)
+       d. pr-feedback-harvester (re-harvest CI/bot status)
+       e. review-worklist-writer (mode: refresh; may add new items)
+       → If stuck_signal: true → exit loop
+```
+
+**Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` in apply mode to parse the worker's response and update state.
+
+**Workers report naturally:** Fix-lane agents (code-implementer, fixer, test-author, doc-writer) do their job and describe what happened. They don't need special output formats. The `review-worklist-writer` parses their natural language response to update item statuses.
+
+**Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.
+
+**Exit conditions:**
+- `pending == 0` → complete
+- Context exhausted → PARTIAL (checkpoint, rerun to continue)
+- `stuck_signal: true` → PARTIAL (human may need to intervene)
+
+**Style Sweep:** If `RW-MD-SWEEP` is pending, call `fixer` once to apply all markdown fixes in one pass.
+
+---
+
+### Phase 3: Close the Loop
+
+**pr-commenter** → **pr-status-manager**
+
+**Call `pr-commenter`:**
+- Posts resolved items checklist (closure signal)
+- Shows what was fixed, skipped, or pending
+- Idempotent (updates existing comment)
+
+**Call `pr-status-manager`:**
+- If review complete: flip Draft → Ready for Review
+- If incomplete: keep Draft, document remaining items
+
+---
+
+### Seal: Receipt + Publish
+
+**review-cleanup** → **secrets-sanitizer** → **repo-operator** → **gh-issue-manager** → **gh-reporter**
+
+1. **`review-cleanup`** — Write `review_receipt.json`, update index
+2. **`secrets-sanitizer`** — Publish gate (returns Gate Result)
+3. **`repo-operator`** — Commit/push (gated on secrets + hygiene)
+4. **`gh-issue-manager`** + **`gh-reporter`** — Update issue (if allowed)
+
+**Gate Result semantics:**
+- `safe_to_commit: false` → skip commit
+- `safe_to_publish: false` → commit locally, skip push
+- `proceed_to_github_ops: false` → skip GitHub updates
+
+---
+
+### flow_plan.md Template
 
 ```markdown
 # Flow 4: Review for <run-id>
 
-## Planned Steps
+## Agents (explicit checklist)
 
-- [ ] run-prep (establish run directory)
-- [ ] repo-operator (ensure run branch `run/<run-id>`)
-- [ ] pr-creator (create Draft PR if none exists)
-- [ ] pr-feedback-harvester (pull all feedback)
-- [ ] review-worklist-writer (create actionable worklist)
-- [ ] worklist loop (unbounded: resolve items)
-- [ ] PR status management (inline: flip Draft to Ready if complete)
-- [ ] review-cleanup (write receipt, update index)
-- [ ] secrets-sanitizer (publish gate)
+- [ ] run-prep
+- [ ] repo-operator (ensure run branch)
+- [ ] pr-creator (create Draft PR if needed)
+- [ ] pr-feedback-harvester
+- [ ] review-worklist-writer
+- [ ] worklist loop (unbounded)
+- [ ] pr-commenter
+- [ ] pr-status-manager
+- [ ] review-cleanup
+- [ ] secrets-sanitizer
 - [ ] repo-operator (commit/push)
-- [ ] gh-issue-manager (update issue board)
-- [ ] gh-reporter (post summary)
+- [ ] gh-issue-manager
+- [ ] gh-reporter
 
 ## Worklist Progress
 
@@ -190,377 +312,15 @@ Create or update `.runs/<run-id>/review/flow_plan.md`:
 |------|----------|----------|--------|
 | (populated by worklist loop) |
 
-## Progress Notes
-
-<Update as each step completes>
-```
-
-### Step 2: Ensure Run Branch
-
-**Call `repo-operator`** with task: "ensure run branch `run/<run-id>`"
-
-The agent handles branch creation/switching safely.
-
-### Step 3: Create Draft PR (if needed)
-
-**Call `pr-creator`** to ensure a Draft PR exists.
-
-- If PR already exists: capture `pr_number` from result
-- If no PR: create Draft PR targeting `main`
-- Write `pr_number` to `run_meta.json`
-
-**Route on PR Creator Result block:**
-- If `operation_status: CREATED` or `EXISTING`: proceed
-- If `operation_status: SKIPPED`: note the reason, proceed anyway (can retry later)
-- If `operation_status: FAILED`: note in concerns, proceed with available feedback
-
-### Step 4: Harvest PR Feedback
-
-**Call `pr-feedback-harvester`** to pull all available feedback sources.
-
-Sources:
-- PR reviews (human + bot like CodeRabbit)
-- PR line comments
-- Issue comments on PR
-- CI check runs (GitHub Actions, etc.)
-- Check suites summary
-
-**Route on PR Feedback Harvester Result block:**
-- If `status: VERIFIED`: proceed with full feedback
-- If `status: UNVERIFIED` (no PR, auth issue): proceed with whatever was captured
-- If `status: CANNOT_PROCEED`: note mechanical failure, proceed without external feedback
-
-### Step 5: Create Review Worklist
-
-**Call `review-worklist-writer`** to convert feedback into actionable items.
-
-- Each item gets a stable `RW-NNN` ID (except the grouped Markdown sweep uses `RW-MD-SWEEP`)
-- Items are categorized: CORRECTNESS, TESTS, STYLE, DOCS
-- Items are prioritized: CRITICAL, MAJOR, MINOR, INFO
-- Items are routed to appropriate agents
-- MINOR markdownlint/formatting nits are grouped into `RW-MD-SWEEP` (STYLE, MINOR, route_to: fixer) with files/rules/examples/scope and optional children for traceability
-
-**Route on Review Worklist Writer Result block:**
-- Proceed with the worklist regardless of status
-- If no items: VERIFIED (nothing to do)
-- If items exist: prepare for worklist loop
-
-### Step 6: Worklist Loop (Unbounded)
-
-**This is the core of Flow 4: iteratively resolve worklist items until completion.**
-
-**Termination conditions** (any of):
-1. All worklist items resolved (`pending == 0`) → status: VERIFIED
-2. Context window exhaustion (approaching limit) → status: PARTIAL (checkpoint & exit)
-3. Unrecoverable blocker (mechanical failure, design issue requiring Plan bounce) → status: UNVERIFIED
-4. **Stuck detection triggered** → status: PARTIAL (checkpoint & exit with documented stuck state)
-
-### Stuck Detection (prevents infinite loops)
-
-The loop is **stuck** when no meaningful progress is made across iterations. Track these signals:
-
-**Progress indicators (reset stuck counter):**
-- Item moved from PENDING to RESOLVED
-- Item moved from PENDING to SKIPPED (with valid reason)
-- New items added to worklist (from re-harvest)
-- Git diff shows meaningful code changes
-
-**Stuck signals (increment stuck counter):**
-- Same item attempted twice with same failure mode
-- Fix agent returns UNVERIFIED with identical blockers
-- No worklist state change after a full iteration
-- No git diff after fix attempt
-
-**Stuck counter threshold:** 3 consecutive iterations without progress.
-
-**On stuck detection:**
-1. Mark remaining PENDING items as `DEFERRED` with reason: `"STUCK: No progress after 3 iterations"`
-2. Write detailed stuck analysis to `review_actions.md`:
-   - Which items were attempted
-   - What failures occurred
-   - Why the loop couldn't make progress
-3. Checkpoint with `status: PARTIAL`
-4. Exit with message: "Review loop stuck. {N} items deferred. See review_actions.md for analysis. Human intervention may be required."
-
-**Why this matters:** An unbounded loop without stuck detection can burn tokens indefinitely trying the same failed fix. Stuck detection ensures the swarm admits defeat gracefully rather than spinning.
-
-**Context checkpoint behavior (PARTIAL):**
-When context is approaching limits, checkpoint immediately:
-- Write current worklist state to `review_worklist.json`
-- Update `review_receipt.json` with `status: PARTIAL`, `items_resolved`, `items_remaining`
-- Commit and push (if gates allow)
-- Exit with message: "Resolved {N} items. {M} remain. Context full. Rerun `/flow-4-review` to continue."
-
-This is a **feature, not a failure**. It prevents hallucination from context stuffing and enables incremental progress. The next `/flow-4-review` invocation will resume from the checkpoint.
-
-**Loop structure:**
-
-```
-stuck_counter = 0
-last_worklist_hash = null
-last_diff_hash = null
-
-while not terminated:
-    1. Read current worklist status from review_worklist.json
-    2. If pending == 0: break (complete)
-    3. If context exhausted: break (can resume later)
-    3b. If stuck_counter >= 3: break (stuck detection triggered)
-
-    4. Run Style Sweep station (always):
-       - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
-       - Update `RW-MD-SWEEP` status and write style_sweep.md (NOOP if no pending MINOR style items)
-       - If sweep touched `.runs/<run-id>/build/`, run build-cleanup to reseal build_receipt.json
-
-    5. Pick next pending item (priority order: CRITICAL > MAJOR > MINOR)
-
-    6. Route to appropriate agent based on item.route_to:
-       - test-author: for TESTS items
-       - code-implementer: for CORRECTNESS/ARCHITECTURE items
-       - doc-writer: for DOCS items
-       - fixer: for STYLE items
-
-    7. Run test-executor to verify the fix (fast confirm)
-
-    8. Update item status in review_worklist.json:
-       - RESOLVED: if fix verified
-       - PENDING: if fix failed (will retry)
-       - SKIPPED: if out of scope (document reason)
-
-    9. Append to review_actions.md what was done
-
-    10. If meaningful code changes made:
-       - Run build-cleanup to reseal build_receipt.json
-       - Run test-executor (full suite) periodically
-
-    11. Re-harvest feedback (pr-feedback-harvester) periodically:
-        - New CodeRabbit comments may appear after pushes
-        - CI results update after commits
-        - Human reviewers may add comments
-
-    12. If new feedback items found:
-        - Run review-worklist-writer to update worklist
-        - New items get appended (IDs continue from last)
-
-    13. **Track progress for stuck detection:**
-        current_worklist_hash = hash(review_worklist.json pending items)
-        current_diff_hash = hash(git diff HEAD~1)
-
-        if (item resolved OR item skipped OR new items added OR diff changed):
-            stuck_counter = 0  # Progress made
-            last_worklist_hash = current_worklist_hash
-            last_diff_hash = current_diff_hash
-        else:
-            stuck_counter += 1  # No progress
-            if stuck_counter >= 3:
-                log "Stuck detection triggered after 3 iterations without progress"
-```
-
-**Style Sweep station (standard, always run):**
-- Check for a pending `RW-MD-SWEEP` or pending MINOR markdownlint items in the worklist.
-- If none: write `.runs/<run-id>/review/style_sweep.md` with `status: NOOP` and "no pending MINOR style items".
-- If present: call `fixer` with "apply all remaining MINOR Markdown formatting fixes in one pass" and `scope: mechanical formatting only`, then run `test-executor` once (pack-check), then re-harvest feedback once.
-- After re-harvest, call `review-worklist-writer` to refresh `review_worklist.json`, then append to `review_actions.md`. If noise remains, leave `RW-MD-SWEEP` PENDING (non-blocking).
-- Do not route markdownlint child items individually; resolve them via the `RW-MD-SWEEP` parent.
-- Guardrail: if the sweep touches anything under `.runs/<run-id>/build/`, call `build-cleanup` to reseal `build_receipt.json`.
-
-### Intelligent Summarization (Not File Pointers)
-
-When summarizing feedback for routing or reporting, use JUDGMENT:
-
-**Bad (file pointer dump):**
-```
-- RW-001: See pr_feedback.md line 45
-- RW-002: CodeRabbit comment at src/auth.ts:42
-- RW-003: CI failure in tests.yml
-```
-
-**Good (intelligent summary):**
-```
-- RW-001: CodeRabbit found a potential null pointer at auth.ts:42. The code assumes `user` is always defined but the function can be called before login completes. Route to code-implementer to add a guard.
-- RW-002: CI tests failing because hashPassword returns undefined for empty strings. This is a valid edge case not covered by current tests. Route to test-author first to add the test, then code-implementer to fix.
-- RW-003: Human reviewer asked about error handling strategy. This is a design question, not a code issue. Document in open_questions.md and proceed.
-```
-
-**The agent reading the feedback is SMART.** It should understand:
-- What the feedback actually means (not just where it is)
-- Whether the feedback is valid or a false positive
-- What agent is best suited to address it
-- Whether the issue is still relevant (stale check)
-
-**Per-item fix process:**
-
-For each pending worklist item RW-NNN (excluding `RW-MD-SWEEP`, which is handled by the Style Sweep station):
-
-1. Read the item details (category, severity, location, summary)
-
-2. **Verify Relevance (Stale Check):**
-   Before routing to a fix agent, verify the referenced code still exists at HEAD:
-   - Does the file at the specified path still exist?
-   - Does the code/line referenced in the comment still exist and match the context?
-   - Has the code changed significantly since the feedback was posted?
-
-   **Stale classification:**
-   - **STALE**: Code has been refactored, deleted, or substantially changed. The feedback no longer applies.
-   - **OUTDATED**: Code exists but has been partially modified. May still apply but needs verification.
-   - **CURRENT**: Code matches the feedback context. Proceed with fix.
-
-   **Action on stale/outdated:**
-   - Mark item as `SKIPPED` with reason: `STALE_COMMENT | OUTDATED_CONTEXT | ALREADY_FIXED`
-   - Log the skip in `review_actions.md` with evidence (what changed, when)
-   - Move to the next item. Do not hallucinate fixes for missing code.
-
-   **Stale detection examples:**
-   - CodeRabbit said "add null check at line 45" but line 45 is now a comment → STALE
-   - CI failed on "auth.test.ts" but that file was renamed to "auth.spec.ts" and tests pass → STALE (ALREADY_FIXED)
-   - Human asked about error handling, but the code was refactored to use a different approach → OUTDATED (re-evaluate if concern still applies)
-
-   **DO NOT:** Attempt to fix code that no longer exists. This wastes cycles and can introduce regressions.
-
-   **Why this matters:** Bots and humans post feedback on specific code. If that code changed (by a later AC iteration, human fix, or refactor), the feedback may no longer apply. Acting on stale feedback wastes cycles and risks regression.
-
-3. Call the routed agent with context:
-   - Item ID and summary
-   - File path and line number
-   - Evidence from feedback
-4. If agent succeeds: mark RESOLVED
-5. If agent fails: keep PENDING (may need different approach)
-6. Log action in `review_actions.md`
-
-**Reseal after changes:**
-
-When code/test changes are made (or the Style Sweep touches `.runs/<run-id>/build/`):
-1. Stage changes (repo-operator)
-2. Run build-cleanup to update build_receipt.json
-3. Periodically run full test suite (test-executor)
-
-**Re-harvest cadence (gated) - MANDATORY after each push:**
-
-The swarm does **not wait** for CI or bots. It pushes, then immediately re-harvests whatever feedback is available. This is the "Push → Re-harvest" pattern:
-
-**Trigger conditions (any of):**
-- After resolving 3-5 worklist items
-- After any CRITICAL item is resolved
-- After significant code changes (touching core modules)
-- When stuck counter increases (to get fresh signal)
-
-**The Reseal → Gate → Push → Re-harvest subroutine:**
-
-1. **Reseal receipts:**
-   - Call `build-cleanup` to reseal build_receipt.json (if code/tests changed)
-   - Call `review-cleanup` to update worklist state
-
-2. **Secrets gate:**
-   - Call `secrets-sanitizer` on staged changes (single pass)
-
-3. **Commit and push (gated):**
-   - If `safe_to_commit: true` and `safe_to_publish: true`: call `repo-operator` to commit/push
-   - If gates fail: record the blocker and proceed without push (bots won't have new code)
-
-4. **Re-harvest (immediately after push):**
-   - Call `pr-feedback-harvester` - captures whatever CI/bot feedback exists *right now*
-   - Call `review-worklist-writer` to update worklist with new items
-   - **Do not wait** for bots to finish - take what's available and proceed
-   - If bots haven't posted yet: that's fine, next iteration will catch it
-
-**Why immediate re-harvest?** The swarm can't "sleep" for CI. By re-harvesting immediately after push, we capture:
-- Any CI that finished between iterations
-- CodeRabbit comments posted on new code
-- Human reviews that arrived while we were fixing
-
-If nothing new appears, the worklist stays the same and we continue. The pattern is: **push early, harvest often, never wait.**
-
-### Step 7: PR Status Management
-
-After worklist loop completes, manage PR status via dedicated agents.
-
-**Call `pr-commenter`** to post/update the PR summary comment:
-- Summarizes worklist progress
-- Lists recent changes from `review_actions.md`
-- Idempotent (updates existing comment with marker)
-
-**Call `pr-status-manager`** to manage PR state:
-- If review is complete: flip Draft PR to Ready for Review
-- If review is incomplete: keep as Draft, document what's remaining
-
-**Route on PR Status Manager Result block:**
-- If `operation_status: TRANSITIONED`: PR is now ready for human review
-- If `operation_status: UNCHANGED`: state kept as-is (review incomplete or already ready)
-- If `operation_status: SKIPPED`: note reason and continue
-
-### Step 8: Finalize and Write Receipt
-
-**Call `review-cleanup`** to:
-- Verify all required artifacts exist
-- Compute counts mechanically
-- Write `review_receipt.json`
-- Update `.runs/index.json` with status, last_flow, updated_at
-
-### Step 9: Sanitize Secrets (Publish Gate)
-
-**Call `secrets-sanitizer`** to scan staged changes and audit artifacts.
-
-**secrets-sanitizer** returns a **Gate Result** block:
-
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
-
-**Gating logic (from Gate Result):**
-- The sanitizer is a boolean gate — it says yes/no, not where to route
-- If `safe_to_commit: false`: skip commit (blocked by `blocker_kind`)
-- If `safe_to_commit: true` but `safe_to_publish: false`: commit locally, skip push
-- `modified_files: true`: artifact files were changed (for audit purposes)
-- Push requires: `safe_to_publish: true` AND Repo Operator Result `proceed_to_github_ops: true`
-- `blocker_kind` explains why blocked: `MECHANICAL` (IO failure), `SECRET_IN_CODE` (needs fix), `SECRET_IN_ARTIFACT` (can't redact)
-
-### Step 10: Commit and Push
-
-**Call `repo-operator`** to commit and push.
-
-Same gating logic as Build:
-- Requires `safe_to_commit: true` and `safe_to_publish: true`
-- Returns Repo Operator Result block
-
-### Step 11-12: GitHub Reporting
-
-**Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
-
-See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
-- Skip if `github_ops_allowed: false` or `gh` unauthenticated
-- Content mode is derived from secrets gate + push surface (not workspace hygiene)
-- Issue-first: flow summaries go to the issue, never the PR
-
-### Step 13: Finalize Flow
-
-Update `flow_plan.md`:
-- Mark all steps as complete
-- Add final summary section:
-
-```markdown
 ## Summary
 
-- **Final Status**: VERIFIED | UNVERIFIED
+- **Final Status**: VERIFIED | PARTIAL | UNVERIFIED
 - **Worklist Items**: <resolved>/<total> resolved
 - **PR State**: draft | ready
-- **Next Flow**: `/flow-5-gate` (after human review)
-
-## Human Review Checklist
-
-Before proceeding to Flow 5, humans should review:
-- [ ] PR is ready for review (not draft)
-- [ ] All critical worklist items are resolved
-- [ ] CI checks are passing
-- [ ] CodeRabbit concerns addressed
+- **Next Flow**: `/flow-5-gate`
 ```
+
+**Important:** Do NOT use phase checkboxes ("Setup", "Harvest & Cluster", etc.). Use the explicit agent checklist above. Phases are explanatory prose, not TodoWrite items.
 
 ## Status States
 
@@ -583,101 +343,76 @@ MINOR and INFO items may remain pending without blocking.
 
 ## Orchestrator Kickoff
 
+### Station Order (5 groups)
 
-### Station order + templates
+```
+SETUP          run-prep → repo-operator (branch) → pr-creator
+HARVEST        pr-feedback-harvester → review-worklist-writer
+EXECUTE        worklist loop (unbounded)
+CLOSE          pr-commenter → pr-status-manager
+SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-issue-manager → gh-reporter
+```
 
-#### Station order
+### Execute Loop (Detailed)
 
-1. `run-prep`
+**Entry:** `review_worklist.json` exists with pending items
 
-2. `repo-operator` (ensure run branch)
-
-3. `pr-creator` (create Draft PR if none exists)
-
-4. `pr-feedback-harvester`
-
-5. `review-worklist-writer`
-
-6. **Worklist loop** (unbounded; apply Worklist Loop Template below)
-
-7. `pr-commenter` (post/update PR summary comment)
-
-8. `pr-status-manager` (flip Draft to Ready if review complete)
-
-9. `review-cleanup`
-
-10. `secrets-sanitizer`
-
-11. `repo-operator` (commit/push)
-
-12. `gh-issue-manager` (if allowed)
-
-13. `gh-reporter` (if allowed)
-
-#### Worklist Loop Template (unbounded resolution)
-
-This is the core review loop. Unlike Build's bounded microloops, this runs until completion.
-
-**Entry:** review_worklist.json exists with items
+**This is an explicit agent call chain. The orchestrator routes on returned fields, not by parsing JSON.**
 
 **Loop:**
 ```
-1) Read worklist status (total, pending, resolved)
-2) If pending == 0: exit loop (complete)
-3) If context exhausted: exit loop (can resume later)
+1) Call review-worklist-writer (mode: refresh)
+   → Returns: pending_blocking, stuck_signal, next_batch
 
-4) Run Style Sweep station (always; NOOP if no pending MINOR Markdown items):
-   - If `RW-MD-SWEEP` is pending: call fixer once to apply all remaining MINOR Markdown formatting fixes in one pass, then run test-executor (pack-check) once, then re-harvest feedback once
-   - Update `review_worklist.json`, write `style_sweep.md`, and reseal build receipt if `.runs/<run-id>/build/` is touched
+2) If pending_blocking == 0: exit (complete)
+3) If context exhausted: checkpoint and exit (PARTIAL)
+4) If stuck_signal: true: checkpoint and exit (PARTIAL)
 
-5) Pick next pending item by priority:
-   - CRITICAL first
-   - Then MAJOR
-   - Then MINOR (optional; exclude `RW-MD-SWEEP` children)
-   - Skip INFO
+5) Style Sweep (if next_batch contains `RW-MD-SWEEP`):
+   - Call fixer once for all markdown fixes
+   - fixer reports naturally what it fixed
 
-6) Route to agent:
-   - TESTS items → test-author
-   - CORRECTNESS items → code-implementer
-   - STYLE items → fixer or standards-enforcer
-   - DOCS items → doc-writer
-   - ARCHITECTURE items → code-implementer
+6) Route next_batch to fix-lane agent:
+   - TESTS → test-author
+   - CORRECTNESS → code-implementer
+   - STYLE → fixer
+   - DOCS → doc-writer
 
-7) Run fix agent with item context
+   Agent behavior:
+   - Receives: batch IDs + file paths + evidence
+   - Reports naturally: what it fixed, what was stale, what needs escalation
 
-8) Run test-executor (fast confirm: relevant tests)
+7) Call review-worklist-writer (mode: apply)
+   → Receives: worker's natural language response + batch_ids
+   → Parses response to determine per-item status
+   → Updates review_worklist.json
+   → Appends to review_actions.md (agent handles this, not orchestrator)
+   → Returns: updated pending count, next_batch
 
-9) Update worklist item status:
-   - If fix verified: RESOLVED
-   - If fix failed: keep PENDING
-   - If out of scope: SKIPPED with reason
-
-10) Append to review_actions.md
-
-11) Every N items or after major changes:
-    - Apply Reseal → Gate → Push → Re-harvest subroutine (see Re-harvest cadence)
-    - This ensures proper gating before push and captures new bot feedback
+8) Periodically: Checkpoint Routine (explicit agent chain)
+   a) repo-operator (stage intended changes)
+   b) secrets-sanitizer (gate staged surface)
+   c) repo-operator (commit/push; gated on Gate Result)
+   d) pr-feedback-harvester (re-harvest)
+   e) review-worklist-writer (mode: refresh; may add new items)
+   → If stuck_signal: true → exit loop
 ```
 
+**Checkpoint Routine:** Sanitizer gates the **staged surface**. Stage first, then scan. Every push must be gated.
+
 **Exit conditions:**
-- `pending == 0` (all resolved)
-- Context window approaching limit
-- Unrecoverable blocker
-
-#### Microloop Template (writer ↔ critic)
-
-Reused from Build when needed within the worklist loop.
-
-1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass: call `<writer>` once using the critic's worklist
-4) Re-critique: call `<critic>` again
-
-Continue beyond default two passes only when critic returns `recommended_action: RERUN` and `can_further_iteration_help: yes`.
+- `pending_blocking == 0` (all resolved) → VERIFIED
+- Context exhausted → PARTIAL
+- `stuck_signal: true` → PARTIAL
+- Unrecoverable blocker → UNVERIFIED
 
 ### TodoWrite (copy exactly)
+
+**These are the agents you call, in order. Do not group. Do not summarize. Execute each line.**
+
+```
 - [ ] run-prep
-- [ ] repo-operator (ensure `run/<run-id>` branch)
+- [ ] repo-operator (ensure run branch `run/<run-id>`)
 - [ ] pr-creator (create Draft PR if needed)
 - [ ] pr-feedback-harvester
 - [ ] review-worklist-writer
@@ -689,6 +424,9 @@ Continue beyond default two passes only when critic returns `recommended_action:
 - [ ] repo-operator (commit/push; return Repo Operator Result)
 - [ ] gh-issue-manager (skip only if github_ops_allowed: false or gh unauth)
 - [ ] gh-reporter (skip only if github_ops_allowed: false or gh unauth)
+```
+
+**Why explicit?** The orchestrator (you) executes what's in the list. Grouped phases get skipped. Explicit agents get called.
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
 

@@ -222,7 +222,22 @@ coverage_summary:
 
 ## Control-plane return (for orchestrator)
 
-At the end of your response, echo this block (must match the file):
+At the end of your response, include TWO routing blocks:
+
+### 1. Explicit Routing Signal (first)
+
+This is the orchestrator's quick-read surface. Not YAML, just bullets:
+
+```markdown
+## Routing Signal
+- **Next:** RERUN | PROCEED | BOUNCE | FIX_ENV
+- **Why:** <1–3 bullets explaining the decision>
+- **Focus:** <what needs attention if RERUN>
+```
+
+### 2. Machine-Readable Result (second)
+
+This must match what you wrote in the artifact file:
 
 ```markdown
 ## Requirements Critic Result
@@ -238,6 +253,8 @@ severity_summary:
   major: <N>
   minor: <N>
 ```
+
+The orchestrator routes on the Routing Signal; the Result block is for logging/traceability.
 
 ## Philosophy
 

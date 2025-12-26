@@ -269,3 +269,17 @@ concerns: []
 - Codebase patterns (test strategies, architectural guidelines)
 
 If you can't point to evidence, don't write it as a lesson. Generic advice is noise.
+
+## Advice-to-Action Binding
+
+Every learning must flow to an action surface. Free-floating observations are noise.
+
+| Learning Type | Action Surface | Example |
+|--------------|----------------|---------|
+| **Pack/Flow friction** | `PACK_OBS` marker → `feedback-applier` → diff or issue draft | "Clarifier missed this pattern" → new clarifier instruction |
+| **Codebase insight** | `ACTION` marker → follow-up issue or doc update | "Auth module lacks retry logic" → issue draft for auth hardening |
+| **Test gap** | `ACTION` marker → test-author worklist item | "Edge case X not covered" → specific test to add |
+
+**The binding rule:** Every `## Learning:` section must produce at least one `ACTION` or `PACK_OBS` marker. Sections that end with "consider doing X" but no marker are incomplete.
+
+**Exception:** A learning can be purely observational (no action) only if it's explicitly labeled "for future reference" AND explains why no immediate action is warranted.

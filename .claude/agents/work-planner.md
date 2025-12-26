@@ -64,7 +64,36 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
    - SLO/alert expectations
    - "signals of health" needed for rollout gates
 
-5. **Decompose into subtasks**:
+5. **Design Foundation-First Sequencing (state transitions)**
+
+   **This is Architecture Law 6: Foundation-First Sequencing.** Infrastructure subtasks are the root of the dependency tree.
+
+   Scan `.runs/<run-id>/plan/migrations/` and `schema.md` for planned state transitions (DB migrations, config changes, etc.):
+
+   - If state transition files exist, create an **infrastructure milestone subtask** (commonly ST-000, but ID is not sacred).
+   - The infrastructure milestone depends on nothing. Code subtasks that assume the *new* state must depend on this milestone.
+   - Acceptance criteria: state transitions applied successfully, system state matches expected shape.
+   - Read `schema.md` for **State Transition Infrastructure** section (target directory, apply command, phasing).
+   - If no infrastructure is documented, add a concern and include "scaffold infrastructure tooling" in the milestone.
+
+   **Phased patterns (expand/backfill/contract):** If state transitions require multiple phases:
+   - Create separate milestone subtasks per phase (e.g., ST-000a: Expand, ST-000b: Migrate, ST-000c: Contract)
+   - Code subtasks depend on the *relevant* phase, not necessarily all phases
+   - Document the phase dependency in each subtask's `depends_on` field
+
+   **Dependency direction:** Foundations → Walls → Roof. Logic subtasks list the infrastructure they consume in `depends_on`. This is how you prevent the common Build failure mode of trying to use state that doesn't exist yet.
+
+6. **Scope variance check**
+
+   Compare your planned work against `.runs/<run-id>/signal/scope_estimate.md` (if present):
+
+   - If scope_estimate says `S` or `M` but your plan looks like `L` or `XL`, add a **Variance Rationale** section explaining why complexity grew.
+   - Common reasons: discovered hidden dependencies, underestimated integration surface, risk mitigation added subtasks.
+   - If scope is justifiably larger, document the rationale. If unjustifiably larger, reconsider the breakdown.
+
+   This is a smell check, not a gate. Growth is often legitimate; it just needs to be explained.
+
+7. **Decompose into subtasks**:
    - Use IDs: `ST-001`, `ST-002`, …
    - Each subtask must be implementable independently (or clearly marked as "scaffold-only").
    - Each subtask must state:
@@ -77,16 +106,16 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
      - **Risk notes** + "blast radius"
      - **Estimate**: S / M / L / XL
 
-6. **Rollout strategy**:
+8. **Rollout strategy**:
    - Prefer feature flags / staged enablement if applicable.
    - Tie phase gates to **observability_spec** signals (what you watch and what "good" means).
    - Keep it GitHub-native: assume Flow 6 verifies via CI + smoke checks; don't require a bespoke platform.
 
-7. **Rollback strategy**:
+9. **Rollback strategy**:
    - Must be realistic.
    - Call out irreversible steps (schema drops, data migrations) and how you mitigate (expand/contract patterns, additive-only first).
 
-8. **If inputs are missing**:
+10. **If inputs are missing**:
    - Still write a best-effort plan.
    - Record missing paths in `missing_required`.
    - Use explicit assumptions.
@@ -113,6 +142,15 @@ missing_required:
 - **Primary impacts**: <1–5 bullets from impact_map.json>
 - **Key constraints**: <1–5 bullets>
 - **Verification posture**: <what must be true in tests + observability>
+
+## Variance Rationale (if scope grew)
+
+If the planned work is significantly larger than `scope_estimate.md` predicted (e.g., L/XL for an S/M estimate), explain why:
+
+- <reason 1>: <evidence>
+- <reason 2>: <evidence>
+
+If scope aligns with estimate, this section may be omitted.
 
 ## Subtask Index (parseable)
 

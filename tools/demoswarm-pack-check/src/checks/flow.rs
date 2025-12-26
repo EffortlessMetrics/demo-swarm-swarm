@@ -1,10 +1,10 @@
 //! Flow command checks.
 //!
-//! Checks: 5, 11, 12, 13, 22, 25, 26, 27, 37, 43, 44, 45, 46, 47, 48, 49, 50
+//! Checks: 5, 11, 12, 13, 22, 25, 26, 43, 44, 45, 46, 47, 48, 49, 50
 
 use super::contracts::headings;
 use crate::reporter::Reporter;
-use crate::util::{contains_ignore_ascii_case, extract_frontmatter_name, has_exact_line};
+use crate::util::{contains_ignore_ascii_case, extract_frontmatter_name};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
@@ -47,16 +47,6 @@ pub fn checks() -> Vec<CheckSpec> {
             id: 26,
             title: "Checking jq commands use single-line paths...",
             run: check_jq_paths,
-        },
-        CheckSpec {
-            id: 27,
-            title: "Checking Orchestrator Kickoff footers in flow commands...",
-            run: check_kickoff_footer,
-        },
-        CheckSpec {
-            id: 37,
-            title: "Checking all control-plane agents (auto-detected)...",
-            run: check_control_plane_agents,
         },
         CheckSpec {
             id: 43,
@@ -369,89 +359,6 @@ fn check_jq_paths(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
         }
         rep.warn("Some jq commands may have multiline path issues");
     }
-
-    Ok(())
-}
-
-/// Check 27: Orchestrator Kickoff footer in flow commands.
-fn check_kickoff_footer(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for cmd in &cx.inv.flow_cmd_files {
-        let flow_name = cmd
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("<unknown>");
-        let content = cx.ctx.read_utf8(cmd)?;
-
-        let mut missing = Vec::new();
-
-        if !content.contains(headings::ORCHESTRATOR_KICKOFF_H2) {
-            missing.push("## Orchestrator Kickoff");
-        }
-        if !content.contains(headings::TODOWRITE_H3) {
-            missing.push("### TodoWrite (copy exactly)");
-        }
-
-        if content.contains("safe_to_publish") && content.contains("proceed_to_github_ops") {
-            if !cx.re.both_gates_same_line.is_match(&content) {
-                missing.push("gating line with both gates");
-            }
-        } else {
-            missing.push("gating line with both gates");
-        }
-
-        if missing.is_empty() {
-            rep.pass(format!("{flow_name} has Orchestrator Kickoff footer"));
-        } else {
-            rep.fail(format!("{flow_name} missing: {}", missing.join(" ")));
-        }
-    }
-
-    Ok(())
-}
-
-/// Check 37: Auto-detect control-plane agents.
-fn check_control_plane_agents(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    let mut detected_count = 0usize;
-
-    for path in &cx.inv.agent_md_files {
-        let content = cx.ctx.read_utf8(path)?;
-        if !has_exact_line(&content, headings::MACHINE_SUMMARY_H2) {
-            continue;
-        }
-
-        detected_count += 1;
-        let agent = path
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("<unknown>");
-
-        let mut issues = Vec::new();
-        if !cx.re.canon_status.is_match(&content) {
-            issues.push("missing canonical status line");
-        }
-        if !cx.re.canon_action.is_match(&content) {
-            issues.push("missing canonical recommended_action line");
-        }
-        if !cx.re.route_to_agent.is_match(&content) {
-            issues.push("missing route_to_agent");
-        }
-        if !cx.re.route_to_flow.is_match(&content) {
-            issues.push("missing route_to_flow");
-        }
-
-        if issues.is_empty() {
-            rep.pass(format!("{agent} has complete control-plane contract"));
-        } else {
-            rep.fail(format!(
-                "{agent} control-plane issues: {}",
-                issues.join(" ")
-            ));
-        }
-    }
-
-    rep.indent_lines([format!(
-        "(Detected {detected_count} agents with '## Machine Summary')"
-    )]);
 
     Ok(())
 }
@@ -1228,14 +1135,22 @@ mod tests {
     #[test]
     fn test_is_agent_char_lowercase_letters() {
         for c in b'a'..=b'z' {
-            assert!(is_agent_char(c), "lowercase '{}' should be agent char", c as char);
+            assert!(
+                is_agent_char(c),
+                "lowercase '{}' should be agent char",
+                c as char
+            );
         }
     }
 
     #[test]
     fn test_is_agent_char_digits() {
         for c in b'0'..=b'9' {
-            assert!(is_agent_char(c), "digit '{}' should be agent char", c as char);
+            assert!(
+                is_agent_char(c),
+                "digit '{}' should be agent char",
+                c as char
+            );
         }
     }
 
@@ -1247,7 +1162,11 @@ mod tests {
     #[test]
     fn test_is_agent_char_rejects_uppercase() {
         for c in b'A'..=b'Z' {
-            assert!(!is_agent_char(c), "uppercase '{}' should NOT be agent char", c as char);
+            assert!(
+                !is_agent_char(c),
+                "uppercase '{}' should NOT be agent char",
+                c as char
+            );
         }
     }
 
@@ -1255,7 +1174,11 @@ mod tests {
     fn test_is_agent_char_rejects_special() {
         let special = [b'_', b'.', b'/', b'\\', b' ', b'\t', b'\n', b'@', b'#'];
         for c in special {
-            assert!(!is_agent_char(c), "special '{}' should NOT be agent char", c as char);
+            assert!(
+                !is_agent_char(c),
+                "special '{}' should NOT be agent char",
+                c as char
+            );
         }
     }
 
@@ -1323,7 +1246,8 @@ mod tests {
         declared.insert("test-author".to_string());
         declared.insert("test-critic".to_string());
 
-        let result = parse_agent_sequence_prefix("test-author / test-critic (microloop)", &declared);
+        let result =
+            parse_agent_sequence_prefix("test-author / test-critic (microloop)", &declared);
         assert_eq!(result, vec!["test-author", "test-critic"]);
     }
 
@@ -1433,14 +1357,8 @@ mod tests {
         let re_parens = Regex::new(r"\(([^)]*)\)").unwrap();
         let re_token = Regex::new(r"[a-z][a-z0-9-]+").unwrap();
 
-        let result = extract_agent_candidates(
-            "",
-            &declared,
-            &re_plus,
-            &re_arrow,
-            &re_parens,
-            &re_token,
-        );
+        let result =
+            extract_agent_candidates("", &declared, &re_plus, &re_arrow, &re_parens, &re_token);
 
         assert!(result.is_empty());
     }
@@ -1534,7 +1452,8 @@ output_file: .runs/<run-id>/build/receipt.json
         let result = extract_output_files(&runs_re, content);
 
         // Should only have one entry despite being mentioned twice
-        let receipt_count = result.iter()
+        let receipt_count = result
+            .iter()
             .filter(|p| *p == ".runs/<run-id>/build/receipt.json")
             .count();
         assert_eq!(receipt_count, 1);
@@ -1668,7 +1587,10 @@ recommended_action: PROCEED
 "#;
 
         assert!(producer_machine_summary_has_key(content, "status"));
-        assert!(producer_machine_summary_has_key(content, "recommended_action"));
+        assert!(producer_machine_summary_has_key(
+            content,
+            "recommended_action"
+        ));
     }
 
     #[test]
@@ -1683,8 +1605,14 @@ counts:
 ## Other
 "#;
 
-        assert!(producer_machine_summary_has_key(content, "counts.tests_added"));
-        assert!(producer_machine_summary_has_key(content, "counts.files_changed"));
+        assert!(producer_machine_summary_has_key(
+            content,
+            "counts.tests_added"
+        ));
+        assert!(producer_machine_summary_has_key(
+            content,
+            "counts.files_changed"
+        ));
     }
 
     #[test]
@@ -1779,8 +1707,14 @@ status_code: 200
         let result = expand_flow_placeholders(".runs/<run-id>/<flow>/file.txt");
 
         for path in &result {
-            assert!(path.contains("<run-id>"), "Should preserve <run-id> placeholder");
-            assert!(!path.contains("<flow>"), "Should replace <flow> placeholder");
+            assert!(
+                path.contains("<run-id>"),
+                "Should preserve <run-id> placeholder"
+            );
+            assert!(
+                !path.contains("<flow>"),
+                "Should replace <flow> placeholder"
+            );
         }
     }
 
@@ -1892,8 +1826,14 @@ severity_summary:
 ## Other
 "#;
 
-        assert!(producer_machine_summary_has_key(content, "severity_summary.critical"));
-        assert!(producer_machine_summary_has_key(content, "severity_summary.major"));
+        assert!(producer_machine_summary_has_key(
+            content,
+            "severity_summary.critical"
+        ));
+        assert!(producer_machine_summary_has_key(
+            content,
+            "severity_summary.major"
+        ));
     }
 
     #[test]

@@ -152,9 +152,9 @@ require_one_of() {
   return 1
 }
 
-require_one_of "toy run tutorial" \
-  "docs/tutorials/toy-run.md" \
-  "docs/TOY_RUN.md" || true
+require_one_of "quickstart tutorial" \
+  "docs/tutorials/quickstart.md" \
+  "docs/QUICKSTART.md" || true
 
 require_one_of "releasing guide" \
   "docs/maintainers/release-checklist.md" \

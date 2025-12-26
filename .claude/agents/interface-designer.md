@@ -125,7 +125,44 @@ These prefixes must not be renamed.
    - If DB changes are required, write planned migrations under `.runs/<run-id>/plan/migrations/`.
    - If DB dialect/tooling is unknown, keep SQL conservative and mark assumptions.
 
-6. **Emit machine-countable inventory**
+6. **Discover state transition infrastructure (required when state changes are planned)**
+
+   "State transitions" are any changes to persistent state that code assumes will exist before running. This includes:
+   - **DB migrations** (most common)
+   - **Config format changes** (new required fields, renamed keys)
+   - **New enum values** persisted to storage
+   - **Feature flag defaults** that change behavior
+   - **Search index / cache schema** changes
+
+   When writing state transitions, scan the repo to identify how Flow 3 should apply them:
+
+   - **Target Directory**: Search for existing migrations (`.sql` files, `migrations/` dirs, `prisma/migrations/`, `db/migrate/`, `alembic/versions/`, etc.) or config schemas.
+   - **Apply Command**: Identify the tooling (e.g., `cargo sqlx migrate run`, `npx prisma migrate dev`, `alembic upgrade head`, `rails db:migrate`).
+   - **Dialect/Format**: Infer the SQL dialect or config format from existing files.
+
+   Document these in `schema.md` under a `## State Transition Infrastructure` section:
+
+   ```markdown
+   ## State Transition Infrastructure
+
+   ### Location Split
+   - **Plan Drafts**: `.runs/<run-id>/plan/migrations/` (reviewed in Flow 2)
+   - **Build Target**: `<repo path where Build moves real migrations>`
+
+   ### Apply Details
+   - **Apply Command**: `<command to apply state transitions>`
+   - **Dialect/Format**: `<sql dialect or config format>`
+   - **Naming Convention**: `<e.g., YYYYMMDDHHMMSS_name.sql, 001_name.sql>`
+
+   ### Phasing (if applicable)
+   - **Phase 1 (Expand)**: Add new columns/fields as nullable/optional
+   - **Phase 2 (Migrate)**: Backfill data, deploy tolerant code
+   - **Phase 3 (Contract)**: Remove old columns/fields, enforce new schema
+   ```
+
+   If no existing infrastructure is found, document that explicitly so Flow 3 knows to scaffold it or use raw SQL/config.
+
+7. **Emit machine-countable inventory**
 
    - Populate the inventory header in `api_contracts.yaml`.
    - Populate the `## Inventory (machine countable)` section in `schema.md`.

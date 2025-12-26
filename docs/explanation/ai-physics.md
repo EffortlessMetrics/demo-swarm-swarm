@@ -14,23 +14,13 @@ Every pattern in this document exists to maximize engineering output per context
 
 ---
 
-## 1. The "Sealed Station" Pattern
+## 1. Sealed Stations
 
 **Rule:** Agents do not talk to each other via chat history. They read from disk and write to disk.
 
-### The Problem: Context Entropy
+Each agent is a **sealed station**: read fresh → do work → write state → die. The next agent starts with zero context and reads from disk. This resets context entropy to zero at every station.
 
-If Agent A passes context to Agent B via conversation history (the "Telephone Game"), details degrade. Agent C (10 turns later) will hallucinate constraints that were dropped 5 turns ago.
-
-### The Solution
-
-We force every agent to be a **Sealed Station**:
-1. **Read Fresh:** Start with zero context. Read `requirements.md` or `plan_receipt.json` fresh from disk.
-2. **Do Work:** Perform the task.
-3. **Write State:** Commit the result to the Audit Plane (files).
-4. **Die:** The context is discarded. The next agent starts fresh.
-
-**Benefit:** We reset context entropy to zero at every station.
+See [Stateless Execution](stateless-execution.md) for the full pattern and why it matters.
 
 ---
 
@@ -166,26 +156,18 @@ A `null` in a receipt is a signal to the human (missing data). A guessed `0` is 
 
 ---
 
-## 6. The "Two-Plane" Data Model
+## 6. Two-Plane Data Model
 
-**Rule:** Separate the routing logic from the human-readable artifact.
+**Rule:** Separate routing logic from human-readable artifacts.
 
-| Plane | Artifacts | Purpose | Lifecycle |
-|-------|-----------|---------|-----------|
-| **Control Plane** | `Gate Result`, `Repo Operator Result`, `Machine Summary` | **Routing.** Determines "What happens next?" | Ephemeral (read once, then discarded) |
-| **Audit Plane** | `*_receipt.json`, `index.json`, `*.md` artifacts | **Record.** Determines "What happened?" | Durable (committed to git) |
+| Plane | Purpose |
+|-------|---------|
+| **Control Plane** | Routing ("What happens next?") — small blocks returned by agents |
+| **Audit Plane** | Record ("What happened?") — durable files committed to git |
 
-### Crucial Nuance
+Orchestrators route on control blocks (fast, deterministic). Files exist for humans and future flows.
 
-- Orchestrators route based on the **Control Plane**
-- Future flows read the **Audit Plane**
-- **Sync Requirement:** `*-cleanup` agents ensure these two planes match before the flow ends
-
-### Why Not Just Parse Files?
-
-1. **Parsing fragility:** Prose varies. "Status: Verified" vs "The status is verified" vs "All checks passed."
-2. **Rereading cost:** Files might be large. Control blocks are returned immediately.
-3. **Drift risk:** If routing parses files, file format becomes a contract. Changes break automation.
+See [Why Two Planes](why-two-planes.md) for the full explanation.
 
 ---
 

@@ -9,8 +9,6 @@ use regex::{Regex, RegexBuilder};
 pub mod headings {
     pub const MACHINE_SUMMARY_H2: &str = "## Machine Summary";
     pub const REPO_OPERATOR_RESULT_H2: &str = "## Repo Operator Result";
-    pub const ORCHESTRATOR_KICKOFF_H2: &str = "## Orchestrator Kickoff";
-    pub const TODOWRITE_H3: &str = "### TodoWrite (copy exactly)";
     pub const SMOKE_VERIFIER_RESULT_H2: &str = "## Smoke Verifier Result";
     pub const SAFE_OUTPUT_CONTRACT: &str = "Safe Output Contract";
     pub const ITERATION_CONTROL_H2: &str = "## Iteration Control";
@@ -30,7 +28,6 @@ pub struct Contracts {
     pub gh_agents: &'static [&'static str],
     pub banned_patterns: &'static [&'static str],
     pub sealing_markers: &'static [&'static str],
-    pub gate_result_fields: &'static [&'static str],
     pub repo_operator_result_fields: &'static [&'static str],
     pub claude_md_sections: &'static [&'static str],
     pub flow_specific_patterns: &'static [&'static str],
@@ -61,7 +58,6 @@ impl Default for Contracts {
             gh_agents: GH_AGENTS,
             banned_patterns: BANNED_PATTERNS,
             sealing_markers: SEALING_MARKERS,
-            gate_result_fields: GATE_RESULT_FIELDS,
             repo_operator_result_fields: REPO_OPERATOR_RESULT_FIELDS,
             claude_md_sections: CLAUDE_MD_SECTIONS,
             flow_specific_patterns: FLOW_SPECIFIC_PATTERNS,
@@ -89,12 +85,6 @@ pub struct Regexes {
 
     // Status validation
     pub blocked_status: Regex,
-
-    // Gate/checkpoint
-    pub checkpoint_mode_local: Regex,
-    pub proceed_false: Regex,
-    pub gh_agent: Regex,
-    pub both_gates_same_line: Regex,
 
     // Taxonomy
     pub old_fr_id: Regex,
@@ -188,14 +178,6 @@ impl Regexes {
             // Status validation
             blocked_status: Regex::new(r"status:.*BLOCKED[^_]|status:.*BLOCKED$")?,
 
-            // Gate/checkpoint
-            checkpoint_mode_local: Regex::new(r"checkpoint_mode.*local_only")?,
-            proceed_false: Regex::new(r"proceed_to_github_ops.*false")?,
-            gh_agent: Regex::new(r"(?i)(gh-issue-manager|gh-reporter)")?,
-            both_gates_same_line: Regex::new(
-                r"(safe_to_publish.*proceed_to_github_ops)|(proceed_to_github_ops.*safe_to_publish)",
-            )?,
-
             // Taxonomy
             old_fr_id: Regex::new(r"(^|[^A-Za-z0-9_])FR-[0-9]{1,3}([^A-Za-z0-9_]|$)")?,
             old_bdd_tag: Regex::new(r"@FR-")?,
@@ -283,12 +265,6 @@ impl Regexes {
     }
 }
 
-/// Sentinel markers for contract blocks.
-pub mod sentinels {
-    pub const GATE_RESULT_START: &str = "PACK-CONTRACT: GATE_RESULT_V1 START";
-    pub const GATE_RESULT_END: &str = "PACK-CONTRACT: GATE_RESULT_V1 END";
-}
-
 /// Required agents (must exist in `.claude/agents/`).
 pub const REQUIRED_AGENTS: &[&str] = &[
     // Cleanup agents (all 6 flows)
@@ -332,9 +308,9 @@ pub const REQUIRED_AGENTS: &[&str] = &[
     "test-critic",
     "code-implementer",
     "code-critic",
-    "mutator",
+    "mutation-auditor",
     "fixer",
-    "lint-executor",
+    "standards-enforcer",
     "test-executor",
     "doc-writer",
     "doc-critic",
@@ -442,17 +418,6 @@ pub const SEALING_MARKERS: &[&str] = &[
     "repo-operator",
     "gh-issue-manager",
     "gh-reporter",
-];
-
-/// Required Gate Result fields.
-pub const GATE_RESULT_FIELDS: &[&str] = &[
-    "safe_to_commit",
-    "safe_to_publish",
-    "modified_files",
-    "needs_upstream_fix",
-    "route_to_agent",
-    "route_to_flow",
-    "recommended_action",
 ];
 
 /// Required Repo Operator Result fields.
