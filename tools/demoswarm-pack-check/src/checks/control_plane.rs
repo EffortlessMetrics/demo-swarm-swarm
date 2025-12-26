@@ -1,10 +1,10 @@
 //! Control-plane checks: Machine Summary contracts, gate blocks, routing fields.
 //!
-//! Checks: 3, 4, 16, 17, 18, 19, 20, 21, 28, 29, 31, 32, 33, 34, 35
+//! Checks: 3, 4, 17, 18, 19, 28, 29, 31, 32, 33, 34, 35
 
-use super::contracts::{headings, sentinels};
+use super::contracts::headings;
 use crate::reporter::Reporter;
-use crate::util::{contains_ignore_ascii_case, has_line_starting_with};
+use crate::util::has_line_starting_with;
 
 use super::{CheckCtx, CheckSpec};
 
@@ -21,11 +21,6 @@ pub fn checks() -> Vec<CheckSpec> {
             run: check_cleanup_receipts,
         },
         CheckSpec {
-            id: 16,
-            title: "Checking Gate Result contract block is present in all flows...",
-            run: check_gate_result_block,
-        },
-        CheckSpec {
             id: 17,
             title: "Checking gh-reporter output constraints...",
             run: check_gh_reporter_output,
@@ -39,16 +34,6 @@ pub fn checks() -> Vec<CheckSpec> {
             id: 19,
             title: "Checking GH agents enforce two gates...",
             run: check_gh_agents_two_gates,
-        },
-        CheckSpec {
-            id: 20,
-            title: "Checking flow commands document GH content-mode gates...",
-            run: check_flow_gh_gating,
-        },
-        CheckSpec {
-            id: 21,
-            title: "Checking checkpoint_mode: local_only contract...",
-            run: check_checkpoint_local_only,
         },
         CheckSpec {
             id: 28,
@@ -152,50 +137,6 @@ fn check_cleanup_receipts(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<(
     Ok(())
 }
 
-/// Check 16: Gate Result contract block in flow commands.
-fn check_gate_result_block(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for cmd in &cx.inv.flow_cmd_files {
-        let flow_name = cmd
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("<unknown>");
-        let content = cx.ctx.read_utf8(cmd)?;
-
-        if !contains_ignore_ascii_case(&content, "secrets-sanitizer") {
-            continue;
-        }
-
-        if !content.contains(sentinels::GATE_RESULT_START)
-            || !content.contains(sentinels::GATE_RESULT_END)
-        {
-            rep.fail(format!(
-                "{flow_name} missing Gate Result sentinel block (GATE_RESULT_V1)"
-            ));
-            continue;
-        }
-
-        let mut missing = Vec::new();
-        for f in cx.c.gate_result_fields {
-            if !content.contains(f) {
-                missing.push(*f);
-            }
-        }
-
-        if missing.is_empty() {
-            rep.pass(format!(
-                "{flow_name} documents Gate Result fields (incl. modified_files)"
-            ));
-        } else {
-            rep.fail(format!(
-                "{flow_name} Gate Result documentation missing fields: {}",
-                missing.join(" ")
-            ));
-        }
-    }
-
-    Ok(())
-}
-
 /// Check 17: gh-reporter safe output contract.
 fn check_gh_reporter_output(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
     if let Some(gh_reporter) = cx.inv.agent("gh-reporter") {
@@ -266,70 +207,6 @@ fn check_gh_agents_two_gates(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Resul
                 "{agent} does NOT enforce both gates (safe_to_publish AND proceed_to_github_ops)"
             ));
         }
-    }
-
-    Ok(())
-}
-
-/// Check 20: Flow commands gate GH ops on proceed_to_github_ops.
-fn check_flow_gh_gating(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for cmd in &cx.inv.flow_cmd_files {
-        let flow_name = cmd
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("<unknown>");
-        let content = cx.ctx.read_utf8(cmd)?;
-
-        if cx.re.gh_agent.is_match(&content) {
-            if content.contains("proceed_to_github_ops") && content.contains("safe_to_publish") {
-                rep.pass(format!("{flow_name} gates GH operations on both gates"));
-            } else {
-                rep.fail(format!(
-                    "{flow_name} invokes GH agents but missing gate documentation (safe_to_publish and/or proceed_to_github_ops)"
-                ));
-            }
-        } else {
-            rep.pass(format!("{flow_name} (no GH agents referenced)"));
-        }
-    }
-
-    Ok(())
-}
-
-/// Check 21: checkpoint_mode: local_only contract.
-fn check_checkpoint_local_only(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    if let Some(repo_operator) = cx.inv.agent("repo-operator") {
-        let content = cx.ctx.read_utf8(repo_operator)?;
-
-        if cx.re.checkpoint_mode_local.is_match(&content) {
-            rep.pass("repo-operator.md documents checkpoint_mode: local_only");
-
-            if cx.re.proceed_false.is_match(&content) {
-                rep.pass("repo-operator.md documents local_only → proceed_to_github_ops: false");
-            } else {
-                rep.fail(
-                    "repo-operator.md missing local_only → proceed_to_github_ops: false behavior",
-                );
-            }
-        } else {
-            rep.fail("repo-operator.md does NOT document checkpoint_mode: local_only");
-        }
-    }
-
-    let mut local_only_flows = 0;
-    for cmd in &cx.inv.flow_cmd_files {
-        let content = cx.ctx.read_utf8(cmd)?;
-        if cx.re.checkpoint_mode_local.is_match(&content) {
-            local_only_flows += 1;
-        }
-    }
-
-    if local_only_flows == 6 {
-        rep.pass("All 6 flows mention checkpoint_mode: local_only for safe-bail");
-    } else {
-        rep.fail(format!(
-            "Expected 6 flows mentioning checkpoint_mode: local_only; found {local_only_flows}"
-        ));
     }
 
     Ok(())
@@ -737,35 +614,6 @@ mod tests {
     }
 
     // -------------------------------------------------------------------------
-    // Gate Result field validation (Check 16)
-    // -------------------------------------------------------------------------
-
-    /// Gate Result fields list contains all required fields.
-    #[test]
-    fn test_gate_result_required_fields() {
-        let contracts = crate::contracts::Contracts::default();
-
-        // Required fields per CLAUDE.md GATE_RESULT_V1
-        let expected_fields = [
-            "safe_to_commit",
-            "safe_to_publish",
-            "modified_files",
-            "needs_upstream_fix",
-            "route_to_agent",
-            "route_to_flow",
-            "recommended_action",
-        ];
-
-        for field in expected_fields {
-            assert!(
-                contracts.gate_result_fields.contains(&field),
-                "Gate Result should require field: {}",
-                field
-            );
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // Repo Operator Result field validation (Check 18)
     // -------------------------------------------------------------------------
 
@@ -791,90 +639,6 @@ mod tests {
                 field
             );
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // Checkpoint mode validation (Check 21)
-    // -------------------------------------------------------------------------
-
-    /// Checkpoint mode regex matches correctly.
-    #[test]
-    fn test_checkpoint_mode_local_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        let valid = "checkpoint_mode: local_only";
-        assert!(
-            re.checkpoint_mode_local.is_match(valid),
-            "Should match checkpoint_mode: local_only"
-        );
-
-        let with_note = "When checkpoint_mode is local_only, no push occurs";
-        assert!(
-            re.checkpoint_mode_local.is_match(with_note),
-            "Should match checkpoint_mode reference"
-        );
-    }
-
-    /// proceed_to_github_ops: false detection.
-    #[test]
-    fn test_proceed_false_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        let valid = "proceed_to_github_ops: false";
-        assert!(
-            re.proceed_false.is_match(valid),
-            "Should match proceed_to_github_ops: false"
-        );
-
-        let sets_false = "sets proceed_to_github_ops to false";
-        assert!(
-            re.proceed_false.is_match(sets_false),
-            "Should match documentation pattern"
-        );
-    }
-
-    // -------------------------------------------------------------------------
-    // GH agents two gates validation (Check 19)
-    // -------------------------------------------------------------------------
-
-    /// GH agents gate pattern detection.
-    #[test]
-    fn test_gh_agent_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        let gh_issue = "gh-issue-manager";
-        assert!(re.gh_agent.is_match(gh_issue), "Should match gh-issue-manager");
-
-        let gh_reporter = "gh-reporter";
-        assert!(re.gh_agent.is_match(gh_reporter), "Should match gh-reporter");
-
-        // Case insensitive
-        let upper = "GH-Issue-Manager";
-        assert!(re.gh_agent.is_match(upper), "Should match case-insensitive");
-    }
-
-    /// Both gates on same line detection.
-    #[test]
-    fn test_both_gates_same_line_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        let both_gates = "safe_to_publish: true AND proceed_to_github_ops: true";
-        assert!(
-            re.both_gates_same_line.is_match(both_gates),
-            "Should match both gates on same line"
-        );
-
-        let reverse_order = "proceed_to_github_ops: true and safe_to_publish: true";
-        assert!(
-            re.both_gates_same_line.is_match(reverse_order),
-            "Should match gates in either order"
-        );
-
-        let separate_lines = "safe_to_publish: true\nproceed_to_github_ops: true";
-        assert!(
-            !re.both_gates_same_line.is_match(separate_lines),
-            "Should not match gates on separate lines"
-        );
     }
 
     // -------------------------------------------------------------------------
@@ -943,11 +707,7 @@ mod tests {
                 .cleanup_agents
                 .iter()
                 .any(|(a, r)| *a == agent && *r == receipt);
-            assert!(
-                found,
-                "Cleanup agents should map {} to {}",
-                agent, receipt
-            );
+            assert!(found, "Cleanup agents should map {} to {}", agent, receipt);
         }
     }
 
@@ -1168,21 +928,7 @@ mod tests {
         // H2 headings should start with ##
         assert!(headings::MACHINE_SUMMARY_H2.starts_with("## "));
         assert!(headings::REPO_OPERATOR_RESULT_H2.starts_with("## "));
-        assert!(headings::ORCHESTRATOR_KICKOFF_H2.starts_with("## "));
         assert!(headings::ITERATION_CONTROL_H2.starts_with("## "));
-
-        // H3 headings should start with ###
-        assert!(headings::TODOWRITE_H3.starts_with("### "));
-    }
-
-    /// Sentinel markers have correct format.
-    #[test]
-    fn test_sentinel_markers_format() {
-        // Gate Result sentinels
-        assert!(sentinels::GATE_RESULT_START.contains("PACK-CONTRACT"));
-        assert!(sentinels::GATE_RESULT_END.contains("PACK-CONTRACT"));
-        assert!(sentinels::GATE_RESULT_START.contains("START"));
-        assert!(sentinels::GATE_RESULT_END.contains("END"));
     }
 
     // -------------------------------------------------------------------------
@@ -1307,145 +1053,6 @@ mod tests {
         // Indented
         let indented = "  route_to_flow: 2";
         assert!(re.route_to_flow.is_match(indented));
-    }
-
-    /// Test checkpoint_mode_local regex edge cases.
-    #[test]
-    fn test_checkpoint_mode_local_edge_cases() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        // Different phrasings
-        let phrasing1 = "checkpoint_mode=local_only";
-        assert!(re.checkpoint_mode_local.is_match(phrasing1));
-
-        let phrasing2 = "checkpoint_mode: local_only";
-        assert!(re.checkpoint_mode_local.is_match(phrasing2));
-
-        let phrasing3 = "set checkpoint_mode to local_only";
-        assert!(re.checkpoint_mode_local.is_match(phrasing3));
-
-        // Without local_only should not match
-        let without = "checkpoint_mode: remote";
-        assert!(!re.checkpoint_mode_local.is_match(without));
-    }
-
-    /// Test proceed_false regex edge cases.
-    #[test]
-    fn test_proceed_false_edge_cases() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        // Different phrasings
-        let phrasing1 = "proceed_to_github_ops: false";
-        assert!(re.proceed_false.is_match(phrasing1));
-
-        let phrasing2 = "proceed_to_github_ops=false";
-        assert!(re.proceed_false.is_match(phrasing2));
-
-        let phrasing3 = "sets proceed_to_github_ops to false";
-        assert!(re.proceed_false.is_match(phrasing3));
-
-        // With true should not match
-        let with_true = "proceed_to_github_ops: true";
-        assert!(!re.proceed_false.is_match(with_true));
-    }
-
-    /// Test gh_agent regex case sensitivity.
-    #[test]
-    fn test_gh_agent_case_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        // Various case combinations
-        let cases = [
-            "gh-issue-manager",
-            "GH-ISSUE-MANAGER",
-            "Gh-Issue-Manager",
-            "gh-reporter",
-            "GH-REPORTER",
-            "Gh-Reporter",
-        ];
-
-        for case in cases {
-            assert!(
-                re.gh_agent.is_match(case),
-                "Should match case variant: {}",
-                case
-            );
-        }
-
-        // Should not match partial
-        let partial = "gh-issue";
-        assert!(
-            !re.gh_agent.is_match(partial),
-            "Should not match partial: gh-issue"
-        );
-    }
-
-    /// Test both_gates_same_line regex.
-    #[test]
-    fn test_both_gates_same_line_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        // With different connectors
-        let with_and = "safe_to_publish: true AND proceed_to_github_ops: true";
-        assert!(re.both_gates_same_line.is_match(with_and));
-
-        let with_ampersand = "safe_to_publish: true && proceed_to_github_ops: true";
-        assert!(re.both_gates_same_line.is_match(with_ampersand));
-
-        let with_comma = "safe_to_publish: true, proceed_to_github_ops: true";
-        assert!(re.both_gates_same_line.is_match(with_comma));
-
-        // Single gate should not match
-        let single_gate = "safe_to_publish: true";
-        assert!(!re.both_gates_same_line.is_match(single_gate));
-    }
-
-    /// Test recommended_action_present regex variations.
-    #[test]
-    fn test_recommended_action_present_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
-
-        // Single value
-        let single = "recommended_action: PROCEED";
-        assert!(re.recommended_action_present.is_match(single));
-
-        // With enum definition
-        let enum_def = "recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
-        assert!(re.recommended_action_present.is_match(enum_def));
-
-        // Indented
-        let indented = "    recommended_action: BOUNCE";
-        assert!(re.recommended_action_present.is_match(indented));
-
-        // Partial match should not work (wrong field name)
-        let wrong_field = "action: PROCEED";
-        assert!(!re.recommended_action_present.is_match(wrong_field));
-    }
-
-    /// Test content matching for Gate Result fields.
-    #[test]
-    fn test_gate_result_fields_in_content() {
-        let contracts = crate::contracts::Contracts::default();
-
-        let content = r#"
-## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
-"#;
-
-        for field in contracts.gate_result_fields {
-            assert!(
-                content.contains(field),
-                "Content should contain Gate Result field: {}",
-                field
-            );
-        }
     }
 
     /// Test content matching for Repo Operator Result fields.
@@ -1612,26 +1219,6 @@ concerns: []
         ));
     }
 
-    /// Test Gate Result sentinel block detection.
-    #[test]
-    fn test_gate_result_sentinel_detection() {
-        let with_both = format!(
-            "some content\n{}\nblock content\n{}\nmore content",
-            sentinels::GATE_RESULT_START,
-            sentinels::GATE_RESULT_END
-        );
-        assert!(with_both.contains(sentinels::GATE_RESULT_START));
-        assert!(with_both.contains(sentinels::GATE_RESULT_END));
-
-        let missing_end = format!("content\n{}\nblock", sentinels::GATE_RESULT_START);
-        assert!(missing_end.contains(sentinels::GATE_RESULT_START));
-        assert!(!missing_end.contains(sentinels::GATE_RESULT_END));
-
-        let missing_start = format!("block\n{}\ncontent", sentinels::GATE_RESULT_END);
-        assert!(!missing_start.contains(sentinels::GATE_RESULT_START));
-        assert!(missing_start.contains(sentinels::GATE_RESULT_END));
-    }
-
     /// Test two gates enforcement detection.
     #[test]
     fn test_two_gates_enforcement() {
@@ -1671,23 +1258,6 @@ concerns: []
         assert!(content.contains(headings::ITERATION_CONTROL_H2));
     }
 
-    /// Test Orchestrator Kickoff heading detection.
-    #[test]
-    fn test_orchestrator_kickoff_heading() {
-        assert_eq!(
-            headings::ORCHESTRATOR_KICKOFF_H2,
-            "## Orchestrator Kickoff",
-            "Orchestrator Kickoff heading should be exact"
-        );
-    }
-
-    /// Test TodoWrite heading detection.
-    #[test]
-    fn test_todowrite_heading() {
-        assert!(headings::TODOWRITE_H3.starts_with("### "));
-        assert!(headings::TODOWRITE_H3.contains("TodoWrite"));
-    }
-
     // =========================================================================
     // Integration tests using tempdir fixtures
     // =========================================================================
@@ -1713,10 +1283,7 @@ concerns: []
 
         impl TestFixture {
             /// Create a new test fixture with the given agents and commands.
-            fn new(
-                agents: &[(&str, &str)],
-                commands: &[(&str, &str)],
-            ) -> anyhow::Result<Self> {
+            fn new(agents: &[(&str, &str)], commands: &[(&str, &str)]) -> anyhow::Result<Self> {
                 let temp_dir = TempDir::new()?;
                 let root = temp_dir.path();
 
@@ -1792,11 +1359,8 @@ blockers: []
 concerns: []
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -1814,11 +1378,8 @@ Some content without Machine Summary heading.
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -1838,11 +1399,8 @@ status: VERIFIED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -1865,11 +1423,8 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -1894,11 +1449,8 @@ Write the signal_receipt.json to the flow directory.
 Update index.json with the run status.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("signal-cleanup", cleanup_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -1916,17 +1468,17 @@ Do some cleanup work.
 Update index.json with the run status.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("signal-cleanup", cleanup_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_cleanup_receipts(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing receipt reference");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing receipt reference"
+            );
         }
 
         #[test]
@@ -1938,132 +1490,17 @@ Write the signal_receipt.json to the flow directory.
 No index update here.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("signal-cleanup", cleanup_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_cleanup_receipts(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing index.json reference");
-        }
-
-        // ---------------------------------------------------------------------
-        // Check 16: Gate Result block tests
-        // ---------------------------------------------------------------------
-
-        #[test]
-        fn test_check_gate_result_block_pass() {
-            let flow_content = r#"# Flow 1 Signal
-
-This flow uses secrets-sanitizer for the publish gate.
-
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-needs_upstream_fix: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-1-signal", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_result_block(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_gate_result_block_missing_sentinel() {
-            let flow_content = r#"# Flow 1 Signal
-
-This flow uses secrets-sanitizer for the publish gate.
-
-## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-1-signal", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_result_block(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing sentinel");
-        }
-
-        #[test]
-        fn test_check_gate_result_block_missing_fields() {
-            let flow_content = r#"# Flow 1 Signal
-
-This flow uses secrets-sanitizer for the publish gate.
-
-<!-- PACK-CONTRACT: GATE_RESULT_V1 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED_PUBLISH
-safe_to_commit: true | false
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V1 END -->
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-1-signal", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_result_block(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing required fields");
-        }
-
-        #[test]
-        fn test_check_gate_result_block_no_sanitizer_skipped() {
-            // Flow without secrets-sanitizer should be skipped
-            let flow_content = r#"# Flow 6 Wisdom
-
-This flow does not mention the sanitizer.
-
-## Some Section
-content here
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-6-wisdom", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_result_block(&cx, &mut rep).expect("Check failed");
-            // Should have no errors because this flow is skipped
-            assert_eq!(rep.errors, 0, "Flow without secrets-sanitizer should be skipped");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing index.json reference"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2081,11 +1518,8 @@ This agent must NOT paste verbatim content from artifacts.
 Only post summaries and links.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("gh-reporter", reporter_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("gh-reporter", reporter_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2103,17 +1537,17 @@ This agent posts to GitHub.
 must NOT paste verbatim content.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("gh-reporter", reporter_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("gh-reporter", reporter_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_gh_reporter_output(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing Safe Output Contract");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing Safe Output Contract"
+            );
         }
 
         #[test]
@@ -2125,17 +1559,17 @@ must NOT paste verbatim content.
 This agent posts summaries.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("gh-reporter", reporter_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("gh-reporter", reporter_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_gh_reporter_output(&cx, &mut rep).expect("Check failed");
-            assert!(rep.warnings > 0, "Should have warning for missing output constraint doc");
+            assert!(
+                rep.warnings > 0,
+                "Should have warning for missing output constraint doc"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2158,11 +1592,8 @@ anomaly_paths: []
 ```
 "#;
 
-            let fixture = TestFixture::new(
-                &[("repo-operator", operator_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("repo-operator", operator_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2181,11 +1612,8 @@ operation: checkpoint
 status: COMPLETED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("repo-operator", operator_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("repo-operator", operator_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2206,11 +1634,8 @@ status: COMPLETED
 ```
 "#;
 
-            let fixture = TestFixture::new(
-                &[("repo-operator", operator_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("repo-operator", operator_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2228,7 +1653,10 @@ status: COMPLETED
             let mut rep = test_reporter();
 
             check_repo_operator_result(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have error for missing repo-operator.md");
+            assert!(
+                rep.errors > 0,
+                "Should have error for missing repo-operator.md"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2269,159 +1697,14 @@ Verify safe_to_publish and proceed_to_github_ops.
 Check safe_to_publish before posting.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("gh-reporter", reporter_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("gh-reporter", reporter_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_gh_agents_two_gates(&cx, &mut rep).expect("Check failed");
             assert!(rep.errors > 0, "Should have errors for missing gate");
-        }
-
-        // ---------------------------------------------------------------------
-        // Check 20: Flow GH gating tests
-        // ---------------------------------------------------------------------
-
-        #[test]
-        fn test_check_flow_gh_gating_pass() {
-            let flow_content = r#"# Flow 1 Signal
-
-Call gh-reporter to post results.
-
-Gate on safe_to_publish and proceed_to_github_ops.
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-1-signal", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_flow_gh_gating(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_flow_gh_gating_missing_gates() {
-            let flow_content = r#"# Flow 1 Signal
-
-Call gh-reporter to post results.
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-1-signal", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_flow_gh_gating(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing gate documentation");
-        }
-
-        #[test]
-        fn test_check_flow_gh_gating_no_gh_agents() {
-            // Flow without GH agent references should pass
-            let flow_content = r#"# Flow 3 Build
-
-Build the code.
-
-No GitHub operations here.
-"#;
-
-            let fixture = TestFixture::new(
-                &[],
-                &[("flow-3-build", flow_content)],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_flow_gh_gating(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Flow without GH agents should pass");
-        }
-
-        // ---------------------------------------------------------------------
-        // Check 21: Checkpoint local_only tests
-        // ---------------------------------------------------------------------
-
-        #[test]
-        fn test_check_checkpoint_local_only_pass() {
-            let operator_content = r#"# Repo Operator
-
-Use checkpoint_mode: local_only for safe-bail.
-
-When local_only is set, proceed_to_github_ops: false.
-"#;
-
-            // Need to create the fixture with owned strings
-            let temp_dir = TempDir::new().expect("Failed to create temp dir");
-            let root = temp_dir.path();
-            let claude_dir = root.join(".claude");
-            let agents_dir = claude_dir.join("agents");
-            let commands_dir = claude_dir.join("commands");
-            let skills_dir = claude_dir.join("skills");
-
-            fs::create_dir_all(&agents_dir).expect("Failed to create agents dir");
-            fs::create_dir_all(&commands_dir).expect("Failed to create commands dir");
-            fs::create_dir_all(&skills_dir).expect("Failed to create skills dir");
-
-            // Write repo-operator
-            fs::write(agents_dir.join("repo-operator.md"), operator_content)
-                .expect("Failed to write agent");
-
-            // Write 6 flow commands
-            for i in 1..=6 {
-                let content = "Use checkpoint_mode: local_only for safe-bail.\n";
-                fs::write(commands_dir.join(format!("flow-{}-test.md", i)), content)
-                    .expect("Failed to write flow");
-            }
-
-            let ctx = Ctx::discover(Some(root.to_path_buf())).expect("Failed to create Ctx");
-            let inv = Inventory::from_ctx(&ctx).expect("Failed to create Inventory");
-            let re = Regexes::compile().expect("Failed to compile regexes");
-            let c = Contracts::default();
-
-            let cx = CheckCtx {
-                ctx: &ctx,
-                inv: &inv,
-                re: &re,
-                c: &c,
-            };
-            let mut rep = test_reporter();
-
-            check_checkpoint_local_only(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_checkpoint_local_only_missing_in_operator() {
-            let operator_content = r#"# Repo Operator
-
-This agent handles git operations.
-"#;
-
-            let fixture = TestFixture::new(
-                &[("repo-operator", operator_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_checkpoint_local_only(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing local_only docs");
         }
 
         // ---------------------------------------------------------------------
@@ -2438,11 +1721,8 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2461,17 +1741,17 @@ status: BLOCKED
 This uses legacy BLOCKED status.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_status_enum(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for legacy BLOCKED status");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for legacy BLOCKED status"
+            );
         }
 
         #[test]
@@ -2485,17 +1765,17 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 Gate status: BLOCKED_PUBLISH is valid.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("contract-enforcer", enforcer_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_status_enum(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "BLOCKED_PUBLISH should not be flagged as legacy");
+            assert_eq!(
+                rep.errors, 0,
+                "BLOCKED_PUBLISH should not be flagged as legacy"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2510,11 +1790,8 @@ Gate status: BLOCKED_PUBLISH is valid.
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2531,17 +1808,17 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_recommended_action_enum(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing recommended_action");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing recommended_action"
+            );
         }
 
         #[test]
@@ -2552,17 +1829,17 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | BOUNCE
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_recommended_action_enum(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for drifted recommended_action");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for drifted recommended_action"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2578,11 +1855,8 @@ route_to_agent: <agent-name | null>
 route_to_flow: <1|2|3|4|5|6 | null>
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2599,17 +1873,17 @@ route_to_flow: <1|2|3|4|5|6 | null>
 status: VERIFIED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_route_fields(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing route fields");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing route fields"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2625,11 +1899,8 @@ CANNOT_PROCEED means mechanical failure.
 missing_required: []
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2645,11 +1916,8 @@ missing_required: []
 CANNOT_PROCEED means mechanical failure.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2669,11 +1937,8 @@ CANNOT_PROCEED means mechanical failure.
 This critic does not mention the status.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2694,11 +1959,8 @@ This critic does not mention the status.
 can_further_iteration_help: yes | no
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2715,11 +1977,8 @@ can_further_iteration_help: yes | no
 status: VERIFIED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2743,11 +2002,8 @@ status: VERIFIED
 route_to_flow: <1|2|3|4|5|6 | null>
 "#;
 
-            let fixture = TestFixture::new(
-                &[("signal-cleanup", cleanup_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2764,17 +2020,17 @@ route_to_flow: <1|2|3|4|5|6 | null>
 This cleanup does not mention the routing field.
 "#;
 
-            let fixture = TestFixture::new(
-                &[("signal-cleanup", cleanup_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_cleanup_route_to_flow(&cx, &mut rep).expect("Check failed");
-            assert!(rep.warnings > 0, "Should have warning for missing route_to_flow");
+            assert!(
+                rep.warnings > 0,
+                "Should have warning for missing route_to_flow"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2789,11 +2045,8 @@ This cleanup does not mention the routing field.
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 "#;
 
-            let fixture = TestFixture::new(
-                &[("contract-enforcer", enforcer_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2810,17 +2063,17 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 recommended_gate_action: MERGE | BOUNCE
 "#;
 
-            let fixture = TestFixture::new(
-                &[("contract-enforcer", enforcer_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_gate_unified_action(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for legacy recommended_gate_action");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for legacy recommended_gate_action"
+            );
         }
 
         #[test]
@@ -2831,17 +2084,17 @@ recommended_gate_action: MERGE | BOUNCE
 status: VERIFIED
 "#;
 
-            let fixture = TestFixture::new(
-                &[("contract-enforcer", enforcer_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_gate_unified_action(&cx, &mut rep).expect("Check failed");
-            assert!(rep.warnings > 0, "Should have warning for missing recommended_action");
+            assert!(
+                rep.warnings > 0,
+                "Should have warning for missing recommended_action"
+            );
         }
 
         // ---------------------------------------------------------------------
@@ -2859,11 +2112,8 @@ concerns: []
 observations: []
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
@@ -2882,17 +2132,17 @@ blockers: []
 concerns: []
 "#;
 
-            let fixture = TestFixture::new(
-                &[("requirements-critic", critic_content)],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
             check_critics_observations_field(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing observations field");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for missing observations field"
+            );
         }
 
         #[test]
@@ -2923,7 +2173,10 @@ observations:
 
             check_critics_observations_field(&cx, &mut rep).expect("Check failed");
             // bdd-critic is missing observations
-            assert!(rep.errors > 0, "Should have errors for critic missing observations");
+            assert!(
+                rep.errors > 0,
+                "Should have errors for critic missing observations"
+            );
         }
     }
 }

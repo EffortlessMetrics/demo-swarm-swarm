@@ -203,7 +203,10 @@ mod tests {
 
         // Second read should return same Arc (cached)
         let content2 = ctx.read_utf8(&test_file).unwrap();
-        assert!(Arc::ptr_eq(&content1, &content2), "Should return cached Arc");
+        assert!(
+            Arc::ptr_eq(&content1, &content2),
+            "Should return cached Arc"
+        );
     }
 
     /// Test that read_utf8() fails on nonexistent file.
@@ -278,7 +281,10 @@ mod tests {
 
         let result = list_md_files(&nonexistent).unwrap();
 
-        assert!(result.is_empty(), "Should return empty vec for nonexistent dir");
+        assert!(
+            result.is_empty(),
+            "Should return empty vec for nonexistent dir"
+        );
     }
 
     /// Test that list_md_files() returns only .md files.
@@ -318,11 +324,13 @@ mod tests {
 
         assert_eq!(result.len(), 3);
         assert!(
-            result[0].file_name().unwrap().to_str().unwrap() < result[1].file_name().unwrap().to_str().unwrap(),
+            result[0].file_name().unwrap().to_str().unwrap()
+                < result[1].file_name().unwrap().to_str().unwrap(),
             "Results should be sorted"
         );
         assert!(
-            result[1].file_name().unwrap().to_str().unwrap() < result[2].file_name().unwrap().to_str().unwrap(),
+            result[1].file_name().unwrap().to_str().unwrap()
+                < result[2].file_name().unwrap().to_str().unwrap(),
             "Results should be sorted"
         );
     }

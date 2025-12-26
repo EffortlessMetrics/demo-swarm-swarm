@@ -180,17 +180,13 @@ These agents don't fit cleanly into one category or are cross-cutting:
 
 ## Agent Model Selection
 
-Agents specify a `model` field in their YAML frontmatter:
+Agents specify a `model` field in their YAML frontmatter. See [Model Allocation](model-allocation.md) for the full strategy.
 
-| Value | Meaning | Use Case |
-|-------|---------|----------|
-| `inherit` | Use the orchestrator's model (typically Sonnet or Opus) | Complex multi-file synthesis, broad architectural decisions, long-context reasoning |
-| `haiku` | Use Claude Haiku (faster, cheaper) | Most focused tasks — Haiku is highly capable for focused work |
-
-**Guidance:**
-- Haiku is highly capable and can handle implementation, reviews, and complex reasoning for focused tasks.
-- Use `haiku` as the default for agents with clear scope: critics, implementers on specific subtasks, cleanup agents, validators.
-- Use `inherit` when the agent must synthesize across many files simultaneously or needs the orchestrator's full context.
+| Value | Use Case |
+|-------|----------|
+| `haiku` | Research, cleanup, mechanical work |
+| `sonnet` | Almost-Haiku tasks needing slightly more reasoning |
+| `inherit` | Core creative work (user chooses Sonnet or Opus) |
 
 ---
 

@@ -4,6 +4,41 @@ Conventions for contributing documentation to DemoSwarm. These exist to keep doc
 
 ---
 
+## Voice
+
+**One sentence:** Write like an incident report or ADR—factual, scoped, reproducible.
+
+The pack trades machine iteration for human verification time. Docs should do the same: spend words on precision, not persuasion.
+
+### Principles
+
+- **Constraint-first:** Open with the problem, not the philosophy
+- **Evidence-centered:** Point to specific file paths
+- **Precise claims:** "may block" beats "blocks"
+- **Positive framing:** "Prefer X" beats "You are forbidden from Y"
+
+### Anti-Patterns
+
+| Pattern | Problem |
+|---------|---------|
+| Hype language ("revolutionary", "magical") | Ages poorly, invites skepticism |
+| Persona language ("rogue auditor") | Requires context outsiders don't have |
+| Proof-of-work flexing (commit counts, token spend) | Distracts from utility |
+| Dramatic terminology ("catastrophic failure") | Makes routine operations sound alarming |
+| Emojis | Undercuts operator-grade tone |
+| Dialogue scripts ("Start by stating X") | Over-constrains agent behavior |
+
+### Litmus Tests
+
+Before committing doc changes:
+
+1. **Would this sound weird in an ADR or postmortem?** If yes, cut it.
+2. **Does it point to a file path?** If it describes something, point to where it lives.
+3. **Does it handle failure without drama?** "Rerun the flow" not "catastrophic failure".
+4. **Is there a hardcoded count?** Remove it and point to the source directory.
+
+---
+
 ## Where to Put Things (Diataxis)
 
 | Type | Purpose | Location | Voice |
@@ -134,7 +169,45 @@ Before submitting documentation changes:
 
 ---
 
+## Reusable Blocks
+
+Copy-paste patterns for consistency:
+
+```markdown
+<!-- Economic anchor (README, architecture docs only) -->
+**Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
+
+<!-- What to skim pattern -->
+Then open:
+- `.runs/<run-id>/signal/requirements.md` — the contract
+- `.runs/<run-id>/signal/open_questions.md` — assumptions needing validation
+
+<!-- Rerun guidance -->
+If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a bad build.
+
+<!-- Gate language -->
+Gates engage at publish boundaries. If a gate blocks, keep working locally.
+
+<!-- Receipt philosophy -->
+Receipts are logs, not locks. The git log is the audit trail.
+```
+
+---
+
+## Agent Prompts
+
+Agent prompts (`.claude/agents/*.md`) follow the same voice principles:
+
+- **Factual, not theatrical:** "You critique. You do not fix." not "You are a harsh auditor who..."
+- **Constraint-first:** Open with what the agent does and doesn't do
+- **Evidence-centered:** Point to specific file paths
+- **No scripts:** Describe behavior, don't prescribe dialogue
+
+For agent structure and mechanics, see [Adding an Agent](../how-to/add-an-agent.md).
+
+---
+
 ## See Also
 
 - [CLAUDE.md](../../CLAUDE.md) — Canonical pack reference
-- [Maintainers Style Guide](../maintainers/style-guide.md) — Voice guidance for maintainers
+- [Maintainer Handover](../maintainers/handover.md) — Pack maintenance onboarding

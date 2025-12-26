@@ -80,10 +80,9 @@ docs/
 |
 |-- tutorials/                   # Learning-oriented
 |   |-- README.md                # Tutorials index
-|   |-- quickstart.md            # Quick start tutorial
+|   |-- quickstart.md            # Quick start (includes offline mode)
 |   |-- validation-run.md        # Pack validation guide
-|   |-- walkthrough.md           # Demonstration walkthrough
-|   `-- toy-run.md               # Flow 1 without GitHub
+|   `-- walkthrough.md           # Demonstration walkthrough
 |
 |-- how-to/                      # Task-oriented
 |   |-- README.md                # How-to index
@@ -116,7 +115,7 @@ docs/
     |-- handover.md              # Take over maintenance
     |-- release-checklist.md     # Ship new versions
     |-- validation-log.md        # Record validation runs
-    `-- ADR-runner-bounded-reseal.md # ADR on reseal limits
+    `-- ADR-runner-bounded-reseal.md  # ADR on reseal limits
 ```
 
 ---

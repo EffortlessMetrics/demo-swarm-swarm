@@ -4,4 +4,4 @@
 //! the expected module structure while keeping the actual contract definitions
 //! in the parent contracts.rs file.
 
-pub use crate::contracts::{headings, sentinels};
+pub use crate::contracts::headings;

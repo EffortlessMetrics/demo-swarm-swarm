@@ -58,9 +58,9 @@ color: <purple|red|green|blue|orange|cyan|pink>
 ```
 
 **Model guidance:**
-- `inherit` — Use orchestrator's model (default for most agents)
 - `haiku` — Mechanical work (cleanup, counting, formatting)
-- `sonnet` — Synthesis, critique, complex reasoning
+- `sonnet` — Almost-Haiku tasks needing slightly more reasoning
+- `inherit` — Core creative work (user chooses Sonnet or Opus)
 
 **Color conventions:**
 - `purple` — Spec/authoring (requirements, BDD, contracts)
@@ -201,7 +201,7 @@ Your job is to take the user's vague ideas and transform them into crystal-clear
 | **Paths, not abstractions** | `.runs/<run-id>/signal/requirements.md` |
 | **No scripts** | Describe behavior, don't prescribe dialogue |
 
-See [Maintainers Style Guide](../maintainers/style-guide.md) for full voice guidance.
+See [Documentation Conventions](../reference/documentation-conventions.md) for voice guidance.
 
 ---
 
@@ -427,7 +427,7 @@ After creating the agent file:
 
 - [ ] Agent file at `.claude/agents/<agent-name>.md`
 - [ ] Frontmatter complete (name, description, model, color)
-- [ ] Voice is factual, not theatrical (see [style guide](../maintainers/style-guide.md))
+- [ ] Voice is factual, not theatrical (see [documentation conventions](../reference/documentation-conventions.md))
 - [ ] Lane hygiene documented
 - [ ] Machine Summary block defined
 - [ ] Control-plane return block defined
@@ -526,7 +526,7 @@ recommended_action: PROCEED | RERUN
 
 ## See Also
 
-- [Maintainers Style Guide](../maintainers/style-guide.md) — Voice and anti-patterns
+- [Documentation Conventions](../reference/documentation-conventions.md) — Voice and anti-patterns
 - [create-a-flow.md](create-a-flow.md) — How to create a new flow
 - [architecture.md](../explanation/architecture.md) — Design patterns
 - [stable-markers.md](../reference/stable-markers.md) — Marker conventions

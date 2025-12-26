@@ -67,7 +67,7 @@ scripts/
 ```
 docs/
 |- README.md              # Docs index (router)
-|- tutorials/             # Learning-oriented (quickstart, validation-run, walkthrough, toy-run)
+|- tutorials/             # Learning-oriented (quickstart, walkthrough, validation-run)
 |- how-to/                # Task-oriented (customize-pack, run-topology, upstream-export, work-without-github, adapt-to-non-github, troubleshoot)
 |- reference/             # Information-oriented (glossary, contracts, stable-markers, pack-check, repo-map, demoswarm-cli)
 |- explanation/           # Understanding-oriented (architecture, why-two-planes, why-two-gates, why-reseal, ai-physics)

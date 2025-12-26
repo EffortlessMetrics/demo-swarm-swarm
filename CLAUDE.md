@@ -640,7 +640,7 @@ status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 route_to_flow: <1|2|3|4|5|6|7 | null>
-route_to_station: <string | null>      # e.g. "test-executor", "lint-executor" — hint, not strict enum
+route_to_station: <string | null>      # e.g. "test-executor", "standards-enforcer" — hint, not strict enum
 route_to_agent: <agent-name | null>    # strict enum — only when certain the name is valid
 
 blockers: []
