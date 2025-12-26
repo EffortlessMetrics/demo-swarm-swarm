@@ -296,6 +296,15 @@ After writing the manifest, provide a natural language summary covering:
 **Partial resolution (some gaps):**
 - "Loaded context for ST-002 but 2 of 5 touch patterns unresolved (no files matching **/session_*.ts). Resolved 3 code files, 5 test files. Proceeding with what we found; implementer may need scope expansion later."
 
+**Synthesis (explain patterns, not just counts):**
+
+Don't just enumerate files—explain what you found and why it matters:
+- "Found session-related code split across 3 locations: middleware (validation), handlers (lifecycle), utils (encoding). This matches the ADR intent (separation of concerns)."
+- "Auth code clusters in src/auth/; test patterns use @auth tags. Coverage by layer: middleware > handlers > utilities."
+- "Login flow chains: login.ts → session.ts → verify.ts. Implementer should modify in dependency order."
+
+This helps workers understand the codebase structure, not just file locations.
+
 **Issues found (selection ambiguous):**
 - "No subtask_id provided and subtasks.yaml missing. Fell back to prose parsing of work_plan.md. Selected first subtask but resolution is weak. Recommend work-planner regenerate subtasks.yaml for deterministic selection."
 

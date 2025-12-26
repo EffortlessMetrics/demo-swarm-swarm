@@ -182,6 +182,24 @@ coverage:
 *Add one line per item; omit markers that do not apply.*
 ```
 
+## Explain What Tests Verify, Not Just Where They Are
+
+In your REQ → Test Map and BDD → Test Map, explain **what behavior** each test verifies:
+
+**Sparse (bad):**
+| REQ-001 | `tests/auth.test.ts::test_login` | added | |
+
+**Rich (good):**
+| REQ-001 | `tests/auth.test.ts::test_login` | added | Verifies JWT returned on valid login with 15m expiration per REQ spec. Tests both happy path and invalid credentials. |
+
+For uncovered items, explain **why** they're uncovered:
+- "Spec ambiguous: REQ-004 null handling undefined; await clarification"
+- "Blocked: REQ-005 needs Session model (AC-002) which doesn't exist yet"
+- "Deferred: REQ-006 integration tests deferred to Flow 4 per test_plan.md"
+
+**What Changed synthesis:** Don't just list files—explain your testing strategy:
+- "Added comprehensive login flow tests (happy path, invalid credentials, expired tokens). Used shared user fixture to reduce duplication. Session tests use mock clock for timeout verification."
+
 ## Status + Routing Rules
 
 ### VERIFIED

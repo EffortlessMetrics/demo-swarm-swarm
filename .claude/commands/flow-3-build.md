@@ -102,6 +102,19 @@ Route on the critic's Result block:
 - `PROCEED`: Move forward (even if `status: UNVERIFIED` — blockers are documented)
 - `can_further_iteration_help: no`: Stop iterating, proceed with blockers
 
+**Handling Logic Mismatches (Law 7: Local Resolution):**
+
+When implementation contradicts the ADR or hits an impossible constraint:
+
+1. **Don't bail.** Machine time is cheap.
+2. **Call a specialist:** Route to `design-optioneer` or `impact-analyzer` for a surgical "Design Fix" scoped to the current AC.
+3. **Re-plan locally:** Have the specialist update `ac_matrix.md` or emit a micro-decision.
+4. **Resume:** Hand the fix back to the implementer.
+
+**Only BOUNCE to Flow 2 if the specialists agree the entire architecture is invalid.**
+
+This is the "Stubborn PM" posture: exhaust local options before interrupting the human with a flow bounce.
+
 **AC Termination (Law 4: Green + Orchestrator Agreement):**
 
 An AC is complete when BOTH conditions are met:

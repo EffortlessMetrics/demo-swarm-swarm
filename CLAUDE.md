@@ -422,6 +422,29 @@ This is structural, not a constraint. The `work-planner` designs dependency grap
 
 **Example:** `ST-001: Create sessions table` has no dependencies. `ST-002: Implement login flow` has `depends_on: ["ST-001"]`.
 
+### Law 7: Local Resolution (The "Zero-Wait" Rule)
+
+**Mismatches between "Plan" and "Reality" are normal. Resolve them locally first.**
+
+When an agent hits a logic gap, design contradiction, or implementation snag:
+
+1. **Don't bail to a previous flow.** Machine time is cheap relative to human interrupt.
+2. **Call a reasoning agent within the current flow.** Route to `design-optioneer`, `adr-author`, or `impact-analyzer` to provide a surgical fix.
+3. **Re-plan locally.** Have the specialist update `ac_matrix.md` or `work_plan.md` in-place.
+4. **Resume.** Hand the micro-fix back to the implementer.
+
+**BOUNCE only when:**
+- The specialists agree the entire architecture is invalid
+- The fix requires upstream stakeholder decisions
+- Multiple flows worth of work needs revisiting
+
+**The bar for flow-level bounces is high.** 2-3 surgical agent calls are always cheaper and faster than a full context switch.
+
+**Practical application (Flow 3):**
+- `code-critic` says "This violates the ADR's performance constraint"
+- PM move: Call `design-optioneer` to propose a scoped alternative
+- Result: 2 agent calls later, the build is back on track. No human interrupt required.
+
 ---
 
 ## Run Identity + State

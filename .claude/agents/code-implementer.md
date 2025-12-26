@@ -123,6 +123,42 @@ tests_passed: yes | no | unknown
 **Recommendation:** <specific next step with reasoning>
 ```
 
+## Explain Intent, Not Just Files
+
+In "What Changed", think in terms of **intent and architecture**, not file lists:
+
+**Sparse (bad):**
+```
+* Modified src/auth/login.ts
+* Modified src/auth/middleware.ts
+* Added src/auth/jwt_handler.ts
+```
+
+**Rich (good):**
+```
+* Authentication flow: Refactored login.ts to extract JWT generation into jwt_handler.ts.
+  Middleware now delegates token validation to handler. Separates concerns for testability.
+* JWT handling: Implemented stateless JWT validation per ADR-005. Signature uses HS256 with ENV secret.
+* Test updates: Updated fixture to pre-generate valid tokens. Added negative path tests for expired/malformed tokens.
+```
+
+In "REQ/NFR → Implementation Map", explain **how** it's implemented:
+| REQ-001 | `src/auth/jwt_handler.ts::validateJWT` | Uses HS256 signature verification with ENV secret per ADR-005. Checks `exp` claim for expiration. |
+
+In "Tests", explain expected vs unexpected failures:
+```
+* Test-runner result: 12 passed, 3 failed (as expected; Session model not implemented yet)
+* Expected failures: session_persistence (AC-002), concurrent_requests (NFR-PERF-001)
+* Unexpected failures: None
+```
+
+In "Handoffs", provide context for the next agent:
+```
+* HANDOFF: test-author — Session tests mock the Session model (I created a minimal stub).
+  Once AC-002 implements the real model, update tests to use it. The test structure assumes
+  persistence and cleanup; document this contract for AC-002 implementer.
+```
+
 ## Handoff Examples
 
 After writing the implementation summary, provide a natural language handoff. Examples:

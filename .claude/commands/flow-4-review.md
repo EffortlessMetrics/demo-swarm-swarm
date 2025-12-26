@@ -241,6 +241,16 @@ while pending > 0 and not exhausted:
 
 **Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` in apply mode to parse the worker's response and update state.
 
+**Handling Design Feedback (Law 7: Local Resolution):**
+
+If a reviewer flags a fundamental design issue (not just a code fix):
+1. **Call `design-optioneer`** to analyze the feedback against the current code and ADR
+2. **If the analysis suggests a scoped fix:** Call `code-implementer` to apply it
+3. **Verification:** Run `test-executor` to confirm no regressions
+4. **Report back:** "Resolved design concern [RW-NNN] with surgical refactor; verified with tests."
+
+**Only escalate to Flow 2** if the design feedback invalidates the entire architecture.
+
 **Workers report naturally:** Fix-lane agents (code-implementer, fixer, test-author, doc-writer) do their job and describe what happened. They don't need special output formats. The `review-worklist-writer` parses their natural language response to update item statuses.
 
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.

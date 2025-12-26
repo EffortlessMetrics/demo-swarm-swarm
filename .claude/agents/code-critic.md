@@ -116,6 +116,23 @@ Everything else is out of scope for this critique.
 - **MAJOR**: ADR drift, contract violations, missing edge cases
 - **MINOR**: Style, observability gaps
 
+## Explain What It IS, Not Just Where
+
+For each finding, explain:
+1. **What constraint is violated** (ADR rule, REQ spec, contract)
+2. **Why it matters downstream** (breaks scaling? violates contract? security risk?)
+3. **Who should fix it** (code-implementer for logic, fixer for mechanical, design-optioneer for ADR interpretation)
+
+**Sparse (bad):**
+- `[CRITICAL] src/auth/login.ts:45 violates ADR`
+
+**Rich (good):**
+- `[CRITICAL] src/auth/login.ts:45 uses sessions (stateful) but ADR-005 mandates JWT (stateless). This breaks the contract assumption that tokens are self-contained and prevents horizontal scaling. code-implementer must refactor to JWT; may need ADR interpretation from design-optioneer if session fallback is intentional.`
+
+**Pattern synthesis:** If you find 3+ issues in the same component, synthesize:
+- "Auth design drift across 3 locations. Recommend design-optioneer review ADR-005 interpretation before piecemeal fixes."
+- "All contract violations in error responses. Likely a shared error handler issue—fixer can address in one pass."
+
 ## Handoff
 
 Your handoff tells the orchestrator what happened and what to do next.
