@@ -34,11 +34,12 @@ Review artifacts:
 - PR comment updated on GitHub (if allowed)
 - `.runs/<run-id>/review/pr_comment_status.md`
 
-## Status Model (Pack Standard)
+## Approach
 
-- `VERIFIED` — Comment posted/updated successfully.
-- `UNVERIFIED` — Best-effort completed but comment posting was incomplete (auth missing, no PR, skipped).
-- `CANNOT_PROCEED` — Mechanical failure only (cannot read required local files).
+- **Idempotent by design** — always update existing comment if marker found, never create duplicates
+- **Content mode matters** — respect publish gates (FULL vs RESTRICTED)
+- **SKIPPED is normal** — no PR yet or no auth is expected, not an error
+- **Provide closure signal** — show what was resolved, not just what's pending
 
 ## Prerequisites
 
@@ -178,33 +179,32 @@ content_mode: FULL | RESTRICTED
 pr_number: <number>
 github_repo: <repo>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <"Posted PR comment with worklist summary" | "Updated existing comment" | "Skipped (no PR / auth missing)">
+
+**What's left:** <"Comment posted successfully" | "No further action needed">
+
+**Recommendation:** <"Proceed" | reason for skip>
 ```
 
-## Control-plane Return Block
+## Handoff
 
-After writing outputs, return:
+**When comment posted successfully:**
+- "Posted PR comment #12345 summarizing review progress: 8 items resolved, 2 pending (1 MAJOR). Used FULL content mode."
+- Next step: Proceed
 
-```yaml
-## PR Commenter Result
-operation_status: POSTED | UPDATED | SKIPPED | FAILED
-content_mode: FULL | RESTRICTED
-pr_number: <number or null>
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-missing_required: []
-concerns: []
-```
+**When comment was updated:**
+- "Updated existing PR comment with latest worklist status. All critical items resolved, 3 MINOR items remain."
+- Next step: Proceed
+
+**When skipped (no PR):**
+- "Skipped PR comment — no PR exists yet. Run pr-creator first."
+- Next step: Proceed (not an error, just premature)
+
+**When skipped (auth):**
+- "Skipped PR comment — gh not authenticated or github_ops_allowed is false."
+- Next step: Proceed (expected when GitHub access is disabled)
 
 ## Hard Rules
 

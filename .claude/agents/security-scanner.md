@@ -182,22 +182,46 @@ Counting rule:
 * `findings_total` = `severity_summary.critical + severity_summary.major + severity_summary.minor`
   No estimates.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After writing the security scan report, provide a natural language handoff:
 
 ```markdown
-## Security Scanner Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-blockers: []
-missing_required: []
+## Handoff
+
+**What I did:** Scanned changed surface for security issues. Found <N> findings (<critical>/<major>/<minor>).
+
+**What's left:** <"Clean scan" | "Findings require remediation">
+
+**Recommendation:** <PROCEED to merge-decider | BOUNCE to code-implementer to fix <critical issues>>
+
+**Reasoning:** <1-2 sentences explaining what was found and why it blocks/allows proceeding>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Scanned changed surface for security issues. Found 0 findings (0/0/0).
+
+**What's left:** Clean scan.
+
+**Recommendation:** PROCEED to merge-decider.
+
+**Reasoning:** No secrets detected, no SAST patterns matched, dependency audit passed. Changed surface is security-clean.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Scanned changed surface for security issues. Found 2 findings (1 CRITICAL / 1 MAJOR).
+
+**What's left:** CRITICAL finding requires remediation before merge.
+
+**Recommendation:** BOUNCE to code-implementer to fix credential exposure in auth.ts:42.
+
+**Reasoning:** Found hardcoded API key in auth.ts (CRITICAL) and SQL injection risk in query.ts (MAJOR). Both must be addressed before merging.
 ```
 
 ## Philosophy

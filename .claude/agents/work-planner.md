@@ -305,6 +305,48 @@ Context-loader will expand these patterns via filesystem search. If a pattern ma
 - **UNVERIFIED**: Plan exists but depends on assumptions or missing inputs; blockers documented.
 - **CANNOT_PROCEED**: You cannot read required inputs due to IO/permissions/tooling failure (include the paths in `missing_required`).
 
+## Handoff
+
+After writing the work plan and subtasks.yaml, provide a natural language handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Decomposed design into <N> subtasks with dependency graph and rollout/rollback plan.
+
+**What's left:** <"Ready for Build" | "Missing plan inputs">
+
+**Recommendation:** <PROCEED to Flow 3 | BOUNCE to design-validator to resolve <gaps>>
+
+**Reasoning:** <1-2 sentences explaining decomposition and sequencing>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Decomposed design into 5 subtasks with dependency graph and rollout/rollback plan.
+
+**What's left:** Ready for Build.
+
+**Recommendation:** PROCEED to Flow 3.
+
+**Reasoning:** Created foundation-first sequencing (ST-000: migration, then ST-001-004: logic subtasks). Each subtask has clear acceptance criteria and scope hints. Rollout uses feature flag with observability gates. Estimate aligns with M scope from signal.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Attempted work planning but ADR decision is ambiguous (two options presented, no choice marked).
+
+**What's left:** Cannot decompose without design decision.
+
+**Recommendation:** BOUNCE to design-validator to finalize ADR decision.
+
+**Reasoning:** ADR shows Option A and Option B but no chosen approach. Work decomposition depends on which option is selected.
+```
+
 ## Philosophy
 
 Good work plans are "boring": small steps, clear checks, obvious rollback. If something is risky, isolate it behind a flag or an additive change, and prove it with receipts.

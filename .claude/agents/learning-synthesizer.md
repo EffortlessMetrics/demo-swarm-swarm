@@ -226,14 +226,13 @@ Friction, gaps, or improvement opportunities noticed during this run (from Agent
 - ACTION: ...
 - ACTION: <pack/flow improvement from observations above>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
+## Handoff
+
+**What I did:** <1-2 sentence summary of learnings extracted>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ## Stable Marker Contract
@@ -246,20 +245,18 @@ For mechanical counting by `wisdom-cleanup`, use:
 
 Do not vary these prefixes.
 
-## Control-plane return block
+## Handoff
 
-After writing the file, return:
+After writing the file, provide a natural language handoff:
 
-```md
-## Learning Synthesizer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null
-route_to_agent: <agent-name> | null
-blockers: []
-missing_required: []
-concerns: []
-```
+**What I did:** Summarize learnings synthesis scope and key findings (include counts: learning sections, actions, pack observations).
+
+**What's left:** Note any missing artifacts or incomplete DevLT data.
+
+**Recommendation:** Explain the specific next step:
+- If learnings complete → "Learnings captured; [N] learning sections, [M] actions, [K] pack observations documented; Flow 7 complete"
+- If missing expected artifacts → "Missing [specific artifacts]; learnings written but incomplete; rerun if artifacts become available"
+- If mechanical failure → "Fix [specific issue] then rerun"
 
 ## Philosophy
 

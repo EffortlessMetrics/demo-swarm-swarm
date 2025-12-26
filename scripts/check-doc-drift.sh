@@ -13,6 +13,7 @@ echo -n "  Checking for stale 'runs-tools' skill references... "
 if grep -rn "\bruns-tools\b" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" \
   --exclude-dir="node_modules" \
   --exclude-dir="tools/demoswarm-runs-tools" | \
@@ -24,6 +25,7 @@ if grep -rn "\bruns-tools\b" . \
   grep -rn "\bruns-tools\b" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" \
     --exclude-dir="node_modules" \
     --exclude-dir="tools/demoswarm-runs-tools" | \
@@ -41,12 +43,14 @@ echo -n "  Checking for old openq interface (--flow, --qid flags)... "
 if grep -rn "openq.*--flow\|openq.*--qid" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found old openq interface references:"
   grep -rn "openq.*--flow\|openq.*--qid" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -10
   ERRORS=$((ERRORS + 1))
 else
@@ -58,12 +62,14 @@ echo -n "  Checking for old secrets interface (--files, --dir flags)... "
 if grep -rn "secrets.*--files\|secrets.*--dir" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found old secrets interface references:"
   grep -rn "secrets.*--files\|secrets.*--dir" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -10
   ERRORS=$((ERRORS + 1))
 else
@@ -77,12 +83,14 @@ echo -n "  Checking for 'yaml count-items --key' drift... "
 if grep -rn "yaml count-items.*--key" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found 'yaml count-items --key' (should be --item-regex):"
   grep -rn "yaml count-items.*--key" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -5
   ERRORS=$((ERRORS + 1))
 else
@@ -93,12 +101,14 @@ echo -n "  Checking for 'inv get --key' drift... "
 if grep -rn "inv get.*--key" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found 'inv get --key' (should be --marker):"
   grep -rn "inv get.*--key" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -5
   ERRORS=$((ERRORS + 1))
 else
@@ -109,12 +119,14 @@ echo -n "  Checking for 'line get --line' drift... "
 if grep -rn "line get.*--line" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found 'line get --line' (should be --prefix):"
   grep -rn "line get.*--line" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -5
   ERRORS=$((ERRORS + 1))
 else
@@ -125,12 +137,14 @@ echo -n "  Checking for 'receipts count --dir' drift... "
 if grep -rn "receipts count.*--dir[^-]" . \
   --include="*.md" \
   --exclude-dir=".git" \
+  --exclude-dir=".runs" \
   --exclude-dir="target" > /dev/null 2>&1; then
   echo "FAILED"
   echo "    Found 'receipts count --dir' (should be --run-dir):"
   grep -rn "receipts count.*--dir[^-]" . \
     --include="*.md" \
     --exclude-dir=".git" \
+    --exclude-dir=".runs" \
     --exclude-dir="target" | head -5
   ERRORS=$((ERRORS + 1))
 else

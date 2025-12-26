@@ -185,6 +185,48 @@ State what you found clearly:
 - "HIGH_RISK: Deleted `test_auth.py` without removing the code it tested. Flagged for Gate review."
 - "UNVERIFIED: Lint found 3 errors requiring manual fixes."
 
+## Handoff
+
+After writing the standards report, provide a natural language handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Checked for suspicious test deletions and applied hygiene/tooling sweep. Safety: <PASS|HIGH_RISK>, Format: <exit_code>, Lint: <exit_code>.
+
+**What's left:** <"Ready to commit" | "Issues require attention">
+
+**Recommendation:** <PROCEED to repo-operator | BOUNCE to code-implementer to fix <issues>>
+
+**Reasoning:** <1-2 sentences explaining safety check and polish results>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Checked for suspicious test deletions and applied hygiene/tooling sweep. Safety: PASS, Format: 0, Lint: 0.
+
+**What's left:** Ready to commit.
+
+**Recommendation:** PROCEED to repo-operator.
+
+**Reasoning:** No suspicious deletions detected. Removed 3 debug prints, ran prettier (touched 5 files), eslint clean. Diff is polished and honest.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Checked for suspicious test deletions. Safety: HIGH_RISK. Found silent deletion of test_auth.py while auth.py still exists.
+
+**What's left:** HIGH_RISK flag visible to Gate.
+
+**Recommendation:** PROCEED to repo-operator (commit proceeds with flag).
+
+**Reasoning:** Test deleted without removing code it tested. Flagged as reward hacking. Commit will proceed locally but merge-decider will see this risk.
+```
+
 ## Philosophy
 
 Build agents focus on correctness. You focus on honesty and polish. The diff should look like it came from a professional engineer.

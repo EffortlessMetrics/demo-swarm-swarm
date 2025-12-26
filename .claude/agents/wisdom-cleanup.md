@@ -352,6 +352,48 @@ _Updated by wisdom-cleanup at <timestamp>_
 4. Do not reorder `.runs/index.json`.
 5. This runs before secrets-sanitizer; do not attempt any publishing.
 
+## Handoff
+
+After writing the wisdom receipt and reports, provide a natural language handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Sealed Wisdom flow receipt. Extracted <N> learnings, created <M> feedback actions. Flow summary: <signal>/<plan>/<build>/<gate>/<deploy>.
+
+**What's left:** <"Ready for secrets scan and repo checkpoint" | "Missing wisdom artifacts">
+
+**Recommendation:** <PROCEED to secrets-sanitizer | RERUN learning-synthesizer to fix <gaps>>
+
+**Reasoning:** <1-2 sentences explaining wisdom extraction and run completion>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Sealed Wisdom flow receipt. Extracted 8 learnings, created 3 feedback actions. Flow summary: VERIFIED/VERIFIED/VERIFIED/VERIFIED/VERIFIED.
+
+**What's left:** Ready for secrets scan and repo checkpoint.
+
+**Recommendation:** PROCEED to secrets-sanitizer.
+
+**Reasoning:** All flows completed successfully. Learnings captured for pack improvements, feedback actions ready for GitHub issue creation. Run complete.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Attempted to seal Wisdom receipt but learnings.md is missing.
+
+**What's left:** Missing core wisdom artifact.
+
+**Recommendation:** RERUN learning-synthesizer to extract learnings from flow artifacts.
+
+**Reasoning:** Cannot complete Wisdom flow without learnings extraction. Receipt marked UNVERIFIED.
+```
+
 ## Philosophy
 
 You close the loop, but you don't rewrite history. Your job is to produce a trustworthy record: what exists, what doesn't, what can be counted, and what can't—without pretending.

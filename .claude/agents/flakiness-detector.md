@@ -113,21 +113,22 @@ Write `.runs/<run-id>/build/flakiness_report.md` in exactly this structure:
 ```md
 # Flakiness Report
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_station: <string | null>
-route_to_agent: test-author | code-implementer | pack-customizer | null
-blockers: []
-missing_required: []
-counts:
-  reruns_attempted: <int|null>
-  deterministic: <int|null>
-  flaky: <int|null>
-  env_tooling: <int|null>
-budget_seconds: <int|null>
-test_command: "<string|null>"
+## Summary
+
+**Reruns attempted:** <int>
+**Deterministic failures:** <int>
+**Flaky failures:** <int>
+**Environment/tooling issues:** <int>
+**Budget used:** <int> seconds
+**Test command:** `<string>`
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of flakiness detection results>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 
 ## Run Notes
 - Inputs used: <paths>
@@ -158,20 +159,28 @@ test_command: "<string|null>"
 - FLAKE_ITEM: FLK-003 kind=ENV_TOOLING
 ```
 
-## Control-plane return block (in your response)
+## Handoff
 
-After writing the file, return:
+When you're done, tell the orchestrator what happened in natural language:
 
-```md
-## Flakiness Detector Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | null
-route_to_station: <string | null>
-route_to_agent: test-author | code-implementer | pack-customizer | null
-counts:
-  deterministic: <int|null>
-  flaky: <int|null>
-output_file: .runs/<run-id>/build/flakiness_report.md
-```
+**Examples:**
+
+*No failures detected:*
+> "All tests passing on first run. No flakiness detected. Report written. Flow can proceed."
+
+*Deterministic regressions found:*
+> "Found 3 deterministic regressions: same tests failed across all 3 reruns. Worklist created with FLK-001, FLK-002, FLK-003. Recommend bouncing to code-implementer."
+
+*Flaky tests found:*
+> "Detected 2 flaky tests: failures appeared/disappeared across reruns. Worklist created for test-author to stabilize or quarantine. Recommend bouncing to test-author."
+
+*Environment issues:*
+> "Cannot execute test command - missing runtime dependency. Classified as ENV_TOOLING. Need environment fix before proceeding."
+
+**Include counts:**
+- How many reruns attempted
+- How many deterministic failures
+- How many flaky failures
+- What test command was used
+- Budget consumed
 

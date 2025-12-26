@@ -100,21 +100,18 @@ If `.runs/<run-id>/signal/requirements_critique.md` exists:
 ```markdown
 # Requirements
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Summary
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+**Status:** VERIFIED / UNVERIFIED / CANNOT_PROCEED
 
-blockers:
-  - <must change to reach VERIFIED>
+**Blockers:**
+- <must change to reach VERIFIED>
 
-missing_required:
-  - <path>
+**Missing:**
+- <path>
 
-concerns:
-  - <non-gating issues>
+**Concerns:**
+- <non-gating issues>
 
 ## Functional Requirements
 
@@ -172,18 +169,18 @@ The system shall <compliance constraint>.
 * `UNVERIFIED`: You produced the file, but some items remain underspecified (record them in `blockers` and/or `concerns`).
 * `CANNOT_PROCEED`: IO/permissions prevented reading/writing.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo this block (must match the file):
+After writing requirements, provide a clear handoff:
 
 ```markdown
-## Requirements Author Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-missing_required: []
-blockers: []
+## Handoff
+
+**What I did:** Wrote N functional requirements (REQ-001 to REQ-NNN) and M non-functional requirements (NFR-*-001 to NFR-*-NNN) based on problem statement. All requirements have atomic AC/MET lists.
+
+**What's left:** Nothing (requirements complete) OR Resolved M/N critique items; P major items remain underspecified.
+
+**Recommendation:** Requirements are complete and testable - proceed to requirements-critic for validation. OR Problem statement is missing - wrote best-effort requirements but need problem-framer to establish clear context first.
 ```
 
 ## Philosophy

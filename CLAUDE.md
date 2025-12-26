@@ -630,72 +630,67 @@ Receipts may include a `devlt` section for retrospective analysis of human vs ma
 
 ---
 
-## Machine Summary Contract
+## Handoff Contract
 
-Critic and verification agents include a machine-parseable summary block:
+Agents communicate routing through natural language, not structured YAML blocks.
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+### The Pattern
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|7 | null>
-route_to_station: <string | null>      # e.g. "test-executor", "standards-enforcer" — hint, not strict enum
-route_to_agent: <agent-name | null>    # strict enum — only when certain the name is valid
+Every agent ends with a handoff that answers three questions:
 
-blockers: []
-missing_required: []
-concerns: []
+1. **What was done?** — Summary of work completed
+2. **What still needs to be done?** — Remaining work, blockers, open questions
+3. **My recommendation** — Specific next step with reasoning
 
-observations: []                       # optional; things noticed worth capturing (friction, cross-cutting, improvements)
+### Example Handoff
 
-can_further_iteration_help: yes | no   # critics only
+```markdown
+## Handoff
 
-severity_summary:                      # critics/verifiers
-  critical: 0
-  major: 0
-  minor: 0
+**What I did:** Reviewed the implementation against REQ-001 through REQ-005.
+Found two issues: the session timeout logic doesn't match the ADR (uses 30m instead of 15m),
+and REQ-003 has no test coverage.
+
+**What's left:** The timeout fix is mechanical. The missing tests need the test-author.
+
+**Recommendation:** Run test-author to add coverage for REQ-003, then re-run me to verify the fixes.
+The timeout issue is minor enough that code-implementer can fix it in the same pass.
 ```
 
-Semantics:
+### Rules
 
-- `CANNOT_PROCEED` = mechanical failure only (I/O, permissions, tooling unusable). `missing_required` must be non-empty.
-- `UNVERIFIED` = gaps/uncertainty/issues documented. `blockers` should explain what prevents VERIFIED.
-- `VERIFIED` = adequate for purpose. `blockers` empty.
-- `observations` = optional; things the agent noticed that aren't blockers but worth capturing (friction encountered, cross-cutting insights, pack/flow improvements). Feeds into Wisdom flow via `learning-synthesizer`.
+**Always make a recommendation.** Even when uncertain, take a stance. The orchestrator decides, but you must provide your best judgment with reasoning.
 
-Routing:
+**Name specific agents when you know them.** "Run test-author" is better than "run tests." Your microloop partners are known to you.
 
-- Orchestrators route on `recommended_action` + `route_to_*`.
-- **Control plane vs audit plane:**
-  - The Machine Summary in the agent's **response** is the routing surface (control plane)
-  - The artifact **file** (e.g., `design_validation.md`, `test_critique.md`) is the durable audit record
-  - Orchestrators route on returned Result blocks, not by re-reading files
-  - Downstream agents read artifact files for detailed context
-  - Both exist and serve different purposes: fast routing vs durable forensics
+**Explain your reasoning.** "Because X" helps the orchestrator override intelligently when needed.
 
-Recommended action semantics (closed enum):
-- `PROCEED` = default, even when human judgment is required; capture blockers/assumptions. Do **not** use PROCEED as a fallback for "can't name the target."
-- `RERUN` = rerun the same station when a deterministic improvement is expected.
-- `BOUNCE` = reroute to an upstream flow. Requires `route_to_flow`; optionally set `route_to_station` (hint) and/or `route_to_agent` (strict enum).
-- `FIX_ENV` = only with `status: CANNOT_PROCEED` (mechanical/env failure).
+**Alternatives are for real tradeoffs only.** Don't hedge. If there's genuinely two good paths, say so. Otherwise, commit to one.
 
-Routing field rules:
-- **`route_to_agent`** = strict enum. Only set when certain the agent name is valid. Never guess.
-- **`route_to_station`** = free-text hint (e.g., "test-executor", "build-cleanup"). Use when you know the station but aren't certain of the exact agent enum.
-- **`route_to_flow`** = required for BOUNCE. If you know which phase needs work but not the specific agent/station, set only this.
+### Status Concepts (Natural Language)
 
-BOUNCE fallback ladder:
-1. Know flow + station + agent → set all three
-2. Know flow + station only → set `route_to_flow` + `route_to_station`, leave `route_to_agent: null`
-3. Know flow only → set `route_to_flow`, explain in blockers what to rerun
-4. Don't know flow → use PROCEED with blockers (rare; document what evidence is missing)
+Use these concepts in your handoff prose:
+
+- **Complete / verified** — Work is done, evidence exists, no blockers
+- **Incomplete / unverified** — Gaps exist, document what's missing
+- **Blocked** — Cannot proceed without external input (human decision, missing access, etc.)
+- **Mechanical failure** — IO/permissions/tooling broken; environment needs fixing
+
+### Routing Intent
+
+Express routing naturally:
+
+- "Run X next" — You know the agent
+- "This needs to go back to Plan" — Flow-level routing
+- "The implementer should fix this" — Station-level hint
+- "I need another pass after they fix the schema" — Rerun self
+- "This is blocked until the user decides on auth approach" — Human escalation needed
 
 ---
 
-## Control-Plane Blocks (Canonical)
+## Control-Plane Blocks (Gate Agents Only)
 
-Flows and agents should use these blocks **verbatim** (copy/paste) to avoid schema drift.
+Most agents use natural language handoffs (see above). These structured blocks are **only for gate agents** that need machine-readable yes/no decisions:
 
 ### Gate Result (emitted by `secrets-sanitizer`)
 
@@ -803,16 +798,15 @@ Notes:
 
 Do not conflate these domains:
 
-1. **Flow/Agent Status** (Machine Summary + receipts)
-   `VERIFIED | UNVERIFIED | PARTIAL | CANNOT_PROCEED`
+1. **Flow/Agent Status** (handoffs + receipts)
 
-   **VERIFIED requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default. Missing verification artifacts (test execution, critics) result in `UNVERIFIED`, not "concern only."
+   Agents express status through natural language in their handoffs. Use these concepts:
+   - **Complete / verified**: Required artifacts exist AND verification ran AND passed
+   - **Incomplete / unverified**: Gaps exist, contradictions, critical failures, or missing outputs
+   - **Partial**: Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review)
+   - **Blocked / cannot proceed**: Mechanical failure only (IO/permissions/tooling)
 
-   Status semantics:
-   - `VERIFIED`: Required artifacts exist AND verification stations ran AND passed (executed evidence present)
-   - `UNVERIFIED`: Verification incomplete, contradictions, critical failures, or missing core outputs
-   - `PARTIAL`: Real progress made, but key verification evidence missing/skipped (valid for unbounded loops like Flow 4 Review)
-   - `CANNOT_PROCEED`: Mechanical failure only (IO/permissions/tooling)
+   **Verified requires executed evidence.** A station being "skipped" means the work is unverified, not verified by default.
 
    **SKIPPED stubs:** Cleanup agents create explicit SKIPPED stubs for missing station artifacts:
    ```markdown

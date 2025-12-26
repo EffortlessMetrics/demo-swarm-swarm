@@ -121,26 +121,23 @@ Each risk must have:
 ```markdown
 # Risk Assessment
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Risk Summary
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
+| Severity | Count |
+|----------|-------|
+| Critical | <int> |
+| High | <int> |
+| Medium | <int> |
+| Low | <int> |
 
-blockers:
-  - <must change to proceed (e.g., "mitigation plan required for RSK-002")>
+**Blockers:**
+- <must change to proceed (e.g., "mitigation plan required for RSK-002")>
 
-missing_required: []
+**Missing:**
+- <path or tool>
 
-concerns:
-  - <non-gating issues>
-
-severity_summary:
-  critical: 0
-  high: 0
-  medium: 0
-  low: 0
+**Concerns:**
+- <non-gating issues>
 
 ## Context
 - flow: <signal|plan|build|gate|deploy|wisdom>
@@ -196,23 +193,18 @@ severity_summary:
 - `UNVERIFIED`: Missing inputs OR CRITICAL/HIGH risks lack mitigation/acceptance plan OR evidence is insufficient.
 - `CANNOT_PROCEED`: Cannot read/write required paths due to IO/permissions/tooling.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo the Machine Summary block as:
+After completing your risk assessment, provide a clear handoff:
 
-```md
-## Risk Analyst Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-severity_summary:
-  critical: 0
-  high: 0
-  medium: 0
-  low: 0
-blockers: []
-missing_required: []
+```markdown
+## Handoff
+
+**What I did:** Analyzed available artifacts for flow N, identified M risks (P critical, Q high, R medium, S low). Carried forward K risks from prior flows. New risks: X. Closed risks: Y.
+
+**What's left:** Nothing (all risks assessed and mitigated/accepted) OR N critical/high risks remain OPEN without mitigation plans.
+
+**Recommendation:** All critical/high risks are mitigated or accepted with clear ownership - proceed. OR RSK-001 (high-severity security gap) needs mitigation - route to code-implementer to add authz checks. OR RSK-003 (critical data migration risk) lacks clear mitigation strategy - route back to plan phase for migration design review.
 ```
 
 This lets the orchestrator route without rereading `risk_assessment.md`.

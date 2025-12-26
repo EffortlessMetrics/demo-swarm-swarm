@@ -170,32 +170,45 @@ What would change this:
 * If you propose only 2 options, that's acceptable; set `options_proposed: 2` and leave OPT-003 columns as `N/A`.
 
 ```markdown
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Handoff
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+**What I did:** <1-2 sentence summary of options analysis>
 
-missing_required:
-  - <path>
+**What's left:** <remaining work or "nothing">
 
-blockers:
-  - <must change to reach VERIFIED>
+**Recommendation:** <specific next step with reasoning>
+
+For example:
+- If options complete: "Proposed 3 options (OPT-001: Monolith, OPT-002: Microservices, OPT-003: Event-driven) with trade-off analysis. Suggested default: OPT-001 (balances velocity vs complexity). Ready for ADR decision."
+- If inputs incomplete: "Generated 2 options but requirements.md has no NFR identifiers—cannot assess NFR fit. Route to requirements-author to add NFR-* identifiers."
+- If scope ambiguous: "Requirements are too vague to propose distinct options—all center on 'make it faster.' Route to problem-framer to clarify scope."
+
+## Metadata
 
 options_proposed: 0
 suggested_default: <OPT-00N | null>
 confidence: High | Medium | Low
 ```
 
-## Completion guidance
+## Handoff
 
-* If you produced 2–3 fully structured options + comparison + suggested default → `VERIFIED`, `recommended_action: PROCEED`.
-* If you produced options but inputs were missing / mappings incomplete → `UNVERIFIED`, list `missing_required` and `blockers` and set:
+After writing the file, provide a natural language summary:
 
-  * `recommended_action: BOUNCE`, `route_to_flow: 1` when you cannot bind to REQ/NFRs
-  * `recommended_action: RERUN` when inputs exist but your output is incomplete
-* If you cannot write the output file due to IO/permissions → `CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+**Success (options ready):**
+"Proposed 3 design options: OPT-001 (monolith), OPT-002 (microservices), OPT-003 (event-driven). Each option mapped to all 5 REQs and 3 NFRs with fit assessment. Suggested default: OPT-001 (fastest to implement, satisfies all REQs). Ready for adr-author to decide."
+
+**Inputs incomplete:**
+"Generated 2 options but requirements.md lacks NFR identifiers—cannot assess performance/scalability fit. Route to requirements-author to add NFR-PERF-* and NFR-SCALE-* markers."
+
+**Scope too vague:**
+"Requirements are ambiguous ('improve the system')—cannot propose distinct architectural options. Route to problem-framer to clarify scope and constraints."
+
+Always mention:
+- How many options proposed
+- Whether all requirements mapped
+- Suggested default and confidence level
+- What's blocking completeness (if anything)
+- Clear next step
 
 ## Philosophy
 

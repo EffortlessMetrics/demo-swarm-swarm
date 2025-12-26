@@ -354,16 +354,18 @@ Write `.runs/<run-id>/gate/cleanup_report.md`:
 ## Run: <run-id>
 ## Completed: <ISO8601 timestamp>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-merge_verdict: MERGE | BOUNCE | null
-missing_required: []
-missing_optional: []
-blockers: []
-concerns: []
+## Handoff
+
+**What I did:** <1-2 sentence summary of gate cleanup results>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+**Merge verdict:** <MERGE | BOUNCE | null>
+**Missing artifacts:** <list or "none">
+**Blockers:** <list or "none">
+**Concerns:** <list or "none">
 
 ## Artifact Verification
 | Artifact | Status |

@@ -77,16 +77,21 @@ Write `.runs/<run-id>/build/doc_critique.md` in exactly this structure:
 ```md
 # Documentation Critique
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | 2 | null
-route_to_agent: doc-writer | code-implementer | interface-designer | adr-author | null
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
+## Handoff
+
+**What I did:** <1-2 sentence summary of documentation critique>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+For example:
+- If docs are current: "Reviewed docs against implementation—README and API docs match impl_changes_summary. Verification steps are accurate. No stale docs found."
+- If stale docs found: "Found 3 stale doc surfaces: README still describes old auth flow, API docs missing new /sessions endpoint, CLI help doesn't mention --token flag. Route to doc-writer for updates."
+- If verification mismatch: "Docs claim 'run npm test' but test_execution.md shows 'pnpm test'. Route to doc-writer to fix verification instructions."
+- If implementation mismatch: "API docs claim POST /login returns user object, but code returns session token. Route to code-implementer or interface-designer—docs or code needs alignment."
+
+**Iteration outlook:** <"One doc-writer pass should fix this" OR "Needs code/spec changes first">
 
 ## Inputs Used
 - <paths actually read>
@@ -113,20 +118,25 @@ can_further_iteration_help: yes | no
  - (If none) <leave empty>
 ```
 
-## Control-plane return block (in your response)
+## Handoff
 
-After writing the file, return:
+After writing the file, provide a natural language summary:
 
-```md
-## Doc Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 3 | 2 | null
-route_to_agent: doc-writer | code-implementer | interface-designer | adr-author | null
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
-output_file: .runs/<run-id>/build/doc_critique.md
-```
+**Success (docs current):**
+"Reviewed documentation against impl_changes_summary—README, API docs, and CLI help all reflect implemented behavior. Verification steps tested against test_execution.md. No stale surfaces found."
+
+**Stale docs (fixable):**
+"Found 3 stale doc issues: README auth section outdated, API docs missing /sessions endpoint, config example has wrong port. All fixable by doc-writer in one pass."
+
+**Verification mismatch:**
+"Docs say 'run pytest' but test_execution.md shows 'pytest tests/' with coverage flags. Route to doc-writer to update 'how to verify' instructions."
+
+**Code/spec mismatch (needs upstream fix):**
+"API docs claim POST /auth returns 201, but impl_changes_summary shows 200. This is a code-vs-contract issue. Route to interface-designer to clarify intended status code, then fix code or docs accordingly."
+
+Always mention:
+- What doc surfaces were checked
+- Counts of stale/missing/mismatched items
+- Whether a doc-writer pass can fix it, or if code/spec needs changes first
+- Specific routing recommendation
+- Whether iteration would help

@@ -244,29 +244,44 @@ Keep minimal placeholders (domain agents will overwrite):
 
 Do not "continue anyway" if the run directory cannot be established.
 
-## Output (control plane)
+## Handoff
 
-After finishing, output both a human summary and a machine block:
+After establishing infrastructure, provide a natural language handoff:
 
-```md
-## Run Infrastructure Established
-run_id: <run-id>
-run_dir: .runs/<run-id>/
-signal_dir: .runs/<run-id>/signal/
-status: NEW | EXISTING | SUPERSEDING
+```markdown
+## Handoff
 
-## Signal Run Prep Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: null
-route_to_flow: null
+**What I did:** Established run infrastructure for <run-id>. Created directories and initialized run_meta.json and index.json.
 
-run_id: <run-id>
-task_key: <task_key | null>
-supersedes: <prior-run-id | null>
+**What's left:** Infrastructure ready for Signal authoring.
 
-blockers: []
-missing_required: []
-notes:
-  - <e.g., "sanitized run-id from X -> Y", "used branch fallback", "reused existing run_meta">
+**Recommendation:** PROCEED to signal normalizer.
+
+**Reasoning:** <1-2 sentences about what was created/reused and any identity decisions made>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Established run infrastructure for gh-456. Created directories and initialized run_meta.json and index.json.
+
+**What's left:** Infrastructure ready for Signal authoring.
+
+**Recommendation:** PROCEED to signal normalizer.
+
+**Reasoning:** New run from GitHub issue #456. Created .runs/gh-456/signal/ with stub artifacts. Run identity bound to issue immediately (run_id_kind: GH_ISSUE).
+```
+
+```markdown
+## Handoff
+
+**What I did:** Reattached to existing run feat-auth (iteration 2). Updated run_meta.json timestamps.
+
+**What's left:** Infrastructure ready for Signal authoring.
+
+**Recommendation:** PROCEED to signal normalizer.
+
+**Reasoning:** Reusing existing run-id from branch name. Previous iteration exists, incremented iteration count. No identity conflicts.
 ```

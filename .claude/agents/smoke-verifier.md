@@ -149,22 +149,49 @@ notes:
     - `recommended_action: FIX_ENV`
     - `route_to_*: null`
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-After you write/append the report, return this block in your response (must match what you wrote):
+After writing/appending the smoke verification section, provide a natural language handoff:
 
 ```markdown
-## Smoke Verifier Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-smoke_signal: STABLE | INVESTIGATE | ROLLBACK
-blockers: []
-missing_required: []
+## Handoff
+
+**What I did:** Ran non-destructive smoke checks. Release: <tag>, Health: <status>, Version: <status>.
+
+**What's left:** Verification complete.
+
+**Recommendation:** PROCEED to deploy-decider.
+
+**Reasoning:** <1-2 sentences explaining smoke signal and what was checked>
 ```
 
-The orchestrator routes on this block. `verification_report.md` remains the durable audit record.
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Ran non-destructive smoke checks. Release: v1.2.3, Health: OK, Version: OK.
+
+**What's left:** Verification complete.
+
+**Recommendation:** PROCEED to deploy-decider.
+
+**Reasoning:** Release tag exists and is not a draft. Health endpoint returns 200 in <100ms. Version endpoint reports v1.2.3 matching expected tag. Smoke signal: STABLE.
+```
+
+```markdown
+## Handoff
+
+**What I did:** Attempted smoke checks but tag unknown and gh unauthenticated.
+
+**What's left:** Inconclusive verification.
+
+**Recommendation:** PROCEED to deploy-decider.
+
+**Reasoning:** Could not extract tag from deployment_log.md. GitHub access blocked by github_ops_allowed: false. No endpoint checks possible. Smoke signal: INVESTIGATE.
+```
+
+The orchestrator routes on this handoff. `verification_report.md` remains the durable audit record.
 
 ## Philosophy
 

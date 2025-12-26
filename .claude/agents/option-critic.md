@@ -101,23 +101,25 @@ Severity counts = exact number of those prefixed lines.
 
 **Option counting (stable marker):** Prefer `^## OPT-[0-9]{3}:` headings (from `design-optioneer`). If markers are missing/inconsistent, set `options_found: null` and add a blocker. Back-compat: accept `^## Option [0-9]+:` if present.
 
-## Machine Summary Contract
+## Handoff
 
-**Status axis:**
-- `VERIFIED`: Options doc is decision-ready (only minor issues remain)
-- `UNVERIFIED`: Options doc exists but has major/critical issues
-- `CANNOT_PROCEED`: Mechanical IO failure (cannot read/write required paths)
+Your handoff should make the orchestrator's next step obvious:
 
-**Recommended action (closed enum, always emit one):**
-- `PROCEED`: Move to `adr-author`
-- `RERUN`: Rerun `design-optioneer` with the worklist
-- `BOUNCE`: Upstream artifacts missing/contradictory; specify where
-- `FIX_ENV`: Only for mechanical failures
+**When options are decision-ready:**
+- "Evaluated 3 design options across 6 comparison axes. All options are distinct, traceable to requirements, and include concrete risks. Ready for ADR authoring."
+- Next step: Call adr-author
 
-**Routing rules:**
-- `route_to_agent` and `route_to_flow` MUST be null unless action is RERUN or BOUNCE
-- If RERUN: `route_to_agent: design-optioneer`
-- If BOUNCE: specify the upstream flow/agent that needs fixes
+**When design-optioneer needs iteration:**
+- "Found 5 major issues blocking decision-making: options 1 and 2 are functionally identical, missing failure mode analysis, no rollout strategy. Provided fix list for design-optioneer."
+- Next step: Call design-optioneer with the fix list
+
+**When upstream inputs are insufficient:**
+- "Cannot evaluate options against requirements — requirements.md is too vague. Need concrete SLOs and failure budget expectations from problem-framer or requirements-author."
+- Next step: Route to Flow 1 for requirement clarification
+
+**When there's mechanical failure:**
+- "Cannot read design_options.md — file doesn't exist or permissions issue."
+- Next step: Fix environment or ensure design-optioneer ran first
 
 ## Output File Format
 
@@ -125,29 +127,6 @@ Write to: `.runs/<run-id>/plan/option_critique.md`
 
 ```markdown
 # Option Critique for <run-id>
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
-
-## Metrics
-severity_summary:
-  critical: N
-  major: N
-  minor: N
-options_summary:
-  options_found: N|null
-  options_with_comparable_axes: N|null
-  options_missing_risks: N|null
-  options_missing_rollout: N|null
-  decision_criteria_present: yes|no|null
 
 ## Summary
 - <3–6 bullets; what's good, what blocks decision-making>
@@ -179,39 +158,46 @@ options_summary:
 ### Testability / Verification Strategy
 - [MINOR] OPT-MIN-002: ...
 
-## Suggested Fix List (only when recommended_action: RERUN)
+## Suggested Fix List (if design-optioneer should iterate)
 - Fix-1: <concrete rewrite instruction>
 - Fix-2: ...
 - Fix-3: ...
 
-## Notes for ADR Author (only when recommended_action: PROCEED)
+## Notes for ADR Author (if moving forward)
 - <optional, informational gotchas to carry into ADR authoring>
+
+## Metrics
+- Critical issues: N
+- Major issues: N
+- Minor issues: N
+- Options found: N
+- Options with comparable axes: N
+- Decision criteria present: yes|no
 
 ## Inventory (machine countable)
 - OPT_CRITICAL: OPT-CRIT-001, OPT-CRIT-002, ...
 - OPT_MAJOR: OPT-MAJ-001, OPT-MAJ-002, ...
 - OPT_MINOR: OPT-MIN-001, OPT-MIN-002, ...
+
+## Handoff
+
+**What I did:** Evaluated <N> design options for decision-readiness, found <critical+major> issues requiring attention.
+
+**What's left:** <"Options ready for ADR" | "design-optioneer needs to address fix list" | "upstream inputs insufficient">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-## Edge Cases and Routing
+## Edge Cases
 
 **No `design_options.md` exists:**
-- Status: `UNVERIFIED`
-- recommended_action: `RERUN`
-- route_to_agent: `design-optioneer`
-- blockers: ["design_options.md not found"]
+- Handoff: "Cannot find design_options.md — design-optioneer needs to run first."
 
 **Requirements missing/too vague (prevents real options):**
-- Status: `UNVERIFIED`
-- recommended_action: `BOUNCE`
-- route_to_flow: `1`
-- route_to_agent: `requirements-author` (or `problem-framer` depending on what's missing)
-- blockers: ["upstream requirements insufficient for options evaluation"]
+- Handoff: "Upstream requirements are too vague to evaluate options meaningfully. Need concrete SLOs, failure budgets, and compliance constraints from requirements-author or problem-framer."
 
 **Mechanical IO failure:**
-- Status: `CANNOT_PROCEED`
-- recommended_action: `FIX_ENV`
-- missing_required: ["<specific path that failed>"]
+- Handoff: "Cannot read/write required files due to IO/permissions issue. Fix environment before proceeding."
 
 ## Critique Philosophy
 

@@ -145,16 +145,19 @@ Write `.runs/<run-id>/build/doc_updates.md` using the template below and include
 ```markdown
 # Documentation Updates for <run-id>
 
-## Machine Summary
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-concerns: []
-```
+## Handoff
+
+**What I did:** <1-2 sentence summary of documentation updates>
+
+**What's left:** <remaining work or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
+
+For example:
+- If docs updated: "Updated README auth section, added /sessions endpoint to API docs, fixed CLI help for --token flag. All changes align with impl_changes_summary and ADR terminology."
+- If partially updated: "Updated README and API docs, but deferred config examples—couldn't verify default port from artifacts. Logged assumption in doc_updates.md."
+- If mismatch found: "Found code-vs-contract mismatch: docs would claim POST /auth returns 201 but code returns 200. Route to interface-designer to clarify intended behavior before updating docs."
+- If blocked: "Cannot update API docs—api_contracts.yaml is missing endpoint schemas. Route to interface-designer to complete contracts."
 
 ## Inputs Used
 - `.runs/<run-id>/build/impl_changes_summary.md`
@@ -209,15 +212,28 @@ Inventory rules:
   - Contract/spec mismatch → `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: interface-designer` (or `adr-author`)
   - Ambiguous + user-impacting → `status: UNVERIFIED`, `recommended_action: PROCEED` (blockers captured)
 
-## Reporting
+## Handoff
 
-When you're done, summarize what you did naturally:
+After writing the file, provide a natural language summary:
 
-- What docs did you update and why?
-- Are there any gaps or mismatches you couldn't resolve?
-- If you processed a worklist item, was it resolved or skipped (and why)?
+**Success (docs aligned):**
+"Updated 4 doc surfaces: README (auth flow), API docs (added /sessions endpoint), CLI help (--token flag), docstrings in auth module. All aligned with impl_changes_summary and ADR terminology. No mismatches found."
 
-Be precise but conversational. The orchestrator needs to know: did this succeed, and what should happen next?
+**Partial update (with deferrals):**
+"Updated README and API docs. Deferred config examples section—couldn't verify new timeout default from artifacts. Logged assumption (kept existing 30s) in doc_updates.md."
+
+**Mismatch discovered:**
+"Found code-vs-contract mismatch: POST /auth returns 200 in code but api_contracts.yaml declares 201. Cannot update docs truthfully until resolved. Route to interface-designer or code-implementer to align."
+
+**Worklist item:**
+"Addressed RW-DOC-003 (update API docs). Found the section was already updated in a prior commit—skipped as stale feedback. Marked resolved in worklist."
+
+Always mention:
+- What files were updated (or deferred, and why)
+- Any mismatches or blockers discovered
+- Whether this was part of a worklist (and outcome)
+- Assumptions made (if any)
+- Next step (proceed, or route to another agent)
 
 ## Obstacle Protocol (When Stuck)
 

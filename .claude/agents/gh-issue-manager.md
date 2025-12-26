@@ -429,25 +429,24 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 ```markdown
 # GitHub Issue Manager Status
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
+## Handoff
 
-operation_status: CREATED | UPDATED | SKIPPED | FAILED
-content_mode: FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY
-content_mode_reason: <reason or null>
-link_style: BLOB_LINKS | PATHS_ONLY
+**What I did:** <1-2 sentence summary of GitHub operations>
 
-blockers:
-  - <only when something must change for this agent to succeed>
+**What's left:** <remaining work or "nothing">
 
-missing_required:
-  - <paths/tools only for mechanical failure>
+**Recommendation:** <specific next step with reasoning>
 
-concerns:
-  - <non-gating issues>
+## Operation Details
+
+**Operation:** <CREATED | UPDATED | SKIPPED | FAILED>
+**Content mode:** <FULL | FULL_PATHS_ONLY | SUMMARY_ONLY | MACHINE_ONLY>
+**Link style:** <BLOB_LINKS | PATHS_ONLY>
+**Content mode reason:** <why this mode was chosen>
+
+**Blockers:** <list or "none">
+**Missing required:** <list or "none">
+**Concerns:** <list or "none">
 
 ## Issue
 - number: #<N | none>
@@ -468,22 +467,33 @@ concerns:
 - <warnings, e.g. "gh unauthenticated; skipped", "issue body markers missing; inserted new board", "issue edit failed; leaving body unchanged">
 ```
 
-## Control-Plane Return (For Orchestrator)
+## Handoff
 
-At the end of your response, return:
+When you're done, tell the orchestrator what happened in natural language:
 
-```markdown
-## GH Issue Manager Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-operation_status: CREATED | UPDATED | SKIPPED | FAILED
-issue_number: <int | null>
-canonical_key: <gh-N | null>
-blockers: []
-missing_required: []
-```
+**Examples:**
 
-The file is the audit record. This block is the control plane.
+*Issue created successfully:*
+> "Created issue #456 for run gh-456. Status board initialized with Flow 1 in progress. Canonical key and aliases updated in run_meta and index. Flow can proceed."
+
+*Issue updated successfully:*
+> "Updated issue #456 status board: Signal VERIFIED, Plan in progress. Open questions section updated with 2 questions needing human input. Content mode FULL (pushed). Flow can proceed."
+
+*Skipped (not pushed yet):*
+> "Issue #456 exists but publish_surface is NOT_PUSHED. Updated status board with path-only links (FULL_PATHS_ONLY mode). Flow can proceed locally."
+
+*Skipped (repo mismatch):*
+> "Repo mismatch detected (expected: org/foo, actual: org/bar). GitHub ops disabled for this run. Local metadata updated. Flow continues locally without GitHub updates."
+
+*Skipped (auth missing):*
+> "gh not authenticated. Skipped GitHub operations (MACHINE_ONLY mode). Issue binding deferred to later. Local metadata updated. Flow can proceed."
+
+**Include details:**
+- What operation was performed (created/updated/skipped)
+- Issue number and canonical key
+- Content mode used and why
+- Whether metadata was updated
+- Any blockers or concerns
 
 ## Hard Rules
 

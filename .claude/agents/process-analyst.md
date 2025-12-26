@@ -159,24 +159,19 @@ Write `.runs/<run-id>/wisdom/process_analysis.md`:
 ```markdown
 # Process Analysis for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
+## Process Metrics
 
-process_summary:
-  flows_executed: <int>
-  flows_rerun: <int>
-  bounces: <int>
-  acs_completed: <int>
-  total_iterations: <int>
-  avg_iterations_per_ac: <float>
-  stall_count: <int>
-  human_checkpoints: <int>
-  efficiency_score: HIGH | MEDIUM | LOW
+| Metric | Value |
+|--------|-------|
+| Flows executed | <int> |
+| Flows re-run | <int> |
+| Bounces | <int> |
+| ACs completed | <int> |
+| Total iterations | <int> |
+| Avg iterations per AC | <float> |
+| Stall count | <int> |
+| Human checkpoints | <int> |
+| Efficiency score | HIGH / MEDIUM / LOW |
 
 ## Executive Summary
 
@@ -324,11 +319,19 @@ No Gate bounces in this run.
 - PROC_FLOWS_RERUN: <count>
 ```
 
-## Status Model
+## Handoff
 
-- **VERIFIED**: Timeline reconstructed, metrics calculated, analysis complete.
-- **UNVERIFIED**: Partial data (missing receipts, incomplete timeline).
-- **CANNOT_PROCEED**: Cannot read required inputs (mechanical failure).
+After completing your analysis, provide a clear handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Analyzed process efficiency across N flows, identified M friction points, and calculated key metrics (X iterations/AC, Y% efficiency score).
+
+**What's left:** Nothing (analysis complete) OR Missing receipts for flows X, Y prevent complete timeline reconstruction.
+
+**Recommendation:** All flows executed efficiently with no bounces - proceed to next phase. OR Flow 3 had excessive iterations on AC-002 (4 cycles); recommend documenting mock patterns to prevent similar friction.
+```
 
 ## Stable Markers
 

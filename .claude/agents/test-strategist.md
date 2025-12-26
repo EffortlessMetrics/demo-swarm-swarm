@@ -334,30 +334,49 @@ Set:
 * `recommended_action: FIX_ENV`
 * `route_to_*: null`
 
-## Control-Plane Return (For Orchestrator)
+## Handoff
 
-At the end of your response, return this block (must match the Machine Summary you wrote):
+After writing the test plan and AC matrix, provide a natural language handoff:
 
 ```markdown
-## Test Strategist Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-missing_required: []
-blockers: []
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-counts:
-  scenarios_total: 0
-  requirements_total: 0
-  requirements_with_scenarios: 0
-  ac_count: 0
+## Handoff
+
+**What I did:** Mapped <N> scenarios to test types, defined coverage thresholds, created AC matrix with <M> ACs.
+
+**What's left:** <"Ready for implementation planning" | "Gaps in test mapping">
+
+**Recommendation:** <PROCEED to work-planner | BOUNCE to bdd-author to fix <gaps>>
+
+**Reasoning:** <1-2 sentences explaining test strategy and AC breakdown>
 ```
 
-The orchestrator routes on this block. `test_plan.md` remains the durable audit artifact.
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Mapped 12 scenarios to test types, defined coverage thresholds (80% line / 70% branch), created AC matrix with 5 ACs.
+
+**What's left:** Ready for implementation planning.
+
+**Recommendation:** PROCEED to work-planner.
+
+**Reasoning:** Complete scenario-to-test-type mapping. All requirements have corresponding ACs. Coverage thresholds set per test_plan.md stable markers. Mutation testing required for auth module (P0).
+```
+
+```markdown
+## Handoff
+
+**What I did:** Attempted test planning but 3 scenarios lack @REQ tags, cannot map to test types.
+
+**What's left:** Orphan scenarios prevent test type assignment.
+
+**Recommendation:** BOUNCE to bdd-author to tag scenarios in login.feature.
+
+**Reasoning:** Cannot create complete AC matrix without REQ traceability. Scenarios at login.feature:12, :25, :38 need @REQ tags.
+```
+
+The orchestrator routes on this handoff. `test_plan.md` and `ac_matrix.md` remain the durable audit artifacts.
 
 ## Philosophy
 

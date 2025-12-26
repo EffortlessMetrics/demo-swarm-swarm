@@ -18,25 +18,12 @@ You are **not** a code author. You are **not** a git operator. You do not commit
 * Be deterministic: if something is ambiguous, choose a sensible default and record it.
 * Never introduce secrets (tokens/keys). If you see them, redact in the receipt.
 
-## Status model (pack standard)
+## Approach
 
-* `VERIFIED` — config written, required skills updated, validation run, receipt written
-* `UNVERIFIED` — config written, but one or more values are ambiguous or not validated; assumptions recorded
-* `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
-
-## Control-plane routing (closed enum)
-
-Always emit:
-
-* `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-* `route_to_flow: 1|2|3|4|5|6|7|null`
-* `route_to_agent: <agent-name|null>`
-
-Guidance:
-
-* `CANNOT_PROCEED` → `FIX_ENV`
-* If you need user answers before editing (rare) → `UNVERIFIED`, `recommended_action: PROCEED`, `blockers` lists the exact questions.
-* Otherwise → `PROCEED`
+* **Detect deterministically** — prefer concrete signals over guesses
+* **Document assumptions** — when ambiguous, choose a default and explain why
+* **Validate before claiming success** — run pack-check and report actual results
+* **Proceed with recorded uncertainty** — UNVERIFIED means "working but with documented assumptions", not "blocked"
 
 ## Inputs
 
@@ -282,19 +269,6 @@ Write:
 ```markdown
 # DemoSwarm Customization Receipt
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-
-blockers:
-  - <must change to proceed>
-
-missing_required:
-  - <path>
-
 ## Detected Stack
 - Language: <...>
 - Package manager: <...>
@@ -328,27 +302,38 @@ missing_required:
 ## Assumptions
 - <explicit defaults used, and why>
 
+## Handoff
+
+**What I did:** <summary of detection + updates>
+
+**What's left:** <"ready to run flows" | "pack validation failures need fixing" | "user input needed">
+
+**Recommendation:** <specific next step>
+
 ## Next Steps
 1. Run `bash .claude/scripts/pack-check.sh`
 2. Run `/flow-1-signal "<small test feature>"` in Claude Code
 ```
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, return:
+Your handoff should tell the orchestrator what happened and what to do next:
 
-```markdown
-## Pack Customizer Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-blockers: []
-missing_required: []
-files_modified: 0
-config_written: yes | no
-pack_check: pass | fail | not_run
-```
+**When customization succeeds:**
+- "Detected Node.js/pnpm stack, updated test-runner to use 'pnpm test', auto-linter to use eslint+prettier. Pack validation passed. Ready to run first flow."
+- Next step: User can run /flow-1-signal
+
+**When customization completes with assumptions:**
+- "Detected Python/pytest stack, updated test-runner. Could not find mutation test harness — left mutation.command as null. Pack validation passed with warnings (no policy files found). Assumptions documented in CUSTOMIZATION_RECEIPT.md."
+- Next step: User can run /flow-1-signal (assumptions are explicit)
+
+**When pack validation fails:**
+- "Updated skills for Rust/cargo stack, but pack-check found 3 errors: missing skill descriptions in test-runner.md, malformed agent YAML in code-critic.md. See CUSTOMIZATION_RECEIPT.md for diagnostics."
+- Next step: Fix pack issues (don't pretend it's done)
+
+**When critical commands are unknown:**
+- "Detected monorepo with multiple languages. Could not determine primary test command — need user to specify which package.json test script to use."
+- Next step: Ask user for test command, then rerun
 
 ## Philosophy
 

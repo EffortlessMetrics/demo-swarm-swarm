@@ -29,33 +29,12 @@ You own:
 - **runs-derive**: For all mechanical derivations (counts, Machine Summary extraction, receipt reading). See `.claude/skills/runs-derive/SKILL.md`.
 - **runs-index**: For `.runs/index.json` updates only. See `.claude/skills/runs-index/SKILL.md`.
 
-## Status model (pack standard)
+## Verification Philosophy
 
-Use the boring machine axis:
-
-- `VERIFIED` — Required artifacts exist AND critic stations ran AND passed (executed evidence present)
-- `UNVERIFIED` — Verification incomplete, contradictions, critical failures, or missing core outputs
-- `CANNOT_PROCEED` — Mechanical failure only (IO/permissions/tooling)
-
-Do **not** use "BLOCKED" as a status. If you feel blocked, put it in `blockers[]`.
-
-**VERIFIED requires executed evidence.** A critic being "skipped" means the plan is unverified, not verified by default.
-
-## Closed action vocabulary (pack standard)
-
-`recommended_action` MUST be one of:
-
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Routing fields:
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Routing rules:
-- Route fields may be populated for **RERUN** or **BOUNCE**.
-- For `PROCEED` and `FIX_ENV`, set both route fields to `null`.
-- `RERUN` = stay in Flow 2; `route_to_agent` identifies the next station (e.g., `adr-author`).
-- `BOUNCE` = cross-flow dependency; `route_to_flow` must be set.
+- **VERIFIED requires executed evidence** — critic stations must have run and passed
+- **Missing verification = UNVERIFIED** — a skipped critic means the plan wasn't verified, not "verified by default"
+- **Mechanical counts over estimates** — if you can't derive safely, output `null` and explain why
+- **Stable markers preferred** — use consistent patterns for counting (OPT-NNN, QID markers, etc.)
 
 ## Inputs (best-effort)
 
@@ -489,15 +468,6 @@ Write `.runs/<run-id>/plan/cleanup_report.md`:
 ## Run: <run-id>
 ## Completed: <ISO8601 timestamp>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-missing_required: []
-blockers: []
-concerns: []
-
 ## Artifact Verification
 | Artifact | Status |
 |----------|--------|
@@ -558,6 +528,14 @@ Decision spine status: VERIFIED | UNVERIFIED | null
 ## Index Update
 - Updated fields: status, last_flow, updated_at
 - last_flow: plan
+
+## Handoff
+
+**What I did:** Verified <N> plan artifacts, derived mechanical counts, extracted quality gate statuses. <"All gates passed" | "N gates unverified" | "Missing required artifacts">.
+
+**What's left:** <"Plan complete, ready for Flow 3" | "Missing ADR/work_plan" | "Critical gates failed">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ### Step 8: Write `github_report.md` (pre-composed GitHub comment)
@@ -628,19 +606,25 @@ Notes:
 - Keep it concise; link to artifacts rather than quoting them
 - This file is the source of truth for what gets posted
 
-### Step 9: Control-plane return (for orchestrator)
+### Step 9: Handoff Guidelines
 
-At the end of your response, echo:
+Your handoff should tell the orchestrator what happened and what's next:
 
-```markdown
-## Plan Cleanup Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-missing_required: []
-blockers: []
-```
+**When plan is complete and verified:**
+- "Verified all required plan artifacts. design-critic, option-critic, and policy-analyst all passed. ADR shows chosen option OPT-002 with 5 decision drivers. Work plan has 12 subtasks. Ready for Flow 3 (Build)."
+- Next step: Proceed to Flow 3
+
+**When plan is complete but unverified:**
+- "Plan artifacts present but option-critic found 3 major issues. design-optioneer needs to iterate on option distinctness and risk analysis before ADR is decision-ready."
+- Next step: Rerun design-optioneer, then option-critic
+
+**When required artifacts are missing:**
+- "Missing ADR — adr-author needs to run. design_options.md exists and option-critic passed, but no decision was recorded."
+- Next step: Call adr-author
+
+**When mechanical failure:**
+- "Cannot write plan_receipt.json due to permissions error. Fix environment before proceeding."
+- Next step: Fix IO/permissions issue
 
 ## Philosophy
 

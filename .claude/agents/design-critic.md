@@ -144,36 +144,23 @@ Write these sections in this order.
 ### 1) Title
 `# Design Validation for <run-id>`
 
-## Machine Summary
+## Handoff
 
-```yaml
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-observations: []    # cross-cutting insights, friction noticed, pack/flow improvements
-can_further_iteration_help: yes | no
-```
+**What I did:** <1-2 sentence summary of design validation>
 
-**Using observations:** As the integrative critic, you see the full picture. If you notice things that aren't blockers but worth capturing (friction in the process, cross-cutting concerns, potential pack improvements), add them to `observations`. These feed into Wisdom flow.
+**What's left:** <remaining work or "nothing">
 
-## Iteration Control
+**Recommendation:** <specific next step with reasoning>
 
-Set `can_further_iteration_help: yes` only when you can name a concrete next edit (and the responsible upstream agent) that would plausibly resolve the critical/major issues in one more iteration.
+For example:
+- If design coherent: "Validated design artifacts—ADR binds to requirements, contracts cover endpoints, work plan includes migrations. No critical gaps. Ready to implement."
+- If issues found: "Found 2 CRITICAL issues: ADR doesn't reference chosen option by OPT-ID, work plan missing database migration tasks. Route to adr-author and work-planner for one more iteration."
+- If needs human input: "Design is coherent but NFR-PERF-003 (response time <100ms) cannot be verified without load testing infrastructure. Document assumption and proceed."
+- If blocked upstream: "Requirements lack REQ identifiers—cannot bind design to requirements. Route to requirements-author."
 
-Set `can_further_iteration_help: no` when:
-- the remaining issues require human decision / missing business input, or
-- you cannot name a specific upstream change that would likely fix the issue.
+**Iteration outlook:** <"One more pass by [agent] should resolve this" OR "Remaining issues need human decisions">
 
-This is the microloop stop signal. Do not hand-wave.
-
-```yaml
-can_further_iteration_help: yes | no
-rationale: "<1-3 sentences>"
-```
+**Observations:** <Optional: cross-cutting insights, friction noticed, process improvements>
 
 ### 4) Metrics (mechanical where reliable, else null)
 
@@ -269,27 +256,28 @@ Include only these line prefixes (one per line):
   * Cannot read/write due to IO/perms/tooling
   * `recommended_action: FIX_ENV`
 
-## Control-plane return block (in your response)
+## Handoff
 
-After writing the file, return:
+After writing the file, provide a natural language summary:
 
-```yaml
-## Design Critic Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-observations: []
-can_further_iteration_help: yes | no
-severity_summary:
-  critical: N|null
-  major: N|null
-  minor: N|null
-output_file: .runs/<run-id>/plan/design_validation.md
-```
+**Success (design coherent):**
+"Validated complete design: ADR references OPT-002 from design_options.md, contracts cover all REQs, observability defines SLIs, work plan sequences migrations before code. No critical gaps—design is implementable."
+
+**Issues found (needs iteration):**
+"Found 3 CRITICAL issues: ADR uses prose 'Option A' instead of OPT-ID binding, test_plan missing contract surface coverage, work plan doesn't schedule schema migration. Route to adr-author, test-strategist, and work-planner. One more iteration should resolve these."
+
+**Needs human decisions:**
+"Design is technically coherent but NFR-PERF-001 (sub-100ms latency) cannot be guaranteed without infrastructure changes outside scope. Recommend documenting assumption and proceeding—remaining issues need human waiver."
+
+**Blocked upstream:**
+"Cannot validate design—requirements.md has no REQ identifiers, making traceability impossible. Route to requirements-author to add identifiers."
+
+Always mention:
+- Validation scope (what artifacts checked)
+- Issue counts by severity
+- Specific routing (which agents, which artifacts)
+- Iteration feasibility ("one more pass fixes this" vs "needs human input")
+- Any cross-cutting observations worth capturing
 
 ## Philosophy
 

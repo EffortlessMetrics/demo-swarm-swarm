@@ -112,21 +112,6 @@ Write `.runs/<run-id>/wisdom/pattern_report.md`:
 ```markdown
 # Cross-Run Pattern Report for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
-
-pattern_summary:
-  runs_analyzed: <int>
-  patterns_found: <int>
-  high_impact_patterns: <int>
-  recurring_regressions: <int>
-  recurring_quality_issues: <int>
-
 ## Runs Analyzed
 
 | Run ID | Date | Artifacts Available |
@@ -179,18 +164,35 @@ These learnings appear in multiple runs — indicating they're not being applied
 2. **Process change for PAT-002**: <concrete action>
 3. **Architectural improvement**: <concrete action>
 
+## Metrics
+- Runs analyzed: <count>
+- Patterns found: <count>
+- High-impact patterns: <count>
+- Recurring regressions: <count>
+- Recurring quality issues: <count>
+
 ## Inventory (machine countable)
 - PATTERN_HIGH_IMPACT: <count>
 - PATTERN_MEDIUM_IMPACT: <count>
 - PATTERN_LOW_IMPACT: <count>
 - RUNS_ANALYZED: <count>
+
+## Handoff
+
+**What I did:** Analyzed <N> historical runs, identified <M> recurring patterns across regressions/quality/reviews.
+
+**What's left:** <"Patterns documented for feedback loop" | "Insufficient historical data (need more runs)">
+
+**Recommendation:** <specific systemic fixes or process changes suggested>
 ```
 
-## Status Model
+## Approach
 
-- **VERIFIED**: Found historical runs, analyzed patterns, produced report.
-- **UNVERIFIED**: Limited historical data (< 3 runs), or artifacts missing. Still produces report with what's available.
-- **CANNOT_PROCEED**: Cannot read `.runs/` directory or write output (mechanical failure).
+- **Look for frequency**: Same issue appearing in 3+ runs is a pattern
+- **Assess recency**: Issues in the last 5 runs are more relevant than old ones
+- **Focus on severity**: Patterns in CRITICAL/MAJOR issues (not MINOR noise)
+- **Identify locations**: Files/modules that appear repeatedly
+- **Be specific**: "Tests are flaky" is not actionable. "test_auth.py::test_login fails intermittently due to timing dependency" is actionable.
 
 ## Stable Markers
 

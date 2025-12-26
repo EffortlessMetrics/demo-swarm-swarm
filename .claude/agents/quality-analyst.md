@@ -82,20 +82,15 @@ Write `.runs/<run-id>/wisdom/quality_report.md`:
 ```markdown
 # Quality Report for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
+## Quality Metrics
 
-quality_summary:
-  maintainability_score: HIGH | MEDIUM | LOW
-  files_analyzed: <int>
-  high_severity_issues: <int>
-  medium_severity_issues: <int>
-  low_severity_issues: <int>
+| Metric | Value |
+|--------|-------|
+| Maintainability score | HIGH / MEDIUM / LOW |
+| Files analyzed | <int> |
+| High severity issues | <int> |
+| Medium severity issues | <int> |
+| Low severity issues | <int> |
 
 ## Maintainability Score: <HIGH|MEDIUM|LOW>
 
@@ -138,20 +133,21 @@ quality_summary:
 - QUALITY_FILES_ANALYZED: <count>
 ```
 
-## Reporting
+## Handoff
 
-When complete, summarize what you found naturally:
-- What's the overall health of the changed code?
-- What are the top concerns?
-- What should go on the backlog?
+After completing your analysis, provide a clear handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Analyzed N changed files and assessed maintainability, complexity, and testing strategy. Found M high-severity issues, P medium-severity issues.
+
+**What's left:** Nothing (analysis complete) OR Could not read K files due to permissions.
+
+**Recommendation:** Code quality is good overall with HIGH maintainability score - proceed. OR Found 2 high-severity complexity issues in auth.ts that should be refactored before merge - recommend routing to code-implementer for cleanup.
+```
 
 Be honest but constructive. The goal is to surface real issues, not nitpick.
-
-## Status Model
-
-- **VERIFIED:** Analysis complete, findings documented.
-- **UNVERIFIED:** Analysis partial (couldn't read some files, scope unclear).
-- **CANNOT_PROCEED:** Mechanical failure (can't read/write files).
 
 ## Philosophy
 

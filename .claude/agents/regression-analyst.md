@@ -148,29 +148,24 @@ Severity guidance:
 ```markdown
 # Regression Report
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+## Summary
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
+| Metric | Value |
+|--------|-------|
+| Regressions found | <int> |
+| Critical | <int> |
+| Major | <int> |
+| Minor | <int> |
+| Baseline available | yes / no / unknown |
 
-blockers:
-  - <must change to resolve CRITICAL/MAJOR regressions or establish baseline>
+**Blockers:**
+- <must change to resolve CRITICAL/MAJOR regressions>
 
-missing_required:
-  - <path or tool>
+**Missing:**
+- <path or tool>
 
-concerns:
-  - <non-gating issues>
-
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-
-regressions_found: 0
-baseline_available: yes | no | unknown
+**Concerns:**
+- <non-gating issues>
 
 ## Context
 - flow: wisdom
@@ -250,26 +245,21 @@ baseline_available: yes | no | unknown
 * Each regression must have exactly one `REG-NNN` ID.
 * Each detail section heading must start with `### REG-NNN:`.
 
-## Control-plane return (for orchestrator)
+## Handoff
 
-At the end of your response, echo:
+After completing your analysis, provide a clear handoff:
 
 ```markdown
-## Regression Analyst Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
-regressions_found: 0
-blockers: []
-missing_required: []
+## Handoff
+
+**What I did:** Analyzed test results, identified N regressions (M critical, P high), correlated with issues, and performed blame analysis. Baseline was/wasn't available.
+
+**What's left:** Nothing (analysis complete) OR Missing test_critique.md prevents baseline comparison.
+
+**Recommendation:** No critical regressions found - proceed. OR Found 2 critical regressions in auth tests (REG-001, REG-002) - route to test-author to fix failing assertions. OR Found 1 high-severity regression traced to commit abc123 - route to code-implementer to revert breaking change.
 ```
 
-The file is the audit record. This block is the control plane.
+The file is the audit record. The handoff is the routing signal.
 
 ## Philosophy
 

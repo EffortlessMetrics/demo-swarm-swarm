@@ -83,15 +83,6 @@ Read context. Understand intent. Implement the feature.
 ```markdown
 # Implementation Changes Summary for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: 1|2|3|4|5|6|7|null
-route_to_agent: <agent|null>
-blockers: []
-missing_required: []
-concerns: []
-
 ## Implementation Facts
 work_status: COMPLETED | PARTIAL | FAILED
 tests_run: yes | no
@@ -123,30 +114,41 @@ scope_manifest_used: yes | no
 - IMPL_REQ_PARTIAL: REQ-###
 - IMPL_TESTS_RUN: yes|no
 - IMPL_TESTS_PASSED: yes|no|unknown
+
+## Handoff
+
+**What I did:** <1-2 sentence summary of what was implemented>
+
+**What's left:** <remaining work or blockers, or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
-## Status States
+## Handoff
 
-- **VERIFIED**: Implementation complete, tests pass
-- **UNVERIFIED**: Tests failed/couldn't run, specs missing
-- **CANNOT_PROCEED**: Mechanical failure (IO/permissions)
+After writing the implementation summary, provide a natural language summary covering:
 
-## When Stuck
+**Success scenario (implementation complete):**
+- "Implemented AC-001: user authentication with JWT. Modified src/auth/login.ts and src/auth/middleware.ts. All 8 unit tests pass. REQ-001 and REQ-003 fully satisfied. Ready for code-critic review."
 
-1. **Re-read context** — answer is often there
-2. **Peer handoff** — missing context → `route_to_agent: context-loader`
-3. **Assumption** — document it and proceed
-4. **Async question** — append to `open_questions.md`, continue with rest
-5. **Mechanical failure** — only then `CANNOT_PROCEED`
+**Partial completion (some work done):**
+- "Implemented 2 of 3 functions for AC-002. Login flow complete and tested. Logout flow pending—requires session management schema from AC-001. Work status: PARTIAL. Recommend context-loader expand scope or wait for AC-001 completion."
 
-## Reporting
+**Issues found (test failures):**
+- "Implemented REQ-005 password validation but 3 tests failing due to bcrypt version mismatch. Recommend fixer address dependency issue before continuing."
 
-Tell the orchestrator what happened:
-- What changed and why
-- Did tests pass?
-- Any blockers or handoffs?
+**Blocked (missing context):**
+- "Cannot implement AC-003 without database migration. Subtask manifest doesn't include schema files. Recommend context-loader expand scope to include migrations."
 
-Be conversational. The Machine Summary goes in the artifact file.
+**Mechanical failure:**
+- "Cannot write code files due to permissions. Need file system access before proceeding."
+
+**When stuck:**
+1. Re-read context — answer is often there
+2. Peer handoff — missing context → context-loader
+3. Assumption — document it and proceed
+4. Async question — append to open_questions.md, continue with rest
+5. Mechanical failure — only then CANNOT_PROCEED
 
 ## Reporting Philosophy
 

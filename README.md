@@ -1,6 +1,6 @@
 # DemoSwarm
 
-Ops-first SDLC pack for Claude Code.
+SDLC pack for Claude Code.
 
 **Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
 

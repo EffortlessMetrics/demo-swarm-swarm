@@ -241,6 +241,36 @@ Use `### SOL-NNN:` for gap headings:
 ### SOL-002: Untested password reset edge cases
 ```
 
+## Handoff
+
+After writing the solution analysis, provide a natural language handoff:
+
+```markdown
+## Handoff
+
+**What I did:** Traced requirements through BDD to implementation and tests. Found <N> requirements: <verified>/<partial>/<unimplemented>.
+
+**What's left:** Analysis complete.
+
+**Recommendation:** PROCEED to next station.
+
+**Reasoning:** <1-2 sentences summarizing alignment and gaps>
+```
+
+Examples:
+
+```markdown
+## Handoff
+
+**What I did:** Traced requirements through BDD to implementation and tests. Found 5 requirements: 3 VERIFIED / 1 PARTIAL / 1 NOT_IMPLEMENTED.
+
+**What's left:** Analysis complete.
+
+**Recommendation:** PROCEED to next station.
+
+**Reasoning:** Core requirements (REQ-001, REQ-002, REQ-004) fully traced with implementation and tests. REQ-003 missing OAuth implementation (documented gap). REQ-002 has missing edge case tests (identified as SOL-002). Overall: we built what was specified, with documented gaps.
+```
+
 ## Philosophy
 
 The hardest bug to fix is building the wrong thing. Your job is to catch misalignment early—before we ship something that technically works but doesn't solve the user's problem.

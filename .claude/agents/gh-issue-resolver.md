@@ -162,39 +162,49 @@ EOF
 7) **Output control-plane block (only output)**
 - Return the block below. Do not touch the filesystem.
 
-## Output (control plane)
+## Handoff Block (control plane output)
 
 <!-- PACK-CONTRACT: GH_ISSUE_RESULT_V1 START -->
 ## GH Issue Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-action_taken: CREATED | BOUND | REUSED_FROM_RUN_META | SKIPPED_REPO_MISMATCH | DEFERRED_GH_UNAVAILABLE
-repo_actual: <owner/repo | unknown>
-repo_expected: <owner/repo | null>
-repo_mismatch: true | false
-issue_number: <int | null>
-issue_url: <url | null>
-issue_state: OPEN | CLOSED | null
-issue_title: <string | null>
-run_id: <string | null>
-run_id_kind: GH_ISSUE | LOCAL_ONLY | null
-issue_binding: IMMEDIATE | DEFERRED | null
-issue_binding_deferred_reason: gh_unauth | gh_unavailable | null
-github_ops_allowed: true | false
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-notes:
-  - <short notes>
+
+**What I did:** <1-2 sentence summary>
+
+**Run ID:** `<run_id>`
+**Run ID kind:** <GH_ISSUE | LOCAL_ONLY | null>
+**Issue binding:** <IMMEDIATE | DEFERRED | null>
+
+**Action taken:** <CREATED | BOUND | REUSED_FROM_RUN_META | SKIPPED_REPO_MISMATCH | DEFERRED_GH_UNAVAILABLE>
+**Repo (actual):** <owner/repo | unknown>
+**Repo (expected):** <owner/repo | null>
+**Repo mismatch:** <true | false>
+**Issue number:** <int | null>
+**Issue URL:** <url | null>
+**Issue state:** <OPEN | CLOSED | null>
+**Issue title:** <string | null>
+**GitHub ops allowed:** <true | false>
+
+**Recommendation:** <specific next step with reasoning>
+
+**Notes:**
+- <short notes about any special conditions or blockers>
 <!-- PACK-CONTRACT: GH_ISSUE_RESULT_V1 END -->
 
-Status guidance:
-- `VERIFIED`: Issue exists/created and bound (`issue_binding: IMMEDIATE`, `run_id_kind: GH_ISSUE`).
-- `UNVERIFIED`: A `run_id` was produced, but issue binding was deferred (`issue_binding: DEFERRED`) due to policy/trust (`github_ops_allowed: false`) or GH unavailability (`issue_binding_deferred_reason: gh_unavailable|gh_unauth`).
-- `CANNOT_PROCEED`: Mechanical failure (cannot determine repo or cannot parse inputs). `recommended_action: FIX_ENV`.
+## Handoff
 
-Recommended actions:
-- `PROCEED` when `run_id` is set (GH or local-only) even if the requested issue was inaccessible/closed.
-- `BOUNCE` only when policy disallows binding to a closed issue and you could not create a replacement.
-- `RERUN` only when a deterministic retry of this agent will help (e.g., transient gh outage while github_ops_allowed would otherwise be true).
-- `FIX_ENV` for mechanical failures (repo resolution/tooling).
+*Issue created successfully:*
+> "Created new issue #456 from signal text. Run ID: gh-456 (GH_ISSUE, IMMEDIATE binding). GitHub ops allowed. Flow can proceed with Signal."
+
+*Issue bound from reference:*
+> "Bound to existing issue #123. Run ID: gh-123 (GH_ISSUE, IMMEDIATE binding). Issue is OPEN. Flow can proceed with Signal."
+
+*Local-only (repo mismatch):*
+> "Repo mismatch (expected: org/foo, actual: org/bar). Created local-only run ID: local-add-auth-a3f2c1. GitHub ops disabled. Flow proceeds locally without GitHub integration."
+
+*Deferred binding (gh unavailable):*
+> "gh tool not available. Created local-only run ID: local-fix-bug-7b4e8d with DEFERRED binding. GitHub ops allowed (will bind when gh works). Issue binding will happen in gh-issue-manager when access restored."
+
+*Reused from meta:*
+> "Found existing run_meta.json with issue #789. Reused binding. Run ID: gh-789. Flow can proceed."
 
 ## Flow 1 handoff
 
