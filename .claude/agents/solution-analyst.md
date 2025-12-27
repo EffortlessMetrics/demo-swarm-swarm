@@ -66,6 +66,22 @@ For each BDD scenario:
 - Do test assertions match requirement expectations?
 - **Weak verification detection**: Tests that pass but don't verify requirements
 
+### 4b. Sad Path Traceability (Mandatory)
+
+**Flow 1 mandated negative scenarios. Flow 7 confirms they survived Build.**
+
+For each "Negative Scenario" or "Sad Path" in the BDD features:
+1. **Did it run?** Is there a test that exercises this scenario?
+2. **Did it pass?** Check test execution results
+3. **Is it real?** Does the test actually verify the failure mode, or is it a stub?
+
+**Flag as Solution Gap if:**
+- Negative scenario from BDD has no corresponding test
+- Test exists but was skipped/disabled
+- Test passes but doesn't actually assert on the failure behavior
+
+This prevents the common failure mode where happy paths are tested but error handling is never verified.
+
 ### 5. User-Facing Alignment
 
 - If there's a UI component, does it match requirements?
@@ -112,6 +128,7 @@ Identify:
 - **Scenario drift**: Implementation that diverges from BDD
 - **Scope creep**: Code that wasn't in requirements (may be valid)
 - **Weak verification**: Tests that don't actually verify requirements
+- **Missing sad paths**: Negative scenarios from BDD that have no test coverage
 
 ### Step 6: Write Report
 

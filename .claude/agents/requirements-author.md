@@ -63,6 +63,13 @@ No bare `NFR-###`. If you need a new domain, use a short uppercase code and decl
   - `- AC-2: ...`
 - Avoid vague terms ("secure", "appropriate") unless bounded by thresholds or predicates.
 
+### State Transition → REQ binding (mandatory)
+If `problem_statement.md` contains a **State Transitions** section (migrations, schema changes, config changes):
+- You **MUST** create specific `REQ-###` items for the migration/transition logic
+- Examples: "System shall support dual-write during migration", "System shall migrate existing records to new schema"
+- These REQs ensure Flow 3 implements the infrastructure before the logic that depends on it
+- State transition REQs should be early in the REQ sequence (they are foundations)
+
 ### Non-functional requirements (NFR)
 - Must be measurable or verifiable.
 - Use stable markers:

@@ -77,6 +77,17 @@ Include these in your `## Implications for Flow 1` section. The scent trail clos
 
 *If the file doesn't exist, note "No prior wisdom available" and continue. This is not a blocker.*
 
+### Wisdom > History (Priority Rule)
+
+**When Wisdom conflicts with GitHub History, Wisdom wins.**
+
+If the Scent Trail warns against something (e.g., "Library X caused failures in Run 50") but an old GitHub Issue suggests using it (e.g., "Issue #123: Use Library X for caching"):
+- **Explicitly warn Flow 1** in your Implications section
+- Example: "Despite Issue #123 suggesting Redis, recent Wisdom advises against it due to connection pool issues in Run 50."
+- The warning should cite both sources so requirements-author can make an informed decision
+
+Wisdom is recent operational learning. GitHub history may be outdated context.
+
 ### 1) Establish run context + deterministic search terms
 
 Read `.runs/<run-id>/run_meta.json` and extract any available identifiers:

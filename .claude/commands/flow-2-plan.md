@@ -224,8 +224,12 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 5: Write ADR
 - Use `adr-author` to write the ADR.
 
-### Step 6: Define contracts and schema (can run in parallel with steps 7-9)
+### Step 6: Define contracts and schema (FIRST - others depend on this)
 - Use `interface-designer` for contracts/schema/migrations (planned migrations live under the run directory; actual migrations move during Build).
+- **This must complete before Steps 8-9** because:
+  - `test-strategist` reads `schema.md` to plan test data/fixture updates
+  - `test-strategist` reads `api_contracts.yaml` to generate contract-bound ACs
+  - `work-planner` reads `migrations/` to schedule infrastructure subtasks (ST-000)
 
 ### Step 6b: Validate contracts (microloop; recommended)
 - Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.
@@ -252,11 +256,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 
 **Conflict note (default):** If Observability Critic recommends fixes or changes, treat that as an open observability-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
 
-### Step 8: Plan testing (parallel)
+### Step 8: Plan testing (after interface-designer)
 - Use `test-strategist` to write the test plan (incorporate Signal BDD + verification notes).
+- **Requires:** `schema.md` (for fixture planning) and `api_contracts.yaml` (for contract-to-AC binding)
 
-### Step 9: Plan work (parallel)
+### Step 9: Plan work (after interface-designer)
 - Use `work-planner` — "produce subtask index + work plan".
+- **Requires:** `migrations/` (to sequence infrastructure subtasks as ST-000 prerequisites)
 
 ### Step 10: Validate design (microloop)
 - Use `design-critic` to validate the design.
@@ -422,7 +428,11 @@ Use `plan_receipt.json` (primary) and the latest critic handoffs (secondary) to 
 
 ## Notes
 
-- Steps 6-9 can run in parallel after `adr-author` completes
+- **Lane dependencies (Materials-First sequencing):**
+  - `interface-designer` (Step 6) must complete first — produces `schema.md`, `api_contracts.yaml`, `migrations/`
+  - `observability-designer` (Step 7) can run in parallel with Step 6
+  - `test-strategist` (Step 8) depends on Step 6 outputs (contract-to-AC binding, fixture planning)
+  - `work-planner` (Step 9) depends on Step 6 outputs (infrastructure subtask sequencing)
 - `design-critic` reviews ALL artifacts before policy check
 - `option-critic` critiques options before ADR authoring
 - Human gate at end: "Is this the right design?"

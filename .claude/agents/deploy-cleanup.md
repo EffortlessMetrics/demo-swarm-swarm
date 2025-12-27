@@ -348,9 +348,18 @@ Write `.runs/<run-id>/deploy/cleanup_report.md`:
 **Recommendation:** <specific next step with reasoning>
 
 For example:
-- If deployment successful: "Sealed deployment receipt—merge completed, tag created, CI passing. Deployment verdict: STABLE. Ready for Flow 7 (Wisdom)."
+- If deployment successful: "Sealed deployment receipt—merge completed to origin/main, tag created, CI passing. Deployment verdict: STABLE. Ready for Flow 7 (Wisdom). Note: upstream integration requires separate human action."
 - If not deployed: "Deployment blocked by gate verdict BOUNCE. Documented reasons in receipt."
 - If verification incomplete: "Deployment attempted but cannot verify governance enforcement. Receipt status: UNVERIFIED."
+
+## Upstream Status Reminder
+
+**Always include in the cleanup report:**
+
+The code is now safe in `origin/main` (the swarm's mainline). **Upstream integration is a separate concern:**
+- This pack does NOT automatically merge to upstream
+- Human action required: sync/PR to upstream when ready
+- Run `/flow-7-wisdom` to extract learnings before upstream export
 
 ## Metadata
 

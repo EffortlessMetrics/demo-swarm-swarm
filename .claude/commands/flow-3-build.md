@@ -85,7 +85,11 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 3. **code-implementer**: Implement to pass tests
 4. **code-critic**: Verify implementation is honest
 5. **test-executor**: Confirm tests pass (AC-scoped); reports AC status in handoff
-6. **build-cleanup** (or `ac-tracker` if added): Updates `ac_status.json` based on test-executor result
+6. **Post-Green Polish Decision:** Read `code_critique.md`. If `can_further_iteration_help: yes` and issues are fixable within AC scope:
+   - Run `code-implementer` (Polish) → `test-executor` (Verify) one time
+   - Then proceed regardless of outcome
+7. **build-cleanup** (or `ac-tracker` if added): Updates `ac_status.json` based on test-executor result
+8. **Save Game Routine:** Push + wake bots + harvest (see below)
 
 **Note:** The orchestrator routes on `test-executor`'s handoff. It does NOT parse `ac_status.json` directly. The cleanup agent owns state file updates.
 
@@ -146,14 +150,23 @@ When `test-executor` returns Green, **read the latest `code-critic` report** bef
 
 **The single polish pass rule:** One extra iteration to clean up what the critic found. Not an infinite loop of gold-plating. One pass, then proceed.
 
-**After first vertical slice (AC-1 complete):**
-1. Call `repo-operator`: checkpoint push
-2. Call `pr-creator`: create Draft PR (gets bots spinning early)
-3. Call `pr-feedback-harvester`: check for CRITICAL blockers only
-   - Route top 1-3 blockers to appropriate agent
-   - Continue AC loop (don't drain the full list - Flow 4 owns that)
+**The "Save Game" Routine (Push & Pulse):**
 
-**Checkpoint cadence:** Push after every 3-5 ACs. Feedback check after each push.
+After **any** AC completion, execute the Save Game Routine:
+
+1. **Sanitize:** Call `secrets-sanitizer` (gate staged changes)
+2. **Persist:** Call `repo-operator` to **checkpoint & push** (save to origin)
+3. **Wake Bots:** Call `pr-creator` (only creates if missing; idempotent)
+4. **Harvest:** Call `pr-feedback-harvester`:
+   - **Check:** Did a previous push trigger a CRITICAL CI failure?
+   - **Action:** If yes, route blocker to appropriate agent before next AC. If no (or pending), continue.
+
+**Resume-safe Pulse Check:** If a run resumes mid-flow:
+- Check: `ac_completed >= 1` AND `pr_number` is null (in `run_meta.json`)
+- If true: Execute Save Game Routine immediately (ensures PR exists even on resume)
+- If false (PR already exists): Continue with normal loop
+
+**Why push per AC:** Data safety (never lose more than 1 AC of work) + bot latency (CI runs on AC-1 while you implement AC-2). By the time AC-2 is done, AC-1's CI results are ready to harvest. It pipelines the waiting time.
 
 ### Step 5: Global Hardening
 

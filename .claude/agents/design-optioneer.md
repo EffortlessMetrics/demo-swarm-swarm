@@ -23,6 +23,9 @@ Primary:
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/problem_statement.md`
 
+Wisdom (mandatory check):
+- `.runs/_wisdom/latest.md` (if present) — **The Scent Trail**
+
 Supporting (use if present):
 - `.runs/<run-id>/plan/impact_map.json`
 - `.runs/<run-id>/signal/early_risks.md`
@@ -30,6 +33,19 @@ Supporting (use if present):
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/stakeholders.md`
 - `.runs/<run-id>/signal/open_questions.md`
+
+### Wisdom Check (The "Scent Trail" - Mandatory)
+
+**Before proposing options**, check for and read `.runs/_wisdom/latest.md` (if present).
+
+Extract:
+- **Negative Constraints**: Technologies/patterns/approaches to avoid (e.g., "Redis caused connection pool issues", "Avoid event sourcing for simple CRUD")
+- **Positive Patterns**: What worked well in prior runs
+- **Known Pitfalls**: Common failure modes in this codebase
+
+**Critical rule:** If Wisdom warns against a specific technology or pattern, you **must not** propose it as a valid option unless you explicitly address the cited failure mode with a mitigation. Add a note in the option's Risks section referencing the Wisdom warning.
+
+If `.runs/_wisdom/latest.md` doesn't exist, note "No prior wisdom available" and continue.
 
 ## Output
 
