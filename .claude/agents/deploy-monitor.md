@@ -37,17 +37,14 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 - `UNVERIFIED` — report written but CI/deploy evidence could not be obtained (auth/tooling/unknown identifiers).
 - `CANNOT_PROCEED` — mechanical failure only (cannot write required output due to IO/permissions).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Populate in Machine Summary:
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Rules:
-- If `status: CANNOT_PROCEED` ⇒ `recommended_action: FIX_ENV`
-- Otherwise default `recommended_action: PROCEED` (Flow 6 continues to smoke-verifier + deploy-decider)
-- Do **not** mint new action words (no ROLLBACK as an action; that's a deploy-decider verdict).
+Use natural language in your handoff to communicate next steps:
+- CI evidence gathered and passing → recommend proceeding to smoke-verifier
+- CI evidence gathered but failing → recommend proceeding with failures documented (deploy-decider will evaluate)
+- Not deployed (gate BOUNCE) → recommend proceeding (this is the correct state)
+- Cannot access CI evidence (auth/tooling) → recommend proceeding with limitations documented
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Evidence discipline
 
@@ -197,7 +194,7 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 - If MERGE and you have concrete CI URLs/results ⇒ status can be VERIFIED (even if CI failed; that's still evidence).
 - If CI/deploy evidence cannot be obtained due to tooling/auth/unknown identifiers ⇒ UNVERIFIED with explicit concerns.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

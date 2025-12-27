@@ -60,6 +60,8 @@ This is a map, not a permission boundary:
 - "Flow 3 outputs to `.runs/<run-id>/build/` + project code" (intent)
 - repo-operator figures out what files to stage (execution)
 
+**Agents are not restricted to the intent surface.** If a code-implementer needs to edit a utility file not mentioned in the manifest, they edit it. The critic checks for scope discipline afterward — that's the guardrail, not preventative file restrictions.
+
 **Extras are normal:** Ad-hoc fixes (typos, config tweaks) get staged and recorded, not blocked.
 
 **Anomalies are rare:** Only tracked/staged changes outside the intent surface trigger push blocks—and even then, the commit proceeds locally.
@@ -133,6 +135,32 @@ When conflicts arise (git, semantic, or otherwise):
 - **Provide context when escalating** - Explain what you tried and why you couldn't resolve it
 
 Agents should behave like senior engineers who can solve most problems themselves and only escalate the genuinely difficult ones.
+
+### Autonomy Philosophy: Roles + Guardrails (Not Permissions + Handcuffs)
+
+**Core principle:** Tell agents what TO DO, not what NOT to do. Trust them to figure out what they need.
+
+**The anti-pattern (handcuffs):**
+- Allowlists that restrict which files an agent can touch
+- Manifests that define "permitted" file paths
+- "Stop and ask permission" protocols for reading context
+- Denylists that forbid certain operations
+
+**The correct pattern (roles + guardrails):**
+- **Role focus:** "Your mission is to write tests for this AC"
+- **Autonomy:** "You can read any file you need. You can edit files to make code testable."
+- **Detective guardrails:** Critics evaluate afterward — quality, correctness, whether it solves the problem
+
+**Why this matters:**
+- Allowlists assume the planner is omniscient — they're not
+- "Stop and ask" creates token-burning loops for basic exploration
+- Agents are intelligent — they can determine what they need by searching and reading
+- Critics evaluate quality afterward — does it work? does it solve the problem?
+
+**Practical implications:**
+- `context-loader` is an **accelerator** (optional starting point), not a gate
+- Workers can explore beyond the manifest if they need more context
+- Critics evaluate quality and whether the implementation solves the problem
 
 ---
 
@@ -393,6 +421,29 @@ This is structural, not a constraint. The `work-planner` designs dependency grap
 - Critics validate that dependencies flow downward (foundations → walls → roof)
 
 **Example:** `ST-001: Create sessions table` has no dependencies. `ST-002: Implement login flow` has `depends_on: ["ST-001"]`.
+
+### Law 7: Local Resolution (The "Zero-Wait" Rule)
+
+**Mismatches between "Plan" and "Reality" are normal. Resolve them locally first.**
+
+When an agent hits a logic gap, design contradiction, or implementation snag:
+
+1. **Don't bail to a previous flow.** Machine time is cheap relative to human interrupt.
+2. **Call a reasoning agent within the current flow.** Route to `design-optioneer`, `adr-author`, or `impact-analyzer` to provide a surgical fix.
+3. **Re-plan locally.** Have the specialist update `ac_matrix.md` or `work_plan.md` in-place.
+4. **Resume.** Hand the micro-fix back to the implementer.
+
+**BOUNCE only when:**
+- The specialists agree the entire architecture is invalid
+- The fix requires upstream stakeholder decisions
+- Multiple flows worth of work needs revisiting
+
+**The bar for flow-level bounces is high.** 2-3 surgical agent calls are always cheaper and faster than a full context switch.
+
+**Practical application (Flow 3):**
+- `code-critic` says "This violates the ADR's performance constraint"
+- PM move: Call `design-optioneer` to propose a scoped alternative
+- Result: 2 agent calls later, the build is back on track. No human interrupt required.
 
 ---
 

@@ -321,7 +321,7 @@ Use `- **MAINT-NNN**:` for issue markers:
 - **MAINT-002**: Email validation duplicated
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the analysis report, provide a natural language handoff:
 

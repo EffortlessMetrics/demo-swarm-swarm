@@ -133,7 +133,7 @@ Write `.runs/<run-id>/wisdom/quality_report.md`:
 - QUALITY_FILES_ANALYZED: <count>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After completing your analysis, provide a clear handoff:
 

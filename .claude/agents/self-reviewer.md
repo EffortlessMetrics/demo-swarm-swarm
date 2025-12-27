@@ -169,7 +169,7 @@ Rationale: <1 short paragraph grounded in critic statuses + mismatch check>
 * If remaining issues require design/spec answers → `recommended_action: BOUNCE`, set `route_to_flow: 2` (Plan) or `1` (Signal).
 * If everything is clean → `status: VERIFIED`, `recommended_action: PROCEED`.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the self review, provide a natural language handoff:
 

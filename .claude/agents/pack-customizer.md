@@ -315,7 +315,7 @@ Write:
 2. Run `/flow-1-signal "<small test feature>"` in Claude Code
 ```
 
-## Handoff
+## Handoff Guidelines
 
 Your handoff should tell the orchestrator what happened and what to do next:
 

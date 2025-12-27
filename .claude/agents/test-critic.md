@@ -63,21 +63,6 @@ Bounded taste check:
 - Error paths covered
 - Edge cases from requirements
 
-### 6. Honest Diff Check
-
-**Simple rule:** If tests were deleted but the code they tested still exists → flag it.
-
-Look at test count changes:
-- Fewer tests passing than before?
-- Tests removed but coverage "improved"?
-
-**Suspicious patterns:**
-- Tests deleted, code remains → FLAG [CRITICAL]
-- All tests pass but fewer exist → FLAG [MAJOR]
-
-**Not suspicious:**
-- Tests deleted alongside the code they tested → ALLOW
-
 ## Output Format
 
 ```markdown
@@ -123,11 +108,27 @@ Look at test count changes:
 
 ## Severity Definitions
 
-- **CRITICAL**: Core REQ has no tests, tests fail for core functionality, suspicious test deletion
+- **CRITICAL**: Core REQ has no tests, tests fail for core functionality
 - **MAJOR**: Weak assertions, missing edge cases, xfailed non-deferred tests
 - **MINOR**: Naming issues, minor improvements
 
-## Handoff
+## Explain What's Wrong, Not Just Where
+
+For each finding, explain:
+1. **What the issue is** (missing coverage, weak assertion, fragile pattern)
+2. **Why it matters** (can't verify REQ? hides bugs? breaks on refactor?)
+3. **What fix looks like** (add test for X, strengthen assertion to check Y)
+
+**Sparse (bad):**
+- `[MAJOR] tests/auth.test.ts::test_login — weak assertions`
+
+**Rich (good):**
+- `[MAJOR] tests/auth.test.ts::test_login — only checks status code 200, not response body. Can't verify REQ-001 claim that JWT is returned. Fix: add assertion for `response.body.token` existence and format.`
+
+**Coverage gaps should explain why:**
+| REQ-002 | [NO TESTS] | N/A | Blocked: depends on Session model (AC-002). Defer until AC-002 implemented. |
+
+## Handoff Guidelines
 
 Your handoff tells the orchestrator what happened and what to do next.
 

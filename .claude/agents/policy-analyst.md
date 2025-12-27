@@ -210,7 +210,7 @@ OR
 **Recommendation:** <specific next step with reasoning>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 Your handoff should tell the orchestrator what compliance state was found and what to do about it:
 

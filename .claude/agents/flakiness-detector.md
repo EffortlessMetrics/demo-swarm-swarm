@@ -34,20 +34,13 @@ Optional:
 - `UNVERIFIED`: report written but classification was partial, inputs missing, or results indicate actionable instability (deterministic or flaky failures present).
 - `CANNOT_PROCEED`: cannot write output due to IO/perms/tooling.
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-`recommended_action` MUST be one of: `PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-`route_to_flow`: `3 | null` (required for BOUNCE)
-
-`route_to_station`: `<string | null>` — free-text hint (e.g., "test-executor", "test-author") when you know the station but aren't certain the agent enum is valid
-
-`route_to_agent`: `test-author | code-implementer | pack-customizer | null` — strict enum, only set when certain
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- Populate `route_to_*` only when `recommended_action: BOUNCE`
-- **Never guess agent names.** If uncertain, use `route_to_station` hint + `route_to_agent: null`
+Use natural language in your handoff to communicate next steps:
+- No failures to classify → recommend proceeding (flow can continue)
+- Deterministic regressions found → recommend code-implementer to fix the specific failing tests
+- Flaky failures found → recommend test-author to stabilize or quarantine the flaky tests
+- Environment/tooling issues → explain what's broken and needs fixing before tests can run
 
 ## Execution (deterministic)
 
@@ -159,7 +152,7 @@ Write `.runs/<run-id>/build/flakiness_report.md` in exactly this structure:
 - FLAKE_ITEM: FLK-003 kind=ENV_TOOLING
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

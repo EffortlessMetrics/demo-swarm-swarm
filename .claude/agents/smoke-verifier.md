@@ -149,7 +149,7 @@ notes:
     - `recommended_action: FIX_ENV`
     - `route_to_*: null`
 
-## Handoff
+## Handoff Guidelines
 
 After writing/appending the smoke verification section, provide a natural language handoff:
 

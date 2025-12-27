@@ -33,18 +33,12 @@ Write exactly one file:
    - `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
    - `CANNOT_PROCEED` is mechanical failure only (IO/permissions prevents reading/writing required paths).
 
-## Control-plane routing (pack standard)
+## Routing Guidance
 
-Closed action enum:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Guidance for this author station:
-- If you can write `requirements.md`, your next step is almost always `PROCEED` (to `requirements-critic`).
-- If `problem_statement.md` is missing (not an IO failure), write best-effort but set `status: UNVERIFIED` and `recommended_action: BOUNCE`, `route_to_agent: problem-framer`.
-- If you cannot read/write due to IO/permissions, set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
-
-Route fields:
-- Populate `route_to_agent` / `route_to_flow` only when `recommended_action` is `BOUNCE`. Otherwise set both to `null`.
+Use natural language in your handoff to communicate next steps:
+- If you successfully write `requirements.md` → recommend proceeding to `requirements-critic`
+- If `problem_statement.md` is missing → write best-effort requirements but recommend routing to `problem-framer` first
+- If you cannot read/write due to IO/permissions → explain the mechanical failure
 
 ## Typed NFR ID Contract (mandatory)
 
@@ -85,10 +79,10 @@ No bare `NFR-###`. If you need a new domain, use a short uppercase code and decl
 ## Behavior
 
 ### Step 0: Preflight
-- If you cannot write `.runs/<run-id>/signal/requirements.md` due to IO/permissions → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, populate `missing_required`, stop.
+- If you cannot write `.runs/<run-id>/signal/requirements.md` due to IO/permissions → report blocked in handoff, explain the failure.
 - If `problem_statement.md` does not exist:
   - Write best-effort requirements with explicit assumptions.
-  - Set `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: problem-framer`.
+  - Report as incomplete in handoff; recommend routing to `problem-framer` first.
 
 ### Step 1: Apply critique first (if present)
 If `.runs/<run-id>/signal/requirements_critique.md` exists:
@@ -169,7 +163,7 @@ The system shall <compliance constraint>.
 * `UNVERIFIED`: You produced the file, but some items remain underspecified (record them in `blockers` and/or `concerns`).
 * `CANNOT_PROCEED`: IO/permissions prevented reading/writing.
 
-## Handoff
+## Handoff Guidelines
 
 After writing requirements, provide a clear handoff:
 

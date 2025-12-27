@@ -496,7 +496,7 @@ When an item is `SKIPPED`, it must include a `skip_reason` from this closed enum
 
 The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 
-## Handoff
+## Handoff Guidelines
 
 After completing your work, provide a clear handoff. The format varies by mode:
 

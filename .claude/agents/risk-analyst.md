@@ -70,14 +70,14 @@ Use:
 - `UNVERIFIED` — missing inputs, or CRITICAL/HIGH risks exist without a mitigation/acceptance plan, or evidence is insufficient
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
 
-### Control-plane routing (closed enum)
+### Routing Guidance
 
-Use only:
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-And express specifics via:
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
+Use natural language in your handoff to communicate next steps:
+- All CRITICAL/HIGH risks mitigated or accepted → recommend proceeding
+- CRITICAL/HIGH risks need spec/design changes → recommend routing to Flow 1 or 2
+- CRITICAL/HIGH risks need implementation fixes → recommend routing to Flow 3 (code-implementer)
+- Analysis incomplete due to missing artifacts → recommend rerunning after artifacts available
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Risk taxonomy
 
@@ -193,7 +193,7 @@ Each risk must have:
 - `UNVERIFIED`: Missing inputs OR CRITICAL/HIGH risks lack mitigation/acceptance plan OR evidence is insufficient.
 - `CANNOT_PROCEED`: Cannot read/write required paths due to IO/permissions/tooling.
 
-## Handoff
+## Handoff Guidelines
 
 After completing your risk assessment, provide a clear handoff:
 

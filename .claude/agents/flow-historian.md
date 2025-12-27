@@ -202,7 +202,7 @@ Recommended action guidance:
 * If timeline is usable but incomplete due to environment/tooling: `recommended_action: PROCEED` or `RERUN` (choose based on whether rerun could plausibly fill gaps)
 * If mechanical failure: `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

@@ -32,20 +32,13 @@ Write exactly one file:
    - `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
    - `CANNOT_PROCEED` is mechanical failure only (IO/permissions prevents reading/writing required paths).
 
-## Control-plane routing (pack standard)
+## Routing Guidance
 
-Use this closed action enum everywhere:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Routing intent:
-- `RERUN` = rerun within Flow 1 (typically `requirements-author`).
-- `BOUNCE` = upstream dependency outside this station (e.g., missing/incorrect problem framing → `problem-framer` or Flow 1 rerun from earlier step).
-- `PROCEED` even when human judgment is needed; capture the decision points in assumptions/open questions with suggested defaults.
-- `FIX_ENV` only when `status: CANNOT_PROCEED`.
-
-Route fields:
-- `route_to_agent`: set when `recommended_action` is `RERUN` or `BOUNCE`.
-- `route_to_flow`: set only when you explicitly mean "go to another flow" (rare for this agent; usually null).
+Use natural language in your handoff to communicate next steps:
+- If requirements need fixes → recommend rerunning `requirements-author` with your worklist
+- If upstream dependency is broken (e.g., problem framing) → recommend routing to `problem-framer`
+- If work is complete or issues require human judgment → recommend proceeding with blockers documented
+- If mechanical failure → explain what's broken
 
 ## Severity definitions
 
@@ -72,8 +65,8 @@ If you cannot reliably enumerate (file missing or unreadable), set the relevant 
 
 ### Step 0: Preflight
 
-- If you cannot read `.runs/<run-id>/signal/requirements.md` due to IO/permissions → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, populate `missing_required`, stop.
-- If the file simply does not exist (author hasn't run) → `status: UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: requirements-author`, and continue by writing a short critique that states what's missing.
+- If you cannot read `.runs/<run-id>/signal/requirements.md` due to IO/permissions → report blocked in handoff, explain the failure.
+- If the file simply does not exist (author hasn't run) → report as incomplete, recommend routing to `requirements-author`, and write a short critique that states what's missing.
 
 ### Step 1: Parse and index requirements
 
@@ -216,7 +209,7 @@ Use exactly this structure:
 - `CANNOT_PROCEED` only for IO/permissions failures.
   - `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After completing your critique, provide a clear handoff:
 

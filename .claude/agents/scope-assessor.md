@@ -202,7 +202,7 @@ Heuristic guidance (use if counts are available):
 * `UNVERIFIED`: missing inputs, markers absent, or estimate is driven by assumptions/unknowns.
 * `CANNOT_PROCEED`: IO/permissions prevents writing outputs.
 
-## Handoff
+## Handoff Guidelines
 
 After writing all outputs, provide a natural language handoff:
 

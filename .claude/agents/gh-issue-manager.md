@@ -467,7 +467,7 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 - <warnings, e.g. "gh unauthenticated; skipped", "issue body markers missing; inserted new board", "issue edit failed; leaving body unchanged">
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

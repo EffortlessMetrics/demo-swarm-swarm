@@ -159,7 +159,7 @@ Do not rename these prefixes.
 
 **Recommendation:** <specific next step with reasoning>
 
-## Handoff
+## Handoff Guidelines
 
 After writing the critique file, provide a natural language summary covering:
 

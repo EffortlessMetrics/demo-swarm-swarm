@@ -185,7 +185,7 @@ State what you found clearly:
 - "HIGH_RISK: Deleted `test_auth.py` without removing the code it tested. Flagged for Gate review."
 - "UNVERIFIED: Lint found 3 errors requiring manual fixes."
 
-## Handoff
+## Handoff Guidelines
 
 After writing the standards report, provide a natural language handoff:
 

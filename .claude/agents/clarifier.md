@@ -293,7 +293,7 @@ When the orchestrator sees `immediate_blocker: true`, it should:
 - No reversible default exists
 - Proceeding without the answer would cause incorrect behavior (not just suboptimal)
 
-## Handoff
+## Handoff Guidelines
 
 After writing the open questions register, provide a natural language summary covering:
 

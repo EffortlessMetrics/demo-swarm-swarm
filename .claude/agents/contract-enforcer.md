@@ -247,7 +247,7 @@ endpoints_checked: 0
 
 If you cannot safely count contract endpoints (missing inventory and OpenAPI parsing ambiguous), set `endpoints_in_contract: null` and add a concern.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

@@ -36,27 +36,17 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot wri
 - `UNVERIFIED`: critique produced but key inputs missing, or critique reveals material doc gaps/mismatches.
 - `CANNOT_PROCEED`: cannot write output due to IO/perms/tooling.
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-`recommended_action` MUST be one of: `PROCEED | RERUN | BOUNCE | FIX_ENV`
+Use natural language in your handoff to communicate next steps:
+- Docs are current and accurate → recommend proceeding
+- Stale docs fixable by doc-writer → recommend doc-writer cleanup pass (note if "one pass should fix this")
+- Spec/contract mismatch → recommend routing to Flow 2 (interface-designer or adr-author)
+- Implementation mismatch → recommend routing to Flow 3 (code-implementer)
+- No actionable worklist → recommend proceeding (keep notes informational)
+- Mechanical failure → explain what's broken and needs fixing
 
-`route_to_flow`: `3 | 2 | null`
-
-`route_to_agent`: `doc-writer | code-implementer | interface-designer | adr-author | null`
-
-`can_further_iteration_help`: `yes | no`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- Populate `route_to_*` only when `recommended_action: BOUNCE`
-- Doc gaps that `doc-writer` can fix in a cleanup pass: `recommended_action: RERUN`, routes null, `can_further_iteration_help: yes`
-- Spec/contract mismatch: `BOUNCE` to Flow 2 (`interface-designer` or `adr-author`)
-- Implementation mismatch (docs would be lying unless code changes): `BOUNCE` to Flow 3 `code-implementer`
-- `recommended_action: PROCEED` implies no actionable worklist: do not emit any `DOC-CRIT-*` items; keep the remaining notes informational (e.g., "gotchas" and verification guidance).
-
-Set `can_further_iteration_help`:
-- `yes` when a single doc-writer cleanup pass would materially reduce risk (missing steps, stale surfaces, unclear verification)
-- `no` when further doc iteration won't help without code/spec changes, or the remaining gaps are deliberately deferred
+In your handoff, indicate whether further iteration would help ("One doc-writer pass should fix this" vs "Needs code/spec changes first").
 
 ## Behavior
 
@@ -118,7 +108,7 @@ For example:
  - (If none) <leave empty>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

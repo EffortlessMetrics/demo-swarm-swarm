@@ -22,18 +22,15 @@ You validate that the planned contract surface is coherent, complete enough to i
 - `UNVERIFIED` - issues exist; write a complete report.
 - `CANNOT_PROCEED` - mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Use:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when you set `route_to_flow` and/or `route_to_agent`
-- Plan-local fixes → `recommended_action: RERUN` and set `route_to_agent`
-- Upstream spec must change → `recommended_action: BOUNCE`, `route_to_flow: 1`
-- Human judgment/waiver needed → `recommended_action: PROCEED` (UNVERIFIED with blockers)
-- **Microloop invariant:** If you provide any writer-addressable Plan-local fixes, use `recommended_action: RERUN` and `can_further_iteration_help: yes`. Use `recommended_action: PROCEED` only when no further Plan writer pass can reasonably clear the remaining notes (informational only, or requires upstream/human decisions).
+Use natural language in your handoff to communicate next steps:
+- Contracts are coherent and testable → recommend proceeding to implementation
+- Contract/schema issues found → recommend interface-designer address specific gaps
+- Test plan mapping missing → recommend test-strategist add contract surface coverage
+- Requirements ambiguous/untestable → recommend routing to Flow 1 (requirements-author)
+- Iteration would help (writer-addressable issues) → recommend rerunning interface-designer
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Inputs (best-effort)
 
@@ -164,7 +161,7 @@ Include only these line prefixes (one per line):
 - Requirements ambiguous/untestable → `recommended_action: BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author`
 - Mechanical IO/perms failure → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

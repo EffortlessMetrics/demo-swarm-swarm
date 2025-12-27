@@ -217,7 +217,7 @@ Notes:
 **Output:** `.runs/<run-id>/gate/fix_forward_report.md`
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

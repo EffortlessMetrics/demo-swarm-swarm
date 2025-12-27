@@ -220,7 +220,7 @@ subtasks:
 | `code_roots` | Directories where implementation code lives. |
 | `test_roots` | Directories where tests live. |
 | `doc_paths` | Specific doc files that may need updates. |
-| `allow_new_files_under` | Directories where Build agents may create new files. Files outside require `context-loader` re-scoping. |
+| `allow_new_files_under` | Suggested directories where Build agents may create new files. (Agents can create files elsewhere if needed — critic checks scope.) |
 
 ### Status lifecycle
 
@@ -305,7 +305,7 @@ Context-loader will expand these patterns via filesystem search. If a pattern ma
 - **UNVERIFIED**: Plan exists but depends on assumptions or missing inputs; blockers documented.
 - **CANNOT_PROCEED**: You cannot read required inputs due to IO/permissions/tooling failure (include the paths in `missing_required`).
 
-## Handoff
+## Handoff Guidelines
 
 After writing the work plan and subtasks.yaml, provide a natural language handoff:
 

@@ -319,7 +319,7 @@ No Gate bounces in this run.
 - PROC_FLOWS_RERUN: <count>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After completing your analysis, provide a clear handoff:
 

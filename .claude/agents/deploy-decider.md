@@ -334,7 +334,7 @@ For example:
 - If CI missing: "No CI workflows found. Cannot verify governance. Route to test-author to add CI configuration."
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

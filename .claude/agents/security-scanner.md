@@ -182,7 +182,7 @@ Counting rule:
 * `findings_total` = `severity_summary.critical + severity_summary.major + severity_summary.minor`
   No estimates.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the security scan report, provide a natural language handoff:
 

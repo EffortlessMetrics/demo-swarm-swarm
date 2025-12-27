@@ -90,7 +90,7 @@ If you can't verify (because files missing), record as note and set UNVERIFIED (
 - <highest leverage next actions>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the audit, provide a natural language summary covering:
 
