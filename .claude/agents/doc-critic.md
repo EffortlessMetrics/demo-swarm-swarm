@@ -108,7 +108,7 @@ For example:
  - (If none) <leave empty>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

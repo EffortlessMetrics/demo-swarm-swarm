@@ -433,7 +433,7 @@ Notes:
 - Keep it concise; link to artifacts rather than quoting them
 - This file is the source of truth for what gets posted
 
-## Handoff
+## Handoff Guidelines
 
 After writing the receipt and reports, provide a natural language handoff:
 

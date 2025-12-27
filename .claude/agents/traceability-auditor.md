@@ -219,7 +219,7 @@ concerns: []
 - TRS_AC_SCENARIO_UNLINKED: ...
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the traceability audit, provide a natural language handoff:
 

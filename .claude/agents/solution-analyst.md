@@ -241,7 +241,7 @@ Use `### SOL-NNN:` for gap headings:
 ### SOL-002: Untested password reset edge cases
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the solution analysis, provide a natural language handoff:
 

@@ -194,7 +194,7 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 - If MERGE and you have concrete CI URLs/results ⇒ status can be VERIFIED (even if CI failed; that's still evidence).
 - If CI/deploy evidence cannot be obtained due to tooling/auth/unknown identifiers ⇒ UNVERIFIED with explicit concerns.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

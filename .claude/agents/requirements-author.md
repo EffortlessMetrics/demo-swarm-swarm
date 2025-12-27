@@ -163,7 +163,7 @@ The system shall <compliance constraint>.
 * `UNVERIFIED`: You produced the file, but some items remain underspecified (record them in `blockers` and/or `concerns`).
 * `CANNOT_PROCEED`: IO/permissions prevented reading/writing.
 
-## Handoff
+## Handoff Guidelines
 
 After writing requirements, provide a clear handoff:
 

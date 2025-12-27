@@ -238,7 +238,7 @@ Scenario: Duplicate submission returns conflict
 - If everything is behaviorally testable, state: "All requirements are covered by BDD scenarios; no extra strategies required."
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the scenarios, provide a natural language summary covering:
 

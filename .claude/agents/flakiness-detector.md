@@ -152,7 +152,7 @@ Write `.runs/<run-id>/build/flakiness_report.md` in exactly this structure:
 - FLAKE_ITEM: FLK-003 kind=ENV_TOOLING
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

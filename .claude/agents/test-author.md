@@ -246,7 +246,7 @@ Set:
 - `recommended_action: FIX_ENV`
 - `route_to_*: null`
 
-## Handoff
+## Handoff Guidelines
 
 After writing tests and the summary, provide a natural language handoff:
 

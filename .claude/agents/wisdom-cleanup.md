@@ -352,7 +352,7 @@ _Updated by wisdom-cleanup at <timestamp>_
 4. Do not reorder `.runs/index.json`.
 5. This runs before secrets-sanitizer; do not attempt any publishing.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the wisdom receipt and reports, provide a natural language handoff:
 

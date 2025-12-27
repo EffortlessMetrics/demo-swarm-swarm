@@ -186,7 +186,7 @@ suggested_default: <OPT-00N | null>
 confidence: High | Medium | Low
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

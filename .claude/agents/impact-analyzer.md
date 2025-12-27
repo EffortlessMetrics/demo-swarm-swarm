@@ -183,7 +183,7 @@ Your affected register must be a map of **Evidence**, not a list of **Guesses**.
 
 Use sequential `IMP-NNN` IDs starting at `IMP-001` in `affected`.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the impact map JSON, provide a natural language handoff:
 

@@ -305,7 +305,7 @@ Context-loader will expand these patterns via filesystem search. If a pattern ma
 - **UNVERIFIED**: Plan exists but depends on assumptions or missing inputs; blockers documented.
 - **CANNOT_PROCEED**: You cannot read required inputs due to IO/permissions/tooling failure (include the paths in `missing_required`).
 
-## Handoff
+## Handoff Guidelines
 
 After writing the work plan and subtasks.yaml, provide a natural language handoff:
 

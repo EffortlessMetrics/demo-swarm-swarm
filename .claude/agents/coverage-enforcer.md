@@ -258,7 +258,7 @@ Counting rules:
 - `major` = number of `COV_MAJOR:` lines
 - `minor` = number of `COV_MINOR:` lines
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

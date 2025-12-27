@@ -260,7 +260,7 @@ Write exactly this structure:
 * If everything validates and cross-checks (when available) are consistent -> `VERIFIED`, `recommended_action: PROCEED`.
 * Snapshot mismatch alone -> concern only (do not fail on this alone).
 
-## Handoff
+## Handoff Guidelines
 
 After completing your audit, provide a clear handoff:
 

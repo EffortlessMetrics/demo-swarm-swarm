@@ -209,7 +209,7 @@ Use exactly this structure:
 - `CANNOT_PROCEED` only for IO/permissions failures.
   - `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After completing your critique, provide a clear handoff:
 

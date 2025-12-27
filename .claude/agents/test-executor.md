@@ -181,7 +181,7 @@ test_summary:
 
 If you cannot extract counts safely, keep them `null`. Do not estimate.
 
-## Handoff
+## Handoff Guidelines
 
 After executing tests and writing the report, provide a natural language handoff:
 

@@ -244,7 +244,7 @@ Keep minimal placeholders (domain agents will overwrite):
 
 Do not "continue anyway" if the run directory cannot be established.
 
-## Handoff
+## Handoff Guidelines
 
 After establishing infrastructure, provide a natural language handoff:
 

@@ -251,7 +251,7 @@ At the end of `gate_fix_summary.md`, include:
 **Non-mechanical findings:** <count>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

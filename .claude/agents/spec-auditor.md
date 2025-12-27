@@ -233,7 +233,7 @@ issues_minor: <int>
   - Mechanical failure only (cannot read/write required paths due to IO/perms/tooling)
   - `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After writing the spec audit report, provide a natural language handoff:
 

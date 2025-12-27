@@ -239,7 +239,7 @@ Severity guidance:
 * Each regression must have exactly one `REG-NNN` ID.
 * Each detail section heading must start with `### REG-NNN:`.
 
-## Handoff
+## Handoff Guidelines
 
 After completing your analysis, provide a clear handoff:
 

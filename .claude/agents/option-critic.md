@@ -101,7 +101,7 @@ Severity counts = exact number of those prefixed lines.
 
 **Option counting (stable marker):** Prefer `^## OPT-[0-9]{3}:` headings (from `design-optioneer`). If markers are missing/inconsistent, set `options_found: null` and add a blocker. Back-compat: accept `^## Option [0-9]+:` if present.
 
-## Handoff
+## Handoff Guidelines
 
 Your handoff should make the orchestrator's next step obvious:
 

@@ -245,7 +245,7 @@ For mechanical counting by `wisdom-cleanup`, use:
 
 Do not vary these prefixes.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language handoff:
 

@@ -276,7 +276,7 @@ The `paths` object is a **starting point**, not a restriction:
 
 The manifest accelerates workers by giving them a head start. The critic checks scope afterward to catch drive-by refactoring or unrelated changes.
 
-## Handoff
+## Handoff Guidelines
 
 After writing the manifest, provide a natural language summary covering:
 

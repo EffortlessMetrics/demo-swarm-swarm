@@ -161,7 +161,7 @@ Include only these line prefixes (one per line):
 - Requirements ambiguous/untestable → `recommended_action: BOUNCE`, `route_to_flow: 1`, `route_to_agent: requirements-author`
 - Mechanical IO/perms failure → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

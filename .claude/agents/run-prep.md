@@ -236,7 +236,7 @@ This is advisory (for humans/orchestrator), not a blocker.
 
 After finishing, output both a human summary and a machine block.
 
-## Handoff
+## Handoff Guidelines
 
 After establishing run infrastructure, provide a clear handoff:
 

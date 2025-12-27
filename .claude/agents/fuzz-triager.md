@@ -124,7 +124,7 @@ Write `.runs/<run-id>/build/fuzz_report.md` in exactly this structure:
 - FUZZ_CRASH: FUZZ-CRASH-001
 ```
 
-## Handoff
+## Handoff Guidelines
 
 When you're done, tell the orchestrator what happened in natural language:
 

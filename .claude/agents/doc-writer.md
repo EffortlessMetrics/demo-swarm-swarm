@@ -207,7 +207,7 @@ Inventory rules:
   - Contract/spec mismatch → `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: interface-designer` (or `adr-author`)
   - Ambiguous + user-impacting → `status: UNVERIFIED`, `recommended_action: PROCEED` (blockers captured)
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

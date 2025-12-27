@@ -252,7 +252,7 @@ Include only these line prefixes (one per line):
   * Cannot read/write due to IO/perms/tooling
   * `recommended_action: FIX_ENV`
 
-## Handoff
+## Handoff Guidelines
 
 After writing the file, provide a natural language summary:
 

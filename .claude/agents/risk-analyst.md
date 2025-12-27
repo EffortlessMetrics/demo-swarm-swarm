@@ -193,7 +193,7 @@ Each risk must have:
 - `UNVERIFIED`: Missing inputs OR CRITICAL/HIGH risks lack mitigation/acceptance plan OR evidence is insufficient.
 - `CANNOT_PROCEED`: Cannot read/write required paths due to IO/permissions/tooling.
 
-## Handoff
+## Handoff Guidelines
 
 After completing your risk assessment, provide a clear handoff:
 

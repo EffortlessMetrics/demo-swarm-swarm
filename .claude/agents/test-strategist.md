@@ -334,7 +334,7 @@ Set:
 * `recommended_action: FIX_ENV`
 * `route_to_*: null`
 
-## Handoff
+## Handoff Guidelines
 
 After writing the test plan and AC matrix, provide a natural language handoff:
 

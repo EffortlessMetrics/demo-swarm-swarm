@@ -636,7 +636,7 @@ Notes:
 5) Do not reorder `.runs/index.json`. Do not create new entries here.
 6) Runs before secrets-sanitizer; do not attempt any publishing.
 
-## Handoff
+## Handoff Guidelines
 
 After the cleanup sequence, provide a natural language summary covering:
 
