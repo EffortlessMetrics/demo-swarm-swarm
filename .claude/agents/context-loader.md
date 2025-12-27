@@ -49,17 +49,6 @@ Use:
 
 **Note:** Context-loader is optional. If workers are invoked without a manifest, they should explore the codebase directly rather than stopping to request one.
 
-## Control-plane routing (closed enum)
-
-Use:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when you set `route_to_flow` and/or `route_to_agent`
-- Prefer **continuing** with `UNVERIFIED + PROCEED` when you can make a reasonable, documented choice.
-- Use `BOUNCE` only when the manifest cannot be made meaningfully actionable.
-
 ## Subtask resolution (deterministic, leaves a trace)
 
 ### Primary source: `.runs/<run-id>/plan/subtasks.yaml`
@@ -92,13 +81,13 @@ subtasks:
 
 1. **Explicit ID provided** (`subtask_id` parameter):
    - Find exact `id` match in `subtasks.yaml`.
-   - If no match → `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: work-planner`, blocker: "Subtask ID not found in subtasks.yaml".
+   - If no match → `status: UNVERIFIED`, blocker: "Subtask ID not found in subtasks.yaml". Recommend work-planner regenerate the subtask index.
    - Record `resolution_source: subtask_index`.
 
 2. **No ID provided + `subtasks.yaml` exists**:
    - Select the first subtask where `status: TODO` (or `status: DOING` if resuming).
    - Tie-break: prefer subtasks with `depends_on: []` (no blockers).
-   - If all subtasks are `DONE` → `status: VERIFIED`, `recommended_action: PROCEED`, note: "All subtasks complete; nothing to build."
+   - If all subtasks are `DONE` → `status: VERIFIED`, note: "All subtasks complete; nothing to build."
    - Record `resolution_source: subtask_index_auto`.
 
 3. **No ID + no `subtasks.yaml` + `work_plan.md` exists**:
@@ -108,7 +97,8 @@ subtasks:
    - Record `resolution_source: prose_fallback`.
 
 4. **No ID + no `subtasks.yaml` + no `work_plan.md`**:
-   - `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 2`, `route_to_agent: work-planner`.
+   - `status: UNVERIFIED`, blocker: "No subtask index or work plan found."
+   - Recommend: "Run work-planner to generate subtasks.yaml before context loading."
    - Record `resolution_source: none`.
 
 ### Fallback: prose parsing

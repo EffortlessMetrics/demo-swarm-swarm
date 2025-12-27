@@ -26,11 +26,11 @@ Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the buil
 
 ## Orchestration Model
 
-**You direct agents and route on their responses.**
+**You direct agents and route on their handoff recommendations.**
 
 - Call agents - they do the work
-- Listen to responses - agents tell you what happened via Result blocks
-- Route on `status`, `recommended_action`, `route_to_*`
+- Listen to handoffs - agents tell you what happened and recommend next steps
+- Route on the agent's recommendation in their `## Handoff` section
 - Do not re-read files to make routing decisions
 
 ## Before You Begin
@@ -47,8 +47,8 @@ Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the 
 If `.runs/<run-id>/build/` exists:
 - Read `flow_plan.md` for navigation state
 - **Call `build-cleanup`** to get AC completion status (every call is an implicit resume — the agent checks disk state)
-- Route on the returned `Build Cleanup Result` block:
-  - `ac_completed` / `ac_total` tells you where to resume
+- Route on the agent's handoff:
+  - The handoff tells you AC progress and where to resume
   - Do NOT parse `ac_status.json` directly — the agent owns that file
 - Pre-mark completed items as done based on the agent's report
 
@@ -84,23 +84,23 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 2. **test-critic**: Verify tests are solid
 3. **code-implementer**: Implement to pass tests
 4. **code-critic**: Verify implementation is honest
-5. **test-executor**: Confirm tests pass (AC-scoped); emits `ac_status` in result block
+5. **test-executor**: Confirm tests pass (AC-scoped); reports AC status in handoff
 6. **build-cleanup** (or `ac-tracker` if added): Updates `ac_status.json` based on test-executor result
 
-**Note:** The orchestrator routes on `test-executor`'s result block. It does NOT parse `ac_status.json` directly. The cleanup agent owns state file updates.
+**Note:** The orchestrator routes on `test-executor`'s handoff. It does NOT parse `ac_status.json` directly. The cleanup agent owns state file updates.
 
-**Adversarial Microloop (writer ↔ critic):**
+**Rigorous Microloop (writer ↔ critic):**
 
-The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is not friendly peer review — it's adversarial verification.
+The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is rigorous verification — trust the worker, verify the work.
 
 ```
-writer → critic → [if RERUN] → writer → critic → ... → [PROCEED]
+writer → critic → [if more work needed] → writer → critic → ... → [proceed]
 ```
 
-Route on the critic's Result block:
-- `RERUN`: Send the worklist back to the writer
-- `PROCEED`: Move forward (even if `status: UNVERIFIED` — blockers are documented)
-- `can_further_iteration_help: no`: Stop iterating, proceed with blockers
+Route on the critic's handoff recommendation:
+- If critic recommends "rerun writer" or "fix X": Send the worklist back to the writer
+- If critic recommends "proceed" or "ready for next step": Move forward
+- If critic says "no further improvement possible": Stop iterating, proceed with documented blockers
 
 **Handling Logic Mismatches (Law 7: Local Resolution):**
 
@@ -202,17 +202,16 @@ Update `flow_plan.md` with completion status.
 
 ## Routing Rules
 
-Route on the Result block returned by each agent:
+Route on the agent's `## Handoff` recommendation:
 
-| `status` | `recommended_action` | What to do |
-|----------|---------------------|------------|
-| VERIFIED | PROCEED | Continue to next station |
-| UNVERIFIED | PROCEED | Continue with blockers documented |
-| UNVERIFIED | RERUN | Rerun the producer/writer |
-| UNVERIFIED | BOUNCE | Route to `route_to_flow` / `route_to_agent` |
-| CANNOT_PROCEED | FIX_ENV | Stop - mechanical failure |
+| Handoff Signal | What to do |
+|----------------|------------|
+| "Ready for X" / "Proceed to X" | Continue to the recommended next station |
+| "Needs another pass" / "Fix Y first" | Rerun the producer/writer with the identified issues |
+| "Route to Flow N" / "Needs design change" | Bounce to the recommended flow |
+| "Blocked by..." / "Cannot proceed" | Stop - mechanical failure or upstream blocker |
 
-If `recommended_action` is absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed).
+**Trust the recommendation.** Agents provide reasoning with their recommendations. Follow their guidance unless you have specific context that suggests otherwise.
 
 ## Agents
 

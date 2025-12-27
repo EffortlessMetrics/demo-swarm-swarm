@@ -224,21 +224,20 @@ Alternate between `requirements-author` and `requirements-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
- 3. **Route on the Requirements Critic Result block** (not by re-reading the file):
-    - If `status: CANNOT_PROCEED` -> **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
-    - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`
-    - If `recommended_action: RERUN` -> do the apply pass: rerun `requirements-author` once with the critique worklist, then rerun `requirements-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
-    - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
+3. **Route on the critic's handoff recommendation:**
+    - If critic says "blocked" or indicates mechanical failure → stop (FIX_ENV)
+    - If critic recommends routing to a different flow/agent → follow the recommendation
+    - If critic recommends "rerun author" or "fix X" → run author with critique worklist, then rerun critic
+    - If critic says "ready to proceed" → proceed (even if some blockers documented)
 
 **Loop guidance (Signal-Based Termination)**:
-- Route on critic's Result block, not pass counts.
-- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
+- Route on the critic's handoff, not pass counts.
+- Continue while the critic recommends improvements and indicates further iteration will help.
 - Exit conditions (in priority order):
-  1. `status: VERIFIED` → proceed (success)
-  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
-  3. `can_further_iteration_help: no` → proceed (no improvement possible)
-  4. Context exhausted → checkpoint and exit `PARTIAL`
-- The Result block is the control plane; the critique file is the audit artifact.
+  1. Critic says "verified" or "ready to proceed" → proceed (success)
+  2. Critic says "no further improvement possible" → proceed with documented blockers
+  3. Context exhausted → checkpoint and exit `PARTIAL`
+- The handoff is the routing surface; the critique file is the audit artifact.
 
 ### Step 7: BDD Scenarios (Microloop)
 
@@ -258,22 +257,21 @@ Alternate between `bdd-author` and `bdd-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
- 3. **Route on the BDD Critic Result block** (not by re-reading the file):
-    - If `status: CANNOT_PROCEED` -> **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
-    - If `recommended_action: BOUNCE` -> follow `route_to_flow/route_to_agent`
-    - If `recommended_action: RERUN` -> do the apply pass: rerun `bdd-author` once with the critique worklist, then rerun `bdd-critic` once; proceed after the second critique even if still UNVERIFIED (carry blockers honestly)
-    - If `recommended_action: PROCEED` -> proceed after the re-critique pass (even if UNVERIFIED)
+3. **Route on the critic's handoff recommendation:**
+    - If critic says "blocked" or indicates mechanical failure → stop (FIX_ENV)
+    - If critic recommends routing to a different flow/agent → follow the recommendation
+    - If critic recommends "rerun author" or "fix X" → run author with critique worklist, then rerun critic
+    - If critic says "ready to proceed" → proceed (even if some blockers documented)
 
 **Loop guidance (Signal-Based Termination)**:
-- Route on critic's Result block, not pass counts.
-- If critic returns `recommended_action: RERUN` AND `can_further_iteration_help: yes`: call writer again with critique worklist, then call critic again.
+- Route on the critic's handoff, not pass counts.
+- Continue while the critic recommends improvements and indicates further iteration will help.
 - **Sad Path enforcement:** The critic will flag REQs missing negative scenarios. Ensure the author addresses these before proceeding.
 - Exit conditions (in priority order):
-  1. `status: VERIFIED` → proceed (success)
-  2. `recommended_action: PROCEED` → proceed (even if UNVERIFIED; carry blockers honestly)
-  3. `can_further_iteration_help: no` → proceed (no improvement possible)
-  4. Context exhausted → checkpoint and exit `PARTIAL`
-- The Result block is the control plane; the critique file is the audit artifact.
+  1. Critic says "verified" or "ready to proceed" → proceed (success)
+  2. Critic says "no further improvement possible" → proceed with documented blockers
+  3. Context exhausted → checkpoint and exit `PARTIAL`
+- The handoff is the routing surface; the critique file is the audit artifact.
 
 ### Step 8: Assess Scope
 
@@ -298,13 +296,12 @@ This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews
 - Cross-artifact consistency
 - Unresolved critic findings
 
-**Route on its Result block:**
-- If `status: VERIFIED` → proceed to cleanup
-- If `status: UNVERIFIED` with `recommended_action: BOUNCE` → route back to the specified agent (e.g., `requirements-author`, `bdd-author`) for rework, then re-run the auditor
-- If `status: UNVERIFIED` with `recommended_action: PROCEED` → proceed with blockers documented (human judgment needed)
-- If `status: CANNOT_PROCEED` → `FIX_ENV` (mechanical failure)
+**Route on the auditor's handoff:**
+- If recommendation is "proceed" or "ready for cleanup" → proceed to cleanup
+- If recommendation is "fix X" or "rerun Y" → route back to the specified agent for rework, then re-run the auditor
+- If recommendation is "blocked" or indicates mechanical failure → stop (FIX_ENV)
 
-**Loop limit:** Re-run the auditor at most twice after routing to fix agents. If still UNVERIFIED after 2 fix attempts, proceed with blockers and let Flow 2/human handle.
+**Signal-based termination:** Continue looping while the auditor recommends fixes and indicates meaningful improvement is possible. Proceed when the auditor says progress has stalled or blockers are documented for human review.
 
 ### Step 10: Finalize and Write Receipt
 
@@ -487,13 +484,13 @@ These sections enable humans to review what was assumed at the flow boundary, an
 
 ## Status States
 
-Agents set status in their output artifacts:
+Agents communicate status through their handoff prose:
 
-- **VERIFIED** - `blockers` empty, `missing_required` empty, and all quality gates passed; assumptions documented. Set `recommended_action: PROCEED`.
-- **UNVERIFIED** - `blockers` non-empty OR `missing_required` non-empty OR any quality gate UNVERIFIED; contains concrete concerns and assumptions. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-- **CANNOT_PROCEED** - IO/permissions/tool failure only (exceptional); cannot read/write files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
+- **Complete / Verified** - Work is done, evidence exists, no blockers. Handoff recommends "proceed" or "ready for X".
+- **Incomplete / Unverified** - Gaps exist, blockers documented. Handoff recommends next steps ("fix X", "rerun Y") or acknowledges human review needed.
+- **Blocked** - Mechanical failure only (IO/permissions/tooling). Handoff explains what's broken and that environment needs fixing.
 
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED. If agents can read inputs and form an opinion, status is VERIFIED or UNVERIFIED with assumptions, never CANNOT_PROCEED. Ambiguity uses documented assumptions + UNVERIFIED status.
+**Key rule**: "Blocked" is strictly for mechanical failures. Missing artifacts result in "incomplete" status with documented gaps, not "blocked". If agents can read inputs and form an opinion, status is complete or incomplete with documented assumptions.
 
 ## Human Collaboration
 
@@ -567,15 +564,15 @@ If yes, proceed to `/flow-2-plan`.
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
 1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its control-plane Result
-3) Route on critic Result:
-   - If `recommended_action: PROCEED` → proceed (no apply pass needed)
-   - If `recommended_action: RERUN` AND `can_further_iteration_help: yes` → continue to step 4
-   - Otherwise → proceed with `UNVERIFIED` + blockers recorded
+2) Critique pass: call `<critic>` and read its handoff
+3) Route on critic handoff:
+   - If critic says "ready to proceed" → proceed (no apply pass needed)
+   - If critic recommends "fix X" or "rerun writer" → continue to step 4
+   - Otherwise → proceed with blockers documented
 4) Apply pass: call `<writer>` with the critique worklist
 5) Re-critique: call `<critic>` again, return to step 3
 
-**Termination:** Signal-based, not count-based. Loop continues while critic says RERUN + can_further_iteration_help: yes. Exit when signal says stop or context exhausted.
+**Termination:** Signal-based, not count-based. Loop continues while critic recommends improvements and indicates further iteration will help. Exit when critic says "proceed" or "no further improvement possible" or context exhausted.
 
 ### TodoWrite (copy exactly)
 
@@ -592,8 +589,8 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 - [ ] risk-analyst
 - [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup
-- [ ] secrets-sanitizer (capture Gate Result block)
-- [ ] repo-operator (checkpoint; capture Repo Operator Result)
+- [ ] secrets-sanitizer
+- [ ] repo-operator (checkpoint)
 - [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
 - [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)
 

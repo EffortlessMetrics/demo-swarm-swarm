@@ -23,17 +23,13 @@ Use:
 - `UNVERIFIED` — issues exist (missing artifacts, contradictions, weak bindings); still write a complete report.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Use:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when you set `route_to_flow` and/or `route_to_agent`
-- Plan-local fixes → `recommended_action: RERUN` and set `route_to_agent`
-- Upstream spec must change → `recommended_action: BOUNCE`, `route_to_flow: 1`
-- Human judgment/waiver needed → `recommended_action: PROCEED` (UNVERIFIED with blockers)
+Use natural language in your handoff to communicate next steps:
+- Plan-local fixes needed → recommend rerunning the appropriate author agent (e.g., `interface-designer`, `adr-author`)
+- Upstream spec must change → recommend routing to Flow 1 or specific agent
+- Human judgment/waiver needed → recommend proceeding with blockers documented
+- Mechanical failure → explain what's broken
 
 ## Inputs (best-effort)
 

@@ -73,9 +73,9 @@ Flow 2 uses **two complementary state machines**:
 
 Think in **worklists**, not "who wins".
 
-- **Signal-based microloop:** writer → critic → route on Result. If critic returns `RERUN` AND `can_further_iteration_help: yes`: call writer with critique worklist, then call critic again. Otherwise proceed (carry blockers honestly).
+- **Signal-based microloop:** writer → critic → route on handoff. If critic recommends improvements and says further iteration will help: call writer with critique worklist, then call critic again. Otherwise proceed (carry blockers honestly).
 - **Option critique (early):** Apply microloop pattern between `design-optioneer` and `option-critic`.
-- **Lane worklists:** If `contract-critic` or `observability-critic` returns `recommended_action: RERUN | BOUNCE | FIX_ENV`, treat that as the active worklist for its lane unless you resolve it or explicitly defer it (Decision Log entry).
+- **Lane worklists:** If `contract-critic` or `observability-critic` recommends fixes or changes, treat that as the active worklist for its lane unless you resolve it or explicitly defer it (Decision Log entry).
 - **Integration read (late):** `design-critic` is integrative across artifacts. Run it after lane worklists are resolved/deferred. A later `design-critic` `PROCEED` does not clear an open lane worklist.
 
 ### Decision log (only when you defer a critic worklist)
@@ -215,11 +215,11 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 4b: Critique design options (microloop; recommended)
 - Use `option-critic` to critique `design_options.md` and write `option_critique.md`.
 
-**Route on the Option Critic Result block** (not by re-reading the file):
- - If `recommended_action: FIX_ENV` -> stop (mechanical failure; IO/permissions/tooling)
-- If `recommended_action: BOUNCE` -> bounce to `route_to_flow`/`route_to_agent`
-- If `recommended_action: RERUN` -> do the apply pass: rerun `route_to_agent` once (typically `design-optioneer`) using the critique worklist, then rerun `option-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
-- If `recommended_action: PROCEED` -> proceed after the re-critique pass
+**Route on the critic's handoff recommendation:**
+- If critic says "blocked" → stop (mechanical failure)
+- If critic recommends routing to a different flow/agent → follow the recommendation
+- If critic recommends "rerun optioneer" or "fix X" → run design-optioneer with critique worklist, then rerun critic
+- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
 
 ### Step 5: Write ADR
 - Use `adr-author` to write the ADR.
@@ -230,13 +230,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 6b: Validate contracts (microloop; recommended)
 - Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.
 
-**Route on the Contract Critic Result block** (not by re-reading the file):
-- If `recommended_action: FIX_ENV` → stop (mechanical failure; IO/permissions/tooling)
-- If `recommended_action: BOUNCE` → bounce to `route_to_flow`/`route_to_agent`
-- If `recommended_action: RERUN` → do the apply pass: rerun `route_to_agent` once (typically `interface-designer`) using the critique worklist, then rerun `contract-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
-- If `recommended_action: PROCEED` → proceed after the re-critique pass
+**Route on the critic's handoff recommendation:**
+- If critic says "blocked" → stop (mechanical failure)
+- If critic recommends routing to a different flow/agent → follow the recommendation
+- If critic recommends "rerun designer" or "fix X" → run interface-designer with critique worklist, then rerun critic
+- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
 
-**Conflict note (default):** If Contract Critic requests `RERUN`/`BOUNCE`/`FIX_ENV`, treat that as an open contract-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
+**Conflict note (default):** If Contract Critic recommends fixes or changes, treat that as an open contract-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
 
 ### Step 7: Plan observability (parallel)
 - Use `observability-designer` to define observability.
@@ -244,13 +244,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 7b: Validate observability (microloop; recommended)
 - Use `observability-critic` to validate `observability_spec.md` and write `observability_critique.md`.
 
-**Route on the Observability Critic Result block** (not by re-reading the file):
-- If `recommended_action: FIX_ENV` → stop (mechanical failure; IO/permissions/tooling)
-- If `recommended_action: BOUNCE` → bounce to `route_to_flow`/`route_to_agent`
-- If `recommended_action: RERUN` → do the apply pass: rerun `route_to_agent` once (typically `observability-designer`) using the critique worklist, then rerun `observability-critic` once; proceed after the second critique even if still UNVERIFIED (Decision Log when deferring)
-- If `recommended_action: PROCEED` → proceed after the re-critique pass
+**Route on the critic's handoff recommendation:**
+- If critic says "blocked" → stop (mechanical failure)
+- If critic recommends routing to a different flow/agent → follow the recommendation
+- If critic recommends "rerun designer" or "fix X" → run observability-designer with critique worklist, then rerun critic
+- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
 
-**Conflict note (default):** If Observability Critic requests `RERUN`/`BOUNCE`/`FIX_ENV`, treat that as an open observability-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
+**Conflict note (default):** If Observability Critic recommends fixes or changes, treat that as an open observability-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
 
 ### Step 8: Plan testing (parallel)
 - Use `test-strategist` to write the test plan (incorporate Signal BDD + verification notes).
@@ -262,15 +262,15 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 - Use `design-critic` to validate the design.
 
 **Conflict handling (default):**
-- If a targeted critic is still requesting `RERUN`/`BOUNCE`/`FIX_ENV`, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
+- If a targeted critic still recommends fixes or changes, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
 
-**Route on the Design Critic Result block** (not by re-reading the file):
-- If `status: VERIFIED` → proceed to policy check
-- If `status: UNVERIFIED` AND `can_further_iteration_help: yes` → rerun affected steps (options/ADR/contracts/plans); if you rerun `interface-designer` or `observability-designer`, run the matching targeted critic (`contract-critic` / `observability-critic`) before re-running design-critic
-- If `status: UNVERIFIED` AND `can_further_iteration_help: no` → proceed (remaining issues documented)
-- If `status: CANNOT_PROCEED` → **FIX_ENV** (mechanical failure; IO/permissions/tooling); stop and require human intervention
+**Route on the critic's handoff recommendation:**
+- If critic says "verified" or "ready to proceed" → proceed to policy check
+- If critic recommends improvements and says further iteration will help → rerun affected steps (options/ADR/contracts/plans); if you rerun `interface-designer` or `observability-designer`, run the matching targeted critic (`contract-critic` / `observability-critic`) before re-running design-critic
+- If critic says "no further improvement possible" → proceed (remaining issues documented)
+- If critic says "blocked" → stop (mechanical failure)
 
-**Loop guidance**: The Result block is the control plane; `design_validation.md` is the audit artifact. Agents do not know they are in a loop—they read inputs, write outputs, and set a status. The orchestrator routes on the Result block.
+**Loop guidance**: The handoff is the routing surface; `design_validation.md` is the audit artifact. Agents do not know they are in a loop—they read inputs, write outputs, and provide a recommendation. The orchestrator routes on the handoff.
 
 ### Step 11: Check policy compliance
 - Use `policy-analyst` for policy compliance.
@@ -410,15 +410,15 @@ Flow 2 is complete when these exist (even if imperfect):
 
 ## Status States
 
-Agents set status in their output artifacts:
+Agents communicate status through their handoff prose:
 
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and all quality gates passed; artifact complete for its purpose. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR any quality gate UNVERIFIED; artifact created but has issues. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read/write files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
+- **Complete / Verified**: Work is done, evidence exists, no blockers. Handoff recommends "proceed" or "ready for X".
+- **Incomplete / Unverified**: Gaps exist, blockers documented. Handoff recommends next steps ("fix X", "rerun Y") or acknowledges human review needed.
+- **Blocked**: Mechanical failure only (IO/permissions/tooling). Handoff explains what's broken and that environment needs fixing.
 
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
+**Key rule**: "Blocked" is strictly for mechanical failures. Missing upstream artifacts result in "incomplete" status with documented gaps, not "blocked".
 
-Use `plan_receipt.json` (primary) and the latest critic Result blocks (secondary) to determine flow outcome. When critic signals conflict, default to keeping targeted-critic `RERUN`/`BOUNCE`/`FIX_ENV` as an open lane worklist unless explicitly deferred (Decision Log entry in `flow_plan.md`).
+Use `plan_receipt.json` (primary) and the latest critic handoffs (secondary) to determine flow outcome. When critics recommend fixes, treat those as open lane worklists unless explicitly deferred (Decision Log entry in `flow_plan.md`).
 
 ## Notes
 
@@ -505,15 +505,15 @@ All written to `.runs/<run-id>/plan/`:
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
 1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its control-plane Result
-3) Route on critic Result:
-   - If `recommended_action: PROCEED` → proceed (no apply pass needed)
-   - If `recommended_action: RERUN` AND `can_further_iteration_help: yes` → continue to step 4
-   - Otherwise → proceed with `UNVERIFIED` + blockers recorded
+2) Critique pass: call `<critic>` and read its handoff
+3) Route on critic handoff:
+   - If critic says "ready to proceed" → proceed (no apply pass needed)
+   - If critic recommends "fix X" or "rerun writer" → continue to step 4
+   - Otherwise → proceed with blockers documented
 4) Apply pass: call `<writer>` with the critique worklist
 5) Re-critique: call `<critic>` again, return to step 3
 
-**Termination:** Signal-based, not count-based. Loop continues while critic says RERUN + can_further_iteration_help: yes. Exit when signal says stop or context exhausted.
+**Termination:** Signal-based, not count-based. Loop continues while critic recommends improvements and indicates further iteration will help. Exit when critic says "proceed" or "no further improvement possible" or context exhausted.
 
 ### TodoWrite (copy exactly)
 - [ ] run-prep
