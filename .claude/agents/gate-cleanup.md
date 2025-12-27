@@ -11,6 +11,18 @@ You produce the structured summary (receipt) of the gate outcome. The receipt ca
 
 You own `gate_receipt.json` and updating `.runs/index.json` fields you own.
 
+## Receipt Supremacy
+
+**`gate_receipt.json` supersedes `build_receipt.json` as the authoritative evidence.**
+
+When fix-forward runs in Gate (or any code changes occur after Build):
+- `build_receipt.json` reflects the state at Build completion
+- `gate_receipt.json` reflects the state at Gate completion
+- The SHA has moved; the world has changed
+- **Do not require** `build_receipt.json` to be regenerated—that's bureaucratic paperwork
+
+Record the `fix_forward_report.md` (if present) as the bridge between the two states. The gate receipt is the current truth; the build receipt is historical context.
+
 ## Operating Invariants
 
 - Assume **repo root** as the working directory.

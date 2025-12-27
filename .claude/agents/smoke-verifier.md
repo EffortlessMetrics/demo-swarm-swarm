@@ -45,14 +45,37 @@ Best-effort:
 
 ## What to Verify (in order)
 
+### Verification Priority: Artifacts First, URLs Second
+
+**Prioritize artifact verification over URL checks.** In a cold environment (no staging server running), you should still be able to verify:
+1. Build artifacts exist (binaries, packages, containers)
+2. Git tag exists and references the correct commit
+3. Artifacts can be invoked (`./bin --version` or equivalent)
+
+Only check URLs if a `deployment_url` is explicitly detected in the verification report or deployment log.
+
 ### 1) Load context
 - Read `verification_report.md` (create if missing).
 - Attempt to extract:
   - `tag` (release tag) from `deployment_log.md` or verification_report
-  - `endpoints` (health/version URLs) from verification_report
+  - `endpoints` (health/version URLs) from verification_report — **only if explicitly present**
   - any commit SHA / version string that should match
 
-### 2) Verify release artifacts (if tag is known and gh is available)
+### 2) Verify build artifacts (primary, always attempt)
+
+Before checking URLs, verify local/release artifacts exist:
+
+```bash
+# Check if build directory exists
+ls -la dist/ build/ target/release/ 2>/dev/null
+
+# Try to run the binary (if applicable)
+./bin/<app-name> --version 2>/dev/null || true
+```
+
+If artifacts are missing but tag exists, this is still useful evidence. Record what you found.
+
+### 3) Verify release artifacts (if tag is known and gh is available)
 Run read-only checks (examples; adapt as needed):
 ```bash
 # Release metadata (read-only)
@@ -64,7 +87,7 @@ gh release view "<tag>" --json assets --jq '.assets[].name'
 
 If `gh` is unauthenticated/unavailable, record as "inconclusive".
 
-### 3) Run health checks (if endpoints are known)
+### 4) Run health checks (if endpoints are known)
 
 Use bounded, non-destructive GETs. Prefer timeouts to avoid hangs:
 
@@ -75,7 +98,7 @@ curl -fsS --max-time 10 "<version_url>" | jq .
 
 If `jq` is unavailable, record the raw response shape at a high level (no long dumps).
 
-### 4) Sanity checks (best-effort)
+### 5) Sanity checks (best-effort)
 
 - If a version string or SHA is available from the app:
   - Compare to expected tag/SHA if known

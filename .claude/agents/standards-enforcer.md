@@ -31,10 +31,24 @@ Write exactly one file:
 
 ### Step 1: Load the Diff
 
+**Determine the diff target:**
+
+1. Check `run_meta.json` for `base_ref` field
+2. If present: `git diff <base_ref>...HEAD` (audit only this run's changes, not the entire stack)
+3. If absent: `git diff origin/main...HEAD` (default)
+
 ```bash
-git diff --cached          # What's staged
-git diff --cached --name-status  # File-level summary (A/M/D)
+# If base_ref is set (stacked run):
+git diff <base_ref>...HEAD --cached --name-status
+
+# Otherwise (normal run):
+git diff origin/main...HEAD --cached --name-status
 ```
+
+**Rationale (Test the Whole, Audit the Delta):**
+- Tests run on the full state (Feature A + B together)
+- Auditing only checks what THIS run changed
+- This prevents false positives on already-approved changes from parent branches
 
 Read and understand what changed.
 

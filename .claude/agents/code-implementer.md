@@ -175,6 +175,9 @@ After writing the implementation summary, provide a natural language handoff. Ex
 **Blocked (missing upstream work):**
 - "Cannot implement AC-003 without database migration. Migration doesn't exist yet. Either create it as part of this AC or document dependency on infrastructure work."
 
+**Blocked (design/spec mismatch - Law 7 escalation):**
+- "Implemented AC-001 but it conflicts with ADR-002 constraints: the ADR requires stateless JWT but the tests expect session-based auth. Cannot satisfy both. Recommend calling `design-optioneer` to resolve the conflict locally—they can propose a scoped amendment to the ADR or clarify the intent. This is a design snag, not a code bug."
+
 **Mechanical failure:**
 - "Cannot write code files due to permissions. Need file system access before proceeding."
 

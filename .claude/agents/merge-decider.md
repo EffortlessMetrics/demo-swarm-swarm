@@ -117,10 +117,20 @@ Compute `REQ Readiness` as:
   * REQ readiness: FAIL (when determinable)
   * Fix-forward attempt failed/ineligible and mechanical blockers remain (format/lint/import drift unresolved)
 
-  Bounce target:
+  **Bounce targeting (specific failure mode → specific agent/station):**
 
-  * **Build (Flow 3)** for implementation/tests/contracts/security/coverage/receipt issues.
-  * **Plan (Flow 2)** for design/architecture/contract-definition flaws clearly requiring redesign.
+  | Failure Mode | Target Flow | Target Agent/Station | Task |
+  |--------------|-------------|---------------------|------|
+  | Reward Hacking (test deletion) | Flow 3 | `code-implementer` | "Restore deleted tests" |
+  | Contract Violation | Flow 3 | `code-implementer` | "Fix API implementation to match contract" |
+  | Missing Spec/Contract | Flow 2 | `interface-designer` | "Define the missing contract" |
+  | Security Finding (code fix) | Flow 3 | `fixer` | "Remediate security issue" |
+  | Security Finding (design flaw) | Flow 2 | `design-optioneer` | "Propose secure alternative" |
+  | Coverage Gap | Flow 3 | `test-author` | "Add missing test coverage" |
+  | Format/Lint Drift | Flow 3 | `fixer` | "Apply formatting fixes" |
+
+  * Default: **Build (Flow 3)** for implementation/tests/contracts/security/coverage/receipt issues.
+  * Use **Plan (Flow 2)** only for design/architecture flaws that cannot be fixed with code changes.
   * If the target is ambiguous, still BOUNCE but keep routes null and record the ambiguity as a blocker.
 
 * **MERGE** when:

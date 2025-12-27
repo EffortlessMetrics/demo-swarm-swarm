@@ -591,12 +591,15 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 - Content mode is derived from secrets gate + push surface (not workspace hygiene)
 - Issue-first: flow summaries go to the issue, never the PR
 
-**Quality-first reporting:** The GitHub postmortem should lead with:
-1. **Solution Verdict** — Did we solve the right problem?
-2. **Maintainability Score** — Will this code be easy to work with?
-3. **Quality Summary** — Code health assessment
+**Quality-first reporting (mandatory priority order):** The GitHub postmortem should lead with:
+1. **Solution Verdict** — Did we solve the right problem? (from `solution-analyst`)
+2. **Asset Health** — Complexity/maintainability score (from `quality-analyst`, `maintainability-analyst`)
+3. **Sad Path Coverage** — Were negative scenarios tested? (from `solution-analyst`)
+4. **Quality Summary** — Code health assessment
 
 DevLT and process metrics go in a **"Process Metrics" fold** at the bottom. We want humans to see the quality assessment first, not just how fast we worked.
+
+**Why quality leads:** We optimize for **Asset Value** first, **Efficiency** second. A run that took 72 hours but produced verified, maintainable code is better than a 2-hour run that produced untested spaghetti.
 
 **Content for postmortem:** Quality/solution verdicts, learnings, pack/flow observations, feedback actions, meta-notes on the wisdom synthesis.
 
