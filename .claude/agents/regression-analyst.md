@@ -23,21 +23,15 @@ Do **not** append into other artifacts.
 - `UNVERIFIED` — analysis produced, but some key inputs/tools unavailable OR baseline not established for "regression" claims
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always populate:
-
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when `route_to_flow` and/or `route_to_agent` is set
-- Code fixes → `BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer` (or `fixer`)
-- Test fixes → `BOUNCE`, `route_to_flow: 3`, `route_to_agent: test-author`
-- Spec/design ambiguity → `BOUNCE`, `route_to_flow: 1|2`, `route_to_agent: requirements-author|adr-author|clarifier`
-- High-impact + unclear ownership → `PROCEED` (UNVERIFIED) with blockers capturing ownership gap
+Use natural language in your handoff to communicate next steps:
+- No actionable regressions found → recommend proceeding
+- Code regressions with clear ownership → recommend code-implementer or fixer to address
+- Test failures requiring test changes → recommend test-author
+- Spec/design ambiguity causing regressions → recommend routing to Flow 1 (requirements) or Flow 2 (design)
+- High-impact regressions with unclear ownership → recommend proceeding with blockers documented
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Inputs (best-effort)
 

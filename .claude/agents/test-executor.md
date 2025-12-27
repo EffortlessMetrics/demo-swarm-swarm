@@ -87,17 +87,13 @@ If inputs are missing, proceed and record `missing_required`/`concerns`.
 - `UNVERIFIED` — tests executed but failed, or could not be executed due to missing config/ambiguous command; report still written and actionable.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always populate:
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Routing guidance:
-- Tests failed (non-zero exit) → `UNVERIFIED`, `recommended_action: RERUN`, `route_to_flow: 3`, `route_to_agent: code-implementer` (default).
-- Tests cannot run because test command is unknown/missing → `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: pack-customizer`.
-- Mechanical inability to run tooling (missing runtime, permissions) → `CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+Use natural language in your handoff to communicate next steps:
+- Tests passed → recommend proceeding to test-critic
+- Tests failed → recommend rerunning code-implementer to fix failures (name specific failing tests)
+- Test command unknown/missing → recommend pack-customizer to configure test command
+- Mechanical failure (permissions, missing runtime) → explain what's broken and needs fixing
 
 ## Behavior
 

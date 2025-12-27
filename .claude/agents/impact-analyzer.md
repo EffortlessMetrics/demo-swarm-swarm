@@ -22,19 +22,14 @@ Do not write markdown. Do not write any other files.
 - `UNVERIFIED` — impact map created but inputs were sparse/missing or exploration was limited; assumptions recorded.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always populate:
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- `BOUNCE` only when `route_to_flow` and/or `route_to_agent` is set
-- Scope creep detected (blast radius materially larger than spec implies) → `BOUNCE` to Flow 1, `route_to_agent: scope-assessor`
-- Design gap detected (REQ implies interface/data decisions not present) → `BOUNCE` to Flow 2, `route_to_agent: design-optioneer`
-- High-risk unclear impact (security/data boundary) → `PROCEED` (UNVERIFIED with blockers captured)
+Use natural language in your handoff to communicate next steps:
+- Impact is clear and bounded → recommend proceeding with Plan
+- Scope creep detected (blast radius larger than spec implies) → recommend scope-assessor review in Flow 1
+- Design gap detected (missing interface/data decisions) → recommend design-optioneer review in Flow 2
+- High-risk unclear impact (security/data boundary) → recommend proceeding with blockers documented
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Inputs (best-effort)
 

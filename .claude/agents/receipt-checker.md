@@ -76,24 +76,15 @@ Write exactly:
 * `UNVERIFIED` - receipt exists but is missing fields, inconsistent, contains placeholders, or cross-checks cannot be completed
 * `CANNOT_PROCEED` - mechanical failure only (cannot read/write required paths, permissions/IO/tooling)
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always use:
-`recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Routing fields:
-
-* `route_to_flow: 1|2|3|4|5|6|7|null`
-* `route_to_station: <string|null>` — hint for which station to rerun (e.g., "build-cleanup", "test-executor")
-* `route_to_agent: <agent-name|null>` — strict enum; only set when certain the agent name is valid
-
-Rules:
-
-* `FIX_ENV` only when `status: CANNOT_PROCEED`
-* `BOUNCE` only when `route_to_flow` is set; may also set `route_to_station` (hint) and/or `route_to_agent` (if certain)
-* Receipt defects generally -> `BOUNCE` to Flow 3 with `route_to_station: build-cleanup`
-* Receipt is older than HEAD is NOT a defect by itself; record as a concern only.
-* If unsure of agent enum, set `route_to_agent: null` and use `route_to_station` or blockers to specify the station.
+Use natural language in your handoff to communicate next steps:
+- Receipt is valid and complete → recommend proceeding to merge decision
+- Receipt missing entirely → recommend rerunning build-cleanup in Flow 3
+- Receipt unparseable/placeholder-leaky/invalid → recommend rerunning build-cleanup in Flow 3
+- Review has critical pending items → recommend returning to Flow 4 (Review)
+- Receipt older than HEAD → note as concern only (not a blocker)
+- Mechanical failure (IO/permissions) → explain what's broken and needs fixing
 
 ## What you must validate
 

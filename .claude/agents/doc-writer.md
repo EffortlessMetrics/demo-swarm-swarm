@@ -62,20 +62,15 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 - `UNVERIFIED` — docs updated partially, or inputs missing, or some claims couldn't be verified. Still write audit file.
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Always populate in Machine Summary:
-- `recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_agent: <agent-name|null>`
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- Populate `route_to_*` only when `recommended_action: BOUNCE`
-- If docs can be completed by rerunning after more context → `RERUN`
-- If docs reveal contract/spec mismatch → typically `BOUNCE` to Flow 2 (e.g., `interface-designer` / `adr-author`)
-- If docs reveal implementation mismatch → `BOUNCE` to Flow 3 (`code-implementer`)
-- If user-impacting and ambiguous → `PROCEED` (UNVERIFIED with blockers/assumptions)
+Use natural language in your handoff to communicate next steps:
+- Docs updated and aligned with ADR/contracts → recommend proceeding
+- Docs can be completed with more context → recommend rerunning after context available
+- Contract/spec mismatch found → recommend routing to Flow 2 (interface-designer or adr-author)
+- Implementation mismatch found → recommend routing to Flow 3 (code-implementer)
+- User-impacting and ambiguous → recommend proceeding with blockers documented
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Anchored parsing rule (important)
 

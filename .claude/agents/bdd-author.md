@@ -44,16 +44,14 @@ Use:
 - `UNVERIFIED` — outputs written but coverage/tagging gaps remain (documented).
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions).
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-Use this closed action vocabulary:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- If `requirements.md` is missing but filesystem is fine: `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: requirements-author`
-- If scenarios are written but gaps remain: `status: UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: bdd-author`
-- Otherwise: `recommended_action: PROCEED`
+Use natural language in your handoff to communicate next steps:
+- All REQs covered with scenarios → recommend proceeding to bdd-critic review
+- Requirements missing → recommend routing to requirements-author first
+- Scenarios written but coverage gaps remain → recommend rerunning bdd-author after gaps addressed
+- Ambiguous requirements → recommend clarifier to resolve before completing coverage
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Non-negotiable traceability rules
 

@@ -33,17 +33,14 @@ Optional:
 - `UNVERIFIED`: fuzz run partial/failed, inputs missing, or crashes found that require work.
 - `CANNOT_PROCEED`: cannot write output due to IO/perms/tooling.
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-`recommended_action` MUST be one of: `PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-`route_to_flow`: `3 | null`
-
-`route_to_agent`: `code-implementer | test-author | pack-customizer | null`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- Populate `route_to_*` only when `recommended_action: BOUNCE`
+Use natural language in your handoff to communicate next steps:
+- Fuzz ran clean (no crashes) → recommend proceeding
+- Crashes found → recommend code-implementer to fix crashes (include worklist IDs)
+- No fuzz harness configured → recommend proceeding (fuzzing is opt-in)
+- Tool unavailable → recommend pack-customizer to configure fuzzing setup
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Execution (deterministic)
 

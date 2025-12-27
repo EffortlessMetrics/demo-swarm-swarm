@@ -32,17 +32,14 @@ You do **not** modify code. You do **not** commit/push. You do **not** "fix" sur
 - `UNVERIFIED`: report written but run incomplete/failed/partial, **or** results indicate important gaps (material survivors).
 - `CANNOT_PROCEED`: cannot write output due to IO/perms/tooling.
 
-## Control-plane routing (closed enum)
+## Routing Guidance
 
-`recommended_action` MUST be one of: `PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Default routing:
-- `route_to_flow`: `3 | null`
-- `route_to_agent`: `test-author | fixer | null`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED`
-- Populate `route_to_*` only when `recommended_action: BOUNCE` **or** `recommended_action: RERUN` and the target is known; otherwise keep routes `null`
+Use natural language in your handoff to communicate next steps:
+- Mutation not configured → recommend proceeding (Build can continue without mutation coverage)
+- Mutation ran, survivors within threshold → recommend proceeding
+- Mutation ran, survivors exceed threshold → recommend test-author to address survivor worklist items
+- Mutation run failed → explain the specific issue and recommend fixing configuration
+- Mechanical failure → explain what's broken and needs fixing
 
 ## Execution (deterministic)
 
