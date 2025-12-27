@@ -43,15 +43,15 @@ If you're evaluating quickly, these four files tell the whole story:
 - `build/build_receipt.json` — what actually ran
 - `gate/merge_decision.md` — ship or bounce
 
-Artifacts are the handoff. Chat is exhaust.
+Artifacts are the handoff. Chat is transient.
 
 ---
 
 ## What This Actually Is
 
-DemoSwarm is a `.claude/` pack (flows + agents + skills) that turns Claude Code into a repeatable build pipeline.
+DemoSwarm is a `.claude/` pack (flows + agents + skills) that turns Claude Code into a repeatable build pipeline. It's a reference implementation of a mentality: the bottleneck was always *how long until the code is trusted*. LLMs just changed the economics — generation and verification are now cheap and fast.
 
-You dispatch flows explicitly. Agents do work and write artifacts to disk. The filesystem is the record; chat is exhaust.
+You dispatch flows explicitly. Agents do work and write artifacts to disk. The filesystem is the record; chat is transient.
 
 This is not "AI that codes for you." It's a system for producing **review-ready changes** — code plus the evidence needed to trust it. The artifact trail is what lets a reviewer skim receipts and approve with confidence, rather than re-auditing everything the model claimed to do.
 
@@ -116,6 +116,19 @@ DemoSwarm doesn't ship to prod. It produces a review-ready PR and leaves the mer
 ### From Typical SDLC Tooling
 
 Traditional tooling tracks what humans decided. DemoSwarm also records what the machine did, what it checked, and what evidence exists.
+
+---
+
+## Where This Fits
+
+**Stack position:** Workflow layer on Claude Code. The pack defines flows (orchestration), agents (workers), and skills (deterministic helpers). Claude Code provides the runtime.
+
+**Platform engineering:** A golden path for AI-assisted development. Opinionated workflow, consistent outputs, self-service dispatch. The `.runs/` directory is the contract between the swarm and the reviewer.
+
+**Agent operations:** The same concerns apply to operating AI agents as to operating services — observability, governance, reproducibility. DemoSwarm maps these:
+- Receipts → observability (what ran, what it produced, what evidence exists)
+- Gates → governance (secrets, anomalies, merge criteria)
+- `.runs/` as committed state → reproducibility (resume, audit, replay)
 
 ---
 
