@@ -128,7 +128,7 @@ For each finding, explain:
 **Coverage gaps should explain why:**
 | REQ-002 | [NO TESTS] | N/A | Blocked: depends on Session model (AC-002). Defer until AC-002 implemented. |
 
-## Handoff
+## Handoff Guidelines
 
 Your handoff tells the orchestrator what happened and what to do next.
 

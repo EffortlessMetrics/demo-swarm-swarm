@@ -133,7 +133,7 @@ For each finding, explain:
 - "Auth design drift across 3 locations. Recommend design-optioneer review ADR-005 interpretation before piecemeal fixes."
 - "All contract violations in error responses. Likely a shared error handler issue—fixer can address in one pass."
 
-## Handoff
+## Handoff Guidelines
 
 Your handoff tells the orchestrator what happened and what to do next.
 

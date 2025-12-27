@@ -111,6 +111,8 @@ When implementation contradicts the ADR or hits an impossible constraint:
 3. **Re-plan locally:** Have the specialist update `ac_matrix.md` or emit a micro-decision.
 4. **Resume:** Hand the fix back to the implementer.
 
+**Write-Through Requirement:** When a specialist (design-optioneer, impact-analyzer) resolves a snag, they MUST use the Edit tool to update the relevant plan artifact (`adr.md`, `ac_matrix.md`, or `work_plan.md`) immediately. This ensures the resolution survives context resets and is visible to subsequent agents.
+
 **Only BOUNCE to Flow 2 if the specialists agree the entire architecture is invalid.**
 
 This is the "Stubborn PM" posture: exhaust local options before interrupting the human with a flow bounce.

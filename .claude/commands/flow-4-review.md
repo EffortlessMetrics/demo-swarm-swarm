@@ -249,6 +249,8 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 3. **Verification:** Run `test-executor` to confirm no regressions
 4. **Report back:** "Resolved design concern [RW-NNN] with surgical refactor; verified with tests."
 
+**Write-Through Requirement:** When `design-optioneer` resolves a design snag, it MUST use the Edit tool to update the relevant plan artifact (`adr.md`, `ac_matrix.md`, or `work_plan.md`) immediately. This ensures the resolution survives context resets and is visible to subsequent agents.
+
 **Only escalate to Flow 2** if the design feedback invalidates the entire architecture.
 
 **Workers report naturally:** Fix-lane agents (code-implementer, fixer, test-author, doc-writer) do their job and describe what happened. They don't need special output formats. The `review-worklist-writer` parses their natural language response to update item statuses.
