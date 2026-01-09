@@ -164,6 +164,61 @@ Receipt writers may include a `schema_version` field for compatibility (e.g., `b
 
 ---
 
+## Handoff Contract
+
+Agents communicate routing through natural language handoffs, not structured YAML blocks.
+
+### The Pattern
+
+Every agent ends with a handoff that answers three questions:
+
+1. **What was done?** — Summary of work completed
+2. **What still needs to be done?** — Remaining work, blockers, open questions
+3. **My recommendation** — Specific next step with reasoning
+
+### Example Handoff
+
+```markdown
+## Handoff
+
+**What I did:** Reviewed the implementation against REQ-001 through REQ-005.
+Found two issues: the session timeout logic doesn't match the ADR (uses 30m instead of 15m),
+and REQ-003 has no test coverage.
+
+**What's left:** The timeout fix is mechanical. The missing tests need the test-author.
+
+**Recommendation:** Run test-author to add coverage for REQ-003, then re-run me to verify the fixes.
+The timeout issue is minor enough that code-implementer can fix it in the same pass.
+```
+
+### Rules
+
+- **Always make a recommendation.** Even when uncertain, take a stance.
+- **Name specific agents when you know them.** "Run test-author" is better than "run tests."
+- **Explain your reasoning.** "Because X" helps the orchestrator override intelligently.
+- **Alternatives are for real tradeoffs only.** Don't hedge unnecessarily.
+
+### Status Concepts (Natural Language)
+
+Use these concepts in your handoff prose:
+
+- **Complete / verified** — Work is done, evidence exists, no blockers
+- **Incomplete / unverified** — Gaps exist, document what's missing
+- **Blocked** — Cannot proceed without external input (human decision, missing access, etc.)
+- **Mechanical failure** — IO/permissions/tooling broken; environment needs fixing
+
+### Routing Intent
+
+Express routing naturally:
+
+- "Run X next" — You know the agent
+- "This needs to go back to Plan" — Flow-level routing
+- "The implementer should fix this" — Station-level hint
+- "I need another pass after they fix the schema" — Rerun self
+- "This is blocked until the user decides on auth approach" — Human escalation needed
+
+---
+
 ## Stable Marker Contracts
 
 Stable markers enable mechanical counting without parsing prose. Agents emit these prefixes; cleanup agents count them via the `demoswarm` CLI.
@@ -433,6 +488,8 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 
 ## See also
 
-- [CLAUDE.md](../../CLAUDE.md) — Canonical blocks with PACK-CONTRACT markers
+- [CLAUDE.md](../../CLAUDE.md) — Pack reference
+- [run-state.md](run-state.md) — Run identity and state schemas
 - [stable-markers.md](stable-markers.md) — Marker prefixes for counting
+- [trust-model.md](trust-model.md) — Evidence hierarchy
 - [glossary.md](glossary.md) — Term definitions

@@ -12,6 +12,7 @@ Understanding-oriented: explore the why behind the pack design.
 | If you're asking... | Read |
 |---------------------|------|
 | "Why default-allow for work but gated for publish?" | [Why Ops-First](why-ops-first.md) |
+| "How do agents think, decide, and fail gracefully?" | [Agent Philosophy](agent-philosophy.md) |
 | "Why do agents read/write disk instead of sharing context?" | [Stateless Execution](stateless-execution.md) |
 | "Why route on control blocks, not by re-reading files?" | [Why Two Planes](why-two-planes.md) |
 | "Why do GitHub ops need two separate gates?" | [Why Two Gates](why-two-gates.md) |
