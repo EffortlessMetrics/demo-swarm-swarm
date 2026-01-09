@@ -1,0 +1,655 @@
+{
+  "schema_version": 1,
+
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": null,
+  "route_to_agent": null,
+
+  "blockers": [],
+  "missing_required": [],
+  "concerns": [
+    "v1.4.0 issues (29-33) have no explicit predecessors but implicitly depend on stable infrastructure from v1.1.0-v1.3.0"
+  ],
+  "assumptions": [
+    "Issue dependencies inferred from explicit 'Blocked by' mentions and implicit file/component relationships",
+    "Priority levels derived from issue body Priority sections where present"
+  ],
+
+  "impact_summary": {
+    "total_files": 34,
+    "high_risk": 4,
+    "medium_risk": 12,
+    "low_risk": 18
+  },
+
+  "context": {
+    "flow": "plan",
+    "run_id": "github-research",
+    "inputs_used": [
+      "gh issue list --state all (issues #9-#42)",
+      "gh issue view (individual issue bodies)"
+    ],
+    "search_terms": [
+      "pack-check", "demoswarm.sh", "secrets.rs", "cargo-audit", "branch protection",
+      "receipt", "openq", "compliance", "walkdir", "CLI"
+    ]
+  },
+
+  "dependency_graph": {
+    "description": "Issues organized by blocking relationships",
+    "explicit_blocks": [
+      {
+        "blocker": 11,
+        "blocks": [25],
+        "evidence": "Issue #25 body states: 'Blocked by: #11 (cargo-audit CVSS 4.0 support)'"
+      }
+    ],
+    "implicit_blocks": [
+      {
+        "blocker": 16,
+        "blocks": [12, 13, 19],
+        "reason": "pack-check --strict flag (#16) enables incremental adoption of new validation rules (#12, #13, #19)",
+        "confidence": "HIGH"
+      },
+      {
+        "blocker": 9,
+        "blocks": [40, 42],
+        "reason": "Path traversal fix in secrets.rs (#9) shares code with walkdir consolidation (#42); both affect CLI tests (#40)",
+        "confidence": "MEDIUM"
+      },
+      {
+        "blocker": 10,
+        "blocks": [22],
+        "reason": "Branch protection (#10) must be enabled before run-prep can check for it (#22)",
+        "confidence": "HIGH"
+      },
+      {
+        "blocker": 40,
+        "blocks": [15],
+        "reason": "CLI test coverage (#40) should precede receipt test fixtures (#15) which depend on CLI commands",
+        "confidence": "MEDIUM"
+      }
+    ]
+  },
+
+  "milestone_analysis": {
+    "v1.1.0_Security_Governance": {
+      "issues": [9, 10, 11, 25],
+      "optimal_order": [
+        {"issue": 9, "reason": "Security vulnerability - highest priority, no dependencies"},
+        {"issue": 10, "reason": "Governance setting - independent, can parallelize with #9"},
+        {"issue": 11, "reason": "Tooling prerequisite for #25"},
+        {"issue": 25, "reason": "Blocked by #11, do last"}
+      ],
+      "parallel_groups": [
+        {"issues": [9, 10, 11], "can_parallelize": true},
+        {"issues": [25], "after": [11]}
+      ]
+    },
+    "v1.2.0_Compliance_Enforcement": {
+      "issues": [12, 13, 14, 15, 16, 28, 35, 40],
+      "optimal_order": [
+        {"issue": 16, "reason": "Enables --strict flag for incremental adoption; foundational for other pack-check rules"},
+        {"issue": 40, "reason": "CLI test coverage enables confident changes to other components"},
+        {"issue": 28, "reason": "pack-check test coverage to CI; pairs with #16"},
+        {"issue": 12, "reason": "Flow boundary enforcement; uses --strict mode from #16"},
+        {"issue": 13, "reason": "Skills section enforcement; uses --strict mode from #16"},
+        {"issue": 14, "reason": "OpenQ prefix normalization; independent compliance task"},
+        {"issue": 35, "reason": "Status semantics standardization; cross-agent impact"},
+        {"issue": 15, "reason": "Receipt test fixtures; depends on CLI test coverage (#40)"}
+      ],
+      "parallel_groups": [
+        {"issues": [16, 40, 28], "can_parallelize": true, "note": "Foundation layer"},
+        {"issues": [12, 13, 14], "can_parallelize": true, "after": [16]},
+        {"issues": [35, 15], "can_parallelize": true, "after": [40]}
+      ]
+    },
+    "v1.3.0_Developer_Experience": {
+      "issues": [17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 34, 36, 37, 38, 39, 41, 42],
+      "optimal_order": [
+        {"issue": 17, "reason": "Template formatting fixes - quick win, eliminates 24 repeat findings"},
+        {"issue": 42, "reason": "Walkdir consolidation - reduces code duplication, low effort"},
+        {"issue": 41, "reason": "Regex caching - minor optimization, low effort"},
+        {"issue": 18, "reason": "Spell-check integration - catches typos automatically"},
+        {"issue": 26, "reason": "CI caching - speeds up all subsequent CI runs"},
+        {"issue": 27, "reason": "Windows CI - platform compatibility"},
+        {"issue": 19, "reason": "Flow count validation - depends on --strict from v1.2.0"},
+        {"issue": 20, "reason": "Git-based receipt fallback - error resilience"},
+        {"issue": 21, "reason": "Question resolution tracking - signal-cleanup enhancement"},
+        {"issue": 22, "reason": "Branch protection pre-flight - depends on #10 being done"},
+        {"issue": 23, "reason": "Atomic write pattern - robustness improvement"},
+        {"issue": 24, "reason": "Documentation phrasing - clarifies architecture"},
+        {"issue": 34, "reason": "Coverage trend analyzer - enhancement"},
+        {"issue": 36, "reason": "Agent enable/disable config - customization"},
+        {"issue": 37, "reason": "CLI reference docs - documentation"},
+        {"issue": 38, "reason": "CI failure guide - documentation"},
+        {"issue": 39, "reason": "Mutation testing guide - documentation"}
+      ],
+      "parallel_groups": [
+        {"issues": [17, 42, 41], "can_parallelize": true, "note": "Quick wins"},
+        {"issues": [18, 26, 27], "can_parallelize": true, "note": "CI/DX improvements"},
+        {"issues": [19, 20, 21, 22, 23], "can_parallelize": true, "note": "Pack improvements"},
+        {"issues": [24, 37, 38, 39], "can_parallelize": true, "note": "Documentation"},
+        {"issues": [34, 36], "can_parallelize": true, "note": "Enhancements"}
+      ]
+    },
+    "v1.4.0_Advanced_Features": {
+      "issues": [29, 30, 31, 32, 33],
+      "optimal_order": [
+        {"issue": 29, "reason": "Cross-run analyzer - foundational for trend detection"},
+        {"issue": 31, "reason": "Security remediation tracker - CRITICAL priority per issue"},
+        {"issue": 30, "reason": "Dependency conflict resolver - CRITICAL priority per issue"},
+        {"issue": 32, "reason": "Performance regression detection - MEDIUM priority"},
+        {"issue": 33, "reason": "Flakiness root cause - builds on test infrastructure"}
+      ],
+      "parallel_groups": [
+        {"issues": [29, 31, 30], "can_parallelize": true, "note": "Can develop independently"},
+        {"issues": [32, 33], "can_parallelize": true, "after": [29]}
+      ]
+    }
+  },
+
+  "high_impact_issues": {
+    "description": "Issues that unblock the most other work",
+    "issues": [
+      {
+        "issue": 16,
+        "title": "Warning-first mode (--strict flag) for pack-check",
+        "unblocks": [12, 13, 19],
+        "impact": "Enables incremental adoption of 3+ new pack-check validation rules",
+        "priority": "HIGH"
+      },
+      {
+        "issue": 11,
+        "title": "Update cargo-audit for CVSS 4.0 support",
+        "unblocks": [25],
+        "impact": "Enables security scanning in CI workflow",
+        "priority": "MEDIUM"
+      },
+      {
+        "issue": 40,
+        "title": "Add test coverage for demoswarm CLI commands",
+        "unblocks": [15],
+        "impact": "Enables confident changes across CLI tools, coverage from 3/11 to 11/11 commands",
+        "priority": "HIGH"
+      },
+      {
+        "issue": 10,
+        "title": "Enable branch protection on main branch",
+        "unblocks": [22],
+        "impact": "Enables governance verification, fixes deploy verdicts",
+        "priority": "HIGH"
+      },
+      {
+        "issue": 9,
+        "title": "Fix path traversal vulnerability in secrets.rs",
+        "unblocks": [],
+        "impact": "Security vulnerability - must be fixed regardless of dependencies",
+        "priority": "CRITICAL"
+      }
+    ]
+  },
+
+  "low_hanging_fruit": {
+    "description": "Issues that can be completed quickly with minimal dependencies",
+    "issues": [
+      {
+        "issue": 17,
+        "title": "Fix markdown template formatting (MD022/MD058)",
+        "effort": "LOW",
+        "impact": "Eliminates ~24 repeat lint findings per run",
+        "milestone": "v1.3.0"
+      },
+      {
+        "issue": 41,
+        "title": "Cache regex compilation in pack-check tests",
+        "effort": "LOW",
+        "impact": "Minor test performance improvement",
+        "milestone": "v1.3.0"
+      },
+      {
+        "issue": 42,
+        "title": "Consolidate walkdir implementations",
+        "effort": "LOW",
+        "impact": "Code quality, reduced duplication",
+        "milestone": "v1.3.0"
+      },
+      {
+        "issue": 10,
+        "title": "Enable branch protection on main branch",
+        "effort": "LOW",
+        "impact": "HIGH - governance compliance",
+        "milestone": "v1.1.0",
+        "note": "Repository settings change, not code"
+      },
+      {
+        "issue": 14,
+        "title": "OpenQ prefix normalization",
+        "effort": "LOW",
+        "impact": "Consistency improvement",
+        "milestone": "v1.2.0"
+      },
+      {
+        "issue": 24,
+        "title": "Document command count vs flow count phrasing",
+        "effort": "LOW",
+        "impact": "Reduces bot reviewer confusion",
+        "milestone": "v1.3.0"
+      }
+    ]
+  },
+
+  "related_changes": {
+    "description": "Issues that should be done together due to shared components",
+    "groups": [
+      {
+        "name": "pack-check validation rules",
+        "issues": [12, 13, 16, 19, 28],
+        "reason": "All modify tools/demoswarm-pack-check; #16 provides foundation",
+        "evidence": "Issue bodies reference tools/demoswarm-pack-check/src/checks/"
+      },
+      {
+        "name": "demoswarm-runs-tools improvements",
+        "issues": [9, 40, 42],
+        "reason": "All modify tools/demoswarm-runs-tools; shared code paths",
+        "evidence": "Issues reference secrets.rs, count.rs, cli_contract.rs"
+      },
+      {
+        "name": "CI workflow improvements",
+        "issues": [25, 26, 27, 28],
+        "reason": "All modify .github/workflows/pack.yml",
+        "evidence": "Issue bodies mention pack.yml CI workflow"
+      },
+      {
+        "name": "receipt handling improvements",
+        "issues": [15, 20, 23],
+        "reason": "All affect receipt read/write patterns",
+        "evidence": "Issues mention receipt reading, writing, error handling"
+      },
+      {
+        "name": "documentation updates",
+        "issues": [24, 37, 38, 39],
+        "reason": "All pure documentation tasks in docs/",
+        "evidence": "Issues mention docs/ directory files"
+      },
+      {
+        "name": "agent status semantics",
+        "issues": [21, 35],
+        "reason": "Both affect agent status reporting/tracking",
+        "evidence": "Issues mention PARTIAL, UNVERIFIED, signal-cleanup, build-cleanup"
+      },
+      {
+        "name": "advanced agent features",
+        "issues": [29, 30, 31, 32, 33, 34],
+        "reason": "All create new analytical capabilities for flows",
+        "evidence": "All in v1.4.0 milestone with 'enhancement' label"
+      }
+    ]
+  },
+
+  "affected": [
+    {
+      "id": "IMP-001",
+      "kind": "code",
+      "path": "tools/demoswarm-runs-tools/src/commands/secrets.rs",
+      "change_type": "MODIFIED",
+      "risk": "HIGH",
+      "confidence": "HIGH",
+      "summary": "Path traversal vulnerability fix required",
+      "evidence": ["gh:issue#9 explicitly references this file"],
+      "depends_on": [],
+      "depended_on_by": ["IMP-002", "IMP-003"],
+      "tests_referencing": ["tools/demoswarm-runs-tools/tests/cli_contract.rs"],
+      "notes": ["Security priority - should be addressed first in v1.1.0"]
+    },
+    {
+      "id": "IMP-002",
+      "kind": "code",
+      "path": "tools/demoswarm-runs-tools/src/commands/count.rs",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Walkdir consolidation target",
+      "evidence": ["gh:issue#42 references lines 154-167"],
+      "depends_on": ["IMP-001"],
+      "depended_on_by": [],
+      "tests_referencing": ["tools/demoswarm-runs-tools/tests/cli_contract.rs"],
+      "notes": ["Should share walkdir logic with secrets.rs after #9 is fixed"]
+    },
+    {
+      "id": "IMP-003",
+      "kind": "test",
+      "path": "tools/demoswarm-runs-tools/tests/cli_contract.rs",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Needs expansion from 3 to 11 command test coverage",
+      "evidence": ["gh:issue#40 explicitly references this file"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Currently only tests count pattern command"]
+    },
+    {
+      "id": "IMP-004",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/drift.rs",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "Flow boundary enforcement rules",
+      "evidence": ["gh:issue#12 references this file"],
+      "depends_on": ["IMP-005"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Depends on --strict flag implementation"]
+    },
+    {
+      "id": "IMP-005",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/main.rs",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "--strict flag addition for warning-first mode",
+      "evidence": ["gh:issue#16 mentions pack-check CLI changes"],
+      "depends_on": [],
+      "depended_on_by": ["IMP-004"],
+      "tests_referencing": [],
+      "notes": ["Foundation for incremental rule adoption"]
+    },
+    {
+      "id": "IMP-006",
+      "kind": "infra",
+      "path": ".github/workflows/pack.yml",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "HIGH",
+      "summary": "CI workflow additions: cargo-audit, pack-check tests, caching, Windows",
+      "evidence": ["gh:issues #25, #26, #27, #28 all reference pack.yml"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Multiple issues target same file - coordinate changes"]
+    },
+    {
+      "id": "IMP-007",
+      "kind": "config",
+      "path": "GitHub repository settings (branch protection)",
+      "change_type": "MODIFIED",
+      "risk": "HIGH",
+      "confidence": "HIGH",
+      "summary": "Enable branch protection on main branch",
+      "evidence": ["gh:issue#10 describes governance requirement"],
+      "depends_on": [],
+      "depended_on_by": ["IMP-008"],
+      "tests_referencing": [],
+      "notes": ["Not a code change - repository settings"]
+    },
+    {
+      "id": "IMP-008",
+      "kind": "code",
+      "path": ".claude/agents/run-prep.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Pre-flight check for branch protection",
+      "evidence": ["gh:issue#22 references run-prep agent"],
+      "depends_on": ["IMP-007"],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["Depends on branch protection being enabled first"]
+    },
+    {
+      "id": "IMP-009",
+      "kind": "code",
+      "path": ".claude/agents/signal-cleanup.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Question resolution tracking ceremony",
+      "evidence": ["gh:issue#21 references signal-cleanup agent"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-010",
+      "kind": "code",
+      "path": ".claude/skills/openq-tools/SKILL.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Resolution tracking for open questions",
+      "evidence": ["gh:issue#21 mentions openq-tools enhancement"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-011",
+      "kind": "code",
+      "path": ".claude/agents/build-cleanup.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Status semantics standardization",
+      "evidence": ["gh:issue#35 references build-cleanup agent"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-012",
+      "kind": "code",
+      "path": ".claude/agents/review-cleanup.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Status semantics standardization",
+      "evidence": ["gh:issue#35 references review-cleanup agent"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-013",
+      "kind": "doc",
+      "path": "CLAUDE.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Status semantics documentation",
+      "evidence": ["gh:issue#35 mentions adding documentation to CLAUDE.md"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-014",
+      "kind": "doc",
+      "path": "docs/reference/pack-check.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Documentation updates for new pack-check rules and flags",
+      "evidence": ["gh:issues #12, #13, #16 mention docs/reference/pack-check.md"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-015",
+      "kind": "doc",
+      "path": "docs/reference/demoswarm-cli.md",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Complete CLI command documentation",
+      "evidence": ["gh:issue#37 explicitly targets this file"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-016",
+      "kind": "doc",
+      "path": "docs/how-to/handling-ci-failures.md",
+      "change_type": "NEW",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "New CI failure troubleshooting guide",
+      "evidence": ["gh:issue#38 specifies this path"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-017",
+      "kind": "doc",
+      "path": "docs/how-to/mutation-testing-guide.md",
+      "change_type": "NEW",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "New mutation testing guide",
+      "evidence": ["gh:issue#39 specifies this path"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-018",
+      "kind": "code",
+      "path": "tools/demoswarm-pack-check/src/checks/control_plane.rs",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "HIGH",
+      "summary": "Regex caching optimization in tests",
+      "evidence": ["gh:issue#41 references lines 425, 445, 479 in control_plane.rs"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    },
+    {
+      "id": "IMP-019",
+      "kind": "config",
+      "path": "demo-swarm.config.json",
+      "change_type": "MODIFIED",
+      "risk": "LOW",
+      "confidence": "MEDIUM",
+      "summary": "Agent enable/disable configuration schema",
+      "evidence": ["gh:issue#36 proposes config schema addition"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": ["May require schema changes"]
+    },
+    {
+      "id": "IMP-020",
+      "kind": "code",
+      "path": ".claude/agents/coverage-enforcer.md",
+      "change_type": "MODIFIED",
+      "risk": "MEDIUM",
+      "confidence": "MEDIUM",
+      "summary": "Coverage trend analysis enhancement",
+      "evidence": ["gh:issue#34 targets this agent"],
+      "depends_on": [],
+      "depended_on_by": [],
+      "tests_referencing": [],
+      "notes": []
+    }
+  ],
+
+  "interfaces_impacted": {
+    "api_endpoints": [],
+    "data_entities": [
+      {
+        "entity": "open_questions.md format",
+        "issues": [14, 21],
+        "impact": "OpenQ prefix normalization and resolution tracking"
+      },
+      {
+        "entity": "receipt JSON schema",
+        "issues": [15, 20, 23],
+        "impact": "Receipt handling improvements"
+      },
+      {
+        "entity": "agent status values",
+        "issues": [35],
+        "impact": "PARTIAL vs UNVERIFIED semantics standardization"
+      }
+    ],
+    "events": []
+  },
+
+  "configuration_impact": [
+    {
+      "file": ".github/workflows/pack.yml",
+      "issues": [25, 26, 27, 28],
+      "changes": "Add cargo-audit job, Rust caching, Windows matrix, pack-check tests"
+    },
+    {
+      "file": "demo-swarm.config.json",
+      "issues": [36],
+      "changes": "Agent enable/disable configuration schema"
+    },
+    {
+      "file": "GitHub repository settings",
+      "issues": [10],
+      "changes": "Branch protection on main branch"
+    }
+  ],
+
+  "test_impact": [
+    {
+      "file": "tools/demoswarm-runs-tools/tests/cli_contract.rs",
+      "issues": [40],
+      "changes": "Expand from 3 to 11 command coverage"
+    },
+    {
+      "file": "tools/demoswarm-pack-check (test suite)",
+      "issues": [28],
+      "changes": "Add CI job for pack-check tests"
+    }
+  ],
+
+  "external_dependencies": [
+    {
+      "dependency": "cargo-audit",
+      "issues": [11, 25],
+      "note": "CVSS 4.0 support needed; blocked until upstream release or workaround"
+    },
+    {
+      "dependency": "GitHub Actions runners",
+      "issues": [27],
+      "note": "Windows runner needed for cross-platform CI"
+    },
+    {
+      "dependency": "cspell or typos-cli",
+      "issues": [18],
+      "note": "External spell-check tooling evaluation needed"
+    }
+  ],
+
+  "recommended_next": [
+    "Start with v1.1.0 milestone - security and governance are foundational",
+    "Within v1.1.0: #9 (security fix) and #10 (branch protection) can be done in parallel",
+    "Complete #11 before #25 (explicit dependency)",
+    "In v1.2.0: start with #16 (--strict flag) to enable other pack-check rules",
+    "Quick wins (#17, #41, #42) can fill gaps between larger work items",
+    "Documentation issues (#24, #37, #38, #39) can be done anytime by anyone"
+  ],
+
+  "completed_at": "2025-12-31T06:00:00Z"
+}
