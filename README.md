@@ -2,7 +2,7 @@
 
 SDLC pack for Claude Code.
 
-**Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
+**The economics shift:** Open-weight coding models can now produce a first pass that's often comparable to what you'd expect from a solid junior engineer for many scoped tasks. More importantly, they can generate and revise code far faster than humans can review it, and cheaply enough that multiple passes (tests, critique, refactors, mutation/fuzz where it matters) are economical.
 
 **Operating principle:** Spend machine iteration to buy down human uncertainty.
 
@@ -28,6 +28,8 @@ If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a
 ---
 
 ## How to Review What DemoSwarm Produces
+
+**The PR description is your primary interface.** Most reviewers won't drill into `.runs/` artifacts unless something looks wrong. The swarm produces a PR Brief in the description with: what changed, review hotspots, quality events, and proof pointers. The artifacts below are drill-down evidence when you need them.
 
 If you're reviewing a run (or a PR produced by the swarm), start here:
 
@@ -62,6 +64,8 @@ Most AI coding tools optimize for **generation speed** — how fast can the mode
 DemoSwarm optimizes for **verification speed** — how quickly can a human decide yes/no with confidence?
 
 The output isn't just code. It's code + tests + receipts + critiques + a clear audit trail.
+
+Open-weight models are now good enough that, for many well-scoped changes, their first draft is at least "junior-quality" — and often cleaner once you add tests and basic cleanup. Since generation is faster than review and cheap enough to repeat, the winning strategy isn't one big prompt. It's many small loops: research → plan → implement → test → critique → harden.
 
 ### Trust and Verify
 

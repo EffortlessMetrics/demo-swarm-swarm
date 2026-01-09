@@ -28,6 +28,18 @@ find_repo_root() {
 
 REPO_ROOT="$(find_repo_root)"
 
+# Helper: convert path to cargo-friendly format on Windows (Git Bash / MSYS)
+to_cargo_path() {
+  local p="$1"
+  # Git Bash / MSYS: convert /c/... to C:/...
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -m "$p"
+    return
+  fi
+  # Default: leave it alone
+  printf "%s" "$p"
+}
+
 # Build candidate list (check both unix and windows binary names)
 TOOL_CANDIDATES=(
   "$REPO_ROOT/.demoswarm/bin/pack-check"
@@ -43,8 +55,7 @@ for tool in "${TOOL_CANDIDATES[@]}"; do
   if [[ -n "$tool" && -x "$tool" ]]; then
     # Convert Unix path to Windows path when calling Windows executable
     if [[ "$tool" == *.exe ]]; then
-      # Convert /mnt/c/path to C:\path format for Windows executables
-      REPO_ROOT_WIN=$(echo "$REPO_ROOT" | sed 's|^/mnt/\([a-z]\)|\1:|' | sed 's|/|\\|g')
+      REPO_ROOT_WIN=$(to_cargo_path "$REPO_ROOT")
       exec "$tool" --repo-root "$REPO_ROOT_WIN" "$@"
     else
       exec "$tool" --repo-root "$REPO_ROOT" "$@"
@@ -57,8 +68,8 @@ CARGO_MANIFEST="$REPO_ROOT/tools/demoswarm-pack-check/Cargo.toml"
 if [[ -f "$CARGO_MANIFEST" ]] && command -v cargo >/dev/null 2>&1; then
   # Convert Unix path to Windows path when running on Windows with cargo
   if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
-    REPO_ROOT_WIN=$(echo "$REPO_ROOT" | sed 's|^/mnt/\([a-z]\)|\1:|' | sed 's|/|\\|g')
-    CARGO_MANIFEST_WIN=$(echo "$CARGO_MANIFEST" | sed 's|^/mnt/\([a-z]\)|\1:|' | sed 's|/|\\|g')
+    REPO_ROOT_WIN=$(to_cargo_path "$REPO_ROOT")
+    CARGO_MANIFEST_WIN=$(to_cargo_path "$CARGO_MANIFEST")
     exec cargo run --quiet --manifest-path "$CARGO_MANIFEST_WIN" -- --repo-root "$REPO_ROOT_WIN" "$@"
   else
     exec cargo run --quiet --manifest-path "$CARGO_MANIFEST" -- --repo-root "$REPO_ROOT" "$@"
