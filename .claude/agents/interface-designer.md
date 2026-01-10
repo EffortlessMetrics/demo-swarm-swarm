@@ -167,7 +167,7 @@ These prefixes must not be renamed.
    - Populate the inventory header in `api_contracts.yaml`.
    - Populate the `## Inventory (machine countable)` section in `schema.md`.
 
-## Completion States (pack-standard)
+## Completion States
 
 - **VERIFIED**
   - `api_contracts.yaml` + `schema.md` produced with inventory markers

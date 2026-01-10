@@ -41,7 +41,7 @@ The orchestrator specifies the mode. Default is `create` if not specified.
 - `.runs/<run-id>/review/review_worklist.json` (create/apply/refresh modes)
 - `.runs/<run-id>/review/review_actions.md` (apply mode; append-only log)
 
-## Status Model (Pack Standard)
+## Status Model
 
 - `VERIFIED` — Worklist created successfully with actionable items.
 - `UNVERIFIED` — Worklist created but incomplete (no feedback, parse errors, ambiguous items).

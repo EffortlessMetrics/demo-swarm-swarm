@@ -26,7 +26,7 @@ You do **not** modify code. You do **not** commit/push. You do **not** "fix" sur
 
 - `.runs/<run-id>/build/mutation_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: mutation run executed **or** cleanly skipped with an explicit, non-error reason; report written.
 - `UNVERIFIED`: report written but run incomplete/failed/partial, **or** results indicate important gaps (material survivors).

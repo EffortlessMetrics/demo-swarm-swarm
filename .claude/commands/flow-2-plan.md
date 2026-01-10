@@ -291,30 +291,18 @@ Your agents produce reports and recommendations. You decide what happens next ba
 ### Step 13: Sanitize secrets (publish gate)
 - Use `secrets-sanitizer` (publish gate).
 
-**Gate Result block (returned by secrets-sanitizer):**
+**Secrets-sanitizer reports status in its handoff.** Example:
 
-The agent returns a Gate Result block for orchestrator routing:
+> Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+For audit purposes, it also writes `secrets_status.json` with fields:
+- `status`: CLEAN, FIXED, or BLOCKED (descriptive — never infer permissions from it)
+- `safe_to_commit` / `safe_to_publish`: authoritative permissions
+- `modified_files`: whether artifact files were changed
+- `findings_count`: number of issues found
+- `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
 
-**Field semantics:**
-- `status` is **descriptive** (what happened). **Never infer permissions** from it.
-- `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
-- `modified_files` signals that artifact files were changed (for audit purposes).
-- `blocker_kind` explains why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
-
-**Control plane vs audit plane:** The Gate Result block is the control plane for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the returned block, not by re-reading the file.
+The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router

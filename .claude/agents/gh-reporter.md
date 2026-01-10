@@ -221,7 +221,7 @@ Write a short status report including:
 - comment id (if posted/updated)
 - summary of what was posted (high level)
 - concerns + missing fields (if any)
-- Machine Summary (pack standard) at the bottom
+- Summary block at the bottom
 
 Posting failures should not block the flow. Record and continue.
 

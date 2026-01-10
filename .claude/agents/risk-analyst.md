@@ -63,7 +63,7 @@ Write (or update) exactly one file:
 
 Do not append into other artifacts. This avoids cross-agent merge conflicts.
 
-## Status model (pack standard)
+## Status model
 
 Use:
 - `VERIFIED` — the risk register is complete for available inputs; no unmitigated CRITICAL/HIGH risks remain without an explicit accept/mitigate plan

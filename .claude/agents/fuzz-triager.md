@@ -27,7 +27,7 @@ Optional:
 
 - `.runs/<run-id>/build/fuzz_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: fuzz run executed and found no crashes, or fuzz cleanly skipped with explicit reason; report written.
 - `UNVERIFIED`: fuzz run partial/failed, inputs missing, or crashes found that require work.

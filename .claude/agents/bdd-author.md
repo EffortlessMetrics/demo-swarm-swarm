@@ -37,7 +37,7 @@ Optional:
 - `.runs/<run-id>/signal/example_matrix.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 
-## Status model (pack standard)
+## Status model
 
 Use:
 - `VERIFIED` — all REQs covered (scenario or verification note), tags correct, matrix + notes written.

@@ -324,22 +324,17 @@ This agent is a **publish gate** that ensures no secrets are accidentally commit
 - `FIXED`: Secrets found and remediated; flags typically true **unless** `needs_upstream_fix` forced gating
 - `BLOCKED_PUBLISH`: Sanitizer couldn't complete (mechanical); `safe_to_publish: false`
 
-**Control plane:** The sanitizer returns a **Gate Result block** for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the Gate Result, not by re-reading the file.
+**Secrets-sanitizer reports status in its handoff.** Example:
 
-**Gate Result block (returned by secrets-sanitizer):**
+> Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+For audit purposes, it also writes `secrets_status.json` with fields:
+- `status`: CLEAN, FIXED, or BLOCKED
+- `safe_to_commit`: whether commit can proceed
+- `safe_to_publish`: whether GitHub posting can proceed
+- `findings_count`: number of issues found
+- `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
+- `blocker_reason`: explanation if blocked
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router

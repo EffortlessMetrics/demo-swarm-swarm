@@ -157,27 +157,27 @@ If blocked: What needs to happen before we can publish?
 
 ## Handoff
 
-After scanning and fixing, report back:
+After scanning, report back with a natural language summary. The `secrets_status.json` is the durable audit record; your handoff is how you communicate to the orchestrator.
 
-**What I did:** Summarize what you scanned, what you found, and what you fixed.
+**Example (clean):**
+> Secrets scan complete. No findings. Safe to commit and publish. Recommend **repo-operator** to proceed with commit.
 
-**What's left:** Any remaining issues or concerns.
+**Example (fixed):**
+> Secrets scan complete. Redacted 2 items in .env.example and requirements.md. Safe to commit. Recommend **repo-operator** to proceed with commit.
 
-**Recommendation:**
-- If clean/fixed: "Safe to publish. [No findings / Findings remediated]."
-- If blocked: "[Description of secret that can't be auto-fixed]. Recommend: [specific action to resolve]."
-- If mechanical failure: "Couldn't complete scan: [reason]. Fix [issue] and retry."
+**Example (blocked):**
+> Secrets scan complete. Found AWS credentials in src/config.js:42. Cannot proceed until removed. Recommend **code-implementer** to replace hardcoded key with environment variable reference, then rerun secrets scan.
 
-## Handoff Targets
+**Example (mechanical failure):**
+> Couldn't complete scan: secrets-tools skill not available. Fix the tooling issue and retry.
 
-When you complete your work, recommend one of these to the orchestrator:
+### Handoff Targets
 
-- **repo-operator**: Proceed with commit/push after secrets scan passes (safe_to_publish: true)
+- **repo-operator**: Proceed with commit/push (when safe_to_publish: true)
 - **code-implementer**: Fix hardcoded secrets in code when auto-redaction is not safe
-- **gh-issue-manager**: Update issue status after successful publish gate
 - **cleanup agents**: Continue flow cleanup after artifacts are sanitized
 
-**Your default recommendation:** If `safe_to_publish: true`, recommend repo-operator for commit/push. If `safe_to_publish: false` with remediable issues, recommend code-implementer with specific guidance. Blocking is the last resort, not the first.
+**Default recommendation:** If clean or fixed, recommend repo-operator. If blocked with fixable issues, recommend code-implementer with specific guidance. Blocking is the last resort.
 
 ## Philosophy
 

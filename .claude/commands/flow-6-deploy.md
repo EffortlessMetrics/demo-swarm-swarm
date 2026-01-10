@@ -207,24 +207,19 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting O
 6. **Sanitize Secrets** (secrets-sanitizer)
    - Scan artifacts before GitHub posting
    - Write `.runs/<run-id>/deploy/secrets_scan.md`, `.runs/<run-id>/deploy/secrets_status.json`
-   - **Returns a Gate Result block** for orchestrator routing (control plane)
-   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `blocker_kind` explains why blocked
-   - The JSON file is an audit record; orchestrator routes on the Gate Result block, not by re-reading the file
 
-   **Gate Result block (returned by secrets-sanitizer):**
+   **Secrets-sanitizer reports status in its handoff.** Example:
 
-   <!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-   ```yaml
-   ## Gate Result
-   status: CLEAN | FIXED | BLOCKED
-   safe_to_commit: true | false
-   safe_to_publish: true | false
-   modified_files: true | false
-   findings_count: <int>
-   blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-   blocker_reason: <string | null>
-   ```
-   <!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+   > Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
+
+   For audit purposes, it also writes `secrets_status.json` with fields:
+   - `status`: CLEAN, FIXED, or BLOCKED (descriptive — never infer permissions from it)
+   - `safe_to_commit` / `safe_to_publish`: authoritative permissions
+   - `modified_files`: whether artifact files were changed
+   - `findings_count`: number of issues found
+   - `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
+
+   The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 6b. **Checkpoint Commit** (repo-operator)
 

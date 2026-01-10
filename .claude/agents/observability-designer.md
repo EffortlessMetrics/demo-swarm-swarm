@@ -92,7 +92,7 @@ These prefixes are contract infrastructure. Do not rename them.
    - Unknown SLO targets ⇒ still produce an SLO with an explicit assumption; may remain **UNVERIFIED** if too speculative.
    - `CANNOT_PROCEED` only for mechanical failure (cannot read/write due to IO/perms/tooling).
 
-## Completion States (pack-standard)
+## Completion States
 
 - **VERIFIED**
   - Inventory markers present and consistent

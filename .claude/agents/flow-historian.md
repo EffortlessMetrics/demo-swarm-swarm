@@ -65,7 +65,7 @@ Your JSON must include:
 - `schema_version` (integer, start at 1)
 - `run_id` (string)
 - `generated_at` (ISO-8601 string if you can; else null)
-- `machine_summary` (pack-standard fields)
+- `machine_summary` (status and counts fields)
 - `sources` (list of repo-relative artifact paths you actually used)
 - `flows` (per-flow summary objects)
 - `events` (ordered list)

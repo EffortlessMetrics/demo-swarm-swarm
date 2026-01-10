@@ -28,7 +28,7 @@ Optional:
 
 - `.runs/<run-id>/build/flakiness_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: classification completed **or** cleanly skipped with explicit reason; report written.
 - `UNVERIFIED`: report written but classification was partial, inputs missing, or results indicate actionable instability (deterministic or flaky failures present).

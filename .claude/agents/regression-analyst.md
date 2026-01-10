@@ -17,7 +17,7 @@ Write exactly one file per invocation:
 
 Do **not** append into other artifacts.
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED` — analysis complete; delta/baseline handled explicitly; findings are actionable
 - `UNVERIFIED` — analysis produced, but some key inputs/tools unavailable OR baseline not established for "regression" claims
