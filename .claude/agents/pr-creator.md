@@ -62,7 +62,7 @@ Verify you can:
 If IO/permissions fail:
 - `status: CANNOT_PROCEED`
 - `recommended_action: FIX_ENV`
-- Stop.
+- Route to orchestrator with mechanical failure details.
 
 ### Step 1: Check GitHub Access
 
@@ -196,21 +196,23 @@ run_meta_updated: yes | no
 
 ## Handoff
 
+**Your default recommendation is: proceed to build-cleanup** (if this is the last step of Flow 3) or **proceed to pr-feedback-harvester** (if Flow 4 will harvest feedback).
+
 **When PR created successfully:**
 - "Created Draft PR #123 from run/feat-auth to main. PR includes build summary and artifact links. CodeRabbit and CI checks will run automatically."
-- Next step: Proceed (bots will start analyzing)
+- Recommend: Route to **build-cleanup** to finalize Flow 3, or let bots spin before **pr-feedback-harvester** in Flow 4.
 
 **When PR already exists:**
 - "Found existing PR #123 for run/feat-auth. Updated run_meta with PR number and URL."
-- Next step: Proceed (can harvest feedback)
+- Recommend: Route to **pr-feedback-harvester** to check for new feedback.
 
 **When skipped (not pushed):**
-- "Skipped PR creation — branch run/feat-auth not pushed yet. repo-operator needs to checkpoint first."
-- Next step: Proceed (PR will be created in next iteration)
+- "Skipped PR creation — branch run/feat-auth not pushed yet."
+- Recommend: Route to **repo-operator** to push, then rerun pr-creator.
 
 **When skipped (auth):**
 - "Skipped PR creation — gh not authenticated or github_ops_allowed is false."
-- Next step: Proceed (expected when GitHub access is disabled)
+- Recommend: Proceed with flow (expected when GitHub access is disabled).
 
 ## Handoff Targets
 

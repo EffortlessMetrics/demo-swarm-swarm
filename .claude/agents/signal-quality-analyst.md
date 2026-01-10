@@ -269,11 +269,17 @@ Signal quality is about learning what to trust. If CodeRabbit is wrong 40% of th
 
 This is calibration, not criticism. Every source has strengths and weaknesses. Your job is to map them so future runs can triage smarter.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Signal quality analysis complete, accuracy metrics documented, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when signal quality analysis is complete (default happy path)
 - **learning-synthesizer**: Extracts actionable lessons; use when signal quality findings should inform run learnings
 - **pattern-analyst**: Analyzes cross-run patterns; use when signal quality issues recur across multiple runs
 - **process-analyst**: Analyzes flow execution efficiency; use when signal quality affected process efficiency
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when signal quality analysis is complete
+
+**Partial completion is valid.** If worklist data is incomplete or skip reasons are missing, analyze what you have, document gaps, and proceed. Partial signal quality analysis is still useful for future triage calibration.

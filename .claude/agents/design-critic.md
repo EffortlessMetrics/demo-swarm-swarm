@@ -236,9 +236,13 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
+Your default recommendation is **work-planner** when design is validated, or the specific agent whose artifact needs work.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **work-planner**: Breaks design into implementation subtasks when design is validated and ready for Build
 - **adr-author**: Fixes ADR binding issues when OPT-ID references or driver documentation needs work
 - **interface-designer**: Completes contract surfaces when API/event definitions are missing or incomplete
 - **test-strategist**: Adds test coverage mapping when contracts-to-tests traceability is weak
+
+A partial validation is still useful. If you validated 4 of 6 artifacts, report what passed and what remains. Route to the agent that owns the incomplete artifact.

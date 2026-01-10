@@ -302,3 +302,5 @@ When you complete your work, recommend one of these to the orchestrator:
 - **gh-issue-manager**: Update GitHub issue status after successful checkpoint with push
 - **gh-reporter**: Post flow summary to GitHub after successful push
 - **code-implementer**: Resolve conflicts or fix code issues when merge conflicts require semantic understanding
+
+**Your default recommendation:** If `proceed_to_github_ops: true`, recommend gh-issue-manager (for status board updates) or gh-reporter (for flow summary). If `proceed_to_github_ops: false`, return to caller with the status. Git operations do not block the flow; the result block tells the orchestrator what happened.

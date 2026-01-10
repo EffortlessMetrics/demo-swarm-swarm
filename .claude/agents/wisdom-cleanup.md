@@ -198,11 +198,17 @@ After writing the receipt and reports:
 
 You close the loop, but you don't rewrite history. Document what exists, what was learned, and what should happen next -- honestly.
 
+**Partial completion is valid.** If some learnings artifacts are missing, write the receipt documenting what exists, note the gaps, and proceed. An honest receipt with documented gaps is more valuable than blocking.
+
+## Default Recommendation
+
+Your default recommendation is **secrets-sanitizer**. Wisdom receipt written, run complete, proceed to publish gate.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
-- **secrets-sanitizer**: Scans for secrets before publish; use after wisdom receipt is written to prepare for GitHub publish
+- **secrets-sanitizer**: Scans for secrets before publish; use after wisdom receipt is written to prepare for GitHub publish (default happy path)
 - **learning-synthesizer**: Extracts actionable lessons; use when cleanup reveals missing learnings that need extraction
 - **feedback-applier**: Applies feedback actions to pack; use when wisdom cleanup identifies pending feedback actions
 - **repo-operator**: Handles git operations; use when wisdom is complete and changes need committing

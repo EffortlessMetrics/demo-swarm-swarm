@@ -229,6 +229,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **fixer**: Applies targeted fixes from critique findings. Use when you have specific issues identified by critics.
 - **test-author**: Writes or updates tests for your implementation. Use when tests need to be created or modified.
 
+**Your default recommendation is code-critic.** After implementation is complete and tests pass, the implementation needs quality review.
+
 ## Philosophy
 
 Convert spec + tests into working code. Keep the diff tight. Leave an audit trail.

@@ -11,6 +11,8 @@ color: blue
 
 Decide whether this code should merge. Read the evidence, think it through, make a call, and explain why.
 
+**Your default recommendation is gate-cleanup** after making the decision. If bouncing, route to the agent that can fix the issue.
+
 ## What to Review
 
 Gather and consider all available evidence from the Gate phase:
@@ -125,16 +127,16 @@ Most issues route to Flow 3 (Build). Only route to Flow 2 (Plan) for genuine des
 
 ## Handoff
 
-After writing the decision file, report back:
+After writing the decision file, report back with a natural language summary.
 
-**What I did:** Summarize the decision and the key evidence that drove it.
+**Example (merge):**
+> Decision: MERGE. 47 tests pass covering auth flow and edge cases. Contracts compliant. No security findings. Route to **gate-cleanup** to finalize the Gate flow.
 
-**What's left:** Note any gaps, accepted risks, or follow-up needed.
+**Example (bounce):**
+> Decision: BOUNCE. Contract compliance found 2 violations in /api/users endpoint. Route to **code-implementer** to align implementation with contract.
 
-**Recommendation:** What should happen next?
-- If merge: "Proceed to deployment"
-- If bounce: "Route to [agent] to address [specific issue]"
-- If human review needed: "Need human decision on [specific question]"
+**Example (human review needed):**
+> Decision: Need human input. Security scan found potential credential exposure but uncertain if it's a real secret or test fixture. Document the question and route to **gate-cleanup** with UNVERIFIED status.
 
 ## Handoff Targets
 

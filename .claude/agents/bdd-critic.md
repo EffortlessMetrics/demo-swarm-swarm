@@ -172,9 +172,10 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation depends on what you find:
+- **If issues found**: Route to **bdd-author** to address the critique.
+- **If scenarios are solid**: Route to **scope-assessor** to assess stakeholders, risks, and scope.
 
-- **bdd-author**: Writes or revises BDD scenarios based on critique findings. Use when issues need fixing.
-- **scope-assessor**: Assesses stakeholders, risks, and scope estimate. Use when scenarios are solid and ready for scope analysis.
-- **requirements-author**: Writes or revises requirements. Use when upstream requirements are vague or missing.
-- **spec-auditor**: Performs holistic audit of complete Flow 1 spec. Use when BDD is ready and you want final validation before Flow 2.
+Other targets when conditions apply:
+- **requirements-author**: Use when upstream requirements are vague or missing.
+- **spec-auditor**: Use when ready for final holistic validation before Flow 2.

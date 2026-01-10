@@ -513,6 +513,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **repo-operator**: Handle git operations when issue binding reveals branch or commit needs
 - **clarifier**: Resolve ambiguities when issue creation reveals missing context
 
+**Your default recommendation:** After updating metadata and status board, recommend gh-reporter (to post the flow summary) or the flow's cleanup agent (to continue the flow). GitHub ops issues are recorded but do not block the flow.
+
 ## Philosophy
 
 **State-first approach:** The repo's current state is the primary truth. Use receipts for structured summaries (counts, statuses, artifact paths), but if receipts seem stale, note this as a concern rather than blocking. The issue is an observability pane, not a permission gate.

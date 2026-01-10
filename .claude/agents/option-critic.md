@@ -205,9 +205,13 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
+Your default recommendation is **adr-author** when options are decision-ready, or **design-optioneer** when they need revision.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **adr-author**: Makes the architectural decision when options are decision-ready with no critical issues
 - **design-optioneer**: Revises design options when distinctness, comparability, or risk analysis needs work
 - **requirements-author**: Clarifies requirements when upstream constraints are undefined or ambiguous (routes to Flow 1)
 - **problem-framer**: Refines problem scope when options cannot be evaluated due to vague requirements (routes to Flow 1)
+
+A partial critique is still useful. If you found distinctness issues but could not evaluate traceability due to missing requirements, report what you found and recommend next steps. Honest incomplete work is a valid outcome.

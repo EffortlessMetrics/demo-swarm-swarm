@@ -57,15 +57,15 @@ If any prerequisite fails, write status as SKIPPED and proceed.
 
 If `run_meta.github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
-- Exit cleanly.
+- Proceed with flow (expected when GitHub access is disabled).
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
-- Exit cleanly.
+- Proceed with flow (auth can be fixed later).
 
 If `pr_number` is null/missing:
 - Write status with `operation_status: SKIPPED`, reason: `no_pr_exists`
-- Exit cleanly.
+- Route to **pr-creator** if PR is needed, otherwise proceed.
 
 ### Step 1: Check Current PR State
 
@@ -144,25 +144,27 @@ critical_pending: <n>
 
 ## Handoff
 
+**Your default recommendation is: route to review-cleanup** to finalize Flow 4.
+
 **When transitioned to Ready:**
 - "Transitioned PR #123 from Draft to Ready for Review. All worklist items resolved (0 CRITICAL, 0 MAJOR pending). Review is complete."
-- Next step: Proceed to Gate
+- Recommend: Route to **review-cleanup** to write receipt and proceed to Gate.
 
 **When kept as Draft (review incomplete):**
-- "Kept PR #123 as Draft — 2 CRITICAL items still pending in review worklist. Review is not complete."
-- Next step: Continue resolving worklist items
+- "Kept PR #123 as Draft — 2 CRITICAL items still pending in review worklist."
+- Recommend: Route to **review-worklist-writer** to continue draining worklist.
 
 **When kept as Draft (publish blocked):**
 - "Kept PR #123 as Draft — publish gate blocked (safe_to_publish: false or proceed_to_github_ops: false)."
-- Next step: Resolve publish blockers first
+- Recommend: Route to **secrets-sanitizer** to resolve publish blockers.
 
 **When unchanged (already Ready):**
 - "PR #123 is already in 'open' state (ready for review). No state change needed."
-- Next step: Proceed
+- Recommend: Route to **review-cleanup** to finalize Flow 4.
 
 **When skipped:**
 - "Skipped PR state management — no PR exists or gh not authenticated."
-- Next step: Proceed (expected when PR doesn't exist or GitHub access disabled)
+- Recommend: Proceed with flow (expected when PR doesn't exist or GitHub access disabled).
 
 ## Handoff Targets
 

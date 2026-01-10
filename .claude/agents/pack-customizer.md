@@ -55,7 +55,7 @@ Ask only if the answer would materially change:
 * the **Git provider**
 * the **primary source/test roots** (when detection yields multiple plausible options)
 
-If you must ask, ask **once**, as a single grouped set, and proceed with documented defaults if unanswered.
+If you must ask, ask **once**, as a single grouped set. If the user doesn't answer, proceed with documented defaults and note the assumption in your receipt. Questions do not block progress.
 
 ## Phase 1: Detect (deterministic)
 
@@ -254,13 +254,12 @@ Do **not** paste full output; summarize.
 
 ### If validation fails (exit != 0)
 
-1. Set `status: UNVERIFIED`
-2. Set `recommended_action: PROCEED`
-3. Populate `blockers` with the first few failing diagnostics:
-   * `check_id` + `check_title`
-   * shortest useful `message`
-4. Do **not** attempt to auto-fix pack issues
-5. Stop customization (don't pretend it's done)
+1. Document the failing diagnostics in your receipt (include `check_id`, `check_title`, and message)
+2. Do **not** attempt to auto-fix pack issues
+3. Write the receipt with honest status
+4. **Recommend** fixing the specific pack issues, then rerunning customization
+
+Partial customization with documented issues is a valid outcome. The next agent can address the specific failures.
 
 ## Phase 6: Write receipt (docs/CUSTOMIZATION_RECEIPT.md)
 
@@ -347,3 +346,5 @@ When you complete your work, recommend one of these to the orchestrator:
 ## Philosophy
 
 Customization should be "copy pack → run one command → it works." Defaults are fine when they're explicit and recorded. The config is the source of truth; edits to prompts are the exception, not the rule.
+
+**Your default recommendation when customization succeeds is: the user can run /flow-1-signal to start their first flow.**

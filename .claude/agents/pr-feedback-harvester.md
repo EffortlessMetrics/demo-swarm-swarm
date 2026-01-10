@@ -150,20 +150,19 @@ Verify you can:
 
 If `pr_number` is null:
 - Write status with `status: UNVERIFIED`, reason: `no_pr_exists`
-- Recommend: run `pr-creator` first
-- Exit cleanly.
+- Route to **pr-creator** first, then return here.
 
 ### Step 1: Check GitHub Access
 
 If `github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
 - `status: UNVERIFIED`, `recommended_action: PROCEED`
-- Exit cleanly.
+- Proceed with flow (expected when GitHub access is disabled).
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
 - `status: UNVERIFIED`, `recommended_action: PROCEED`
-- Exit cleanly.
+- Proceed with flow (auth can be fixed later).
 
 ### Step 2: Harvest All Sources
 
@@ -399,25 +398,27 @@ sources_unavailable: []
 
 ## Handoff
 
+**Your default recommendation is: route to review-worklist-writer** to convert feedback into actionable Work Items.
+
 **When blockers found:**
 - "Harvested PR #123 feedback: 2 CRITICAL blockers (CI test failures in auth module, CodeRabbit found md5 password hashing). 5 MAJOR items and 8 MINOR suggestions in full worklist. CI status: FAILING (2 checks)."
-- Next step: Fix blockers immediately (Flow 3 interrupts AC loop)
+- Recommend: Route to **code-implementer** for immediate CRITICAL fixes (Flow 3 interrupt), OR route to **review-worklist-writer** to structure all feedback (Flow 4).
 
 **When no blockers, items available:**
 - "Harvested PR #123 feedback: CI passing, CodeRabbit posted 12 suggestions (0 CRITICAL, 4 MAJOR, 8 MINOR). Human reviewer requested test additions (MAJOR). Full worklist ready for Flow 4."
-- Next step: Continue AC loop (Flow 3) or drain worklist (Flow 4)
+- Recommend: Route to **review-worklist-writer** to cluster into Work Items.
 
 **When feedback not available yet:**
-- "Harvested PR #123: CI checks still pending (3/5 in_progress), no bot comments yet. Will catch feedback on next iteration."
-- Next step: Proceed (feedback will appear later)
+- "Harvested PR #123: CI checks still pending (3/5 in_progress), no bot comments yet. Captured what's available."
+- Recommend: Proceed with flow. Next iteration will catch new feedback.
 
 **When no PR exists:**
-- "Cannot harvest feedback — PR doesn't exist yet. Run pr-creator first."
-- Next step: Create PR, then harvest
+- "Cannot harvest feedback — PR doesn't exist yet."
+- Recommend: Route to **pr-creator** first, then return here.
 
 **When auth missing:**
 - "Skipped feedback harvest — gh not authenticated or github_ops_allowed is false."
-- Next step: Proceed (expected when GitHub access is disabled)
+- Recommend: Proceed with flow (expected when GitHub access is disabled).
 
 ## Handoff Targets
 

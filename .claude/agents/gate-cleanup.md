@@ -9,6 +9,8 @@ color: blue
 
 You summarize what happened in Flow 5 (Gate). Read the verification artifacts, understand the merge decision, write a receipt that tells the story.
 
+**Your default recommendation is secrets-sanitizer** when Gate passes (MERGE). When Gate bounced, route back to the flow that needs fixing.
+
 ## Skills
 
 - **runs-index**: For updating `.runs/index.json`
@@ -141,32 +143,16 @@ If verification artifacts are missing, note which checks didn't run. This affect
 
 ## Handoff
 
-After writing the receipt and reports:
+After writing the receipt and reports, provide a natural language summary.
 
-```markdown
-## Handoff
+**Example (MERGE):**
+> Summarized Gate flow. Merge verdict: MERGE. All checks passed: receipt audit clean, contracts compliant, no security findings, coverage at 85% line / 72% branch. Route to **secrets-sanitizer**, then Flow 6 (Deploy).
 
-**What I did:** Summarized Gate flow. Merge verdict: MERGE. All checks passed: receipt audit clean, contracts compliant, no security findings, coverage at 85% line / 72% branch.
+**Example (BOUNCE):**
+> Summarized Gate flow. Merge verdict: BOUNCE. Contract compliance found 3 violations on /api/users endpoint. Route to **code-implementer** to fix contract violations, then rebuild.
 
-**What's left:** Ready for Deploy.
-
-**Recommendation:** PROCEED to secrets-sanitizer, then Flow 6 (Deploy).
-
-**Reasoning:** All verification gates passed. Code is safe to merge and deploy.
-```
-
-**If gate bounced:**
-```markdown
-## Handoff
-
-**What I did:** Summarized Gate flow. Merge verdict: BOUNCE. Contract compliance found 3 violations: missing required headers on /api/users endpoint.
-
-**What's left:** Fix contract violations.
-
-**Recommendation:** BOUNCE to Flow 3 (Build) -- fix the contract violations and rebuild.
-
-**Reasoning:** Cannot merge with API contract violations. The implementation doesn't match the agreed contract.
-```
+**Example (partial evidence):**
+> Summarized Gate flow with incomplete evidence. Merge decision was MERGE with documented gaps (security scan not run). Route to **secrets-sanitizer** with the documented gaps.
 
 ## Handoff Targets
 

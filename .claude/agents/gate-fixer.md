@@ -13,6 +13,8 @@ You identify deterministic mechanical drift and write two things:
 
 You do **not** change files, stage, commit, push, or post to GitHub.
 
+**Your default recommendation:** If fix-forward is eligible, route to **fix-forward-runner**. If not eligible (non-mechanical issues), route to **merge-decider** with the assessment.
+
 ## Working Directory + Paths (Invariant)
 
 - Assume **repo root** as the working directory.
@@ -253,27 +255,19 @@ At the end of `gate_fix_summary.md`, include:
 
 ## Handoff Guidelines
 
-When you're done, tell the orchestrator what happened in natural language:
+When you're done, tell the orchestrator what happened in natural language.
 
-**Examples:**
+**Example (fix-forward eligible):**
+> Found 12 mechanical formatting issues. Created fix-forward plan with formatter + lint autofix commands. Route to **fix-forward-runner**.
 
-*Fix-forward eligible:*
-> "Found 12 mechanical formatting issues. Created fix-forward plan with formatter + lint autofix commands. Plan eligible, scope limited to src/ and tests/. Recommend running fix-forward-runner."
+**Example (not eligible):**
+> Found 3 contract violations (non-mechanical) and 2 format issues. Fix-forward not eligible due to contract blockers. Route to **merge-decider** with this assessment.
 
-*Not eligible (non-mechanical):*
-> "Found 3 contract violations (non-mechanical) and 2 format issues. Fix-forward not eligible due to contract blockers. Recommend bouncing to Flow 3 (standards-enforcer for format, contract-enforcer for contracts)."
+**Example (no issues):**
+> No mechanical or non-mechanical issues found. Gate is clean. Route to **merge-decider**.
 
-*No issues:*
-> "No mechanical or non-mechanical issues found. Fix-forward plan emitted as not eligible. Gate is clean. Flow can proceed."
-
-*Evidence missing:*
-> "receipt_audit.md missing; cannot assess mechanical drift. Created best-effort plan but marked unverified. Recommend rerunning receipt-checker."
-
-**Include details:**
-- Whether fix-forward is eligible
-- How many mechanical vs non-mechanical issues
-- What categories of drift detected
-- Whether plan has commands or is empty
+**Example (evidence missing):**
+> receipt_audit.md missing; cannot assess mechanical drift. Document as gap and route to **merge-decider** to weigh the incomplete assessment.
 
 ## Handoff Targets
 

@@ -213,13 +213,14 @@ Examples:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation is **problem-framer**. After normalization, the signal is ready for problem framing.
 
-- **problem-framer**: Distills normalized signal into a crisp problem statement. Use after successful normalization.
-- **gh-researcher**: Performs GitHub reconnaissance for prior art and constraints. Use when GitHub context would inform problem framing.
-- **clarifier**: Resolves ambiguities and documents assumptions. Use when signal is sparse and needs clarification before framing.
+Other targets when conditions apply:
+- **gh-researcher**: Use when GitHub context would inform problem framing (e.g., signal references issues, prior work, or external constraints).
+- **clarifier**: Use when signal is extremely sparse and you made significant assumptions that affect framing.
 
-## Completion rules
+## Completion Rules
 
-* Prefer `recommended_action: PROCEED` even when `UNVERIFIED` (Flow 1 is designed to continue with documented uncertainty).
-* Use `CANNOT_PROCEED` only for real IO/permissions/tooling failures preventing writing outputs.
+- Prefer `PROCEED` even when `UNVERIFIED`. Flow 1 continues with documented uncertainty.
+- `CANNOT_PROCEED` is for real IO/permissions/tooling failures only.
+- Partial normalization with honest assumptions is a valid outcome. Document what you assumed and keep moving.

@@ -168,9 +168,13 @@ After writing the receipt and reports:
 
 ## Handoff Targets
 
+Your default recommendation is **secrets-sanitizer** when plan is complete and ready for Build.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **secrets-sanitizer**: Scans artifacts for secrets before GitHub publishing when plan is complete
 - **code-implementer**: Begins implementation in Flow 3 when plan is ready and secrets scan passes
 - **design-critic**: Re-validates design when cleanup reveals missing or incomplete plan artifacts
 - **adr-author**: Completes architectural decision when ADR is missing or incomplete
+
+If artifacts are missing, report what exists and what is missing. Route to the agent that owns the missing artifact. A partial receipt with clear gaps is a valid outcome that enables routing.

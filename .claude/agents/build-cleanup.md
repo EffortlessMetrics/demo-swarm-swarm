@@ -204,3 +204,5 @@ When you complete your work, recommend one of these to the orchestrator:
 - **code-implementer**: Fixes implementation issues when forensic mismatches are found. Use when worker claims do not match evidence.
 - **test-executor**: Reruns tests when test evidence is missing or stale. Use to regenerate test_execution.md.
 - **self-reviewer**: Re-reviews artifacts if you find inconsistencies. Use to regenerate self_review.md before sealing.
+
+**Your default recommendation is secrets-sanitizer.** After the receipt is sealed, scan for secrets before proceeding to Gate.

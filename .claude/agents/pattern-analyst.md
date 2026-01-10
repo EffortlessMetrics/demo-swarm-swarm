@@ -208,11 +208,17 @@ Patterns are signals, not judgments. If the same issue keeps appearing, the syst
 
 Be specific. "Tests are flaky" is not actionable. "test_auth.py::test_login fails intermittently due to timing dependency on mock server startup" is actionable.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Patterns analyzed, report written, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when pattern analysis is complete (default happy path)
 - **learning-synthesizer**: Extracts actionable lessons from run artifacts; use when patterns inform specific learnings for this run
 - **process-analyst**: Analyzes flow execution efficiency; use when patterns reveal systemic process issues across runs
 - **regression-analyst**: Traces regressions to root causes; use when patterns indicate recurring test or coverage regressions
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when pattern analysis is complete and ready for rollup
+
+**Partial completion is valid.** If historical data is sparse (few prior runs), document what you found and proceed. Patterns emerge over time; an honest "insufficient data for pattern detection" is a valid finding.

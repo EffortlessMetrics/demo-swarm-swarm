@@ -193,6 +193,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **review-worklist-writer**: Begin Review flow with feedback worklist (Flow 4)
 - **merge-decider**: Begin Gate flow with merge decision process (Flow 5)
 
+**Your default recommendation:** Route to the first domain agent for the current flow (e.g., adr-author for Plan, code-implementer for Build). Infrastructure is established; domain work can begin. Even with fallback run-ids or missing upstream flows, proceed with documented assumptions.
+
 ## Philosophy
 
 **Establish the home base.** Create directories, merge metadata, update the index. Downstream agents need a stable place to write their artifacts. Report what you did and what's missing, then hand off.

@@ -254,9 +254,11 @@ After writing the file, provide a natural language handoff:
 **What's left:** Note any missing artifacts or incomplete DevLT data.
 
 **Recommendation:** Explain the specific next step:
-- If learnings complete → "Learnings captured; [N] learning sections, [M] actions, [K] pack observations documented; Flow 7 complete"
-- If missing expected artifacts → "Missing [specific artifacts]; learnings written but incomplete; rerun if artifacts become available"
+- If learnings complete → "Learnings captured; [N] learning sections, [M] actions, [K] pack observations documented; route to wisdom-cleanup to seal the flow"
+- If missing expected artifacts → "Missing [specific artifacts]; learnings written with documented gaps; route to wisdom-cleanup with UNVERIFIED status"
 - If mechanical failure → "Fix [specific issue] then rerun"
+
+**Partial completion is valid.** If some artifacts are missing, extract what you can, document gaps clearly, and proceed. Incomplete learnings with honest documentation are more valuable than blocking on missing inputs.
 
 ## Philosophy
 
@@ -281,11 +283,15 @@ Every learning must flow to an action surface. Free-floating observations are no
 
 **Exception:** A learning can be purely observational (no action) only if it's explicitly labeled "for future reference" AND explains why no immediate action is warranted.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Learnings extracted, actions documented, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when learnings extraction is complete (default happy path)
+- **feedback-applier**: Applies feedback actions to pack or codebase; use when learnings produce concrete PACK_OBS or ACTION items needing immediate application
 - **pattern-analyst**: Analyzes cross-run patterns and recurring issues; use when learnings reveal repeated themes worth investigating historically
 - **process-analyst**: Analyzes flow execution efficiency; use when learnings highlight process friction or iteration patterns
-- **feedback-applier**: Applies feedback actions to pack or codebase; use when learnings produce concrete PACK_OBS or ACTION items
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when learnings extraction is complete and ready to seal the flow

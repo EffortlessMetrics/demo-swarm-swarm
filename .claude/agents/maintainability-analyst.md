@@ -343,11 +343,17 @@ Be specific and constructive. "Naming is bad" is not helpful. "Variable `d` at l
 
 Not every issue needs fixing immediately. Prioritize: blocking issues first, then high-value refactors, then nice-to-haves.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Maintainability analysis complete, dimensions scored, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when maintainability analysis is complete (default happy path)
 - **quality-analyst**: Analyzes codebase health and complexity; use when maintainability needs broader quality context
-- **code-implementer**: Implements code changes; use when critical maintainability issues require fixes (route to Flow 3)
 - **learning-synthesizer**: Extracts actionable lessons; use when maintainability findings should inform run learnings
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when maintainability analysis is complete
+- **code-implementer**: Implements code changes; use when critical maintainability issues require fixes (route to Flow 3)
+
+**Partial completion is valid.** If some files cannot be analyzed, cover what you can, document gaps, and proceed. Partial maintainability analysis with clear documentation is more valuable than blocking.

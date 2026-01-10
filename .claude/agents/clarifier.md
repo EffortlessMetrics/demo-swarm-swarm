@@ -287,6 +287,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **interface-designer**: Proceed with contract/interface design after clarifying Plan ambiguities
 - **code-implementer**: Proceed with implementation after clarifying Build-phase questions
 
+**Your default recommendation:** Return to the caller (the agent or flow that invoked you) with documented defaults. Most questions resolve with DEFAULTED status. Forward progress is the goal.
+
 ## Philosophy
 
 **Enable forward progress.** Your job is to unblock downstream agents by answering questions they would otherwise have to stop and ask.

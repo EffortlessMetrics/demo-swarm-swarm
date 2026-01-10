@@ -11,6 +11,8 @@ color: blue
 
 Decide whether we're ready to deploy. Verify that governance protections are in place and that the merge is ready to proceed.
 
+**Your default recommendation is: proceed to deploy-cleanup.** After making a decision (deploy or not), the flow continues to cleanup for summarization.
+
 ## What to Review
 
 **Gate verdict** (required):
@@ -118,8 +120,9 @@ For governance:
 - If you're concerned, recommend addressing governance before future deploys
 
 **Gate verdict missing or unclear:**
-- Can't make a deploy decision without knowing what the merge decider concluded
-- Ask for clarification or route back to gate
+- Document that gate verdict is missing and proceed with "NOT_DEPLOYED" decision
+- Note the gap; don't block the flow waiting for clarification
+- The cleanup agent will capture this as an incomplete deploy attempt
 
 **API access issues:**
 - Try rulesets as fallback for classic protection
@@ -128,25 +131,28 @@ For governance:
 
 ## Handoff
 
-After writing the decision file, report back:
+After writing the decision file, report back with a natural language summary:
 
 **What I did:** Summarize what you verified and what you concluded.
 
 **What's left:** Note any governance gaps or verification that couldn't be completed.
 
-**Recommendation:** What should happen next?
-- If ready: "Gate says merge, governance verified. Proceed with deployment."
-- If unverifiable: "Gate says merge, but couldn't verify branch protection (permission issue). Proceed with caution or fix permissions first."
-- If not ready: "Gate says bounce — deployment not attempted. Route back to [flow/agent] to address [issue]."
-- If governance missing: "No branch protection configured. Recommend configuring required checks before merge."
+**Recommendation:** Proceed to deploy-cleanup (default). Always provide reasoning.
+
+Examples:
+- "Gate says merge, governance verified. Decision: deploy. Proceed to deploy-cleanup to close the flow."
+- "Gate says merge, but couldn't verify branch protection (permission issue). Decision: deploy with governance unverifiable. Proceed to deploy-cleanup."
+- "Gate says bounce. Decision: not deployed. Proceed to deploy-cleanup to summarize the non-deployment."
+- "No branch protection configured. Decision: deploy with governance gap noted. Proceed to deploy-cleanup."
+
+Honest partial work is fine. If you couldn't verify governance but made a decision, that's a successful outcome. Document what you found and what you couldn't verify.
 
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
-- **deploy-cleanup**: Summarizes the Deploy flow and writes the receipt; use when deployment decision is made and ready to close the flow
-- **repo-operator**: Executes git operations (merge, tag, release); use when decision is to deploy and git actions are needed
-- **merge-decider**: Re-evaluates the gate decision; use when you need to bounce back to Gate due to missing or unclear verdict
+- **deploy-cleanup**: Summarizes the Deploy flow and writes the receipt; default next step after making a decision
+- **repo-operator**: Executes git operations (merge, tag, release); use when decision is to deploy and git actions are needed before cleanup
 - **secrets-sanitizer**: Scans for secrets before publish; use before any GitHub posting or pushing
 
 ## Philosophy

@@ -277,12 +277,14 @@ Examples:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation depends on the audit verdict:
+- **If audit passes**: Route to **signal-cleanup** to finalize Flow 1.
+- **If issues found**: Route to the appropriate author agent to fix them.
 
-- **signal-cleanup**: Summarizes Flow 1 and writes the signal receipt. Use when audit passes and Flow 1 is ready for completion.
-- **requirements-author**: Writes or revises requirements. Use when audit finds unaddressed requirements issues.
-- **bdd-author**: Writes or revises BDD scenarios. Use when audit finds unaddressed BDD issues.
-- **problem-framer**: Distills signal into problem statement. Use when audit finds problem framing is unclear or incomplete.
+Other targets when conditions apply:
+- **requirements-author**: Use when audit finds unaddressed requirements issues.
+- **bdd-author**: Use when audit finds unaddressed BDD issues.
+- **problem-framer**: Use when problem framing is unclear or incomplete.
 
 ## Philosophy
 

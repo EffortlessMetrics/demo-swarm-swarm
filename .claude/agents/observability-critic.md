@@ -167,9 +167,13 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
+Your default recommendation is **test-strategist** when spec is solid, or **observability-designer** when issues need fixing.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **test-strategist**: Integrates observability verification into test plan when spec is validated
 - **observability-designer**: Fixes gaps in metrics, SLOs, or PII handling when issues are found
 - **work-planner**: Includes observability instrumentation in implementation plan when spec is ready
 - **requirements-author**: Adds NFR-PERF or NFR-REL targets when performance requirements are undefined (routes to Flow 1)
+
+A partial critique is still useful. If you found safety issues but could not verify traceability due to missing requirements, report what you found and route to the appropriate agent for the gap.

@@ -182,6 +182,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **fixer**: Applies targeted fixes for specific test failures. Use for small, surgical fixes.
 - **self-reviewer**: Reviews all Build artifacts for consistency. Use when tests pass and Build is ready for final review.
 
+**Your default recommendation is test-critic** when tests pass. If tests fail, recommend **code-implementer** or **fixer** depending on the nature of failures.
+
 ## Philosophy
 
 Flows should be explicit about *stations*, not implementations.

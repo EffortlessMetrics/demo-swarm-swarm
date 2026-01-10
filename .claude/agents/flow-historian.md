@@ -228,11 +228,17 @@ When you're done, tell the orchestrator what happened in natural language:
 
 History is a receipt. If you don't have evidence, say "unknown" rather than guessing.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Timeline compiled, DevLT calculated, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when flow history is complete (default happy path)
 - **process-analyst**: Analyzes flow execution efficiency; use when timeline reveals process friction worth deeper analysis
 - **learning-synthesizer**: Extracts actionable lessons; use when DevLT data informs run learnings
 - **pattern-analyst**: Analyzes cross-run patterns; use when timeline shows recurring issues across runs
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when flow history is complete
+
+**Partial completion is valid.** If some receipts or timestamps are missing, compile what you have, document gaps, and proceed. Partial timeline with honest gaps is more valuable than blocking.

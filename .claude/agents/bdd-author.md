@@ -256,12 +256,12 @@ After writing the scenarios, provide a natural language summary covering:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation is **bdd-critic**. Scenarios need validation before scope assessment.
 
-- **bdd-critic**: Reviews BDD scenarios for testability, traceability, and coverage. Use after writing scenarios.
-- **requirements-author**: Writes or revises requirements. Use when requirements are missing or need refinement before scenarios can be written.
-- **clarifier**: Resolves ambiguities and documents assumptions. Use when requirements are ambiguous about error handling or edge cases.
-- **scope-assessor**: Assesses stakeholders, risks, and scope. Use after BDD coverage is complete.
+Other targets when conditions apply:
+- **requirements-author**: Use when requirements are missing or need refinement.
+- **clarifier**: Use when requirements are ambiguous about error handling or edge cases (document assumption and queue question, then continue).
+- **scope-assessor**: Use only after bdd-critic has passed (skip-critic is not the default path).
 
 ## Philosophy
 

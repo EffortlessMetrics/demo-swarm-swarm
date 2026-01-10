@@ -168,9 +168,13 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
+Your default recommendation is **test-strategist** when contracts are complete, or **interface-designer** when they need revision.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **test-strategist**: Maps contract surfaces to test types when contracts are complete and validated
 - **interface-designer**: Fixes contract issues when error models, schemas, or endpoints are incomplete
 - **observability-designer**: Defines observability signals when contract review passes
 - **design-critic**: Validates overall design coherence when contracts are one of several artifacts needing review
+
+A partial critique is still useful. If you validated contracts but schema.md is missing, report what you validated and route to interface-designer for the gap.

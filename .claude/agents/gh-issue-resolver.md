@@ -215,6 +215,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **gh-issue-manager**: Handle deferred issue binding when gh becomes available later
 - **signal-normalizer**: Begin signal processing after run infrastructure is established
 
+**Your default recommendation:** Route to signal-run-prep with the resolved run_id. Even if issue binding is DEFERRED or github_ops_allowed is false, signal-run-prep proceeds with a local-only run. GitHub unavailability does not block flow progress.
+
 ## Flow 1 handoff
 
 1. Orchestrator reads this block.

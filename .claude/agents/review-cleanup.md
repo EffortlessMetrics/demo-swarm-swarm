@@ -17,6 +17,8 @@ You summarize what happened in Flow 4 (Review). Read the feedback and worklist a
 
 Compress the Review flow into a meaningful summary. You're the forensic auditor for review -- verify that worklist claims match evidence, then seal the envelope.
 
+**Partial work is a valid outcome.** If the worklist is partially resolved, write a PARTIAL receipt and recommend RERUN. This is context checkpointing, not failure. The next iteration picks up where this one left off.
+
 ## What to Review
 
 Read these artifacts and understand what they tell you:
@@ -141,32 +143,22 @@ If `pr_feedback.md` is missing, note as concern (maybe no feedback yet).
 
 ## Handoff
 
-After writing the receipt and reports:
+**Your default recommendation is:**
+- **PROCEED to gate-cleanup** when review is complete (VERIFIED status)
+- **RERUN via review-worklist-writer** when work remains (PARTIAL status)
+- **FIX_ENV** when mechanical failure prevents progress (CANNOT_PROCEED status)
 
-```markdown
-## Handoff
+**When review complete:**
+- "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred."
+- Recommend: Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5.
 
-**What I did:** Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred.
+**When work remains (partial):**
+- "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache."
+- Recommend: Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure.
 
-**What's left:** 2 minor items pending (documentation tweaks).
-
-**Recommendation:** PROCEED to Gate -- critical and major items resolved. Minor items can be addressed post-merge.
-
-**Reasoning:** All blocking feedback addressed. Remaining items are cosmetic and don't affect functionality.
-```
-
-**If critical items pending:**
-```markdown
-## Handoff
-
-**What I did:** Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache.
-
-**What's left:** 3 critical issues need resolution.
-
-**Recommendation:** RERUN -- must address critical feedback before Gate.
-
-**Reasoning:** Cannot proceed to Gate with unresolved security concerns.
-```
+**When blocked on environment:**
+- "Cannot write review_receipt.json due to permissions."
+- Recommend: Route to orchestrator with `FIX_ENV` -- mechanical issue needs resolution.
 
 ## Handoff Targets
 

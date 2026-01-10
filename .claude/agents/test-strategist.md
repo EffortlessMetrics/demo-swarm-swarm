@@ -407,12 +407,16 @@ The orchestrator routes on this handoff. `test_plan.md` and `ac_matrix.md` remai
 
 ## Handoff Targets
 
+Your default recommendation is **work-planner** when test plan and AC matrix are complete.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **work-planner**: Breaks design into implementation subtasks when test plan and AC matrix are complete
 - **bdd-author**: Adds missing scenario tags when scenarios lack @REQ traceability (routes to Flow 1)
 - **interface-designer**: Generates API contracts when test planning requires contract surfaces not yet defined
 - **design-critic**: Validates overall design coherence when test plan reveals coverage gaps in other artifacts
+
+If scenarios are missing REQ tags, still write a partial test plan with what you can map. Document the gaps and recommend bdd-author. A partial plan with clear gaps is more useful than no plan.
 
 ## Philosophy
 

@@ -177,12 +177,12 @@ Write exactly this structure:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation is **requirements-author**. A well-framed problem is ready for requirements.
 
-- **requirements-author**: Writes functional and non-functional requirements from the problem statement. Use after successful problem framing.
-- **signal-normalizer**: Normalizes raw signal into structured facts. Use when upstream inputs are missing or incomplete.
-- **clarifier**: Resolves ambiguities and documents assumptions. Use when problem statement has significant unknowns that need investigation.
-- **gh-researcher**: Performs GitHub reconnaissance for prior art. Use when GitHub context would help clarify the problem scope.
+Other targets when conditions apply:
+- **signal-normalizer**: Use when upstream inputs (issue_normalized.md, context_brief.md) are missing.
+- **gh-researcher**: Use when GitHub context would clarify problem scope (prior art, constraints from discussions).
+- **clarifier**: Use when significant unknowns exist that require investigation before requirements can be written.
 
 ## Philosophy
 

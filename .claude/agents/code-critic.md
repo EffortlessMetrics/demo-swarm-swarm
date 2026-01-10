@@ -195,3 +195,5 @@ When you complete your work, recommend one of these to the orchestrator:
 - **test-critic**: Reviews tests after you have reviewed the implementation. Use to continue the critique cycle.
 - **fixer**: Applies targeted fixes from your critique. Use for small, surgical fixes rather than full reimplementation.
 - **design-optioneer**: Clarifies ADR interpretation or design questions. Use when spec/implementation conflicts need resolution.
+
+**Your default recommendation is test-critic** when the implementation is solid. If you found issues, recommend **fixer** for small surgical fixes or **code-implementer** for larger implementation gaps.

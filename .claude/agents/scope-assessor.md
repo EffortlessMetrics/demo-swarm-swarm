@@ -248,12 +248,12 @@ Examples:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation is **spec-auditor**. After scope assessment, the spec needs holistic validation before Flow 2.
 
-- **spec-auditor**: Performs holistic audit of complete Flow 1 spec. Use after scope assessment to validate readiness for Flow 2.
-- **requirements-author**: Writes or revises requirements. Use when requirements are missing and scope cannot be accurately assessed.
-- **bdd-author**: Writes BDD scenarios from requirements. Use when scenarios are missing and coverage cannot be assessed.
-- **signal-cleanup**: Summarizes Flow 1 and writes the signal receipt. Use when spec audit has passed and Flow 1 is complete.
+Other targets when conditions apply:
+- **requirements-author**: Use when requirements are missing and scope cannot be accurately assessed.
+- **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
+- **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
 
 ## Philosophy
 

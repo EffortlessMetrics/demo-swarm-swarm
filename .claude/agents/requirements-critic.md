@@ -188,9 +188,10 @@ After writing your critique, summarize what you found:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation depends on what you find:
+- **If issues found**: Route to **requirements-author** to address the critique.
+- **If requirements are solid**: Route to **bdd-author** to convert requirements into scenarios.
 
-- **requirements-author**: Writes or revises requirements based on critique findings. Use when issues need fixing.
-- **bdd-author**: Converts requirements into BDD scenarios. Use when requirements are solid and ready for scenario authoring.
-- **problem-framer**: Distills signal into problem statement. Use when upstream problem framing needs clarification.
-- **clarifier**: Resolves ambiguities and documents assumptions. Use when requirements have undefined terms or vague criteria that need investigation.
+Other targets when conditions apply:
+- **problem-framer**: Use when upstream problem framing is unclear or incomplete.
+- **clarifier**: Use when requirements have undefined terms that need investigation.

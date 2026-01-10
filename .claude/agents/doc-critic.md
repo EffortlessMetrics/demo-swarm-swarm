@@ -181,3 +181,5 @@ When you complete your work, recommend one of these to the orchestrator:
 - **code-implementer**: Fixes code bugs when implementation differs from documented behavior. Use when code is wrong, not docs.
 - **interface-designer**: Clarifies contract ambiguities when code and docs disagree. Use to determine intended behavior.
 - **self-reviewer**: Reviews all Build artifacts for final consistency. Use when docs are current and Build is ready.
+
+**Your default recommendation is self-reviewer** when docs are current. If you found stale docs, recommend **doc-writer** to update them.

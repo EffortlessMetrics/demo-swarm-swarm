@@ -216,12 +216,16 @@ Outputs written:
 
 ## Handoff Targets
 
+Your default recommendation is **contract-critic** to validate contracts before proceeding.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **contract-critic**: Reviews contracts for completeness and testability before proceeding to implementation
 - **observability-designer**: Defines observability signals when contracts are ready and critical paths are known
 - **test-strategist**: Maps contract surfaces to test types when contract review passes
 - **adr-author**: Clarifies architectural decision when ADR is missing or ambiguous
+
+If ADR is missing or vague, derive what you can from requirements and document assumptions. An UNVERIFIED contract with clear gaps is more useful than no contract.
 
 ## Philosophy
 

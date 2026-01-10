@@ -138,9 +138,13 @@ After writing the spec file, provide a natural language handoff:
 
 ## Handoff Targets
 
+Your default recommendation is **observability-critic** to validate the spec before proceeding.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **observability-critic**: Reviews spec for measurability and safety before proceeding to test planning
 - **test-strategist**: Integrates observability signals into test plan when spec is validated
 - **adr-author**: Clarifies architectural decision when ADR is missing or boundaries are unclear
 - **requirements-author**: Adds NFR targets when performance or reliability requirements are undefined (routes to Flow 1)
+
+If NFR targets are missing, propose conservative defaults and document them as assumptions. An UNVERIFIED spec with explicit assumptions is more useful than no spec.

@@ -250,6 +250,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **test-author**: Creates new test files when coverage gaps require them. Use when fixes need new test infrastructure.
 - **clarifier**: Resolves spec ambiguities blocking correct fixes. Use when the right fix is unclear due to spec issues.
 
+**Your default recommendation is test-executor.** After applying fixes, run tests to verify they actually resolved the issues.
+
 ## Philosophy
 
 Close specific gaps with minimal change. If a fix needs architecture, new files, or judgment calls, hand it off—don't smuggle a refactor into "fixes."

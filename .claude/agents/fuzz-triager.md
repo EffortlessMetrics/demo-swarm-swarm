@@ -49,13 +49,13 @@ Use natural language in your handoff to communicate next steps:
 Verify you can write:
 - `.runs/<run-id>/build/fuzz_report.md`
 
-If you cannot write due to IO/perms/tooling: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and stop (after best-effort report write).
+If you cannot write due to IO/perms/tooling: write a best-effort report explaining the issue, then hand off with a recommendation to fix the environment.
 
 ### Step 1: Choose fuzz command (no guessing)
 
 1) If `demo-swarm.config.json` defines `fuzz.command`, use it **exactly**.
 2) Else: skip fuzzing and write the report explaining "no configured fuzz harness".
-   - set `status: UNVERIFIED`, `recommended_action: PROCEED`
+   - **Your default recommendation when skipped is: proceed to build-cleanup** (fuzzing is opt-in)
 
 ### Step 2: Run with a budget
 
@@ -81,8 +81,11 @@ If crashes occur, for each distinct crash signature:
 
 ### Step 4: Decide routing
 
-- If fuzz ran and any crashes found: `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer`
-- If fuzz ran clean: `VERIFIED`, `recommended_action: PROCEED`
+Based on your results, make a clear recommendation:
+- **Crashes found** → Recommend code-implementer to fix crash-causing bugs
+- **Fuzz ran clean** → Recommend proceeding to build-cleanup
+
+**Your default recommendation when no crashes found is: proceed to build-cleanup.**
 
 ## fuzz_report.md format (required)
 

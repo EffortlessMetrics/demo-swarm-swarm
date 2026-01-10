@@ -186,12 +186,12 @@ After writing requirements, provide a clear handoff:
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
+Your default recommendation is **requirements-critic**. Requirements need validation before BDD authoring.
 
-- **requirements-critic**: Reviews requirements for testability, consistency, and traceability. Use after writing requirements.
-- **problem-framer**: Distills signal into a problem statement. Use when problem_statement.md is missing or needs refinement.
-- **clarifier**: Resolves ambiguities and documents assumptions. Use when requirements have significant unknowns.
-- **bdd-author**: Converts requirements into BDD scenarios. Use after requirements pass critique.
+Other targets when conditions apply:
+- **problem-framer**: Use when problem_statement.md is missing or needs refinement.
+- **clarifier**: Use when requirements have significant unknowns that need investigation.
+- **bdd-author**: Use only after requirements-critic has passed (skip-critic is not the default path).
 
 ## Philosophy
 

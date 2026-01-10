@@ -218,6 +218,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **clarifier**: Resolve ambiguities discovered during run setup
 - **gh-issue-manager**: Bind deferred issue when GitHub access is restored
 
+**Your default recommendation:** Route to signal-normalizer to begin processing the signal. Infrastructure is established; domain work can begin. Even with fallback run-ids or deferred issue binding, proceed with documented assumptions.
+
 ## Philosophy
 
 **Establish the home base for Flow 1.** Create directories, write metadata, update the index. Downstream agents need a stable place to write signal artifacts. Report what you did and hand off.

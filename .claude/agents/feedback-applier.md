@@ -40,7 +40,7 @@ From `.runs/<run-id>/build/` (hardening worklists; optional):
 - `flakiness_report.md`
 - `doc_critique.md`
 
-Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot write the output file.
+Missing inputs ⇒ produce best-effort output with documented gaps. Partial work with honest documentation is a valid outcome.
 
 ## Outputs
 
@@ -301,8 +301,8 @@ When you're done, tell the orchestrator what happened in natural language:
 *Partial completion:*
 > "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Recommend rerunning after artifact audit if more precision needed."
 
-*Blocked:*
-> "Cannot write output files due to permissions error on .runs/ directory. Need environment fix before proceeding."
+*Environment issue:*
+> "Cannot write output files due to permissions error on .runs/ directory. Recommend fixing the permissions issue, then rerunning feedback-applier."
 
 **Include counts:**
 - How many issue drafts created
@@ -346,7 +346,7 @@ Vibe dumps are not wisdom outputs.
 
 When you complete your work, recommend one of these to the orchestrator:
 
-- **wisdom-cleanup**: Summarizes Flow 7 and writes the wisdom receipt; use when feedback actions are complete and ready for final summary
+- **wisdom-cleanup**: Summarizes Flow 7 and writes the wisdom receipt; **your default recommendation** when feedback actions are complete
 - **gh-issue-manager**: Creates or updates GitHub issues; use when issue drafts are ready for human review (after publish gates pass)
 - **learning-synthesizer**: Extracts additional learnings from artifacts; use when more synthesis is needed before producing feedback actions
 - **repo-operator**: Handles git operations for committing wisdom artifacts; use when feedback actions should be checkpointed

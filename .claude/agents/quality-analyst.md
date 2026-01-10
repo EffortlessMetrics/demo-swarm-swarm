@@ -153,11 +153,17 @@ Be honest but constructive. The goal is to surface real issues, not nitpick.
 
 Quality analysis is a spotlight, not a grade. You're here to help engineers see what they might have missed, not to punish them for imperfection. Be specific, be actionable, be kind.
 
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Quality analysis complete, findings documented, proceed to seal the flow.
+
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:
 
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when quality analysis is complete (default happy path)
 - **maintainability-analyst**: Deep analysis of code maintainability; use when quality report reveals issues needing deeper investigation
 - **regression-analyst**: Traces regressions to root causes; use when quality issues indicate potential regressions
 - **learning-synthesizer**: Extracts actionable lessons; use when quality findings should inform run learnings
-- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when quality analysis is complete and ready for rollup
+
+**Partial completion is valid.** If some files cannot be read, analyze what you can, document gaps, and proceed. A quality report covering 80% of changed files with clear documentation of gaps is more valuable than blocking.

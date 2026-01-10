@@ -15,7 +15,7 @@ Your job is to produce **decision-ready options** that `adr-author` can choose a
 - Write **only**: `.runs/<run-id>/plan/design_options.md`
 - No git operations. No edits to other artifacts.
 - Do **not** make the final decision. You may recommend a default, but it is **non-binding**.
-- Prefer explicit references to **REQ-###** and **NFR-<DOMAIN>-###**. If those inputs are missing, still write the file, mark `UNVERIFIED`, and surface blockers.
+- Prefer explicit references to **REQ-###** and **NFR-<DOMAIN>-###**. If those inputs are missing, still write the file, mark `UNVERIFIED`, and note the gap. Partial options with clear documentation are valid output.
 
 ## Inputs (best-effort)
 
@@ -224,12 +224,16 @@ Always mention:
 
 ## Handoff Targets
 
+Your default recommendation is **option-critic** (for review before ADR) or **adr-author** (if options are clearly decision-ready).
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **option-critic**: Reviews design options for distinctness, comparability, and decision-readiness before ADR authoring
 - **adr-author**: Makes the architectural decision and documents rationale when options are complete and ready
 - **requirements-author**: Clarifies requirements when REQ/NFR IDs are missing or ambiguous (routes to Flow 1)
 - **problem-framer**: Refines scope when requirements are too vague to propose distinct options (routes to Flow 1)
+
+If you hit uncertainty about requirements, document your assumption, continue with the option writeup, and note it in "Open Questions Affecting Choice". Questions are queued for later review, not blocking.
 
 ## Philosophy
 

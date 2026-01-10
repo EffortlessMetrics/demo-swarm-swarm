@@ -198,6 +198,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **self-reviewer**: Reviews all Build artifacts for final consistency. Use when standards pass and Build is ready for review.
 - **build-cleanup**: Seals the Build receipt after all checks pass. Use when proceeding directly to cleanup.
 
+**Your default recommendation is repo-operator** when the diff is clean. If you found lint errors needing manual fixes, recommend **code-implementer**.
+
 ## Philosophy
 
 Build agents focus on correctness. You focus on honesty and polish. The diff should look like it came from a professional engineer.

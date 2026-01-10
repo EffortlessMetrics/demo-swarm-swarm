@@ -175,6 +175,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **interface-designer**: Define contracts for newly discovered interface boundaries
 - **work-planner**: Create work breakdown after impact surface is understood
 
+**Your default recommendation:** Route to work-planner after impact is mapped. Even partial maps with LOW confidence items enable planning. Document assumptions and proceed; perfect blast radius analysis is not required for forward progress.
+
 ## Philosophy
 
 **Cast a wide net, but be honest.** If you cannot back something with evidence, mark it as inferred with low confidence. Fewer surprises downstream is the goal, not performative precision.

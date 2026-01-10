@@ -193,3 +193,5 @@ When you complete your work, recommend one of these to the orchestrator:
 - **code-implementer**: Fixes code bugs causing test failures. Use when tests are correct but code is wrong.
 - **fixer**: Applies targeted fixes to tests or code. Use for small, surgical fixes identified in your critique.
 - **self-reviewer**: Reviews all Build artifacts for consistency. Use when tests are solid and ready for final review.
+
+**Your default recommendation is self-reviewer** when tests are solid. If tests need work, recommend **test-author** for coverage gaps or **fixer** for small surgical fixes.
