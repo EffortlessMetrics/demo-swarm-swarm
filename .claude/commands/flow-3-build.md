@@ -152,14 +152,17 @@ When `test-executor` returns Green, **read the latest `code-critic` report** bef
 
 **The "Save Game" Routine (Push & Pulse):**
 
-After **any** AC completion, execute the Save Game Routine:
+After **any** AC completion, execute the Save Game Routine in this order:
 
-1. **Sanitize:** Call `secrets-sanitizer` (gate staged changes)
-2. **Persist:** Call `repo-operator` to **checkpoint & push** (save to origin)
-3. **Wake Bots:** Call `pr-creator` (only creates if missing; idempotent)
-4. **Harvest:** Call `pr-feedback-harvester`:
+1. **Stage:** Call `repo-operator` to stage intended changes (and any ad-hoc extras)
+2. **Sanitize:** Call `secrets-sanitizer` to scan the staged surface
+3. **Persist:** Call `repo-operator` to **commit & push** (gated on `safe_to_commit` / `safe_to_publish`)
+4. **Wake Bots:** Call `pr-creator` (only creates if missing; idempotent)
+5. **Harvest:** Call `pr-feedback-harvester`:
    - **Check:** Did a previous push trigger a CRITICAL CI failure?
    - **Action:** If yes, route blocker to appropriate agent before next AC. If no (or pending), continue.
+
+**Why this order matters:** The sanitizer must scan what's actually staged, not an empty or stale index. Staging first ensures the scan is accurate.
 
 **Resume-safe Pulse Check:** If a run resumes mid-flow:
 - Check: `ac_completed >= 1` AND `pr_number` is null (in `run_meta.json`)
