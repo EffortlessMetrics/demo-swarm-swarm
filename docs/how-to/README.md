@@ -12,6 +12,7 @@ Task-oriented: pick the guide that matches the job you need to do.
 | [Adapt to Non-GitHub](adapt-to-non-github.md) | Use GitLab/Azure/Bitbucket | Mapping of GitHub ops to your provider |
 | [Create a Flow](create-a-flow.md) | Add a new flow to the pack | New flow command + cleanup agent |
 | [Add an Agent](add-an-agent.md) | Add a new agent to existing flows | New agent file + flow integration |
+| [Design Agents](design-agents.md) | Write effective agent prompts | Well-structured agent prompt |
 | [Working with Microloops](working-with-microloops.md) | Understand and use writer↔critic patterns | Effective adversarial iteration |
 | [Working with Receipts](working-with-receipts.md) | Read and interpret flow receipts | Understanding flow outputs and routing |
 | [Troubleshoot](troubleshoot.md) | Debug pack runs | Checklists for common failures and reseal loops |

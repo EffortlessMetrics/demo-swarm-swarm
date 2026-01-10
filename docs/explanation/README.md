@@ -6,6 +6,7 @@ Understanding-oriented: explore the why behind the pack design.
 
 **Start here:**
 1. [Architecture](architecture.md) — Core philosophy and patterns
+2. [What Makes This Different](what-makes-this-different.md) — Assumptions that don't apply here
 
 **Then pick by interest:**
 
