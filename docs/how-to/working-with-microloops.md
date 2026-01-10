@@ -19,7 +19,7 @@ A microloop pairs a **writer** (produces artifacts) with a **critic** (reviews b
      └────────────────────────────┘
 ```
 
-The orchestrator routes on the critic's **control-plane Result block**, not by re-reading files.
+The orchestrator routes on the critic's **prose handoff**, not by parsing structured fields or re-reading files.
 
 ---
 
@@ -53,42 +53,43 @@ The default microloop runs 2 passes:
 
 ```
 1) Writer pass: call writer agent
-2) Critique pass: call critic agent, capture Result block
+2) Critique pass: call critic agent, read its prose handoff
 3) Writer pass: apply critique worklist (if any; may be no-op)
-4) Critique pass: confirm changes moved
+4) Critique pass: confirm changes addressed
 ```
 
 **Continue beyond 2 passes only when:**
-- `recommended_action: RERUN` AND
-- `can_further_iteration_help: yes`
+- The critic's handoff recommends another iteration
+- The critic indicates further iteration would help
 
 ---
 
-## Routing on the Result Block
+## Routing on the Handoff
 
-After each critic pass, route on the **control-plane Result block**:
+After each critic pass, read the **prose handoff** and route based on understanding:
 
-```yaml
-## <Critic> Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1-7 | null>
-route_to_agent: <agent | null>
-can_further_iteration_help: yes | no
-blockers: [...]
+```markdown
+## Handoff
+
+**What I found:** <summary of review findings>
+
+**What's left:** <issues that remain, or "nothing">
+
+**Recommendation:** <specific next step with reasoning>
 ```
 
 ### Routing Rules
 
-| Condition | Action |
-|-----------|--------|
-| `status: VERIFIED` | **Exit loop** — proceed to next station |
-| `recommended_action: FIX_ENV` | **Stop** — mechanical failure (IO/permissions/tooling) |
-| `recommended_action: BOUNCE` | **Bounce** — route to `route_to_flow`/`route_to_agent` |
-| `recommended_action: RERUN` + `can_further_iteration_help: yes` | **Rerun** — call writer with critique worklist |
-| `recommended_action: RERUN` + `can_further_iteration_help: no` | **Exit loop** — proceed (issues recorded) |
-| `recommended_action: PROCEED` | **Exit loop** — proceed even if UNVERIFIED |
-| Missing `recommended_action` | Use `can_further_iteration_help` as tie-breaker |
+| What the critic says | Action |
+|---------------------|--------|
+| "Work is complete, no issues" | **Exit loop** — proceed to next station |
+| "Mechanical failure" (IO/permissions/tooling) | **Stop** — fix environment first |
+| "This needs to go back to [flow/agent]" | **Bounce** — route as recommended |
+| "Recommend another iteration" + "this should help" | **Rerun** — call writer with critique worklist |
+| "Another iteration won't help" | **Exit loop** — proceed with blockers recorded |
+| "Ready to proceed despite issues" | **Exit loop** — proceed even if unverified |
+
+The orchestrator reads and understands the prose. There is no parsing of `recommended_action` or `can_further_iteration_help` fields.
 
 ---
 
@@ -97,21 +98,22 @@ blockers: [...]
 ```
 Orchestrator calls test-author
   → test-author writes tests + test_changes_summary.md
+  → Handoff: "Wrote 8 unit tests. Ready for test-critic review."
 
 Orchestrator calls test-critic
-  → test-critic reviews tests, returns Result:
-      status: UNVERIFIED
-      recommended_action: RERUN
-      can_further_iteration_help: yes
-      blockers: ["Missing edge case coverage for null input"]
+  → test-critic reviews tests
+  → Handoff: "Found 1 MAJOR issue: missing edge case coverage for null input.
+              Recommend running test-author again with this finding.
+              Another iteration should resolve this."
 
 Orchestrator calls test-author with critique worklist
-  → test-author addresses blockers, updates tests
+  → test-author addresses the finding, updates tests
+  → Handoff: "Added null input edge case test. Ready for test-critic review."
 
 Orchestrator calls test-critic again
-  → test-critic reviews updates, returns Result:
-      status: VERIFIED
-      recommended_action: PROCEED
+  → test-critic reviews updates
+  → Handoff: "Tests look complete. No blocking issues found.
+              Ready for code-implementer."
 
 Orchestrator exits loop, proceeds to code-implementer
 ```
@@ -124,13 +126,13 @@ Microloops are **bounded** to prevent infinite iteration:
 
 | Pass Type | Default Limit | When to Extend |
 |-----------|---------------|----------------|
-| Writer → Critic | 2 full passes | Only when `can_further_iteration_help: yes` |
+| Writer → Critic | 2 full passes | Only when critic says another iteration would help |
 | Maximum iterations | 3-4 | Rarely; indicates upstream issue |
 
 **If a loop won't converge:**
-1. The critic should set `can_further_iteration_help: no`
-2. Blockers remain in the critique
-3. Flow proceeds with UNVERIFIED status
+1. The critic should say "another iteration won't help" in its handoff
+2. Blockers remain documented in the critique
+3. Flow proceeds with issues recorded
 4. Issues surface in Gate (Flow 5) or Review (Flow 4)
 
 ---
@@ -196,14 +198,14 @@ Decide to rerun
 **Right:**
 ```
 Call critic
-Route on returned Result block
+Route based on the prose handoff it returns
 ```
 
 ### 2. Infinite Loops
 
 **Wrong:**
 ```
-while critic.status != VERIFIED:
+while critic says issues exist:
     call writer
     call critic
 ```
@@ -213,17 +215,32 @@ while critic.status != VERIFIED:
 for pass in [1, 2]:
     call writer
     call critic
-    if critic.status == VERIFIED or critic.can_further_iteration_help == "no":
+    if critic says "complete" or "another iteration won't help":
         break
 ```
 
-### 3. Fixing in Critics
+### 3. Parsing Structured Fields for Routing
+
+**Wrong:**
+```
+if critic.recommended_action == "RERUN":
+    call writer again
+```
+
+**Right:**
+```
+Read critic's handoff prose
+Understand the recommendation
+Route accordingly
+```
+
+### 4. Fixing in Critics
 
 Critics **never fix**. If a critic is modifying code/tests/docs, that's a bug. Critics review and produce worklists.
 
-### 4. Skipping Critique Worklists
+### 5. Skipping Critique Worklists
 
-If a critic returns `RERUN`, the writer must address the worklist. Don't skip it hoping the next station will fix it.
+If a critic recommends another iteration, the writer must address the findings. Don't skip it hoping the next station will fix it.
 
 ---
 
@@ -258,14 +275,14 @@ Use this template for any writer ↔ critic pair:
 
 **Loop:**
 1. Call `<writer>` with context
-2. Call `<critic>`, capture Result block
-3. Route on Result:
-   - VERIFIED → exit
-   - FIX_ENV → stop (mechanical failure)
-   - BOUNCE → route to indicated flow/agent
-   - RERUN + can_help: yes → goto 1 with worklist
-   - RERUN + can_help: no → exit (issues recorded)
-   - PROCEED → exit (issues recorded)
+2. Call `<critic>`, read its prose handoff
+3. Route on handoff:
+   - Critic says "work is complete" → exit
+   - Critic reports mechanical failure → stop (fix environment)
+   - Critic recommends upstream routing → bounce as recommended
+   - Critic recommends iteration + "this should help" → goto 1 with worklist
+   - Critic says "another iteration won't help" → exit (issues recorded)
+   - Critic says "ready to proceed" → exit (issues recorded)
 
 **Exit:** When loop terminates, update TodoWrite and flow_plan.md
 ```

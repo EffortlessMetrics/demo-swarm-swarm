@@ -33,7 +33,7 @@ It's not just one ratio—it's multiple angles that add up:
 | **Human Time** | Minimal architect attention required |
 | **Scope of Automation** | Planning + testing + verification, not just coding |
 
-**The vibe:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
+**In practice:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
 
 ### The Trade-Off That Matters
 

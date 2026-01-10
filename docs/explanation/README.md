@@ -18,7 +18,7 @@ Understanding-oriented: explore the why behind the pack design.
 | "How do agents think, decide, and fail gracefully?" | [Agent Philosophy](agent-philosophy.md) |
 | "Why do agents read/write disk instead of sharing context?" | [Stateless Execution](stateless-execution.md) |
 | "How do agents coordinate without message passing?" | [Coordination by Artifact](coordination-by-artifact.md) |
-| "Why route on control blocks, not by re-reading files?" | [Why Two Planes](why-two-planes.md) |
+| "Why route on prose handoffs, not by parsing structured blocks?" | [Why Two Planes](why-two-planes.md) |
 | "Why do GitHub ops need two separate gates?" | [Why Two Gates](why-two-gates.md) |
 | "How do publish boundaries make bypassPermissions safe?" | [Boundary Physics](boundary-physics.md) |
 | "How does trust emerge from verification, not restrictions?" | [Trust Architecture](trust-architecture.md) |
@@ -46,6 +46,6 @@ The pack uses "planes" in two different contexts:
 | Term | Meaning | Explained in |
 |------|---------|--------------|
 | **Work Plane / Publish Plane** | Where gates engage (publish boundary only) | [Why Ops-First](why-ops-first.md) |
-| **Control Plane / Audit Plane** | How routing works (blocks vs files) | [Why Two Planes](why-two-planes.md) |
+| **Routing Plane / Audit Plane** | How decisions flow (prose handoffs vs files) | [Why Two Planes](why-two-planes.md) |
 
 These are orthogonal concepts—both matter, in different ways.

@@ -90,8 +90,8 @@ Tips are positive guidance:
 ## Constraints
 - Do NOT modify files outside your scope
 - Do NOT emit fields not in the schema
-- NEVER skip the Machine Summary block
-- Must NOT use status values other than VERIFIED | UNVERIFIED
+- NEVER skip the summary section
+- Must NOT use arbitrary status values
 - Do NOT include code in your response
 - NEVER make assumptions about requirements
 ```
@@ -130,7 +130,7 @@ Review the implementation.
 ## Constraints
 - Do NOT review style unless critical
 - Do NOT make changes yourself
-- NEVER skip the Machine Summary
+- NEVER skip the handoff section
 - Must NOT report issues without locations
 - Do NOT group unrelated issues
 - NEVER guess at spec intent

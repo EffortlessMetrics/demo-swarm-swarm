@@ -521,5 +521,5 @@ The pack replaces patterns from traditional automation harnesses. These patterns
 - [why-ops-first.md](why-ops-first.md) - Default-allow philosophy
 - [stateless-execution.md](stateless-execution.md) - State transfer between flows
 - [ai-physics.md](ai-physics.md) - LLM-specific design constraints
-- [contracts.md](../reference/contracts.md) - Control-plane blocks and schemas
+- [contracts.md](../reference/contracts.md) - Handoff patterns and receipt schemas
 - [CLAUDE.md](../../CLAUDE.md) - Pack reference

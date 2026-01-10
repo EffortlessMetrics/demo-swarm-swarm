@@ -212,25 +212,25 @@ When staging, expect "extras" (files changed outside the expected set):
 
 ---
 
-## The Data Model: Two Planes (Control vs Audit)
+## The Data Model: Two Planes (Routing vs Audit)
 
 Separate from Work/Publish planes, the pack has two **data planes**:
 
 | Plane | Artifacts | Purpose | Lifecycle |
 |-------|-----------|---------|-----------|
-| **Control** | `Gate Result`, `Machine Summary`, Result blocks | Routing decisions | Ephemeral (read once, route, discard) |
+| **Routing** | Prose handoffs, `Gate Result` (for boolean gates) | Routing decisions | Ephemeral (read once, route, discard) |
 | **Audit** | `*_receipt.json`, `*.md` artifacts, `index.json` | Record of what happened | Durable (committed to git) |
 
-**Crucial rule:** Orchestrators route on Control Plane blocks, not by re-parsing files.
+**Crucial rule:** Orchestrators route on prose handoffs, not by parsing structured blocks or re-reading files.
 
 ```
 Agent runs
   ├─→ Writes audit artifacts (files)
-  └─→ Returns control block (response)
+  └─→ Returns prose handoff (response)
 
 Orchestrator
-  ├─→ Routes on control block
-  └─→ Does NOT reread files for routing
+  ├─→ Routes on prose handoff (Claude reads and understands)
+  └─→ Does NOT parse structured data for routing
 ```
 
 ---
@@ -519,7 +519,7 @@ This separation is about **token economics**: Orchestrator context is expensive,
 - All procedural work (read files, run commands, write outputs)
 - Intent-to-paths mapping (the agent figures out what to stage)
 - Validation logic (the agent checks if things are correct)
-- Machine Summary + Result blocks for orchestrator routing
+- Prose handoffs for orchestrator routing (Claude reads and understands)
 
 **Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
 

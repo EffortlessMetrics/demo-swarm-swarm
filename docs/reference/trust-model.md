@@ -205,7 +205,21 @@ A cleanup agent needs to know if tests passed. It:
 
 Verification agents (critics, auditors) produce two surfaces:
 
-1. **Machine Summary** (control plane):
+1. **Prose handoff** (routing communication):
+
+Natural language summary of findings and recommendations. This is what orchestrators read to make routing decisions. Example:
+
+```markdown
+## Handoff
+
+**What I found:** Session timeout uses 30m instead of 15m per spec. Missing test for error path.
+
+**Recommendation:** Route to fixer for the timeout (mechanical fix), then test-author for coverage.
+```
+
+2. **Machine Summary** (audit plane):
+
+Structured fields that cleanup agents derive from the prose for receipts:
 
 ```yaml
 ## Machine Summary
@@ -220,11 +234,11 @@ severity_summary:
   minor: 0
 ```
 
-2. **Artifact body** (audit plane):
+3. **Artifact body** (human audit plane):
 
 Human-readable narrative explaining findings, reasoning, and recommendations.
 
-**Orchestrators route on the control plane. Humans read the audit plane.**
+**Orchestrators route on prose handoffs. Machine Summary is for audit trails, not routing.**
 
 ---
 

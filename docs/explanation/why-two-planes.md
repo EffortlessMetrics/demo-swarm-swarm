@@ -1,52 +1,49 @@
-# Why Two Planes (Control vs Audit)
+# Why Two Planes (Routing vs Audit)
 
-> Control plane vs audit plane: what they are and why they're separate.
+> Prose handoffs route work. Receipts preserve history.
 
-**Note:** This doc is about **Control Plane vs Audit Plane** (how routing works). For **Work Plane vs Publish Plane** (where gates engage), see [Why Ops-First](why-ops-first.md).
+**Note:** This doc is about **Routing Plane vs Audit Plane** (how decisions flow). For **Work Plane vs Publish Plane** (where gates engage), see [Why Ops-First](why-ops-first.md).
 
 ---
 
-## The problem
+## The insight
 
-When agents write artifacts and orchestrators need to route:
+Routing and audit serve different purposes:
 
-**Option A: Reread the artifact**
-- Parse the prose
-- Extract status/routing info
-- Risk: Interpretation varies, parsing is fragile
+**Routing:** "What should happen next?" — Real-time decisions during a run
+**Audit:** "What happened?" — Records for humans reviewing later
 
-**Option B: Return structured blocks**
-- Agent returns a small, machine-readable block
-- Orchestrator routes on the block
-- Artifact exists for humans and audit
-
-The pack uses Option B.
+These are different audiences with different needs. Don't conflate them.
 
 ---
 
 ## Two planes defined
 
-### Control plane
+### Routing plane
 
-Machine-readable blocks returned by agents:
+Natural language handoffs between agents and orchestrator:
 
-```yaml
-## Gate Result
-status: CLEAN
-safe_to_publish: true
-proceed_to_github_ops: true
-...
+```markdown
+## Handoff
+
+**What I did:** Reviewed the implementation against REQ-001 through REQ-005.
+Found two issues: session timeout doesn't match ADR, REQ-003 has no test coverage.
+
+**What's left:** Timeout fix is mechanical. Missing tests need test-author.
+
+**Recommendation:** Route to **fixer** for the timeout issue, then **test-author**
+for coverage. Re-run me after both to verify fixes landed.
 ```
 
 Properties:
-- Small, structured, deterministic
+- Natural language, contextual
 - Returned in agent response
-- Used for routing decisions
-- Closed vocabulary (enums)
+- The orchestrator (Claude) reads and understands it
+- Expressive — handles edge cases and nuance
 
 ### Audit plane
 
-Durable files written to `.runs/<run-id>/`:
+Durable artifacts written to `.runs/<run-id>/`:
 
 - `requirements.md`
 - `code_critique.md`
@@ -54,10 +51,10 @@ Durable files written to `.runs/<run-id>/`:
 - `*_receipt.json`
 
 Properties:
-- Rich, contextual, inspectable
+- Rich, detailed, inspectable
 - Written to disk
 - Used for human review, reruns, debugging
-- Can contain prose, code, details
+- Receipts include structured fields (derived from handoffs by cleanup agents)
 
 ---
 
@@ -66,102 +63,146 @@ Properties:
 ```
 Agent runs
   ├─→ Writes audit artifacts (files)
-  └─→ Returns control block (response)
+  └─→ Returns prose handoff (response)
 
 Orchestrator
-  ├─→ Routes on control block
-  └─→ Does NOT reread files for routing
+  ├─→ Routes on prose handoff (understands it)
+  └─→ Does NOT parse structured data for routing
+
+Cleanup agent
+  ├─→ Reads artifacts and handoff
+  └─→ Writes receipt with structured fields (for audit trail)
 ```
 
-Example: secrets-sanitizer
+Example: code-critic
 
-1. Scans publish surface
-2. Writes `secrets_scan.md` and `secrets_status.json` (audit)
-3. Returns `## Gate Result` block (control)
-4. Orchestrator routes on Gate Result
-5. Later: humans inspect `secrets_scan.md` if needed
+1. Reviews implementation
+2. Writes `code_critique.md` (audit artifact)
+3. Returns prose handoff: "Found 2 issues. Recommend fixer address both."
+4. Orchestrator reads handoff, routes to fixer
+5. Later: cleanup agent writes `build_receipt.json` with structured fields
+6. Much later: humans inspect receipts to understand run history
 
 ---
 
-## Why not just use files?
+## Why prose routes and structure audits
 
-### Parsing fragility
+### Claude is the orchestrator
 
-Prose varies. "Status: Verified" vs "The status is verified" vs "All checks passed (verified)".
+Claude doesn't need structured data to make routing decisions. It reads prose:
 
-Structured blocks have fixed format:
-```yaml
-status: VERIFIED
+> "Implementation looks good but the session timeout is wrong. Recommend the fixer address this before we continue."
+
+Claude understands this completely. No parsing needed. No enum matching. Just reading and deciding.
+
+Structured routing blocks are from systems where a Python script made routing decisions. Claude doesn't need training wheels.
+
+### Prose handles edge cases
+
+Real work rarely fits in enums. Consider:
+
+> "Almost done, but the database migration is missing. Either create it as part of this AC, or document the dependency and proceed."
+
+What status enum captures this? `MOSTLY_DONE_BUT_BLOCKED_ON_EXTERNAL_DEPENDENCY_WHICH_MIGHT_BE_IN_SCOPE`?
+
+Prose lets agents tell the truth. Claude understands nuance.
+
+### Structure serves audit
+
+Receipts need structured fields for:
+- Mechanical processing (counting, aggregation)
+- Consistent audit trail
+- Index updates
+
+But these fields are derived AFTER routing happens. Cleanup agents read the prose handoff and produce structured receipts. The structure exists for later review, not for real-time routing.
+
+---
+
+## The derivation flow
+
+```
+Agent completes work
+    │
+    ├─→ Prose handoff: "Found 3 issues. Recommend fixer."
+    │
+    ▼
+Orchestrator routes on handoff
+    │
+    ▼
+Later: Cleanup agent runs
+    │
+    ├─→ Reads prose handoff
+    ├─→ Writes receipt:
+    │     {
+    │       "status": "UNVERIFIED",
+    │       "recommended_action": "BOUNCE",
+    │       "route_to_agent": "fixer",
+    │       "counts": { "critical": 0, "major": 2, "minor": 1 }
+    │     }
+    │
+    ▼
+Audit plane now has structured record
 ```
 
-### Rereading cost
-
-Files might be large. Rereading and parsing adds latency and failure modes.
-
-Control blocks are returned immediately with the response.
-
-### Drift risk
-
-If routing logic parses files, file format becomes a contract. Changes to artifact structure can break routing.
-
-Separating planes lets artifacts evolve without breaking automation.
+The structured fields in receipts are **derived from prose**, not the other way around. They exist for audit trail completeness, not for routing.
 
 ---
 
 ## Examples
 
-### Critic (Machine Summary)
+### Critic handoff (routing)
 
-```yaml
-## Machine Summary
-status: UNVERIFIED
-recommended_action: RERUN
-route_to_agent: code-implementer
-blockers:
-  - Missing error handling in auth module
-can_further_iteration_help: yes
+```markdown
+## Handoff
+
+**What I did:** Reviewed implementation against the ADR and requirements.
+
+**Findings:**
+- [MAJOR] Session timeout uses 30m but ADR specifies 15m
+- [MAJOR] Missing error handling in auth refresh path
+- [MINOR] Inconsistent naming between UserSession and SessionUser
+
+**Recommendation:** Route to **fixer** for the MAJOR items. The timeout
+is a one-line change; the error handling needs about 10 lines. After fixes,
+re-run me to verify they landed correctly.
 ```
 
-Orchestrator routes on this. The detailed critique in the artifact body is for humans.
+The orchestrator reads this and routes to fixer. No parsing of structured blocks.
 
-### Repo Operator
-
-```yaml
-## Repo Operator Result
-operation: checkpoint
-status: COMPLETED
-proceed_to_github_ops: true
-commit_sha: abc123
-anomaly_paths: []
-```
-
-Orchestrator checks `proceed_to_github_ops`. The commit SHA and paths are for audit.
-
-### Receipt
+### Receipt (audit)
 
 ```json
 {
-  "status": "VERIFIED",
-  "recommended_action": "PROCEED",
-  "counts": { ... }
+  "run_id": "feat-auth",
+  "flow": "build",
+  "status": "UNVERIFIED",
+  "recommended_action": "BOUNCE",
+  "route_to_agent": "fixer",
+  "counts": {
+    "critical": 0,
+    "major": 2,
+    "minor": 1
+  },
+  "completed_at": "2024-01-15T10:30:00Z"
 }
 ```
 
-Reporters read receipts (audit). Flow routing already happened via control blocks.
+The cleanup agent derived this from the prose handoff. It exists so humans reviewing the run in 3 months understand what happened.
 
 ---
 
 ## Rules
 
-1. **Orchestrators route on control blocks, not files**
-2. **Control blocks use closed vocabularies** (enums, not prose)
-3. **Audit artifacts can be rich and detailed**
-4. **Don't duplicate routing logic in file parsing**
+1. **Orchestrators route on prose handoffs** — Claude reads and understands
+2. **Receipts are audit artifacts** — Structured fields for later review
+3. **Cleanup agents derive structure from prose** — The derivation is one-way
+4. **Don't conflate routing and audit** — Different audiences, different needs
 
 ---
 
 ## See also
 
 - [architecture.md](architecture.md) — Overall pack design
-- [contracts.md](../reference/contracts.md) — Control-plane block schemas
+- [what-makes-this-different.md](what-makes-this-different.md) — Contrasts with old patterns
+- [contracts.md](../reference/contracts.md) — Handoff patterns and receipt schemas
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference

@@ -45,7 +45,9 @@ PROCEED | RERUN | BOUNCE | FIX_ENV
 
 ## Control-Plane Blocks
 
-These blocks are returned by agents and used for routing. Orchestrators route on these; they don't reread files.
+These specialized blocks are returned by specific agents for **boolean gate decisions**, not general routing. They answer yes/no questions at publish boundaries (can we commit? can we push?).
+
+For general routing, orchestrators read **prose handoffs** from agents. Control-plane blocks are distinct: they're structured responses from specialized agents (secrets-sanitizer, repo-operator) that need deterministic parsing for safety gates.
 
 ### Gate Result (secrets-sanitizer)
 

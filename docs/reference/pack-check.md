@@ -41,7 +41,10 @@ This is the **single source of truth** for pack portability and contract drift.
 
 ### Machine Summary blocks
 
-- Presence in critics and verifiers
+Machine Summary is an **audit format**, not a routing mechanism. Orchestrators route on prose handoffs; cleanup agents derive Machine Summary fields for receipts.
+
+pack-check validates:
+- Presence in critics and verifiers (for audit completeness)
 - Correct heading casing (`## Machine Summary`)
 - Required fields present
 

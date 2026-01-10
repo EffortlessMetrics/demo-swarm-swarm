@@ -158,14 +158,14 @@ A `null` in a receipt is a signal to the human (missing data). A guessed `0` is 
 
 ## 6. Two-Plane Data Model
 
-**Rule:** Separate routing logic from human-readable artifacts.
+**Rule:** Separate routing from audit.
 
 | Plane | Purpose |
 |-------|---------|
-| **Control Plane** | Routing ("What happens next?") — small blocks returned by agents |
+| **Routing Plane** | Routing ("What happens next?") — prose handoffs returned by agents |
 | **Audit Plane** | Record ("What happened?") — durable files committed to git |
 
-Orchestrators route on control blocks (fast, deterministic). Files exist for humans and future flows.
+Orchestrators route on prose handoffs (Claude reads and understands). Files and receipts exist for humans and future review.
 
 See [Why Two Planes](why-two-planes.md) for the full explanation.
 
@@ -198,7 +198,7 @@ We replaced ad-hoc bash pipelines with the `demoswarm` CLI:
 
 1. **Trust the Shims:** Don't bypass `.claude/scripts/demoswarm.sh`.
 2. **Trust the Gates:** If Flow 4 bounces, don't force-merge. Fix the upstream flow.
-3. **Respect the Planes:** Never let an agent route based on a file read; force it to route based on the Machine Summary block.
+3. **Respect the Planes:** Orchestrators route on prose handoffs. Receipts are for audit, not routing.
 4. **Design for Compression:** Heavy agents must emit light outputs.
 5. **Design for Affinity:** Group related work by context loaded, not by task purity.
 6. **Null Over Guess:** Missing is information. Guessing creates phantom confidence.

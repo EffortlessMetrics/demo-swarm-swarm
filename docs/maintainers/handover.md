@@ -52,7 +52,7 @@ Common drift patterns:
 | pack-check fails on enum | Agent uses non-canonical status value |
 | pack-check fails on heading | Casing mismatch (e.g., "Block" vs "block") |
 | Missing Machine Summary | Critic/verifier doesn't emit required block |
-| Routing doesn't work | Field name drift (`route_to` vs `route_to_agent`) |
+| Routing doesn't work | Agent handoff missing clear recommendation or next step |
 
 ---
 

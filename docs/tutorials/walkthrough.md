@@ -102,12 +102,12 @@ Open the sandbox repo in Claude Code. It will discover:
 
 **What happens:**
 1. `test-author` writes tests
-2. `test-critic` reviews and returns `recommended_action`
-3. Route on `recommended_action` (RERUN/BOUNCE/PROCEED; `FIX_ENV` only with `status: CANNOT_PROCEED`). PROCEED is the default even with open questions; use `can_further_iteration_help` only as a tie-breaker when no action is set.
+2. `test-critic` reviews and provides a prose handoff with recommendation
+3. Orchestrator reads the handoff and routes accordingly (rerun, bounce to another agent, or proceed)
 4. `code-implementer` writes code
-5. `code-critic` reviews (same routing rules)
+5. `code-critic` reviews and provides prose recommendation
 6. `self-reviewer` produces final review
-7. `build-cleanup` computes the receipt
+7. `build-cleanup` computes the receipt (derives routing fields from prose for audit)
 8. `repo-operator` commits changes
 
 **You show:**
@@ -258,10 +258,11 @@ This demonstrates the core value: **"prompt → structured artifacts → receipt
 
 See [Quickstart troubleshooting](quickstart.md#troubleshooting) for common issues.
 
-**Critic keeps bouncing?** Route on `recommended_action`:
-- `BOUNCE` → follow `route_to_flow/route_to_agent`
-- `RERUN` → loop once more
-- No action set → use `can_further_iteration_help` as tie-breaker
+**Critic keeps bouncing?** Read the critic's prose handoff:
+- If it recommends another agent or flow, route there
+- If it suggests another pass, rerun the critic
+- If it says "proceed," continue to the next station
+- The handoff explains what needs to happen next in natural language
 
 ---
 

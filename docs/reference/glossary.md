@@ -46,7 +46,7 @@ An agent provided by Claude Code (no local definition). Names and capabilities m
 A domain agent used across multiple flows (e.g., `clarifier`, `risk-analyst`, `repo-operator`, `gh-reporter`).
 
 ### Critic
-An agent that reviews work but never fixes it. Critics produce harsh critiques with structured "Machine Summary" fields and routing guidance (e.g., `requirements-critic`, `bdd-critic`, `test-critic`, `code-critic`, `design-critic`).
+An agent that reviews work but never fixes it. Critics produce prose critiques with severity markers and end with a prose handoff recommending next steps. Cleanup agents later derive Machine Summary fields from the prose for audit purposes. (e.g., `requirements-critic`, `bdd-critic`, `test-critic`, `code-critic`, `design-critic`).
 
 ---
 
@@ -94,12 +94,13 @@ See [Role Families](#role-families) above for color → role mappings.
 Durable files under `.runs/<run-id>/...` that exist for inspection, handoffs, and reruns (e.g., `*_receipt.json`, critiques, reports).
 
 ### Control plane
-Machine-parseable **Result blocks** returned by agents to drive orchestrator routing **without rereading files**.
+Machine-parseable **Result blocks** returned by specialized agents for **boolean gate decisions** at publish boundaries. These are distinct from general routing, which uses prose handoffs.
 
 Examples:
-- **Gate Result** (from `secrets-sanitizer`)
-- **Repo Operator Result** (from `repo-operator`)
-- **Critic Result** (from critics; mirrors their Machine Summary)
+- **Gate Result** (from `secrets-sanitizer`) — answers "safe to publish?"
+- **Repo Operator Result** (from `repo-operator`) — answers "safe to proceed with GitHub ops?"
+
+Note: General routing uses prose handoffs, not control-plane blocks. Orchestrators read prose recommendations to decide what to run next.
 
 ### Two-gate rule
 GitHub operations require both:
@@ -129,12 +130,10 @@ Receipts are **sealed**: reporters read receipts; they do not recompute counts o
 An optional section in receipts that captures timing and human interaction data for retrospective analysis. Includes observable timestamps (`flow_started_at`, `flow_completed_at`), human checkpoint events, and inferred estimates of human attention time. Used in Flow 7 (Wisdom) for understanding how much human attention a run required. Not used for gating or routing.
 
 ### Critique
-A structured review artifact produced by a critic (Markdown). Contains a `## Machine Summary` section for mechanical parsing plus human-readable analysis.
+A structured review artifact produced by a critic (Markdown). Contains human-readable analysis with severity markers, plus a prose handoff. Cleanup agents derive Machine Summary fields for receipts.
 
 ### Bounce
-Routing from one station/flow back to another due to issues. In pack terms, expressed via:
-- `recommended_action: BOUNCE`
-- `route_to_flow` and/or `route_to_agent`
+Routing from one station/flow back to another due to issues. Agents express this in prose handoffs (e.g., "This needs to go back to Plan to resolve the contract conflict"). Cleanup agents translate this to `recommended_action: BOUNCE` and `route_to_flow`/`route_to_agent` fields in receipts for audit purposes.
 
 ### Mechanical fix
 A fix requiring minimal judgment (formatting, small correctness fixes, mechanical hygiene). In this pack, "mechanical" fixes should still respect lanes and scope boundaries.
@@ -147,7 +146,18 @@ Unexpected repository state (e.g., dirty tree outside allowlist) detected by `re
 
 ---
 
-## Status and Routing Fields
+## Status and Routing
+
+### Natural Language Routing
+The primary way agents communicate routing intent. Agents write prose handoffs that explain what they did, what's left, and their recommendation. Orchestrators (which are Claude threads) read and understand these recommendations to make routing decisions.
+
+**Agents say things like:**
+- "Run code-implementer to fix the timeout, then back to me for verification"
+- "This needs to go back to Plan flow to resolve the contract conflict"
+- "Ready for test-author to add coverage for the error paths"
+
+### Audit Fields (Derived, Not Routing Input)
+Receipt fields like `recommended_action`, `route_to_flow`, and `route_to_agent` exist for **audit purposes only**. Cleanup agents derive these values from the agent's prose handoff when writing receipts. Orchestrators do not parse these fields for routing decisions.
 
 ### status
 Pack-standard status axis:
@@ -162,9 +172,7 @@ A list of concrete items preventing `VERIFIED`. This is the sanctioned "blocked 
 Closed enum (pack-wide):
 `PROCEED | RERUN | BOUNCE | FIX_ENV`
 
-Specific routing uses:
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent|null>`
+These values are written to receipts for audit trail. Cleanup agents derive them from prose handoffs.
 
 ### can_further_iteration_help
 Critic-only field used as a tie-breaker when `recommended_action` is absent.

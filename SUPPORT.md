@@ -14,7 +14,7 @@ This is a **pattern library**, not a product or service.
 
 ## Maintenance Posture
 
-Maintainers:
+**Maintainer:** Steven · [effortlesssteven.com/demoswarm](https://effortlesssteven.com/demoswarm/)
 
 - Read issues (bugs, questions, feature requests)
 - Do not promise SLAs — this is a pack repo, not a hosted service

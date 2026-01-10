@@ -291,6 +291,19 @@ A pack that requires external training is harder to adopt than one that teaches 
 
 ---
 
+## Influences
+
+This approach was shaped by several domains:
+
+- **ERP systems** — Where data integrity is non-negotiable and audit trails matter. The receipt-based verification and evidence discipline come from here.
+- **XDA / FOSS communities** — Where teaching, portability, and helping newcomers are core values. The executable documentation and self-teaching design come from here.
+- **Accessibility engineering** — Where building for everyone (not just the common case) is the standard. The PR cockpit as UI and "don't rely on color alone" come from here.
+- **Lean manufacturing** — Where small stations, sensors, and throughput-with-quality are the model. The flow structure and fix-forward patterns come from here.
+
+These aren't abstract influences—they show up in specific design choices throughout the pack.
+
+---
+
 ## See Also
 
 - [how-claude-md-works.md](how-claude-md-works.md) - CLAUDE.md mechanics
