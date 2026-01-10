@@ -164,3 +164,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need performance requirements from upstream.
 >
 > **Recommendation:** Route to requirements-author to add NFR-PERF targets, then re-run observability validation.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-strategist**: Integrates observability verification into test plan when spec is validated
+- **observability-designer**: Fixes gaps in metrics, SLOs, or PII handling when issues are found
+- **work-planner**: Includes observability instrumentation in implementation plan when spec is ready
+- **requirements-author**: Adds NFR-PERF or NFR-REL targets when performance requirements are undefined (routes to Flow 1)

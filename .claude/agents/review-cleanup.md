@@ -167,3 +167,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Cannot proceed to Gate with unresolved security concerns.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scan artifacts for secrets before committing and pushing review artifacts
+- **gate-cleanup**: Begin Flow 5 (Gate) verification when review is complete and PROCEED is recommended
+- **review-worklist-writer**: Continue draining worklist items when review is incomplete (RERUN recommended)
+- **repo-operator**: Commit and push review artifacts after cleanup is complete

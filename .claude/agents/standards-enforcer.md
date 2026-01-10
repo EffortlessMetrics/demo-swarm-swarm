@@ -189,6 +189,15 @@ State what you found clearly:
 **Issues found:**
 > "Lint found 3 errors in auth.ts that need manual fixes. Recommend routing to code-implementer before commit."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **repo-operator**: Commits the polished changes after your sweep passes. Use when diff is clean and ready to commit.
+- **code-implementer**: Fixes lint errors or coherence issues requiring manual intervention. Use when issues need code changes.
+- **self-reviewer**: Reviews all Build artifacts for final consistency. Use when standards pass and Build is ready for review.
+- **build-cleanup**: Seals the Build receipt after all checks pass. Use when proceeding directly to cleanup.
+
 ## Philosophy
 
 Build agents focus on correctness. You focus on honesty and polish. The diff should look like it came from a professional engineer.

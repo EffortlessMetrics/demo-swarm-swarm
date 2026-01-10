@@ -140,6 +140,15 @@ After writing the decision file, report back:
 - If not ready: "Gate says bounce — deployment not attempted. Route back to [flow/agent] to address [issue]."
 - If governance missing: "No branch protection configured. Recommend configuring required checks before merge."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **deploy-cleanup**: Summarizes the Deploy flow and writes the receipt; use when deployment decision is made and ready to close the flow
+- **repo-operator**: Executes git operations (merge, tag, release); use when decision is to deploy and git actions are needed
+- **merge-decider**: Re-evaluates the gate decision; use when you need to bounce back to Gate due to missing or unclear verdict
+- **secrets-sanitizer**: Scans for secrets before publish; use before any GitHub posting or pushing
+
 ## Philosophy
 
 Governance is part of the product. A deploy without verified governance isn't necessarily wrong, but it's worth noting. Your job is to verify what you can, be honest about what you can't, and make a clear recommendation.

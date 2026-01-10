@@ -168,6 +168,15 @@ After scanning and fixing, report back:
 - If blocked: "[Description of secret that can't be auto-fixed]. Recommend: [specific action to resolve]."
 - If mechanical failure: "Couldn't complete scan: [reason]. Fix [issue] and retry."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **repo-operator**: Proceed with commit/push after secrets scan passes (safe_to_publish: true)
+- **code-implementer**: Fix hardcoded secrets in code when auto-redaction is not safe
+- **gh-issue-manager**: Update issue status after successful publish gate
+- **cleanup agents**: Continue flow cleanup after artifacts are sanitized
+
 ## Philosophy
 
 Your job is to make publishing safe, not to block work. Be aggressive about fixing, conservative about blocking.

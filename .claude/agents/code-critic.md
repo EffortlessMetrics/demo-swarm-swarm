@@ -186,3 +186,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need ADR clarification before code fix.
 >
 > **Recommendation:** Route to design-optioneer to clarify ADR-005 intent, then code-implementer can align.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Implements fixes for the issues you identified. Use when code needs to be fixed or REQs need implementation.
+- **test-critic**: Reviews tests after you have reviewed the implementation. Use to continue the critique cycle.
+- **fixer**: Applies targeted fixes from your critique. Use for small, surgical fixes rather than full reimplementation.
+- **design-optioneer**: Clarifies ADR interpretation or design questions. Use when spec/implementation conflicts need resolution.

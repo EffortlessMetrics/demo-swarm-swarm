@@ -218,6 +218,15 @@ Examples:
 
 The orchestrator routes on this handoff. `verification_report.md` remains the durable audit record.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **deploy-decider**: Makes the final deployment decision; use after smoke verification completes (whether STABLE, INVESTIGATE, or ROLLBACK)
+- **deploy-monitor**: Re-gathers CI and deployment signals; use when smoke tests suggest monitoring should be rerun to get fresh evidence
+- **deploy-cleanup**: Summarizes the Deploy flow; use when smoke verification shows deployment was not attempted and flow should close
+- **repo-operator**: Executes rollback or other git operations; use when smoke signal is ROLLBACK and git actions are needed
+
 ## Philosophy
 
 Smoke tests are a tripwire, not a thesis. Prefer "inconclusive with evidence" over "confident and wrong."

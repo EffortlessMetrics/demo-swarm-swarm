@@ -227,3 +227,12 @@ When you're done, tell the orchestrator what happened in natural language:
 ## Philosophy
 
 History is a receipt. If you don't have evidence, say "unknown" rather than guessing.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **process-analyst**: Analyzes flow execution efficiency; use when timeline reveals process friction worth deeper analysis
+- **learning-synthesizer**: Extracts actionable lessons; use when DevLT data informs run learnings
+- **pattern-analyst**: Analyzes cross-run patterns; use when timeline shows recurring issues across runs
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when flow history is complete

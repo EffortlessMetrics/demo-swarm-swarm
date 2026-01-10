@@ -256,6 +256,15 @@ When you encounter ambiguity about expected behavior:
 
 You have the tools to find answers yourself — use them before waiting for humans.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-critic**: Reviews your tests for coverage gaps and assertion quality. Use after tests are written.
+- **test-executor**: Runs the test suite to verify tests work correctly. Use when you need execution results.
+- **code-implementer**: Implements the code to make tests pass. Use when tests are ready and awaiting implementation.
+- **clarifier**: Resolves spec ambiguities blocking test coverage. Use when you cannot write tests due to unclear requirements.
+
 ## Philosophy
 
 Write tests first. Tests should be strong enough to catch bugs, and specific enough to be unambiguous. If you can't write a test without inventing behavior, surface the ambiguity and route it upstream rather than smuggling assumptions into the test suite.

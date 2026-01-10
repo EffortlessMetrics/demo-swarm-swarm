@@ -405,6 +405,15 @@ Examples:
 
 The orchestrator routes on this handoff. `test_plan.md` and `ac_matrix.md` remain the durable audit artifacts.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **work-planner**: Breaks design into implementation subtasks when test plan and AC matrix are complete
+- **bdd-author**: Adds missing scenario tags when scenarios lack @REQ traceability (routes to Flow 1)
+- **interface-designer**: Generates API contracts when test planning requires contract surfaces not yet defined
+- **design-critic**: Validates overall design coherence when test plan reveals coverage gaps in other artifacts
+
 ## Philosophy
 
 A test plan is a contract between Spec and Build. If Flow 3 follows this plan, Flow 5 should be able to audit it mechanically. Prefer fewer, stronger tests over sprawling E2E suites.

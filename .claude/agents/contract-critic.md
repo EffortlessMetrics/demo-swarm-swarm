@@ -165,3 +165,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need valid contract specification.
 >
 > **Recommendation:** Route to interface-designer to create contract spec.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-strategist**: Maps contract surfaces to test types when contracts are complete and validated
+- **interface-designer**: Fixes contract issues when error models, schemas, or endpoints are incomplete
+- **observability-designer**: Defines observability signals when contract review passes
+- **design-critic**: Validates overall design coherence when contracts are one of several artifacts needing review

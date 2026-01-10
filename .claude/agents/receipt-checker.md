@@ -276,6 +276,15 @@ After completing your audit, provide a clear handoff:
 
 The file is the audit record. The handoff is the routing signal.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **contract-enforcer**: Verifies API implementation matches Plan contracts. Use after receipt is validated to check contract compliance.
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when receipt is valid and all Gate checks are complete.
+- **build-cleanup**: Regenerates build receipt and seals the Build flow. Use when receipt is missing, unparseable, or has placeholder leakage.
+- **gate-cleanup**: Summarizes Gate flow and writes the gate receipt. Use after merge decision is made to finalize the Gate flow.
+
 ## Philosophy
 
 **State-first verification:** The repo's current state (HEAD + working tree + actual tool outputs) is the primary truth. Receipts are structured evidence of what a prior agent saw and decided—useful for investigation and summary, but not permissions.

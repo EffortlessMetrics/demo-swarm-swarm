@@ -341,3 +341,12 @@ Every advice line must map to exactly one of:
 - Mark it as `[DISCUSSION]` with explicit options
 
 Vibe dumps are not wisdom outputs.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes the wisdom receipt; use when feedback actions are complete and ready for final summary
+- **gh-issue-manager**: Creates or updates GitHub issues; use when issue drafts are ready for human review (after publish gates pass)
+- **learning-synthesizer**: Extracts additional learnings from artifacts; use when more synthesis is needed before producing feedback actions
+- **repo-operator**: Handles git operations for committing wisdom artifacts; use when feedback actions should be checkpointed

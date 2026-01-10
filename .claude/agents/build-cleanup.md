@@ -195,3 +195,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Cannot verify AC-003 completion when test evidence contradicts the claim.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scans for secrets before publishing. Use after receipt is sealed and before Flow 5 (Gate).
+- **code-implementer**: Fixes implementation issues when forensic mismatches are found. Use when worker claims do not match evidence.
+- **test-executor**: Reruns tests when test evidence is missing or stale. Use to regenerate test_execution.md.
+- **self-reviewer**: Re-reviews artifacts if you find inconsistencies. Use to regenerate self_review.md before sealing.

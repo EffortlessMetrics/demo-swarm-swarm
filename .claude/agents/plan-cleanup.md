@@ -165,3 +165,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Clear decision with documented rationale, work is broken into manageable chunks, critics validated the approach. API contracts defined for 4 endpoints.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scans artifacts for secrets before GitHub publishing when plan is complete
+- **code-implementer**: Begins implementation in Flow 3 when plan is ready and secrets scan passes
+- **design-critic**: Re-validates design when cleanup reveals missing or incomplete plan artifacts
+- **adr-author**: Completes architectural decision when ADR is missing or incomplete

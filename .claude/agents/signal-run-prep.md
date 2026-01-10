@@ -209,6 +209,15 @@ Create these only if missing (domain agents will overwrite):
 **Blocked:**
 > "Cannot create .runs/gh-456/ due to permissions. Fix file system access and rerun."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-normalizer**: Process and normalize the raw signal text into structured form
+- **requirements-author**: Write requirements after signal is normalized
+- **clarifier**: Resolve ambiguities discovered during run setup
+- **gh-issue-manager**: Bind deferred issue when GitHub access is restored
+
 ## Philosophy
 
 **Establish the home base for Flow 1.** Create directories, write metadata, update the index. Downstream agents need a stable place to write signal artifacts. Report what you did and hand off.

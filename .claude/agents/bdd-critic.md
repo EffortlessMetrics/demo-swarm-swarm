@@ -169,3 +169,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Upstream requirements need clarification.
 >
 > **Recommendation:** Route to requirements-author to clarify REQ-008 error behavior, then re-run bdd-author.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **bdd-author**: Writes or revises BDD scenarios based on critique findings. Use when issues need fixing.
+- **scope-assessor**: Assesses stakeholders, risks, and scope estimate. Use when scenarios are solid and ready for scope analysis.
+- **requirements-author**: Writes or revises requirements. Use when upstream requirements are vague or missing.
+- **spec-auditor**: Performs holistic audit of complete Flow 1 spec. Use when BDD is ready and you want final validation before Flow 2.

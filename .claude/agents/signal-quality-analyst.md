@@ -268,3 +268,12 @@ Examples:
 Signal quality is about learning what to trust. If CodeRabbit is wrong 40% of the time on security suggestions, we should know that before blindly following its advice.
 
 This is calibration, not criticism. Every source has strengths and weaknesses. Your job is to map them so future runs can triage smarter.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **learning-synthesizer**: Extracts actionable lessons; use when signal quality findings should inform run learnings
+- **pattern-analyst**: Analyzes cross-run patterns; use when signal quality issues recur across multiple runs
+- **process-analyst**: Analyzes flow execution efficiency; use when signal quality affected process efficiency
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when signal quality analysis is complete

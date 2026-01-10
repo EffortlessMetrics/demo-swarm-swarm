@@ -177,3 +177,12 @@ When you're done, tell the orchestrator what happened in natural language:
 - What test command was used
 - Budget consumed
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fixes production code to resolve deterministic test failures; use when tests consistently fail due to implementation bugs
+- **test-author**: Stabilizes or quarantines flaky tests; use when tests show non-deterministic behavior across reruns
+- **pack-customizer**: Configures test commands and flakiness settings; use when test command is missing or misconfigured
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when flakiness detection is complete and flow can proceed
+

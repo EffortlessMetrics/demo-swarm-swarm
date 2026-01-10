@@ -184,3 +184,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Code bugs causing test failures.
 >
 > **Recommendation:** Run code-implementer to fix the status code issues, then re-run me to verify.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-author**: Adds missing tests or strengthens weak assertions. Use when test coverage gaps need to be filled.
+- **code-implementer**: Fixes code bugs causing test failures. Use when tests are correct but code is wrong.
+- **fixer**: Applies targeted fixes to tests or code. Use for small, surgical fixes identified in your critique.
+- **self-reviewer**: Reviews all Build artifacts for consistency. Use when tests are solid and ready for final review.

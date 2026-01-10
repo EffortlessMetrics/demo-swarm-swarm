@@ -166,6 +166,15 @@ Use sequential IDs: `IMP-001`, `IMP-002`, etc.
 **Blocked:**
 > "Cannot write impact_map.json due to permissions. Fix file system access and rerun."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **scope-assessor**: Review scope when blast radius is larger than expected
+- **design-optioneer**: Explore design alternatives when impact reveals complexity
+- **interface-designer**: Define contracts for newly discovered interface boundaries
+- **work-planner**: Create work breakdown after impact surface is understood
+
 ## Philosophy
 
 **Cast a wide net, but be honest.** If you cannot back something with evidence, mark it as inferred with low confidence. Fewer surprises downstream is the goal, not performative precision.

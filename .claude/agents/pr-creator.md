@@ -212,6 +212,15 @@ run_meta_updated: yes | no
 - "Skipped PR creation — gh not authenticated or github_ops_allowed is false."
 - Next step: Proceed (expected when GitHub access is disabled)
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **pr-feedback-harvester**: Harvest PR feedback from CodeRabbit, GitHub Actions, and human reviewers once the PR is created and bots have posted
+- **repo-operator**: Push changes to remote if branch not yet pushed (pr-creator needs pushed branch)
+- **build-cleanup**: Finalize the Build flow receipt if PR creation was the last step of Flow 3
+- **review-worklist-writer**: Convert harvested feedback into actionable Work Items (after pr-feedback-harvester runs)
+
 ## Hard Rules
 
 1) Only create Draft PRs (never ready-for-review).

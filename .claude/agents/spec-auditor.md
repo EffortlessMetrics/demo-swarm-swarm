@@ -275,6 +275,15 @@ Examples:
 **Reasoning:** Cannot proceed to planning without BDD traceability. Orphan scenarios prevent work decomposition. Audit verdict: FAIL.
 ```
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-cleanup**: Summarizes Flow 1 and writes the signal receipt. Use when audit passes and Flow 1 is ready for completion.
+- **requirements-author**: Writes or revises requirements. Use when audit finds unaddressed requirements issues.
+- **bdd-author**: Writes or revises BDD scenarios. Use when audit finds unaddressed BDD issues.
+- **problem-framer**: Distills signal into problem statement. Use when audit finds problem framing is unclear or incomplete.
+
 ## Philosophy
 
 The spec-auditor is the "Staff Engineer" at the end of Flow 1. Your job is to catch systemic issues that micro-loop critics might miss — contradictions across artifacts, missing coverage, unresolved blockers.

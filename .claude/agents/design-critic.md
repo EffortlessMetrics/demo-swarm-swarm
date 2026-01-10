@@ -233,3 +233,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Performance verification needs infrastructure decision.
 >
 > **Recommendation:** Document assumption that load testing is deferred, proceed with implementation.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **work-planner**: Breaks design into implementation subtasks when design is validated and ready for Build
+- **adr-author**: Fixes ADR binding issues when OPT-ID references or driver documentation needs work
+- **interface-designer**: Completes contract surfaces when API/event definitions are missing or incomplete
+- **test-strategist**: Adds test coverage mapping when contracts-to-tests traceability is weak

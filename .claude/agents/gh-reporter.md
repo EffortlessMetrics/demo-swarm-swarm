@@ -414,6 +414,15 @@ After writing outputs, provide a natural language handoff:
 - If skipped (auth issue) → "Flow should continue; authenticate gh CLI for future posting"
 - If failed → "Retry posting after fixing [specific issue]"
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-cleanup / plan-cleanup / build-cleanup / gate-cleanup / deploy-cleanup / wisdom-cleanup**: Complete flow cleanup after summary is posted
+- **gh-issue-manager**: Update issue status board if posting revealed metadata sync issues
+- **repo-operator**: Handle checkpoint if posting revealed uncommitted changes
+- **clarifier**: Address open questions surfaced in the flow summary
+
 ## Philosophy
 
 Be a neutral clerk. Receipts are truth. Summarize what happened, point to artifacts, and keep the issue thread clean and searchable. Reporting failures are recorded, not dramatized.

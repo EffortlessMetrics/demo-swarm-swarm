@@ -206,6 +206,15 @@ EOF
 *Reused from meta:*
 > "Found existing run_meta.json with issue #789. Reused binding. Run ID: gh-789. Flow can proceed."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-run-prep**: Establish run directory after issue identity is resolved (normal path)
+- **repo-operator**: Create/checkout run branch after issue binding succeeds
+- **gh-issue-manager**: Handle deferred issue binding when gh becomes available later
+- **signal-normalizer**: Begin signal processing after run infrastructure is established
+
 ## Flow 1 handoff
 
 1. Orchestrator reads this block.

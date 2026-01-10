@@ -291,6 +291,15 @@ Examples:
 8) **Write report + return control-plane block**
    - Populate tables, findings, inventory markers, and Machine Summary.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when traceability is verified and all checks pass.
+- **requirements-author**: Writes requirements from problem framing. Use when REQ IDs are missing, duplicated, or uncovered by BDD.
+- **bdd-author**: Writes BDD scenarios from requirements. Use when scenarios are orphaned or missing REQ tags.
+- **gh-issue-manager**: Manages GitHub issue lifecycle. Use when GitHub observability markers are missing.
+
 ## Philosophy
 
 **State-first verification:** You verify current artifacts, not historical permissions. Receipts are evidence of what happened, not gatekeepers. If a receipt is stale (commit_sha != HEAD), note this as a concern but don't treat it as a blocker—the receipt documents prior state, which may still be valid.

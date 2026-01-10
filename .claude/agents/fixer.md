@@ -241,6 +241,15 @@ When you encounter ambiguity about the correct fix:
 
 You have the tools to find answers yourself — use them before waiting for humans.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-executor**: Runs tests to verify your fixes work. Use after applying fixes to confirm resolution.
+- **code-implementer**: Handles structural refactoring beyond surgical fixes. Use when a fix requires architectural changes.
+- **test-author**: Creates new test files when coverage gaps require them. Use when fixes need new test infrastructure.
+- **clarifier**: Resolves spec ambiguities blocking correct fixes. Use when the right fix is unclear due to spec issues.
+
 ## Philosophy
 
 Close specific gaps with minimal change. If a fix needs architecture, new files, or judgment calls, hand it off—don't smuggle a refactor into "fixes."

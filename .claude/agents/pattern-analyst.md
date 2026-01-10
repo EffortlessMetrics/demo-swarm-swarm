@@ -207,3 +207,12 @@ Use `### PAT-NNN:` for pattern headings so wisdom-cleanup can count them:
 Patterns are signals, not judgments. If the same issue keeps appearing, the system is teaching us something. Your job is to surface what the history is trying to tell us.
 
 Be specific. "Tests are flaky" is not actionable. "test_auth.py::test_login fails intermittently due to timing dependency on mock server startup" is actionable.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **learning-synthesizer**: Extracts actionable lessons from run artifacts; use when patterns inform specific learnings for this run
+- **process-analyst**: Analyzes flow execution efficiency; use when patterns reveal systemic process issues across runs
+- **regression-analyst**: Traces regressions to root causes; use when patterns indicate recurring test or coverage regressions
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when pattern analysis is complete and ready for rollup

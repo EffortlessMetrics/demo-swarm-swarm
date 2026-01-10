@@ -214,6 +214,15 @@ Outputs written:
 - `.runs/<run-id>/plan/schema.md`
 - `.runs/<run-id>/plan/migrations/<files...>` (only if migrations were needed)
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **contract-critic**: Reviews contracts for completeness and testability before proceeding to implementation
+- **observability-designer**: Defines observability signals when contracts are ready and critical paths are known
+- **test-strategist**: Maps contract surfaces to test types when contract review passes
+- **adr-author**: Clarifies architectural decision when ADR is missing or ambiguous
+
 ## Philosophy
 
 Contracts are load-bearing. Ambiguity becomes integration debt. Prefer explicit schemas, explicit errors, and explicit compatibility rules.

@@ -148,3 +148,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Requirements are clear and testable, scenarios cover the happy paths and key error cases, critics verified the artifacts. One integration risk (third-party API dependency) noted for design consideration.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scans for secrets before publish. Use after cleanup to ensure artifacts are safe to commit.
+- **spec-auditor**: Performs holistic audit of Flow 1 spec. Use when cleanup finds missing or incomplete artifacts that need validation.
+- **requirements-author**: Writes or revises requirements. Use when cleanup finds requirements are missing or incomplete.
+- **bdd-author**: Writes BDD scenarios. Use when cleanup finds scenarios are missing or incomplete.

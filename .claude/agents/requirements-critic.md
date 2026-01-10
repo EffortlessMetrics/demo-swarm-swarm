@@ -185,3 +185,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need compliance scope clarified upstream.
 >
 > **Recommendation:** Route to problem-framer to clarify compliance scope, then re-run requirements-author.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **requirements-author**: Writes or revises requirements based on critique findings. Use when issues need fixing.
+- **bdd-author**: Converts requirements into BDD scenarios. Use when requirements are solid and ready for scenario authoring.
+- **problem-framer**: Distills signal into problem statement. Use when upstream problem framing needs clarification.
+- **clarifier**: Resolves ambiguities and documents assumptions. Use when requirements have undefined terms or vague criteria that need investigation.

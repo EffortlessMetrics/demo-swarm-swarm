@@ -172,3 +172,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need to determine intended behavior.
 >
 > **Recommendation:** Route to interface-designer to clarify contract, then either doc-writer or code-implementer will fix the mismatch.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **doc-writer**: Updates stale or missing documentation you identified. Use when docs need corrections or additions.
+- **code-implementer**: Fixes code bugs when implementation differs from documented behavior. Use when code is wrong, not docs.
+- **interface-designer**: Clarifies contract ambiguities when code and docs disagree. Use to determine intended behavior.
+- **self-reviewer**: Reviews all Build artifacts for final consistency. Use when docs are current and Build is ready.

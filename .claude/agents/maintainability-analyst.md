@@ -342,3 +342,12 @@ Maintainability is about the next developer. Code that works but is hard to unde
 Be specific and constructive. "Naming is bad" is not helpful. "Variable `d` at line 42 should be `expirationDate` to clarify its purpose" is helpful.
 
 Not every issue needs fixing immediately. Prioritize: blocking issues first, then high-value refactors, then nice-to-haves.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **quality-analyst**: Analyzes codebase health and complexity; use when maintainability needs broader quality context
+- **code-implementer**: Implements code changes; use when critical maintainability issues require fixes (route to Flow 3)
+- **learning-synthesizer**: Extracts actionable lessons; use when maintainability findings should inform run learnings
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when maintainability analysis is complete

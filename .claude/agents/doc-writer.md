@@ -234,6 +234,15 @@ When you encounter ambiguity about what to document:
 
 You have the tools to find answers yourself — use them before waiting for humans.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **doc-critic**: Reviews your documentation for staleness and accuracy. Use after docs are updated.
+- **code-implementer**: Fixes code/contract mismatches you discovered. Use when docs cannot be written truthfully due to code issues.
+- **interface-designer**: Clarifies contract details when code and contracts disagree. Use for API/schema ambiguities.
+- **self-reviewer**: Reviews all Build artifacts for final consistency check. Use when docs are complete and Build is ready.
+
 ## Philosophy
 
 Docs are part of the contract surface. They must match what we built and what we promised. Prefer small, surgical edits. If you can't verify a claim, don't write it—record the gap and route it.

@@ -211,6 +211,14 @@ Examples:
 **Reasoning:** Extracted clear request type (feature), impact (user login), and constraints. Found 3 related prior runs and likely touchpoints in src/auth/*. No redaction needed.
 ```
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **problem-framer**: Distills normalized signal into a crisp problem statement. Use after successful normalization.
+- **gh-researcher**: Performs GitHub reconnaissance for prior art and constraints. Use when GitHub context would inform problem framing.
+- **clarifier**: Resolves ambiguities and documents assumptions. Use when signal is sparse and needs clarification before framing.
+
 ## Completion rules
 
 * Prefer `recommended_action: PROCEED` even when `UNVERIFIED` (Flow 1 is designed to continue with documented uncertainty).

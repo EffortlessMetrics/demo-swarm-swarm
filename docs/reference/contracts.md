@@ -201,9 +201,12 @@ and REQ-003 has no test coverage.
 
 **What's left:** The timeout fix is mechanical. The missing tests need the test-author.
 
-**Recommendation:** Run test-author to add coverage for REQ-003, then re-run me to verify the fixes.
-The timeout issue is minor enough that code-implementer can fix it in the same pass.
+**Recommendation:** Route to **fixer** for the timeout issue (mechanical fix, no design input needed),
+then route to **test-author** to add coverage for REQ-003. Re-run me after both are done to verify
+the fixes landed correctly.
 ```
+
+Note how the recommendation names specific agents and explains why each is appropriate.
 
 ### Rules
 
@@ -211,6 +214,114 @@ The timeout issue is minor enough that code-implementer can fix it in the same p
 - **Name specific agents when you know them.** "Run test-author" is better than "run tests."
 - **Explain your reasoning.** "Because X" helps the orchestrator override intelligently.
 - **Alternatives are for real tradeoffs only.** Don't hedge unnecessarily.
+
+---
+
+## Handoff Recommendations
+
+Agents only need to know their immediate neighbors, not the entire swarm. Each agent prompt includes a short list of agents it might reasonably hand off to.
+
+### The Pattern
+
+**In the agent prompt**, include a "Handoff Targets" section with 3-4 likely neighbors:
+
+```markdown
+## Handoff Targets
+
+When you complete your work, recommend one of these agents to the orchestrator:
+
+- **fixer**: Applies targeted fixes for issues you've identified
+- **test-author**: Writes or updates tests when test coverage is needed
+- **code-critic**: Reviews implementation when you want a second opinion on code quality
+
+Tell the orchestrator which agent you recommend and why.
+```
+
+**In the agent's response**, make a specific recommendation with reasoning:
+
+```markdown
+## My Recommendation
+
+Route to **fixer** - I found 3 MINOR issues that are mechanical fixes.
+The fixer can address these without needing design input.
+```
+
+### Why This Works
+
+- **Agents only know their neighbors, not the whole swarm.** Each agent is responsible for knowing a handful of agents it commonly routes to. No agent needs to understand all 50+ agents.
+- **Recommendations are reasoned, not just "done."** The agent explains why this routing makes sense, giving the orchestrator context to override if needed.
+- **Orchestrator gets context for routing decisions.** The recommendation plus reasoning lets the orchestrator make an informed choice.
+- **No central routing table to maintain.** Routing knowledge is distributed across agent prompts. Adding a new agent only requires updating its direct neighbors.
+
+### What This Replaces
+
+| Old Pattern | Problem | New Pattern |
+|-------------|---------|-------------|
+| Rigid routing rules | Brittle, requires updates across the system | Agent recommends, orchestrator routes |
+| Agents knowing all agents | Impossible to maintain, prompts bloat | Agents know 3-4 neighbors |
+| Orchestrator guessing | Orchestrator lacks context | Agent provides reasoning |
+
+### Guidelines for Neighbor Descriptions
+
+Keep descriptions to **one line** with two parts:
+1. **What the agent does** (verb phrase)
+2. **When to route there** (condition)
+
+**Good examples:**
+```
+- **fixer**: Applies targeted fixes when issues are mechanical and well-defined
+- **test-author**: Writes or updates tests when test coverage gaps are identified
+- **code-implementer**: Implements features when new code is needed beyond fixes
+- **clarifier**: Queues questions when human input is needed to proceed
+```
+
+**Anti-patterns to avoid:**
+```
+# Too vague - doesn't say when to route
+- **fixer**: Fixes things
+
+# Too long - loses scanability
+- **test-author**: This agent is responsible for writing comprehensive test suites
+  including unit tests, integration tests, and end-to-end tests when the code
+  reviewer or critic identifies gaps in test coverage
+```
+
+### Choosing Which Neighbors to Include
+
+Include agents that handle:
+1. **The happy path** - Where does work normally go next after you?
+2. **Common issues** - What problems do you often discover that someone else should fix?
+3. **Quality gates** - Who reviews your work before it moves forward?
+
+Do not include agents for:
+- Edge cases that rarely happen
+- Agents many hops away in the flow
+- Mechanical skills (use skill invocations instead)
+
+### Example: Full Agent Handoff Section
+
+```markdown
+## Handoff Targets
+
+When you complete your work, recommend one of these agents:
+
+- **fixer**: Applies targeted fixes for MINOR/MAJOR issues that are mechanical
+- **test-author**: Writes tests when you identify coverage gaps
+- **code-implementer**: Implements new features when scope expands beyond fixes
+- **clarifier**: Queues questions when requirements are ambiguous
+
+## My Recommendation
+
+Route to **test-author** - Implementation is complete and passes existing tests,
+but I identified two untested edge cases in the error handling path. The
+test-author should add coverage for:
+1. Network timeout during auth refresh
+2. Malformed token response from OAuth provider
+
+After tests are added, route to code-critic for final review.
+```
+
+See [agent-philosophy.md](../explanation/agent-philosophy.md) for the broader philosophy on agent autonomy and communication, and [routing-table.md](routing-table.md) for the full routing reference.
 
 ### Graceful Outcomes
 

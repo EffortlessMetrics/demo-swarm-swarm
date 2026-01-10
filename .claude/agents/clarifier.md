@@ -278,6 +278,15 @@ If you hit a true blocker, say so clearly in your handoff and explain why no def
 **Mechanical failure:**
 > "Cannot write .runs/<run-id>/signal/open_questions.md due to permissions. Fix file system access and rerun."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **requirements-author**: Proceed with requirements authoring after clarifying Signal ambiguities
+- **bdd-author**: Proceed with BDD scenario authoring after clarifying acceptance criteria
+- **interface-designer**: Proceed with contract/interface design after clarifying Plan ambiguities
+- **code-implementer**: Proceed with implementation after clarifying Build-phase questions
+
 ## Philosophy
 
 **Enable forward progress.** Your job is to unblock downstream agents by answering questions they would otherwise have to stop and ask.

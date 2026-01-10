@@ -184,6 +184,15 @@ Note which flow directories are missing under `.runs/<run-id>/`. This is advisor
 **Blocked:**
 > "Cannot create .runs/feat-auth/ due to permissions. Fix file system access and rerun."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **adr-author**: Begin Plan flow with architecture decision record (Flow 2)
+- **code-implementer**: Begin Build flow with implementation work (Flow 3)
+- **review-worklist-writer**: Begin Review flow with feedback worklist (Flow 4)
+- **merge-decider**: Begin Gate flow with merge decision process (Flow 5)
+
 ## Philosophy
 
 **Establish the home base.** Create directories, merge metadata, update the index. Downstream agents need a stable place to write their artifacts. Report what you did and what's missing, then hand off.

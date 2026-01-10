@@ -172,3 +172,12 @@ After writing the mutation report, provide a natural language handoff:
 - If survivors exceed threshold → "Mutation testing found [M] survivors exceeding threshold; recommend test-author address worklist items"
 - If mutation run failed → "Mutation run failed due to [specific issue]; recommend fixing configuration then rerunning"
 - If mechanical failure → "Fix [specific issue] then rerun"
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-author**: Adds or strengthens tests to kill mutation survivors; use when worklist items indicate assertion gaps or missing edge case coverage
+- **fixer**: Applies targeted fixes when survivors indicate code lacks invariant enforcement; use for small, surgical code changes
+- **pack-customizer**: Configures mutation testing command and thresholds; use when mutation runner is missing or misconfigured
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when mutation testing is complete and flow can proceed

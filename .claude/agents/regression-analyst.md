@@ -258,3 +258,12 @@ The file is the audit record. The handoff is the routing signal.
 ## Philosophy
 
 Regressions are inevitable. What matters is how quickly you can tie symptoms to causes and owners. "Blame" is routing, not judgment. Keep evidence tight, actions explicit, and contracts closed.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Implements code changes; use when regressions require code fixes (route to Flow 3)
+- **test-author**: Authors test code; use when regressions require test fixes or additions (route to Flow 3)
+- **learning-synthesizer**: Extracts actionable lessons; use when regression findings should inform run learnings
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when regression analysis is complete

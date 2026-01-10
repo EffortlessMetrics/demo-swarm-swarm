@@ -335,6 +335,15 @@ Your handoff should tell the orchestrator what happened and what to do next:
 - "Detected monorepo with multiple languages. Could not determine primary test command — need user to specify which package.json test script to use."
 - Next step: Ask user for test command, then rerun
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-run-prep**: Initializes a run folder for Flow 1 (Signal); use when pack is customized and ready for first flow
+- **repo-operator**: Handles git operations for committing pack customization; use when config and skill edits should be committed
+- **test-executor**: Verifies test command works correctly; use when you want to validate the configured test command
+- **build-cleanup**: Summarizes Flow 3 if customization was triggered during Build; use when pack-customizer was invoked mid-flow
+
 ## Philosophy
 
 Customization should be "copy pack → run one command → it works." Defaults are fine when they're explicit and recorded. The config is the source of truth; edits to prompts are the exception, not the rule.

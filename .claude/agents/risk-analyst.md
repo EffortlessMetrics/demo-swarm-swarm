@@ -208,3 +208,12 @@ After completing your risk assessment, provide a clear handoff:
 ```
 
 This lets the orchestrator route without rereading `risk_assessment.md`.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fix implementation-level risks (missing validation, error handling, authz checks)
+- **interface-designer**: Address design-level risks requiring contract or API changes
+- **adr-author**: Revise architecture decisions when risks reveal design gaps
+- **merge-decider**: Proceed to merge decision when all risks are mitigated or accepted

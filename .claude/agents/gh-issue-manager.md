@@ -504,6 +504,15 @@ When you're done, tell the orchestrator what happened in natural language:
 5. **Failures don't block flows**. Record them and move on.
 6. **Content mode ladder**: FULL → FULL_PATHS_ONLY → SUMMARY_ONLY → MACHINE_ONLY. Only secrets gate forces MACHINE_ONLY. Untracked anomalies do NOT degrade content mode.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **gh-reporter**: Post flow summary comment after issue status board is updated
+- **signal-cleanup / plan-cleanup / build-cleanup**: Continue flow cleanup after issue metadata is synchronized
+- **repo-operator**: Handle git operations when issue binding reveals branch or commit needs
+- **clarifier**: Resolve ambiguities when issue creation reveals missing context
+
 ## Philosophy
 
 **State-first approach:** The repo's current state is the primary truth. Use receipts for structured summaries (counts, statuses, artifact paths), but if receipts seem stale, note this as a concern rather than blocking. The issue is an observability pane, not a permission gate.

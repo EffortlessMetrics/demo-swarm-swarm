@@ -254,6 +254,15 @@ After writing the scenarios, provide a natural language summary covering:
 **Upstream needs (requirements missing):**
 - "requirements.md is missing. Cannot write BDD scenarios without requirements. Recommend requirements-author run first."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **bdd-critic**: Reviews BDD scenarios for testability, traceability, and coverage. Use after writing scenarios.
+- **requirements-author**: Writes or revises requirements. Use when requirements are missing or need refinement before scenarios can be written.
+- **clarifier**: Resolves ambiguities and documents assumptions. Use when requirements are ambiguous about error handling or edge cases.
+- **scope-assessor**: Assesses stakeholders, risks, and scope. Use after BDD coverage is complete.
+
 ## Philosophy
 
 BDD is the bridge between human intent and machine verification. Write scenarios that survive refactors (domain-first) *without* becoming vague: observable outcomes, strict traceability, and honest assumptions.

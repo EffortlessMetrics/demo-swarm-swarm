@@ -157,3 +157,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Cannot deploy with unresolved security findings.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scans for secrets before publish; use after writing the receipt and before any GitHub posting
+- **learning-synthesizer**: Extracts actionable learnings from run artifacts; use when proceeding to Flow 7 (Wisdom)
+- **gate-cleanup**: Summarizes the Gate flow; use when bouncing back to Gate due to issues that blocked deployment
+- **fixer**: Applies targeted fixes; use when deployment was blocked by fixable issues and needs to retry Build/Gate

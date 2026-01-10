@@ -148,3 +148,12 @@ When you're done, tell the orchestrator what happened in natural language:
 - What command was used (or why skipped)
 - Whether worklist was created
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fixes crash-causing bugs in production code; use when fuzzing found crashes that need code fixes
+- **test-author**: Creates regression tests for discovered crashes; use when a repro is known and a test should prevent recurrence
+- **pack-customizer**: Configures fuzz harness and command settings; use when fuzzing is unavailable due to missing configuration
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when fuzzing is complete (clean or skipped) and flow can proceed
+

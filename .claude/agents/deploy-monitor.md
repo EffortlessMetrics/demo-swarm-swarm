@@ -217,6 +217,15 @@ Always mention:
 - What evidence was gathered
 - Next step (proceed to smoke-verifier, or note limitations)
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **smoke-verifier**: Runs non-destructive release and health verification; use after CI evidence is gathered to verify the deployment is alive
+- **deploy-decider**: Makes the final deployment decision; use after monitoring shows CI passing or when evidence gathering is complete
+- **deploy-cleanup**: Summarizes the Deploy flow; use when deployment was not attempted (gate BOUNCE) and no further verification is needed
+- **fixer**: Applies targeted fixes; use when CI failures indicate fixable issues that need addressing before retry
+
 ## Philosophy
 
 Create a trustworthy "what happened" snapshot with pointers, not a remediation plan. Minimal, evidence-backed, and honest about unknowns.

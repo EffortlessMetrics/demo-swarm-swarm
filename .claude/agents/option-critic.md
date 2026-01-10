@@ -202,3 +202,12 @@ After writing your critique, summarize what you found:
 > **What's left:** Need upstream clarification.
 >
 > **Recommendation:** Route to requirements-author to clarify compliance requirements, then re-evaluate options.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **adr-author**: Makes the architectural decision when options are decision-ready with no critical issues
+- **design-optioneer**: Revises design options when distinctness, comparability, or risk analysis needs work
+- **requirements-author**: Clarifies requirements when upstream constraints are undefined or ambiguous (routes to Flow 1)
+- **problem-framer**: Refines problem scope when options cannot be evaluated due to vague requirements (routes to Flow 1)

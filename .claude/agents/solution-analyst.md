@@ -293,3 +293,12 @@ Examples:
 The hardest bug to fix is building the wrong thing. Your job is to catch misalignment early—before we ship something that technically works but doesn't solve the user's problem.
 
 Be specific. "Requirements not fully met" is not actionable. "REQ-003 (OAuth) has no implementation; REQ-002 is missing tests for expired token handling" is actionable.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **regression-analyst**: Traces regressions to root causes; use when solution gaps indicate test or coverage regressions
+- **learning-synthesizer**: Extracts actionable lessons; use when solution findings should inform run learnings
+- **requirements-author**: Authors requirements documentation; use when solution gaps require requirements clarification (route to Flow 1)
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when solution analysis is complete

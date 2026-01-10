@@ -280,3 +280,12 @@ Every learning must flow to an action surface. Free-floating observations are no
 **The binding rule:** Every `## Learning:` section must produce at least one `ACTION` or `PACK_OBS` marker. Sections that end with "consider doing X" but no marker are incomplete.
 
 **Exception:** A learning can be purely observational (no action) only if it's explicitly labeled "for future reference" AND explains why no immediate action is warranted.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **pattern-analyst**: Analyzes cross-run patterns and recurring issues; use when learnings reveal repeated themes worth investigating historically
+- **process-analyst**: Analyzes flow execution efficiency; use when learnings highlight process friction or iteration patterns
+- **feedback-applier**: Applies feedback actions to pack or codebase; use when learnings produce concrete PACK_OBS or ACTION items
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when learnings extraction is complete and ready to seal the flow

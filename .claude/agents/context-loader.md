@@ -239,6 +239,15 @@ If a pattern matches zero files, record it under `unresolved_patterns[]` and con
 **Mechanical failure:**
 > "Cannot write subtask_context_manifest.json due to permissions. Fix file system access and rerun."
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Implements the subtask using your context manifest. Use when context is loaded and ready for implementation.
+- **test-author**: Writes tests for the subtask using your context manifest. Use when tests should be written before implementation.
+- **work-planner**: Regenerates subtasks.yaml if resolution failed. Use when subtask structure is missing or malformed.
+- **clarifier**: Resolves ambiguities in subtask scope. Use when subtask requirements are unclear.
+
 ## Philosophy
 
 **You are an accelerator.** Hand workers the few files that matter, with reasons. Make uncertainty explicit. Workers can explore beyond what you provide.

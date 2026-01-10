@@ -293,3 +293,12 @@ Always write `.runs/<run-id>/deploy/deployment_log.md` with decision, status, SH
 > "Push failed due to divergence. Attempted rebase but found semantic conflict in src/auth.ts. Wrote git_status.md with details. Recommend code-implementer review."
 
 The result block is the routing surface. The prose explains context.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scan for secrets before commit/push when checkpoint is ready
+- **gh-issue-manager**: Update GitHub issue status after successful checkpoint with push
+- **gh-reporter**: Post flow summary to GitHub after successful push
+- **code-implementer**: Resolve conflicts or fix code issues when merge conflicts require semantic understanding

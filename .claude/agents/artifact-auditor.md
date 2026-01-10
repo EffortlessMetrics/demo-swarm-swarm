@@ -104,3 +104,12 @@ After writing the audit, provide a natural language summary covering:
 
 **Blocked (mechanical failure):**
 - "Cannot read .runs/<run-id>/ directory due to permissions. Need file system access before proceeding."
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **learning-synthesizer**: Extracts actionable lessons from run artifacts; use after audit confirms artifacts are present
+- **pattern-analyst**: Analyzes cross-run patterns and recurring issues; use when audit reveals repeated gaps across runs
+- **regression-analyst**: Traces regressions to root causes; use when audit finds test or coverage gaps
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when all wisdom analysis is complete

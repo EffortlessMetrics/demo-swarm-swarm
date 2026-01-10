@@ -173,7 +173,16 @@ If you cannot extract counts safely, keep them `null`. Do not estimate.
 
 The file is the audit record. The handoff tells the orchestrator what to do next.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-critic**: Reviews test results and coverage quality. Use after tests pass to verify test quality.
+- **code-implementer**: Fixes failing tests by updating implementation. Use when tests fail due to code bugs.
+- **fixer**: Applies targeted fixes for specific test failures. Use for small, surgical fixes.
+- **self-reviewer**: Reviews all Build artifacts for consistency. Use when tests pass and Build is ready for final review.
+
 ## Philosophy
 
 Flows should be explicit about *stations*, not implementations.
-This agent is the “test station” adapter: stable, tool-bound, and easy to route from.
+This agent is the "test station" adapter: stable, tool-bound, and easy to route from.

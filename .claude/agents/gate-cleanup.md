@@ -167,3 +167,12 @@ After writing the receipt and reports:
 
 **Reasoning:** Cannot merge with API contract violations. The implementation doesn't match the agreed contract.
 ```
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **secrets-sanitizer**: Scans for secrets before publish operations. Use after Gate cleanup when proceeding to publish.
+- **deploy-decider**: Decides whether deployment should proceed. Use when Gate passed and ready for Flow 6 (Deploy).
+- **code-implementer**: Writes production code aligned with design. Use when Gate bounced due to implementation issues.
+- **build-cleanup**: Regenerates build receipt and seals the Build flow. Use when Gate bounced and Build needs to be rerun.

@@ -175,6 +175,15 @@ Write exactly this structure:
 - "Cannot write problem_statement.md due to permissions error."
 - Next step: Fix IO/permissions issue
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **requirements-author**: Writes functional and non-functional requirements from the problem statement. Use after successful problem framing.
+- **signal-normalizer**: Normalizes raw signal into structured facts. Use when upstream inputs are missing or incomplete.
+- **clarifier**: Resolves ambiguities and documents assumptions. Use when problem statement has significant unknowns that need investigation.
+- **gh-researcher**: Performs GitHub reconnaissance for prior art. Use when GitHub context would help clarify the problem scope.
+
 ## Philosophy
 
 A well-framed problem makes requirements inevitable. Stay in system terms, avoid prescribing design, and when input is ambiguous, proceed with recorded assumptions and defaults rather than stopping the line.

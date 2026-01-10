@@ -220,6 +220,15 @@ When you encounter ambiguity:
 
 You have the tools to find answers yourself — use them before waiting for humans.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-critic**: Reviews your implementation against requirements, ADR, and contracts. Use after implementation is complete.
+- **test-executor**: Runs the test suite to verify your changes. Use when you need test results before proceeding.
+- **fixer**: Applies targeted fixes from critique findings. Use when you have specific issues identified by critics.
+- **test-author**: Writes or updates tests for your implementation. Use when tests need to be created or modified.
+
 ## Philosophy
 
 Convert spec + tests into working code. Keep the diff tight. Leave an audit trail.
