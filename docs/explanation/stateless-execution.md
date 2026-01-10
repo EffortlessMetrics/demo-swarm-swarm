@@ -346,5 +346,5 @@ The entire state machine is **inspectable**.
 - [ai-physics.md](ai-physics.md) — Sealed stations, compressors, context affinity
 - [why-ops-first.md](why-ops-first.md) — Work Plane vs Publish Plane
 - [architecture.md](architecture.md) — Overall pack design
-- [why-two-planes.md](why-two-planes.md) — Control plane vs audit plane
+- [why-two-planes.md](why-two-planes.md) — Routing plane vs audit plane
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference

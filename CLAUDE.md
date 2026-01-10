@@ -32,7 +32,31 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 The pack is a **build pipeline with guardrails**, not a guardrail pipeline that sometimes builds. Agents explore, implement, and iterate freely. Gates engage only at publish boundaries (commit, push, GitHub post).
 
+**The thesis:** Humans author intent. Swarms manufacture verified change. Reviewers audit the cockpit, not the diff.
+
+**The ratio:** Quality per DevLT (PR quality achieved per minute of developer attention). Compute is cheap; architect attention is expensive. Trade accordingly.
+
 See: [docs/explanation/why-ops-first.md](docs/explanation/why-ops-first.md)
+
+---
+
+## Rules (The Constitution)
+
+Claude Code rules live in `.claude/rules/`. They encode the physics and vibe that shape all behavior.
+
+| Rule | What It Governs |
+|------|-----------------|
+| `00-doctrine.md` | Core thesis, the triangle, anti-austerity |
+| `10-operating-model.md` | PM + IC swarm, when to spawn agents |
+| `20-intent-to-narrative.md` | The pipeline from intent to PR |
+| `30-autonomy-and-boundaries.md` | Default-allow + strict gates |
+| `40-evidence-and-quality.md` | Claims require pointers, the quality panel |
+| `50-agent-contract.md` | Agent prompts (scoped to `.claude/agents/`) |
+| `60-flow-orchestrators.md` | Flow commands (scoped to `.claude/commands/flow-*`) |
+| `70-docs-and-teaching.md` | Documentation (scoped to `docs/`) |
+| `80-developer-experience.md` | UX, accessibility, investing in quality |
+
+Rules are the constitution Claude loads reliably. CLAUDE.md is the contract. Docs are the textbook.
 
 ---
 
@@ -226,6 +250,7 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 
 | Topic | Location |
 |-------|----------|
+| **Rules (constitution)** | `.claude/rules/*.md` |
 | Architecture & Philosophy | `docs/explanation/` |
 | Control-plane blocks, schemas | `docs/reference/contracts.md` |
 | Run state schemas | `docs/reference/run-state.md` |

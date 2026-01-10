@@ -2,7 +2,7 @@
 
 > How to read, interpret, and use flow receipts.
 
-Receipts are structured JSON artifacts produced by cleanup agents at the end of each flow. They summarize what happened and enable downstream routing.
+Receipts are structured JSON artifacts produced by cleanup agents at the end of each flow. They summarize what happened and provide an audit trail. Routing is based on prose handoffs from agents, not receipt fields.
 
 ---
 
@@ -267,7 +267,13 @@ Receipts include per-station execution status:
 
 ---
 
-## Using Receipts for Routing
+## Using Receipts
+
+### Receipts Are for Audit, Not Routing
+
+**Key distinction:** Orchestrators route on prose handoffs from agents. Receipts capture what happened for audit and analysis.
+
+The routing fields (`recommended_action`, `route_to_flow`, `route_to_agent`) exist in receipts because cleanup agents derive them from the agent's prose handoff. They are **not** read by orchestrators for live routing decisions.
 
 ### Downstream Flows
 
@@ -282,24 +288,25 @@ Flow 7 (Wisdom) reads:
   - All prior receipts for timeline and analysis
 ```
 
-### Routing on Receipt Status
+### Investigating with Receipts
+
+Use receipts to understand what happened during a run:
 
 ```python
-# Pseudo-code for routing
+# Pseudo-code for investigation
 receipt = read_receipt("build_receipt.json")
 
-if receipt.status == "CANNOT_PROCEED":
-    # Stop - mechanical failure
-    return FIX_ENV
+# What was the outcome?
+print(receipt.status)  # VERIFIED, UNVERIFIED, CANNOT_PROCEED
 
-if receipt.status == "UNVERIFIED":
-    # Check blockers - may still proceed with caution
-    if has_critical_blockers(receipt.blockers):
-        return BOUNCE to receipt.route_to_flow
+# What were the blockers?
+print(receipt.blockers)
 
-# Proceed to next flow
-return PROCEED
+# What did tests show?
+print(receipt.tests.passed, receipt.tests.failed)
 ```
+
+For live routing decisions, orchestrators read the prose handoff that agents return.
 
 ---
 
@@ -382,6 +389,8 @@ bash .claude/scripts/demoswarm.sh receipts count \
 
 ## Common Receipt Patterns
 
+These examples show what receipts look like. Remember: these are **audit records**, not routing inputs. Cleanup agents derive the routing fields from agent prose handoffs.
+
 ### Healthy Flow
 ```json
 {
@@ -407,6 +416,8 @@ bash .claude/scripts/demoswarm.sh receipts count \
 }
 ```
 
+The `recommended_action: "PROCEED"` was derived from the agent's handoff which said something like "Ready to move forward despite the gap in integration tests."
+
 ### Needs Upstream Fix
 ```json
 {
@@ -417,6 +428,8 @@ bash .claude/scripts/demoswarm.sh receipts count \
   "blockers": ["API contract doesn't match implementation"]
 }
 ```
+
+The routing fields were derived from the agent's handoff which said something like "This needs to go back to Plan. The interface-designer should update the API contract."
 
 ### Mechanical Failure
 ```json

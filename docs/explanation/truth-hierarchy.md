@@ -288,9 +288,9 @@ Resolution:
 
 ### For Orchestrators
 
-1. **Route on derived truth.** Use Machine Summary blocks, not prose.
+1. **Route on prose handoffs.** Claude reads and understands natural language recommendations.
 2. **Verify before proceeding.** When a gate matters, confirm kernel truth.
-3. **Don't trust narrative for pass/fail.** An agent saying "done" is not the same as evidence showing completion.
+3. **Don't trust narrative for pass/fail.** An agent saying "done" should be backed by derived truth (receipts, counts) and kernel truth (exit codes, tests).
 
 ### For Critics
 

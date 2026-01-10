@@ -11,7 +11,7 @@
 | Nothing posted to GitHub | `gh auth status` + check gates | Auth missing OR `safe_to_publish: false` OR `proceed_to_github_ops: false` |
 | `CANNOT_PROCEED` | Check tooling (`jq`, `gh`, etc.) | Mechanical failure (IO/perms/missing tool) |
 | Counts are `null` | Check `cleanup_report.md` | Stable markers missing in producer artifact |
-| Microloop won't stop | Check critic's `recommended_action` | Route on PROCEED/BOUNCE/RERUN, not just status |
+| Microloop won't stop | Check critic's handoff recommendation | Read the prose to understand if iteration should continue |
 | Anomaly detected | Check `anomaly_paths` | Unexpected files outside allowlist |
 | Command not found | Check `.claude/` exists at repo root | Pack not discovered |
 
@@ -120,16 +120,16 @@ cleanup → sanitizer → modified_files: true → cleanup → sanitizer → mod
 
 **Symptom:** Critic keeps saying issues exist; author/implementer can't fix them.
 
-**Diagnosis:** Route on the critic's `recommended_action` first (control plane wins).
+**Diagnosis:** Read the critic's prose handoff to understand the recommendation.
 
-Microloops route as follows:
-- `status: CANNOT_PROCEED` → stop (FIX_ENV)
-- `recommended_action: BOUNCE` → follow `route_to_flow/route_to_agent`
-- `recommended_action: RERUN` → rerun the specified agent (default author/implementer)
-- `recommended_action: PROCEED` → proceed even if UNVERIFIED (capture blockers/limitations)
-- If `recommended_action` absent: use `can_further_iteration_help` as tie-breaker (`no` → proceed; `yes` → rerun)
+The orchestrator routes on the critic's handoff:
+- If the critic reports mechanical failure → stop (FIX_ENV)
+- If the critic recommends going back to an earlier flow → follow that recommendation
+- If the critic recommends another iteration → rerun the author/implementer
+- If the critic says ready to proceed → move on even if issues remain (document blockers)
+- If the critic says "another iteration won't help" → proceed with blockers recorded
 
-If a critic keeps saying `RERUN` but the issues are unfixable locally, proceed with crisp blockers/limitations documented (or `BOUNCE` to the upstream owner when clear).
+If a critic keeps recommending reruns but the issues are unfixable locally, the orchestrator should proceed with crisp blockers documented (or route to the upstream owner if that's what the critic suggests).
 
 ---
 

@@ -28,9 +28,8 @@ Security issues in the pack may include:
 
 Please **do not** open public issues for security reports.
 
-**Email:** security@demo-swarm.dev (or file a private security advisory on GitHub)
-
-**Subject:** `[demo-swarm] Security report`
+- **Preferred:** [GitHub Security Advisory](https://github.com/EffortlessMetrics/demo-swarm/security/advisories/new)
+- **Alternative:** [LinkedIn](https://ca.linkedin.com/in/effortlesssteven) (for private contact)
 
 **Include:**
 

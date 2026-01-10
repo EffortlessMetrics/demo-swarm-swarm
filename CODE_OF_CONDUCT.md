@@ -38,15 +38,14 @@ Maintainers may:
 
 ## Reporting
 
-Report concerns to: conduct@demo-swarm.dev
+- **Public issues:** [GitHub Issues](https://github.com/EffortlessMetrics/demo-swarm/issues)
+- **Private concerns:** [LinkedIn](https://ca.linkedin.com/in/effortlesssteven)
 
 Include:
 
 - What happened
 - When and where it occurred
 - Any relevant context or evidence
-
-We will respond within 7 days and keep reports confidential to the extent possible.
 
 ## Attribution
 

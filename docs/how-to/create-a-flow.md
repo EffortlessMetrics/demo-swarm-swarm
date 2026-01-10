@@ -221,23 +221,23 @@ For writer ↔ critic stations:
 #### Microloop Template (writer ↔ critic)
 
 1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its control-plane Result
-3) Apply pass: call `<writer>` once using the critic's worklist
+2) Critique pass: call `<critic>` and read its prose handoff
+3) Apply pass: call `<writer>` once using the critic's findings
 4) Re-critique: call `<critic>` again
 
 Continue looping beyond default two passes only when:
-- critic returns `recommended_action: RERUN`, and
-- `can_further_iteration_help: yes`, and
-- the critic's open items are specific
+- The critic's handoff recommends another iteration
+- The critic indicates further iteration would help
+- The issues are specific and actionable
 
-Otherwise proceed with `UNVERIFIED` + blockers recorded.
+Otherwise proceed with blockers recorded.
 ```
 
 ---
 
 ## Control-Plane Blocks
 
-Flows route on control-plane blocks, NOT by re-reading files.
+Flows route on **prose handoffs** from agents. Some specialized agents (secrets-sanitizer, repo-operator) return structured blocks because they are boolean gates, not cognitive agents.
 
 ### Gate Result (from secrets-sanitizer)
 
@@ -268,17 +268,21 @@ anomaly_classification:
 anomaly_paths: []
 ```
 
-### Agent Result (from cleanup agents)
+### Agent Handoffs (from domain agents)
 
-```yaml
-## <Flow> Cleanup Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1-7 | null>
-route_to_agent: <agent-name | null>
-missing_required: []
-blockers: []
+Domain agents (critics, authors, implementers) return prose handoffs:
+
+```markdown
+## Handoff
+
+**What I did:** <summary>
+
+**What's left:** <remaining work or blockers>
+
+**Recommendation:** <next agent with reasoning>
 ```
+
+Orchestrators read these handoffs and route based on understanding, not by parsing structured fields.
 
 ---
 
@@ -287,11 +291,13 @@ blockers: []
 Include routing guidance for each major decision point:
 
 ```markdown
-**Route on the <Agent> Result block** (not by re-reading the file):
-- If `status: CANNOT_PROCEED` → **FIX_ENV**; stop and require human intervention
-- If `recommended_action: BOUNCE` → follow `route_to_flow`/`route_to_agent`
-- If `recommended_action: RERUN` → rerun the specified agent
-- If `recommended_action: PROCEED` → continue to next station
+**Route on the agent's prose handoff:**
+- If the agent reports mechanical failure (IO/tooling) → **FIX_ENV**; stop and require human intervention
+- If the agent recommends going back to an earlier flow → follow the recommendation
+- If the agent recommends another iteration → rerun the specified agent
+- If the agent says ready to proceed → continue to next station
+
+The orchestrator reads and understands the handoff. There is no parsing of `route_to_flow` or `recommended_action` fields — those exist in receipts for audit purposes only.
 ```
 
 ---
@@ -328,7 +334,7 @@ Define what the flow produces for secrets-sanitizer to scan:
 
 ## Receipt Schema
 
-Every flow produces a receipt at `.runs/<run-id>/<flow>/<flow>_receipt.json`:
+Every flow produces a receipt at `.runs/<run-id>/<flow>/<flow>_receipt.json`. Receipts are **audit logs**, not routing contracts.
 
 ```json
 {
@@ -364,6 +370,8 @@ Every flow produces a receipt at `.runs/<run-id>/<flow>/<flow>_receipt.json`:
   "completed_at": "<ISO8601>"
 }
 ```
+
+**Note:** The `recommended_action`, `route_to_flow`, and `route_to_agent` fields exist for audit/traceability. Cleanup agents derive these from the agent's prose handoff. Orchestrators route on the handoff, not these fields.
 
 ---
 

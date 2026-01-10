@@ -97,15 +97,11 @@ Write exactly:
 2. Write only your output file. No temp files.
 3. <Domain-specific constraints>
 
-## Control-plane routing (pack standard)
+## Handoff Targets
 
-Closed action enum:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Guidance for this station:
-- <When to PROCEED>
-- <When to BOUNCE and where>
-- <When to FIX_ENV>
+When you complete your work, recommend one of these agents:
+- <agent-1>: <what it does> — <when to route there>
+- <agent-2>: <what it does> — <when to route there>
 
 ## Behavior
 
@@ -115,22 +111,12 @@ Guidance for this station:
 ### Step 1-N: Work
 <Domain-specific steps>
 
-### Final Step: Status decision
-<How to determine VERIFIED vs UNVERIFIED>
+### Final Step: Handoff
 
-## Control-plane return (for orchestrator)
-
-At the end of your response, echo:
-
-```markdown
-## <Agent Name> Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1-7 | null>
-missing_required: []
-blockers: []
-```
+Write a prose handoff with:
+1. **What I did** — summary of work completed
+2. **What's left** — remaining work or blockers
+3. **Recommendation** — specific next agent with reasoning
 
 ## Philosophy
 
@@ -164,7 +150,7 @@ Every agent has a "lane" — what it can and cannot do.
 
 **Critics:**
 - Never fix. Write assessment only.
-- Include `can_further_iteration_help: yes | no`.
+- Indicate in prose whether further iteration would help.
 
 **Cleanup:**
 - Counts are mechanical. If you can't derive safely, output `null`.
@@ -207,47 +193,43 @@ See [Documentation Conventions](../reference/documentation-conventions.md) for v
 
 ## Output Contract
 
-Agent outputs must be **stable and machine-readable**.
+Agent outputs consist of **artifacts** (files written to disk) and **handoffs** (prose responses to the orchestrator).
 
-### Machine Summary Block
+### Handoff Structure
 
-Every non-trivial agent output includes:
+Every agent ends with a prose handoff:
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
+```markdown
+## Handoff
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1-7 | null>
-route_to_station: <string | null>
-route_to_agent: <agent-name | null>
+**What I did:** <summary of work completed>
 
-blockers: []
-missing_required: []
-concerns: []
+**What's left:** <remaining work, blockers, or "nothing">
 
-observations: []
-
-can_further_iteration_help: yes | no   # critics only
-
-severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+**Recommendation:** <specific next agent with reasoning>
 ```
 
-### Status Semantics
+### Status Concepts
 
-- **VERIFIED** — Required artifacts exist, verification stations ran, all gates passed. `blockers` empty.
-- **UNVERIFIED** — Gaps, uncertainties, or issues documented. `blockers` should explain what prevents VERIFIED.
-- **CANNOT_PROCEED** — Mechanical failure only (IO, permissions, tooling). `missing_required` must be non-empty.
+Use these concepts naturally in your prose:
 
-### Routing Semantics
+- **Complete / verified** — Work is done, evidence exists, no blockers
+- **Incomplete / unverified** — Gaps exist; document what's missing
+- **Blocked** — Cannot proceed without external input
+- **Mechanical failure** — IO/permissions/tooling broken
 
-- **PROCEED** — Default. Even with UNVERIFIED, capture blockers and continue.
-- **RERUN** — Rerun this station. Deterministic improvement expected.
-- **BOUNCE** — Route to upstream flow. Requires `route_to_flow`.
-- **FIX_ENV** — Only with CANNOT_PROCEED. Mechanical fix needed.
+### Routing Intent
+
+Express routing naturally in your recommendation:
+
+- "Run fixer next to address the three MINOR issues"
+- "This needs to go back to Plan — the API contract doesn't match the ADR"
+- "Ready for code-critic review"
+- "Blocked until user clarifies the auth approach"
+
+### Machine Summary (Cleanup Agents Only)
+
+Cleanup agents write receipts with structured Machine Summary for audit purposes. This format is **not** for communication between agents — it's derived from prose handoffs when writing receipts.
 
 ---
 
@@ -293,6 +275,11 @@ You critique. You do not fix. You do not perform git ops.
 
 - `.runs/<run-id>/<flow>/<thing>_critique.md`
 
+## Handoff Targets
+
+- **<thing>-author**: Addresses the issues you found
+- **fixer**: Applies mechanical fixes for MINOR issues
+
 ## Behavior
 
 ### Step 1: Review against standards
@@ -311,26 +298,17 @@ You critique. You do not fix. You do not perform git ops.
 <Nice to fix>
 ```
 
-### Step 3: Verdict
+### Step 3: Handoff
 
-```yaml
-## Machine Summary
-status: VERIFIED | UNVERIFIED
-can_further_iteration_help: yes | no
-severity_summary:
-  critical: <n>
-  major: <n>
-  minor: <n>
-```
+Write a prose handoff:
+- Summarize what you found
+- Say whether another iteration would help
+- Recommend specific next steps
 
-## Control-plane return
-
-```markdown
-## <Thing> Critic Result
-status: VERIFIED | UNVERIFIED
-recommended_action: PROCEED | RERUN
-can_further_iteration_help: yes | no
-```
+Example:
+"Found 2 CRITICAL and 1 MAJOR issue. The CRITICAL issues are fixable by the author.
+Recommend running <thing>-author again with this critique. Another pass should resolve
+the blocking issues."
 
 ## Philosophy
 
@@ -341,7 +319,7 @@ Critics are harsh and specific. Vague criticism is useless.
 
 ## Cleanup Agent Pattern
 
-Cleanup agents seal the flow:
+Cleanup agents seal the flow and translate prose handoffs into structured receipts:
 
 ```markdown
 ---
@@ -374,10 +352,12 @@ bash .claude/scripts/demoswarm.sh count pattern \
 ```
 
 ### Step 3: Quality gates
-Extract from critic Machine Summary blocks.
+Read critic prose handoffs and derive status.
 
 ### Step 4: Write receipt
 JSON with counts, gates, stations, evidence_sha.
+
+The receipt includes routing fields (`recommended_action`, `route_to_flow`, `route_to_agent`) for audit trail purposes. Derive these from the agent prose handoffs — they are not used for live routing.
 
 ### Step 5: Update index
 ```bash
@@ -394,6 +374,7 @@ Evidence of derivation.
 ## Philosophy
 
 Cleanup does not interpret. Prefer `null` + evidence over invented precision.
+Receipts are audit logs — the orchestrator routes on prose handoffs, not receipt fields.
 ```
 
 ---
@@ -429,8 +410,8 @@ After creating the agent file:
 - [ ] Frontmatter complete (name, description, model, color)
 - [ ] Voice is factual, not theatrical (see [documentation conventions](../reference/documentation-conventions.md))
 - [ ] Lane hygiene documented
-- [ ] Machine Summary block defined
-- [ ] Control-plane return block defined
+- [ ] Handoff targets section included
+- [ ] Handoff structure documented in behavior
 - [ ] Stable markers used for countable items
 - [ ] Added to flow command(s)
 - [ ] Pack-check passes: `bash .claude/scripts/pack-check.sh`
@@ -463,6 +444,11 @@ You plan migrations. You do not critique or implement.
 
 - `.runs/<run-id>/plan/migration_plan.md`
 
+## Handoff Targets
+
+- **migration-critic**: Reviews your migration plan
+- **rollback-designer**: Designs rollback strategy after plan is approved
+
 ## Lane + hygiene (non-negotiable)
 
 1. No git ops.
@@ -477,11 +463,9 @@ You plan migrations. You do not critique or implement.
 ### Step 2: Design migration steps
 ...
 
-## Control-plane return
+### Step 3: Handoff
 
-## Migration Planner Result
-status: VERIFIED | UNVERIFIED
-recommended_action: PROCEED
+Write a prose handoff explaining what you planned and recommending migration-critic review.
 ```
 
 ### Minimal Critic
@@ -506,6 +490,11 @@ You critique. You never fix.
 
 - `.runs/<run-id>/plan/migration_critique.md`
 
+## Handoff Targets
+
+- **migration-planner**: Addresses the issues you found
+- **rollback-designer**: Proceeds if migration plan is acceptable
+
 ## Behavior
 
 ### Step 1: Check for rollback strategy
@@ -514,12 +503,12 @@ You critique. You never fix.
 ### Step 2: Check for data safety
 ...
 
-## Control-plane return
+### Step 3: Handoff
 
-## Migration Critic Result
-status: VERIFIED | UNVERIFIED
-can_further_iteration_help: yes | no
-recommended_action: PROCEED | RERUN
+Write a prose handoff:
+- Summarize findings with severity markers
+- Say whether another iteration would help
+- Recommend next step (rerun planner or proceed to rollback-designer)
 ```
 
 ---
