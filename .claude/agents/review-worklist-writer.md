@@ -530,6 +530,15 @@ When you complete your work, recommend one of these to the orchestrator:
 - **fixer**: Handle STYLE category items and small targeted fixes from critiques
 - **doc-writer**: Update documentation for DOCS category items
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fix CORRECTNESS and ARCHITECTURE items requiring code changes (bugs, security issues, logic errors)
+- **test-author**: Address TESTS category items (missing tests, test failures, coverage gaps)
+- **fixer**: Handle STYLE category items and small targeted fixes from critiques
+- **doc-writer**: Update documentation for DOCS category items
+
 ## Hard Rules
 
 1) **Cluster, don't enumerate**: Don't create one Work Item per comment. Cluster related issues into actionable units. 5-15 Work Items for a typical review, not 50.

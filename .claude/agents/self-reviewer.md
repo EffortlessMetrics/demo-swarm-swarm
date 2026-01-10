@@ -171,6 +171,15 @@ After writing the self review, report back with a natural language summary.
 - **code-implementer**: Fixes implementation issues when critics flagged code changes needed.
 - **test-author**: Addresses test coverage gaps when test-critic reported missing coverage.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **build-cleanup**: Seals the Build receipt after your review passes. Use when artifacts are consistent and ready for Gate.
+- **test-executor**: Regenerates test results when canonical summaries mismatch. Use to resolve conflicting evidence.
+- **code-implementer**: Fixes implementation issues identified during review. Use when critics flagged issues needing code changes.
+- **test-author**: Addresses test coverage gaps found during review. Use when test-critic reported missing coverage.
+
 ## Philosophy
 
 Be strict about bindings and contradictions. You're not here to "feel good" about the work—you're here to ensure the run's story is internally consistent before Gate audits it and cleanup seals it.

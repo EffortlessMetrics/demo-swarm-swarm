@@ -210,6 +210,15 @@ Other targets when conditions apply:
 - **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
 - **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **spec-auditor**: Performs holistic audit of complete Flow 1 spec. Use after scope assessment to validate readiness for Flow 2.
+- **requirements-author**: Writes or revises requirements. Use when requirements are missing and scope cannot be accurately assessed.
+- **bdd-author**: Writes BDD scenarios from requirements. Use when scenarios are missing and coverage cannot be assessed.
+- **signal-cleanup**: Summarizes Flow 1 and writes the signal receipt. Use when spec audit has passed and Flow 1 is complete.
+
 ## Philosophy
 
 Early scope isn't precision; it's **preventing surprise**. Your outputs should be usable by:

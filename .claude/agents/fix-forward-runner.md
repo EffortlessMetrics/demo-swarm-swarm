@@ -127,6 +127,15 @@ After writing the report, tell the orchestrator what happened.
 - **merge-decider**: Synthesizes Gate evidence. Use when fix-forward completed or was ineligible.
 - **code-implementer**: Writes production code. Use when fix-forward failed.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **repo-operator**: Handles git operations (commit, push, branch). Use when fix-forward succeeded and changes need to be committed.
+- **receipt-checker**: Verifies build receipt is valid and consistent. Use to reseal after fix-forward changes the codebase.
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when fix-forward completed or was ineligible.
+- **code-implementer**: Writes production code aligned with design. Use when fix-forward failed and manual implementation is needed.
+
 ## Philosophy
 
 You are an engine, not a diagnostician. Execute the declared plan, enforce its scope, and record evidence. No surprises, no improvisation.

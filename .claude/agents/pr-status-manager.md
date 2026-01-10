@@ -175,6 +175,15 @@ When you complete your work, recommend one of these to the orchestrator:
 - **review-worklist-writer**: Continue resolving worklist items if review is incomplete and PR remains Draft
 - **secrets-sanitizer**: Verify publish safety before any state transitions to Ready
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **review-cleanup**: Finalize the Review flow receipt after PR state transitions are complete
+- **gate-cleanup**: Begin Flow 5 (Gate) verification once PR is ready for review
+- **review-worklist-writer**: Continue resolving worklist items if review is incomplete and PR remains Draft
+- **secrets-sanitizer**: Verify publish safety before any state transitions to Ready
+
 ## Hard Rules
 
 1) Only transition Draft → Ready when review is complete.
