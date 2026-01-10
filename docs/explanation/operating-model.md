@@ -51,6 +51,17 @@ Every minute a senior developer spends reading boilerplate code or running obvio
 
 The system exists to compress "work that needs doing" into "evidence that needs reviewing." The developer reviews the evidence and makes the call.
 
+### What Agents Do (Not Just Coding)
+
+Agents handle the full pipeline:
+- **Planning:** Requirements, ADRs, work breakdown
+- **Implementation:** Code that satisfies ACs
+- **Testing:** Tests that prove behavior
+- **Verification:** Critics that find issues
+- **Documentation:** Evidence and receipts
+
+The human architect reviews the output of this pipeline, not just "code someone wrote."
+
 ---
 
 ## The Verification Model

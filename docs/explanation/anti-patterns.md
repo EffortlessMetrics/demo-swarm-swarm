@@ -45,16 +45,25 @@ Good:
 - "Blocked" used for anything that isn't perfect
 - Agents report blocked status for fixable problems
 
+**The reality:** "Blocked" is almost always just routing to another agent. True halting is very rare.
+
+| What They Say | What Should Happen |
+|---------------|-------------------|
+| "Blocked on lint" | Route to auto-linter |
+| "Blocked on test failure" | Route to fixer |
+| "Blocked on design conflict" | Route to design-optioneer |
+| "Blocked on unclear spec" | Route to clarifier |
+
 **Why it fails:**
 - Kills momentum on work that could continue
 - Wastes expensive human attention on fixable issues
 - Creates a culture of learned helplessness
 - Agents stop trying when they could fix-forward
 
-**The fix:** Fix-forward by default. Route to fixer agents. Reserve "blocked" for:
-- Mechanical failure (can't write files, can't run commands)
-- True ambiguity (spec contradicts itself, no safe default exists)
-- Unsafe publish boundary (secrets detected, force-push required)
+**The fix:** Almost everything is "route to X," not "blocked." True halt is reserved for:
+- Mechanical failure (tooling broken, infra down)
+- Non-derivable decision (business choice requiring human input)
+- Unsafe publish boundary (secrets detected)
 
 **Example:**
 

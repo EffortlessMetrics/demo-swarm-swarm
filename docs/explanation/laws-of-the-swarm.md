@@ -68,16 +68,36 @@ When an agent says "tests pass," there must be a receipt showing exit code 0. Wh
 
 ### Law 5: Fix Forward by Default
 
-Fixable issues route to fixers. "Blocked" is reserved for: mechanical failure, non-derivable decisions, unsafe boundaries.
+"Blocked" is almost always just routing to another agent. True halting is very rare.
 
-**Corollary:** If everything is blocked, nothing ships.
+**Corollary:** If you say "blocked," you should usually say "routing to X" instead.
 
-Most issues can be fixed with another agent call. A lint error routes to auto-linter. A test failure routes to fixer. A missing import routes back to code-implementer. BLOCKED means: the system cannot proceed without human input or external intervention.
+### The Reality of "Blocked"
+
+| What People Say | What Actually Happens |
+|-----------------|----------------------|
+| "Blocked on lint" | Route to auto-linter |
+| "Blocked on test failure" | Route to fixer |
+| "Blocked on missing import" | Route back to code-implementer |
+| "Blocked on design conflict" | Route to design-optioneer |
+| "Blocked on unclear spec" | Route to clarifier |
+
+**These are not blocks. They are routing decisions.**
+
+### True Halting (Very Rare)
+
+True halt requires human intervention or external action:
+
+1. **Mechanical failure** — Tooling broken, permissions missing, infra down
+2. **Non-derivable decision** — Business choice that can't be inferred from codebase
+3. **Unsafe publish boundary** — Secrets detected, must be remediated before continuing
+
+Even then, work often continues in parallel while waiting for resolution.
 
 **Violation:** "BLOCKED: Code style does not match conventions."
 **Correct:** "Routing to auto-linter to fix style issues."
 
-**When BLOCKED is appropriate:**
+**When true halt is appropriate:**
 - Mechanical failure (file system permissions, network unavailable)
 - Non-derivable decision (two valid designs, human must choose)
 - Unsafe boundary (would expose secrets, requires human approval)

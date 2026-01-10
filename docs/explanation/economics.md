@@ -4,13 +4,71 @@
 
 ---
 
-## The Core Equation
+## The Core Metrics
 
-**DevLT (Dev Lead Time)** = Minutes of developer attention per trusted change
+### North Star: PR Quality + Maintainability
 
-This is the metric that matters. Not lines generated. Not tokens consumed. Not calendar time.
+The ultimate goal is **high-quality, maintainable PRs** that meet modern standards:
+- Well-tested (mutation score, coverage, BDD alignment)
+- Well-documented (clear PR description, evidence, context for future readers)
+- Well-structured (reviewable, modular, follows codebase patterns)
+- Maintainable (readable code, clear intent, sustainable architecture)
+- Verified (critics passed, gates cleared)
 
-**DevLT is the only metric that matters. Everything else is vanity.**
+### The Ratio: Quality per DevLT
+
+**Quality:DevLT** = PR quality achieved per minute of developer attention
+
+This ratio is what we optimize. Not just speed. Not just quality. The *efficiency* of producing quality.
+
+### The Full Picture
+
+It's not just one ratio—it's multiple angles that add up:
+
+| Dimension | What We Optimize |
+|-----------|------------------|
+| **Change Size** | Large, meaningful changes (not tiny PRs) |
+| **Trust Level** | Verified, tested, critiqued (not "hope it works") |
+| **Evidence Quality** | Clear proof of what was done (not just claims) |
+| **Human Time** | Minimal architect attention required |
+| **Scope of Automation** | Planning + testing + verification, not just coding |
+
+**The vibe:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
+
+### The Trade-Off That Matters
+
+Machine time is cheap. Dev time is expensive. Trade accordingly.
+
+| Option A | Option B | Winner |
+|----------|----------|--------|
+| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably) |
+| 2 hrs machine, 45 min dev | 6 hrs machine, 20 min dev | **B** (definitely) |
+| 1 hr machine, 60 min dev | 4 hrs machine, 15 min dev | **B** (absolutely) |
+
+More verification loops, more critic passes, more evidence generation = more machine time but less dev review time. That's almost always the right trade.
+
+**Within reason:** There's a point of diminishing returns. You wouldn't spend 100 hours of machine time to save 5 minutes of dev time. But in the typical range (hours of machine time vs tens of minutes of dev time), lean toward more machine grinding.
+
+**The flywheel:** The more we push to machine and automation, the more we can improve and speed up those things in the future. Human workflows are hard to optimize. Machine workflows are just code—profile them, optimize them, parallelize them, cache them. Every hour of work moved from human to machine becomes an hour we can make faster tomorrow.
+
+```
+Today: 8 hrs machine time
+Tomorrow: Optimize critic loop → 6 hrs
+Next month: Parallelize testing → 4 hrs
+Next quarter: Smarter caching → 2 hrs
+```
+
+Dev time doesn't compress like that. Machine time does.
+
+**The exception:** When calendar time matters (urgent hotfix), you might accept more dev time to ship faster. But for normal work, burn machine hours to save dev minutes.
+
+A 2000-line PR that's fully tested, mutation-verified, and critic-approved—reviewable in 30 minutes—is better than twenty 100-line PRs requiring 15 minutes each.
+
+### DevLT (Dev Lead Time)
+
+**DevLT** = Minutes of developer attention per trusted change
+
+Not lines generated. Not tokens consumed. Not calendar time. Developer minutes.
 
 ---
 
