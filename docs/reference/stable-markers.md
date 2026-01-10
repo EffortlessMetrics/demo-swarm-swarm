@@ -15,6 +15,24 @@ Receipts derive counts mechanically (grep/wc/parse). Stable markers make this po
 
 ---
 
+## Markers vs Routing
+
+Markers are for **mechanical counting and audit trails**, not for routing or communication.
+
+**Markers are FOR:**
+- Counting (how many REQs, how many tests, how many risks)
+- Audit trails (grep-able facts that prove what was produced)
+- Receipt generation (cleanup agents count markers to populate receipts)
+
+**Markers are NOT FOR:**
+- Routing decisions (orchestrator reads prose handoffs, not marker counts)
+- Status communication (agents use handoffs, not structured markers)
+- Agent-to-agent communication (prose, not data formats)
+
+The orchestrator routes on natural language handoffs. Markers exist so that cleanup agents can mechanically derive counts for receipts without parsing prose.
+
+---
+
 ## Marker conventions
 
 - **Single-line, anchored:** Markers must be on their own line, anchored at start
@@ -57,7 +75,7 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 |--------|---------|---------|
 | Question ID | `^- QID: OQ-<FLOW>-###` | `- QID: OQ-SIG-001` |
 
-`<FLOW>` values: SIG, PLN, BLD, GAT, DEP, WIS
+`<FLOW>` values: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM
 
 ---
 

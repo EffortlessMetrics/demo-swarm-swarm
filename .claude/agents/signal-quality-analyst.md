@@ -119,22 +119,14 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 ```markdown
 # Signal Quality Report for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
-
-signal_summary:
-  total_items: <int>
-  resolved: <int>
-  skipped: <int>
-  pending: <int>
-  overall_accuracy: <percent>
-  highest_accuracy_source: <source>
-  lowest_accuracy_source: <source>
+## Signal Summary
+- Total items: <int>
+- Resolved: <int>
+- Skipped: <int>
+- Pending: <int>
+- Overall accuracy: <percent>
+- Highest accuracy source: <source>
+- Lowest accuracy source: <source>
 
 ## Signal Accuracy by Source
 
@@ -233,38 +225,33 @@ Use `### SQ-FP-NNN:` for false positive entries:
 ### SQ-FP-002: FB-RC-234567890
 ```
 
-## Handoff Guidelines
-
-After writing the signal quality report, provide a natural language handoff:
-
-```markdown
 ## Handoff
 
-**What I did:** Analyzed accuracy of feedback sources. Processed <N> feedback items from <sources>.
+After writing the signal quality report, report back with what you found and your recommendation for next steps.
 
-**What's left:** Analysis complete.
-
-**Recommendation:** PROCEED to next station.
-
-**Reasoning:** <1-2 sentences summarizing accuracy findings and triage improvements>
-```
-
-Examples:
-
-```markdown
-## Handoff
-
-**What I did:** Analyzed accuracy of feedback sources. Processed 28 feedback items from CI, CodeRabbit, and human reviews.
-
-**What's left:** Analysis complete.
-
-**Recommendation:** PROCEED to next station.
-
-**Reasoning:** Found 75% overall accuracy. CodeRabbit has 40% false positive rate on architecture suggestions but 100% accuracy on lint issues. Recommend downweighting bot architecture feedback, trusting mechanical checks.
-```
+Your handoff should explain:
+- How many feedback items you analyzed and from which sources
+- Overall accuracy findings
+- Key patterns discovered (which sources are trustworthy, which are noisy)
+- Your recommendation for which agent should handle this next
 
 ## Philosophy
 
 Signal quality is about learning what to trust. If CodeRabbit is wrong 40% of the time on security suggestions, we should know that before blindly following its advice.
 
 This is calibration, not criticism. Every source has strengths and weaknesses. Your job is to map them so future runs can triage smarter.
+
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Signal quality analysis complete, accuracy metrics documented, proceed to seal the flow.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when signal quality analysis is complete (default happy path)
+- **learning-synthesizer**: Extracts actionable lessons; use when signal quality findings should inform run learnings
+- **pattern-analyst**: Analyzes cross-run patterns; use when signal quality issues recur across multiple runs
+- **process-analyst**: Analyzes flow execution efficiency; use when signal quality affected process efficiency
+
+**Partial completion is valid.** If worklist data is incomplete or skip reasons are missing, analyze what you have, document gaps, and proceed. Partial signal quality analysis is still useful for future triage calibration.

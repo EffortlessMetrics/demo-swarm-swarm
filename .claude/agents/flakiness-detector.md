@@ -28,7 +28,7 @@ Optional:
 
 - `.runs/<run-id>/build/flakiness_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: classification completed **or** cleanly skipped with explicit reason; report written.
 - `UNVERIFIED`: report written but classification was partial, inputs missing, or results indicate actionable instability (deterministic or flaky failures present).
@@ -49,7 +49,7 @@ Use natural language in your handoff to communicate next steps:
 Verify you can write:
 - `.runs/<run-id>/build/flakiness_report.md`
 
-If you cannot write due to IO/perms/tooling: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and stop (after best-effort report write).
+If you cannot write due to IO/perms/tooling: write a best-effort report explaining the issue, then hand off with a recommendation to fix the environment.
 
 ### Step 1: Establish the failing set (best-effort, no guessing)
 
@@ -57,17 +57,15 @@ Prefer:
 - Parse `test_execution.md` for `## Test Summary (Canonical): passed=... failed=...` and the `## Failures (if any)` section.
 
 If `test_execution.md` is missing or does not contain enough information to identify whether there are failures:
-- set `status: UNVERIFIED`
-- set `recommended_action: BOUNCE`
-- set `route_to_flow: 3`, `route_to_station: "test-executor"`, `route_to_agent: null`
-- add blocker: "Missing test execution evidence; rerun test-executor station"
+- Write your report documenting the gap
+- Recommend rerunning test-executor to produce the missing evidence
 
 ### Step 2: Skip when there are no failures
 
 If the canonical summary indicates `failed=0`:
-- do not rerun anything
-- set `status: VERIFIED`, `recommended_action: PROCEED`
-- write the report noting "no failures to re-run"
+- Do not rerun anything
+- Write the report noting "no failures to re-run"
+- **Your default recommendation is: proceed to build-cleanup** (flow can continue)
 
 ### Step 3: Re-run with a small repetition budget
 
@@ -95,9 +93,12 @@ Classification rules (conservative):
 
 ### Step 5: Decide routing
 
-- If deterministic regressions exist: `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer` (default).
-- If flaky failures exist (even if some are deterministic): `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: test-author` (stabilize/quarantine).
-- If ENV_TOOLING prevents execution: `CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+Based on your classification, make a clear recommendation:
+- **Deterministic regressions exist** → Recommend code-implementer to fix the failing tests
+- **Flaky failures exist** → Recommend test-author to stabilize or quarantine
+- **Environment/tooling prevents execution** → Explain what's broken and recommend fixing it
+
+**Your default recommendation when no issues found is: proceed to build-cleanup.**
 
 ## flakiness_report.md format (required)
 
@@ -176,4 +177,13 @@ When you're done, tell the orchestrator what happened in natural language:
 - How many flaky failures
 - What test command was used
 - Budget consumed
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fixes production code to resolve deterministic test failures; use when tests consistently fail due to implementation bugs
+- **test-author**: Stabilizes or quarantines flaky tests; use when tests show non-deterministic behavior across reruns
+- **pack-customizer**: Configures test commands and flakiness settings; use when test command is missing or misconfigured
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when flakiness detection is complete and flow can proceed
 

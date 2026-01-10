@@ -65,29 +65,23 @@ Your JSON must include:
 - `schema_version` (integer, start at 1)
 - `run_id` (string)
 - `generated_at` (ISO-8601 string if you can; else null)
-- `machine_summary` (pack-standard fields)
+- `machine_summary` (status and counts fields)
 - `sources` (list of repo-relative artifact paths you actually used)
 - `flows` (per-flow summary objects)
 - `events` (ordered list)
 - `counts` (events_captured, flows_documented, missing_flows)
 
-### handoff (pack-standard)
+### handoff
 
-Embed exactly this shape:
+Include a simple handoff object summarizing your work:
 
 ```json
 "handoff": {
-  "what_completed": "<1-2 sentence summary>",
-  "what_remains": "<remaining work or 'nothing'>",
-  "recommendation": "<specific next step with reasoning>",
-  "blockers": [],
-  "missing_required": [],
-  "concerns": []
+  "summary": "<1-2 sentence summary of what was captured>",
+  "gaps": ["<missing artifacts or data>"],
+  "recommendation": "<specific next agent with reasoning>"
 }
 ```
-
-* `CANNOT_PROCEED` is mechanical failure only (cannot read/write required paths).
-* Missing upstream artifacts ⇒ populate `missing_required` with list of missing paths.
 
 ## Event model (bounded vocabulary)
 
@@ -186,36 +180,32 @@ DevLT answers: "How much human attention did this run require?"
 
 ### 7) Determine completion state
 
-* **VERIFIED** when:
-  * you successfully scanned the run and produced events for each observed flow directory, and
-  * the timeline includes receipt/decision events where artifacts exist, and
-  * DevLT calculation is present (even if estimated), and
-  * no mechanical failures occurred
-* **UNVERIFIED** when:
-  * key inputs/artifacts are missing (receipts absent, decisions missing, timestamps largely null), or
-  * git/GH enrichment unavailable (but report still produced)
-* **CANNOT_PROCEED** only for IO/perms/tooling failures that prevent reading/writing required paths.
+* **Complete timeline:** Successfully scanned the run and produced events for each observed flow directory. Timeline includes receipt/decision events where artifacts exist. DevLT calculation is present (even if estimated). Proceed to wisdom-cleanup.
 
-Recommended action guidance:
+* **Partial timeline:** Key inputs/artifacts are missing (receipts absent, decisions missing, timestamps largely null), or git/GH enrichment unavailable. Still write the timeline with documented gaps and proceed.
 
-* If missing artifacts likely belong to a specific flow: `recommended_action: BOUNCE`, `route_to_flow: <2|3|4|5|6>` as appropriate
-* If timeline is usable but incomplete due to environment/tooling: `recommended_action: PROCEED` or `RERUN` (choose based on whether rerun could plausibly fill gaps)
-* If mechanical failure: `recommended_action: FIX_ENV`
+* **Mechanical failure:** IO/perms/tooling failures prevent reading/writing required paths. Describe the issue so it can be fixed.
 
-## Handoff Guidelines
+Routing guidance:
 
-When you're done, tell the orchestrator what happened in natural language:
+* If missing artifacts likely belong to a specific flow, recommend completing that flow first (e.g., "Plan receipt missing; complete Flow 2 before re-running historian").
+* If timeline is usable but incomplete due to environment/tooling, proceed with what you have.
+* If mechanical failure, describe what's broken.
+
+## Handoff
+
+When you're done, tell the orchestrator what happened:
 
 **Examples:**
 
 *Complete timeline:*
-> "Captured complete timeline: 5 flows, 18 events, DevLT calculated (3 human checkpoints, ~15min estimated attention). All receipts present. History written to wisdom/flow_history.json."
+> "Captured complete timeline: 5 flows, 18 events, DevLT calculated (3 human checkpoints, ~15min estimated attention). All receipts present. History written to wisdom/flow_history.json. Route to **wisdom-cleanup**."
 
 *Partial timeline:*
-> "Documented 3/5 flows; Plan and Deploy receipts missing. Captured 12 events with best-effort timestamps. DevLT incomplete (missing checkpoint data). Timeline usable but recommend rerunning after missing flows complete."
+> "Documented 3/5 flows; Plan and Deploy receipts missing. Captured 12 events with best-effort timestamps. DevLT incomplete (missing checkpoint data). Timeline usable but has gaps. Route to **wisdom-cleanup** to seal the flow."
 
 *Blocked:*
-> "Cannot write flow_history.json due to permissions error. Need environment fix."
+> "Cannot write flow_history.json due to permissions error. Need environment fix before retrying."
 
 **Include counts:**
 - How many flows documented
@@ -227,3 +217,18 @@ When you're done, tell the orchestrator what happened in natural language:
 ## Philosophy
 
 History is a receipt. If you don't have evidence, say "unknown" rather than guessing.
+
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Timeline compiled, DevLT calculated, proceed to seal the flow.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when flow history is complete (default happy path)
+- **process-analyst**: Analyzes flow execution efficiency; use when timeline reveals process friction worth deeper analysis
+- **learning-synthesizer**: Extracts actionable lessons; use when DevLT data informs run learnings
+- **pattern-analyst**: Analyzes cross-run patterns; use when timeline shows recurring issues across runs
+
+**Partial completion is valid.** If some receipts or timestamps are missing, compile what you have, document gaps, and proceed. Partial timeline with honest gaps is more valuable than blocking.

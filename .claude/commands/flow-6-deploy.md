@@ -4,7 +4,9 @@ description: Run Flow 6 (Artifact -> Prod): execute GitHub-native deployment, mo
 
 # Flow 6: Artifact -> Prod (Deploy)
 
-You are orchestrating Flow 6 of the SDLC swarm.
+You are the PM orchestrating Flow 6 of the SDLC swarm. Your team of specialist agents executes the deployment and verifies the result.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## Working Directory + Paths (Invariant)
 
@@ -149,19 +151,13 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 
 ### Step 2: Determine Gate Decision (delegated to deploy-decider)
 
-**Do NOT parse `merge_decision.md` in the orchestrator.** The gate decision is read by `deploy-decider`.
+**Call `deploy-decider` BEFORE any merge operations.**
 
-**Early call to deploy-decider:**
-Call `deploy-decider` BEFORE any merge operations. This agent:
-- Reads `.runs/<run-id>/gate/merge_decision.md`
-- Parses the `verdict:` field from `## Machine Summary`
-- Returns a Result block with `gate_verdict: MERGE | BOUNCE | null`
+This agent reads the gate decision and tells you what to do:
+- If the agent recommends proceeding with merge → Path A (merge + verify)
+- If the agent recommends not deploying → Path B (NOT_DEPLOYED)
 
-**Orchestrator routing (pure routing, no parsing):**
-- If `gate_verdict: MERGE`: proceed to Path A (merge + verify)
-- If `gate_verdict: BOUNCE` or `null`: proceed to Path B (NOT_DEPLOYED)
-
-**Why delegated?** The orchestrator should not parse files. The `deploy-decider` agent already needs to read the gate decision for its governance checks — it can return the verdict for routing.
+**Why delegated?** You direct agents and read their reports. The `deploy-decider` reads the gate artifacts and gives you a clear recommendation.
 
 ### Path A: Gate Decision = MERGE
 
@@ -211,24 +207,19 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting O
 6. **Sanitize Secrets** (secrets-sanitizer)
    - Scan artifacts before GitHub posting
    - Write `.runs/<run-id>/deploy/secrets_scan.md`, `.runs/<run-id>/deploy/secrets_status.json`
-   - **Returns a Gate Result block** for orchestrator routing (control plane)
-   - **Status vs flags:** `status` is descriptive (CLEAN/FIXED/BLOCKED); `safe_to_commit`/`safe_to_publish` are authoritative permissions; `blocker_kind` explains why blocked
-   - The JSON file is an audit record; orchestrator routes on the Gate Result block, not by re-reading the file
 
-   **Gate Result block (returned by secrets-sanitizer):**
+   **Secrets-sanitizer reports status in its handoff.** Example:
 
-   <!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-   ```yaml
-   ## Gate Result
-   status: CLEAN | FIXED | BLOCKED
-   safe_to_commit: true | false
-   safe_to_publish: true | false
-   modified_files: true | false
-   findings_count: <int>
-   blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-   blocker_reason: <string | null>
-   ```
-   <!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+   > Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
+
+   For audit purposes, it also writes `secrets_status.json` with fields:
+   - `status`: CLEAN, FIXED, or BLOCKED (descriptive — never infer permissions from it)
+   - `safe_to_commit` / `safe_to_publish`: authoritative permissions
+   - `modified_files`: whether artifact files were changed
+   - `findings_count`: number of issues found
+   - `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
+
+   The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 6b. **Checkpoint Commit** (repo-operator)
 
@@ -362,10 +353,10 @@ Human gate at end: "Did deployment succeed?" (or "Why didn't we deploy?")
 
 - `run-prep`
 - `repo-operator` (ensure run branch)
-- `deploy-decider` (EARLY CALL: read gate verdict for routing; returns `gate_verdict` in Result block)
-- **Route on `gate_verdict`:**
-  - If `MERGE`: proceed with merge operations
-  - If `BOUNCE` or `null`: skip to deploy-cleanup (Path B)
+- `deploy-decider` (EARLY CALL: read gate verdict for routing)
+- **Route on the agent's recommendation:**
+  - If the agent recommends merge → proceed with merge operations
+  - If the agent recommends not deploying → skip to deploy-cleanup (Path B)
 - `repo-operator` (merge + tag + release; only if gate_verdict == MERGE)
 - `deploy-monitor` (only if gate_verdict == MERGE)
 - `smoke-verifier` (only if gate_verdict == MERGE)

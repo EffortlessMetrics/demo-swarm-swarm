@@ -60,27 +60,26 @@ Verify you can:
 - Write `.runs/<run-id>/build/pr_creation_status.md`
 
 If IO/permissions fail:
-- `status: CANNOT_PROCEED`
-- `recommended_action: FIX_ENV`
-- Stop.
+- Write status with mechanical failure details
+- Recommend: "Fix [specific IO/tooling issue] then rerun **pr-creator**"
 
 ### Step 1: Check GitHub Access
 
 If `run_meta.github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Proceed with flow (expected when GitHub access is disabled)"
 - Exit cleanly.
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Proceed with flow; authenticate gh CLI for future PR creation"
 - Exit cleanly.
 
 ### Step 2: Check Publish Surface
 
 If `publish_surface: NOT_PUSHED`:
 - Write status with `operation_status: SKIPPED`, reason: `branch_not_pushed`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Route to **repo-operator** to push, then rerun **pr-creator**"
 - Exit cleanly (PR can be created after branch is pushed).
 
 ### Step 3: Check for Existing PR
@@ -95,7 +94,7 @@ If PR exists:
 - Read its `number` and `url`
 - Update `run_meta.json` with existing `pr_number`
 - Write status with `operation_status: EXISTING`, `pr_number`, `pr_url`
-- `status: VERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Found existing PR. Proceed to **pr-feedback-harvester** to check for new feedback."
 - Exit cleanly.
 
 ### Step 4: Create Draft PR
@@ -196,21 +195,20 @@ run_meta_updated: yes | no
 
 ## Handoff
 
-**When PR created successfully:**
-- "Created Draft PR #123 from run/feat-auth to main. PR includes build summary and artifact links. CodeRabbit and CI checks will run automatically."
-- Next step: Proceed (bots will start analyzing)
+After writing outputs, provide a natural language handoff to the orchestrator.
 
-**When PR already exists:**
-- "Found existing PR #123 for run/feat-auth. Updated run_meta with PR number and URL."
-- Next step: Proceed (can harvest feedback)
+**What I did:** Summarize PR creation outcome (created/existing/skipped).
 
-**When skipped (not pushed):**
-- "Skipped PR creation — branch run/feat-auth not pushed yet. repo-operator needs to checkpoint first."
-- Next step: Proceed (PR will be created in next iteration)
+**What's left:** Note if PR is ready for bot feedback or if branch needs to be pushed first.
 
-**When skipped (auth):**
-- "Skipped PR creation — gh not authenticated or github_ops_allowed is false."
-- Next step: Proceed (expected when GitHub access is disabled)
+**Recommendation:** Name a specific agent and explain your reasoning:
+
+- PR created successfully: "Created Draft PR #123. CodeRabbit and CI checks will run automatically. Recommend **build-cleanup** to finalize Flow 3."
+- PR already exists: "Found existing PR #123. Recommend **pr-feedback-harvester** to check for new feedback."
+- Skipped (not pushed): "Branch not pushed yet. Recommend **repo-operator** to push, then rerun **pr-creator**."
+- Skipped (auth): "gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
+
+**Your default recommendation:** Route to **build-cleanup** (if this is the last step of Flow 3) or **pr-feedback-harvester** (if Flow 4 will harvest feedback).
 
 ## Hard Rules
 

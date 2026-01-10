@@ -391,10 +391,145 @@ The system is working when:
 
 ---
 
+## Architecture Laws
+
+Seven invariants that prevent execution drift. Violating them creates subtle failures.
+
+### Law 1: PM/IC Boundary
+
+**Orchestrators route. Agents work. Cleanup agents audit.**
+
+| Role | Responsibility | Example |
+|------|----------------|---------|
+| **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite | "If gate_verdict is MERGE, proceed to merge ops" |
+| **Worker** (agent) | Do the work, update tracking artifacts, report honestly | `code-implementer`, `test-author`, `fixer` |
+| **Auditor** (cleanup agent) | Verify on-disk state matches evidence (tests/diffs), seal receipts | `build-cleanup`, `review-cleanup` |
+
+Workers own their progress updates. Cleanup agents verify that claims match reality.
+
+**Violation:** Orchestrator parsing `ac_status.json` to determine routing.
+**Correct:** Orchestrator routes on the Result block returned by `build-cleanup`.
+
+### Law 2: Every Call Is an Implicit Resume
+
+**Agents don't need "resume mode" flags.** They check disk state and determine what's left.
+
+When an agent starts:
+1. Check if its tracking artifact exists (e.g., `ac_status.json`, `review_worklist.json`)
+2. If yes: read it, determine what's PENDING, continue from there
+3. If no: initialize fresh
+
+**Violation:** Flow says "call build-cleanup in resume mode."
+**Correct:** Flow says "call build-cleanup." The agent checks disk state and behaves appropriately.
+
+**Corollary:** If an agent needs genuinely different behavior (not just "resume vs fresh"), that's a signal for two separate agents, not a `mode:` parameter.
+
+### Law 3: Workers Maintain the Ledger
+
+**The worker who touches the code is the worker who updates the status.**
+
+Workers (`code-implementer`, `test-author`, `fixer`, `doc-writer`) update their tracking artifacts (`ac_status.json`, `review_worklist.json`) **before** reporting back to the orchestrator. This ensures:
+- The "save game" is atomic with the work
+- The orchestrator routes on Result blocks, not prose parsing
+- State survives context exhaustion
+
+| Artifact Type | Who Updates | Who Audits |
+|--------------|-------------|------------|
+| **Progress state** (`ac_status.json`, `review_worklist.json`) | Worker completing the work | Cleanup agent cross-checks against test results |
+| **Receipts** (`*_receipt.json`) | Cleanup agent (mechanical derivation) | Downstream flows |
+| **Index** (`.runs/index.json`) | Cleanup agents, `run-prep`, `gh-issue-manager` | — |
+
+**Key insight:** Cross-agent coordination happens through artifacts, not prose parsing. The cleanup agent reads `ac_status.json` and cross-references it with `test_execution.md`. If they disagree, it reports a **Forensic Mismatch** — status becomes UNVERIFIED.
+
+### Law 4: AC Termination = Green + Orchestrator Agreement
+
+**"Green tests" is necessary but not sufficient for AC completion.**
+
+An AC is done when:
+1. `test-executor` returns Green for that AC's scope
+2. The orchestrator agrees there's nothing left worth fixing based on critic feedback
+
+**The loop:** implement → test → critique → (if critic has actionable items) → improve → test again
+
+Even with green tests, if `code-critic` identifies a maintainability risk or clear technical debt, the orchestrator should authorize one improvement pass. The critic's `can_further_iteration_help: no` signal (or orchestrator judgment) terminates the loop.
+
+### Law 5: Research-First Autonomy
+
+**If an agent can't derive an answer, it investigates first, then defaults, then escalates.**
+
+The escalation ladder (in order):
+1. **Investigate locally:** Search code, tests, configs, prior runs, existing docs
+2. **Investigate remotely (if allowed):** GitHub issues/PRs, web search, library docs
+3. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
+4. **Default if safe:** Choose a reversible default, document it, continue
+5. **Escalate only when boxed in:** All of the above failed AND no safe default exists
+
+**The bar for human escalation is high.** A timeout value? Look at existing timeouts. An error format? Look at existing error handlers. Auth approach? Look at existing auth code.
+
+### Law 6: Foundation-First Sequencing
+
+**Infrastructure subtasks are the root of the dependency tree.**
+
+The `work-planner` designs dependency graphs where:
+- Infrastructure/migration subtasks (ST-000, etc.) have no dependencies
+- Logic subtasks that consume new state list infrastructure in `depends_on`
+- Critics validate that dependencies flow downward (foundations → walls → roof)
+
+**Example:** `ST-001: Create sessions table` has no dependencies. `ST-002: Implement login flow` has `depends_on: ["ST-001"]`.
+
+### Law 7: Local Resolution (The "Zero-Wait" Rule)
+
+**Mismatches between "Plan" and "Reality" are normal. Resolve them locally first.**
+
+When an agent hits a logic gap, design contradiction, or implementation snag:
+
+1. **Don't bail to a previous flow.** Machine time is cheap relative to human interrupt.
+2. **Call a reasoning agent within the current flow.** Route to `design-optioneer`, `adr-author`, or `impact-analyzer` to provide a surgical fix.
+3. **Re-plan locally.** Have the specialist update `ac_matrix.md` or `work_plan.md` in-place.
+4. **Resume.** Hand the micro-fix back to the implementer.
+
+**BOUNCE only when:**
+- The specialists agree the entire architecture is invalid
+- The fix requires upstream stakeholder decisions
+- Multiple flows worth of work needs revisiting
+
+**The bar for flow-level bounces is high.** 2-3 surgical agent calls are always cheaper and faster than a full context switch.
+
+---
+
+## Flow Authoring Rule
+
+**Flows are routing tables. Agents are workers.**
+
+This separation is about **token economics**: Orchestrator context is expensive, Agent execution is cheap.
+
+### Flows contain:
+- Station order (which agents to call, in what sequence)
+- Routing logic (which Result block to read, what to do on PROCEED/RERUN/BOUNCE)
+- Artifact expectations (what outputs to expect from each station)
+- Termination conditions (when the flow is complete)
+
+### Flows must NOT contain:
+- Shell snippets (beyond illustrative examples)
+- File path lists to stage/check (move to agents)
+- Parsing logic or computation
+- If/else chains for file existence checks
+
+### Agents contain:
+- All procedural work (read files, run commands, write outputs)
+- Intent-to-paths mapping (the agent figures out what to stage)
+- Validation logic (the agent checks if things are correct)
+- Machine Summary + Result blocks for orchestrator routing
+
+**Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
+
+---
+
 ## See Also
 
 - [why-ops-first.md](why-ops-first.md) — The philosophy behind default-allow engineering
+- [agent-philosophy.md](agent-philosophy.md) — Agent intelligence and resiliency
 - [ai-physics.md](ai-physics.md) — LLM-specific design constraints
 - [why-two-planes.md](why-two-planes.md) — Control vs audit plane separation
 - [why-two-gates.md](why-two-gates.md) — GitHub ops gating
-- [CLAUDE.md](../../CLAUDE.md) — Full pack reference
+- [CLAUDE.md](../../CLAUDE.md) — Pack reference

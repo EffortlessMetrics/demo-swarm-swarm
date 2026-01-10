@@ -117,14 +117,13 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 - Do **not** call `gh`.
 - Write local outputs with `posting_status: SKIPPED`, `reason: github_ops_not_allowed`, `content_mode: MACHINE_ONLY`, `link_style: PATHS_ONLY`.
-- Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows continue locally).
-- Exit cleanly.
+- Exit cleanly (flows continue locally).
 
 ### Step 1: Determine run + flow context (no guessing)
 
 - Use orchestrator-provided `<run-id>` and `<flow>`.
 - Read `.runs/<run-id>/run_meta.json` and require `issue_number` **and** `github_repo` for posting.
-  - If either is null/missing → SKIP (do not infer), write `gh_report_status.md` with `posting_status: SKIPPED` and `recommended_action: BOUNCE`, `route_to_agent: gh-issue-manager`.
+  - If either is null/missing → SKIP (do not infer), write `gh_report_status.md` with `posting_status: SKIPPED`. In your handoff, recommend **gh-issue-manager** to establish the issue binding.
 
 ### Step 2: Confirm `gh` is available + authenticated
 
@@ -222,7 +221,7 @@ Write a short status report including:
 - comment id (if posted/updated)
 - summary of what was posted (high level)
 - concerns + missing fields (if any)
-- Machine Summary (pack standard) at the bottom
+- Summary block at the bottom
 
 Posting failures should not block the flow. Record and continue.
 
@@ -232,7 +231,7 @@ Posting failures should not block the flow. Record and continue.
 
 **For reporting purposes:** Receipts are excellent structured summaries. Use them to populate counts, statuses, and artifact paths. But if a receipt seems stale (different commit_sha than current HEAD), note this as a concern rather than treating the receipt as blocking.
 
-Applies to **FULL** and **FULL_PATHS_ONLY** modes. In **SUMMARY_ONLY** and **MACHINE_ONLY** modes, receipts may be read for machine fields only (`status`, `recommended_action`, `counts.*`, `quality_gates.*`).
+Applies to **FULL** and **FULL_PATHS_ONLY** modes. In **SUMMARY_ONLY** and **MACHINE_ONLY** modes, receipts may be read for machine fields only (`status`, `counts.*`, `quality_gates.*`).
 
 Prefer these canonical receipts for summary data:
 
@@ -400,19 +399,23 @@ comment_id: <id or null>
 **Recommendation:** <specific next step with reasoning>
 ```
 
-## Handoff Guidelines
+## Handoff
 
-After writing outputs, provide a natural language handoff:
+After writing outputs, provide a natural language handoff to the orchestrator.
 
 **What I did:** Summarize posting outcome and content mode used in 1-2 sentences.
 
 **What's left:** Note any missing issue bindings or auth issues if posting was skipped.
 
-**Recommendation:** Explain the specific next step:
-- If posted successfully → "Flow can continue; GitHub is updated with FULL/PATHS_ONLY/SUMMARY content"
-- If skipped (GitHub ops disabled) → "Flow should continue locally; issue binding needed for future GitHub posting"
-- If skipped (auth issue) → "Flow should continue; authenticate gh CLI for future posting"
-- If failed → "Retry posting after fixing [specific issue]"
+**Recommendation:** Name a specific agent and explain your reasoning:
+
+- Posted successfully: "Flow can continue. Recommend **signal-cleanup** (or the appropriate flow cleanup agent) to finalize the flow."
+- Skipped (GitHub ops disabled): "Flow should continue locally. Recommend **signal-cleanup** to continue; issue binding can happen later via **gh-issue-manager**."
+- Skipped (auth issue): "Flow should continue. Recommend **signal-cleanup** to proceed; authenticate gh CLI for future posting."
+- Failed: "Recommend **gh-reporter** rerun after fixing [specific issue]."
+- Metadata sync issues: "Posting revealed metadata inconsistency. Recommend **gh-issue-manager** to sync issue state."
+
+**Your default recommendation:** After posting (or recording skip), recommend the flow's cleanup agent to complete the flow. Posting failures are recorded but do not block flow progress.
 
 ## Philosophy
 

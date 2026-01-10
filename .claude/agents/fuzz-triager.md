@@ -27,7 +27,7 @@ Optional:
 
 - `.runs/<run-id>/build/fuzz_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: fuzz run executed and found no crashes, or fuzz cleanly skipped with explicit reason; report written.
 - `UNVERIFIED`: fuzz run partial/failed, inputs missing, or crashes found that require work.
@@ -49,13 +49,13 @@ Use natural language in your handoff to communicate next steps:
 Verify you can write:
 - `.runs/<run-id>/build/fuzz_report.md`
 
-If you cannot write due to IO/perms/tooling: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and stop (after best-effort report write).
+If you cannot write due to IO/perms/tooling: write a best-effort report explaining the issue, then hand off with a recommendation to fix the environment.
 
 ### Step 1: Choose fuzz command (no guessing)
 
 1) If `demo-swarm.config.json` defines `fuzz.command`, use it **exactly**.
 2) Else: skip fuzzing and write the report explaining "no configured fuzz harness".
-   - set `status: UNVERIFIED`, `recommended_action: PROCEED`
+   - **Your default recommendation when skipped is: proceed to build-cleanup** (fuzzing is opt-in)
 
 ### Step 2: Run with a budget
 
@@ -81,8 +81,11 @@ If crashes occur, for each distinct crash signature:
 
 ### Step 4: Decide routing
 
-- If fuzz ran and any crashes found: `UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer`
-- If fuzz ran clean: `VERIFIED`, `recommended_action: PROCEED`
+Based on your results, make a clear recommendation:
+- **Crashes found** → Recommend code-implementer to fix crash-causing bugs
+- **Fuzz ran clean** → Recommend proceeding to build-cleanup
+
+**Your default recommendation when no crashes found is: proceed to build-cleanup.**
 
 ## fuzz_report.md format (required)
 
@@ -147,4 +150,13 @@ When you're done, tell the orchestrator what happened in natural language:
 - Budget and duration
 - What command was used (or why skipped)
 - Whether worklist was created
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fixes crash-causing bugs in production code; use when fuzzing found crashes that need code fixes
+- **test-author**: Creates regression tests for discovered crashes; use when a repro is known and a test should prevent recurrence
+- **pack-customizer**: Configures fuzz harness and command settings; use when fuzzing is unavailable due to missing configuration
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when fuzzing is complete (clean or skipped) and flow can proceed
 

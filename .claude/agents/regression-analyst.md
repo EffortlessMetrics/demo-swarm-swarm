@@ -17,7 +17,7 @@ Write exactly one file per invocation:
 
 Do **not** append into other artifacts.
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED` — analysis complete; delta/baseline handled explicitly; findings are actionable
 - `UNVERIFIED` — analysis produced, but some key inputs/tools unavailable OR baseline not established for "regression" claims
@@ -71,7 +71,7 @@ If you cannot establish a baseline, report:
 
 ### 1) Preflight writeability
 - You must be able to write `.runs/<run-id>/wisdom/regression_report.md`.
-- If not writable due to IO/permissions, set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, populate `missing_required`, and stop.
+- If not writable due to IO/permissions, explain the mechanical failure and stop.
 
 ### 2) Establish context
 - Determine whether this run is tied to a GitHub issue (`run_meta.json.issue_number`) and note it.
@@ -130,12 +130,13 @@ Severity guidance:
 - MAJOR: meaningful quality/coverage drop; non-core failing tests; widespread flakiness.
 - MINOR: low-impact failures or noisy findings.
 
-### 9) Decide Machine Summary routing
-- If `status: CANNOT_PROCEED` → `recommended_action: FIX_ENV`
-- If CRITICAL regressions with clear owner → `recommended_action: BOUNCE`, `route_to_flow: 3`, `route_to_agent: code-implementer|test-author`
-- If regressions imply spec/design change → `BOUNCE`, `route_to_flow: 1|2`
-- If CRITICAL and unclear → `PROCEED` (UNVERIFIED) with blockers capturing the ownership gap
-- If no actionable regressions → `PROCEED`
+### 9) Determine routing recommendation
+Use natural language to communicate next steps:
+- If mechanical failure: Explain what's broken and needs fixing
+- If CRITICAL regressions with clear owner: Recommend code-implementer or test-author to address
+- If regressions imply spec/design changes: Recommend routing to Flow 1 (requirements) or Flow 2 (design)
+- If CRITICAL but unclear ownership: Recommend proceeding with blockers documented
+- If no actionable regressions: Recommend proceeding
 
 ## Output format (write exactly)
 
@@ -225,7 +226,7 @@ Severity guidance:
 | abc1234 | alice | 2025-12-11 | 3 | REG-001 |
 
 ## Recommended Next
-- <1–5 bullets consistent with Machine Summary routing>
+- <1-5 bullets explaining what should happen next>
 ```
 
 ## Counting rules
@@ -258,3 +259,18 @@ The file is the audit record. The handoff is the routing signal.
 ## Philosophy
 
 Regressions are inevitable. What matters is how quickly you can tie symptoms to causes and owners. "Blame" is routing, not judgment. Keep evidence tight, actions explicit, and contracts closed.
+
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Regression analysis complete, findings documented, proceed to seal the flow.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when regression analysis is complete (default happy path)
+- **learning-synthesizer**: Extracts actionable lessons; use when regression findings should inform run learnings
+- **code-implementer**: Implements code changes; use when critical regressions require code fixes (route to Flow 3)
+- **test-author**: Authors test code; use when critical regressions require test fixes or additions (route to Flow 3)
+
+**Partial completion is valid.** If baseline data is unavailable, report current state and suspected regressions with UNVERIFIED status. Honest partial analysis is more valuable than blocking on missing baselines.

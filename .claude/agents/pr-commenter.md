@@ -57,15 +57,15 @@ If any prerequisite fails, write status as SKIPPED and proceed.
 
 If `run_meta.github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
-- Exit cleanly.
+- Proceed with flow (expected when GitHub access is disabled).
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
-- Exit cleanly.
+- Proceed with flow (auth can be fixed later).
 
 If `pr_number` is null/missing:
 - Write status with `operation_status: SKIPPED`, reason: `no_pr_exists`
-- Exit cleanly.
+- Route to **pr-creator** if PR is needed, otherwise proceed.
 
 ### Step 1: Determine Content Mode
 
@@ -190,21 +190,32 @@ github_repo: <repo>
 
 ## Handoff
 
+**Your default recommendation is: route to pr-status-manager** (to transition Draft to Ready if complete) or **review-cleanup** (to finalize the flow).
+
 **When comment posted successfully:**
 - "Posted PR comment #12345 summarizing review progress: 8 items resolved, 2 pending (1 MAJOR). Used FULL content mode."
-- Next step: Proceed
+- Recommend: Route to **pr-status-manager** to check if PR should transition to Ready.
 
 **When comment was updated:**
 - "Updated existing PR comment with latest worklist status. All critical items resolved, 3 MINOR items remain."
-- Next step: Proceed
+- Recommend: Route to **pr-status-manager** or **review-cleanup** depending on worklist state.
 
 **When skipped (no PR):**
-- "Skipped PR comment — no PR exists yet. Run pr-creator first."
-- Next step: Proceed (not an error, just premature)
+- "Skipped PR comment — no PR exists yet."
+- Recommend: Route to **pr-creator** if PR is needed, otherwise proceed with flow.
 
 **When skipped (auth):**
 - "Skipped PR comment — gh not authenticated or github_ops_allowed is false."
-- Next step: Proceed (expected when GitHub access is disabled)
+- Recommend: Proceed with flow (expected when GitHub access is disabled).
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **pr-status-manager**: Transition PR from Draft to Ready for Review once worklist is complete
+- **review-cleanup**: Finalize the Review flow receipt after all PR operations are done
+- **pr-creator**: Create the PR first if no PR exists yet (pr-commenter requires an existing PR)
+- **secrets-sanitizer**: Scan for secrets before any GitHub publishing operations
 
 ## Hard Rules
 

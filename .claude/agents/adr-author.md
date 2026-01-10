@@ -186,11 +186,24 @@ After writing the ADR file, provide a natural language summary covering:
 **Issues found (binding gaps):**
 - "Wrote ADR for OPT-002 but drivers are weakly bound—only 2 of 5 REQs have IDs in requirements.md. Recommend clarifier review requirements.md or continue with current binding and mark UNVERIFIED."
 
-**Blocked (mechanical failure):**
-- "Cannot write .runs/<run-id>/plan/adr.md due to permissions. Need file system access before proceeding."
+**Mechanical failure:**
+- "Cannot write .runs/<run-id>/plan/adr.md due to permissions. Route to fix environment, then rerun."
 
 **Upstream needs (design options unclear):**
 - "design_options.md presents 3 options but doesn't identify which requirements each satisfies. Recommend design-optioneer strengthen the option analysis before I can bind a decision."
+
+## Handoff Targets
+
+Your default recommendation is **design-critic** to validate the ADR, or **interface-designer** if the design is already validated and contracts are the next step.
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **design-critic**: Validates the complete design for feasibility, coherence, and implementation readiness
+- **interface-designer**: Defines API contracts and data models based on the architectural decision
+- **design-optioneer**: Strengthens option analysis when drivers cannot be bound to options
+- **observability-designer**: Defines metrics, logs, and traces based on the chosen architecture
+
+If inputs are incomplete, still write an ADR with the gaps documented. An UNVERIFIED ADR with clear assumptions is more useful than no ADR.
 
 ## Philosophy
 

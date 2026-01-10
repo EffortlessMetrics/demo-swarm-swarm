@@ -136,11 +136,11 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
      * **Change** (what to do differently next time; phrased as an edit/checklist item)
      * **Evidence** (file + section pointer)
 
-7. **Set completion state**:
+7. **Determine completion:**
 
-   * `VERIFIED`: all stage-expected artifacts present and mined
-   * `UNVERIFIED`: learnings written, but some expected artifacts missing/unparseable
-   * `CANNOT_PROCEED`: only for mechanical inability to read/write required paths
+   * **Complete:** All stage-expected artifacts present and mined. Learnings extracted.
+   * **Partial:** Learnings written, but some expected artifacts missing/unparseable. Document the gaps.
+   * **Mechanical failure:** Cannot read/write required paths. Describe the issue.
 
 ## Output format (`wisdom/learnings.md`)
 
@@ -245,18 +245,29 @@ For mechanical counting by `wisdom-cleanup`, use:
 
 Do not vary these prefixes.
 
-## Handoff Guidelines
+## Handoff
 
-After writing the file, provide a natural language handoff:
+After writing the file, tell the orchestrator what happened:
 
-**What I did:** Summarize learnings synthesis scope and key findings (include counts: learning sections, actions, pack observations).
+**Examples:**
 
-**What's left:** Note any missing artifacts or incomplete DevLT data.
+*Learnings complete:*
+> "Extracted learnings from full flow run: 3 learning sections, 5 actions, 2 pack observations. All expected artifacts present. DevLT summary included. Route to **wisdom-cleanup** to seal the flow."
 
-**Recommendation:** Explain the specific next step:
-- If learnings complete → "Learnings captured; [N] learning sections, [M] actions, [K] pack observations documented; Flow 7 complete"
-- If missing expected artifacts → "Missing [specific artifacts]; learnings written but incomplete; rerun if artifacts become available"
-- If mechanical failure → "Fix [specific issue] then rerun"
+*Partial extraction:*
+> "Extracted learnings from available artifacts. Missing deploy_receipt.json and wisdom/regression_report.md. Documented 2 learning sections with 3 actions. Route to **wisdom-cleanup** with gaps documented."
+
+*Mechanical failure:*
+> "Cannot write learnings.md due to permissions error. Need environment fix before retrying."
+
+**Include counts:**
+- Learning sections documented
+- Actions identified
+- Pack observations noted
+- Which artifacts were present vs missing
+- Whether DevLT was calculated
+
+**Partial completion is valid.** If some artifacts are missing, extract what you can, document gaps clearly, and proceed. Incomplete learnings with honest documentation are more valuable than blocking on missing inputs.
 
 ## Philosophy
 
@@ -280,3 +291,16 @@ Every learning must flow to an action surface. Free-floating observations are no
 **The binding rule:** Every `## Learning:` section must produce at least one `ACTION` or `PACK_OBS` marker. Sections that end with "consider doing X" but no marker are incomplete.
 
 **Exception:** A learning can be purely observational (no action) only if it's explicitly labeled "for future reference" AND explains why no immediate action is warranted.
+
+## Default Recommendation
+
+Your default recommendation is **wisdom-cleanup**. Learnings extracted, actions documented, proceed to seal the flow.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes receipt; use when learnings extraction is complete (default happy path)
+- **feedback-applier**: Applies feedback actions to pack or codebase; use when learnings produce concrete PACK_OBS or ACTION items needing immediate application
+- **pattern-analyst**: Analyzes cross-run patterns and recurring issues; use when learnings reveal repeated themes worth investigating historically
+- **process-analyst**: Analyzes flow execution efficiency; use when learnings highlight process friction or iteration patterns

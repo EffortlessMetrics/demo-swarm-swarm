@@ -4,7 +4,9 @@ description: Run Flow 5 (Code -> Artifact): verify receipts, contracts, security
 
 # Flow 5: Code -> Artifact (Gate)
 
-You are orchestrating Flow 5 of the SDLC swarm.
+You are the PM orchestrating Flow 5 of the SDLC swarm. Your team of specialist agents verifies that the code is ready for production.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## Working Directory + Paths (Invariant)
 
@@ -168,7 +170,7 @@ If these files are not visible locally but may exist in committed state, do **no
 
 All artifacts live under `.runs/<run-id>/gate/`.
 
-**Fix-forward contract:** `gate_fix_summary.md` must contain the `## Fix-forward Plan (machine readable)` block (`PACK-CONTRACT: FIX_FORWARD_PLAN_V1`). `fix_forward_report.md` records what the runner actually executed (commands, scope check, files touched, reseal guidance).
+**Fix-forward contract:** `gate_fix_summary.md` includes a `## Fix-forward Plan` section with the mechanical steps that the runner can execute. `fix_forward_report.md` records what the runner actually executed (commands, scope check, files touched, reseal guidance).
 
 ## Orchestration outline
 
@@ -277,20 +279,20 @@ If the runner reports UNVERIFIED or scope violation, proceed with remaining Gate
 ### Step 13: Sanitize Secrets (Publish Gate)
 - `secrets-sanitizer` -> `.runs/<run-id>/gate/secrets_scan.md`, `.runs/<run-id>/gate/secrets_status.json`
 - Scans .runs/ artifacts before GitHub posting
-- Returns a **Gate Result** block (control plane; file is audit-only)
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+**Secrets-sanitizer reports status in its handoff.** Example:
+
+> Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
+
+For audit purposes, it also writes `secrets_status.json` with fields:
+- `status`: CLEAN, FIXED, or BLOCKED
+- `safe_to_commit` / `safe_to_publish`: authoritative permissions
+- `modified_files`: whether artifact files were changed
+- `findings_count`: number of issues found
+- `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
+- `blocker_reason`: explanation if blocked
+
+The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router
@@ -402,17 +404,19 @@ Gate-fixer **remains report-only**. It emits the fix-forward plan; the **fix-for
 - Architecture issues
 - Missing requirements
 
-## Status States
+## Understanding Agent Reports
 
-Agents set status in their output artifacts:
+Your agents report what they found and what they recommend. Read their prose and follow their guidance:
 
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and check passed. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR check has concerns. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
+- When an agent says **"proceed" or "verified"** → they found no blockers
+- When an agent says **"concerns" or "issues"** → they explain what they found
+- When an agent says **"blocked"** → something mechanical failed (IO, permissions, tooling)
 
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
+The `merge-decider` synthesizes all agent reports into a final recommendation. Trust this synthesis.
 
-`merge-decider` synthesizes all statuses into a merge decision.
+**PARTIAL is a success.** If a flow ends PARTIAL with honest documentation, that's a valid checkpoint. The flow is resumable.
+
+**Key rule**: "Blocked" means mechanical failure only. Missing upstream artifacts are "unverified" with documented gaps, not "blocked".
 
 ## Merge Decision States
 

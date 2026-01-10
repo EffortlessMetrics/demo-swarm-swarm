@@ -37,7 +37,7 @@ Optional:
 - `.runs/<run-id>/signal/example_matrix.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 
-## Status model (pack standard)
+## Status model
 
 Use:
 - `VERIFIED` — all REQs covered (scenario or verification note), tags correct, matrix + notes written.
@@ -253,6 +253,15 @@ After writing the scenarios, provide a natural language summary covering:
 
 **Upstream needs (requirements missing):**
 - "requirements.md is missing. Cannot write BDD scenarios without requirements. Recommend requirements-author run first."
+
+## Handoff Targets
+
+Your default recommendation is **bdd-critic**. Scenarios need validation before scope assessment.
+
+Other targets when conditions apply:
+- **requirements-author**: Use when requirements are missing or need refinement.
+- **clarifier**: Use when requirements are ambiguous about error handling or edge cases (document assumption and queue question, then continue).
+- **scope-assessor**: Use only after bdd-critic has passed (skip-critic is not the default path).
 
 ## Philosophy
 

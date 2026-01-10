@@ -41,7 +41,7 @@ The orchestrator specifies the mode. Default is `create` if not specified.
 - `.runs/<run-id>/review/review_worklist.json` (create/apply/refresh modes)
 - `.runs/<run-id>/review/review_actions.md` (apply mode; append-only log)
 
-## Status Model (Pack Standard)
+## Status Model
 
 - `VERIFIED` — Worklist created successfully with actionable items.
 - `UNVERIFIED` — Worklist created but incomplete (no feedback, parse errors, ambiguous items).
@@ -70,7 +70,7 @@ Verify you can:
 If `pr_feedback.md` does not exist:
 - `status: UNVERIFIED`, reason: `no_feedback_file`
 - Write empty worklist with note
-- Exit cleanly.
+- Route to **pr-feedback-harvester** to collect feedback first.
 
 ### Step 1: Parse Feedback Items
 
@@ -496,55 +496,39 @@ When an item is `SKIPPED`, it must include a `skip_reason` from this closed enum
 
 The orchestrator updates statuses as work progresses. Child items under `RW-MD-SWEEP` inherit the parent's status and are not tracked as top-level items.
 
-## Handoff Guidelines
-
-After completing your work, provide a clear handoff. The format varies by mode:
-
-### Create Mode Handoff
-
-```markdown
 ## Handoff
 
-**What I did:** Converted N raw feedback items into M actionable Work Items. Clustered related issues by file/theme. Breakdown: P CORRECTNESS, Q TESTS, R STYLE, S DOCS items.
+**Your default recommendations by mode:**
+- **create**: Route to the agent matching the highest-priority batch (e.g., **code-implementer** for CRITICAL correctness items)
+- **apply**: Route to next batch's agent, or **review-cleanup** if all items resolved
+- **refresh**: Continue if making progress, or **review-cleanup** if stuck or complete
 
-**What's left:** All M items are pending and ready for routing.
+**Partial work is a valid outcome.** If you processed 10/15 items before context exhaustion, report what's done and what remains. The orchestrator will rerun to continue.
 
-**Next batch:** Route RW-001, RW-002 to code-implementer (batch_hint: auth) - these are CRITICAL auth security issues.
+**Create mode example:**
+- "Created 8 Work Items from 23 feedback comments. 2 CRITICAL (auth security), 3 MAJOR (test gaps), 3 MINOR (style)."
+- Recommend: Route RW-001, RW-002 to **code-implementer** (auth security fixes are highest priority).
 
-**Recommendation:** Worklist created successfully - proceed to dispatch first batch. OR No feedback items found - review may not be needed.
-```
+**Apply mode example:**
+- "Updated worklist: 3 items resolved, 1 skipped (stale comment), 0 still pending from this batch."
+- Recommend: Route RW-004, RW-005 to **test-author** for coverage gaps.
 
-### Apply Mode Handoff
+**Refresh mode example:**
+- "Iteration 3: 2 items resolved this cycle, 4 remaining. No stuck signal."
+- Recommend: Route next batch to **fixer** for STYLE items.
 
-```markdown
-## Handoff
+**When stuck:**
+- "Iteration 5: Same 2 items pending for 3+ cycles. Stuck signal: true."
+- Recommend: Route to **review-cleanup** to checkpoint progress. Human may need to resolve blockers.
 
-**What I did:** Updated worklist based on worker response for batch [RW-001, RW-002, RW-003]. Resolved: 2, Skipped: 1, Still pending: 0.
+## Handoff Targets
 
-**What's left:** N items still pending in worklist (M critical, P major).
+When you complete your work, recommend one of these to the orchestrator:
 
-**Next batch:** Route RW-004, RW-005 to test-author (batch_hint: tests) - missing test coverage.
-
-**Recommendation:** Progress made on this batch - continue with next batch. OR All items now resolved - review complete.
-```
-
-### Refresh Mode Handoff
-
-```markdown
-## Handoff
-
-**What I did:** Refreshed worklist state, iteration N. Resolved M items this cycle. Stuck detection: yes/no.
-
-**What's left:** P items still pending.
-
-**Stuck signal:** True (same items failing for 3+ cycles, loop is stuck) OR False (progress is being made).
-
-**Next batch:** Route RW-001, RW-002 to code-implementer OR No next batch (loop stuck, recommend escalation).
-
-**Recommendation:** Continue processing OR Loop stuck with same items failing repeatedly - recommend human review/escalation.
-```
-
-Be conversational. The orchestrator needs to understand the shape of the work ahead and what to do next.
+- **code-implementer**: Fix CORRECTNESS and ARCHITECTURE items requiring code changes (bugs, security issues, logic errors)
+- **test-author**: Address TESTS category items (missing tests, test failures, coverage gaps)
+- **fixer**: Handle STYLE category items and small targeted fixes from critiques
+- **doc-writer**: Update documentation for DOCS category items
 
 ## Hard Rules
 

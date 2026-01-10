@@ -4,7 +4,9 @@ description: Run Flow 2 (Spec to Design): produce ADR, contracts, observability 
 
 # Flow 2: Spec to Design
 
-You are orchestrating Flow 2 of the SDLC swarm.
+You are the PM orchestrating Flow 2 of the SDLC swarm. Your team of specialist agents transforms requirements into architecture decisions, API contracts, and execution plans.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## Working Directory + Paths (Invariant)
 
@@ -215,11 +217,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 4b: Critique design options (microloop; recommended)
 - Use `option-critic` to critique `design_options.md` and write `option_critique.md`.
 
-**Route on the critic's handoff recommendation:**
-- If critic says "blocked" → stop (mechanical failure)
-- If critic recommends routing to a different flow/agent → follow the recommendation
-- If critic recommends "rerun optioneer" or "fix X" → run design-optioneer with critique worklist, then rerun critic
-- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
+**Route on the critic's handoff:**
+Read the critic's report. They will tell you what they found and what they recommend:
+- If the critic recommends "proceed" or says options are ready → move forward
+- If the critic recommends fixes → run the optioneer with their feedback, then ask the critic again
+- If the critic reports a mechanical failure → stop and address the environment issue
+
+When you defer issues the critic raised, record why in the Decision Log.
 
 ### Step 5: Write ADR
 - Use `adr-author` to write the ADR.
@@ -234,13 +238,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 6b: Validate contracts (microloop; recommended)
 - Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.
 
-**Route on the critic's handoff recommendation:**
-- If critic says "blocked" → stop (mechanical failure)
-- If critic recommends routing to a different flow/agent → follow the recommendation
-- If critic recommends "rerun designer" or "fix X" → run interface-designer with critique worklist, then rerun critic
-- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
+**Route on the critic's handoff:**
+Read the critic's report. They will tell you what they found and what they recommend:
+- If the critic recommends "proceed" or says contracts are ready → move forward
+- If the critic recommends fixes → run the designer with their feedback, then ask the critic again
+- If the critic reports a mechanical failure → stop and address the environment issue
 
-**Conflict note (default):** If Contract Critic recommends fixes or changes, treat that as an open contract-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
+When the critic recommends changes, that becomes your active worklist for this lane. Resolve it or defer it (with a Decision Log entry explaining why).
 
 ### Step 7: Plan observability (parallel)
 - Use `observability-designer` to define observability.
@@ -248,13 +252,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 7b: Validate observability (microloop; recommended)
 - Use `observability-critic` to validate `observability_spec.md` and write `observability_critique.md`.
 
-**Route on the critic's handoff recommendation:**
-- If critic says "blocked" → stop (mechanical failure)
-- If critic recommends routing to a different flow/agent → follow the recommendation
-- If critic recommends "rerun designer" or "fix X" → run observability-designer with critique worklist, then rerun critic
-- If critic says "ready to proceed" → proceed (Decision Log when deferring issues)
+**Route on the critic's handoff:**
+Read the critic's report. They will tell you what they found and what they recommend:
+- If the critic recommends "proceed" or says observability spec is ready → move forward
+- If the critic recommends fixes → run the designer with their feedback, then ask the critic again
+- If the critic reports a mechanical failure → stop and address the environment issue
 
-**Conflict note (default):** If Observability Critic recommends fixes or changes, treat that as an open observability-lane worklist unless you resolve it or explicitly defer it (record a Decision Log entry in `flow_plan.md`).
+When the critic recommends changes, that becomes your active worklist for this lane. Resolve it or defer it (with a Decision Log entry explaining why).
 
 ### Step 8: Plan testing (after interface-designer)
 - Use `test-strategist` to write the test plan (incorporate Signal BDD + verification notes).
@@ -270,13 +274,13 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 **Conflict handling (default):**
 - If a targeted critic still recommends fixes or changes, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
 
-**Route on the critic's handoff recommendation:**
-- If critic says "verified" or "ready to proceed" → proceed to policy check
-- If critic recommends improvements and says further iteration will help → rerun affected steps (options/ADR/contracts/plans); if you rerun `interface-designer` or `observability-designer`, run the matching targeted critic (`contract-critic` / `observability-critic`) before re-running design-critic
-- If critic says "no further improvement possible" → proceed (remaining issues documented)
-- If critic says "blocked" → stop (mechanical failure)
+**Route on the design-critic's handoff:**
+Read the critic's integrative report. This is the final quality check before policy. Trust their assessment:
+- If the critic recommends "proceed" → move to policy check
+- If the critic recommends improvements and believes another iteration will help → address the specific areas they name
+- If the critic says "no further improvement possible" → proceed with documented issues
 
-**Loop guidance**: The handoff is the routing surface; `design_validation.md` is the audit artifact. Agents do not know they are in a loop—they read inputs, write outputs, and provide a recommendation. The orchestrator routes on the handoff.
+Your agents produce reports and recommendations. You decide what happens next based on their guidance.
 
 ### Step 11: Check policy compliance
 - Use `policy-analyst` for policy compliance.
@@ -287,30 +291,18 @@ Call `clarifier` to create the Plan-local questions register. Signal's `open_que
 ### Step 13: Sanitize secrets (publish gate)
 - Use `secrets-sanitizer` (publish gate).
 
-**Gate Result block (returned by secrets-sanitizer):**
+**Secrets-sanitizer reports status in its handoff.** Example:
 
-The agent returns a Gate Result block for orchestrator routing:
+> Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+For audit purposes, it also writes `secrets_status.json` with fields:
+- `status`: CLEAN, FIXED, or BLOCKED (descriptive — never infer permissions from it)
+- `safe_to_commit` / `safe_to_publish`: authoritative permissions
+- `modified_files`: whether artifact files were changed
+- `findings_count`: number of issues found
+- `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
 
-**Field semantics:**
-- `status` is **descriptive** (what happened). **Never infer permissions** from it.
-- `safe_to_commit` / `safe_to_publish` are **authoritative permissions**.
-- `modified_files` signals that artifact files were changed (for audit purposes).
-- `blocker_kind` explains why blocked (machine-readable category): `NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT`
-
-**Control plane vs audit plane:** The Gate Result block is the control plane for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the returned block, not by re-reading the file.
+The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router
@@ -414,17 +406,17 @@ Flow 2 is complete when these exist (even if imperfect):
 - `work_plan.md` - Subtasks, ordering, dependencies
 - `design_validation.md` - Feasibility assessment, known issues
 
-## Status States
+## Understanding Agent Reports
 
-Agents communicate status through their handoff prose:
+Your agents report what they did and what they recommend. Read their prose and follow their guidance:
 
-- **Complete / Verified**: Work is done, evidence exists, no blockers. Handoff recommends "proceed" or "ready for X".
-- **Incomplete / Unverified**: Gaps exist, blockers documented. Handoff recommends next steps ("fix X", "rerun Y") or acknowledges human review needed.
-- **Blocked**: Mechanical failure only (IO/permissions/tooling). Handoff explains what's broken and that environment needs fixing.
+- When an agent says **"ready" or "proceed"** → they are satisfied and you should move forward
+- When an agent says **"needs X" or "fix Y"** → they identified work and are telling you what to do next
+- When an agent says **"blocked"** → something mechanical failed (IO, permissions, tooling). Address the environment issue.
 
-**Key rule**: "Blocked" is strictly for mechanical failures. Missing upstream artifacts result in "incomplete" status with documented gaps, not "blocked".
+**PARTIAL is a success.** If a flow ends PARTIAL with honest documentation of what's done and what remains, that's a valid checkpoint. The flow is resumable; state is on disk.
 
-Use `plan_receipt.json` (primary) and the latest critic handoffs (secondary) to determine flow outcome. When critics recommend fixes, treat those as open lane worklists unless explicitly deferred (Decision Log entry in `flow_plan.md`).
+**Key rule**: "Blocked" means mechanical failure only. Missing upstream artifacts are "incomplete/unverified" with documented assumptions, not "blocked".
 
 ## Notes
 
@@ -514,16 +506,14 @@ All written to `.runs/<run-id>/plan/`:
 
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
-1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its handoff
-3) Route on critic handoff:
-   - If critic says "ready to proceed" → proceed (no apply pass needed)
-   - If critic recommends "fix X" or "rerun writer" → continue to step 4
-   - Otherwise → proceed with blockers documented
-4) Apply pass: call `<writer>` with the critique worklist
-5) Re-critique: call `<critic>` again, return to step 3
+1) **Writer pass:** call the writer agent
+2) **Critique pass:** call the critic agent, read their handoff
+3) **Route on the critic's recommendation:**
+   - If the critic says "ready" or "proceed" → move forward
+   - If the critic recommends improvements → run the writer with their feedback, then ask the critic again
+   - If the critic says "no further improvement possible" → proceed with documented blockers
 
-**Termination:** Signal-based, not count-based. Loop continues while critic recommends improvements and indicates further iteration will help. Exit when critic says "proceed" or "no further improvement possible" or context exhausted.
+**Termination:** Trust the critic's judgment. They will tell you when to proceed. If context is exhausted, exit PARTIAL with an honest checkpoint.
 
 ### TodoWrite (copy exactly)
 - [ ] run-prep

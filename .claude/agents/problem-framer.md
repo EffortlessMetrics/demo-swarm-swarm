@@ -49,7 +49,7 @@ Write to `.runs/<run-id>/signal/`:
 ### Step 0: Preflight (mechanical)
 - Verify you can write `.runs/<run-id>/signal/problem_statement.md`.
 - Attempt to read primary inputs. If one is missing, proceed best-effort; if both missing, BOUNCE.
-- If you cannot write output due to IO/permissions: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+- If you cannot write output due to IO/permissions: note the mechanical failure. In your handoff, explain the issue and recommend fixing the environment.
 
 ### Step 1: Distill the problem (system terms)
 Answer, plainly:
@@ -174,6 +174,15 @@ Write exactly this structure:
 **When mechanical failure:**
 - "Cannot write problem_statement.md due to permissions error."
 - Next step: Fix IO/permissions issue
+
+## Handoff Targets
+
+Your default recommendation is **requirements-author**. A well-framed problem is ready for requirements.
+
+Other targets when conditions apply:
+- **signal-normalizer**: Use when upstream inputs (issue_normalized.md, context_brief.md) are missing.
+- **gh-researcher**: Use when GitHub context would clarify problem scope (prior art, constraints from discussions).
+- **clarifier**: Use when significant unknowns exist that require investigation before requirements can be written.
 
 ## Philosophy
 

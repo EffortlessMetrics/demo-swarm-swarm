@@ -77,9 +77,9 @@ See [demoswarm-cli.md](demoswarm-cli.md) for the shim surface and command contra
 
 - QID patterns in `.runs/**/open_questions.md` must use canonical flow codes
 - Valid format: `OQ-<FLOW>-<NNN>` where:
-  - `<FLOW>` is one of: SIG, PLN, BLD, GAT, DEP, WIS
+  - `<FLOW>` is one of: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM
   - `<NNN>` is a three-digit zero-padded number (001-999)
-- Reports warnings for non-canonical codes (PLAN instead of PLN, BUILD instead of BLD)
+- Reports warnings for non-canonical codes (PLN instead of PLAN, BLD instead of BUILD)
 
 **Violations reported as warnings** (not errors). Use `--strict` to elevate to errors.
 
@@ -233,13 +233,14 @@ These are supplements, not replacements for pack-check.
 
 **Symptom:** pack-check warns about non-canonical QID flow codes.
 
-**Fix:** Update QIDs to use canonical abbreviations:
-- `SIGNAL` or `SIG` -> `SIG`
-- `PLAN` -> `PLN`
-- `BUILD` -> `BLD`
-- `GATE` -> `GAT`
-- `DEPLOY` -> `DEP`
-- `WISDOM` -> `WIS`
+**Fix:** Update QIDs to use canonical flow codes:
+- `SIGNAL` -> `SIG`
+- `PLN` -> `PLAN`
+- `BLD` -> `BUILD`
+- `REV` -> `REVIEW`
+- `GAT` -> `GATE`
+- `DEP` -> `DEPLOY`
+- `WIS` -> `WISDOM`
 
 ---
 
@@ -257,6 +258,7 @@ When adding a pack contract:
 
 ## See also
 
+- [pack-check-scope.md](pack-check-scope.md) — What pack-check enforces vs refuses to enforce
 - [contracts.md](contracts.md) — What pack-check validates
 - [stable-markers.md](stable-markers.md) — Marker patterns
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference

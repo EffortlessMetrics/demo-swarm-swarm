@@ -184,6 +184,15 @@ After writing requirements, provide a clear handoff:
 **Recommendation:** Requirements are complete and testable - proceed to requirements-critic for validation. OR Problem statement is missing - wrote best-effort requirements but need problem-framer to establish clear context first.
 ```
 
+## Handoff Targets
+
+Your default recommendation is **requirements-critic**. Requirements need validation before BDD authoring.
+
+Other targets when conditions apply:
+- **problem-framer**: Use when problem_statement.md is missing or needs refinement.
+- **clarifier**: Use when requirements have significant unknowns that need investigation.
+- **bdd-author**: Use only after requirements-critic has passed (skip-critic is not the default path).
+
 ## Philosophy
 
 Requirements are contracts. If a stranger can't turn a requirement into a deterministic test without asking follow-ups, it's not done. Write with enough structure that critics and cleanup can count and verify without interpretation.

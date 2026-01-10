@@ -26,7 +26,7 @@ You do **not** modify code. You do **not** commit/push. You do **not** "fix" sur
 
 - `.runs/<run-id>/build/mutation_report.md`
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: mutation run executed **or** cleanly skipped with an explicit, non-error reason; report written.
 - `UNVERIFIED`: report written but run incomplete/failed/partial, **or** results indicate important gaps (material survivors).
@@ -48,11 +48,7 @@ Use natural language in your handoff to communicate next steps:
 Verify you can write:
 - `.runs/<run-id>/build/mutation_report.md`
 
-If you cannot write due to IO/perms/tooling:
-- set `status: CANNOT_PROCEED`
-- set `recommended_action: FIX_ENV`
-- set `missing_required` to the output path
-- write the report as best-effort (if possible) and stop
+If you cannot write due to IO/perms/tooling: write a best-effort report explaining the issue, then hand off with a recommendation to fix the environment.
 
 ### Step 1: Choose mutation command (in order; no guessing)
 
@@ -103,14 +99,14 @@ For each worklist item:
   - usually `test-author`
   - sometimes `fixer` (when it’s “code lacks invariant enforcement”)
 
-### Step 5: Decide control-plane recommendation
+### Step 5: Decide routing
 
-Defaults:
-- If mutation could not run due to missing config/tool: `UNVERIFIED`, `recommended_action: PROCEED` (with a clear “enable mutation by adding config” note).
-- If mutation ran and survivor count is material:
-  - threshold = `mutation.survivor_threshold` from config, else default `0`
-  - if `survived > threshold`: `UNVERIFIED`, `recommended_action: RERUN`, `route_to_flow: 3`, `route_to_agent: test-author`
-- If mutation ran and `survived <= threshold`: `VERIFIED`, `recommended_action: PROCEED`
+Based on your results, make a clear recommendation:
+- **Mutation not configured** → Recommend proceeding (Build can continue without mutation coverage)
+- **Survivors exceed threshold** → Recommend test-author to address the survivor worklist
+- **Survivors within threshold** → Recommend proceeding to build-cleanup
+
+**Your default recommendation when no material issues found is: proceed to build-cleanup.**
 
 ## mutation_report.md format (must follow)
 
@@ -172,3 +168,12 @@ After writing the mutation report, provide a natural language handoff:
 - If survivors exceed threshold → "Mutation testing found [M] survivors exceeding threshold; recommend test-author address worklist items"
 - If mutation run failed → "Mutation run failed due to [specific issue]; recommend fixing configuration then rerunning"
 - If mechanical failure → "Fix [specific issue] then rerun"
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **test-author**: Adds or strengthens tests to kill mutation survivors; use when worklist items indicate assertion gaps or missing edge case coverage
+- **fixer**: Applies targeted fixes when survivors indicate code lacks invariant enforcement; use for small, surgical code changes
+- **pack-customizer**: Configures mutation testing command and thresholds; use when mutation runner is missing or misconfigured
+- **build-cleanup**: Summarizes Flow 3 and writes build receipt; use when mutation testing is complete and flow can proceed

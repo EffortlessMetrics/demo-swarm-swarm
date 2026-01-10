@@ -54,7 +54,7 @@ Optional:
   - If a scenario lacks a scenario-level `@REQ-###` tag → record as an issue (this is a Flow 1 fix, not yours).
 
 If there are zero feature files or zero scenarios:
-- Proceed best-effort (write a plan skeleton), but set `status: UNVERIFIED` and recommend bouncing to Flow 1 (`bdd-author`).
+- Proceed best-effort (write a plan skeleton), mark it as partial, and recommend bdd-author address the missing scenarios.
 
 ### Step 2: Map scenarios to test types
 
@@ -185,28 +185,18 @@ Write the plan using this structure (includes the Scenario → Test Type Matrix 
 ```markdown
 # Test Plan
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-missing_required:
-  - <path> (reason)
-blockers:
-  - <short actionable blocker>
-concerns:
-  - <non-gating issues>
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+## Summary
 
-counts:
-  scenarios_total: <int|null>
-  requirements_total: <int|null>
-  requirements_with_scenarios: <int|null>
-  ac_count: <int|null>
+<2-3 sentences summarizing the test strategy: what's covered, coverage thresholds, key priorities>
 
-severity_summary:
-  critical: <int>
-  major: <int>
-  minor: <int>
+## Status
+
+- **Completeness**: Complete | Partial | Incomplete
+- **Scenarios mapped**: <int>
+- **Requirements covered**: <int>
+- **ACs defined**: <int>
+- **Blockers**: <list or "none">
+- **Concerns**: <list or "none">
 
 ## Scope
 - What this plan covers (and what it explicitly does not)
@@ -263,10 +253,11 @@ Write `ac_matrix.md` using this structure:
 ```markdown
 # Acceptance Criteria Matrix
 
-## Machine Summary
-ac_count: <int>
-requirements_covered: <int>
-scenarios_covered: <int>
+## Summary
+
+- **Total ACs**: <int>
+- **Requirements covered**: <int>
+- **Scenarios covered**: <int>
 
 ## AC Inventory
 
@@ -300,110 +291,52 @@ Recommended sequence for Flow 3 (respects dependencies):
 - Flow 3 creates `build/ac_status.json` and updates it as it completes each AC.
 ```
 
-### Step 6: Set completion state
+### Step 6: Assess completion
 
-* `VERIFIED` if:
-  * scenarios exist and are mapped, **and**
-  * thresholds are defined, **and**
-  * AC matrix is complete (all scenarios/requirements have AC entries), **and**
-  * no material blockers remain
+Your test plan is **complete** when:
+- Scenarios exist and are mapped to test types
+- Coverage thresholds are defined
+- AC matrix covers all scenarios/requirements
+- No material blockers remain
 
-* `UNVERIFIED` if:
-  * scenarios are missing, tagging is broken, key inputs missing, or mapping requires unresolved answers
+Your test plan is **partial** when:
+- Scenarios are missing or tagging is broken
+- Key inputs missing (features, requirements)
+- Mapping requires unresolved answers
 
-* `CANNOT_PROCEED` only for mechanical failure:
-  * cannot read/write required files, permission errors, tooling missing, etc.
-
-## Status + Routing Rules
-
-### VERIFIED
-
-Use when:
-
-* Scenarios exist and are mapped to test types
-* Coverage thresholds are defined
-* No material blockers remain
-
-Set:
-
-* `recommended_action: PROCEED`
-* `route_to_agent: null`
-* `route_to_flow: null`
-
-**Note:** The orchestrator knows the next station. `route_to_*` fields are only populated for `BOUNCE`.
-
-### UNVERIFIED
-
-Use when:
-
-* Scenarios are missing or tagging is broken
-* Key inputs missing (features, requirements)
-* Mapping requires unresolved answers
-* Coverage thresholds cannot be set without clarification
-
-Routing:
-
-* If gaps are spec-local (missing features/scenarios) → `recommended_action: BOUNCE`, `route_to_agent: bdd-author`, `route_to_flow: 1`
-* If requirements are missing/unclear → `recommended_action: BOUNCE`, `route_to_agent: requirements-author`, `route_to_flow: 1`
-* If you can proceed with documented assumptions → `recommended_action: PROCEED`, `route_to_agent: null`, `route_to_flow: null` (and note assumptions in Gaps section)
-
-**Note:** `route_to_*` fields must only be populated when `recommended_action: BOUNCE`. For `PROCEED`, `RERUN`, and `FIX_ENV`, set both to `null`.
-
-### CANNOT_PROCEED
-
-Mechanical failure only:
-
-* Cannot read/write required files
-* Permission errors, tooling missing
-
-Set:
-
-* `recommended_action: FIX_ENV`
-* `route_to_*: null`
+You **cannot proceed** when:
+- Mechanical failure (cannot read/write required files, permission errors, tooling missing)
 
 ## Handoff Guidelines
 
-After writing the test plan and AC matrix, provide a natural language handoff:
+After writing the test plan and AC matrix, explain what you did and recommend next steps.
 
-```markdown
-## Handoff
+**When test plan is complete:**
+"Mapped 12 scenarios to test types, defined coverage thresholds (80% line / 70% branch), created AC matrix with 5 ACs. All requirements have corresponding ACs. Ready for work-planner to break this into implementation subtasks."
 
-**What I did:** Mapped <N> scenarios to test types, defined coverage thresholds, created AC matrix with <M> ACs.
+**When scenarios lack REQ tags:**
+"Attempted test planning but 3 scenarios lack @REQ tags (login.feature:12, :25, :38). Cannot create complete AC matrix without REQ traceability. bdd-author should tag these scenarios before test planning can complete."
 
-**What's left:** <"Ready for implementation planning" | "Gaps in test mapping">
+**When requirements are missing:**
+"Requirements.md is missing or incomplete. Test planning needs clear REQ/NFR identifiers to map to test types. requirements-author should complete the requirements first."
 
-**Recommendation:** <PROCEED to work-planner | BOUNCE to bdd-author to fix <gaps>>
+Your handoff should include:
+- What you accomplished (scenarios mapped, thresholds set, ACs defined)
+- What gaps remain (if any)
+- Which agent should work next and why
 
-**Reasoning:** <1-2 sentences explaining test strategy and AC breakdown>
-```
+## Handoff Targets
 
-Examples:
+Your default recommendation is **work-planner** when test plan and AC matrix are complete.
 
-```markdown
-## Handoff
+When you complete your work, recommend one of these to the orchestrator:
 
-**What I did:** Mapped 12 scenarios to test types, defined coverage thresholds (80% line / 70% branch), created AC matrix with 5 ACs.
+- **work-planner**: Breaks design into implementation subtasks when test plan and AC matrix are complete
+- **bdd-author**: Adds missing scenario tags when scenarios lack @REQ traceability (routes to Flow 1)
+- **interface-designer**: Generates API contracts when test planning requires contract surfaces not yet defined
+- **design-critic**: Validates overall design coherence when test plan reveals coverage gaps in other artifacts
 
-**What's left:** Ready for implementation planning.
-
-**Recommendation:** PROCEED to work-planner.
-
-**Reasoning:** Complete scenario-to-test-type mapping. All requirements have corresponding ACs. Coverage thresholds set per test_plan.md stable markers. Mutation testing required for auth module (P0).
-```
-
-```markdown
-## Handoff
-
-**What I did:** Attempted test planning but 3 scenarios lack @REQ tags, cannot map to test types.
-
-**What's left:** Orphan scenarios prevent test type assignment.
-
-**Recommendation:** BOUNCE to bdd-author to tag scenarios in login.feature.
-
-**Reasoning:** Cannot create complete AC matrix without REQ traceability. Scenarios at login.feature:12, :25, :38 need @REQ tags.
-```
-
-The orchestrator routes on this handoff. `test_plan.md` and `ac_matrix.md` remain the durable audit artifacts.
+If scenarios are missing REQ tags, still write a partial test plan with what you can map. Document the gaps and recommend bdd-author. A partial plan with clear gaps is more useful than no plan.
 
 ## Philosophy
 

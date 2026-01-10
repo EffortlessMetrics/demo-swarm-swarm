@@ -40,7 +40,7 @@ From `.runs/<run-id>/build/` (hardening worklists; optional):
 - `flakiness_report.md`
 - `doc_critique.md`
 
-Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot write the output file.
+Missing inputs ⇒ produce best-effort output with documented gaps. Partial work with honest documentation is a valid outcome.
 
 ## Outputs
 
@@ -94,10 +94,10 @@ Missing inputs ⇒ **UNVERIFIED**, not mechanical failure, unless you cannot wri
 - Use stable IDs: `SUG-001`, `SUG-002`, ...
 - Provide a clear insertion point (file path + heading/section).
 
-5) Set completion state:
-- `VERIFIED`: at least one input was present and you produced actionable drafts/suggestions with evidence pointers.
-- `UNVERIFIED`: inputs missing/unusable, but you still produced a best-effort set and recorded the gaps.
-- `CANNOT_PROCEED`: only if you cannot write the output due to IO/permissions/tooling.
+5) Determine completion:
+- **Complete:** At least one input was present and you produced actionable drafts/suggestions with evidence pointers.
+- **Partial:** Inputs missing/unusable, but you still produced a best-effort set and recorded the gaps.
+- **Mechanical failure:** Cannot write the output due to IO/permissions/tooling. Describe the issue.
 
 ## Output format (`.runs/<run-id>/wisdom/feedback_actions.md`)
 
@@ -289,20 +289,20 @@ For mechanical counting, preserve these exact line prefixes:
 
 Do not vary these prefixes.
 
-## Handoff Guidelines
+## Handoff
 
-When you're done, tell the orchestrator what happened in natural language:
+When you're done, tell the orchestrator what happened:
 
 **Examples:**
 
 *Completed successfully:*
-> "Created 3 issue drafts and 5 suggestions from mutation survivors and learnings. All outputs written to wisdom/. Flow can proceed."
+> "Created 3 issue drafts and 5 suggestions from mutation survivors and learnings. All outputs written to wisdom/. Route to **wisdom-cleanup** to seal the flow."
 
 *Partial completion:*
-> "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Recommend rerunning after artifact audit if more precision needed."
+> "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Route to **wisdom-cleanup** with gaps documented."
 
-*Blocked:*
-> "Cannot write output files due to permissions error on .runs/ directory. Need environment fix before proceeding."
+*Environment issue:*
+> "Cannot write output files due to permissions error on .runs/ directory. Need environment fix before retrying."
 
 **Include counts:**
 - How many issue drafts created
@@ -341,3 +341,12 @@ Every advice line must map to exactly one of:
 - Mark it as `[DISCUSSION]` with explicit options
 
 Vibe dumps are not wisdom outputs.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **wisdom-cleanup**: Summarizes Flow 7 and writes the wisdom receipt; **your default recommendation** when feedback actions are complete
+- **gh-issue-manager**: Creates or updates GitHub issues; use when issue drafts are ready for human review (after publish gates pass)
+- **learning-synthesizer**: Extracts additional learnings from artifacts; use when more synthesis is needed before producing feedback actions
+- **repo-operator**: Handles git operations for committing wisdom artifacts; use when feedback actions should be checkpointed

@@ -5,7 +5,9 @@ argument-hint: "[optional-run-id] <feature request or signal>"
 
 # Flow 1: Signal -> Spec
 
-You are orchestrating Flow 1 of the SDLC swarm. This flow transforms messy input into testable requirements, BDD features, early risks, and a GitHub-ready summary.
+You are the PM orchestrating Flow 1 of the SDLC swarm. Your team of specialist agents transforms messy input into testable requirements, BDD features, early risks, and a GitHub-ready summary.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## Working Directory + Paths (Invariant)
 
@@ -224,20 +226,16 @@ Alternate between `requirements-author` and `requirements-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
-3. **Route on the critic's handoff recommendation:**
-    - If critic says "blocked" or indicates mechanical failure → stop (FIX_ENV)
-    - If critic recommends routing to a different flow/agent → follow the recommendation
-    - If critic recommends "rerun author" or "fix X" → run author with critique worklist, then rerun critic
-    - If critic says "ready to proceed" → proceed (even if some blockers documented)
+3. **Route on the critic's handoff:**
+   Read the critic's report. They will tell you what they found and what they recommend. Trust their recommendation:
+   - If the critic recommends "proceed" or says work is ready → move forward
+   - If the critic recommends fixes and says another pass will help → run the author with their feedback
+   - If the critic reports a mechanical failure → stop and address the environment issue
 
-**Loop guidance (Signal-Based Termination)**:
-- Route on the critic's handoff, not pass counts.
-- Continue while the critic recommends improvements and indicates further iteration will help.
-- Exit conditions (in priority order):
-  1. Critic says "verified" or "ready to proceed" → proceed (success)
-  2. Critic says "no further improvement possible" → proceed with documented blockers
-  3. Context exhausted → checkpoint and exit `PARTIAL`
-- The handoff is the routing surface; the critique file is the audit artifact.
+**Loop guidance:**
+- Your agents do the thinking. You read their recommendations and route accordingly.
+- Continue while the critic sees value in another iteration.
+- If context is exhausted before completion, checkpoint and exit with status PARTIAL. This is a valid outcome; the flow is resumable.
 
 ### Step 7: BDD Scenarios (Microloop)
 
@@ -257,21 +255,16 @@ Alternate between `bdd-author` and `bdd-critic`:
    - Sets `can_further_iteration_help: yes | no`
    - Lists issues by severity (critical, major, minor)
 
-3. **Route on the critic's handoff recommendation:**
-    - If critic says "blocked" or indicates mechanical failure → stop (FIX_ENV)
-    - If critic recommends routing to a different flow/agent → follow the recommendation
-    - If critic recommends "rerun author" or "fix X" → run author with critique worklist, then rerun critic
-    - If critic says "ready to proceed" → proceed (even if some blockers documented)
+3. **Route on the critic's handoff:**
+   Read the critic's report. They will tell you what they found and what they recommend. Trust their recommendation:
+   - If the critic recommends "proceed" or says scenarios are ready → move forward
+   - If the critic recommends fixes (especially sad path coverage) and says another pass will help → run the author with their feedback
+   - If the critic reports a mechanical failure → stop and address the environment issue
 
-**Loop guidance (Signal-Based Termination)**:
-- Route on the critic's handoff, not pass counts.
-- Continue while the critic recommends improvements and indicates further iteration will help.
-- **Sad Path enforcement:** The critic will flag REQs missing negative scenarios. Ensure the author addresses these before proceeding.
-- Exit conditions (in priority order):
-  1. Critic says "verified" or "ready to proceed" → proceed (success)
-  2. Critic says "no further improvement possible" → proceed with documented blockers
-  3. Context exhausted → checkpoint and exit `PARTIAL`
-- The handoff is the routing surface; the critique file is the audit artifact.
+**Loop guidance:**
+- Your agents do the thinking. You read their recommendations and route accordingly.
+- The critic will flag missing sad paths. Trust them to identify what needs improvement.
+- If context is exhausted before completion, checkpoint and exit with status PARTIAL. This is a valid outcome; the flow is resumable.
 
 ### Step 8: Assess Scope
 
@@ -297,11 +290,12 @@ This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews
 - Unresolved critic findings
 
 **Route on the auditor's handoff:**
-- If recommendation is "proceed" or "ready for cleanup" → proceed to cleanup
-- If recommendation is "fix X" or "rerun Y" → route back to the specified agent for rework, then re-run the auditor
-- If recommendation is "blocked" or indicates mechanical failure → stop (FIX_ENV)
+Read the auditor's report. This is the "Staff Engineer" check. Trust their assessment:
+- If the auditor says "proceed" or "ready for cleanup" → move to cleanup
+- If the auditor recommends specific fixes → route to the agent they name, then check back with the auditor
+- If the auditor reports a mechanical failure → stop and address the environment issue
 
-**Signal-based termination:** Continue looping while the auditor recommends fixes and indicates meaningful improvement is possible. Proceed when the auditor says progress has stalled or blockers are documented for human review.
+The auditor will tell you when progress has stalled or when remaining issues need human review. Trust their judgment on when to proceed.
 
 ### Step 10: Finalize and Write Receipt
 
@@ -330,22 +324,17 @@ This agent is a **publish gate** that ensures no secrets are accidentally commit
 - `FIXED`: Secrets found and remediated; flags typically true **unless** `needs_upstream_fix` forced gating
 - `BLOCKED_PUBLISH`: Sanitizer couldn't complete (mechanical); `safe_to_publish: false`
 
-**Control plane:** The sanitizer returns a **Gate Result block** for orchestrator routing. `secrets_status.json` is the durable audit record. Route on the Gate Result, not by re-reading the file.
+**Secrets-sanitizer reports status in its handoff.** Example:
 
-**Gate Result block (returned by secrets-sanitizer):**
+> Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
-<!-- PACK-CONTRACT: GATE_RESULT_V3 START -->
-```yaml
-## Gate Result
-status: CLEAN | FIXED | BLOCKED
-safe_to_commit: true | false
-safe_to_publish: true | false
-modified_files: true | false
-findings_count: <int>
-blocker_kind: NONE | MECHANICAL | SECRET_IN_CODE | SECRET_IN_ARTIFACT
-blocker_reason: <string | null>
-```
-<!-- PACK-CONTRACT: GATE_RESULT_V3 END -->
+For audit purposes, it also writes `secrets_status.json` with fields:
+- `status`: CLEAN, FIXED, or BLOCKED
+- `safe_to_commit`: whether commit can proceed
+- `safe_to_publish`: whether GitHub posting can proceed
+- `findings_count`: number of issues found
+- `blocker_kind`: NONE, MECHANICAL, SECRET_IN_CODE, or SECRET_IN_ARTIFACT
+- `blocker_reason`: explanation if blocked
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
 - The sanitizer is a fix-first pre-commit hook, not a router
@@ -482,15 +471,17 @@ These sections enable humans to review what was assumed at the flow boundary, an
 - Agents will read and refine existing artifacts
 - Each run improves the output based on newly resolved ambiguity
 
-## Status States
+## Understanding Agent Reports
 
-Agents communicate status through their handoff prose:
+Your agents report what they did and what they recommend. Read their prose and follow their guidance:
 
-- **Complete / Verified** - Work is done, evidence exists, no blockers. Handoff recommends "proceed" or "ready for X".
-- **Incomplete / Unverified** - Gaps exist, blockers documented. Handoff recommends next steps ("fix X", "rerun Y") or acknowledges human review needed.
-- **Blocked** - Mechanical failure only (IO/permissions/tooling). Handoff explains what's broken and that environment needs fixing.
+- When an agent says **"ready" or "proceed"** → they are satisfied and you should move forward
+- When an agent says **"needs X" or "fix Y"** → they identified work and are telling you what to do next
+- When an agent says **"blocked"** → something mechanical failed (IO, permissions, tooling). Address the environment issue.
 
-**Key rule**: "Blocked" is strictly for mechanical failures. Missing artifacts result in "incomplete" status with documented gaps, not "blocked". If agents can read inputs and form an opinion, status is complete or incomplete with documented assumptions.
+**PARTIAL is a success.** If a flow ends PARTIAL with honest documentation of what's done and what remains, that's a valid checkpoint. The flow is resumable; state is on disk. You do not need to complete everything in one run.
+
+**Key rule**: "Blocked" means mechanical failure only. Missing artifacts or gaps in work are "incomplete/unverified" with documented assumptions, not "blocked".
 
 ## Human Collaboration
 
@@ -563,16 +554,14 @@ If yes, proceed to `/flow-2-plan`.
 
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
-1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its handoff
-3) Route on critic handoff:
-   - If critic says "ready to proceed" → proceed (no apply pass needed)
-   - If critic recommends "fix X" or "rerun writer" → continue to step 4
-   - Otherwise → proceed with blockers documented
-4) Apply pass: call `<writer>` with the critique worklist
-5) Re-critique: call `<critic>` again, return to step 3
+1) **Writer pass:** call the writer agent
+2) **Critique pass:** call the critic agent, read their handoff
+3) **Route on the critic's recommendation:**
+   - If the critic says "ready" or "proceed" → move forward
+   - If the critic recommends improvements → run the writer with their feedback, then ask the critic again
+   - If the critic says "no further improvement possible" → proceed with documented blockers
 
-**Termination:** Signal-based, not count-based. Loop continues while critic recommends improvements and indicates further iteration will help. Exit when critic says "proceed" or "no further improvement possible" or context exhausted.
+**Termination:** Trust the critic's judgment. They will tell you when to proceed. If context is exhausted, exit PARTIAL with an honest checkpoint.
 
 ### TodoWrite (copy exactly)
 

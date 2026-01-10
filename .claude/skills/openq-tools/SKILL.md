@@ -28,7 +28,7 @@ bash .claude/scripts/demoswarm.sh openq <command> [options]
 
 ### QID format
 - Pattern: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-PLAN-002`, `OQ-BUILD-003`)
-- Flow codes: `SIG` (signal), `PLAN` (plan), `BUILD` (build), `GATE` (gate), `DEPLOY` (deploy), `WISDOM` (wisdom)
+- Flow codes: `SIG` (signal), `PLAN` (plan), `BUILD` (build), `REVIEW` (review), `GATE` (gate), `DEPLOY` (deploy), `WISDOM` (wisdom)
 - Sequential within flow (auto-incremented from existing entries)
 
 ### Append-only
@@ -144,6 +144,7 @@ echo "Registered question: $QID"
 | signal | SIG | OQ-SIG-001 |
 | plan | PLAN | OQ-PLAN-001 |
 | build | BUILD | OQ-BUILD-001 |
+| review | REVIEW | OQ-REVIEW-001 |
 | gate | GATE | OQ-GATE-001 |
 | deploy | DEPLOY | OQ-DEPLOY-001 |
 | wisdom | WISDOM | OQ-WISDOM-001 |

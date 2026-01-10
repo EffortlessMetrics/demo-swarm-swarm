@@ -462,7 +462,7 @@ bash .claude/scripts/demoswarm.sh openq next-id --file <path> --prefix <prefix>
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--file <path>` | Yes | Path to open_questions.md file |
-| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLN`, `BLD`) |
+| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`) |
 
 **Stdout:** `OQ-<PREFIX>-NNN` (e.g., `OQ-SIG-001`)
 
@@ -498,7 +498,7 @@ bash .claude/scripts/demoswarm.sh openq append \
 | Flag | Required | Description |
 |------|----------|-------------|
 | `--file <path>` | Yes | Path to open_questions.md file |
-| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLN`, `BLD`) |
+| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`) |
 | `--question <text>` | Yes | The open question text |
 | `--default <text>` | Yes | Suggested default answer/assumption |
 | `--impact <text>` | Yes | Impact description if assumption is wrong |

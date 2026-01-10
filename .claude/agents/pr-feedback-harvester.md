@@ -150,20 +150,17 @@ Verify you can:
 
 If `pr_number` is null:
 - Write status with `status: UNVERIFIED`, reason: `no_pr_exists`
-- Recommend: run `pr-creator` first
-- Exit cleanly.
+- Route to **pr-creator** first, then return here.
 
 ### Step 1: Check GitHub Access
 
 If `github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
-- Exit cleanly.
+- Proceed with flow (expected when GitHub access is disabled).
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
-- Exit cleanly.
+- Proceed with flow (auth can be fixed later).
 
 ### Step 2: Harvest All Sources
 
@@ -281,7 +278,7 @@ Write to the flow-specific output directory (`.runs/<run-id>/build/` or `.runs/<
 - **severity:** CRITICAL
 - **source:** CI
 - **category:** TESTS
-- **route_to_agent:** code-implementer
+- **who_should_fix:** code-implementer
 - **evidence:** check:test → auth.test.ts:45 assertion failed
 - **thoughts:** Looks like hashPassword returns undefined for empty input. Test expects an error. Probably a code bug, not test bug.
 
@@ -289,7 +286,7 @@ Write to the flow-specific output directory (`.runs/<run-id>/build/` or `.runs/<
 - **severity:** CRITICAL
 - **source:** CODERABBIT
 - **category:** SECURITY
-- **route_to_agent:** code-implementer
+- **who_should_fix:** code-implementer
 - **evidence:** src/auth.ts:42
 - **thoughts:** Real security issue - md5 for passwords is broken. Should be bcrypt or argon2.
 - **context:** (glanced at code) Line 42 is `crypto.createHash('md5').update(password)`
@@ -332,7 +329,7 @@ IDs are derived from upstream identifiers for stability across reruns:
 - **severity:** CRITICAL | MAJOR | MINOR | INFO
 - **source:** CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
 - **category:** BUILD | TESTS | SECURITY | CORRECTNESS | DOCS | STYLE
-- **route_to_agent:** code-implementer | test-author | fixer | doc-writer
+- **who_should_fix:** code-implementer | test-author | fixer | doc-writer
 - **evidence:** <check name | file:line | comment id/url>
 - **thoughts:** <your quick read - is this valid? outdated? same as another item?>
 - **context:** <optional - what you saw if you glanced at the code>
@@ -350,74 +347,56 @@ IDs are derived from upstream identifiers for stability across reruns:
 - `ci_status == FAILING` means CI failures exist in `blockers[]` (one routing surface, not a separate path)
 - Otherwise ⇒ continue AC loop (MAJOR/MINOR/INFO ignored until Flow 4)
 
-## Result Block
+## Summary Block
 
-After writing outputs, include the **PR Feedback Harvester Result** block in your response. The orchestrator uses this for routing decisions. The artifact file (`pr_feedback.md`) is for audit and downstream agents.
+After writing `pr_feedback.md`, include a summary in your response for the orchestrator:
 
-<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 START -->
-```yaml
-## PR Feedback Harvester Result
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-evidence_sha: <sha>                  # commit being evaluated
-pr_number: <int | null>
+```markdown
+## PR Feedback Summary
 
-ci_status: PASSING | FAILING | PENDING | NONE
-ci_failing_checks: [<check-name>]    # names of failing checks (also appear as blockers)
+**PR:** #<number>
+**CI status:** PASSING | FAILING | PENDING | NONE
+**Commit:** <sha>
 
-blockers_count: <int>                # CRITICAL items only (stop-the-line)
-blockers:                            # top N blockers (cap at 10)
-  - id: FB-CI-<check_run_id> | FB-RC-<review_comment_id> | FB-IC-<issue_comment_id> | FB-RV-<review_id>
-    source: CI | CODERABBIT | REVIEW | LINTER | DEPENDABOT | OTHER
-    severity: CRITICAL               # blockers are CRITICAL-only
-    category: BUILD | TESTS | SECURITY | CORRECTNESS | DOCS | STYLE
-    title: <short title>
-    route_to_agent: code-implementer | test-author | fixer | doc-writer
-    evidence: <check name | file:line | comment id>
-    thoughts: <your quick read on this item>
+**Counts:**
+- Critical: <n>
+- Major: <n>
+- Minor: <n>
+- Info: <n>
 
-counts:
-  total: <n>
-  critical: <n>
-  major: <n>
-  minor: <n>
-  info: <n>
+**Blockers (if any):**
+- FB-CI-xxx: <title> (route to **code-implementer**)
+- FB-RC-xxx: <title> (route to **test-author**)
 
-sources_harvested: [reviews, review_comments, check_runs, ...]
-sources_unavailable: []
+**Sources harvested:** reviews, review_comments, check_runs, ...
+**Sources unavailable:** <any that failed>
 ```
-<!-- PACK-CONTRACT: PR_FEEDBACK_RESULT_V2 END -->
 
 **Key invariants:**
 - **One routing surface**: CI failures, CodeRabbit, human reviews all become blockers with `source` tag — no separate CI path
 - **CRITICAL-only blockers**: `blockers[]` contains only genuine stop-the-line items. MAJOR stays in counts + full `pr_feedback.md`
 - **Stable IDs**: Derived from upstream IDs (check_run_id, review_comment_id, etc.) — reruns don't reshuffle
 - `thoughts` is your intelligent read: valid? outdated? same as another? bot probably wrong?
-- Flow 3 routes on `blockers[]` — the routed agent does deep investigation
+- Flow 3 routes on blockers — the routed agent does deep investigation
 - Flow 4 drains the complete worklist from `pr_feedback.md` (all severities)
-
-**After the Result block, provide a natural handoff:**
 
 ## Handoff
 
-**When blockers found:**
-- "Harvested PR #123 feedback: 2 CRITICAL blockers (CI test failures in auth module, CodeRabbit found md5 password hashing). 5 MAJOR items and 8 MINOR suggestions in full worklist. CI status: FAILING (2 checks)."
-- Next step: Fix blockers immediately (Flow 3 interrupts AC loop)
+After writing outputs, provide a natural language handoff to the orchestrator.
 
-**When no blockers, items available:**
-- "Harvested PR #123 feedback: CI passing, CodeRabbit posted 12 suggestions (0 CRITICAL, 4 MAJOR, 8 MINOR). Human reviewer requested test additions (MAJOR). Full worklist ready for Flow 4."
-- Next step: Continue AC loop (Flow 3) or drain worklist (Flow 4)
+**What I did:** Summarize what feedback was harvested, CI status, and blocker count.
 
-**When feedback not available yet:**
-- "Harvested PR #123: CI checks still pending (3/5 in_progress), no bot comments yet. Will catch feedback on next iteration."
-- Next step: Proceed (feedback will appear later)
+**What's left:** Note if feedback sources are still pending or unavailable.
 
-**When no PR exists:**
-- "Cannot harvest feedback — PR doesn't exist yet. Run pr-creator first."
-- Next step: Create PR, then harvest
+**Recommendation:** Name a specific agent and explain your reasoning:
 
-**When auth missing:**
-- "Skipped feedback harvest — gh not authenticated or github_ops_allowed is false."
-- Next step: Proceed (expected when GitHub access is disabled)
+- Blockers found: "Harvested PR #123 feedback: 2 CRITICAL blockers (CI test failures, security issue). Recommend **code-implementer** for immediate fixes (Flow 3 interrupt)."
+- No blockers, items available: "Harvested PR #123 feedback: CI passing, 12 suggestions (0 CRITICAL). Recommend **review-worklist-writer** to cluster into Work Items for Flow 4."
+- Feedback not available yet: "CI checks still pending. Recommend proceeding with flow; next iteration will catch new feedback."
+- No PR exists: "Cannot harvest feedback — no PR yet. Recommend **pr-creator** first."
+- Auth missing: "Skipped feedback harvest — gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
+
+**Your default recommendation:** Route to **review-worklist-writer** to convert feedback into actionable Work Items.
 
 ## Hard Rules
 

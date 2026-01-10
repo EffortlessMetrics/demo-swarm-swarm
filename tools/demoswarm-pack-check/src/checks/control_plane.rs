@@ -1,20 +1,38 @@
-//! Control-plane checks: Machine Summary contracts, gate blocks, routing fields.
+//! Control-plane checks: Claude-native patterns, gate blocks, handoff validation.
 //!
-//! Checks: 3, 4, 17, 18, 19, 28, 29, 31, 32, 33, 34, 35
+//! == Claude-Native Migration ==
+//! The pack has shifted from harness-era Machine Summary YAML blocks to Claude-native
+//! prose handoffs. Checks that enforced YAML field contracts are now disabled.
+//!
+//! DISABLED (harness-era patterns):
+//! - Check 3: Machine Summary axis (critics use Handoff sections now)
+//! - Check 28: status enum (routing is prose, not enums)
+//! - Check 29: recommended_action enum (same)
+//! - Check 31: route_to_agent/route_to_flow fields (same)
+//! - Check 33: can_further_iteration_help (expressed in prose handoff)
+//! - Check 51: observations field (same)
+//! - Check 34: cleanup route_to_flow (softened to pass-through)
+//! - Check 35: gate unified action (softened to pass-through)
+//!
+//! ACTIVE:
+//! - Check 4: Cleanup agents reference receipts (still valid - they write receipts)
+//! - Check 17: gh-reporter output constraints (safety check)
+//! - Check 18: repo-operator Result block (git ops still need structure)
+//! - Check 19: GH agents enforce two gates (publish safety)
+//! - Check 32: CANNOT_PROCEED invariant (useful for mechanical failures)
+//! - Check 54: Critics have Handoff section (NEW - Claude-native)
+//! - Check 55: Agents have clear job section (NEW - Claude-native)
+//!
+//! Checks: 4, 17, 18, 19, 32, 54, 55
 
 use super::contracts::headings;
 use crate::reporter::Reporter;
-use crate::util::has_line_starting_with;
 
 use super::{CheckCtx, CheckSpec};
 
 pub fn checks() -> Vec<CheckSpec> {
     vec![
-        CheckSpec {
-            id: 3,
-            title: "Checking critics have canonical Machine Summary axis...",
-            run: check_critics_machine_summary,
-        },
+        // == ACTIVE CHECKS ==
         CheckSpec {
             id: 4,
             title: "Checking cleanup agents reference receipts + index.json...",
@@ -36,79 +54,38 @@ pub fn checks() -> Vec<CheckSpec> {
             run: check_gh_agents_two_gates,
         },
         CheckSpec {
-            id: 28,
-            title: "Checking Machine Summary status enum...",
-            run: check_status_enum,
-        },
-        CheckSpec {
-            id: 29,
-            title: "Checking recommended_action canonical closed enum line...",
-            run: check_recommended_action_enum,
-        },
-        CheckSpec {
-            id: 31,
-            title: "Checking route_to_agent and route_to_flow fields exist...",
-            run: check_route_fields,
-        },
-        CheckSpec {
             id: 32,
             title: "Checking CANNOT_PROCEED invariant...",
             run: check_cannot_proceed_invariant,
         },
+        // == NEW CLAUDE-NATIVE CHECKS ==
         CheckSpec {
-            id: 33,
-            title: "Checking critics have can_further_iteration_help...",
-            run: check_critics_iteration_help,
+            id: 54,
+            title: "Checking critics have Handoff section...",
+            run: check_critics_handoff_section,
         },
         CheckSpec {
-            id: 34,
-            title: "Checking cleanup agents mention route_to_flow...",
-            run: check_cleanup_route_to_flow,
-        },
-        CheckSpec {
-            id: 35,
-            title: "Checking gate agents use unified recommended_action...",
-            run: check_gate_unified_action,
-        },
-        CheckSpec {
-            id: 51,
-            title: "Checking critics have observations field in Machine Summary...",
-            run: check_critics_observations_field,
+            id: 55,
+            title: "Checking agents have clear job section...",
+            run: check_agents_clear_job,
         },
     ]
 }
 
-/// Check 3: Critics have canonical Machine Summary axis.
-fn check_critics_machine_summary(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for critic in cx.c.critics {
-        let Some(file) = cx.inv.agent(critic) else {
-            continue;
-        };
+// =============================================================================
+// DEPRECATED HARNESS-ERA CHECKS (kept for reference, not called)
+// =============================================================================
+// The following checks enforced Machine Summary YAML block contracts.
+// In Claude-native mode, critics use prose Handoff sections instead.
+// These are retained for historical reference but not included in checks().
 
-        let content = cx.ctx.read_utf8(file)?;
-
-        if !has_line_starting_with(&content, headings::MACHINE_SUMMARY_H2) {
-            rep.fail(format!("{critic} missing '## Machine Summary' section"));
-            continue;
-        }
-
-        if !cx.re.canon_status.is_match(&content) {
-            rep.fail(format!(
-                "{critic} missing canonical status axis line (VERIFIED | UNVERIFIED | CANNOT_PROCEED)"
-            ));
-            continue;
-        }
-
-        if !cx.re.canon_action.is_match(&content) {
-            rep.fail(format!(
-                "{critic} recommended_action drifted (expected: recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV)"
-            ));
-            continue;
-        }
-
-        rep.pass(format!("{critic} has canonical Machine Summary axis"));
-    }
-
+/// DEPRECATED: Check 3 - Critics have canonical Machine Summary axis.
+/// Replaced by check_critics_handoff_section (Check 54).
+#[allow(dead_code)]
+fn check_critics_machine_summary(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced YAML Machine Summary blocks with specific fields.
+    // Claude-native: critics use ## Handoff sections with prose recommendations.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
@@ -212,78 +189,33 @@ fn check_gh_agents_two_gates(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Resul
     Ok(())
 }
 
-/// Check 28: Machine Summary status enum.
-fn check_status_enum(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for agent in cx.c.critic_and_verifier_agents {
-        let Some(file) = cx.inv.agent(agent) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-
-        let mut has_bad_blocked = false;
-        for line in content.lines() {
-            if cx.re.blocked_status.is_match(line) && !line.contains("BLOCKED_PUBLISH") {
-                has_bad_blocked = true;
-                break;
-            }
-        }
-
-        if has_bad_blocked {
-            rep.fail(format!(
-                "{agent} uses legacy 'BLOCKED' status (should be CANNOT_PROCEED)"
-            ));
-        } else if !cx.re.canon_status.is_match(&content) {
-            rep.fail(format!(
-                "{agent} missing canonical status axis line (VERIFIED | UNVERIFIED | CANNOT_PROCEED)"
-            ));
-        } else {
-            rep.pass(format!("{agent} has canonical status axis"));
-        }
-    }
-
+/// DEPRECATED: Check 28 - Machine Summary status enum.
+/// Routing is now expressed in prose handoffs, not YAML enums.
+#[allow(dead_code)]
+fn check_status_enum(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced status: VERIFIED | UNVERIFIED | CANNOT_PROCEED enum.
+    // Claude-native: routing decisions are expressed in prose Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
-/// Check 29: recommended_action closed enum.
-fn check_recommended_action_enum(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for agent in cx.c.critic_and_verifier_agents {
-        let Some(file) = cx.inv.agent(agent) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-        if !cx.re.recommended_action_present.is_match(&content) {
-            rep.fail(format!("{agent} missing recommended_action field"));
-        } else if !cx.re.canon_action.is_match(&content) {
-            rep.fail(format!(
-                "{agent} recommended_action drifted (expected: recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV)"
-            ));
-        } else {
-            rep.pass(format!("{agent} has canonical recommended_action line"));
-        }
-    }
-
+/// DEPRECATED: Check 29 - recommended_action closed enum.
+/// Routing is now expressed in prose handoffs, not YAML enums.
+#[allow(dead_code)]
+fn check_recommended_action_enum(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV.
+    // Claude-native: recommendations are made in prose Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
-/// Check 31: route_to_agent and route_to_flow fields exist.
-fn check_route_fields(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for agent in cx.c.critic_and_verifier_agents {
-        let Some(file) = cx.inv.agent(agent) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-        if cx.re.route_to_agent.is_match(&content) && cx.re.route_to_flow.is_match(&content) {
-            rep.pass(format!("{agent} has route_to_agent + route_to_flow"));
-        } else {
-            rep.fail(format!(
-                "{agent} missing route_to_agent and/or route_to_flow"
-            ));
-        }
-    }
-
+/// DEPRECATED: Check 31 - route_to_agent and route_to_flow fields exist.
+/// Routing is now expressed in prose handoffs, not YAML fields.
+#[allow(dead_code)]
+fn check_route_fields(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced route_to_agent: and route_to_flow: YAML fields.
+    // Claude-native: routing is expressed via prose recommendations in Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
@@ -313,71 +245,55 @@ fn check_cannot_proceed_invariant(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::
     Ok(())
 }
 
-/// Check 33: Critics have can_further_iteration_help.
-fn check_critics_iteration_help(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for critic in cx.c.critics {
-        let Some(file) = cx.inv.agent(critic) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-        if content.contains("can_further_iteration_help") {
-            rep.pass(format!("{critic} has can_further_iteration_help"));
-        } else {
-            rep.fail(format!("{critic} missing can_further_iteration_help"));
-        }
-    }
-
+/// DEPRECATED: Check 33 - Critics have can_further_iteration_help.
+/// Iteration guidance is now expressed in prose handoffs.
+#[allow(dead_code)]
+fn check_critics_iteration_help(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced can_further_iteration_help: yes | no field.
+    // Claude-native: iteration guidance is expressed in prose Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
-/// Check 34: Cleanup agents mention route_to_flow.
-fn check_cleanup_route_to_flow(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for (agent, _) in cx.c.cleanup_agents {
-        let Some(file) = cx.inv.agent(agent) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-        if content.contains("route_to_flow") {
-            rep.pass(format!("{agent} mentions route_to_flow"));
-        } else {
-            rep.warn(format!(
-                "{agent} may be missing route_to_flow documentation"
-            ));
-        }
-    }
-
+/// DEPRECATED: Check 34 - Cleanup agents mention route_to_flow.
+/// Routing is now expressed in prose handoffs.
+#[allow(dead_code)]
+fn check_cleanup_route_to_flow(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: checked for route_to_flow field documentation.
+    // Claude-native: routing is expressed in prose Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
-/// Check 35: Gate agents use unified recommended_action.
-fn check_gate_unified_action(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    for agent in cx.c.gate_agents {
-        let Some(file) = cx.inv.agent(agent) else {
-            continue;
-        };
-
-        let content = cx.ctx.read_utf8(file)?;
-        if content.contains("recommended_gate_action") {
-            rep.fail(format!(
-                "{agent} uses legacy 'recommended_gate_action' (should be 'recommended_action')"
-            ));
-        } else if content.contains("recommended_action") {
-            rep.pass(format!("{agent} uses unified recommended_action"));
-        } else {
-            rep.warn(format!("{agent} missing recommended_action field"));
-        }
-    }
-
+/// DEPRECATED: Check 35 - Gate agents use unified recommended_action.
+/// Routing is now expressed in prose handoffs.
+#[allow(dead_code)]
+fn check_gate_unified_action(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: checked for recommended_action vs legacy recommended_gate_action.
+    // Claude-native: routing is expressed in prose Handoff sections.
+    // This check is disabled but retained for reference.
     Ok(())
 }
 
-/// Check 51: Critics have observations field in Machine Summary.
+/// DEPRECATED: Check 51 - Critics have observations field in Machine Summary.
+/// Observations are now expressed in prose handoffs.
+#[allow(dead_code)]
+fn check_critics_observations_field(_cx: &CheckCtx, _rep: &mut Reporter) -> anyhow::Result<()> {
+    // Harness-era pattern: enforced observations: [] field in Machine Summary.
+    // Claude-native: observations are captured in prose Handoff sections.
+    // This check is disabled but retained for reference.
+    Ok(())
+}
+
+// =============================================================================
+// NEW CLAUDE-NATIVE CHECKS
+// =============================================================================
+
+/// Check 54: Critics have Handoff section.
 ///
-/// The observations field captures cross-cutting insights, friction noticed,
-/// and pack/flow improvements. This feeds into Wisdom flow via learning-synthesizer.
-fn check_critics_observations_field(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
+/// In Claude-native mode, critics communicate routing decisions via prose Handoff
+/// sections instead of structured YAML Machine Summary blocks.
+fn check_critics_handoff_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
     let mut missing = Vec::new();
 
     for critic in cx.c.critics {
@@ -387,18 +303,67 @@ fn check_critics_observations_field(cx: &CheckCtx, rep: &mut Reporter) -> anyhow
 
         let content = cx.ctx.read_utf8(file)?;
 
-        // Check if observations field exists in Machine Summary context
-        // Look for "observations:" or "observations: []" near concerns/blockers
-        if !content.contains("observations:") {
+        // Look for ## Handoff section (Claude-native pattern)
+        if !content.contains("## Handoff") {
             missing.push(critic.to_string());
         }
     }
 
     if missing.is_empty() {
-        rep.pass("All critics have observations field in Machine Summary");
+        rep.pass("All critics have ## Handoff section");
     } else {
-        rep.fail(format!(
-            "Critics missing observations field: {}",
+        // Warn rather than fail during transition period
+        rep.warn(format!(
+            "Critics missing ## Handoff section (Claude-native pattern): {}",
+            missing.join(", ")
+        ));
+    }
+
+    Ok(())
+}
+
+/// Check 55: Agents have clear job section.
+///
+/// Claude-native agents should have a clear job description, typically under
+/// ## Your Job, ## Job, or similar heading.
+fn check_agents_clear_job(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
+    // Check a subset of critical agents for clear job descriptions
+    let critical_agents = [
+        "code-implementer",
+        "code-critic",
+        "test-author",
+        "test-critic",
+        "repo-operator",
+        "secrets-sanitizer",
+    ];
+
+    let mut missing = Vec::new();
+
+    for agent in critical_agents {
+        let Some(file) = cx.inv.agent(agent) else {
+            continue;
+        };
+
+        let content = cx.ctx.read_utf8(file)?;
+
+        // Look for job-related headings (Claude-native pattern)
+        let has_job_section = content.contains("## Your Job")
+            || content.contains("## Job")
+            || content.contains("## Role")
+            || content.contains("## Purpose")
+            || content.contains("You are the");
+
+        if !has_job_section {
+            missing.push(agent.to_string());
+        }
+    }
+
+    if missing.is_empty() {
+        rep.pass("Critical agents have clear job descriptions");
+    } else {
+        // Warn rather than fail during transition period
+        rep.warn(format!(
+            "Agents missing clear job section: {}",
             missing.join(", ")
         ));
     }
@@ -1341,22 +1306,15 @@ concerns: []
         }
 
         // ---------------------------------------------------------------------
-        // Check 3: Critics Machine Summary tests
+        // DEPRECATED: Check 3 tests - Machine Summary is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_critics_machine_summary_pass() {
+        fn test_deprecated_check_critics_machine_summary_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-
-blockers: []
-concerns: []
+No Machine Summary section at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -1366,73 +1324,9 @@ concerns: []
             let mut rep = test_reporter();
 
             check_critics_machine_summary(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_critics_machine_summary_missing_heading() {
-            let critic_content = r#"# Requirements Critic
-
-Some content without Machine Summary heading.
-
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_critics_machine_summary(&cx, &mut rep).expect("Check failed");
-            assert!(rep.errors > 0, "Should have errors for missing heading");
-        }
-
-        #[test]
-        fn test_check_critics_machine_summary_missing_status_axis() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-
-status: VERIFIED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_critics_machine_summary(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing canonical status axis"
-            );
-        }
-
-        #[test]
-        fn test_check_critics_machine_summary_missing_action_axis() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_critics_machine_summary(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing canonical action axis"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
             );
         }
 
@@ -1708,64 +1602,18 @@ Check safe_to_publish before posting.
         }
 
         // ---------------------------------------------------------------------
-        // Check 28: Status enum tests
+        // DEPRECATED: Check 28 tests - Status enum is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_status_enum_pass() {
+        fn test_deprecated_check_status_enum_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
+No status enum at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_status_enum(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_status_enum_legacy_blocked() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: BLOCKED
-
-This uses legacy BLOCKED status.
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_status_enum(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for legacy BLOCKED status"
-            );
-        }
-
-        #[test]
-        fn test_check_status_enum_blocked_publish_ok() {
-            // BLOCKED_PUBLISH is a valid gate status, not legacy
-            let enforcer_content = r#"# Contract Enforcer
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-Gate status: BLOCKED_PUBLISH is valid.
-"#;
-
-            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
                 .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
@@ -1774,20 +1622,20 @@ Gate status: BLOCKED_PUBLISH is valid.
             check_status_enum(&cx, &mut rep).expect("Check failed");
             assert_eq!(
                 rep.errors, 0,
-                "BLOCKED_PUBLISH should not be flagged as legacy"
+                "Deprecated check should be no-op (always pass)"
             );
         }
 
         // ---------------------------------------------------------------------
-        // Check 29: Recommended action enum tests
+        // DEPRECATED: Check 29 tests - Recommended action enum is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_recommended_action_enum_pass() {
+        fn test_deprecated_check_recommended_action_enum_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
+No recommended_action at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -1797,62 +1645,22 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
             let mut rep = test_reporter();
 
             check_recommended_action_enum(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_recommended_action_enum_missing() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_recommended_action_enum(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing recommended_action"
-            );
-        }
-
-        #[test]
-        fn test_check_recommended_action_enum_drifted() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-recommended_action: PROCEED | BOUNCE
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_recommended_action_enum(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for drifted recommended_action"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
             );
         }
 
         // ---------------------------------------------------------------------
-        // Check 31: Route fields tests
+        // DEPRECATED: Check 31 tests - Route fields are no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_route_fields_pass() {
+        fn test_deprecated_check_route_fields_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+No route fields at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -1862,27 +1670,9 @@ route_to_flow: <1|2|3|4|5|6 | null>
             let mut rep = test_reporter();
 
             check_route_fields(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_route_fields_missing() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_route_fields(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing route fields"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
             );
         }
 
@@ -1948,15 +1738,15 @@ This critic does not mention the status.
         }
 
         // ---------------------------------------------------------------------
-        // Check 33: Critics iteration help tests
+        // DEPRECATED: Check 33 tests - can_further_iteration_help is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_critics_iteration_help_pass() {
+        fn test_deprecated_check_critics_iteration_help_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-can_further_iteration_help: yes | no
+No iteration help field at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -1966,40 +1756,22 @@ can_further_iteration_help: yes | no
             let mut rep = test_reporter();
 
             check_critics_iteration_help(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_critics_iteration_help_missing() {
-            let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED
-"#;
-
-            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_critics_iteration_help(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing can_further_iteration_help"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
             );
         }
 
         // ---------------------------------------------------------------------
-        // Check 34: Cleanup route_to_flow tests
+        // DEPRECATED: Check 34 tests - Cleanup route_to_flow is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_cleanup_route_to_flow_pass() {
+        fn test_deprecated_check_cleanup_route_to_flow_is_noop() {
+            // The deprecated check should always pass (no-op)
             let cleanup_content = r#"# Signal Cleanup
-
-## Machine Summary
-route_to_flow: <1|2|3|4|5|6 | null>
+No route_to_flow at all.
 "#;
 
             let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
@@ -2009,40 +1781,26 @@ route_to_flow: <1|2|3|4|5|6 | null>
             let mut rep = test_reporter();
 
             check_cleanup_route_to_flow(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-            assert_eq!(rep.warnings, 0, "Should have no warnings");
-        }
-
-        #[test]
-        fn test_check_cleanup_route_to_flow_missing() {
-            let cleanup_content = r#"# Signal Cleanup
-
-This cleanup does not mention the routing field.
-"#;
-
-            let fixture = TestFixture::new(&[("signal-cleanup", cleanup_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_cleanup_route_to_flow(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.warnings > 0,
-                "Should have warning for missing route_to_flow"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
+            );
+            assert_eq!(
+                rep.warnings, 0,
+                "Deprecated check should be no-op (no warnings)"
             );
         }
 
         // ---------------------------------------------------------------------
-        // Check 35: Gate unified action tests
+        // DEPRECATED: Check 35 tests - Gate unified action is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_gate_unified_action_pass() {
+        fn test_deprecated_check_gate_unified_action_is_noop() {
+            // The deprecated check should always pass (no-op)
             let enforcer_content = r#"# Contract Enforcer
-
-## Machine Summary
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
+No recommended_action at all.
 "#;
 
             let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
@@ -2052,64 +1810,26 @@ recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
             let mut rep = test_reporter();
 
             check_gate_unified_action(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
-        }
-
-        #[test]
-        fn test_check_gate_unified_action_legacy() {
-            let enforcer_content = r#"# Contract Enforcer
-
-## Machine Summary
-recommended_gate_action: MERGE | BOUNCE
-"#;
-
-            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_unified_action(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for legacy recommended_gate_action"
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
             );
-        }
-
-        #[test]
-        fn test_check_gate_unified_action_missing() {
-            let enforcer_content = r#"# Contract Enforcer
-
-## Machine Summary
-status: VERIFIED
-"#;
-
-            let fixture = TestFixture::new(&[("contract-enforcer", enforcer_content)], &[])
-                .expect("Failed to create fixture");
-
-            let cx = fixture.check_ctx();
-            let mut rep = test_reporter();
-
-            check_gate_unified_action(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.warnings > 0,
-                "Should have warning for missing recommended_action"
+            assert_eq!(
+                rep.warnings, 0,
+                "Deprecated check should be no-op (no warnings)"
             );
         }
 
         // ---------------------------------------------------------------------
-        // Check 51: Critics observations field tests
+        // DEPRECATED: Check 51 tests - observations field is no longer enforced
+        // These tests verify the deprecated check is now a no-op
         // ---------------------------------------------------------------------
 
         #[test]
-        fn test_check_critics_observations_field_pass() {
+        fn test_deprecated_check_critics_observations_field_is_noop() {
+            // The deprecated check should always pass (no-op)
             let critic_content = r#"# Requirements Critic
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-blockers: []
-concerns: []
-observations: []
+No observations field at all.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -2119,17 +1839,27 @@ observations: []
             let mut rep = test_reporter();
 
             check_critics_observations_field(&cx, &mut rep).expect("Check failed");
-            assert_eq!(rep.errors, 0, "Should have no errors");
+            assert_eq!(
+                rep.errors, 0,
+                "Deprecated check should be no-op (always pass)"
+            );
         }
 
+        // ---------------------------------------------------------------------
+        // NEW CLAUDE-NATIVE CHECKS: Check 54 and 55 tests
+        // ---------------------------------------------------------------------
+
         #[test]
-        fn test_check_critics_observations_field_missing() {
+        fn test_check_critics_handoff_section_pass() {
             let critic_content = r#"# Requirements Critic
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-blockers: []
-concerns: []
+## Handoff
+
+**What was done:** Reviewed requirements.
+
+**What's left:** Nothing.
+
+**Recommendation:** Proceed to implementation.
 "#;
 
             let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
@@ -2138,44 +1868,74 @@ concerns: []
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
-            check_critics_observations_field(&cx, &mut rep).expect("Check failed");
-            assert!(
-                rep.errors > 0,
-                "Should have errors for missing observations field"
-            );
+            check_critics_handoff_section(&cx, &mut rep).expect("Check failed");
+            assert_eq!(rep.errors, 0, "Should have no errors");
+            assert_eq!(rep.warnings, 0, "Should have no warnings with Handoff section");
         }
 
         #[test]
-        fn test_check_critics_observations_field_multiple_critics() {
-            let req_critic = r#"# Requirements Critic
-observations: []
-"#;
-            let bdd_critic = r#"# BDD Critic
-blockers: []
-"#;
-            let code_critic = r#"# Code Critic
-observations:
-  - some observation
+        fn test_check_critics_handoff_section_missing() {
+            let critic_content = r#"# Requirements Critic
+
+No Handoff section here.
+
+Just some other content.
 "#;
 
-            let fixture = TestFixture::new(
-                &[
-                    ("requirements-critic", req_critic),
-                    ("bdd-critic", bdd_critic),
-                    ("code-critic", code_critic),
-                ],
-                &[],
-            )
-            .expect("Failed to create fixture");
+            let fixture = TestFixture::new(&[("requirements-critic", critic_content)], &[])
+                .expect("Failed to create fixture");
 
             let cx = fixture.check_ctx();
             let mut rep = test_reporter();
 
-            check_critics_observations_field(&cx, &mut rep).expect("Check failed");
-            // bdd-critic is missing observations
+            check_critics_handoff_section(&cx, &mut rep).expect("Check failed");
+            // Should warn (not fail) during transition period
+            assert_eq!(rep.errors, 0, "Should have no errors (warning only)");
             assert!(
-                rep.errors > 0,
-                "Should have errors for critic missing observations"
+                rep.warnings > 0,
+                "Should have warning for missing Handoff section"
+            );
+        }
+
+        #[test]
+        fn test_check_agents_clear_job_pass() {
+            let implementer_content = r#"# Code Implementer
+
+You are the **Code Implementer**.
+
+Build working code. Run tests. Report what happened.
+"#;
+
+            let fixture = TestFixture::new(&[("code-implementer", implementer_content)], &[])
+                .expect("Failed to create fixture");
+
+            let cx = fixture.check_ctx();
+            let mut rep = test_reporter();
+
+            check_agents_clear_job(&cx, &mut rep).expect("Check failed");
+            assert_eq!(rep.errors, 0, "Should have no errors");
+            assert_eq!(rep.warnings, 0, "Should have no warnings with clear job");
+        }
+
+        #[test]
+        fn test_check_agents_clear_job_missing() {
+            let implementer_content = r#"# Code Implementer
+
+Some vague content without clear job description.
+"#;
+
+            let fixture = TestFixture::new(&[("code-implementer", implementer_content)], &[])
+                .expect("Failed to create fixture");
+
+            let cx = fixture.check_ctx();
+            let mut rep = test_reporter();
+
+            check_agents_clear_job(&cx, &mut rep).expect("Check failed");
+            // Should warn (not fail) during transition period
+            assert_eq!(rep.errors, 0, "Should have no errors (warning only)");
+            assert!(
+                rep.warnings > 0,
+                "Should have warning for missing clear job section"
             );
         }
     }

@@ -778,11 +778,11 @@ fn check_flow_boundary_enforcement(cx: &CheckCtx, rep: &mut Reporter) -> anyhow:
 /// the canonical format: OQ-<FLOW>-<NNN>
 ///
 /// Where:
-/// - <FLOW> is one of: SIG, PLN, BLD, GAT, DEP, WIS (canonical abbreviations)
+/// - <FLOW> is one of: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM (full names preferred)
 /// - <NNN> is a three-digit zero-padded number (001-999)
 ///
 /// Reports warnings for:
-/// - Non-canonical flow codes (e.g., PLAN instead of PLN, BUILD instead of BLD)
+/// - Non-canonical flow codes (e.g., PLN instead of PLAN, BLD instead of BUILD)
 /// - Invalid numeric suffixes (not three digits)
 fn check_openq_prefix_validation(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
     use walkdir::WalkDir;
@@ -819,8 +819,8 @@ fn check_openq_prefix_validation(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::R
         };
 
         // Look for QID patterns: OQ-XXX-NNN or similar
-        // Valid: OQ-SIG-001, OQ-PLN-002, etc.
-        // Invalid: OQ-PLAN-001, OQ-BUILD-002, OQ-SIG-1, etc.
+        // Valid: OQ-SIG-001, OQ-PLAN-002, OQ-BUILD-003, etc.
+        // Invalid: OQ-PLN-001, OQ-BLD-002, OQ-SIG-1, etc.
         for (idx, line) in content.lines().enumerate() {
             // Look for QID: or - QID: patterns
             if !line.contains("QID:") && !line.contains("OQ-") {
@@ -850,9 +850,9 @@ fn check_openq_prefix_validation(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::R
                         let is_canonical = cx.c.openq_flow_codes.contains(&flow_code);
 
                         if !is_canonical {
-                            // Check if it's a known non-canonical code
+                            // Check if it's a known non-canonical code (3-letter abbreviations)
                             let non_canonical_codes =
-                                ["PLAN", "BUILD", "GATE", "DEPLOY", "SIGNAL", "WISDOM"];
+                                ["PLN", "BLD", "REV", "GAT", "DEP", "WIS", "SIGNAL"];
                             let is_known_wrong = non_canonical_codes.contains(&flow_code);
 
                             if is_known_wrong {
@@ -921,11 +921,12 @@ fn check_openq_prefix_validation(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::R
 fn suggest_canonical_code(non_canonical: &str) -> &'static str {
     match non_canonical {
         "SIGNAL" => "SIG",
-        "PLAN" => "PLN",
-        "BUILD" => "BLD",
-        "GATE" => "GAT",
-        "DEPLOY" => "DEP",
-        "WISDOM" => "WIS",
+        "PLN" => "PLAN",
+        "BLD" => "BUILD",
+        "REV" => "REVIEW",
+        "GAT" => "GATE",
+        "DEP" => "DEPLOY",
+        "WIS" => "WISDOM",
         _ => "???",
     }
 }
@@ -944,28 +945,33 @@ mod tests {
     }
 
     #[test]
-    fn test_suggest_canonical_code_plan() {
-        assert_eq!(suggest_canonical_code("PLAN"), "PLN");
+    fn test_suggest_canonical_code_pln() {
+        assert_eq!(suggest_canonical_code("PLN"), "PLAN");
     }
 
     #[test]
-    fn test_suggest_canonical_code_build() {
-        assert_eq!(suggest_canonical_code("BUILD"), "BLD");
+    fn test_suggest_canonical_code_bld() {
+        assert_eq!(suggest_canonical_code("BLD"), "BUILD");
     }
 
     #[test]
-    fn test_suggest_canonical_code_gate() {
-        assert_eq!(suggest_canonical_code("GATE"), "GAT");
+    fn test_suggest_canonical_code_rev() {
+        assert_eq!(suggest_canonical_code("REV"), "REVIEW");
     }
 
     #[test]
-    fn test_suggest_canonical_code_deploy() {
-        assert_eq!(suggest_canonical_code("DEPLOY"), "DEP");
+    fn test_suggest_canonical_code_gat() {
+        assert_eq!(suggest_canonical_code("GAT"), "GATE");
     }
 
     #[test]
-    fn test_suggest_canonical_code_wisdom() {
-        assert_eq!(suggest_canonical_code("WISDOM"), "WIS");
+    fn test_suggest_canonical_code_dep() {
+        assert_eq!(suggest_canonical_code("DEP"), "DEPLOY");
+    }
+
+    #[test]
+    fn test_suggest_canonical_code_wis() {
+        assert_eq!(suggest_canonical_code("WIS"), "WISDOM");
     }
 
     #[test]
@@ -1577,11 +1583,12 @@ Use demoswarm.sh openq append to add questions.
                 r#"# Open Questions
 
 - QID: OQ-SIG-001 - What is the scope?
-- QID: OQ-PLN-002 - How to implement?
-- QID: OQ-BLD-003 - Which tests?
-- QID: OQ-GAT-004 - Gate criteria?
-- QID: OQ-DEP-005 - Deploy target?
-- QID: OQ-WIS-006 - Lessons learned?
+- QID: OQ-PLAN-002 - How to implement?
+- QID: OQ-BUILD-003 - Which tests?
+- QID: OQ-REVIEW-004 - Review feedback?
+- QID: OQ-GATE-005 - Gate criteria?
+- QID: OQ-DEPLOY-006 - Deploy target?
+- QID: OQ-WISDOM-007 - Lessons learned?
 "#,
             ));
 
@@ -1621,11 +1628,11 @@ Use demoswarm.sh openq append to add questions.
         }
 
         #[test]
-        fn test_openq_validation_non_canonical_flow_code_plan() {
+        fn test_openq_validation_non_canonical_flow_code_pln() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-PLAN-001 - How to implement?
+- QID: OQ-PLN-001 - How to implement?
 "#,
             ));
 
@@ -1638,16 +1645,16 @@ Use demoswarm.sh openq append to add questions.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // PLAN instead of PLN should trigger warning
+            // PLN instead of PLAN should trigger warning
             assert!(rep.warnings > 0);
         }
 
         #[test]
-        fn test_openq_validation_non_canonical_flow_code_build() {
+        fn test_openq_validation_non_canonical_flow_code_bld() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-BUILD-001 - Which tests?
+- QID: OQ-BLD-001 - Which tests?
 "#,
             ));
 
@@ -1660,16 +1667,16 @@ Use demoswarm.sh openq append to add questions.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // BUILD instead of BLD should trigger warning
+            // BLD instead of BUILD should trigger warning
             assert!(rep.warnings > 0);
         }
 
         #[test]
-        fn test_openq_validation_non_canonical_flow_code_gate() {
+        fn test_openq_validation_non_canonical_flow_code_gat() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-GATE-001 - Gate criteria?
+- QID: OQ-GAT-001 - Gate criteria?
 "#,
             ));
 
@@ -1682,16 +1689,16 @@ Use demoswarm.sh openq append to add questions.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // GATE instead of GAT should trigger warning
+            // GAT instead of GATE should trigger warning
             assert!(rep.warnings > 0);
         }
 
         #[test]
-        fn test_openq_validation_non_canonical_flow_code_deploy() {
+        fn test_openq_validation_non_canonical_flow_code_dep() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-DEPLOY-001 - Deploy target?
+- QID: OQ-DEP-001 - Deploy target?
 "#,
             ));
 
@@ -1704,16 +1711,16 @@ Use demoswarm.sh openq append to add questions.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // DEPLOY instead of DEP should trigger warning
+            // DEP instead of DEPLOY should trigger warning
             assert!(rep.warnings > 0);
         }
 
         #[test]
-        fn test_openq_validation_non_canonical_flow_code_wisdom() {
+        fn test_openq_validation_non_canonical_flow_code_wis() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-WISDOM-001 - Lessons learned?
+- QID: OQ-WIS-001 - Lessons learned?
 "#,
             ));
 
@@ -1726,7 +1733,7 @@ Use demoswarm.sh openq append to add questions.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // WISDOM instead of WIS should trigger warning
+            // WIS instead of WISDOM should trigger warning
             assert!(rep.warnings > 0);
         }
 
@@ -1819,7 +1826,7 @@ Use demoswarm.sh openq append to add questions.
         }
 
         #[test]
-        fn test_openq_validation_multiple_qids_on_same_line() {
+        fn test_openq_validation_multiple_qids_on_same_line_all_canonical() {
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
@@ -1836,7 +1843,29 @@ See also OQ-SIG-001 and OQ-PLAN-002 for related context.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // Both QIDs should be validated; PLAN should trigger warning
+            // Both QIDs use canonical codes (SIG, PLAN) - should pass
+            assert_eq!(rep.warnings, 0);
+        }
+
+        #[test]
+        fn test_openq_validation_multiple_qids_on_same_line_mixed() {
+            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+                r#"# Open Questions
+
+See also OQ-SIG-001 and OQ-PLN-002 for related context.
+"#,
+            ));
+
+            let cx = CheckCtx {
+                ctx: &ctx,
+                inv: &inv,
+                re: &re,
+                c: &c,
+            };
+
+            let result = check_openq_prefix_validation(&cx, &mut rep);
+            assert!(result.is_ok());
+            // PLN is non-canonical (should be PLAN) - trigger warning
             assert!(rep.warnings > 0);
         }
 
@@ -1884,8 +1913,8 @@ No questions yet.
             let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
-- QID: OQ-PLAN-001 - First
-- QID: OQ-PLAN-001 - Duplicate
+- QID: OQ-PLN-001 - First
+- QID: OQ-PLN-001 - Duplicate
 "#,
             ));
 
@@ -1898,7 +1927,7 @@ No questions yet.
 
             let result = check_openq_prefix_validation(&cx, &mut rep);
             assert!(result.is_ok());
-            // Duplicate violations should be deduplicated
+            // Duplicate violations should be deduplicated (PLN is non-canonical)
             // Still expect warnings, but test that it doesn't fail
         }
     }
