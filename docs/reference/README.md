@@ -17,4 +17,5 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Navigate the repo | [Repo Map](repo-map.md) |
 | Understand model tiers | [Model Allocation](model-allocation.md) |
 | Understand evidence hierarchy | [Trust Model](trust-model.md) |
+| Review a PR produced by DemoSwarm | [PR Review Interface](pr-review-interface.md) |
 | Write documentation | [Documentation Conventions](documentation-conventions.md) |

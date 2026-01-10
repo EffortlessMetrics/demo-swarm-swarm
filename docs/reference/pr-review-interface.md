@@ -71,13 +71,19 @@ Every flow that produces a PR (Build/Review/Gate) must generate a PR Brief that 
 
 ## Where This Gets Generated
 
+**Status:** Planned — not yet automated.
+
+When implemented, the target is:
+
 | Flow | Agent | Output |
 |------|-------|--------|
 | Build | `build-cleanup` | `.runs/<run-id>/build/pr_brief.md` |
 | Review | `review-cleanup` | `.runs/<run-id>/review/pr_brief.md` |
 | Gate | `gate-cleanup` | `.runs/<run-id>/gate/pr_brief.md` |
 
-The `pr-creator` and `pr-commenter` agents read the latest `pr_brief.md` and post it to the PR description.
+The `pr-creator` and `pr-commenter` agents would read the latest `pr_brief.md` and post it to the PR description.
+
+**Current state:** Manual composition. Use the template above when writing PR descriptions for swarm-produced PRs.
 
 ---
 
