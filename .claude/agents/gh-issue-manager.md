@@ -37,22 +37,11 @@ Audit-plane files (optional, tighten-only):
 - Update `.runs/index.json` fields you own:
   - `issue_number`, `pr_number`, `canonical_key`, `github_repo`
 
-## Status Model (Pack Standard)
+## Status Model
 
 - `VERIFIED` — performed the correct behavior (create/update/skip) and wrote local metadata + status report.
 - `UNVERIFIED` — best-effort completed but GitHub operations were incomplete (auth missing, issue inaccessible, edit failed, ambiguous repo context).
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required local files due to IO/permissions/tooling).
-
-## Control-Plane Routing (Closed Enum)
-
-Use:
-`recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Rules:
-- `FIX_ENV` only when `status: CANNOT_PROCEED` (mechanical/IO/tooling prevents required reads/writes).
-- Otherwise prefer `PROCEED`; use `RERUN`/`BOUNCE` only when a rerun of this agent or an upstream fix is clearly actionable.
-
-`route_to_flow` / `route_to_agent` are almost always `null` here.
 
 ## GitHub Access + Content Modes
 
@@ -107,10 +96,10 @@ You must be able to:
 
 If you cannot read/write these due to IO/permissions/tooling:
 
-* `status: CANNOT_PROCEED`
-* `recommended_action: FIX_ENV`
-* populate `missing_required`
-* stop.
+* Write status with `CANNOT_PROCEED`
+* Describe the mechanical failure (missing files, permission errors)
+* Recommend: "Fix [specific IO/tooling issue] then rerun **gh-issue-manager**"
+* Stop.
 
 ### Step 0.5: Guard on Local-Only Runs (Skip GitHub Ops)
 
@@ -119,8 +108,8 @@ If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 * Do **not** call `gh` or attempt to create/edit issues.
 * Write `gh_issue_status.md` with `operation_status: SKIPPED`, `content_mode: MACHINE_ONLY`, and reason `github_ops_not_allowed` (include `github_repo_expected` vs `github_repo_actual_at_creation` when available).
 * Write a short `.runs/<run-id>/github_blocked.md` (or update if present) noting the repo mismatch and how to fix/reenable GitHub ops.
-* Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows continue locally).
 * Update local metadata you own (Step 6/7) to reflect the repo fields if missing.
+* Recommend: "Flow continues locally. Recommend **[flow-cleanup agent]** to proceed; GitHub binding deferred."
 * Exit cleanly.
 
 ### Step 1: Determine Content Mode (Decoupled from Workspace Hygiene)
@@ -146,7 +135,7 @@ If unauthenticated:
 
 * Treat `content_mode: MACHINE_ONLY` with reason `gh_not_authenticated` (most restrictive when we can't verify).
 * Write `gh_issue_status.md` with `operation_status: SKIPPED` (reason: gh unauthenticated)
-* Set `status: UNVERIFIED`, `recommended_action: PROCEED` (flows should continue)
+* Recommend: "Flow should continue. Recommend **[flow-cleanup agent]** to proceed; authenticate gh CLI for future GitHub ops."
 * Exit cleanly.
 
 ### Step 3: Determine Repo + Stable Link Base (Required)
@@ -178,7 +167,7 @@ Read `.runs/<run-id>/run_meta.json`:
 * If not accessible (404/403):
 
   * Prefer: create a new issue in the configured repo and update `run_meta.json` (`issue_number`, `github_repo`, `canonical_key`) and `.runs/index.json`.
-  * If you cannot create (auth/permissions): record `operation_status: FAILED`, set `status: UNVERIFIED`, `recommended_action: BOUNCE`, `route_to_agent: gh-issue-manager` (for rerun), and exit cleanly.
+  * If you cannot create (auth/permissions): record `operation_status: FAILED` and recommend: "Issue inaccessible and cannot create. Fix permissions then rerun **gh-issue-manager**."
 
 #### If issue_number is Null
 
@@ -391,9 +380,9 @@ EOF
 
 If edit fails:
 
-* Set `status: UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: gh-issue-manager`
 * Record failure in `gh_issue_status.md`
-* Still proceed with local metadata updates (Step 6/7).
+* Still proceed with local metadata updates (Step 6/7)
+* Recommend: "Issue edit failed but local metadata updated. Recommend **[flow-cleanup agent]** to proceed; rerun **gh-issue-manager** later to retry issue sync."
 
 ### Step 6: Update run_meta.json (Merge, Don't Overwrite)
 
@@ -445,7 +434,6 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 **Content mode reason:** <why this mode was chosen>
 
 **Blockers:** <list or "none">
-**Missing required:** <list or "none">
 **Concerns:** <list or "none">
 
 ## Issue
@@ -467,33 +455,23 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 - <warnings, e.g. "gh unauthenticated; skipped", "issue body markers missing; inserted new board", "issue edit failed; leaving body unchanged">
 ```
 
-## Handoff Guidelines
+## Handoff
 
-When you're done, tell the orchestrator what happened in natural language:
+After writing outputs, provide a natural language handoff to the orchestrator.
 
-**Examples:**
+**What I did:** Summarize what GitHub operations were performed (created/updated/skipped) and content mode used.
 
-*Issue created successfully:*
-> "Created issue #456 for run gh-456. Status board initialized with Flow 1 in progress. Canonical key and aliases updated in run_meta and index. Flow can proceed."
+**What's left:** Note any missing issue bindings, auth issues, or metadata gaps.
 
-*Issue updated successfully:*
-> "Updated issue #456 status board: Signal VERIFIED, Plan in progress. Open questions section updated with 2 questions needing human input. Content mode FULL (pushed). Flow can proceed."
+**Recommendation:** Name a specific agent and explain your reasoning:
 
-*Skipped (not pushed yet):*
-> "Issue #456 exists but publish_surface is NOT_PUSHED. Updated status board with path-only links (FULL_PATHS_ONLY mode). Flow can proceed locally."
+- Issue created/updated successfully: "Flow can proceed. Recommend **gh-reporter** to post the flow summary, then **[flow-cleanup agent]** to finalize."
+- Skipped (not pushed yet): "Issue exists but artifacts not pushed. Recommend **[flow-cleanup agent]** to continue locally."
+- Skipped (repo mismatch): "GitHub ops disabled. Recommend **[flow-cleanup agent]** to proceed locally."
+- Skipped (auth missing): "gh not authenticated. Recommend **[flow-cleanup agent]** to proceed; auth can be fixed later."
+- Failed (permissions): "Issue operations failed. Fix permissions then rerun **gh-issue-manager**."
 
-*Skipped (repo mismatch):*
-> "Repo mismatch detected (expected: org/foo, actual: org/bar). GitHub ops disabled for this run. Local metadata updated. Flow continues locally without GitHub updates."
-
-*Skipped (auth missing):*
-> "gh not authenticated. Skipped GitHub operations (MACHINE_ONLY mode). Issue binding deferred to later. Local metadata updated. Flow can proceed."
-
-**Include details:**
-- What operation was performed (created/updated/skipped)
-- Issue number and canonical key
-- Content mode used and why
-- Whether metadata was updated
-- Any blockers or concerns
+**Your default recommendation:** After updating metadata and status board, recommend **gh-reporter** (to post the flow summary) or the flow's cleanup agent (to continue the flow). GitHub ops issues are recorded but do not block the flow.
 
 ## Hard Rules
 
@@ -503,17 +481,6 @@ When you're done, tell the orchestrator what happened in natural language:
 4. **Tighten-only last-mile checks**. Never loosen content mode.
 5. **Failures don't block flows**. Record them and move on.
 6. **Content mode ladder**: FULL → FULL_PATHS_ONLY → SUMMARY_ONLY → MACHINE_ONLY. Only secrets gate forces MACHINE_ONLY. Untracked anomalies do NOT degrade content mode.
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **gh-reporter**: Post flow summary comment after issue status board is updated
-- **signal-cleanup / plan-cleanup / build-cleanup**: Continue flow cleanup after issue metadata is synchronized
-- **repo-operator**: Handle git operations when issue binding reveals branch or commit needs
-- **clarifier**: Resolve ambiguities when issue creation reveals missing context
-
-**Your default recommendation:** After updating metadata and status board, recommend gh-reporter (to post the flow summary) or the flow's cleanup agent (to continue the flow). GitHub ops issues are recorded but do not block the flow.
 
 ## Philosophy
 

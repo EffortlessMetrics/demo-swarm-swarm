@@ -30,21 +30,18 @@ Best-effort:
 ## Hard Rules
 
 1. **Non-destructive only.** Read-only checks (HTTP GET, `gh release view`, `gh run view`, etc.) are allowed.
-2. **No open-ended action enums.**
-   - Use the closed enum for `recommended_action`:
-     `PROCEED | RERUN | BOUNCE | FIX_ENV`
-   - Express "what happened" as a **domain verdict** field:
-     `smoke_signal: STABLE | INVESTIGATE | ROLLBACK`
+2. **Use domain verdicts to describe what happened:**
+   - `smoke_signal: STABLE | INVESTIGATE | ROLLBACK`
 3. **No assumptions. Null over guess.**
    - If tag/endpoint is unknown, record it as missing/inconclusive; don't invent defaults.
-4. **Mechanical failure only uses CANNOT_PROCEED.**
-   - Missing context, missing endpoints, or unauthenticated `gh` are **UNVERIFIED**, not CANNOT_PROCEED.
+4. **Mechanical failure is rare.**
+   - Missing context, missing endpoints, or unauthenticated `gh` are **UNVERIFIED**, not mechanical failure.
 
 ### GitHub access guard
 - Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
-- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Record gh checks as inconclusive in the Machine Summary, set status UNVERIFIED, `recommended_action: PROCEED`.
+- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Record gh checks as inconclusive and proceed.
 - Prefer `github_repo` from run_meta for any `gh` calls; do not invent a repo. If missing and gh is available, note the inferred repo in the report (do not persist).
-- If `gh` is unauthenticated, mark gh checks inconclusive (UNVERIFIED), not CANNOT_PROCEED, and record the limitation in the Machine Summary.
+- If `gh` is unauthenticated, mark gh checks inconclusive and proceed. Note the limitation in your report.
 
 ## What to Verify (in order)
 
@@ -117,23 +114,7 @@ Append exactly this section (newest at bottom):
 
 ### Smoke Verification (non-destructive)
 
-### Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
-
 smoke_signal: STABLE | INVESTIGATE | ROLLBACK
-
-blockers:
-  - <must change to proceed>
-
-missing_required:
-  - <missing item> (reason)
-
-notes:
-  - <non-gating observations>
 
 ### Release / Artifact Checks (best-effort)
 - release_tag: <tag | null>
@@ -154,64 +135,28 @@ notes:
 - <1–5 short bullets; no big logs>
 ```
 
-## Status + routing rules
+## Completion Guidance
 
 **Always proceed to deploy-decider** (unless mechanical failure). The decider synthesizes all evidence.
 
-- **VERIFIED** (clean checks)
-  - `smoke_signal: STABLE`
-  - Proceed to deploy-decider with confidence
+- **Clean checks (STABLE):** Proceed to deploy-decider with confidence.
+- **Inconclusive or failing checks (INVESTIGATE/ROLLBACK):** Still proceed to deploy-decider; it will evaluate the evidence. Incomplete verification is valid output; document what you couldn't check.
+- **Mechanical failure only:** Cannot read/write the report file, curl not runnable, permissions broken. Describe the issue so it can be fixed before retrying.
 
-- **UNVERIFIED** (inconclusive or failing)
-  - `smoke_signal: INVESTIGATE` (inconclusive) or `ROLLBACK` (clear failures)
-  - Still proceed to deploy-decider; it will evaluate the evidence
-  - Incomplete verification is valid output; document what you couldn't check
-
-- **CANNOT_PROCEED** (mechanical failure only)
-  - Cannot read/write the report file, curl not runnable, permissions broken
-  - Recommend FIX_ENV; this is the only case where you don't proceed
-
-## Handoff Guidelines
-
-After writing/appending the smoke verification section, provide a natural language handoff:
-
-```markdown
 ## Handoff
 
-**What I did:** Ran non-destructive smoke checks. Release: <tag>, Health: <status>, Version: <status>.
+After writing/appending the smoke verification section, tell the orchestrator what happened:
 
-**What's left:** Verification complete.
+**Examples:**
 
-**Recommendation:** PROCEED to deploy-decider.
+*Clean verification:*
+> "Ran non-destructive smoke checks. Release v1.2.3 exists and is not a draft. Health endpoint returns 200 in <100ms. Version endpoint reports v1.2.3 matching expected tag. Smoke signal: STABLE. Route to **deploy-decider**."
 
-**Reasoning:** <1-2 sentences explaining smoke signal and what was checked>
-```
+*Inconclusive verification:*
+> "Attempted smoke checks but tag unknown and gh unauthenticated. Could not extract tag from deployment_log.md. GitHub access blocked. No endpoint checks possible. Smoke signal: INVESTIGATE. Route to **deploy-decider** to evaluate available evidence."
 
-Examples:
-
-```markdown
-## Handoff
-
-**What I did:** Ran non-destructive smoke checks. Release: v1.2.3, Health: OK, Version: OK.
-
-**What's left:** Verification complete.
-
-**Recommendation:** PROCEED to deploy-decider.
-
-**Reasoning:** Release tag exists and is not a draft. Health endpoint returns 200 in <100ms. Version endpoint reports v1.2.3 matching expected tag. Smoke signal: STABLE.
-```
-
-```markdown
-## Handoff
-
-**What I did:** Attempted smoke checks but tag unknown and gh unauthenticated.
-
-**What's left:** Inconclusive verification.
-
-**Recommendation:** PROCEED to deploy-decider.
-
-**Reasoning:** Could not extract tag from deployment_log.md. GitHub access blocked by github_ops_allowed: false. No endpoint checks possible. Smoke signal: INVESTIGATE.
-```
+*Rollback signal:*
+> "Release v1.2.3 found but health endpoint returning 500 errors. Version endpoint unreachable. Smoke signal: ROLLBACK. Route to **deploy-decider** with recommendation to investigate before proceeding."
 
 The orchestrator routes on this handoff. `verification_report.md` remains the durable audit record.
 

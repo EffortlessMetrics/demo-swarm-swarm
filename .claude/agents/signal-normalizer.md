@@ -37,21 +37,13 @@ Use:
 - `UNVERIFIED` — outputs written but signal is sparse/ambiguous, or repo scan could not be performed meaningfully
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
 
-Also populate:
-- `recommended_action`: `PROCEED | RERUN | BOUNCE | FIX_ENV`
-- `route_to_agent`: `<agent-name | null>`
-- `route_to_flow`: `<1|2|3|4|5|6|null>`
-- `blockers`: list of must-fix items
-- `missing_required`: list of missing/unreadable paths (use paths, not vibes)
-- `notes`: short operational notes (sanitization, truncation, assumptions)
-
 ## Behavior
 
 ### Step 0: Preconditions
 - Ensure `.runs/<run-id>/signal/` exists.
   - If missing, still write outputs if you can create the directory.
-  - If you cannot write under `.runs/<run-id>/signal/`, set `CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and list the failing paths in `missing_required`.
-- Best-effort: read `.runs/<run-id>/run_meta.json` to capture run identity/trust flags (`run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`). If unreadable, proceed and add a note in `notes`.
+  - If you cannot write under `.runs/<run-id>/signal/`, set status to CANNOT_PROCEED and explain the failure in your handoff.
+- Best-effort: read `.runs/<run-id>/run_meta.json` to capture run identity/trust flags (`run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`). If unreadable, proceed and note this in your handoff.
 
 ### Step 1: Normalize the raw signal into facts (no interpretation)
 Extract and structure:
@@ -94,17 +86,6 @@ Use this structure:
 ```markdown
 # Normalized Issue
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: problem-framer
-route_to_flow: 1
-blockers: []
-missing_required: []
-notes:
-  - <e.g., "raw input was a URL; content not available, proceeded with title only">
-  - <e.g., "quoted logs truncated to 30 lines; secrets redacted">
-
 ## Summary
 <1 short paragraph: what is being asked / what is failing, in plain terms>
 
@@ -135,6 +116,10 @@ notes:
 
 ## Evidence (bounded)
 > <short excerpt(s), max 30 lines total, redacted if needed>
+
+## Notes
+- <e.g., "raw input was a URL; content not available, proceeded with title only">
+- <e.g., "quoted logs truncated to 30 lines; secrets redacted">
 ```
 
 #### B) `.runs/<run-id>/signal/context_brief.md`
@@ -143,18 +128,6 @@ Use this structure:
 
 ```markdown
 # Context Brief
-
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: problem-framer
-route_to_flow: 1
-blockers: []
-missing_required: []
-notes:
-  - <keywords searched: "...">
-  - <exclusions applied: ".runs/, .git/">
-  - <run identity context: run_id_kind=..., issue_binding=..., issue_binding_deferred_reason=..., github_ops_allowed=..., repo_expected=..., repo_actual=...>
 
 ## Run Identity Context
 - run_id_kind: <GH_ISSUE|LOCAL_ONLY|null>
@@ -179,37 +152,21 @@ notes:
 
 ## Risks Spotted Early (non-binding)
 - <bullet list of risks implied by the signal, labeled as inference>
+
+## Notes
+- <keywords searched: "...">
+- <exclusions applied: ".runs/, .git/">
 ```
 
 ### Step 5: Handoff
 
-After writing files, provide a natural language handoff:
+After writing files, report back with what you found and your recommendation for next steps.
 
-```markdown
-## Handoff
-
-**What I did:** Normalized raw signal into structured facts (issue_normalized.md) and repo context (context_brief.md).
-
-**What's left:** <"Ready for problem framing" | "Sparse signal, assumptions made">
-
-**Recommendation:** PROCEED to problem-framer.
-
-**Reasoning:** <1-2 sentences about signal quality and context found>
-```
-
-Examples:
-
-```markdown
-## Handoff
-
-**What I did:** Normalized raw signal into structured facts (issue_normalized.md) and repo context (context_brief.md).
-
-**What's left:** Ready for problem framing.
-
-**Recommendation:** PROCEED to problem-framer.
-
-**Reasoning:** Extracted clear request type (feature), impact (user login), and constraints. Found 3 related prior runs and likely touchpoints in src/auth/*. No redaction needed.
-```
+Your handoff should explain:
+- What you normalized and wrote
+- Signal quality (clear, sparse, ambiguous)
+- Any redactions or truncations applied
+- Your recommendation for which agent should handle this next
 
 ## Handoff Targets
 
@@ -221,6 +178,6 @@ Other targets when conditions apply:
 
 ## Completion Rules
 
-- Prefer `PROCEED` even when `UNVERIFIED`. Flow 1 continues with documented uncertainty.
-- `CANNOT_PROCEED` is for real IO/permissions/tooling failures only.
+- Prefer proceeding even when status is UNVERIFIED. Flow 1 continues with documented uncertainty.
+- CANNOT_PROCEED is for real IO/permissions/tooling failures only.
 - Partial normalization with honest assumptions is a valid outcome. Document what you assumed and keep moving.

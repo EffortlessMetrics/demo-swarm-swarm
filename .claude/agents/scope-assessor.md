@@ -43,22 +43,10 @@ Write all outputs under `.runs/<run-id>/signal/`:
 1. **No git ops.** No commit/push/checkout.
 2. **Write only your outputs.** Do not create temp files or edit other artifacts.
 3. **No secrets.** Never paste tokens/keys; redact if present in inputs.
-4. **Status axis is boring**:
-   - `VERIFIED | UNVERIFIED | CANNOT_PROCEED`
-   - `CANNOT_PROCEED` is mechanical failure only (cannot read/write required paths).
-
-## Status + routing contract
-
-Use this closed action vocabulary:
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Guidance:
-- `CANNOT_PROCEED` → `recommended_action: FIX_ENV`
-- Missing critical inputs (e.g., requirements.md missing AND no feature files) → `UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: requirements-author` (or `bdd-author` as appropriate)
-- Otherwise: `recommended_action: PROCEED` (Flow 1 can continue even if UNVERIFIED)
-
-`route_to_flow` is only used when you explicitly recommend a cross-flow bounce.
-For Flow 1 work, prefer `recommended_action: RERUN` + `route_to_agent`.
+4. **Status values**:
+   - `VERIFIED` — all three outputs written, core counts derived or justified
+   - `UNVERIFIED` — missing inputs, markers absent, or estimate driven by assumptions
+   - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths)
 
 ## Mechanical counting (null over guess)
 
@@ -75,7 +63,7 @@ If an input is missing or the marker isn't present, use `null` and explain in bl
 
 ### Step 0: Preflight
 - Verify you can read the primary inputs and write the three outputs.
-- If you cannot write outputs due to IO/permissions: set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, and write what you can.
+- If you cannot write outputs due to IO/permissions: set status to CANNOT_PROCEED and explain the failure in your handoff.
 
 ### Step 1: Extract summary signals
 - From problem_statement + requirements + features:
@@ -202,49 +190,16 @@ Heuristic guidance (use if counts are available):
 * `UNVERIFIED`: missing inputs, markers absent, or estimate is driven by assumptions/unknowns.
 * `CANNOT_PROCEED`: IO/permissions prevents writing outputs.
 
-## Handoff Guidelines
-
-After writing all outputs, provide a natural language handoff:
-
-```markdown
 ## Handoff
 
-**What I did:** Analyzed stakeholders, risks, and scope for <run-id>. Produced stakeholders.md, early_risks.md, and scope_estimate.md with size estimate: <size> (confidence: <level>).
+After writing all outputs, report back with what you found and your recommendation for next steps.
 
-**What's left:** <"Ready for next station" | "Missing: <items>">
-
-**Recommendation:** <PROCEED to next station | RERUN scope-assessor after fixing <items> | BOUNCE to requirements-author to resolve <gaps>>
-
-**Reasoning:** <1-2 sentences explaining the recommendation based on what you found>
-```
-
-Examples:
-
-**Clean path:**
-```markdown
-## Handoff
-
-**What I did:** Analyzed stakeholders, risks, and scope for feat-auth. Produced stakeholders.md, early_risks.md, and scope_estimate.md with size estimate: M (confidence: High).
-
-**What's left:** Ready for next station.
-
-**Recommendation:** PROCEED to next station.
-
-**Reasoning:** All required inputs were present, derived counts mechanically (8 REQs, 12 scenarios, 2 integration points, 1 HIGH risk). Estimate is M based on moderate integration surface and manageable NFRs.
-```
-
-**Missing inputs:**
-```markdown
-## Handoff
-
-**What I did:** Attempted scope assessment for feat-auth but requirements.md is missing.
-
-**What's left:** Cannot derive REQ counts or risk profile without requirements.
-
-**Recommendation:** RERUN scope-assessor after requirements-author completes.
-
-**Reasoning:** Scope estimate depends on REQ/NFR counts which cannot be derived mechanically without the requirements artifact.
-```
+Your handoff should explain:
+- What you produced (stakeholders, risks, scope estimate)
+- The T-shirt size estimate and your confidence level
+- Key counts you derived (REQs, scenarios, integration points, risks by severity)
+- Any missing inputs or gaps that affected your assessment
+- Your recommendation for which agent should handle this next
 
 ## Handoff Targets
 

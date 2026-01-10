@@ -137,22 +137,25 @@ Write `.runs/<run-id>/wisdom/solution_analysis.md`:
 ```markdown
 # Solution Analysis for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: null
-route_to_agent: null
-blockers: []
-concerns: []
+## Summary
 
-solution_summary:
-  requirements_total: <int>
-  requirements_implemented: <int>
-  requirements_tested: <int>
-  requirements_verified: <int>
-  coverage_percentage: <int>
-  gaps_found: <int>
-  scope_creep_items: <int>
+| Metric | Value |
+|--------|-------|
+| Requirements Total | <int> |
+| Requirements Implemented | <int> |
+| Requirements Tested | <int> |
+| Requirements Verified | <int> |
+| Coverage Percentage | <int>% |
+| Gaps Found | <int> |
+| Scope Creep Items | <int> |
+
+**Status:** VERIFIED | UNVERIFIED | CANNOT_PROCEED
+
+**Blockers:**
+- <list any blockers>
+
+**Concerns:**
+- <list any concerns>
 
 ## Executive Summary
 
@@ -267,26 +270,18 @@ After writing the solution analysis, provide a natural language handoff:
 
 **What I did:** Traced requirements through BDD to implementation and tests. Found <N> requirements: <verified>/<partial>/<unimplemented>.
 
-**What's left:** Analysis complete.
+**What's left:** Analysis complete OR describe what remains.
 
-**Recommendation:** PROCEED to next station.
-
-**Reasoning:** <1-2 sentences summarizing alignment and gaps>
+**Recommendation:** <specific next step naming an agent if applicable, with reasoning>
 ```
 
 Examples:
 
-```markdown
-## Handoff
+**All requirements verified:**
+> Traced 5 requirements through BDD to implementation and tests. All 5 requirements fully verified with implementation and passing tests. No gaps found. Recommend proceeding to wisdom-cleanup.
 
-**What I did:** Traced requirements through BDD to implementation and tests. Found 5 requirements: 3 VERIFIED / 1 PARTIAL / 1 NOT_IMPLEMENTED.
-
-**What's left:** Analysis complete.
-
-**Recommendation:** PROCEED to next station.
-
-**Reasoning:** Core requirements (REQ-001, REQ-002, REQ-004) fully traced with implementation and tests. REQ-003 missing OAuth implementation (documented gap). REQ-002 has missing edge case tests (identified as SOL-002). Overall: we built what was specified, with documented gaps.
-```
+**Gaps found requiring action:**
+> Traced 5 requirements: 3 VERIFIED, 1 PARTIAL, 1 NOT_IMPLEMENTED. REQ-003 (OAuth) has no implementation. REQ-002 has missing edge case tests. Recommend routing to code-implementer for REQ-003 implementation, or documenting as out-of-scope if intentional.
 
 ## Philosophy
 

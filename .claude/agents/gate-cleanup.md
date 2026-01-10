@@ -1,6 +1,6 @@
 ---
 name: gate-cleanup
-description: Summarizes Flow 5 (Gate) by reading verification artifacts, understanding the merge decision, and writing a meaningful receipt. Runs AFTER merge-decider and BEFORE secrets-sanitizer.
+description: Summarizes Flow 5 (Gate) by reading verification artifacts, understanding the merge decision, and writing a meaningful receipt.
 model: haiku
 color: blue
 ---
@@ -60,32 +60,14 @@ The receipt should answer:
 - Did all checks pass?
 - Is this safe to deploy?
 
-**Status determination:**
-- `VERIFIED`: Merge verdict is MERGE AND all required checks passed
-- `UNVERIFIED`: Missing decision OR any check failed OR verdict is BOUNCE
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write gate_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Gate passed, ready for Deploy
-- `BOUNCE`: Gate failed, route back to Build (include route_to_flow: 3)
-- `RERUN`: Missing artifacts
-- `FIX_ENV`: Mechanical failure
-
-## Receipt Schema
-
 ```json
 {
   "run_id": "<run-id>",
   "flow": "gate",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | BOUNCE | RERUN | FIX_ENV",
-  "route_to_flow": null,
-
   "summary": "<1-2 sentence description of gate outcome>",
-
   "merge_verdict": "MERGE | BOUNCE",
   "verdict_reason": "<why this decision was made>",
-
   "checks": {
     "receipt_audit": { "ran": true, "passed": true },
     "contract_compliance": { "ran": true, "passed": true, "violations": 0 },
@@ -93,19 +75,17 @@ The receipt should answer:
     "coverage_audit": { "ran": true, "line_percent": 85, "branch_percent": 72 },
     "policy_analysis": { "ran": false }
   },
-
-  "ac_passthrough": {
-    "total": 5,
-    "completed": 5
-  },
-
   "blockers": [],
   "concerns": [],
-
   "evidence_sha": "<current HEAD>",
   "generated_at": "<ISO8601>"
 }
 ```
+
+**Status determination:**
+- `VERIFIED`: Merge verdict is MERGE AND all required checks passed
+- `UNVERIFIED`: Missing decision OR any check failed OR verdict is BOUNCE
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
 
 ## Updating the Index
 
@@ -156,9 +136,7 @@ After writing the receipt and reports, provide a natural language summary.
 
 ## Handoff Targets
 
-When you complete your work, recommend one of these to the orchestrator:
-
-- **secrets-sanitizer**: Scans for secrets before publish operations. Use after Gate cleanup when proceeding to publish.
-- **deploy-decider**: Decides whether deployment should proceed. Use when Gate passed and ready for Flow 6 (Deploy).
-- **code-implementer**: Writes production code aligned with design. Use when Gate bounced due to implementation issues.
-- **build-cleanup**: Regenerates build receipt and seals the Build flow. Use when Gate bounced and Build needs to be rerun.
+- **secrets-sanitizer**: Scans for secrets before publish. Use after Gate cleanup when proceeding to Deploy.
+- **deploy-decider**: Decides whether deployment should proceed. Use when Gate passed and ready for Flow 6.
+- **code-implementer**: Writes production code. Use when Gate bounced due to implementation issues.
+- **build-cleanup**: Regenerates build receipt. Use when Gate bounced and Build needs to be rerun.

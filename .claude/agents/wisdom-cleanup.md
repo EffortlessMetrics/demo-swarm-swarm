@@ -52,16 +52,10 @@ The receipt should answer:
 - Did the full flow complete successfully?
 - What actions were identified for follow-up?
 
-**Status determination:**
-- `VERIFIED`: Learnings extracted AND core artifacts produced
-- `UNVERIFIED`: Missing required artifacts OR no learnings extracted
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write wisdom_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Wisdom complete, run finished
-- `RERUN`: Missing artifacts
-- `BOUNCE`: Need to go back to Deploy
-- `FIX_ENV`: Mechanical failure
+**Completion states:**
+- **Complete:** Learnings extracted AND core artifacts produced. Run finished.
+- **Incomplete:** Missing required artifacts OR no learnings extracted. Document what's missing.
+- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
 
 ## Receipt Schema
 
@@ -69,9 +63,6 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "wisdom",
-  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
-
   "summary": "<1-2 sentence description of what was learned>",
 
   "learnings": {
@@ -88,11 +79,11 @@ The receipt should answer:
   "regressions_found": 0,
 
   "flow_summary": {
-    "signal": "VERIFIED",
-    "plan": "VERIFIED",
-    "build": "VERIFIED",
-    "gate": "VERIFIED",
-    "deploy": "VERIFIED"
+    "signal": "complete",
+    "plan": "complete",
+    "build": "complete",
+    "gate": "complete",
+    "deploy": "complete"
   },
 
   "final_outcomes": {
@@ -102,8 +93,7 @@ The receipt should answer:
 
   "run_complete": true,
 
-  "blockers": [],
-  "concerns": [],
+  "gaps": ["<any missing learnings or incomplete flows>"],
 
   "evidence_sha": "<current HEAD>",
   "generated_at": "<ISO8601>"
@@ -167,32 +157,18 @@ If prior receipts are missing, note which flows weren't tracked.
 
 ## Handoff
 
-After writing the receipt and reports:
+After writing the receipt and reports, tell the orchestrator what happened:
 
-```markdown
-## Handoff
+**Examples:**
 
-**What I did:** Summarized Wisdom flow. Extracted 8 learnings, identified 3 follow-up actions. Full flow completed: all 7 flows VERIFIED. Final outcome: MERGE + STABLE deployment.
+*Run complete:*
+> "Summarized Wisdom flow. Extracted 8 learnings, identified 3 follow-up actions. Full flow completed: all 7 flows complete. Final outcome: MERGE + STABLE deployment. Route to **secrets-sanitizer**, then close the run."
 
-**What's left:** Run complete.
+*Learnings missing:*
+> "Attempted to seal Wisdom receipt but learnings.md is missing. Route to **learning-synthesizer** to extract learnings before sealing."
 
-**Recommendation:** PROCEED to secrets-sanitizer, then close the run.
-
-**Reasoning:** Learnings captured for future runs. Feedback actions ready for GitHub issue creation. This feature is done.
-```
-
-**If learnings missing:**
-```markdown
-## Handoff
-
-**What I did:** Attempted to seal Wisdom receipt but learnings.md is missing.
-
-**What's left:** Need to extract learnings from flow artifacts.
-
-**Recommendation:** RERUN learning-synthesizer to extract learnings.
-
-**Reasoning:** Cannot close the loop without capturing what was learned.
-```
+*Partial completion:*
+> "Sealed Wisdom receipt with 5 learnings documented. Some flows incomplete (Gate and Deploy missing receipts). Route to **secrets-sanitizer** to close the run with documented gaps."
 
 ## Philosophy
 

@@ -34,23 +34,11 @@ Optional (if present):
 
 **Hard rule:** You do **not** write `build_receipt.json`. `build-cleanup` is the receipt authority.
 
-## Status model (pack standard)
+## Status model
 
 - `VERIFIED`: Critics are consistent, no blockers, and readiness is justified.
 - `UNVERIFIED`: Any blocker exists (missing critical artifacts, critic UNVERIFIED, canonical mismatch).
 - `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required files due to IO/permissions/tooling).
-
-## Closed action vocabulary (pack standard)
-
-`recommended_action` MUST be one of:
-
-`PROCEED | RERUN | BOUNCE | FIX_ENV`
-
-Routing specificity:
-- `route_to_flow: 1|2|3|4|5|6|7|null`
-- `route_to_agent: <agent-name|null>`
-
-Route fields may be populated for **RERUN** or **BOUNCE**. For `PROCEED` and `FIX_ENV`, set both to `null`.
 
 ## What you are checking
 
@@ -79,7 +67,7 @@ Do NOT try to parse counts out of prose. Compare exact lines and cite file paths
 4) **Critic agreement**
 - Do the critics disagree on major facts (e.g., test-critic VERIFIED but says "no tests for REQ-003" while code-critic says "REQ-003 implemented + tested")? If found, UNVERIFIED and explain with citations.
 - If either critic is UNVERIFIED → you are UNVERIFIED (not ready for Gate).
-- If a critic is CANNOT_PROCEED → you are UNVERIFIED with `recommended_action: FIX_ENV` (you can still write your report).
+- If a critic is CANNOT_PROCEED → you are UNVERIFIED (you can still write your report). In your handoff, note the environment issue that needs fixing.
 
 5) **Readiness decision**
 - Ready for Gate only when:
@@ -91,27 +79,16 @@ Do NOT try to parse counts out of prose. Compare exact lines and cite file paths
 
 ## Output format: `.runs/<run-id>/build/self_review.md`
 
-Write exactly this structure:
+Write a human-readable review that covers these sections:
 
 ```markdown
 # Self Review
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_agent: <agent-name|null>
+## Summary
 
-blockers:
-  - <must change to proceed>
+Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
-missing_required: []
-
-concerns:
-  - <non-gating issues>
-
-sources:
-  - <file paths you relied on>
+<1-2 sentence summary of what you found>
 
 ## Canonical Bindings
 
@@ -123,7 +100,7 @@ Source: `.runs/<run-id>/build/test_critique.md`
 Source: `.runs/<run-id>/build/mutation_report.md`
 <quote the exact mutation score line(s) or "NOT_RUN">
 
-## Critic Verdicts (Read-only)
+## Critic Verdicts
 
 | Critic | Status | Notes |
 |--------|--------|------|
@@ -157,70 +134,42 @@ Source: `.runs/<run-id>/build/mutation_report.md`
 YES | NO
 
 Rationale: <1 short paragraph grounded in critic statuses + mismatch check>
+
+## Sources Consulted
+- <file paths you relied on>
 ```
 
-## Routing guidance (how to fill Machine Summary)
+## Routing guidance
 
-* If you cannot read/write due to IO/perms → `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
-* If `test_critique.md` missing → `status: UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: test-critic`, `route_to_flow: 3`.
-* If `code_critique.md` missing → `status: UNVERIFIED`, `recommended_action: RERUN`, `route_to_agent: code-critic`, `route_to_flow: 3`.
-* If test-critic UNVERIFIED and can_further_iteration_help is yes → `recommended_action: RERUN`, `route_to_agent: test-author`, `route_to_flow: 3`.
-* If code-critic UNVERIFIED and can_further_iteration_help is yes → `recommended_action: RERUN`, `route_to_agent: code-implementer`, `route_to_flow: 3`.
-* If remaining issues require design/spec answers → `recommended_action: BOUNCE`, set `route_to_flow: 2` (Plan) or `1` (Signal).
-* If everything is clean → `status: VERIFIED`, `recommended_action: PROCEED`.
+Use these patterns to determine your recommendation:
 
-## Handoff Guidelines
+* If you cannot read/write due to IO/perms: status is CANNOT_PROCEED, recommend fixing the environment.
+* If `test_critique.md` missing: status is UNVERIFIED, recommend running **test-critic**.
+* If `code_critique.md` missing: status is UNVERIFIED, recommend running **code-critic**.
+* If test-critic is UNVERIFIED and iteration could help: recommend **test-author** to address gaps.
+* If code-critic is UNVERIFIED and iteration could help: recommend **code-implementer** to fix issues.
+* If remaining issues require design/spec answers: recommend bouncing to **interface-designer** (Flow 2) or **requirements-author** (Flow 1).
+* If everything is clean: recommend proceeding to **build-cleanup**.
 
-After writing the self review, provide a natural language handoff:
-
-```markdown
 ## Handoff
 
-**What I did:** Reviewed Flow 3 build artifacts for internal consistency. <Summary of findings>.
+After writing the self review, report back with a natural language summary.
 
-**What's left:** <"Ready for Gate" | "Issues require attention">
+**Example (ready for Gate):**
+> Review complete. Critics are consistent, no canonical mismatches, AC loop complete (5/5 ACs). Route to **build-cleanup** to seal the receipt.
 
-**Recommendation:** <PROCEED to build-cleanup | RERUN test-author to address <gaps> | BOUNCE to code-implementer for <issues>>
+**Example (canonical mismatch):**
+> Review found canonical mismatch: test_critique.md says "5 passed, 1 failed" but test_summary.md says "6 passed, 0 failed". Route to **test-executor** to regenerate canonical summary.
 
-**Reasoning:** <1-2 sentences explaining coherence status and readiness>
-```
+**Example (critic UNVERIFIED):**
+> Test-critic is UNVERIFIED due to missing coverage for REQ-003. Route to **test-author** to add the missing tests.
 
-Examples:
+## Handoff Targets (reference)
 
-```markdown
-## Handoff
-
-**What I did:** Reviewed Flow 3 build artifacts for internal consistency. Critics are consistent, no canonical mismatches, AC loop complete (5/5 ACs).
-
-**What's left:** Ready for Gate.
-
-**Recommendation:** PROCEED to build-cleanup.
-
-**Reasoning:** Test-critic and code-critic both VERIFIED, canonical pytest summary matches across artifacts, all 5 ACs completed with green tests.
-```
-
-```markdown
-## Handoff
-
-**What I did:** Reviewed Flow 3 build artifacts. Found canonical mismatch between test_critique.md and test_summary.md pytest counts.
-
-**What's left:** Canonical conflict must be resolved.
-
-**Recommendation:** RERUN test-executor to regenerate canonical summary.
-
-**Reasoning:** test_critique.md says "5 passed, 1 failed" but test_summary.md says "6 passed, 0 failed". Cannot proceed with conflicting evidence.
-```
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **build-cleanup**: Seals the Build receipt after your review passes. Use when artifacts are consistent and ready for Gate.
-- **test-executor**: Regenerates test results when canonical summaries mismatch. Use to resolve conflicting evidence.
-- **code-implementer**: Fixes implementation issues identified during review. Use when critics flagged issues needing code changes.
-- **test-author**: Addresses test coverage gaps found during review. Use when test-critic reported missing coverage.
-
-**Your default recommendation is build-cleanup.** When artifacts are consistent and ready for Gate, proceed to seal the receipt.
+- **build-cleanup**: Seals the Build receipt. Default when artifacts are consistent and ready for Gate.
+- **test-executor**: Regenerates test results when canonical summaries mismatch.
+- **code-implementer**: Fixes implementation issues when critics flagged code changes needed.
+- **test-author**: Addresses test coverage gaps when test-critic reported missing coverage.
 
 ## Philosophy
 

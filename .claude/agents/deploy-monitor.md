@@ -31,20 +31,15 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 
 - `.runs/<run-id>/deploy/verification_report.md`
 
-## Status model (pack standard)
-
-- `VERIFIED` — report written with clear evidence (or explicit NOT_DEPLOYED with reasons).
-- `UNVERIFIED` — report written but CI/deploy evidence could not be obtained (auth/tooling/unknown identifiers).
-- `CANNOT_PROCEED` — mechanical failure only (cannot write required output due to IO/permissions).
-
-## Routing Guidance
+## Completion States
 
 **Always proceed.** Document what you found (or couldn't find) and continue:
-- CI evidence gathered and passing: proceed to smoke-verifier
-- CI evidence gathered but failing: proceed to smoke-verifier (failures are documented evidence)
-- Not deployed (gate BOUNCE): proceed to deploy-cleanup (nothing to verify)
-- Cannot access CI evidence: proceed to smoke-verifier with limitations documented
-- Mechanical failure only: recommend FIX_ENV (cannot write output file)
+
+- **Evidence gathered, CI passing:** Report written with clear evidence. Route to smoke-verifier.
+- **Evidence gathered, CI failing:** Report written with failure evidence. Route to smoke-verifier (failures are documented evidence).
+- **Not deployed (gate BOUNCE):** Nothing to verify. Route to deploy-cleanup.
+- **Cannot access CI evidence:** Report written with limitations. Route to smoke-verifier with gaps documented.
+- **Mechanical failure:** Cannot write output file. Describe the issue so it can be fixed.
 
 Incomplete evidence is not a blocker. Document it and continue.
 
@@ -58,13 +53,13 @@ Incomplete evidence is not a blocker. Document it and continue.
 
 ### Step 0: Preflight writeability
 - You must be able to write `.runs/<run-id>/deploy/verification_report.md`.
-- If you cannot write (permissions/IO), set `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, populate `missing_required` with the output path, and stop.
+- If you cannot write (permissions/IO), describe the issue and stop. The environment needs fixing.
 
 ### Step 0.5: GitHub access guard (read-only)
 - Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
-- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Write the report with limitations noted, set `status: UNVERIFIED`, `recommended_action: PROCEED`, and capture the limitation in the Machine Summary.
+- If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Write the report with limitations noted and proceed.
 - Prefer `github_repo` from run_meta for any `gh` calls. Do not invent a repo; if missing and gh is available, record the inferred repo in the report rather than writing back.
-- If `gh` is unauthenticated, note the limitation and continue in **UNVERIFIED** (no gh calls, limitation recorded in Machine Summary).
+- If `gh` is unauthenticated, note the limitation in the report and continue without gh calls.
 
 ### Step 1: Determine whether a deployment should exist (best-effort)
 Best-effort parse:
@@ -114,28 +109,12 @@ If CI is clearly in progress and you can re-check:
 ```markdown
 # Verification Report for <run-id>
 
-## Handoff
-
-**What I did:** <1-2 sentence summary of monitoring results>
-
-**What's left:** <remaining work or "nothing">
-
-**Recommendation:** <specific next step with reasoning>
-
-For example:
-- If CI passing: "Monitored CI for merge commit abc123—all workflows passed. CI signal: PASS. Ready for smoke verification."
-- If CI failing: "CI monitoring shows 2 failed workflows: tests and lint. CI signal: FAIL. Evidence captured in verification report."
-- If not deployed: "Gate verdict was BOUNCE—no deployment to monitor. Documented in report."
-- If auth unavailable: "Cannot access CI status (gh unauthenticated). Report written with limitations noted."
-
 ## Signals
 
-```yaml
 gate_decision: MERGE | BOUNCE | UNKNOWN
 merge_performed: yes | no | unknown
 ci_signal: PASS | FAIL | UNKNOWN | N/A
 deploy_signal: PASS | FAIL | UNKNOWN | N/A
-```
 
 ## Context
 
@@ -173,51 +152,41 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 
 * <short, link-heavy notes; no big logs>
 
-## Recommended Next
+## Limitations
 
-* Proceed to `smoke-verifier`, then `deploy-decider` (this report is evidence input).
-
-## Inventory (machine countable)
-
-(Only these prefixed lines; do not rename prefixes)
-
-- DEP_GATE_DECISION: <MERGE|BOUNCE|UNKNOWN>
-- DEP_MERGE_PERFORMED: <yes|no|unknown>
-- DEP_CI_SIGNAL: <PASS|FAIL|UNKNOWN|N/A>
-- DEP_DEPLOY_SIGNAL: <PASS|FAIL|UNKNOWN|N/A>
-- DEP_CI_RUN: workflow="<name>" run_id=<id|unknown> conclusion=<...> url=<...>
-- DEP_DEPLOY_EVENT: env="<env>" state=<...> url=<...>
-- DEP_NOT_DEPLOYED: <yes|no>
+* <what evidence could not be gathered and why>
 ```
 
 ## Completion guidance
 
-- If NOT_DEPLOYED is clearly correct ⇒ status can be VERIFIED.
-- If MERGE and you have concrete CI URLs/results ⇒ status can be VERIFIED (even if CI failed; that's still evidence).
-- If CI/deploy evidence cannot be obtained due to tooling/auth/unknown identifiers ⇒ UNVERIFIED with explicit concerns.
+- If NOT_DEPLOYED is clearly correct, that's a valid completed state.
+- If MERGE and you have concrete CI URLs/results, you have good evidence (even if CI failed; that's still evidence).
+- If CI/deploy evidence cannot be obtained due to tooling/auth/unknown identifiers, document the limitations and proceed.
 
-## Handoff Guidelines
+## Handoff
 
-After writing the file, provide a natural language summary:
+After writing the file, tell the orchestrator what happened:
 
-**Success (evidence gathered):**
-"Monitored CI for merge commit abc123: 3 workflows completed (tests, lint, build) with status=success. CI signal: PASS. Deployment evidence: production environment shows state=success. Ready for smoke verification."
+**Examples:**
 
-**CI failing:**
-"CI monitoring detected failures: 'tests' workflow failed with 2 test failures. CI signal: FAIL. Full evidence in verification_report.md."
+*Evidence gathered, CI passing:*
+> "Monitored CI for merge commit abc123: 3 workflows completed (tests, lint, build) with status=success. CI signal: PASS. Deployment evidence: production environment shows state=success. Route to **smoke-verifier**."
 
-**Not deployed:**
-"Gate decision was BOUNCE—deployment not attempted. Documented gate context in verification report. Status: VERIFIED (NOT_DEPLOYED is the correct state)."
+*CI failing:*
+> "CI monitoring detected failures: 'tests' workflow failed with 2 test failures. CI signal: FAIL. Full evidence in verification_report.md. Route to **smoke-verifier** to continue verification (failures are documented)."
 
-**Limited evidence:**
-"Cannot access CI evidence (gh unavailable). Verification report written with limitations documented. Status: UNVERIFIED."
+*Not deployed:*
+> "Gate decision was BOUNCE—deployment not attempted. Documented gate context in verification report. Route to **deploy-cleanup** (nothing to verify)."
+
+*Limited evidence:*
+> "Cannot access CI evidence (gh unavailable). Verification report written with limitations documented. Route to **smoke-verifier** with gaps noted."
 
 Always mention:
 - Whether deployment was attempted
 - CI signal (PASS/FAIL/UNKNOWN/N/A)
 - Deploy signal if applicable (PASS/FAIL/UNKNOWN/N/A)
 - What evidence was gathered
-- Next step (proceed to smoke-verifier, or note limitations)
+- Next step (which agent to route to)
 
 ## Handoff Targets
 

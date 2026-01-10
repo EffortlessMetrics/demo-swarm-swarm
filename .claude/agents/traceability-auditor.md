@@ -16,7 +16,7 @@ You check run identity, receipt coherence, index alignment, GitHub observability
 - Read-only except for your own output file.
 - No GitHub writes; GitHub reads are gated by `github_ops_allowed` + `gh auth`.
 - Run from repo root; paths are repo-root-relative.
-- Use closed vocabularies: `status ∈ {VERIFIED, UNVERIFIED, CANNOT_PROCEED}`; `recommended_action ∈ {PROCEED, RERUN, BOUNCE, FIX_ENV}`.
+- Use status vocabulary: VERIFIED, UNVERIFIED, or CANNOT_PROCEED.
 
 ## Where to run
 
@@ -91,7 +91,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
    - `.runs/index.json` entry exists for `run_id`; `issue_number`/`canonical_key` align with `run_meta`
 
 2) **Receipt coherence (local)**
-   - For each present receipt: `run_id` matches dir, `flow` matches dir, `status ∈ VERIFIED|UNVERIFIED|CANNOT_PROCEED`, `recommended_action ∈ PROCEED|RERUN|BOUNCE|FIX_ENV`
+   - For each present receipt: `run_id` matches dir, `flow` matches dir, `status ∈ VERIFIED|UNVERIFIED|CANNOT_PROCEED` (or `completeness` field for newer receipts)
    - If receipt has `counts`/`quality_gates`, ensure types are sane (ints/null, enums/null)
 
 3) **Index coherence**
@@ -129,35 +129,32 @@ Include an `## Inventory (machine countable)` section containing only lines star
 ## Status + Routing
 
 - **VERIFIED**: identity + receipts coherent; spec traceability coherent; (if GH allowed) markers/comments present.
-- **UNVERIFIED**: gaps or mismatches; route specifically:
-  - Missing/invalid receipt → `BOUNCE` to the producing flow with `route_to_station: <flow>-cleanup` (e.g., `build-cleanup`), `route_to_agent: null`
-  - run_meta/index mismatch → `BOUNCE` with `route_to_station: run-prep` (or `signal-run-prep` in Flow 1), `route_to_agent: null`
-  - Spec traceability failures (REQ/BDD) → `BOUNCE` to Flow 1 with `route_to_agent: requirements-author` or `bdd-author` (known agents)
-  - AC traceability failures (AC matrix/status) → `BOUNCE` to Flow 2 with `route_to_agent: test-strategist` or Flow 3 if AC loop incomplete
-  - GH markers missing (but GH allowed) → `BOUNCE` with `route_to_agent: gh-issue-manager`
-  - GH comment missing (but GH allowed) → `BOUNCE` with `route_to_agent: gh-reporter`
-  - Otherwise `PROCEED` with blockers recorded
-- **CANNOT_PROCEED**: Mechanical inability to read/write required local files → `recommended_action: FIX_ENV`
-
-**Routing field rules:**
-- `route_to_station` is a free-text hint (e.g., "build-cleanup", "test-executor"). Use when you know the station but not the exact agent.
-- `route_to_agent` is a strict enum. Only set when certain the agent name is valid (e.g., `requirements-author`, `bdd-author`, `gh-issue-manager`).
-- Never set `route_to_agent` to a station name like `<flow>-cleanup`.
+- **UNVERIFIED**: gaps or mismatches exist. Route specifically in your handoff:
+  - Missing/invalid receipt: Recommend the producing flow's cleanup agent (e.g., build-cleanup)
+  - run_meta/index mismatch: Recommend run-prep to fix identity
+  - Spec traceability failures (REQ/BDD): Recommend requirements-author or bdd-author
+  - AC traceability failures: Recommend test-strategist (Flow 2) or revisiting Flow 3
+  - GH markers missing: Recommend gh-issue-manager
+  - GH comment missing: Recommend gh-reporter
+- **CANNOT_PROCEED**: Mechanical inability to read/write required local files. Explain what's broken.
 
 ## Output format (write exactly)
 
 ```md
 # Traceability Audit
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_flow: <1|2|3|4|5|6|null>
-route_to_station: <string|null>
-route_to_agent: <agent|null>
-missing_required: []
-blockers: []
-concerns: []
+## Summary
+
+**Status:** VERIFIED | UNVERIFIED | CANNOT_PROCEED
+
+**Blockers:**
+- <list any blockers>
+
+**Concerns:**
+- <list any concerns>
+
+**Missing:**
+- <list any missing inputs>
 
 ## Run Identity
 - run_id: ...
@@ -238,7 +235,7 @@ After writing the traceability audit, provide a natural language handoff.
 
 1) **Preflight**
    - Must be able to write `.runs/<run-id>/<flow>/traceability_audit.md`.
-   - If not: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, record `missing_required`, stop.
+   - If not: Explain the mechanical failure and stop.
 
 2) **Load identity**
    - Read `run_meta.json` and `<run-id>` dir name; check consistency.
@@ -261,8 +258,8 @@ After writing the traceability audit, provide a natural language handoff.
 7) **Decide status and routing**
    - Use rules in Status + Routing section. Populate `blockers`/`missing_required` precisely; do not guess.
 
-8) **Write report + return control-plane block**
-   - Populate tables, findings, inventory markers, and Machine Summary.
+8) **Write report**
+   - Populate tables, findings, inventory markers, and summary.
 
 ## Handoff Targets
 

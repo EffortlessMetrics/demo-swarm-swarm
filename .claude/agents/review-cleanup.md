@@ -56,18 +56,13 @@ The receipt should answer:
 - Are there critical items still pending?
 - Is this ready for Gate, or does more work remain?
 
-**Status determination:**
-- `VERIFIED`: All critical/major items resolved, worklist complete
-- `PARTIAL`: Some items resolved but work remains (context checkpoint, not failure)
-- `UNVERIFIED`: Missing worklist OR critical items pending OR no progress made
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write review_receipt.json due to permissions").
+**Completion states:**
+- **Complete:** All critical/major items resolved, worklist complete. Ready for Gate.
+- **Partial:** Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
+- **Incomplete:** Missing worklist OR critical items pending OR no progress made. Document what's missing.
+- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
 
 **PARTIAL is a feature:** Flow 4 has unbounded loops. When context is exhausted mid-worklist, PARTIAL means "real progress made, more to do, rerun to continue."
-
-**Recommended action:**
-- `PROCEED`: Review complete, ready for Gate
-- `RERUN`: More items to address
-- `FIX_ENV`: Mechanical failure
 
 ## Receipt Schema
 
@@ -75,9 +70,6 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "review",
-  "status": "VERIFIED | PARTIAL | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | FIX_ENV",
-
   "summary": "<1-2 sentence description of review progress>",
 
   "feedback": {
@@ -98,8 +90,7 @@ The receipt should answer:
 
   "forensic_check": "PASS | MISMATCH",
 
-  "blockers": [],
-  "concerns": [],
+  "gaps": ["<any missing artifacts or pending critical items>"],
 
   "evidence_sha": "<current HEAD>",
   "generated_at": "<ISO8601>"
@@ -143,22 +134,18 @@ If `pr_feedback.md` is missing, note as concern (maybe no feedback yet).
 
 ## Handoff
 
-**Your default recommendation is:**
-- **PROCEED to gate-cleanup** when review is complete (VERIFIED status)
-- **RERUN via review-worklist-writer** when work remains (PARTIAL status)
-- **FIX_ENV** when mechanical failure prevents progress (CANNOT_PROCEED status)
+After writing the receipt and reports, tell the orchestrator what happened:
 
-**When review complete:**
-- "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred."
-- Recommend: Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5.
+**Examples:**
 
-**When work remains (partial):**
-- "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache."
-- Recommend: Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure.
+*Review complete:*
+> "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred. Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5."
 
-**When blocked on environment:**
-- "Cannot write review_receipt.json due to permissions."
-- Recommend: Route to orchestrator with `FIX_ENV` -- mechanical issue needs resolution.
+*Work remains (partial):*
+> "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
+
+*Blocked on environment:*
+> "Cannot write review_receipt.json due to permissions. Need environment fix before retrying."
 
 ## Handoff Targets
 

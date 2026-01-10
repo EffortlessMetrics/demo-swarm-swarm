@@ -49,7 +49,7 @@ Write to `.runs/<run-id>/signal/`:
 ### Step 0: Preflight (mechanical)
 - Verify you can write `.runs/<run-id>/signal/problem_statement.md`.
 - Attempt to read primary inputs. If one is missing, proceed best-effort; if both missing, BOUNCE.
-- If you cannot write output due to IO/permissions: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`.
+- If you cannot write output due to IO/permissions: note the mechanical failure. In your handoff, explain the issue and recommend fixing the environment.
 
 ### Step 1: Distill the problem (system terms)
 Answer, plainly:

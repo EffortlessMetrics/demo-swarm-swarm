@@ -60,27 +60,26 @@ Verify you can:
 - Write `.runs/<run-id>/build/pr_creation_status.md`
 
 If IO/permissions fail:
-- `status: CANNOT_PROCEED`
-- `recommended_action: FIX_ENV`
-- Route to orchestrator with mechanical failure details.
+- Write status with mechanical failure details
+- Recommend: "Fix [specific IO/tooling issue] then rerun **pr-creator**"
 
 ### Step 1: Check GitHub Access
 
 If `run_meta.github_ops_allowed == false`:
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Proceed with flow (expected when GitHub access is disabled)"
 - Exit cleanly.
 
 If `gh auth status` fails:
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Proceed with flow; authenticate gh CLI for future PR creation"
 - Exit cleanly.
 
 ### Step 2: Check Publish Surface
 
 If `publish_surface: NOT_PUSHED`:
 - Write status with `operation_status: SKIPPED`, reason: `branch_not_pushed`
-- `status: UNVERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Route to **repo-operator** to push, then rerun **pr-creator**"
 - Exit cleanly (PR can be created after branch is pushed).
 
 ### Step 3: Check for Existing PR
@@ -95,7 +94,7 @@ If PR exists:
 - Read its `number` and `url`
 - Update `run_meta.json` with existing `pr_number`
 - Write status with `operation_status: EXISTING`, `pr_number`, `pr_url`
-- `status: VERIFIED`, `recommended_action: PROCEED`
+- Recommend: "Found existing PR. Proceed to **pr-feedback-harvester** to check for new feedback."
 - Exit cleanly.
 
 ### Step 4: Create Draft PR
@@ -196,32 +195,20 @@ run_meta_updated: yes | no
 
 ## Handoff
 
-**Your default recommendation is: proceed to build-cleanup** (if this is the last step of Flow 3) or **proceed to pr-feedback-harvester** (if Flow 4 will harvest feedback).
+After writing outputs, provide a natural language handoff to the orchestrator.
 
-**When PR created successfully:**
-- "Created Draft PR #123 from run/feat-auth to main. PR includes build summary and artifact links. CodeRabbit and CI checks will run automatically."
-- Recommend: Route to **build-cleanup** to finalize Flow 3, or let bots spin before **pr-feedback-harvester** in Flow 4.
+**What I did:** Summarize PR creation outcome (created/existing/skipped).
 
-**When PR already exists:**
-- "Found existing PR #123 for run/feat-auth. Updated run_meta with PR number and URL."
-- Recommend: Route to **pr-feedback-harvester** to check for new feedback.
+**What's left:** Note if PR is ready for bot feedback or if branch needs to be pushed first.
 
-**When skipped (not pushed):**
-- "Skipped PR creation — branch run/feat-auth not pushed yet."
-- Recommend: Route to **repo-operator** to push, then rerun pr-creator.
+**Recommendation:** Name a specific agent and explain your reasoning:
 
-**When skipped (auth):**
-- "Skipped PR creation — gh not authenticated or github_ops_allowed is false."
-- Recommend: Proceed with flow (expected when GitHub access is disabled).
+- PR created successfully: "Created Draft PR #123. CodeRabbit and CI checks will run automatically. Recommend **build-cleanup** to finalize Flow 3."
+- PR already exists: "Found existing PR #123. Recommend **pr-feedback-harvester** to check for new feedback."
+- Skipped (not pushed): "Branch not pushed yet. Recommend **repo-operator** to push, then rerun **pr-creator**."
+- Skipped (auth): "gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
 
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **pr-feedback-harvester**: Harvest PR feedback from CodeRabbit, GitHub Actions, and human reviewers once the PR is created and bots have posted
-- **repo-operator**: Push changes to remote if branch not yet pushed (pr-creator needs pushed branch)
-- **build-cleanup**: Finalize the Build flow receipt if PR creation was the last step of Flow 3
-- **review-worklist-writer**: Convert harvested feedback into actionable Work Items (after pr-feedback-harvester runs)
+**Your default recommendation:** Route to **build-cleanup** (if this is the last step of Flow 3) or **pr-feedback-harvester** (if Flow 4 will harvest feedback).
 
 ## Hard Rules
 

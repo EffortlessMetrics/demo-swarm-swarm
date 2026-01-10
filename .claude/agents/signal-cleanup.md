@@ -56,12 +56,7 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
 **Status determination:**
 - `VERIFIED`: Requirements exist AND critics ran AND passed
 - `UNVERIFIED`: Missing required artifacts OR critics found critical issues OR critics didn't run
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write signal_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Signal is ready for Flow 2
-- `RERUN`: Missing artifacts or critical issues need addressing
-- `FIX_ENV`: Mechanical failure
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
 
 ## Receipt Schema
 
@@ -70,7 +65,6 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
   "run_id": "<run-id>",
   "flow": "signal",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | FIX_ENV",
 
   "summary": "<1-2 sentence description of what Signal produced>",
 
@@ -135,19 +129,14 @@ If optional artifacts (risks, open questions) are missing, note it as a concern 
 
 ## Handoff
 
-After writing the receipt and reports:
+After writing the receipt and reports, report back with what you found and your recommendation for next steps.
 
-```markdown
-## Handoff
-
-**What I did:** Summarized Signal flow. Found 8 requirements, 2 NFRs, 12 BDD scenarios. Both critics passed. 1 high-risk item flagged for Plan consideration.
-
-**What's left:** Ready for secrets scan and Flow 2.
-
-**Recommendation:** PROCEED to secrets-sanitizer, then Flow 2 (Plan).
-
-**Reasoning:** Requirements are clear and testable, scenarios cover the happy paths and key error cases, critics verified the artifacts. One integration risk (third-party API dependency) noted for design consideration.
-```
+Your handoff should explain:
+- What artifacts you found and summarized
+- Key counts (requirements, NFRs, scenarios, risks)
+- Whether critics passed or found issues
+- Whether Signal is ready for the next phase or needs more work
+- Your recommendation for which agent should handle this next
 
 ## Handoff Targets
 

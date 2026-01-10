@@ -61,16 +61,10 @@ The receipt should answer:
 - Is there a clear implementation plan?
 - Is this ready for Build, or does it need more work?
 
-**Status determination:**
-- `VERIFIED`: ADR exists with chosen option AND required critics passed AND work plan exists
-- `UNVERIFIED`: Missing required artifacts OR critics found critical issues OR decision not made
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write plan_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Plan is ready for Flow 3
-- `RERUN`: Missing artifacts or critical issues
-- `BOUNCE`: Need to go back to Signal for clarification
-- `FIX_ENV`: Mechanical failure
+**Assessing completion:**
+- **Complete**: ADR exists with chosen option AND required critics passed AND work plan exists
+- **Partial**: Missing required artifacts OR critics found critical issues OR decision not made
+- **Cannot proceed**: Can't read/write files (mechanical failure)
 
 ## Receipt Schema
 
@@ -78,8 +72,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "plan",
-  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
+  "completeness": "complete | partial | incomplete",
 
   "summary": "<1-2 sentence description of the design decision and plan>",
 
@@ -146,25 +139,28 @@ Report what you found and what's missing.
 
 If neither `adr.md` nor `work_plan.md` exists, that's a blocker -- no actionable plan.
 
-If critics are missing, note that design wasn't validated. Status is UNVERIFIED.
+If critics are missing, note that design wasn't validated and the plan is incomplete.
 
 If optional artifacts (contracts, observability spec) are missing, note as concern and continue.
 
-## Handoff
+## Handoff Guidelines
 
-After writing the receipt and reports:
+After writing the receipt and reports, explain what you found and recommend next steps.
 
-```markdown
-## Handoff
+**When plan is complete:**
+"Summarized Plan flow. Design decision: OPT-002 (modular architecture) chosen for maintainability and team familiarity. 12 subtasks planned across 5 ACs. All critics passed. Ready for secrets-sanitizer to scan artifacts, then Flow 3 can begin implementation."
 
-**What I did:** Summarized Plan flow. Design decision: OPT-002 (modular architecture) chosen for maintainability and team familiarity. 12 subtasks planned across 5 ACs. All critics passed.
+**When ADR is missing:**
+"Reviewed Plan flow artifacts. design_options.md exists with 3 options but no ADR decision was made. adr-author should choose an option and document the rationale before cleanup can complete."
 
-**What's left:** Ready for secrets scan and Build.
+**When critics found issues:**
+"Summarized Plan flow. ADR exists but design_validation found 2 major concerns about scalability. design-critic flagged issues that should be addressed. Route back to design-optioneer to revise options or adr-author to update decision with mitigations."
 
-**Recommendation:** PROCEED to secrets-sanitizer, then Flow 3 (Build).
-
-**Reasoning:** Clear decision with documented rationale, work is broken into manageable chunks, critics validated the approach. API contracts defined for 4 endpoints.
-```
+Your handoff should include:
+- What design decision was made (if any)
+- Whether critics passed
+- Scope of implementation work planned
+- Which agent should work next and why
 
 ## Handoff Targets
 

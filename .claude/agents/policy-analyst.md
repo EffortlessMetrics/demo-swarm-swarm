@@ -96,17 +96,14 @@ Track missing inputs in `missing_required` but keep going unless you cannot writ
 1. **Preflight**
 
    * Verify you can write: `.runs/<run-id>/<current-flow>/policy_analysis.md`
-   * If not: `status: CANNOT_PROCEED`, `recommended_action: FIX_ENV`, list the path in `missing_required`, stop.
+   * If not: Explain the mechanical failure and stop.
 
 2. **Locate policy corpus**
 
    * Search the configured roots first (from `demo-swarm.config.json` if present), then defaults.
    * If no policy documents found:
-
-     * `status: UNVERIFIED`
-    * `recommended_action: PROCEED`
-     * `blockers`: "No policy documents found in expected roots"
-     * Continue and write a report documenting where you searched.
+     * Document where you searched
+     * Continue with the analysis (proceed with documented uncertainty)
 
 3. **Extract policy requirements**
 
@@ -135,15 +132,13 @@ Track missing inputs in `missing_required` but keep going unless you cannot writ
    * For each `NON-COMPLIANT` or `UNKNOWN` item, assign a severity: `CRITICAL | HIGH | MEDIUM | LOW`
    * Mark "waiver candidate" when the only path forward is an explicit exception (e.g., policy requires approval/signoff, or remediation is out of scope).
 
-7. **Set control-plane routing**
+7. **Determine routing recommendation**
 
-   * If any `CRITICAL` `NON-COMPLIANT` → usually `BOUNCE` (Plan context → Flow 2; Gate context → Flow 3) with blockers
-   * If `NON-COMPLIANT` and fix is clear + in-scope:
-
-     * Plan context → `BOUNCE` to Flow 2, `route_to_agent: interface-designer` (or `adr-author`)
-     * Gate context → `BOUNCE` to Flow 3, `route_to_agent: code-implementer` (or `test-author`)
-   * If only `UNKNOWN` items remain for applicable requirements → `UNVERIFIED`, usually `PROCEED` with blockers
-   * If all applicable items are `COMPLIANT` (or justified `NOT_APPLICABLE`) → `VERIFIED`, `PROCEED`
+   Use natural language to communicate next steps:
+   * If CRITICAL non-compliant items exist: Recommend routing to the appropriate fixer (interface-designer for Plan context, code-implementer for Gate context)
+   * If non-compliant items have clear fixes: Recommend the specific agent to address them
+   * If only UNKNOWN items remain: Recommend proceeding with documented uncertainty
+   * If all applicable items are compliant: Recommend proceeding
 
 ## Output format (write exactly)
 

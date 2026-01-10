@@ -94,10 +94,10 @@ Missing inputs ⇒ produce best-effort output with documented gaps. Partial work
 - Use stable IDs: `SUG-001`, `SUG-002`, ...
 - Provide a clear insertion point (file path + heading/section).
 
-5) Set completion state:
-- `VERIFIED`: at least one input was present and you produced actionable drafts/suggestions with evidence pointers.
-- `UNVERIFIED`: inputs missing/unusable, but you still produced a best-effort set and recorded the gaps.
-- `CANNOT_PROCEED`: only if you cannot write the output due to IO/permissions/tooling.
+5) Determine completion:
+- **Complete:** At least one input was present and you produced actionable drafts/suggestions with evidence pointers.
+- **Partial:** Inputs missing/unusable, but you still produced a best-effort set and recorded the gaps.
+- **Mechanical failure:** Cannot write the output due to IO/permissions/tooling. Describe the issue.
 
 ## Output format (`.runs/<run-id>/wisdom/feedback_actions.md`)
 
@@ -289,20 +289,20 @@ For mechanical counting, preserve these exact line prefixes:
 
 Do not vary these prefixes.
 
-## Handoff Guidelines
+## Handoff
 
-When you're done, tell the orchestrator what happened in natural language:
+When you're done, tell the orchestrator what happened:
 
 **Examples:**
 
 *Completed successfully:*
-> "Created 3 issue drafts and 5 suggestions from mutation survivors and learnings. All outputs written to wisdom/. Flow can proceed."
+> "Created 3 issue drafts and 5 suggestions from mutation survivors and learnings. All outputs written to wisdom/. Route to **wisdom-cleanup** to seal the flow."
 
 *Partial completion:*
-> "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Recommend rerunning after artifact audit if more precision needed."
+> "Produced 2 issue drafts but regression_report.md was missing. Created best-effort suggestions from available learnings. Route to **wisdom-cleanup** with gaps documented."
 
 *Environment issue:*
-> "Cannot write output files due to permissions error on .runs/ directory. Recommend fixing the permissions issue, then rerunning feedback-applier."
+> "Cannot write output files due to permissions error on .runs/ directory. Need environment fix before retrying."
 
 **Include counts:**
 - How many issue drafts created

@@ -85,10 +85,9 @@ When invoked with a worklist item (e.g., `RW-NNN` targeting documentation):
 ### Step 0: Preflight
 - Verify you can write: `.runs/<run-id>/build/doc_updates.md`.
 - If you cannot write due to IO/permissions/tooling:
-  - `status: CANNOT_PROCEED`
-  - `recommended_action: FIX_ENV`
-  - set `missing_required` to the output path
-  - stop
+  - Note the mechanical failure
+  - In your handoff, explain the issue and recommend fixing the environment
+  - Stop
 
 ### Step 1: Determine "doc surface" from reality (bounded discovery)
 Start from:

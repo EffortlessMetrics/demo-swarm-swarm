@@ -45,16 +45,10 @@ The receipt should answer:
 - If not, why not?
 - What's the state of the codebase now?
 
-**Status determination:**
-- `VERIFIED`: Deployment verdict is STABLE AND deploy-decider passed
-- `UNVERIFIED`: Deployment not stable OR verification incomplete
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write deploy_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Deploy complete, ready for Wisdom
-- `BOUNCE`: Need to go back to Build/Gate
-- `RERUN`: Missing artifacts
-- `FIX_ENV`: Mechanical failure
+**Completion states:**
+- **Complete:** Deployment verdict is STABLE and deploy-decider passed. Route to Wisdom.
+- **Incomplete:** Deployment not stable OR verification incomplete. Document what happened.
+- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
 
 ## Receipt Schema
 
@@ -62,9 +56,6 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "deploy",
-  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | BOUNCE | RERUN | FIX_ENV",
-
   "summary": "<1-2 sentence description of deployment outcome>",
 
   "deployment_verdict": "STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE",
@@ -81,8 +72,7 @@ The receipt should answer:
     "smoke_tests": "passed"
   },
 
-  "blockers": [],
-  "concerns": [],
+  "gaps": ["<any missing artifacts or incomplete verification>"],
 
   "evidence_sha": "<current HEAD>",
   "generated_at": "<ISO8601>"
@@ -139,16 +129,18 @@ Honest partial work is fine. A receipt that says "deployment decision was never 
 
 ## Handoff
 
-After writing the receipt and reports, provide a natural language summary. Always proceed to secrets-sanitizer (default path to Wisdom):
+After writing the receipt and reports, tell the orchestrator what happened:
 
-**Deployed successfully:**
-"Summarized Deploy flow. Deployment verdict: STABLE. PR merged, tag v1.2.3 created. Proceed to secrets-sanitizer, then Wisdom to extract learnings."
+**Examples:**
 
-**Not deployed (gate bounce):**
-"Summarized Deploy flow. Deployment verdict: BLOCKED_BY_GATE due to security findings. Receipt documents the non-deployment. Proceed to secrets-sanitizer, then Wisdom. (Fixing the security issues is a separate run.)"
+*Deployed successfully:*
+> "Summarized Deploy flow. Deployment verdict: STABLE. PR merged, tag v1.2.3 created. Route to **secrets-sanitizer**, then **learning-synthesizer** to extract learnings."
 
-**Incomplete data:**
-"Summarized Deploy flow with incomplete evidence. Deployment decision artifact was missing; receipt documents what was available. Proceed to secrets-sanitizer, then Wisdom."
+*Not deployed (gate bounce):*
+> "Summarized Deploy flow. Deployment verdict: BLOCKED_BY_GATE due to security findings. Receipt documents the non-deployment. Route to **secrets-sanitizer**, then **learning-synthesizer**. (Fixing the security issues is a separate run.)"
+
+*Incomplete data:*
+> "Summarized Deploy flow with incomplete evidence. Deployment decision artifact was missing; receipt documents what was available. Route to **secrets-sanitizer**, then **learning-synthesizer**."
 
 Note: Bouncing back to Gate/Build is a new run, not a continuation. This run proceeds to Wisdom to capture learnings even when deployment failed.
 

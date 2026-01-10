@@ -117,25 +117,25 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
 
 10. **If inputs are missing**:
    - Still write a best-effort plan.
-   - Record missing paths in `missing_required`.
+   - Record missing paths in the Status section.
    - Use explicit assumptions.
-   - Set `status: UNVERIFIED` and `recommended_action: RERUN` (after the missing artifacts are produced), unless you truly cannot read files.
+   - Mark the plan as partial, note what's missing, and recommend what should happen next.
 
 ## work_plan.md Format (required)
 
 ```markdown
 # Work Plan for <run-id>
 
-## Machine Summary
-status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-route_to_agent: <agent-name | null>
-route_to_flow: <1|2|3|4|5|6 | null>
+## Summary
 
-blockers:
-  - <must change to reach VERIFIED / to proceed>
-missing_required:
-  - <path> (reason)
+<2-3 sentences: what this plan covers, how many subtasks, key dependencies>
+
+## Status
+
+- **Completeness**: Complete | Partial | Incomplete
+- **Subtasks**: <int>
+- **Blockers**: <list or "none">
+- **Missing inputs**: <list or "none">
 
 ## Scope Snapshot
 - **ADR decision**: <one sentence>
@@ -299,53 +299,37 @@ Context-loader will expand these patterns via filesystem search. If a pattern ma
 - Planned migrations must be written under: `.runs/<run-id>/plan/migrations/`
 - Build (Flow 3) is where migrations move into the repo's real migration system.
 
-## Completion States
+## Assessing Completion
 
-- **VERIFIED**: Subtasks are coherent, dependency chain makes sense, rollout/rollback ties to observability, and no `missing_required`.
-- **UNVERIFIED**: Plan exists but depends on assumptions or missing inputs; blockers documented.
-- **CANNOT_PROCEED**: You cannot read required inputs due to IO/permissions/tooling failure (include the paths in `missing_required`).
+Your work plan is **complete** when:
+- Subtasks are coherent with clear dependencies
+- Rollout/rollback ties to observability
+- No missing inputs or blockers
+
+Your work plan is **partial** when:
+- Plan exists but depends on assumptions or missing inputs
+- Key design decisions are ambiguous
+
+You **cannot proceed** when:
+- Mechanical failure (cannot read/write required files)
 
 ## Handoff Guidelines
 
-After writing the work plan and subtasks.yaml, provide a natural language handoff:
+After writing the work plan and subtasks.yaml, explain what you did and recommend next steps.
 
-```markdown
-## Handoff
+**When work plan is complete:**
+"Decomposed design into 5 subtasks with dependency graph and rollout/rollback plan. Created foundation-first sequencing (ST-000: migration, then ST-001-004: logic subtasks). Each subtask has clear acceptance criteria and scope hints. Ready for plan-cleanup to finalize Flow 2."
 
-**What I did:** Decomposed design into <N> subtasks with dependency graph and rollout/rollback plan.
+**When ADR is ambiguous:**
+"Attempted work planning but ADR shows Option A and Option B with no chosen approach. Cannot decompose without a clear design decision. adr-author should finalize the decision before work planning can proceed."
 
-**What's left:** <"Ready for Build" | "Missing plan inputs">
+**When test plan is missing:**
+"ADR and impact map are present, but test_plan.md is missing. Work breakdown would benefit from knowing the test strategy. test-strategist should create the test plan, or I can proceed with assumptions about test coverage."
 
-**Recommendation:** <PROCEED to Flow 3 | BOUNCE to design-validator to resolve <gaps>>
-
-**Reasoning:** <1-2 sentences explaining decomposition and sequencing>
-```
-
-Examples:
-
-```markdown
-## Handoff
-
-**What I did:** Decomposed design into 5 subtasks with dependency graph and rollout/rollback plan.
-
-**What's left:** Ready for Build.
-
-**Recommendation:** PROCEED to Flow 3.
-
-**Reasoning:** Created foundation-first sequencing (ST-000: migration, then ST-001-004: logic subtasks). Each subtask has clear acceptance criteria and scope hints. Rollout uses feature flag with observability gates. Estimate aligns with M scope from signal.
-```
-
-```markdown
-## Handoff
-
-**What I did:** Attempted work planning but ADR decision is ambiguous (two options presented, no choice marked).
-
-**What's left:** Cannot decompose without design decision.
-
-**Recommendation:** BOUNCE to design-validator to finalize ADR decision.
-
-**Reasoning:** ADR shows Option A and Option B but no chosen approach. Work decomposition depends on which option is selected.
-```
+Your handoff should include:
+- What you accomplished (subtask count, dependency structure, rollout/rollback approach)
+- What gaps remain (if any)
+- Which agent should work next and why
 
 ## Handoff Targets
 
@@ -358,7 +342,7 @@ When you complete your work, recommend one of these to the orchestrator:
 - **adr-author**: Clarifies architectural decision when ADR is ambiguous or missing chosen option
 - **test-strategist**: Refines test plan when coverage or AC matrix needs alignment with work breakdown
 
-If inputs are missing, still write a best-effort plan with explicit assumptions and document the gaps. An UNVERIFIED plan with clear assumptions enables the flow to continue and be refined later.
+If inputs are missing, still write a best-effort plan with explicit assumptions and document the gaps. A partial plan with clear assumptions enables the flow to continue and be refined later.
 
 ## Philosophy
 

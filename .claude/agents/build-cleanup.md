@@ -69,12 +69,7 @@ The receipt should answer:
 **Status determination:**
 - `VERIFIED`: Implementation exists AND tests ran and passed AND critics approved
 - `UNVERIFIED`: Missing artifacts OR tests failed OR critics found critical issues OR forensic mismatch
-- `CANNOT_PROCEED`: Can't read/write files (mechanical failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write build_receipt.json due to permissions").
-
-**Recommended action:**
-- `PROCEED`: Build is ready for Gate
-- `RERUN`: Need to fix issues and rebuild
-- `FIX_ENV`: Mechanical failure
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
 
 ## Receipt Schema
 
@@ -83,7 +78,6 @@ The receipt should answer:
   "run_id": "<run-id>",
   "flow": "build",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | FIX_ENV",
 
   "summary": "<1-2 sentence description of what was built and tested>",
 
@@ -169,40 +163,20 @@ If critics are missing, note that code wasn't reviewed. Status is UNVERIFIED.
 
 ## Handoff
 
-After writing the receipt and reports:
+After writing the receipt and reports, report back with a natural language summary.
 
-```markdown
-## Handoff
+**Example (ready for Gate):**
+> Build summary complete. 8 files changed implementing REQ-001 through REQ-003. Tests: 25 passed, 0 failed. All 5 ACs completed. Code and test critics both passed. Route to **secrets-sanitizer** before Gate.
 
-**What I did:** Summarized Build flow. Implementation complete: 8 files changed implementing REQ-001 through REQ-003. Tests: 25 passed, 0 failed. All 5 ACs completed. Code and test critics both passed.
+**Example (forensic mismatch):**
+> Found forensic mismatch: ac_status.json claims AC-003 passed but test_execution.md shows 3 failures. Route to **code-implementer** to fix AC-003 implementation.
 
-**What's left:** Ready for Gate.
+**Example (missing artifacts):**
+> test_execution.md is missing -- tests were not run. Route to **test-executor** to run tests before sealing the receipt.
 
-**Recommendation:** PROCEED to secrets-sanitizer, then Flow 5 (Gate).
+## Handoff Targets (reference)
 
-**Reasoning:** Implementation matches plan, tests verify behavior, critics approved the code. No forensic mismatches -- worker claims match evidence.
-```
-
-**If forensic mismatch:**
-```markdown
-## Handoff
-
-**What I did:** Audited Build flow artifacts. Found forensic mismatch: ac_status.json claims AC-003 passed but test_execution.md shows 3 failures for AC-003 tests.
-
-**What's left:** Fix failing tests for AC-003.
-
-**Recommendation:** RERUN -- code-implementer needs to fix AC-003 implementation.
-
-**Reasoning:** Cannot verify AC-003 completion when test evidence contradicts the claim.
-```
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **secrets-sanitizer**: Scans for secrets before publishing. Use after receipt is sealed and before Flow 5 (Gate).
-- **code-implementer**: Fixes implementation issues when forensic mismatches are found. Use when worker claims do not match evidence.
-- **test-executor**: Reruns tests when test evidence is missing or stale. Use to regenerate test_execution.md.
-- **self-reviewer**: Re-reviews artifacts if you find inconsistencies. Use to regenerate self_review.md before sealing.
-
-**Your default recommendation is secrets-sanitizer.** After the receipt is sealed, scan for secrets before proceeding to Gate.
+- **secrets-sanitizer**: Scans for secrets before publishing. Default after receipt is sealed.
+- **code-implementer**: Fixes implementation issues when forensic mismatches are found.
+- **test-executor**: Reruns tests when test evidence is missing or stale.
+- **self-reviewer**: Re-reviews artifacts if you find inconsistencies before sealing.
