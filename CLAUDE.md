@@ -34,33 +34,54 @@ The pack is a **build pipeline with guardrails**, not a guardrail pipeline that 
 
 See: [docs/explanation/why-ops-first.md](docs/explanation/why-ops-first.md)
 
-**Agents are intelligent actors.** They investigate, derive, default, then escalate. Critics never fix. Workers maintain the ledger. Cleanup agents audit.
+---
+
+## Agent Philosophy
+
+**Orchestrators are PMs. Agents are well-trained juniors.**
+
+Orchestrators scope work, route tasks, and make sequencing decisions. Agents do real cognitive work: they think, investigate, make judgment calls, and produce artifacts with substance. Agents are not clipboard-copiers or template-fillers.
+
+**Why spawn an agent?** Two reasons only:
+1. **Do work** — The task requires focused expertise (code-implementer writes code, test-author writes tests)
+2. **Compress context** — A specialist can summarize, filter, or derive information more efficiently than carrying full context forward
+
+**Every agent returns two things:**
+1. **An answer** — What they found, built, or concluded
+2. **A routing suggestion** — What should happen next and why
+
+**Honest partial reports are successful outcomes.** An agent that completes 60% of the work and clearly documents what's done, what's blocked, and what to try next has succeeded. Failure to complete work is not failure as an agent. Hiding uncertainty behind false completion is the actual failure mode.
+
+**Artifacts exist because content matters.** Receipts tell stories about what happened. Decision documents explain reasoning. These artifacts have value as records and communication, not just as routing gates. Write them for the next reader (human or agent), not for a parser.
+
+**Single responsibility, done deeply.** Each agent has one clear job. They do it thoroughly, then hand off. code-critic critiques but never fixes. code-implementer implements but never commits. repo-operator handles git but doesn't judge code quality.
 
 See: [docs/explanation/agent-philosophy.md](docs/explanation/agent-philosophy.md)
 
 ---
 
-## Non-Negotiables
+## Coordination Patterns
 
-These rules exist to prevent drift and "model invention":
+These patterns keep agents aligned without over-constraining them:
 
-1. **Repo root only**
-   All commands run from **repo root**; all paths are **repo-root-relative**. Do not rely on `cd`.
+1. **Repo root orientation**
+   Commands run from repo root; paths are repo-root-relative. This keeps agents oriented consistently.
 
-2. **No raw git in flow commands or agent prompts**
-   Git operations are owned by `repo-operator`. Orchestrators call `repo-operator` using **task phrasing**.
+2. **Git ownership**
+   `repo-operator` owns git operations. Other agents describe what they want ("commit these changes with this message") rather than running git directly. This concentrates git expertise and prevents conflicts.
 
-3. **Control plane vs audit plane**
-   Orchestrators route on returned result blocks (`Gate Result`, `Repo Operator Result`).
-   Files like `secrets_status.json` and `git_status.md` are durable audit records, not routing inputs.
+3. **Natural language routing**
+   Orchestrators route based on what agents tell them in their handoff response. Agents explain what happened and recommend next steps. Files on disk are durable records, not routing inputs.
 
-4. **Two gates for GitHub operations**
-   GitHub operations (`gh-issue-manager`, `gh-reporter`) require BOTH:
-   - `safe_to_publish: true` (secrets gate)
-   - `proceed_to_github_ops: true` (repo hygiene gate)
+4. **Publish gates**
+   Before posting to GitHub, two conditions apply:
+   - Secrets scan passes (no credentials in content)
+   - Repo is in a clean, pushable state
 
-5. **`run_id` folders never rename**
-   Identity changes happen via `canonical_key` + `aliases[]`, never via renaming directories.
+   These gates protect the publish boundary, not internal iteration.
+
+5. **Stable run identities**
+   Run folders keep their names. If a run's meaning changes, update metadata (`canonical_key`, `aliases[]`) rather than renaming directories.
 
 ---
 
@@ -116,43 +137,41 @@ See: [docs/reference/run-state.md](docs/reference/run-state.md) for schemas (`in
 
 ---
 
-## Control-Plane Blocks
+## Handoffs
 
-Gate agents emit structured blocks for routing. Orchestrators route on these, not by rereading files.
-
-See: [docs/reference/contracts.md](docs/reference/contracts.md) for:
-- Gate Result (secrets-sanitizer)
-- Repo Operator Result
-- PR Feedback Harvester Result
-- Machine Summary format
-
----
-
-## Handoff Contract
-
-Agents communicate routing through natural language handoffs:
+Agents communicate through natural language. When an agent finishes work, it provides a handoff:
 
 1. **What was done?** — Summary of work completed
 2. **What still needs to be done?** — Remaining work, blockers, open questions
 3. **My recommendation** — Specific next step with reasoning
 
-**Always make a recommendation.** Name specific agents when you know them. Explain your reasoning.
+Orchestrators read these responses and route accordingly. There's no parsing of structured blocks; agents are trusted to communicate clearly.
 
-See: [docs/reference/contracts.md](docs/reference/contracts.md) for status concepts and routing patterns.
+**Always make a recommendation.** Name specific agents when you know them. Explain your reasoning. If you're uncertain, say so and explain why.
+
+**Specialized agents** (like secrets-sanitizer, repo-operator) include specific details the orchestrator needs to make routing decisions, but these are part of a natural response, not a machine-parsed format.
+
+See: [docs/reference/contracts.md](docs/reference/contracts.md) for communication patterns and examples.
 
 ---
 
-## Architecture Laws
+## Architecture Principles
 
-Seven invariants that prevent execution drift:
+Seven principles that guide how agents collaborate:
 
-1. **PM/IC Boundary** — Orchestrators route. Agents work. Cleanup agents audit.
-2. **Every Call Is an Implicit Resume** — Agents check disk state, not mode flags.
-3. **Workers Maintain the Ledger** — The worker who touches code updates the status.
-4. **AC Termination = Green + Orchestrator Agreement** — Tests + critic satisfaction.
-5. **Research-First Autonomy** — Investigate → Derive → Default → Escalate.
-6. **Foundation-First Sequencing** — Infrastructure subtasks have no dependencies.
-7. **Local Resolution** — Resolve mismatches locally before bouncing to previous flows.
+1. **Clear roles** — Orchestrators scope and route. Agents do focused work. Cleanup agents verify state.
+
+2. **Resume-ready** — Agents check what exists on disk when they start. They pick up where things left off rather than assuming a blank slate.
+
+3. **Workers own their ledger** — The agent who does the work updates the status. If you wrote the code, you update the implementation status.
+
+4. **Completion = verified** — Work is complete when tests pass and the orchestrator agrees. Partial progress with honest reporting is a valid intermediate state.
+
+5. **Research before asking** — Investigate the codebase, derive from patterns, choose safe defaults, then escalate only if truly stuck.
+
+6. **Foundation first** — Infrastructure and shared components come before features that depend on them.
+
+7. **Local resolution** — When something doesn't fit, try to resolve it within your scope before bouncing back to earlier flows.
 
 See: [docs/explanation/architecture.md](docs/explanation/architecture.md) for details and examples.
 
@@ -170,11 +189,11 @@ See [docs/how-to/customize-pack.md](docs/how-to/customize-pack.md) for:
 
 ## Troubleshooting
 
-See [docs/how-to/troubleshoot.md](docs/how-to/troubleshoot.md) for:
-- "CANNOT_PROCEED" — Mechanical failure; fix environment/tooling
-- "No GitHub update" — Check two gates (`safe_to_publish`, `proceed_to_github_ops`)
-- "Microloop won't terminate" — Route on `recommended_action`
-- "Counts are null" — Check stable markers in producer artifacts
+See [docs/how-to/troubleshoot.md](docs/how-to/troubleshoot.md) for common situations:
+- **Mechanical failures** — Environment or tooling issues blocking execution
+- **GitHub operations not happening** — Check that secrets scan passed and repo is in pushable state
+- **Loops not terminating** — Follow the agent's recommended action
+- **Missing information** — Check that upstream artifacts contain the expected content
 
 ---
 

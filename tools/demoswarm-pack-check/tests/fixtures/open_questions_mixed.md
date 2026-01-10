@@ -9,23 +9,23 @@ This is a test fixture with a mix of valid and invalid QID patterns.
   - A: This is correct
 
 - QID: OQ-PLAN-002
-  - Q: Invalid flow code (PLAN should be PLN) [OPEN]
-  - A: This is a violation
-
-- QID: OQ-BLD-003
-  - Q: Another valid question [RESOLVED]
+  - Q: Valid question with canonical flow code [OPEN]
   - A: This is correct
 
-- QID: OQ-BLD-3
+- QID: OQ-BLD-003
+  - Q: Invalid flow code (BLD should be BUILD) [OPEN]
+  - A: This is a violation
+
+- QID: OQ-BUILD-3
   - Q: Invalid padding (should be 003) [OPEN]
   - A: This is a violation
 
-- QID: OQ-GAT-999
+- QID: OQ-GATE-999
   - Q: Valid at upper bound [OPEN]
   - A: This is correct
 
 ## Notes
 
 This file tests multi-match validation:
-- 3 valid QIDs: OQ-SIG-001, OQ-BLD-003, OQ-GAT-999
-- 2 invalid QIDs: OQ-PLAN-002 (bad flow code), OQ-BLD-3 (bad padding)
+- 3 valid QIDs: OQ-SIG-001, OQ-PLAN-002, OQ-GATE-999
+- 2 invalid QIDs: OQ-BLD-003 (bad flow code), OQ-BUILD-3 (bad padding)

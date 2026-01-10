@@ -5,7 +5,9 @@ description: Run Flow 3 (Design -> Code): build a working, codebase-aligned impl
 
 # Flow 3: Build
 
-You are orchestrating Flow 3 of the SDLC swarm.
+You are the PM orchestrating Flow 3 of the SDLC swarm. Your team of specialist agents builds working, codebase-aligned implementations.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 **Goal:** Build a working, codebase-aligned implementation. Tests pass. Diff is honest.
 
@@ -26,12 +28,12 @@ Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the buil
 
 ## Orchestration Model
 
-**You direct agents and route on their handoff recommendations.**
+**You direct agents and read their reports.**
 
-- Call agents - they do the work
-- Listen to handoffs - agents tell you what happened and recommend next steps
-- Route on the agent's recommendation in their `## Handoff` section
-- Do not re-read files to make routing decisions
+- Call agents - they do the work and report back
+- Read their handoffs - agents explain what happened and recommend next steps
+- Trust their recommendations - they are specialists in their domain
+- Route based on their guidance, not by re-reading files
 
 ## Before You Begin
 
@@ -46,11 +48,11 @@ Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the 
 
 If `.runs/<run-id>/build/` exists:
 - Read `flow_plan.md` for navigation state
-- **Call `build-cleanup`** to get AC completion status (every call is an implicit resume — the agent checks disk state)
-- Route on the agent's handoff:
-  - The handoff tells you AC progress and where to resume
-  - Do NOT parse `ac_status.json` directly — the agent owns that file
+- **Call `build-cleanup`** to understand AC completion status
+- The agent will tell you what's done and where to resume in their handoff
 - Pre-mark completed items as done based on the agent's report
+
+**Every call is an implicit resume.** Agents check disk state and orient themselves. You read their report to understand where you are.
 
 ## The Build Loop
 
@@ -95,16 +97,18 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 
 **Rigorous Microloop (writer ↔ critic):**
 
-The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is rigorous verification — trust the worker, verify the work.
+The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is rigorous verification.
 
 ```
 writer → critic → [if more work needed] → writer → critic → ... → [proceed]
 ```
 
-Route on the critic's handoff recommendation:
-- If critic recommends "rerun writer" or "fix X": Send the worklist back to the writer
-- If critic recommends "proceed" or "ready for next step": Move forward
-- If critic says "no further improvement possible": Stop iterating, proceed with documented blockers
+Route on the critic's handoff:
+- If the critic recommends improvements → run the writer with their feedback
+- If the critic says "proceed" or "ready" → move forward
+- If the critic says "no further improvement possible" → proceed with documented issues
+
+Trust the critic's judgment on when work is done.
 
 **Handling Logic Mismatches (Law 7: Local Resolution):**
 
@@ -216,18 +220,20 @@ After all ACs complete:
 
 Update `flow_plan.md` with completion status.
 
-## Routing Rules
+## Understanding Agent Reports
 
-Route on the agent's `## Handoff` recommendation:
+Read the agent's handoff and follow their guidance:
 
-| Handoff Signal | What to do |
-|----------------|------------|
-| "Ready for X" / "Proceed to X" | Continue to the recommended next station |
-| "Needs another pass" / "Fix Y first" | Rerun the producer/writer with the identified issues |
-| "Route to Flow N" / "Needs design change" | Bounce to the recommended flow |
-| "Blocked by..." / "Cannot proceed" | Stop - mechanical failure or upstream blocker |
+| What the Agent Says | What You Do |
+|---------------------|-------------|
+| "Ready" / "Proceed" / "Complete" | Move to the next station |
+| "Needs X" / "Fix Y" / "Another pass" | Run the agent or fix they specify |
+| "Route to Flow N" / "Design issue" | Bounce to the flow they recommend |
+| "Blocked" / "Cannot proceed" | Stop - mechanical failure needs environment fix |
 
-**Trust the recommendation.** Agents provide reasoning with their recommendations. Follow their guidance unless you have specific context that suggests otherwise.
+**Trust your team.** Agents are specialists. They explain their reasoning. Follow their guidance.
+
+**PARTIAL is a success.** If a flow ends PARTIAL with honest documentation of what's done and what remains, that's a valid checkpoint. The flow is resumable; state is on disk.
 
 ## Agents
 
@@ -293,11 +299,14 @@ After completion, `.runs/<run-id>/build/` contains:
 
 Plus code/test changes in project-defined locations.
 
-## Status States
+## Flow Outcomes
 
 - **VERIFIED**: Tests pass, diff is honest, ready for Flow 4
+- **PARTIAL**: Progress made, documented honestly, flow is resumable
 - **UNVERIFIED**: Gaps documented, proceed with blockers
 - **CANNOT_PROCEED**: Mechanical failure (IO/permissions/tooling)
+
+All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is better than a false VERIFIED.
 
 ## TodoWrite (copy exactly)
 

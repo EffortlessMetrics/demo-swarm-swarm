@@ -505,11 +505,11 @@ pub const SKILL_CLI_SUBCOMMANDS: &[&str] = &[
 /// Canonical OpenQ flow codes (check 53).
 /// QID format: OQ-<FLOW>-<NNN> where FLOW is one of these.
 pub const OPENQ_FLOW_CODES: &[&str] = &[
-    "SIG", // Signal (Flow 1)
-    "PLN", // Plan (Flow 2)
-    "BLD", // Build (Flow 3)
-    "REV", // Review (Flow 4)
-    "GAT", // Gate (Flow 5)
-    "DEP", // Deploy (Flow 6)
-    "WIS", // Wisdom (Flow 7)
+    "SIG",    // Signal (Flow 1)
+    "PLAN",   // Plan (Flow 2)
+    "BUILD",  // Build (Flow 3)
+    "REVIEW", // Review (Flow 4)
+    "GATE",   // Gate (Flow 5)
+    "DEPLOY", // Deploy (Flow 6)
+    "WISDOM", // Wisdom (Flow 7)
 ];

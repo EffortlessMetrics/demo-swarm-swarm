@@ -20,6 +20,8 @@ You are the **Artifact Auditor**.
 
 If any flow directory is missing, still write the audit and mark UNVERIFIED.
 
+When returning CANNOT_PROCEED (mechanical failure), include `missing_required` listing what's missing (e.g., "cannot read .runs/<run-id>/ due to permissions").
+
 ## Output
 - `.runs/<run-id>/wisdom/artifact_audit.md`
 

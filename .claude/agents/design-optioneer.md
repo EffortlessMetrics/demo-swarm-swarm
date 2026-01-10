@@ -210,7 +210,7 @@ After writing the file, provide a natural language summary:
 "Proposed 3 design options: OPT-001 (monolith), OPT-002 (microservices), OPT-003 (event-driven). Each option mapped to all 5 REQs and 3 NFRs with fit assessment. Suggested default: OPT-001 (fastest to implement, satisfies all REQs). Ready for adr-author to decide."
 
 **Inputs incomplete:**
-"Generated 2 options but requirements.md lacks NFR identifiers—cannot assess performance/scalability fit. Route to requirements-author to add NFR-PERF-* and NFR-SCALE-* markers."
+"Generated 2 options but requirements.md lacks NFR identifiers—cannot assess performance/scalability fit. Route to requirements-author to add NFR-PERF-* markers."
 
 **Scope too vague:**
 "Requirements are ambiguous ('improve the system')—cannot propose distinct architectural options. Route to problem-framer to clarify scope and constraints."

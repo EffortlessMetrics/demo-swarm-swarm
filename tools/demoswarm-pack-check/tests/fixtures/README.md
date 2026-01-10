@@ -89,18 +89,20 @@ Per `stable-markers.md` and `openq-tools/SKILL.md`:
 | Canonical | Flow |
 |-----------|------|
 | SIG | Signal (Flow 1) |
-| PLN | Plan (Flow 2) |
-| BLD | Build (Flow 3) |
-| GAT | Gate (Flow 4) |
-| DEP | Deploy (Flow 5) |
-| WIS | Wisdom (Flow 6) |
+| PLAN | Plan (Flow 2) |
+| BUILD | Build (Flow 3) |
+| REVIEW | Review (Flow 4) |
+| GATE | Gate (Flow 5) |
+| DEPLOY | Deploy (Flow 6) |
+| WISDOM | Wisdom (Flow 7) |
 
 Non-canonical codes that should be flagged:
-- PLAN (use PLN)
-- BUILD (use BLD)
-- GATE (use GAT)
-- DEPLOY (use DEP)
-- WISDOM (use WIS)
+- PLN (use PLAN)
+- BLD (use BUILD)
+- REV (use REVIEW)
+- GAT (use GATE)
+- DEP (use DEPLOY)
+- WIS (use WISDOM)
 
 ## Security Notes
 

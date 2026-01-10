@@ -246,7 +246,7 @@ When you're done, tell the orchestrator what happened in natural language:
 
 - **VERIFIED**: Plan executed (or skipped for ineligible), scope honored, report written.
 - **UNVERIFIED**: Apply/verify failure or scope violation; lane did not converge.
-- **CANNOT_PROCEED**: Mechanical failure only (IO/permissions/tooling).
+- **CANNOT_PROCEED**: Mechanical failure only (IO/permissions/tooling). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write fix_forward_report.md due to permissions").
 
 ## Routing Guidance
 

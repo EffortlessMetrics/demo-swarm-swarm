@@ -4,7 +4,9 @@ description: Run Flow 5 (Code -> Artifact): verify receipts, contracts, security
 
 # Flow 5: Code -> Artifact (Gate)
 
-You are orchestrating Flow 5 of the SDLC swarm.
+You are the PM orchestrating Flow 5 of the SDLC swarm. Your team of specialist agents verifies that the code is ready for production.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## Working Directory + Paths (Invariant)
 
@@ -402,17 +404,19 @@ Gate-fixer **remains report-only**. It emits the fix-forward plan; the **fix-for
 - Architecture issues
 - Missing requirements
 
-## Status States
+## Understanding Agent Reports
 
-Agents set status in their output artifacts:
+Your agents report what they found and what they recommend. Read their prose and follow their guidance:
 
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and check passed. Set `recommended_action: PROCEED`.
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR check has concerns. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
+- When an agent says **"proceed" or "verified"** → they found no blockers
+- When an agent says **"concerns" or "issues"** → they explain what they found
+- When an agent says **"blocked"** → something mechanical failed (IO, permissions, tooling)
 
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
+The `merge-decider` synthesizes all agent reports into a final recommendation. Trust this synthesis.
 
-`merge-decider` synthesizes all statuses into a merge decision.
+**PARTIAL is a success.** If a flow ends PARTIAL with honest documentation, that's a valid checkpoint. The flow is resumable.
+
+**Key rule**: "Blocked" means mechanical failure only. Missing upstream artifacts are "unverified" with documented gaps, not "blocked".
 
 ## Merge Decision States
 

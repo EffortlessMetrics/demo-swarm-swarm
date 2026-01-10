@@ -4,7 +4,9 @@ description: "Run Flow 4 (Review): harvest PR feedback, apply fixes, flip Draft 
 
 # Flow 4: PR Review + Improvement
 
-You are orchestrating Flow 4 of the SDLC swarm.
+You are the PM orchestrating Flow 4 of the SDLC swarm. Your team of specialist agents harvests feedback, applies fixes, and prepares the PR for human review.
+
+**Your role:** You direct agents, read their reports, and decide what happens next. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 ## The Mental Model: "The Finishing School"
 
@@ -17,7 +19,7 @@ Flow 3 built the house. Flow 4 does the punch list.
 2. **Execute** — Route Work Items to agents, fix what's current, skip what's stale
 3. **Close the Loop** — Update the PR, show humans what was addressed
 
-**Key principle:** Agents are smart. They read the file, see if the code is there, fix it or report "context changed." No separate stale-check ceremony.
+**Key principle:** Your agents are capable. They read the code, understand context, and fix issues or report that context has changed. Trust them to do their job and report back honestly.
 
 ## Working Directory + Paths (Invariant)
 
@@ -243,7 +245,7 @@ while pending > 0 and not exhausted:
        → If stuck_signal: true → exit loop
 ```
 
-**Key principle:** The orchestrator does NOT read `review_worklist.json` directly. It calls `review-worklist-writer` which reads the JSON, picks the batch, and returns routing info. After the fix-lane agent works, it calls `review-worklist-writer` in apply mode to parse the worker's response and update state.
+**Key principle:** You direct agents and read their reports. The `review-worklist-writer` manages the worklist state and tells you what to work on next. Fix-lane agents report what they did. You route based on what they tell you.
 
 **Handling Design Feedback (Law 7: Local Resolution):**
 
@@ -262,9 +264,11 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.
 
 **Exit conditions:**
-- `pending == 0` → complete
+- The worklist-writer reports no pending items → complete
 - Context exhausted → PARTIAL (checkpoint, rerun to continue)
-- `stuck_signal: true` → PARTIAL (human may need to intervene)
+- The worklist-writer reports a stuck signal → PARTIAL (human may need to intervene)
+
+**PARTIAL is a success.** If you make progress and checkpoint honestly, the flow is resumable.
 
 **Style Sweep:** If `RW-MD-SWEEP` is pending, call `fixer` once to apply all markdown fixes in one pass.
 
@@ -338,12 +342,14 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 
 **Important:** Do NOT use phase checkboxes ("Setup", "Harvest & Cluster", etc.). Use the explicit agent checklist above. Phases are explanatory prose, not TodoWrite items.
 
-## Status States
+## Flow Outcomes
 
-Agents report one of:
-- **VERIFIED**: All critical items resolved, review complete.
-- **UNVERIFIED**: Items still pending or incomplete feedback.
-- **CANNOT_PROCEED**: IO/permissions/tool failure only.
+- **VERIFIED**: All critical items resolved, review complete
+- **PARTIAL**: Progress made, documented honestly, flow is resumable
+- **UNVERIFIED**: Items still pending or incomplete feedback
+- **CANNOT_PROCEED**: IO/permissions/tool failure only
+
+All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is better than a false VERIFIED.
 
 ## Review Completion Criteria
 
@@ -373,16 +379,16 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 
 **Entry:** `review_worklist.json` exists with pending items
 
-**This is an explicit agent call chain. The orchestrator routes on returned fields, not by parsing JSON.**
+**This is an explicit agent call chain. You route based on what agents tell you.**
 
 **Loop:**
 ```
 1) Call review-worklist-writer (mode: refresh)
-   → Returns: pending_blocking, stuck_signal, next_batch
+   → The agent tells you: what's pending, whether it's stuck, what to work on next
 
-2) If pending_blocking == 0: exit (complete)
+2) If the agent reports nothing pending: exit (complete)
 3) If context exhausted: checkpoint and exit (PARTIAL)
-4) If stuck_signal: true: checkpoint and exit (PARTIAL)
+4) If the agent reports stuck: checkpoint and exit (PARTIAL)
 
 5) Style Sweep (if next_batch contains `RW-MD-SWEEP`):
    - Call fixer once for all markdown fixes
@@ -417,9 +423,9 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Stage first, then scan. Every push must be gated.
 
 **Exit conditions:**
-- `pending_blocking == 0` (all resolved) → VERIFIED
+- Agent reports all items resolved → VERIFIED
 - Context exhausted → PARTIAL
-- `stuck_signal: true` → PARTIAL
+- Agent reports stuck → PARTIAL
 - Unrecoverable blocker → UNVERIFIED
 
 ### TodoWrite (copy exactly)

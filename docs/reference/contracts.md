@@ -6,9 +6,13 @@ This document indexes canonical contracts. The source of truth is `CLAUDE.md` an
 
 ---
 
-## Canonical Enums
+## Canonical Enums (Audit Vocabulary)
 
-### Status axis (most agents)
+These enums define the **audit vocabulary** used in receipts and machine summaries. They are not routing contracts for agents.
+
+**Agents express these concepts in prose handoffs**, not enum values. The orchestrator reads handoffs; cleanup agents write receipts with these values for audit purposes.
+
+### Status axis
 
 ```
 VERIFIED | UNVERIFIED | CANNOT_PROCEED
@@ -22,7 +26,7 @@ VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 **Rule:** `CANNOT_PROCEED` requires `missing_required` to be non-empty.
 
-### Recommended action (routing)
+### Recommended action
 
 ```
 PROCEED | RERUN | BOUNCE | FIX_ENV
@@ -35,12 +39,7 @@ PROCEED | RERUN | BOUNCE | FIX_ENV
 | `BOUNCE` | Route to a specific flow/agent for an actionable fix |
 | `FIX_ENV` | Environment/tooling issue (paired with `status: CANNOT_PROCEED`) |
 
-### Route fields
-
-```yaml
-route_to_flow: 1 | 2 | 3 | 4 | 5 | 6 | null
-route_to_agent: <agent-name> | null
-```
+**Note:** Agents don't emit these values directly. They write prose like "run code-implementer next" or "this needs to go back to Plan." Cleanup agents translate prose into enum values when writing receipts.
 
 ---
 
@@ -99,7 +98,18 @@ Notes:
 
 ---
 
-## Machine Summary (critics/verifiers)
+## Machine Summary (Receipts Only)
+
+Machine Summary is an **audit format** used by cleanup agents when writing receipts. It is not a communication format between agents.
+
+**Who uses Machine Summary:**
+- Cleanup agents (signal-cleanup, plan-cleanup, build-cleanup, etc.) write these when producing receipts
+- The format enables mechanical processing of receipt data
+
+**Who does NOT use Machine Summary:**
+- Critics communicate via prose critiques with severity markers
+- Workers communicate via prose handoffs
+- Orchestrators route on prose handoffs, not Machine Summary
 
 ```yaml
 ## Machine Summary
@@ -120,6 +130,8 @@ severity_summary:                      # critics/verifiers
   major: 0
   minor: 0
 ```
+
+**Note:** The `route_to_agent` and `route_to_flow` fields exist for audit trail completeness. Cleanup agents derive these from the agent's prose handoff, not from structured routing blocks.
 
 ---
 
@@ -164,9 +176,11 @@ Receipt writers may include a `schema_version` field for compatibility (e.g., `b
 
 ---
 
-## Handoff Contract
+## Handoff Contract (Primary Agent Communication)
 
-Agents communicate routing through natural language handoffs, not structured YAML blocks.
+The handoff is **the primary way agents communicate** with the orchestrator. All agent-to-orchestrator communication flows through prose handoffs, not structured YAML blocks.
+
+This is how intelligent actors report to their PM: natural language that conveys intent, context, and reasoning.
 
 ### The Pattern
 
@@ -198,6 +212,19 @@ The timeout issue is minor enough that code-implementer can fix it in the same p
 - **Explain your reasoning.** "Because X" helps the orchestrator override intelligently.
 - **Alternatives are for real tradeoffs only.** Don't hedge unnecessarily.
 
+### Graceful Outcomes
+
+**Honest partial reports are successful outcomes.** A handoff that says "I completed 2/5 ACs, blocked on missing schema" is a verified success. A report saying "All 5 ACs complete (assuming schema exists)" is a high-risk failure.
+
+The orchestrator routes on your signals. Hiding uncertainty behind false completion causes downstream failures.
+
+**PARTIAL is a win.** If you:
+- Made real progress
+- Documented what's done and what's blocked
+- Left the codebase in a runnable state
+
+...then reporting partial completion with honest blockers is correct. The flow will rerun and pick up where you left off.
+
 ### Status Concepts (Natural Language)
 
 Use these concepts in your handoff prose:
@@ -216,6 +243,37 @@ Express routing naturally:
 - "The implementer should fix this" — Station-level hint
 - "I need another pass after they fix the schema" — Rerun self
 - "This is blocked until the user decides on auth approach" — Human escalation needed
+
+---
+
+## Agent Philosophy
+
+Agents are **intelligent actors**, not mechanical extractors. They do real cognitive work.
+
+### Core Principles
+
+**Agents are like well-trained juniors reporting to a PM.** They:
+- Investigate autonomously before asking for help
+- Make reasonable assumptions and document them
+- Report what they found, what they did, and what they recommend
+- Communicate in natural language, not structured data formats
+
+**Single responsibility per agent.** Each agent has one job:
+- Critics critique (they never fix)
+- Workers implement (they maintain the ledger)
+- Cleanup agents audit (they write receipts)
+
+**Positive prompting.** Agent prompts emphasize what to do, not what not to do. This produces more capable, less defensive behavior.
+
+**Graceful outcomes.** An honest partial report is a successful outcome. The system routes on truth, not on completeness. Agents that admit uncertainty enable better decisions than agents that hide it.
+
+### Research-First Autonomy
+
+When agents encounter ambiguity, they follow this sequence:
+1. **Investigate** — Search the codebase, read existing implementations
+2. **Derive** — Use existing patterns to infer correct behavior
+3. **Default** — Choose reversible defaults and document them
+4. **Escalate** — Only flag as blocked if research failed AND no safe default exists
 
 ---
 

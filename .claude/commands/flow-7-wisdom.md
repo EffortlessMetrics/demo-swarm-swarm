@@ -8,9 +8,9 @@ description: Run Flow 7 (Prod -> Wisdom): analyze artifacts, detect regressions,
 
 # Flow 7: Prod -> Wisdom
 
+You are the PM orchestrating Flow 7 of the SDLC swarm. Your team of specialist analysts examines the run and extracts learnings.
 
-
-You are orchestrating Flow 7 of the SDLC swarm.
+**Your role:** You direct agents, read their reports, and synthesize findings. You do not parse files or extract fields. You understand your agents' prose and route on their recommendations.
 
 
 
@@ -747,27 +747,18 @@ When complete, `.runs/<run-id>/wisdom/` should contain:
 
 
 
-## Completion States
+## Flow Outcomes
 
+Your agents report what they found and what they recommend:
 
+- **VERIFIED**: Analysis complete, learnings extracted, all artifacts processed
+- **PARTIAL**: Progress made, documented honestly, flow is resumable
+- **UNVERIFIED**: Some data unavailable, documented gaps
+- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional)
 
-Flow 7 agents report:
+All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is better than a false VERIFIED.
 
-
-
-- **VERIFIED**: `blockers` empty, `missing_required` empty, and analysis complete with all artifacts processed. Set `recommended_action: PROCEED`.
-
-- **UNVERIFIED**: `blockers` non-empty OR `missing_required` non-empty OR some data unavailable (GitHub, git, etc.) OR anomaly detected during checkpoint. Set `recommended_action: RERUN | BOUNCE` depending on fix location.
-
-- **CANNOT_PROCEED**: IO/permissions/tool failure only (exceptional); cannot read files, tool missing, etc. Set `missing_required` with paths and `recommended_action: FIX_ENV`.
-
-
-
-**Key rule**: CANNOT_PROCEED is strictly for mechanical failures. Missing upstream artifacts are UNVERIFIED with `missing_required` populated, not CANNOT_PROCEED.
-
-
-
-Any of these are valid outcomes. Document concerns and continue.
+**Key rule**: "Blocked" means mechanical failure only. Missing upstream artifacts are "unverified" with documented gaps, not "blocked".
 
 
 

@@ -110,7 +110,9 @@ If `jq` is unavailable, record the raw response shape at a high level (no long d
 Append exactly this section (newest at bottom):
 
 ```markdown
-## Smoke Verification (non-destructive)
+## Smoke Verifier Result
+
+### Smoke Verification (non-destructive)
 
 ### Machine Summary
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
