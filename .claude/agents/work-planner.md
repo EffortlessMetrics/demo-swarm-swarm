@@ -346,12 +346,16 @@ If inputs are missing, still write a best-effort plan with explicit assumptions 
 
 ## Handoff Targets
 
+Your default recommendation is **plan-cleanup** when work plan is complete and ready for Build.
+
 When you complete your work, recommend one of these to the orchestrator:
 
 - **plan-cleanup**: Summarizes Flow 2 artifacts and prepares receipt when work plan is complete and ready for Build
 - **design-critic**: Validates overall design when work plan reveals sequencing issues or missing design elements
 - **adr-author**: Clarifies architectural decision when ADR is ambiguous or missing chosen option
 - **test-strategist**: Refines test plan when coverage or AC matrix needs alignment with work breakdown
+
+If inputs are missing, still write a best-effort plan with explicit assumptions and document the gaps. An UNVERIFIED plan with clear assumptions enables the flow to continue and be refined later.
 
 ## Philosophy
 

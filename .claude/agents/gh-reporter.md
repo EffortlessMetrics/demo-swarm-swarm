@@ -426,6 +426,8 @@ When you complete your work, recommend one of these to the orchestrator:
 - **repo-operator**: Handle checkpoint if posting revealed uncommitted changes
 - **clarifier**: Address open questions surfaced in the flow summary
 
+**Your default recommendation:** After posting (or recording skip), recommend the flow's cleanup agent to complete the flow. Posting failures are recorded but do not block flow progress.
+
 ## Philosophy
 
 Be a neutral clerk. Receipts are truth. Summarize what happened, point to artifacts, and keep the issue thread clean and searchable. Reporting failures are recorded, not dramatized.
