@@ -20,4 +20,6 @@ Task-oriented: pick the guide that matches the job you need to do.
 | [Review a Swarm PR](review-a-swarm-pr.md) | Decide yes/no on swarm-generated PRs | Bounded review procedure with hotspot selection |
 | [Troubleshoot](troubleshoot.md) | Debug pack runs | Checklists for common failures and reseal loops |
 | [Failure Recovery](failure-recovery.md) | Recover from failed runs | Nuclear delete/restart procedures |
+| [Team Operations](team-operations.md) | Coordinate multi-person swarm usage | Collision avoidance + handoff procedures |
 | [Maintain the Pack](maintain-the-pack.md) | Add or modify agents, flows, or skills | Pre-commit checklist for maintainers |
+| [Documentation Governance](documentation-governance.md) | Prevent doc drift and duplication | Rules for canonical locations and cross-references |

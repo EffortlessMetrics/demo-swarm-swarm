@@ -258,6 +258,7 @@ When adding a pack contract:
 
 ## See also
 
+- [pack-check-scope.md](pack-check-scope.md) — What pack-check enforces vs refuses to enforce
 - [contracts.md](contracts.md) — What pack-check validates
 - [stable-markers.md](stable-markers.md) — Marker patterns
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference

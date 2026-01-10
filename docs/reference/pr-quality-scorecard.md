@@ -207,6 +207,7 @@ The scorecard can appear in section 4 (Quality events) or as a standalone sectio
 ## See Also
 
 - [pr-review-interface.md](pr-review-interface.md) — PR Brief template and philosophy
+- [evidence-freshness.md](evidence-freshness.md) — When evidence is stale and when to re-verify
 - [economics.md](../explanation/economics.md) — Quality:DevLT ratio and token economics
 - [contracts.md](contracts.md) — Receipt schemas and evidence formats
 - [stable-markers.md](stable-markers.md) — Markers for scorecard sections

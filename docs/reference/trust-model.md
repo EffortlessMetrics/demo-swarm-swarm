@@ -296,5 +296,6 @@ A station being "skipped" means the work is **unverified**, not verified by defa
 ## See also
 
 - [contracts.md](contracts.md) — Control-plane blocks and schemas
+- [evidence-freshness.md](evidence-freshness.md) — When evidence is stale and when to re-verify
 - [CLAUDE.md](../../CLAUDE.md) — State-first verification principle (Receipts section)
 - [stable-markers.md](stable-markers.md) — Mechanical counting patterns

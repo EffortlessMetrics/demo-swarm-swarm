@@ -256,5 +256,6 @@ Receipts may include a `devlt` section for retrospective analysis:
 ## See Also
 
 - [contracts.md](contracts.md) — Control-plane blocks, receipt schemas
+- [evidence-freshness.md](evidence-freshness.md) — When evidence is stale and when to re-verify
 - [stable-markers.md](stable-markers.md) — Marker patterns for counting
 - [CLAUDE.md](../../CLAUDE.md) — Pack reference

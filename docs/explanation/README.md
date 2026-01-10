@@ -30,6 +30,7 @@ Understanding-oriented: explore the why behind the pack design.
 | "How does raw LLM output become trusted?" | [Candidates to Artifacts](candidates-to-artifacts.md) |
 | "Why is the PR description the primary review interface?" | [PR as Review Surface](pr-as-review-surface.md) |
 | "How do critics produce queues that fixers can drain?" | [Worklist Pattern](worklist-pattern.md) |
+| "Can I skip flows or mix human work with swarm work?" | [Flow Flexibility](flow-flexibility.md) |
 | "What are the layers of verification and what does each prove?" | [Verification Stack](verification-stack.md) |
 | "Why is generation cheap but review expensive?" | [Throughput Inversion](throughput-inversion.md) |
 | "What's the ROI math and why does DevLT matter?" | [Economics](economics.md) |
