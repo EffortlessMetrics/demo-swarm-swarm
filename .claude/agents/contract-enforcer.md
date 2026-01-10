@@ -48,7 +48,7 @@ If contract files are missing, this is **UNVERIFIED**, not mechanical failure.
 
 - `VERIFIED`: No CRITICAL/MAJOR findings and contract endpoint checks are complete enough to trust.
 - `UNVERIFIED`: Any CRITICAL/MAJOR findings, contract missing/incomplete, or endpoints cannot be verified reliably.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure).
+- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot read api_contracts.yaml due to permissions").
 
 ## Evidence discipline
 

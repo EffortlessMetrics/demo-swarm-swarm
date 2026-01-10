@@ -53,7 +53,7 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 
 - `VERIFIED`: Thresholds are PRESENT and all required metrics are met with evidence.
 - `UNVERIFIED`: Any required metric is unmet, thresholds are missing/ambiguous, or coverage cannot be determined from artifacts.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths).
+- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write coverage_audit.md due to permissions").
 
 ## Severity model (bounded taste)
 
