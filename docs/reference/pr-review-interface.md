@@ -117,5 +117,6 @@ Do NOT invent precision. If you don't have data, don't estimate.
 ## See Also
 
 - [CLAUDE.md](../../CLAUDE.md) — PR Review Interface non-negotiable
+- [pr-quality-scorecard.md](pr-quality-scorecard.md) — The five quality surfaces and scorecard template
 - [contracts.md](contracts.md) — Receipt schemas
 - [stable-markers.md](stable-markers.md) — Marker prefixes for PR Brief sections

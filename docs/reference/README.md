@@ -19,4 +19,5 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Understand evidence hierarchy | [Trust Model](trust-model.md) |
 | Validate sandbox containment | [Sandbox Threat Model](sandbox-threat-model.md) |
 | Review a PR produced by DemoSwarm | [PR Review Interface](pr-review-interface.md) |
+| Understand PR quality surfaces | [PR Quality Scorecard](pr-quality-scorecard.md) |
 | Write documentation | [Documentation Conventions](documentation-conventions.md) |
