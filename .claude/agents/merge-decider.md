@@ -122,12 +122,19 @@ Compute `REQ Readiness` as:
   | Failure Mode | Target Flow | Target Agent/Station | Task |
   |--------------|-------------|---------------------|------|
   | Reward Hacking (test deletion) | Flow 3 | `code-implementer` | "Restore deleted tests" |
-  | Contract Violation | Flow 3 | `code-implementer` | "Fix API implementation to match contract" |
+  | Contract Violation (impl bug) | Flow 3 | `code-implementer` | "Fix API implementation to match contract" |
+  | Contract Violation (contract wrong) | Flow 2 | `interface-designer` | "Update contract to match intended behavior" |
   | Missing Spec/Contract | Flow 2 | `interface-designer` | "Define the missing contract" |
   | Security Finding (code fix) | Flow 3 | `fixer` | "Remediate security issue" |
   | Security Finding (design flaw) | Flow 2 | `design-optioneer` | "Propose secure alternative" |
   | Coverage Gap | Flow 3 | `test-author` | "Add missing test coverage" |
   | Format/Lint Drift | Flow 3 | `fixer` | "Apply formatting fixes" |
+
+  **Law 7 consideration (Local Resolution First):**
+  * Before bouncing to a previous flow, consider whether the issue can be resolved locally using specialist agents
+  * **Try local resolution first:** Call `design-optioneer`, `adr-author`, or `impact-analyzer` for surgical fixes within the current flow
+  * **BOUNCE only when:** The specialists agree the issue cannot be resolved locally, requires stakeholder decisions, or spans multiple flows
+  * The bar for flow-level bounces is high—2-3 surgical agent calls are almost always cheaper than a full context switch
 
   * Default: **Build (Flow 3)** for implementation/tests/contracts/security/coverage/receipt issues.
   * Use **Plan (Flow 2)** only for design/architecture flaws that cannot be fixed with code changes.
