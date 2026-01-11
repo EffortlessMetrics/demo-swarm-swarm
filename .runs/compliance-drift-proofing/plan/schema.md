@@ -133,8 +133,8 @@ Canonical Open Question identifier.
 
 **Valid Examples:**
 - `OQ-SIG-001`
-- `OQ-PLN-004`
-- `OQ-BLD-012`
+- `OQ-PLAN-004`
+- `OQ-BUILD-012`
 
 **Invalid Examples:**
 - `OQ-PLAN-001` (wrong flow code)

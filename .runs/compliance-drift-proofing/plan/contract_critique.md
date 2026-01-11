@@ -48,7 +48,7 @@ severity_summary:
 
 ## Minor Issues
 
-- [MINOR] CC-MIN-001: Exit code semantics clarification - api_contracts.yaml x-cli-interface exit_codes section shows 0=SUCCESS, 1=FAILURE, 2=RUNTIME_ERROR, but OQ-PLN-002 in ADR suggests "exit 2 for warnings with --strict" as a possible alternative. The contract correctly defines the current behavior; the open question is documented but resolved by the contract (warnings with --strict elevate to exit 1, not 2). This is informational only.
+- [MINOR] CC-MIN-001: Exit code semantics clarification - api_contracts.yaml x-cli-interface exit_codes section shows 0=SUCCESS, 1=FAILURE, 2=RUNTIME_ERROR, but OQ-PLAN-002 in ADR suggests "exit 2 for warnings with --strict" as a possible alternative. The contract correctly defines the current behavior; the open question is documented but resolved by the contract (warnings with --strict elevate to exit 1, not 2). This is informational only.
 
 - [MINOR] CC-MIN-002: BuildReceipt.tests sub-object required fields inconsistency - schema.md entity table marks `tests` as Required=Yes, but within the tests sub-object, passed/failed/skipped are marked Required=No. This is intentional flexibility (metrics may not always be available), but the asymmetry could confuse implementers. Documentation is adequate.
 

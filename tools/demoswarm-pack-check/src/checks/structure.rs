@@ -330,7 +330,7 @@ name: test-agent
             "flow-3-build.md",
             "flow-4-gate.md",
             "flow-5-deploy.md",
-            "flow-6-wisdom.md",
+            "flow-7-wisdom.md",
         ];
 
         for (i, name) in valid_names.iter().enumerate() {

@@ -187,7 +187,7 @@ See `.runs/compliance-drift-proofing/plan/subtasks.yaml` for machine-canonical Y
   * grep -E 'PLAN|BUILD' docs/reference/stable-markers.md docs/reference/contracts.md
 * **Observability**: (none)
 * **Dependencies**: None (can proceed in parallel)
-* **Risk / blast radius**: Low - documentation changes only; resolves OQ-SIG-002 and OQ-PLN-004
+* **Risk / blast radius**: Low - documentation changes only; resolves OQ-SIG-002 and OQ-PLAN-004
 * **Estimate**: S
 
 ---
@@ -443,13 +443,13 @@ Reference: `.runs/compliance-drift-proofing/plan/open_questions.md`
 
 Questions that materially affect sequencing/rollout:
 
-* **OQ-PLN-004** (PLN vs PLAN): Resolved by assumption - PLN/BLD is canonical per openq-tools. ST-006 updates docs to match.
+* **OQ-PLAN-004** (PLN vs PLAN): Resolved by assumption - PLN/BLD is canonical per openq-tools. ST-006 updates docs to match.
 
-* **OQ-PLN-009** (Missing Skills sections): Addressed by ST-003 gap analysis and ST-004 remediation.
+* **OQ-PLAN-009** (Missing Skills sections): Addressed by ST-003 gap analysis and ST-004 remediation.
 
-* **OQ-PLN-001** (Module location for new checks): Resolved by ADR - checks go in drift.rs per existing pattern (checks 38-49).
+* **OQ-PLAN-001** (Module location for new checks): Resolved by ADR - checks go in drift.rs per existing pattern (checks 38-49).
 
-* **OQ-PLN-002** (--strict exit codes): Default assumed - exit 0 success, exit 1 errors/warnings+strict. Verified in ST-007.
+* **OQ-PLAN-002** (--strict exit codes): Default assumed - exit 0 success, exit 1 errors/warnings+strict. Verified in ST-007.
 
 ---
 
@@ -474,7 +474,7 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - OQ-PLN-009: 4 agents missing Skills sections not yet enumerated (deferred to ST-003/ST-004)
+  - OQ-PLAN-009: 4 agents missing Skills sections not yet enumerated (deferred to ST-003/ST-004)
   - RSK-001: Prior #49 bounce - mitigated by warning-first mode and narrower scope
 
 subtask_count: 12

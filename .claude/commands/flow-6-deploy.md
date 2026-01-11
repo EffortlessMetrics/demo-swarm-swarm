@@ -1,4 +1,5 @@
 ---
+name: flow-6-deploy
 description: Run Flow 6 (Artifact -> Prod): execute GitHub-native deployment, monitor CI, verify, create audit trail.
 ---
 
@@ -199,6 +200,8 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting O
      - STABLE: Merge succeeded, CI passing, smoke checks green
      - NOT_DEPLOYED: Merge failed, CI failing, or verification issues
      - BLOCKED_BY_GATE: Gate verdict was not MERGE
+
+   **Reseal-if-modified:** If the deploy-decider recommends retrying merge (e.g., after a rebase) and you rerun `repo-operator` for merge operations, you must call `deploy-cleanup` again to regenerate `deploy_receipt.json` before the final seal. The receipt must reflect the final deployment state, not an intermediate state.
 
 5. **Finalize Receipt** (deploy-cleanup)
    - Write `.runs/<run-id>/deploy/deploy_receipt.json`, `.runs/<run-id>/deploy/cleanup_report.md`

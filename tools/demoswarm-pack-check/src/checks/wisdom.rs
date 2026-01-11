@@ -77,7 +77,7 @@ fn check_smoke_verifier(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()>
 
 /// Check 41: Flow 6 regression markers match wisdom-cleanup (grep-stable).
 fn check_regression_markers(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    if let Some(flow6_wisdom) = cx.inv.command("flow-6-wisdom") {
+    if let Some(flow6_wisdom) = cx.inv.command("flow-7-wisdom") {
         let content = cx.ctx.read_utf8(flow6_wisdom)?;
         if content.contains(cx.c.reg_marker_literal) {
             rep.pass(format!(
@@ -92,7 +92,7 @@ fn check_regression_markers(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result
             rep.warn("Flow 6 may be missing stable regression marker documentation");
         }
     } else {
-        rep.warn("flow-6-wisdom.md not found (cannot validate regression marker docs)");
+        rep.warn("flow-7-wisdom.md not found (cannot validate regression marker docs)");
     }
 
     if let Some(wisdom_cleanup) = cx.inv.agent("wisdom-cleanup") {

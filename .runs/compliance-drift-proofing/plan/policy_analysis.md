@@ -179,7 +179,7 @@ The planned changes maintain backward compatibility per NFR-COMP-001:
 
 ## Recommended Next
 - Proceed to Flow 3 (Build) with confidence in policy compliance
-- Resolve OQ-PLN-004 (PLN vs PLAN prefix) before implementing check 51 regex
+- Resolve OQ-PLAN-004 (PLN vs PLAN prefix) before implementing check 51 regex
 - Enumerate the 4 agents potentially missing Skills sections during ST-003
 - Establish validation baseline (ST-011) before introducing new checks
 - Document any edge cases discovered during implementation as known exceptions

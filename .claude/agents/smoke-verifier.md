@@ -114,6 +114,7 @@ Append exactly this section (newest at bottom):
 
 ### Smoke Verification (non-destructive)
 
+recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 smoke_signal: STABLE | INVESTIGATE | ROLLBACK
 
 ### Release / Artifact Checks (best-effort)

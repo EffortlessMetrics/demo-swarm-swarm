@@ -134,6 +134,34 @@ Fit enum (machine-parseable): `SATISFIED | PARTIAL | TRADE_OFF`
 <1–2 sentences: the conditions where this option wins>
 ```
 
+## Machine Summary (append to output)
+
+After the Comparison Matrix and Suggested Default sections, include this machine-parseable block:
+
+```yaml
+## Machine Summary
+status: VERIFIED | UNVERIFIED | PARTIAL
+options_count: <int>
+reqs_enumerated: <int or null>
+nfrs_enumerated: <int or null>
+wisdom_consulted: yes | no
+wisdom_constraints_applied: <int>
+missing_inputs: []
+concerns: []
+observations:
+  - "<cross-cutting insight noticed during option development>"
+  - "<pattern or friction worth noting for future runs>"
+```
+
+**Status values:**
+- `VERIFIED`: 2-3 distinct options with full structure, all enumerated REQ/NFR IDs mapped, comparison matrix complete
+- `PARTIAL`: Options written but key sections incomplete or requirements unavailable for mapping
+- `UNVERIFIED`: Cannot produce valid options due to missing inputs or constraints
+
+**Observations field:** Capture cross-cutting insights that don't fit in the options themselves - patterns noticed, friction encountered, things the ADR author or future runs should know. These are harvested by `learning-synthesizer` for Wisdom extraction.
+
+---
+
 ## Comparison + non-binding recommendation (use exactly)
 
 Counts rules for `REQ coverage (count)` / `NFR coverage (count)`:

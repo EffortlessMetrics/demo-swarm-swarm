@@ -17,6 +17,27 @@ You summarize what happened in Flow 7 (Wisdom). Read the learning artifacts, und
 
 Compress the Wisdom flow into a meaningful summary. Document what was learned so future runs can benefit.
 
+## Required Inputs
+
+Before you can proceed, verify these exist:
+
+| Required | Path | What It Contains |
+|----------|------|------------------|
+| Run directory | `.runs/<run-id>/wisdom/` | The wisdom flow artifact directory |
+| Write access | `.runs/<run-id>/wisdom/wisdom_receipt.json` | Must be writable for receipt output |
+| Index file | `.runs/index.json` | Must exist for status updates |
+| Wisdom broadcast dir | `.runs/_wisdom/` | Directory for latest wisdom broadcast |
+
+**CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
+
+- **Missing run directory:** "CANNOT_PROCEED: Run directory `.runs/<run-id>/wisdom/` does not exist. Create the run directory or verify run-id is correct."
+- **No write access:** "CANNOT_PROCEED: Cannot write to `.runs/<run-id>/wisdom/wisdom_receipt.json`. Check file permissions or disk space."
+- **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
+- **Missing wisdom dir:** "CANNOT_PROCEED: `.runs/_wisdom/` directory does not exist. Create it to enable wisdom broadcast."
+- **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
+
+These are mechanical failures. Missing *artifacts* (like `learnings.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
+
 ## What to Review
 
 Read these artifacts and understand what they tell you:
@@ -33,6 +54,8 @@ Read these artifacts and understand what they tell you:
 **Regression Report (`regression_report.md`)**
 - Were any regressions detected?
 - Patterns that should be avoided?
+- Count regressions using the heading-based marker pattern `^### REG-[0-9]{3}:`
+- Each regression has a unique ID (REG-001, REG-002, etc.) and severity
 
 **Artifact Audit (`artifact_audit.md`)**
 - Were all expected artifacts produced?
@@ -76,7 +99,15 @@ The receipt should answer:
     "docs_to_update": 1
   },
 
-  "regressions_found": 0,
+  "regressions": {
+    "count": 0,
+    "ids": [],
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "notes": "No regressions detected"
+  },
 
   "flow_summary": {
     "signal": "complete",
@@ -93,12 +124,43 @@ The receipt should answer:
 
   "run_complete": true,
 
+  "missing_required": [],
   "gaps": ["<any missing learnings or incomplete flows>"],
 
   "evidence_sha": "<current HEAD>",
   "generated_at": "<ISO8601>"
 }
 ```
+
+## Counting Markers
+
+Use the heading-based marker pattern to count regressions mechanically. See `docs/reference/stable-markers.md` for the full marker reference.
+
+**Regression count:**
+```bash
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/wisdom/regression_report.md" \
+  --regex '^### REG-[0-9]{3}:' \
+  --null-if-missing
+```
+
+**Learning count:**
+```bash
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/wisdom/learnings.md" \
+  --regex '^## Learning: ' \
+  --null-if-missing
+```
+
+**Action count:**
+```bash
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/wisdom/feedback_actions.md" \
+  --regex '^- ISSUE: ' \
+  --null-if-missing
+```
+
+If a file is missing, the count is `null` (not 0). Document missing files in the gaps array.
 
 ## Updating the Index
 
@@ -169,6 +231,9 @@ After writing the receipt and reports, tell the orchestrator what happened:
 
 *Partial completion:*
 > "Sealed Wisdom receipt with 5 learnings documented. Some flows incomplete (Gate and Deploy missing receipts). Route to **secrets-sanitizer** to close the run with documented gaps."
+
+*Regressions found:*
+> "Summarized Wisdom flow. Found 2 regressions (REG-001 HIGH, REG-002 MEDIUM) in regression_report.md. Extracted 6 learnings including patterns to avoid. Route to **secrets-sanitizer**, but note regressions for follow-up in next run."
 
 ## Philosophy
 

@@ -1,4 +1,5 @@
 ---
+name: flow-3-build
 description: Run Flow 3 (Design -> Code): build a working, codebase-aligned implementation.
 # argument-hint: [run-id]
 ---
@@ -202,6 +203,10 @@ After all ACs complete:
 
 **Call `self-reviewer`** for final consistency check.
 
+**Reseal-if-modified:** If the self-reviewer identifies issues that require fixes (and you run `fixer`, `code-implementer`, or `test-author` to address them), you must call `build-cleanup` again to regenerate `build_receipt.json` before the final seal. The receipt must reflect the final state of code and tests, not an intermediate state.
+
+**Non-convergence guard:** Reseal at most twice. If `modified_files` persists after the second reseal pass, proceed with the receipt as-is and document the non-convergent state in `build_receipt.json.observations[]`. Do not enter an infinite reseal loop.
+
 ### Step 8: Flow Boundary Harvest
 
 **Call `pr-feedback-harvester`** one last time (if PR exists):
@@ -254,6 +259,7 @@ Read the agent's handoff and follow their guidance:
 **Code loop:**
 - `code-implementer` - implement code
 - `code-critic` - verify implementation
+- `mold-improver` - identify pattern improvements (optional, when critic flags recurring pattern issues)
 
 **Hardening:**
 - `test-executor` - run tests

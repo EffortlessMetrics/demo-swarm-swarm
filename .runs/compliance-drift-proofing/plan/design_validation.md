@@ -10,7 +10,7 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - OQ-PLN-004 (PLN vs PLAN prefix) should be resolved definitively before implementation; assumed PLN/BLD canonical per openq-tools
+  - OQ-PLAN-004 (PLN vs PLAN prefix) should be resolved definitively before implementation; assumed PLN/BLD canonical per openq-tools
   - 4 agents missing Skills sections not enumerated (deferred to ST-003/ST-004 per work_plan.md)
   - TBD runbook paths in observability_spec.md (acceptable at Plan phase)
 can_further_iteration_help: no
@@ -59,13 +59,13 @@ coverage_summary:
 
 - [MINOR] DC-MIN-001: Observability runbook paths are TBD - ALERT-STRICT-001, ALERT-PERF-001, ALERT-BASELINE-001 reference "docs/troubleshooting/*.md (TBD)". Acceptable at Plan phase; should be created during Build/Gate. Evidence: observability_spec.md lines 169, 176, 183.
 
-- [MINOR] DC-MIN-002: OQ-PLN-004 prefix resolution deferred - stable-markers.md and contracts.md use PLAN/BUILD while openq-tools uses PLN/BLD. ADR assumes PLN/BLD is canonical (ASM-002). ST-006 in work_plan.md addresses this, but resolution should be explicit before implementation. Evidence: ADR line 119, impact_map.json IMP-009/IMP-010.
+- [MINOR] DC-MIN-002: OQ-PLAN-004 prefix resolution deferred - stable-markers.md and contracts.md use PLAN/BUILD while openq-tools uses PLN/BLD. ADR assumes PLN/BLD is canonical (ASM-002). ST-006 in work_plan.md addresses this, but resolution should be explicit before implementation. Evidence: ADR line 119, impact_map.json IMP-009/IMP-010.
 
 - [MINOR] DC-MIN-003: Test plan scenario count discrepancy - test_plan.md Machine Summary shows "scenarios_total: 40" but the scenario inventory tables sum to 40 exactly (6+6+8+5+8+7). This is correct, but the "counts" section shows "requirements_with_scenarios: 6" which only counts REQs, not NFRs. This is accurate (NFRs are non-behavioral) but could be clarified. Evidence: test_plan.md lines 14-22.
 
 - [MINOR] DC-MIN-004: Risk traceability to SLOs - observability_spec.md maps RSK-008 to "CHECK-050 false negative rate" but no metric measures false negatives. This is correctly documented as manual audit mitigation but the traceability table is imprecise. Evidence: observability_spec.md line 337, observability_critique.md OC-MIN-003.
 
-- [MINOR] DC-MIN-005: Exit code 2 semantics - api_contracts.yaml defines exit code 2 as RUNTIME_ERROR, but OQ-PLN-002 suggests "exit 2 for warnings with --strict" as an alternative. The contract correctly defines current behavior; the open question is resolved by the contract (warnings + strict = exit 1). Informational only. Evidence: api_contracts.yaml lines 79-82, ADR line 134.
+- [MINOR] DC-MIN-005: Exit code 2 semantics - api_contracts.yaml defines exit code 2 as RUNTIME_ERROR, but OQ-PLAN-002 suggests "exit 2 for warnings with --strict" as an alternative. The contract correctly defines current behavior; the open question is resolved by the contract (warnings + strict = exit 1). Informational only. Evidence: api_contracts.yaml lines 79-82, ADR line 134.
 
 - [MINOR] DC-MIN-006: BuildReceipt.tests sub-object flexibility - schema.md marks `tests` as Required=Yes but within tests, passed/failed/skipped are Required=No. This is intentional flexibility (metrics may not always be available) but the asymmetry could confuse implementers. Documentation is adequate. Evidence: schema.md lines 98-108, contract_critique.md CC-MIN-002.
 
@@ -92,9 +92,9 @@ Verified coverage for all REQ/NFR identifiers:
 
 ## Questions for Humans
 
-- Q1: OQ-PLN-004 (PLN vs PLAN) - Should the canonical flow codes be PLN/BLD (per openq-tools implementation) or PLAN/BUILD (per stable-markers.md documentation)? Suggested default: PLN/BLD (openq-tools is the implementation source of truth). Impact: Determines REQ-003 regex pattern and which docs need updating.
+- Q1: OQ-PLAN-004 (PLN vs PLAN) - Should the canonical flow codes be PLN/BLD (per openq-tools implementation) or PLAN/BUILD (per stable-markers.md documentation)? Suggested default: PLN/BLD (openq-tools is the implementation source of truth). Impact: Determines REQ-003 regex pattern and which docs need updating.
 
-- Q2: OQ-PLN-009 (Missing Skills sections) - Are the 4 agents potentially missing Skills sections (per initial concern) gaps to fix or intentional exceptions? Suggested default: Gaps to fix (add sections). Impact: If exceptions, need exemption mechanism in check 49.
+- Q2: OQ-PLAN-009 (Missing Skills sections) - Are the 4 agents potentially missing Skills sections (per initial concern) gaps to fix or intentional exceptions? Suggested default: Gaps to fix (add sections). Impact: If exceptions, need exemption mechanism in check 49.
 
 - Q3: OQ-IFACE-001 (Prose vs CLI detection) - Should Check 50 flag skill subcommands appearing in prose descriptions, or only in CLI invocation contexts? Suggested default: Only CLI contexts (code blocks, lines with "bash" or "demoswarm"). Impact: Affects false positive rate.
 
@@ -238,7 +238,7 @@ All artifacts use consistent identifiers:
 - Risks: RSK-001 through RSK-006
 - Assumptions: ASM-001 through ASM-006 (ADR), ASM-IFACE-001 through ASM-IFACE-004 (schema)
 - Drivers: DR-001 through DR-005
-- Open questions: OQ-PLN-001 through OQ-PLN-010, OQ-IFACE-001, OQ-IFACE-002
+- Open questions: OQ-PLAN-001 through OQ-PLAN-010, OQ-IFACE-001, OQ-IFACE-002
 - Subtasks: ST-001 through ST-012
 
 All Machine Summary blocks use consistent status enum: VERIFIED

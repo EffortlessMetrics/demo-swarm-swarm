@@ -203,7 +203,7 @@ For a CLI tool, "alerts" are CI pipeline failure conditions.
 
 ## Exit Code Semantics
 
-### Standard Exit Codes (REQ-005, OQ-PLN-002)
+### Standard Exit Codes (REQ-005, OQ-PLAN-002)
 
 | Exit Code | Meaning | When |
 |-----------|---------|------|
@@ -349,7 +349,7 @@ Warning: Invalid content in file
 
 ## Questions / Clarifications Needed
 
-- Q: OQ-PLN-002 (from ADR) - Should exit code 2 distinguish warnings-elevated-to-errors from native errors? Suggested default: Use exit 1 for both initially; exit 2 as future enhancement.
+- Q: OQ-PLAN-002 (from ADR) - Should exit code 2 distinguish warnings-elevated-to-errors from native errors? Suggested default: Use exit 1 for both initially; exit 2 as future enhancement.
 - Q: Should JSON output include the actual line content for context? Suggested default: No (NFR-SEC-001 prohibits content in output).
 - Q: Is there an existing CI dashboard to integrate with? Suggested default: Output JSON artifacts; dashboard integration is downstream concern.
 
@@ -385,7 +385,7 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - Exit code 2 semantics deferred (using 0/1 for now per OQ-PLN-002 suggested default)
+  - Exit code 2 semantics deferred (using 0/1 for now per OQ-PLAN-002 suggested default)
   - Runbook paths are TBD; documentation to be created during implementation
   - JSON output schema assumed based on CLI patterns; may need adjustment during Build
 ```

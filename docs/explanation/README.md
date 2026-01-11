@@ -46,6 +46,8 @@ These documents explain *why* things work the way they do. Understanding-oriente
 | "What are the layers of verification and what does each prove?" | [Verification Stack](verification-stack.md) |
 | "Why is generation cheap but review expensive?" | [Throughput Inversion](throughput-inversion.md) |
 | "What's the mental model for LLMs generating code?" | [Stochastic Compiler](stochastic-compiler.md) |
+| "How does reviewing change with evidence-based PRs?" | [Reviewing as Audit](reviewing-as-audit.md) |
+| "Why does the codebase shape all future generation?" | [Codebase as Mold](codebase-as-mold.md) |
 
 ---
 

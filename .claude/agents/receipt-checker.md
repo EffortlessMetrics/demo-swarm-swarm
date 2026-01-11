@@ -113,7 +113,7 @@ Write `.runs/<run-id>/gate/receipt_audit.md`:
 
 - **VERIFIED**: Receipt is valid and cross-checks pass
 - **UNVERIFIED**: Receipt exists but has problems (missing fields, placeholders, mismatches)
-- **CANNOT_PROCEED**: Mechanical failure (IO/permissions)
+- **CANNOT_PROCEED**: Mechanical failure (IO/permissions). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot read .runs/<run-id>/build/ due to permissions")
 
 ## Handoff
 

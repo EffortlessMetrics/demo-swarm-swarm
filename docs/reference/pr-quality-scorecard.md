@@ -240,3 +240,4 @@ The scorecard can appear in section 4 (Quality events) or as a standalone sectio
 - [economics.md](../explanation/economics.md) — Quality:DevLT ratio and token economics
 - [contracts.md](contracts.md) — Receipt schemas and evidence formats
 - [stable-markers.md](stable-markers.md) — Markers for scorecard sections
+- [reviewing-as-audit.md](../explanation/reviewing-as-audit.md) — The skill shift from diff-reading to evidence evaluation

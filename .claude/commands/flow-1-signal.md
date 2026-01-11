@@ -1,4 +1,5 @@
 ---
+name: flow-1-signal
 description: Run Flow 1 (Signal -> Spec): shape the problem, identify stakeholders, flag early risks, estimate scope.
 argument-hint: "[optional-run-id] <feature request or signal>"
 ---
@@ -296,6 +297,8 @@ Read the auditor's report. This is the "Staff Engineer" check. Trust their asses
 - If the auditor reports a mechanical failure → stop and address the environment issue
 
 The auditor will tell you when progress has stalled or when remaining issues need human review. Trust their judgment on when to proceed.
+
+**Reseal-if-modified:** If the auditor's feedback loop causes artifact modifications (requirements-author rerun, bdd-author rerun), you must call `signal-cleanup` again to regenerate `signal_receipt.json` before the final seal. The receipt must reflect the final state of artifacts, not an intermediate state.
 
 ### Step 10: Finalize and Write Receipt
 

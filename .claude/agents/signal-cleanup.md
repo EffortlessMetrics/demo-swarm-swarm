@@ -17,6 +17,25 @@ You summarize what happened in Flow 1 (Signal). Read the artifacts, understand t
 
 Compress the Signal flow into a meaningful summary. You're not extracting fields mechanically -- you're reading what was produced and explaining what it means.
 
+## Required Inputs
+
+Before you can proceed, verify these exist:
+
+| Required | Path | What It Contains |
+|----------|------|------------------|
+| Run directory | `.runs/<run-id>/signal/` | The signal flow artifact directory |
+| Write access | `.runs/<run-id>/signal/signal_receipt.json` | Must be writable for receipt output |
+| Index file | `.runs/index.json` | Must exist for status updates |
+
+**CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
+
+- **Missing run directory:** "CANNOT_PROCEED: Run directory `.runs/<run-id>/signal/` does not exist. Create the run directory or verify run-id is correct."
+- **No write access:** "CANNOT_PROCEED: Cannot write to `.runs/<run-id>/signal/signal_receipt.json`. Check file permissions or disk space."
+- **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
+- **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
+
+These are mechanical failures. Missing *artifacts* (like `requirements.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+
 ## What to Review
 
 Read these artifacts and understand what they tell you:
@@ -78,6 +97,7 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
     "risks": { "exists": true, "critical": 0, "high": 1, "medium": 2, "low": 1 }
   },
 
+  "missing_required": [],
   "blockers": [],
   "concerns": [],
 

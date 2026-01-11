@@ -162,13 +162,13 @@ The pack-check validation framework executed 53 distinct checks covering:
 
 21. **OpenQ QID Patterns**
     - All OpenQ QIDs use valid format (OQ-<FLOW>-<NNN>)
-    - Found 9 non-canonical OpenQ flow codes (OQ-PLAN-* should be OQ-PLN-*) — advisory only, does not block
+    - Found 9 non-canonical OpenQ flow codes (OQ-PLAN-* should be OQ-PLAN-*) — advisory only, does not block
 
 ### Warnings (Non-Critical)
 
 1. **flow-7-wisdom.md present** — Flow 7 (Wisdom) command documentation is now available and validated. The wisdom-cleanup agent correctly references REG marker pattern for regression detection.
 
-2. **Non-canonical OpenQ flow codes** — 9 instances of OQ-PLAN-* found in open_questions.md files; pack-check recommends OQ-PLN-* for consistency with flow code abbreviations (SIG, PLN, BLD, REV, GT, DPL, WIS). This is advisory only and does not impact validation.
+2. **Non-canonical OpenQ flow codes** — 9 instances of OQ-PLAN-* found in open_questions.md files; pack-check recommends OQ-PLAN-* for consistency with flow code abbreviations (SIG, PLN, BLD, REV, GT, DPL, WIS). This is advisory only and does not impact validation.
 
 ## Control-Plane Routing
 

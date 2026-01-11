@@ -26,7 +26,7 @@
 
 - **run-prep**: Created `.runs/compliance-drift-proofing/plan/` directory, updated run_meta.json and index.json
 - **repo-operator**: Verified on branch `run/compliance-drift-proofing`
-- **clarifier**: Created 10 plan-phase open questions (OQ-PLN-001 through OQ-PLN-010)
+- **clarifier**: Created 10 plan-phase open questions (OQ-PLAN-001 through OQ-PLAN-010)
 - **impact-analyzer**: Mapped 17 affected files (3 high risk, 7 medium, 7 low)
 - **design-optioneer**: Proposed 3 options (OPT-001 Inline Extension, OPT-002 Framework, OPT-003 Minimal)
 - **option-critic**: VERIFIED - OPT-001 recommended with high confidence

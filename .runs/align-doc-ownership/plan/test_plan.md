@@ -7,7 +7,7 @@ blockers: []
 concerns:
   - Negative test execution requires temporary patch-revert workflow (non-automated)
   - Toy Run A/B validation depends on all subtasks completing first (ST-006 dependency)
-  - pack-check boundary rules are pending implementation (OQ-PLN-001 defaults to Rust)
+  - pack-check boundary rules are pending implementation (OQ-PLAN-001 defaults to Rust)
 recommended_action: PROCEED
 route_to_agent: null
 route_to_flow: null

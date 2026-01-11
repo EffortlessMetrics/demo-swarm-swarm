@@ -101,9 +101,9 @@ Use stable markers:
 
 - RISK: RSK-001 Prior related work (issue #49) bounced at Gate, indicating implementation complexity may be underestimated. -> Mitigation: Design for warning-first mode (REQ-005) to allow incremental rollout; limit scope to syntactic checks; review #49 Gate bounce reasons before implementation.
 
-- RISK: RSK-002 PLN vs PLAN prefix inconsistency in existing documentation may cause validation confusion. -> Mitigation: Resolve OQ-SIG-002/OQ-PLN-004 definitively before implementation; update stable-markers.md and contracts.md to use PLN/BLD (canonical per openq-tools).
+- RISK: RSK-002 PLN vs PLAN prefix inconsistency in existing documentation may cause validation confusion. -> Mitigation: Resolve OQ-SIG-002/OQ-PLAN-004 definitively before implementation; update stable-markers.md and contracts.md to use PLN/BLD (canonical per openq-tools).
 
-- RISK: RSK-003 4 agents using demoswarm.sh may lack required Skills sections, requiring content remediation alongside validation code. -> Mitigation: Enumerate specific agents via audit during implementation; remediate in parallel with validation rule development per OQ-PLN-009.
+- RISK: RSK-003 4 agents using demoswarm.sh may lack required Skills sections, requiring content remediation alongside validation code. -> Mitigation: Enumerate specific agents via audit during implementation; remediate in parallel with validation rule development per OQ-PLAN-009.
 
 - RISK: RSK-004 --strict_warnings flag behavior may not exactly match REQ-005 requirements (exit code handling). -> Mitigation: Add tests to verify exit code behavior during implementation; small CLI changes if needed.
 
@@ -129,13 +129,13 @@ Use stable markers:
 ## Questions / Clarifications Needed
 Use stable markers and include suggested defaults:
 
-- Q: OQ-PLN-004 Should REQ-003 normalize to PLN/BLD (per openq-tools) or PLAN/BUILD (per stable-markers.md)? Suggested default: PLN/BLD (openq-tools is canonical implementation). Impact: If PLAN/BUILD chosen, requires openq-tools code changes.
+- Q: OQ-PLAN-004 Should REQ-003 normalize to PLN/BLD (per openq-tools) or PLAN/BUILD (per stable-markers.md)? Suggested default: PLN/BLD (openq-tools is canonical implementation). Impact: If PLAN/BUILD chosen, requires openq-tools code changes.
 
-- Q: OQ-PLN-002 How should --strict flag interact with existing exit codes? Suggested default: Exit 0 for success, exit 1 for errors, exit 2 for warnings with --strict (provides diagnostic granularity). Impact: Different exit code scheme may affect CI integration.
+- Q: OQ-PLAN-002 How should --strict flag interact with existing exit codes? Suggested default: Exit 0 for success, exit 1 for errors, exit 2 for warnings with --strict (provides diagnostic granularity). Impact: Different exit code scheme may affect CI integration.
 
-- Q: OQ-PLN-009 Which 4 agents are missing Skills sections? Suggested default: Identify via audit (grep demoswarm.sh minus grep "## Skills"); remediate as part of implementation. Impact: If some are intentionally exempt, need exemption mechanism.
+- Q: OQ-PLAN-009 Which 4 agents are missing Skills sections? Suggested default: Identify via audit (grep demoswarm.sh minus grep "## Skills"); remediate as part of implementation. Impact: If some are intentionally exempt, need exemption mechanism.
 
-- Q: OQ-PLN-001 Should checks 50-51 go in drift.rs specifically or a new validation.rs module? Suggested default: drift.rs (aligns with existing boundary enforcement checks 38-49). Impact: New module adds file overhead but provides separation.
+- Q: OQ-PLAN-001 Should checks 50-51 go in drift.rs specifically or a new validation.rs module? Suggested default: drift.rs (aligns with existing boundary enforcement checks 38-49). Impact: New module adds file overhead but provides separation.
 
 ## Next Steps (Flow 2 binding)
 - Interface/contracts -> `.runs/compliance-drift-proofing/plan/api_contracts.yaml` + `.runs/compliance-drift-proofing/plan/schema.md`
@@ -176,10 +176,10 @@ Use stable markers and include suggested defaults:
 - ADR_ASM: ASM-004
 - ADR_ASM: ASM-005
 - ADR_ASM: ASM-006
-- ADR_Q: OQ-PLN-004 OpenQ prefix normalization
-- ADR_Q: OQ-PLN-002 --strict exit codes
-- ADR_Q: OQ-PLN-009 Missing Skills sections
-- ADR_Q: OQ-PLN-001 Check module location
+- ADR_Q: OQ-PLAN-004 OpenQ prefix normalization
+- ADR_Q: OQ-PLAN-002 --strict exit codes
+- ADR_Q: OQ-PLAN-009 Missing Skills sections
+- ADR_Q: OQ-PLAN-001 Check module location
 
 ## Machine Summary Block
 
@@ -192,8 +192,8 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - OQ-PLN-004 (PLN vs PLAN prefix) should be resolved before implementation; suggested default is PLN/BLD
-  - 4 agents missing Skills sections not yet enumerated (deferred to implementation per OQ-PLN-009)
+  - OQ-PLAN-004 (PLN vs PLAN prefix) should be resolved before implementation; suggested default is PLN/BLD
+  - 4 agents missing Skills sections not yet enumerated (deferred to implementation per OQ-PLAN-009)
 
 chosen_option: OPT-001 Inline Extension of Existing Modules
 drivers_total: 5

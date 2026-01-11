@@ -102,7 +102,7 @@ Required:
 
 - **VERIFIED**: Plan executed (or skipped for ineligible), scope honored, report written
 - **UNVERIFIED**: Apply/verify failure or scope violation
-- **CANNOT_PROCEED**: Mechanical failure (IO/permissions)
+- **CANNOT_PROCEED**: Mechanical failure (IO/permissions). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot read gate_fix_summary.md due to permissions")
 
 ## Handoff
 

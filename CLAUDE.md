@@ -262,6 +262,8 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 | Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
 | Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
 | Org Design as Code | `docs/explanation/org-design-as-code.md` |
+| Reviewing as Audit | `docs/explanation/reviewing-as-audit.md` |
+| Codebase as Mold | `docs/explanation/codebase-as-mold.md` |
 | Control-plane blocks, schemas | `docs/reference/contracts.md` |
 | Schemas | `docs/reference/schemas.md` |
 | Run state schemas | `docs/reference/run-state.md` |
