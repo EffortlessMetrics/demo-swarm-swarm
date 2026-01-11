@@ -24,6 +24,11 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
 
+**Quick links for reviewers:**
+- [What is quality here?](docs/reference/pr-quality-scorecard.md) — the multi-sensor trust panel
+- [How do I review a swarm PR?](docs/how-to/review-a-swarm-pr.md) — the decision procedure
+- [Show me examples](docs/examples/) — sample artifacts
+
 ---
 
 ## Core Philosophy
@@ -251,11 +256,18 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 | Topic | Location |
 |-------|----------|
 | **Rules (constitution)** | `.claude/rules/*.md` |
+| The Thesis | `docs/explanation/the-thesis.md` |
 | Architecture & Philosophy | `docs/explanation/` |
+| The Physics | `docs/explanation/the-five-physics.md` |
+| Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
+| Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
+| Org Design as Code | `docs/explanation/org-design-as-code.md` |
 | Control-plane blocks, schemas | `docs/reference/contracts.md` |
+| Schemas | `docs/reference/schemas.md` |
 | Run state schemas | `docs/reference/run-state.md` |
 | Stable markers | `docs/reference/stable-markers.md` |
 | Trust model | `docs/reference/trust-model.md` |
+| Calibration | `docs/reference/calibration.md` |
 | CLI commands | `docs/reference/demoswarm-cli.md` |
 | How-to guides | `docs/how-to/` |
 | Flow commands | `.claude/commands/flow-*.md` |

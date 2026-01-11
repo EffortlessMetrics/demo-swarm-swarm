@@ -1,0 +1,50 @@
+{
+  "schema_version": "build_receipt_v1",
+  "run_id": "feat-session-timeout",
+  "flow": "build",
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": 5,
+  "route_to_agent": null,
+  "missing_required": [],
+  "blockers": [],
+  "completed_at": "2024-01-15T14:32:00Z",
+
+  "counts": {
+    "tests_written": 8,
+    "files_changed": 4,
+    "mutation_score": null,
+    "open_questions": 0
+  },
+
+  "tests": {
+    "summary_source": "build/test_execution.md",
+    "canonical_summary": "142 passed, 0 failed, 0 skipped",
+    "passed": 142,
+    "failed": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": null,
+    "metrics_binding": "test_execution:test-runner"
+  },
+
+  "critic_verdicts": {
+    "test_critic": "PASS",
+    "code_critic": "PASS_WITH_NOTES"
+  },
+
+  "quality_gates": {
+    "test_critic": "PASS",
+    "code_critic": "PASS",
+    "self_reviewer": "PASS"
+  },
+
+  "key_artifacts": [
+    "self_review.md",
+    "test_changes_summary.md",
+    "impl_changes_summary.md",
+    "test_execution.md",
+    "test_critique.md",
+    "code_critique.md"
+  ]
+}

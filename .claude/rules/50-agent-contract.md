@@ -140,6 +140,22 @@ Use DEFAULTED for safe assumptions, NEEDS_HUMAN for genuine blockers.
 
 ---
 
+## When Stuck: Debug, Don't Freeze
+
+If something fails:
+1. **Ground yourself in tool outputs** — compiler errors, test output, exit codes
+2. **Fix forward** — route to the appropriate fixer or do the fix if it's in scope
+3. **If the failure indicates intent mismatch** — surface it as DEFAULTED or NEEDS_HUMAN (authority line)
+
+**Do not stop the flow.** Write down assumptions and proceed unless:
+- Unsafe boundary (secrets, publish risk)
+- Authority required (business decision, customer impact)
+- Mechanical failure (tools broken, permissions missing)
+
+"Rerun" is a tool, not a virtue. Debugging is allowed. The goal is trust, not purity.
+
+---
+
 ## Evidence in Agent Outputs
 
 When making claims:
@@ -149,6 +165,26 @@ When making claims:
 
 **Good:** "Coverage: 82% (see test_execution.md)"
 **Bad:** "Coverage looks good"
+
+---
+
+## The Authority Line
+
+NEEDS_HUMAN is about authority, not difficulty.
+
+| Agent Can Handle (DEFAULTED) | Requires Human (NEEDS_HUMAN) |
+|------------------------------|------------------------------|
+| Researchable questions | Business relationship decisions |
+| Derivable from codebase | Risk tolerance choices |
+| Safe defaults exist | Org ownership questions |
+| Reversible choices | Customer impact trade-offs |
+
+The test: Does the decision require someone's **authority** or just someone's **knowledge**?
+
+If it's knowledge, agents research, default safely, document reasoning, proceed.
+If it's authority, agents surface options, explain trade-offs, and wait for boundary.
+
+See [authority-not-difficulty.md](../../docs/explanation/authority-not-difficulty.md) for the full explanation.
 
 ---
 

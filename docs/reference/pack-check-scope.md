@@ -146,6 +146,106 @@ If the answer to #1 is "content quality" or #2 is "no" or #3 is "yes", do not ad
 
 ---
 
+## Warning-First Philosophy
+
+**Prefer WARN over FAIL.** A blocking error stops the entire pack from running. That's a high bar.
+
+### When to FAIL (blocking)
+
+An issue should block execution only when it:
+
+1. **Breaks execution** — The pack will crash, error, or hang if this isn't fixed
+2. **Creates misleading interfaces** — Users or agents will be deceived (missing gates appear to pass, broken references appear to work)
+3. **Compromises boundary safety** — Publish gates bypassed, ownership boundaries violated, secrets exposed
+
+### When to WARN (non-blocking)
+
+Everything else. Specifically:
+
+- Style preferences (formatting, naming conventions beyond contracts)
+- Missing optional features (customize-pack, optional sections)
+- Suboptimal patterns that still work correctly
+- Things that might cause confusion but won't cause failure
+
+### The cost of false FAILs
+
+A blocking error that fires incorrectly:
+- Stops legitimate work
+- Trains maintainers to work around pack-check
+- Erodes trust in the validation system
+
+When in doubt, warn. A warning that's ignored costs little. A block that's wrong costs a lot.
+
+---
+
+## How to Add a New Check
+
+Before adding a check, prove it's necessary.
+
+### 1. Name the failure mode it prevents
+
+Not "enforce X" but "prevent Y from happening." Examples:
+
+- **Good:** "Prevents agents from bypassing secrets scan before GitHub posts"
+- **Bad:** "Ensures proper documentation format"
+
+If you can't name a concrete failure, you don't have a check — you have a preference.
+
+### 2. Show how it causes real drift
+
+Describe a scenario where the missing check caused actual problems:
+
+- "Agent X posted credentials because gate Y wasn't enforced"
+- "Flow command called git directly, causing repo-operator state to desync"
+
+Hypothetical drift doesn't justify checks. Wait for the actual failure, then add the check.
+
+### 3. Make the check minimal and durable
+
+- Check the smallest thing that catches the failure mode
+- Use patterns that won't break when prose changes
+- Avoid regex that matches too broadly
+
+**Bad:** Check that a section contains specific phrases
+**Good:** Check that a section heading exists
+
+### 4. Avoid parsing prose
+
+Natural language changes. Checks that parse prose become:
+- Brittle (break on rewording)
+- Frustrating (block legitimate edits)
+- Circumvented (maintainers learn the magic words)
+
+Check structure, not content. Check presence, not phrasing.
+
+### Example: Adding a check correctly
+
+**Failure mode:** Cleanup agents that don't use the demoswarm.sh shim can't be audited.
+
+**Real drift:** Cleanup agent used bespoke bash, counts diverged from runs-derive, orchestrator made wrong routing decision.
+
+**Minimal check:** Grep for `demoswarm.sh` in cleanup agent files. Warn if absent.
+
+**Why this works:** Checks structure (shim invocation), not prose. Won't break if agent instructions change. Catches the actual failure mode.
+
+---
+
+## What pack-check Is NOT
+
+Pack-check does **not** exist to:
+
+- **Enforce bureaucracy** — "Did you fill out all the forms correctly?"
+- **Police writing style** — "Is this phrased the way we prefer?"
+- **Create compliance theater** — "Check passes = quality assured"
+
+These are failure modes of validation systems, not goals.
+
+Pack-check exists to answer one question: **"Will this pack execute without crashing?"**
+
+If a check doesn't serve that question, it doesn't belong in pack-check. Put it in a critic agent, a review checklist, or a human review process — somewhere that can exercise judgment.
+
+---
+
 ## Running pack-check
 
 ```bash

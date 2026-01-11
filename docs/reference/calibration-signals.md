@@ -214,6 +214,7 @@ Machine workflows are code. Profile them, optimize them, cache them. Every calib
 
 ## See Also
 
+- [Calibration](calibration.md) - Active calibration: defect injection, Goodhart defense
 - [PR Quality Scorecard](pr-quality-scorecard.md) - Single-PR quality surfaces
 - [Agents Index](agents-index.md) - Agent listing by role family
 - [Economics](../explanation/economics.md) - The math behind the flywheel

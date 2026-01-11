@@ -11,6 +11,7 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | See agent capabilities and handoffs | [Agent Matrix](agent-matrix.md) |
 | Understand agent dependencies | [Agent Data Flows](agent-data-flows.md) |
 | Check a control-plane schema | [Contracts](contracts.md) |
+| Look up a data schema | [Schemas](schemas.md) |
 | Understand run identity + state | [Run State](run-state.md) |
 | Count something mechanically | [Stable Markers](stable-markers.md) |
 | Use the CLI | [DemoSwarm CLI](demoswarm-cli.md) |
@@ -24,4 +25,5 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Review a PR produced by DemoSwarm | [PR Review Interface](pr-review-interface.md) |
 | Understand PR quality surfaces | [PR Quality Scorecard](pr-quality-scorecard.md) |
 | Track system health over time | [Calibration Signals](calibration-signals.md) |
+| Prevent trust decay and gaming | [Calibration](calibration.md) |
 | Write documentation | [Documentation Conventions](documentation-conventions.md) |

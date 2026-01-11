@@ -43,6 +43,7 @@ When an agent encounters something outside its scope:
 | Design ambiguity | `design-optioneer` | Generate options |
 | Security concern | `risk-analyst` | Assess and document |
 | Git operation needed | `repo-operator` | Sole owner of git |
+| Merge conflict | `merge-reconciler` | Resolve conflicts, then back to repo-operator |
 | Critique finding | `fixer` | Address the issue |
 | Contract mismatch | `interface-designer` or `fixer` | Design or implementation gap |
 | Secrets detected | `secrets-sanitizer` | Must clean before publish |

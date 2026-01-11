@@ -17,6 +17,7 @@ Task-oriented: pick the guide that matches the job you need to do.
 | [Decompose Work](decompose-work.md) | Break features into SRP agent tasks | Task graph with clear ownership |
 | [Working with Microloops](working-with-microloops.md) | Understand and use writer↔critic patterns | Effective adversarial iteration |
 | [Working with Receipts](working-with-receipts.md) | Read and interpret flow receipts | Understanding flow outputs and routing |
+| [Handle Open Questions](handle-open-questions.md) | Resolve uncertainty without stopping flows | DEFAULTED and NEEDS_HUMAN protocols |
 | [Review a Swarm PR](review-a-swarm-pr.md) | Decide yes/no on swarm-generated PRs | Bounded review procedure with hotspot selection |
 | [Troubleshoot](troubleshoot.md) | Debug pack runs | Checklists for common failures and reseal loops |
 | [Failure Recovery](failure-recovery.md) | Recover from failed runs | Nuclear delete/restart procedures |

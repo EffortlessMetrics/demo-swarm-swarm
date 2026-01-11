@@ -2,6 +2,8 @@
 
 > Claims require pointers. The PR cockpit is the primary review surface.
 
+**The factory produces trust, not code.** Code is a byproduct. The actual product is a PR where the verification panel answers every question the reviewer would have asked.
+
 ---
 
 ## The Evidence Discipline
@@ -19,6 +21,26 @@ Claims require pointers. Receipts summarize tool outputs. "Not measured" is acce
 | "Not measured: mutation testing skipped (no budget)" | "Tests are probably effective" |
 
 Uncertainty is fine when labeled. Certainty without evidence is the failure mode.
+
+---
+
+## Evidence Freshness
+
+Receipts are historical. Current state is NOW.
+
+| Status | Meaning |
+|--------|---------|
+| FRESH | Evidence SHA matches current HEAD |
+| ACCEPTABLE_STALE | Minor drift, still trustworthy |
+| STALE | Significant drift, re-verify before trusting |
+| UNKNOWN | Cannot determine freshness |
+
+When evidence and current state diverge:
+- Note the divergence explicitly
+- Don't pretend the receipt is current
+- Re-verify if the change is significant
+
+See [evidence-freshness.md](../../docs/reference/evidence-freshness.md) for staleness policies.
 
 ---
 
@@ -104,6 +126,36 @@ Issues caught by machines don't require human attention.
 - PR cockpits orient, don't overwhelm
 
 Every unnecessary line increases DevLT.
+
+---
+
+## Review Is an Audit Skill
+
+The reviewer's job is **evidence sufficiency**, not diff archaeology.
+
+Questions a skilled reviewer asks:
+- Is the evidence fresh? (SHA matches HEAD?)
+- Is the panel complete for the risk profile?
+- What 3-8 hotspots should I spot-check?
+- What evidence proves each major claim?
+- What's explicitly "not measured" vs silently missing?
+
+This is cockpit piloting: read instruments, verify readings, spot-check controls. Not line-by-line code reading.
+
+---
+
+## The Codebase Is a Mold
+
+The existing codebase shapes all future generation.
+
+**Schema gravity:** Existing patterns, conventions, and structure constrain what gets generated. A well-structured codebase produces well-structured output. A messy codebase produces consistent mess.
+
+**Implications:**
+- Improving the mold (refactoring, better interfaces, clearer conventions) improves all future output
+- Technical debt compounds: bad patterns get reinforced
+- Maintainability work is first-class because it increases future reliability
+
+The codebase is not just what we ship. It's the jig that shapes everything we make.
 
 ---
 

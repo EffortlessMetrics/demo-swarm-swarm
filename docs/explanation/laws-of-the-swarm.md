@@ -137,19 +137,19 @@ When an agent hits a logic gap, design contradiction, or implementation snag: ca
 
 ### Law 8: Truth Flows Downward
 
-Kernel > derived > intent > binary > narrative. When sources conflict, trust flows down.
+Tool outputs > derived facts > intent > implementation > narrative. When sources conflict, trust flows down.
 
-**Corollary:** An agent's claim does not override an exit code.
+**Corollary:** An agent's claim does not override tool output.
 
 The hierarchy:
-1. **Kernel:** OS, filesystem, tool exit codes (cannot be argued with)
-2. **Derived:** Counts and metrics from deterministic tools
+1. **Tool outputs:** Exit codes, stdout, test results (what actually happened)
+2. **Derived facts:** Counts and metrics extracted from outputs
 3. **Intent:** BDD scenarios, ADRs, contracts (what we meant to build)
-4. **Binary:** Implementation code (what we actually built)
-5. **Narrative:** Agent chat, status updates (useful for debugging, not for truth)
+4. **Implementation:** Code (what we actually built)
+5. **Narrative:** Agent chat, status updates (useful for reasoning, not for truth)
 
 **Violation:** "The agent said tests passed, so we proceed."
-**Correct:** "The receipt shows exit code 0 and 0 failures. We proceed."
+**Correct:** "The test runner shows exit code 0 and 0 failures. We proceed."
 
 ---
 

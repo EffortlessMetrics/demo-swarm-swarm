@@ -223,6 +223,147 @@ flowchart TB
 
 ---
 
+## Canonical Diagram Types
+
+Three diagram patterns recur throughout DemoSwarm documentation. Use these as templates for consistency.
+
+### Intent-to-Narrative Pipeline (LR)
+
+Shows transformation from user intent through processing to observable outcomes. Use left-to-right (`LR`) orientation.
+
+**Use for:** Feature flows, signal-to-artifact pipelines, data transformations
+
+```mermaid
+flowchart LR
+    A([User intent]):::intent --> B[Signal]:::workPlane
+    B --> C[Plan]:::workPlane
+    C --> D[Build]:::workPlane
+    D --> E[(Artifact)]:::evidence
+    E --> F([Narrative]):::evidence
+
+    classDef intent fill:#4A90D9,color:#fff
+    classDef workPlane fill:#9E9E9E,color:#fff
+    classDef evidence fill:#7CB342,color:#fff
+```
+
+**Pattern:** Intent (blue) flows through work (gray) to produce evidence (green).
+
+### Truth Arbitration Stack (TD)
+
+Shows authority hierarchy where higher layers override lower layers. Use top-to-bottom (`TD`) orientation.
+
+**Use for:** Configuration precedence, trust hierarchies, verification stacks
+
+```mermaid
+flowchart TD
+    A[Human decision]:::halt --> B[Gate receipt]:::evidence
+    B --> C[Test results]:::evidence
+    C --> D[Agent claims]:::workPlane
+    D --> E[LLM output]:::workPlane
+
+    classDef halt fill:#D94A4A,color:#fff
+    classDef evidence fill:#7CB342,color:#fff
+    classDef workPlane fill:#9E9E9E,color:#fff
+```
+
+**Pattern:** Higher = more authoritative. Red at top indicates halting authority.
+
+### Boundary Model (Work vs Publish)
+
+Shows the two-plane architecture: default-allow work plane and gated publish plane. Uses subgraphs to separate domains.
+
+**Use for:** Permission models, gate explanations, security boundaries
+
+```mermaid
+flowchart TB
+    subgraph Work["Work Plane"]
+        direction LR
+        A[Read]:::workPlane --> B[Write]:::workPlane
+        B --> C[Test]:::workPlane
+    end
+
+    subgraph Publish["Publish Plane"]
+        D{Gate}:::boundary --> E[Push]:::boundary
+    end
+
+    C --> D
+    D -->|Fail| F[Block]:::halt
+
+    classDef workPlane fill:#9E9E9E,color:#fff
+    classDef boundary fill:#F5A623,color:#000
+    classDef halt fill:#D94A4A,color:#fff
+```
+
+**Pattern:** Work is gray (neutral, default-allow). Boundaries are orange (attention required). Halting is red.
+
+---
+
+## Color Semantics
+
+Colors communicate meaning. Use sparingly and consistently.
+
+| Semantic | Color | Hex | When to Use |
+|----------|-------|-----|-------------|
+| Intent | Blue | `#4A90D9` | User requests, goals, inputs that drive work |
+| Work plane | Gray | `#9E9E9E` | Internal operations, building, iteration (default-allow) |
+| Evidence | Green | `#7CB342` | Verified artifacts, passing tests, proof |
+| Boundaries | Orange | `#F5A623` | Gates, attention points, transitions between planes |
+| Halting | Red | `#D94A4A` | Blocked, failed, stopped, human-required decisions |
+
+### Usage Guidelines
+
+1. **One color per semantic** - Do not use blue for both intent and work
+2. **Gray is default** - Most nodes should be gray; color highlights exceptions
+3. **Red means stop** - Reserve red for genuine halting conditions, not warnings
+4. **Orange draws attention** - Use for boundaries that require verification
+5. **Green confirms** - Use only for verified/evidenced states, not hopes
+
+### Mermaid Class Definitions
+
+Standard class definitions for consistent styling:
+
+```mermaid
+classDef intent fill:#4A90D9,color:#fff
+classDef workPlane fill:#9E9E9E,color:#fff
+classDef evidence fill:#7CB342,color:#fff
+classDef boundary fill:#F5A623,color:#000
+classDef halt fill:#D94A4A,color:#fff
+```
+
+---
+
+## Section Budgets
+
+Beyond node/edge limits, apply these constraints:
+
+### One Diagram Per Section
+
+Each documentation section should contain at most one diagram. If you need multiple diagrams:
+- Split into subsections
+- Question whether all diagrams are necessary
+- Consider if prose would suffice
+
+### Avoid Universe Diagrams
+
+Do not create diagrams that show "everything." Signs of a universe diagram:
+- More than 3 subgraphs
+- Nodes that require scrolling to see
+- Legend longer than the diagram
+- "See diagram for overview" as the only explanation
+
+**Instead:** Create focused diagrams for specific questions. Link between documents for broader context.
+
+### Complexity Budget
+
+| If you have... | Then limit to... |
+|----------------|------------------|
+| 1 subgraph | 8 nodes |
+| 2 subgraphs | 6 nodes per subgraph |
+| 3 subgraphs | 4 nodes per subgraph |
+| More subgraphs | Split into multiple diagrams |
+
+---
+
 ## Diagram Discipline
 
 ### Every Diagram Must Have
