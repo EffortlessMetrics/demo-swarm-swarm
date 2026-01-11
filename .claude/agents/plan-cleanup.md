@@ -126,10 +126,6 @@ The receipt should answer:
   "run_id": "<run-id>",
   "flow": "plan",
   "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
-  "recommended_action": "PROCEED | RERUN | BOUNCE | FIX_ENV",
-  "route_to_flow": null,
-  "route_to_agent": null,
-
   "summary": "<1-2 sentence description of the design decision and plan>",
 
   "counts": {

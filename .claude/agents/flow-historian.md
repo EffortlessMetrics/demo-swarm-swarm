@@ -53,12 +53,12 @@ Audit artifacts for linking commits / gates (if present):
 Optional enrichment (only if available):
 - Read-only `git log` to add timestamps for known commit SHAs (do not require this)
 
-## Output (single source of truth)
+## Output
 
 Write exactly:
 - `.runs/<run-id>/wisdom/flow_history.json`
 
-## Output Schema (stable)
+## Output Schema
 
 Your JSON must include:
 

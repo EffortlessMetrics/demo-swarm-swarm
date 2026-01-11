@@ -136,10 +136,18 @@ Identify what's "Not measured" and whether it matters:
 ### Unacceptable Gaps
 - <what's missing and matters for this risk level>
 
-## Recommendation
+## Verdict
 
-recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
-rationale: <why>
+**Status**: SUFFICIENT | INSUFFICIENT | UNKNOWN
+**Rationale**: <why this verdict>
+
+## Next Steps
+
+<Prose explanation of what should happen next. Examples:>
+- "Evidence is complete. Route to merge-decider for final synthesis."
+- "Test evidence is stale. Route to test-executor to re-run tests against current HEAD."
+- "Security scan missing for this auth change. Route to security-scanner before merge decision."
+- "Multiple gaps exist. Route to test-executor first, then mutation-auditor."
 ```
 
 ## Completion States

@@ -22,9 +22,9 @@ Find issues in the test suite: missing REQ coverage, weak assertions, BDD scenar
 
 **AC-scoped invocation:** When invoked with `ac_id`, focus on tests for that specific AC.
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/build/test_critique.md`
+`.runs/<run-id>/build/test_critique.md`
 
 ## What to Look For
 

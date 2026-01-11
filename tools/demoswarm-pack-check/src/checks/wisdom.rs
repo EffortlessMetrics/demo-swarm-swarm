@@ -57,11 +57,9 @@ fn check_smoke_verifier(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()>
     if !cx.re.smoke_signal.is_match(&content) {
         issues.push("smoke_signal enum line drifted (expected: STABLE | INVESTIGATE | ROLLBACK)");
     }
-    if !cx.re.canon_action.is_match(&content) {
-        issues.push(
-            "recommended_action drifted (expected: recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV)",
-        );
-    }
+    // NOTE: recommended_action field removed in favor of prose routing.
+    // Routing decisions are now in the Handoff section as natural language,
+    // not as machine-parseable fields. See: .claude/rules/60-flow-orchestrators.md
     if !content.contains(headings::SMOKE_VERIFIER_RESULT_H2) {
         issues.push("## Smoke Verifier Result block missing");
     }

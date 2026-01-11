@@ -57,7 +57,7 @@ Repository context:
 - `pr_number` from run_meta (required)
 - Current commit SHA (from repo-operator or `git rev-parse HEAD`)
 
-## Outputs
+## Output
 
 **Per-flow output directories (no coupling between flows):**
 

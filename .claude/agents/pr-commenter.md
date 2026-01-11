@@ -29,7 +29,7 @@ Review artifacts:
 - `.runs/<run-id>/review/review_worklist.json` (for item counts)
 - `.runs/<run-id>/review/review_actions.md` (for changes made)
 
-## Outputs
+## Output
 
 - PR comment updated on GitHub (if allowed)
 - `.runs/<run-id>/review/pr_comment_status.md`

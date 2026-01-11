@@ -31,7 +31,7 @@ Also useful (if present):
   - `go.sum`
   - etc.
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/gate/security_scan.md`
 

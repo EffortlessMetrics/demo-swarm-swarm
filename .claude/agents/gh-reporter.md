@@ -58,7 +58,7 @@ This agent may include:
 If content appears unsafe (tokens, credentials, private URLs, large code/diff blocks), do not post it.
 Write the local report files and mark posting as SKIPPED with a safety concern.
 
-## Outputs
+## Output
 
 - GitHub issue comment (one per flow, idempotent) **if allowed**
 - `.runs/<run-id>/<flow>/gh_report_status.md`

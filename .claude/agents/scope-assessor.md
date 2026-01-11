@@ -31,7 +31,7 @@ Signals that affect confidence:
 Optional repo context (tight scope only):
 - Search for mentioned systems/modules/endpoints via repo-root-relative grep (no deep dives).
 
-## Outputs
+## Output
 
 Write all outputs under `.runs/<run-id>/signal/`:
 - `stakeholders.md`

@@ -24,6 +24,9 @@ pub struct Contracts {
     pub cleanup_agents: &'static [(&'static str, &'static str)],
     pub critics: &'static [&'static str],
     pub critic_and_verifier_agents: &'static [&'static str],
+    /// Gate agents list. Currently only used in contract tests to verify
+    /// the list is complete. May be used in future checks.
+    #[allow(dead_code)]
     pub gate_agents: &'static [&'static str],
     pub gh_agents: &'static [&'static str],
     pub banned_patterns: &'static [&'static str],
@@ -76,14 +79,22 @@ impl Default for Contracts {
 
 /// Compiled regex patterns used across checks.
 pub struct Regexes {
-    // Machine Summary axis
+    // Machine Summary axis patterns.
+    // The following patterns are from the harness-era routing schema.
+    // Currently only used in contract tests to verify regex correctness.
+    // Kept for potential future reintroduction of structured routing checks.
+    #[allow(dead_code)]
     pub canon_status: Regex,
     pub canon_action: Regex,
+    #[allow(dead_code)]
     pub route_to_agent: Regex,
+    #[allow(dead_code)]
     pub route_to_flow: Regex,
+    #[allow(dead_code)]
     pub recommended_action_present: Regex,
 
-    // Status validation
+    // Status validation (harness-era, kept for contract tests)
+    #[allow(dead_code)]
     pub blocked_status: Regex,
 
     // Taxonomy

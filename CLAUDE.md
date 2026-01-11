@@ -124,17 +124,7 @@ Most reviewers will only read the GitHub PR description. Treat it as the cockpit
 
 See: [docs/reference/pr-review-interface.md](docs/reference/pr-review-interface.md) for the template and guidelines.
 
----
-
-## PR Review Interface
-
-Most reviewers will only read the GitHub PR description. Treat it as the cockpit display.
-
-- Every run that produces a PR **must** produce a **PR Brief** (hotspots, quality events, proof pointers, explicit "not measured")
-- Receipts are the underlying truth; the PR Brief is the primary human interface; the diff is spot-check/audit
-- Avoid "dev vs machine" framing. This is a developer enablement system: cheap iteration buys verification so humans spend time on decisions
-
-See: [docs/reference/pr-review-interface.md](docs/reference/pr-review-interface.md) for the template and guidelines.
+See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audit.md) for the philosophy.
 
 ---
 

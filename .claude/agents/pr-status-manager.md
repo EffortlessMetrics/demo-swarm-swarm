@@ -28,7 +28,7 @@ Review artifacts:
 - `.runs/<run-id>/review/review_receipt.json` (for completion status)
 - `.runs/<run-id>/review/review_worklist.json` (for item counts)
 
-## Outputs
+## Output
 
 - PR state updated on GitHub (if allowed and warranted)
 - `.runs/<run-id>/review/pr_status_update.md`

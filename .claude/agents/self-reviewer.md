@@ -28,7 +28,7 @@ Optional (if present):
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/observability_spec.md`
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/build/self_review.md`
 

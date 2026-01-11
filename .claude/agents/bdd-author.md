@@ -31,7 +31,7 @@ Optional:
 - `.runs/<run-id>/signal/open_questions.md` (existing register)
 - `.runs/<run-id>/signal/bdd_critique.md` (if rerunning)
 
-## Outputs (always)
+## Output
 
 - `.runs/<run-id>/signal/features/*.feature`
 - `.runs/<run-id>/signal/example_matrix.md`

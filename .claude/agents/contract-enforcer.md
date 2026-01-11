@@ -141,7 +141,7 @@ Use these patterns:
 
 The merge decision is owned by **merge-decider**.
 
-## Output Format (`contract_compliance.md`)
+## Output Format
 
 Write a human-readable report with these sections:
 

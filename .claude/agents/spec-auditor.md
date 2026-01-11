@@ -104,7 +104,7 @@ Write to `.runs/<run-id>/signal/`:
 
 ### Step 4: Write `spec_audit.md`
 
-## Output Format (`spec_audit.md`)
+## Output Format
 
 ```markdown
 # Specification Audit Report for <run-id>

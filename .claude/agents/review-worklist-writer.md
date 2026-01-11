@@ -35,7 +35,7 @@ The orchestrator specifies the mode. Default is `create` if not specified.
 - `.runs/<run-id>/run_meta.json` (optional; for context)
 - `.runs/<run-id>/build/build_receipt.json` (optional; for test/coverage context)
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/review/review_worklist.md` (create mode)
 - `.runs/<run-id>/review/review_worklist.json` (create/apply/refresh modes)

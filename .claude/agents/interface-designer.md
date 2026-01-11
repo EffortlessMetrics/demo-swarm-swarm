@@ -34,7 +34,7 @@ Read what exists; missing inputs are **not** mechanical failure.
 
 If Flow 1 artifacts are missing, proceed from ADR and record the gap.
 
-## Outputs
+## Output
 
 Write only within the Flow 2 lane:
 

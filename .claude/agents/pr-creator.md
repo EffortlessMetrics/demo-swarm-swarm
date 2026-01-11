@@ -28,7 +28,7 @@ Build artifacts:
 - `.runs/<run-id>/build/build_receipt.json` (for status summary)
 - `.runs/<run-id>/build/impl_changes_summary.md` (for PR body context)
 
-## Outputs
+## Output
 
 - Draft PR on GitHub (if created)
 - `.runs/<run-id>/build/pr_creation_status.md`

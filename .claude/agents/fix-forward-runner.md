@@ -33,7 +33,7 @@ You never diagnose, invent commands, or perform git side effects.
 Required:
 - `.runs/<run-id>/gate/gate_fix_summary.md` containing a fix-forward plan YAML block
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/gate/fix_forward_report.md` (required)
 - `.runs/<run-id>/gate/fix_forward_logs/` (optional; per-step logs)

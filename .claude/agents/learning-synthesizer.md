@@ -142,7 +142,7 @@ If any expected-by-stage artifact is missing, still write learnings, but set `st
    * **Partial:** Learnings written, but some expected artifacts missing/unparseable. Document the gaps.
    * **Mechanical failure:** Cannot read/write required paths. Describe the issue.
 
-## Output format (`wisdom/learnings.md`)
+## Output Format
 
 ```markdown
 # Learnings from Run: <run-id>

@@ -150,7 +150,7 @@ If tests fail:
 
 Write `.runs/<run-id>/build/merge_resolution.md` with full audit trail.
 
-## Output Format (`merge_resolution.md`)
+## Output Format
 
 ```markdown
 # Merge Resolution for <run-id>

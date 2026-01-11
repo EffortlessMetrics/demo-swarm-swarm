@@ -23,9 +23,9 @@ Find issues in design options that would make ADR authoring difficult: options t
 - `.runs/<run-id>/signal/early_risks.md`
 - `.runs/<run-id>/plan/impact_map.json`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/plan/option_critique.md`
+`.runs/<run-id>/plan/option_critique.md`
 
 ## What to Look For
 

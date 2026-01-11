@@ -30,7 +30,7 @@ Read what exists; missing inputs are **not** mechanical failure.
 
 If Flow 1 artifacts are absent, proceed from ADR alone and record the gap.
 
-## Output (single source of truth)
+## Output
 
 Write exactly one file:
 

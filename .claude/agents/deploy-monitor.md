@@ -27,7 +27,7 @@ You observe CI/deployment state and write a concise, link-heavy verification rep
 
 Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot read/write due to IO/perms/tooling.
 
-## Output (single file)
+## Output
 
 - `.runs/<run-id>/deploy/verification_report.md`
 
@@ -104,7 +104,7 @@ If CI is clearly in progress and you can re-check:
 - record each observation with an ISO timestamp
 - if still not converged, keep `ci_signal: UNKNOWN` and status UNVERIFIED (unless you have enough other evidence)
 
-## Output format (write exactly)
+## Output Format
 
 ```markdown
 # Verification Report for <run-id>

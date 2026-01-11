@@ -29,7 +29,7 @@ Audit-plane files (optional, tighten-only):
 - `.runs/<run-id>/<flow>/secrets_status.json`
 - `.runs/<run-id>/<flow>/git_status.md`
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/<current-flow>/gh_issue_status.md`
 - Update `.runs/<run-id>/run_meta.json` fields you own:

@@ -24,7 +24,7 @@ Your job is to **establish the run directory** so downstream agents have a stabl
 - Current git branch name (read-only)
 - Existing `.runs/<run-id>/run_meta.json` and `.runs/index.json` if present
 
-## Outputs
+## Output
 
 Directories:
 - `.runs/`

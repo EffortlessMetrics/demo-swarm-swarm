@@ -23,7 +23,7 @@ Optional:
 - `.runs/<run-id>/build/subtask_context_manifest.json` (changed-surface scope)
 - `.runs/<run-id>/plan/test_plan.md` (critical paths)
 
-## Output (only)
+## Output
 
 - `.runs/<run-id>/build/fuzz_report.md`
 

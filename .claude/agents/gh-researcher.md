@@ -27,12 +27,12 @@ Your job is reconnaissance, not judgment: surface prior art, constraints, and li
 - Optional local context:
   - Repository remote metadata (e.g., from `git remote -v` if available)
 
-## Output (single source of truth)
+## Output
 
 Write exactly:
 - `.runs/<run-id>/signal/github_research.md`
 
-## Output Structure (must follow)
+## Output Structure
 
 Your markdown must include:
 

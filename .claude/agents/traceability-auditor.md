@@ -138,7 +138,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
   - GH comment missing: Recommend gh-reporter
 - **CANNOT_PROCEED**: Mechanical inability to read/write required local files. Explain what's broken.
 
-## Output format (write exactly)
+## Output Format
 
 ```md
 # Traceability Audit

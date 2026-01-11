@@ -148,7 +148,7 @@ Use these patterns:
 - Evidence inconsistent/ambiguous: proceed to **merge-decider** with UNVERIFIED status and blockers documented
 - Everything met with consistent evidence: proceed to **merge-decider**
 
-## Output Format (`coverage_audit.md`)
+## Output Format
 
 Write a human-readable report with these sections:
 
