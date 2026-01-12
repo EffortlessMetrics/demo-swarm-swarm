@@ -133,6 +133,101 @@ Humans are asked at flow boundaries, with context, with options, with recommenda
 
 ---
 
+## Completion Discipline
+
+**Flows run to completion. They never stop mid-execution.**
+
+A flow ends with one of two statuses:
+
+| Status | When | What It Means |
+|--------|------|---------------|
+| **VERIFIED** | Evidence says done | Panel green, evidence fresh, blockers empty |
+| **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable |
+
+Everything else is "keep grinding."
+
+### No Early Exit
+
+Orchestrators do not accept "DONE" prose as completion. Completion requires:
+- **Evidence panel green** (all required sensors pass), OR
+- **External constraint** forces checkpoint (complete UNVERIFIED with honest state)
+
+"Feels done" is not done. "Agent said done" is not done. **Evidence says done.**
+
+**Any agent claiming completion without producing evidence is automatically treated as UNKNOWN and routed to the evidence producer** (test-runner, linter, mutation, etc.). This is the stop-hook that prevents early exit.
+
+### The Loop Body
+
+The microloop that produces convergence:
+
+```
+Author → Critic → Fixer → Verifier → [if not converged] → repeat
+```
+
+For each station:
+1. Run the producer (author, implementer, etc.)
+2. Run the critic (attacks the output)
+3. If critic finds issues → run fixer → run verifier
+4. Repeat until critic says "proceed"
+
+### Routing to Unstick
+
+**Counts are not conditions. Signal is.**
+
+"We've run 3 times" → run it again. A count alone justifies nothing.
+
+**Stagnation** (same failure, no new signal) → orchestrator routes to unstick. Try a different agent, change the approach, get new signal. This is normal routing, not a special mechanism.
+
+**Oscillation** (toggling between states) → orchestrator breaks the cycle. Route to a different specialist, reframe the problem, get out of the loop.
+
+The orchestrator's job is to keep things moving. When progress stalls, route to unstick. That's orchestration.
+
+| Wrong | Right |
+|-------|-------|
+| "3 tries, moving on" | "3 tries, running again" |
+| "Stagnation detected, stopping" | "Stagnation detected, routing to different agent" |
+| "Max iterations, proceeding as done" | "Still not converged, change approach" |
+| "Timeout, assuming success" | "External constraint hit, checkpointing UNVERIFIED" |
+
+### "Clean" Means Panel Clean
+
+"Clean" is defined by the evidence panel, not by any single sensor:
+
+- **Intent fidelity**: REQ/BDD/ADR satisfied (or explicit DEFAULTED/NEEDS_HUMAN logged)
+- **Verification depth**: Tests + mutation (where required)
+- **Maintainability**: Deltas acceptable / hotspots checked
+- **Boundaries**: Stage→sanitize→persist, secrets scan on staged surface
+- **Explainability**: Cockpit + pointers
+- **Freshness**: Evidence SHA matches HEAD
+
+If any of these are red/unknown AND it matters for this change, you're not clean.
+
+### Checkpoint Report
+
+When an external constraint forces UNVERIFIED completion, document:
+
+```markdown
+## Checkpoint
+
+**Constraint:** <budget | access | authority>
+**Detail:** <what specifically: tokens exhausted, tooling broken, decision needed>
+
+**Current state:**
+- <what's done>
+- <what's not done>
+
+**Evidence (if any):**
+- <artifact path>: <what it shows>
+
+**Recommended next step:** <what to do when constraint clears>
+```
+
+**Checkpoint means: save state, publish artifacts, recommend next route. Work continues when constraint clears.**
+
+This makes the flow resumable. External constraints are checkpoints, not failures. UNVERIFIED is not failure—it's unmerged state.
+
+---
+
 ## Local Resolution Before Bouncing
 
 **Law 7: Local Resolution First**

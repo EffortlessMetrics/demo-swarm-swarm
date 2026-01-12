@@ -106,7 +106,7 @@ The audit trail shows exactly what happened. A full rerun would bury the formatt
 
 ### Non-Convergence Guard
 
-The fix-forward lane runs at most twice. If issues persist after two passes, Gate proceeds to merge-decider with the issues documented.
+Observation window: if the same issues persist across two reseal passes (no new signal / no net improvement), this lane isn't converging—route out. Gate proceeds to merge-decider with the issues documented. The lane stops; the flow continues.
 
 This prevents:
 - Infinite loops where formatters fight
