@@ -53,7 +53,7 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 
 - `VERIFIED`: Thresholds are PRESENT and all required metrics are met with evidence.
 - `UNVERIFIED`: Any required metric is unmet, thresholds are missing/ambiguous, or coverage cannot be determined from artifacts.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths).
+- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot write coverage_audit.md due to permissions").
 
 ## Severity model (bounded taste)
 
@@ -148,7 +148,7 @@ Use these patterns:
 - Evidence inconsistent/ambiguous: proceed to **merge-decider** with UNVERIFIED status and blockers documented
 - Everything met with consistent evidence: proceed to **merge-decider**
 
-## Output Format (`coverage_audit.md`)
+## Output Format
 
 Write a human-readable report with these sections:
 
@@ -221,6 +221,15 @@ After writing the report, provide a natural language summary with coverage numbe
 - **test-author**: Writes test code. Use when coverage is below threshold.
 - **test-strategist**: Designs test strategy. Use when thresholds are missing or ambiguous.
 - **security-scanner**: Scans for security issues. Next Gate check after coverage verification.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when coverage meets thresholds or findings are documented.
+- **test-author**: Writes test code to cover implementation. Use when coverage is below threshold and more tests are needed.
+- **test-strategist**: Designs test strategy and coverage policy. Use when thresholds are missing or ambiguous in Plan.
+- **security-scanner**: Scans changed surface for security issues. Use as the next Gate check after coverage verification.
 
 ## Philosophy
 

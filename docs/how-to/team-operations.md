@@ -95,6 +95,95 @@ Main moved: 5 new commits since you branched
 
 ---
 
+## Human Edits Between Flows
+
+The swarm is designed for human interleaving. You can make manual changes at any point; the swarm reconciles at the next flow boundary.
+
+### The Reconciliation Model
+
+Each flow starts by examining what actually exists on disk. Agents don't assume they're seeing a pristine state from the previous flow. They read artifacts, check git status, and work from reality.
+
+**This means you can:**
+
+- Edit code between Build and Review
+- Fix typos in generated docs
+- Adjust configuration values
+- Add files the swarm didn't create
+- Delete files you don't want
+- Use other tools (your IDE, other AI assistants, scripts)
+
+**The swarm will:**
+
+- See your changes at the next flow boundary
+- Incorporate them into its understanding
+- Continue from the actual state, not an assumed state
+
+### When to Make Manual Edits
+
+| Timing | Impact |
+|--------|--------|
+| **Between flows** | Clean. Next flow sees your changes as the starting state. |
+| **During a flow** | Depends. If the flow hasn't touched that file yet, fine. If it has, you may create conflicts. |
+| **During agent execution** | Risky. Wait for the agent to finish. |
+
+**Safest pattern:** Let the current flow complete, make your edits, then start the next flow.
+
+### What Gets Reconciled vs. What Gets Lost
+
+**Reconciled (preserved):**
+- File content changes (code, docs, config)
+- New files you added
+- Deleted files (they stay deleted)
+- Git state (commits, branch position)
+
+**May cause confusion:**
+- Editing artifact files (`.runs/`) that agents expect to control
+- Changing file paths that receipts reference
+- Modifying mid-flow while an agent is running
+
+### Example: Human Fix Between Build and Review
+
+```
+Flow 3 (Build) completes
+├── Code implemented
+├── Tests written
+└── build_receipt.json generated
+
+Human notices a typo in error message
+├── Edits src/auth/errors.py directly
+└── Commits: "fix: typo in auth error message"
+
+Flow 4 (Review) starts
+├── Sees the extra commit
+├── Includes it in the review scope
+└── Continues normally
+```
+
+The swarm doesn't "notice" or "complain" about your edit. It just sees the current state and works from there.
+
+### Interleaving Other Tools
+
+You can use other tools between flows:
+
+- Your IDE's refactoring tools
+- Other AI assistants
+- Linters and formatters
+- Database migration tools
+- Deployment scripts
+
+**Treat the swarm as one tool among many.** It maintains state in `.runs/` and works via git. Other tools can coexist as long as they don't corrupt those interfaces.
+
+### When Manual Edits Require Re-verification
+
+If your manual changes affect:
+- Test behavior - Re-run tests before Review
+- API contracts - Verify alignment with `api_contracts.yaml`
+- Security-sensitive code - Consider re-running relevant checks
+
+The Gate (Flow 5) will catch many issues, but earlier verification saves time.
+
+---
+
 ## Collision Avoidance
 
 ### File-Level Collisions
@@ -183,6 +272,108 @@ The swarm's resume-ready design means Bob doesn't need Alice's session state.
 
 ---
 
+## Questions and Escalation
+
+The swarm surfaces questions continuously but only requests human input at flow boundaries.
+
+### How Questions Flow
+
+Questions arise during agent work:
+- Ambiguous requirements
+- Design trade-offs
+- Missing information
+- Blockers requiring human judgment
+
+**Questions are captured immediately** in `open_questions.md` as they arise. Agents don't stop to wait for answers; they document the question, make a reasonable assumption (if possible), and continue.
+
+**Human input is requested at flow boundaries.** When a flow completes, open questions are surfaced in the receipt and handoff. This is when humans review and provide answers.
+
+### The Question Lifecycle
+
+```
+During Flow
+├── Agent encounters ambiguity
+├── Records question in open_questions.md
+├── Makes assumption (documented) OR flags as blocking
+└── Continues work
+
+At Flow Boundary
+├── Receipt lists open questions
+├── Human reviews questions
+├── Human provides answers (or confirms assumptions)
+└── Answers feed into next flow
+
+Next Flow
+├── Reads previous answers
+├── Adjusts approach based on human input
+└── May generate new questions
+```
+
+### Question Severity Levels
+
+| Level | Description | Handling |
+|-------|-------------|----------|
+| **Informational** | Curious, not blocking | Log and continue |
+| **Assumption-made** | Needed answer, chose default | Log assumption, continue, human can override |
+| **Blocking** | Cannot proceed without answer | Complete partial work, surface at boundary |
+
+**Most questions should be assumption-made.** The swarm is biased toward progress. Make a reasonable choice, document it clearly, and let humans correct if needed.
+
+### Providing Answers at Flow Boundaries
+
+When you review open questions at a flow boundary, update the artifact:
+
+```markdown
+## OQ-BUILD-003: Token refresh interval
+
+**Status:** ANSWERED
+**Answer:** Use 15 minutes, not 1 hour
+**Answered by:** Alice
+**Date:** 2024-01-15
+
+**Original question:**
+What should the token refresh interval be? Defaulted to 1 hour based on industry standard.
+
+**Impact:** Update auth config before Gate
+```
+
+Or confirm the assumption:
+
+```markdown
+## OQ-BUILD-003: Token refresh interval
+
+**Status:** CONFIRMED
+**Confirmed by:** Alice
+**Date:** 2024-01-15
+
+**Original assumption:** 1 hour refresh interval
+**Confirmation:** Assumption is correct, proceed with 1 hour
+```
+
+### When to Interrupt a Flow
+
+Almost never. But these situations warrant interruption:
+
+- **Security issue discovered** - Stop immediately
+- **Working on wrong problem** - Stop before wasting more effort
+- **Critical blocker** - External dependency unavailable
+- **Human changed their mind** - Requirements shifted fundamentally
+
+**To interrupt:** Simply stop the current session. Start fresh with updated context. The swarm will read the actual state and adjust.
+
+### Escalation Paths
+
+| Issue Type | Escalation Target | Method |
+|------------|-------------------|--------|
+| Technical question about code | Team tech lead | Update open_questions.md, tag in PR |
+| Requirements clarification | Product owner | Out-of-band communication |
+| Security concern | Security team | Stop flow, communicate immediately |
+| Infrastructure blocker | DevOps | Out-of-band, document in run artifacts |
+
+**The swarm doesn't have escalation automation.** Humans route to humans. The swarm captures the questions and context; you decide who answers them.
+
+---
+
 ## Parallel Runs (Safe Patterns)
 
 ### Safe
@@ -241,6 +432,138 @@ See [failure-recovery.md](failure-recovery.md) for detailed procedures.
 Gate handles this: if main moved, rebase and re-verify.
 
 **Never force-push over someone else's work.** If you must force-push, communicate first.
+
+---
+
+## Merge Discipline and Break Glass
+
+The swarm enforces merge discipline through Gate (Flow 5). Sometimes you need to bypass it.
+
+### Standard Merge Path
+
+```
+Flow 5 (Gate)
+├── Verification checks pass
+├── Policy checks pass
+├── Secrets scan clean
+├── merge_decision.md: MERGE
+└── repo-operator executes merge
+```
+
+This is the expected path. Gate provides the audit trail and verification.
+
+### When to Use Break Glass
+
+"Break glass" means bypassing normal controls. Use it when:
+
+| Scenario | Justification | Risk Level |
+|----------|---------------|------------|
+| **Production hotfix** | Outage requires immediate fix | High - verify manually |
+| **Gate false positive** | Check failing incorrectly, verified manually | Medium - document bypass |
+| **Blocked on infrastructure** | CI down, need to ship | Medium - run checks locally |
+| **Security patch** | Vulnerability disclosure timeline | High - minimal change, verify manually |
+| **Reverts** | Undoing a bad merge quickly | Low - revert is well-understood |
+
+### Break Glass Procedure
+
+**1. Announce your intent**
+
+Tell your team you're bypassing Gate. This is not optional.
+
+```
+[Slack/Teams]: Breaking glass on feat-auth. Reason: CI infrastructure down,
+manually verified tests pass. Merging directly.
+```
+
+**2. Document the bypass**
+
+Create a record in the run artifacts:
+
+```markdown
+# Break Glass Record
+
+**Run ID:** feat-auth
+**Date:** 2024-01-15T14:30:00Z
+**Operator:** alice@example.com
+
+## Reason for Bypass
+CI infrastructure (GitHub Actions) has been down for 2 hours.
+Feature is blocking release. Tests verified locally.
+
+## Verification Performed Manually
+- [ ] Unit tests: `npm test` - all passing
+- [ ] Integration tests: `npm run test:integration` - all passing
+- [ ] Lint: `npm run lint` - clean
+- [ ] Build: `npm run build` - success
+- [ ] Security scan: `npm audit` - no high/critical
+
+## Risks Accepted
+- CI may catch issues we missed
+- No automated policy checks ran
+- Merge decision not formally documented
+
+## Planned Follow-up
+- Re-run Gate when CI recovers
+- Verify no regressions in next deploy
+```
+
+Save as `.runs/<run-id>/gate/break_glass_record.md`
+
+**3. Execute the merge**
+
+```bash
+# Merge directly (no swarm involvement)
+git checkout main
+git merge feat-auth --no-ff -m "feat: user authentication (break glass - CI down)"
+git push origin main
+```
+
+**4. Follow up**
+
+When conditions normalize:
+- Run verification that was skipped
+- Address any issues found
+- Update the break glass record with outcomes
+
+### Break Glass Anti-Patterns
+
+| Don't | Why |
+|-------|-----|
+| Break glass because Gate is "too slow" | Speed is not an emergency |
+| Skip documentation | You lose the audit trail |
+| Break glass alone in secret | Team needs visibility |
+| Use break glass for convenience | Erodes the discipline for everyone |
+| Break glass on others' runs | Only the run owner should decide |
+
+### Merge Discipline Beyond Gate
+
+Even with Gate, teams should maintain discipline:
+
+**Protected branches:** Configure GitHub/GitLab to require:
+- PR before merge (no direct pushes)
+- At least one approval
+- CI checks passing
+- Up-to-date with base branch
+
+**Merge windows:** Consider limiting merges to:
+- Business hours (so humans are available if issues arise)
+- Not Friday afternoon (Monday debugging is painful)
+- Not during incidents
+
+**Merge order:** When multiple runs are ready:
+- Smaller changes first (less conflict potential)
+- Infrastructure before features
+- Communicate the queue
+
+### Post-Merge Verification
+
+After any merge (Gate or break glass):
+
+1. **Monitor:** Watch for errors in production/staging
+2. **Verify:** Confirm the feature works as expected
+3. **Communicate:** Update the team that the merge completed
+
+The swarm's Flow 6 (Deploy) and Flow 7 (Wisdom) handle this for normal paths. Break glass bypasses them, so you're responsible for follow-through.
 
 ---
 

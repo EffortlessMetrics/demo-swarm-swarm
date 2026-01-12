@@ -58,7 +58,7 @@ This agent may include:
 If content appears unsafe (tokens, credentials, private URLs, large code/diff blocks), do not post it.
 Write the local report files and mark posting as SKIPPED with a safety concern.
 
-## Outputs
+## Output
 
 - GitHub issue comment (one per flow, idempotent) **if allowed**
 - `.runs/<run-id>/<flow>/gh_report_status.md`
@@ -414,6 +414,17 @@ After writing outputs, provide a natural language handoff to the orchestrator.
 - Skipped (auth issue): "Flow should continue. Recommend **signal-cleanup** to proceed; authenticate gh CLI for future posting."
 - Failed: "Recommend **gh-reporter** rerun after fixing [specific issue]."
 - Metadata sync issues: "Posting revealed metadata inconsistency. Recommend **gh-issue-manager** to sync issue state."
+
+**Your default recommendation:** After posting (or recording skip), recommend the flow's cleanup agent to complete the flow. Posting failures are recorded but do not block flow progress.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **signal-cleanup / plan-cleanup / build-cleanup / gate-cleanup / deploy-cleanup / wisdom-cleanup**: Complete flow cleanup after summary is posted
+- **gh-issue-manager**: Update issue status board if posting revealed metadata sync issues
+- **repo-operator**: Handle checkpoint if posting revealed uncommitted changes
+- **clarifier**: Address open questions surfaced in the flow summary
 
 **Your default recommendation:** After posting (or recording skip), recommend the flow's cleanup agent to complete the flow. Posting failures are recorded but do not block flow progress.
 

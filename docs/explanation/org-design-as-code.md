@@ -1,23 +1,237 @@
 # Org Design as Code
 
-> The pack is org design, compiled into prompts and flows.
+> The pack is organizational architecture, compiled into prompts and flows.
 
 ---
 
 ## The Meta-Pattern
 
-This pack doesn't just *use* organizational concepts as metaphors. It **literally encodes** them into agent prompts, flow definitions, and verification gates.
+The swarm is not prompt engineering. It is organizational architecture encoded as executable specifications.
 
 When we say "PM + IC model," we mean:
-- The orchestrator prompt is designed like a PM job description
+- Orchestrator prompts are designed like PM job descriptions
 - Agent prompts are designed like IC role definitions
 - Handoffs work like status updates in a well-run team
 
-This isn't analogy. It's implementation.
+This is not analogy. It is implementation.
 
 ---
 
-## What We're Encoding
+## The Roles
+
+```mermaid
+flowchart TB
+    subgraph Orchestrators["Orchestrators (PMs)"]
+        O1[flow-1-signal]
+        O2[flow-2-plan]
+        O3[flow-3-build]
+        O4[flow-4-review]
+        O5[flow-5-gate]
+    end
+
+    subgraph Workers["Workers (ICs)"]
+        W1[code-implementer]
+        W2[test-author]
+        W3[requirements-author]
+        W4[fixer]
+    end
+
+    subgraph Critics["Critics (ICs)"]
+        C1[code-critic]
+        C2[test-critic]
+        C3[requirements-critic]
+    end
+
+    subgraph Cleanup["Cleanup (ICs)"]
+        CL1[signal-cleanup]
+        CL2[plan-cleanup]
+        CL3[build-cleanup]
+    end
+
+    subgraph Gate["Gate (ICs)"]
+        G1[merge-decider]
+        G2[deploy-decider]
+        G3[secrets-sanitizer]
+    end
+
+    subgraph Skills["Skills (Tools)"]
+        S1[test-runner]
+        S2[auto-linter]
+        S3[policy-runner]
+    end
+
+    O3 --> W1
+    O3 --> W2
+    W1 --> C1
+    W2 --> C2
+    C1 --> W4
+    O3 --> CL3
+    O5 --> G1
+    W1 --> S1
+    W1 --> S2
+```
+
+| Role | Responsibility | Pattern | Examples |
+|------|---------------|---------|----------|
+| Orchestrators (PMs) | Route, sequence, checkpoint | Read handoffs, decide next step | flow commands |
+| Workers (ICs) | Implement, produce artifacts | Do focused cognitive work | code-implementer, test-author |
+| Critics (ICs) | Find problems, produce worklists | Adversarial review | code-critic, test-critic |
+| Cleanup (ICs) | Compress, summarize, verify state | Context reduction | *-cleanup agents |
+| Gate (ICs) | Make judgment calls, decide | Authority to proceed/bounce | merge-decider, deploy-decider |
+| Skills (tools) | Execute deterministically | Return machine truth | test-runner, auto-linter |
+
+---
+
+## Why This Structure Works
+
+### Mission Command
+
+From military doctrine: commander sets intent + constraints + acceptance criteria. Units act autonomously within boundaries. System gates boundary crossings.
+
+Applied here:
+- Orchestrator sets the task + constraints + success criteria
+- Agent acts autonomously inside the sandbox
+- Gates verify at publish boundaries
+
+This is not "AI helps you code faster." This is an industrial control loop where intent flows through autonomous units to produce verified outcomes.
+
+### Separation of Concerns
+
+Critics never fix (conflict of interest). Implementers never commit (git expertise centralized). Gates do not trust previous agents (fresh verification).
+
+This prevents:
+- Critic rubber-stamping its own fixes
+- Implementers fighting git instead of coding
+- Accumulated trust replacing verification
+
+**Example:** When `code-critic` finds an issue, it reports to `fixer`. It does not fix the issue itself. This separation ensures honest assessment: a critic who fixes has incentive to underreport problems to reduce their own workload.
+
+### Adversarial Roles
+
+LLMs are sycophantic by default. They agree to please. Structural opposition forces honest assessment:
+
+- Author produces, Critic attacks
+- Implementer claims done, Gate verifies
+- Agent says "clean," Skill returns exit code
+
+The system is designed assuming each agent might lie or be wrong. Adversarial structure forces honesty through verification, not trust.
+
+---
+
+## The Communication Pattern
+
+Agents communicate through:
+
+1. **Artifacts on disk** (durable, reviewable)
+2. **Handoff recommendations** (routing guidance)
+3. **Natural language** (Claude understands, no parsing needed)
+
+Not through:
+- JSON routing schemas
+- Closed enums of next steps
+- Machine-parsed control blocks
+
+**Why natural language?** Claude understands prose. Rigid schemas force agents into categories that may not fit. An agent that says "I completed 3/5 ACs, recommend routing to fixer for the auth issue, then back to me" communicates more information than `{ "status": "PARTIAL", "next": "fixer" }`.
+
+---
+
+## Neighbors, Not Global Knowledge
+
+Each agent knows 3-4 likely handoff targets (neighbors), not the entire swarm:
+
+```
+code-implementer neighbors:
+- code-critic (for review)
+- test-author (for test updates)
+- fixer (for issues found)
+- repo-operator (when ready to commit)
+```
+
+This keeps agent prompts focused and context light. An agent does not need to know about `wisdom-harvester` to do its job in Build.
+
+**The routing table is implicit.** Orchestrators read handoffs and route based on understanding. Agents recommend next steps. The system routes via understanding, not via lookup tables.
+
+---
+
+## The Microloop Pattern
+
+Inside a flow, work often loops:
+
+```
+Author -> Critic -> Fix -> Author (refined) -> Critic (satisfied) -> Continue
+```
+
+**Stopping condition:** Critic runs out of ammunition OR quality threshold met.
+
+This is not orchestrator logic. It is local optimization within a flow. The orchestrator says "implement AC-001." The implementation loop runs until the work is done or blocked.
+
+### Why Microloops Work
+
+| Without Microloops | With Microloops |
+|-------------------|-----------------|
+| Submit PR, wait for review, get feedback, revise | Iterate until quality threshold before any human sees it |
+| 3-day review cycles | Quality issues caught in minutes |
+| Human attention on mechanical issues | Human attention on genuine decisions |
+
+Machine iteration is cheap. Human iteration is expensive. The microloop trades tokens for attention.
+
+---
+
+## Why Not a DAG?
+
+Traditional workflow systems use directed acyclic graphs with explicit edges.
+
+We use:
+- Recommendations (not commands)
+- Understanding (not parsing)
+- Local knowledge (not global routing tables)
+
+### DAG Limitations
+
+A DAG requires:
+- Enumerated states
+- Explicit edge definitions
+- Schema changes for new routes
+
+This creates:
+- Brittleness (unexpected states fail)
+- Rigidity (new routes require schema updates)
+- Complexity (routing logic accumulates)
+
+### Our Approach
+
+Agents recommend. Orchestrators understand. Routes emerge from conversation.
+
+**Example:** If `code-implementer` discovers it needs a database migration:
+- **DAG approach:** Is there an edge from `code-implementer` to `migration-author`? If not, fail or route to catch-all.
+- **Our approach:** Agent says "I need a migration for the users table. Recommend routing to whoever handles DB changes or creating the migration myself." Orchestrator understands and routes appropriately.
+
+The system is:
+- Resilient to unexpected states
+- Adaptable without schema changes
+- Debuggable through natural language
+
+---
+
+## The Compilation Process
+
+Traditional software compiles source code into machine instructions.
+
+This pack compiles org design into:
+
+| Org Design Element | Compiled Into |
+|-------------------|---------------|
+| Role definitions | Agent prompts (`.claude/agents/*.md`) |
+| Workflows | Flow commands (`.claude/commands/flow-*.md`) |
+| Policies | Gate logic, critic criteria |
+| Communication norms | Handoff structure |
+| Quality standards | Critic severity levels, verification gates |
+
+**The compiler is the pack author.** Reading org design literature and encoding it into prompts is compilation. The prompts are the bytecode.
+
+---
+
+## What We Are Encoding
 
 Three bodies of organizational theory, compiled into executable code.
 
@@ -35,35 +249,31 @@ From Laloux's *Reinventing Organizations*:
 - Agents bring judgment, not just execution
 - Real cognitive work, not template filling
 - Graceful outcomes include honest uncertainty
-- Partial progress with clear reporting is a valid outcome
+- Partial progress with clear reporting is valid
 
 **Evolutionary purpose:**
 - Wisdom loop improves the system
 - Templates evolve based on learnings
 - The org gets smarter over time
-- Flow 7 extracts insights; humans decide what to adopt
 
 ### Agile Principles
 
 From the manifesto and its descendants:
 
 **Short feedback loops:**
-- Microloops iterate quickly (write -> critique -> fix -> verify)
+- Microloops iterate quickly (write, critique, fix, verify)
 - Critics catch issues fast (per-AC, not per-feature)
 - Fix-forward maintains momentum
-- Push early to get bot feedback
 
 **Working software over documentation:**
 - Receipts capture what happened, not what was planned
 - Evidence over claims
-- Artifacts with substance, not theater
 - The diff is the audit surface; tests are the runtime truth
 
 **Responding to change:**
 - Resume from disk state
 - Adapt to what exists
 - Local resolution before escalation
-- "Extras" are embraced, not blocked
 
 ### Modern PM/IC Dynamics
 
@@ -72,7 +282,7 @@ From contemporary tech org design:
 **PM as context-holder:**
 - Orchestrator maintains intent
 - Routes based on understanding
-- Doesn't parse, reads
+- Does not parse, reads
 - Coordinates without micromanaging
 
 **IC as expert:**
@@ -80,127 +290,6 @@ From contemporary tech org design:
 - Honest reporting
 - Recommends next steps
 - Makes decisions within scope
-
-**Staff as quality bar:**
-- Critics maintain standards
-- Cleanup compresses context
-- Gates decide ship/no-ship
-- Reviews produce evidence, not gatekeeping
-
----
-
-## How It's Encoded
-
-Organizational patterns appear in four places.
-
-### In Agent Prompts
-
-Each agent prompt is a job description:
-
-| Job Description Element | Prompt Equivalent |
-|------------------------|-------------------|
-| Role title | Agent name (`code-implementer`, `test-author`) |
-| One clear responsibility | "Your job is to..." statement |
-| Success criteria | "You're done when..." conditions |
-| What to do when stuck | Research ladder, escalation path |
-| How to hand off | Result block format, recommendation requirement |
-
-**Example:** The `code-critic` prompt says "Critics review and find issues. Never fix—they report to workers." This is the same instruction you'd give a human code reviewer on a team that separates review from implementation.
-
-### In Flow Definitions
-
-Flows are org processes:
-
-| Org Process Element | Flow Equivalent |
-|--------------------|-----------------|
-| Workflow stages | Station order (Signal -> Plan -> Build...) |
-| Iterative refinement | Microloops (author -> critic -> fix -> verify) |
-| Approval processes | Gates (secrets check, merge decision) |
-| Handoff protocols | Result blocks between stations |
-| Status meetings | Cleanup agents summarizing progress |
-
-**Example:** Flow 3's microloop structure encodes how a good team does code review: write, get feedback, improve, verify. The 2-pass default mirrors "review once, address feedback, final check."
-
-### In Handoff Structure
-
-Handoffs are status updates:
-
-| Status Update Element | Handoff Equivalent |
-|----------------------|-------------------|
-| What I did | Summary of work completed |
-| What I found | Key findings, blockers, open questions |
-| My recommendation | Specific next step with reasoning |
-| Owner for next action | Named agent or explicit uncertainty |
-
-**Example:** A good junior engineer doesn't just say "done." They say "I implemented the login flow, tests pass, but I noticed the session table doesn't exist yet. I recommend routing to whoever handles migrations before AC-002."
-
-### In Artifact Design
-
-Artifacts are org memory:
-
-| Org Memory Element | Artifact Equivalent |
-|-------------------|---------------------|
-| Project records | Receipts (`*_receipt.json`) |
-| Documented rationale | ADRs, decision memos |
-| Tracked action items | Worklists, AC matrices |
-| Audit trail | Git log, run folders |
-| Lessons learned | `learnings.md`, `wisdom_receipt.json` |
-
-**Example:** `build_receipt.json` serves the same purpose as a project status report: what was attempted, what succeeded, what remains.
-
----
-
-## Why This Matters
-
-### Predictable Behavior
-
-When org patterns are explicit:
-- Agents behave consistently across runs
-- Expectations are clear to both agents and humans
-- Failures are diagnosable (which role failed? which handoff broke?)
-
-Compare to implicit patterns: "The AI should figure out how to collaborate." That's unpredictable. Explicit role definitions produce consistent behavior.
-
-### Transferable Knowledge
-
-Org design expertise transfers:
-
-| Human Org Skill | Pack Design Application |
-|-----------------|------------------------|
-| Good PM practices | Good orchestrator design |
-| Good IC practices | Good agent design |
-| Good team dynamics | Good flow design |
-| Good meeting hygiene | Good handoff design |
-| Good documentation | Good artifact design |
-
-If you know how to run a good eng team, you already know most of what makes this pack work. The patterns aren't novel—they're encoded.
-
-### Evolvable System
-
-As org theory evolves:
-- Patterns can be updated in prompts
-- New research applies directly
-- System improves with organizational knowledge
-
-When someone publishes better practices for code review, we can update `code-critic.md`. When team dynamics research suggests better handoff formats, we can update the Result block schema.
-
----
-
-## The Compilation Process
-
-Traditional software compiles source code into machine instructions.
-
-This pack compiles org design into:
-
-| Org Design Element | Compiled Into |
-|-------------------|---------------|
-| Role definitions | Agent prompts (`.claude/agents/*.md`) |
-| Workflows | Flow commands (`.claude/commands/flow-*.md`) |
-| Policies | Gate logic, critic criteria |
-| Communication norms | Handoff structure, Result blocks |
-| Quality standards | Critic severity levels, verification gates |
-
-**The compiler is the pack author.** Reading org design literature and encoding it into prompts is compilation. The prompts are the bytecode.
 
 ---
 
@@ -210,64 +299,39 @@ This pack compiles org design into:
 
 **Org theory:** PMs scope work and remove blockers. ICs do the technical work. Mixing these roles creates confusion.
 
-**Pack encoding:** Orchestrators call agents and route on results. They don't parse files or run commands. Agents do the work and report back. Orchestrators never reach into agent work; agents never route themselves.
+**Pack encoding:** Orchestrators call agents and route on results. They do not parse files or run commands. Agents do the work and report back. Orchestrators never reach into agent work; agents never route themselves.
 
 ### Single Responsibility
 
 **Org theory:** Teams work best when each member has one clear job. Overlapping responsibilities create coordination overhead and diffuse accountability.
 
-**Pack encoding:** `code-implementer` writes code. `code-critic` reviews code. `fixer` fixes issues. No overlap. If a critic spots an issue, they report it; they don't fix it themselves.
+**Pack encoding:** `code-implementer` writes code. `code-critic` reviews code. `fixer` fixes issues. No overlap. If a critic spots an issue, they report it; they do not fix it themselves.
 
 ### Psychological Safety
 
 **Org theory:** Teams perform better when members can report problems without fear of blame. Honest uncertainty beats false confidence.
 
-**Pack encoding:** `PARTIAL` is a valid completion status. Agents are explicitly told that honest partial reports are successful outcomes. The prompt says "A report saying 'I completed 2/5 ACs, blocked on missing schema' is a VERIFIED success."
+**Pack encoding:** `PARTIAL` is a valid completion status. Agents are explicitly told that honest partial reports are successful outcomes. "I completed 2/5 ACs, blocked on missing schema" is a verified success.
 
 ### Research Before Escalating
 
-**Org theory:** Good ICs investigate problems themselves before asking for help. Escalation should be the last resort, not the first.
+**Org theory:** Good ICs investigate problems themselves before asking for help. Escalation should be the last resort.
 
-**Pack encoding:** Law 5 (Research-First Autonomy) gives agents a five-step escalation ladder. They investigate locally, derive from evidence, choose safe defaults, then escalate "only when boxed in."
-
-### Fix-Forward Culture
-
-**Org theory:** High-performing teams fix issues as they find them rather than blocking on approval chains.
-
-**Pack encoding:** The default outcome is "route to fix," not "block and wait." Gates constrain publishing, not thinking. Small issues get fixed in-place; only design-level problems bounce to earlier flows.
-
----
-
-## The Key Insight
-
-Traditional AI systems try to make models "smart enough" to figure out collaboration. They assume that with enough capability, the model will discover how to work with humans.
-
-This pack says: **encode collaboration patterns explicitly**.
-
-Give agents the same structure that makes human teams work:
-- Clear roles with defined boundaries
-- Explicit handoff protocols
-- Shared vocabulary for status and outcomes
-- Escalation ladders for when things go wrong
-- Quality gates at appropriate boundaries
-
-It's not about making AI human. It's about giving AI the same organizational scaffolding that helps humans collaborate effectively.
-
-The pack is a team structure, compiled into prompts and flows.
+**Pack encoding:** Agents have a five-step escalation ladder. They investigate locally, derive from evidence, choose safe defaults, then escalate "only when boxed in."
 
 ---
 
 ## Implications for Pack Authors
 
-If you're extending or forking this pack:
+If you are extending or forking this pack:
 
-**Think in org design first.** Before writing a new agent prompt, ask: "What role is this person playing on the team? What's their job description?"
+**Think in org design first.** Before writing a new agent prompt, ask: "What role is this person playing on the team? What is their job description?"
 
 **Encode the team you want.** If you want agents to pair-program, encode pair-programming practices. If you want strict code review, encode strict review criteria.
 
-**Test with org theory.** When something isn't working, ask: "Would this team dynamic work with humans?" If the handoff is broken, the handoff is broken—regardless of whether agents or humans are doing it.
+**Test with org theory.** When something is not working, ask: "Would this team dynamic work with humans?" If the handoff is broken, the handoff is broken, regardless of whether agents or humans are doing it.
 
-**Update the org, not just the code.** When you change agent behavior, you're changing your org design. Be intentional about it.
+**Update the org, not just the code.** When you change agent behavior, you are changing your org design. Be intentional about it.
 
 ---
 

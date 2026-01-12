@@ -172,6 +172,54 @@ Periodic doc hygiene (monthly or before major releases):
 
 ---
 
+## Canonical Sources
+
+Quick reference for where to find authoritative definitions of key concepts.
+
+| Concept | Authoritative Location | Description |
+|---------|------------------------|-------------|
+| Quality definition | `docs/reference/pr-quality-scorecard.md` | What "quality" means, how to measure it |
+| Review procedure | `docs/how-to/review-a-swarm-pr.md` | Step-by-step PR review process |
+| Run state | `docs/reference/run-state.md` | Schemas for run artifacts and metadata |
+| Trust model | `docs/reference/trust-model.md` | How evidence creates trust, verification hierarchy |
+| Agent philosophy | `docs/explanation/agent-philosophy.md` | Why agents work the way they do |
+
+When in doubt about which doc owns a concept, consult this table first. If a concept is missing, propose adding it here before documenting elsewhere.
+
+---
+
+## Change Control
+
+Some documentation surfaces are tightly coupled. Changing one requires updating others.
+
+**When changing any of these:**
+- PR cockpit format
+- Quality scorecard
+- Review procedure
+- Boundary/trust model
+
+**You must also update:**
+1. **README links** - Ensure CLAUDE.md and top-level README point to current locations
+2. **Docs index** - Update the relevant `docs/*/README.md` index file
+3. **Examples** - If `docs/examples/` contains related examples, update them to match
+
+**Why:** These surfaces define the pack's public interface. Drift between them creates confusion about what "correct" looks like.
+
+---
+
+## Truth Documentation Principle
+
+When documenting truth (how the system actually works), include both:
+
+1. **Causal pipeline** - The chain from intent to narrative (why we do things, how decisions flow forward)
+2. **Arbitration order** - What wins on conflict (tool outputs beat derived, verified beats assumed)
+
+This matters because documentation isn't just description—it's also conflict resolution. When two docs disagree, readers need to know which one to trust.
+
+Example: If `run-state.md` defines a schema and `impl_changes_summary.md` shows a different shape, the reference doc (`run-state.md`) is canonical. Document this hierarchy explicitly so readers don't have to guess.
+
+---
+
 ## See Also
 
 - [Documentation Conventions](../reference/documentation-conventions.md) - Voice, style, terminology

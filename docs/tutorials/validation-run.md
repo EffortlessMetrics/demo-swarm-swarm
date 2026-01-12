@@ -255,6 +255,8 @@ Every `<flow>_receipt.json` should include at least:
 }
 ```
 
+**Note on routing fields:** The `recommended_action`, `route_to_flow`, and `route_to_agent` fields exist for **audit trail purposes**. Cleanup agents derive these values from the agent's prose handoff. Orchestrators route based on reading handoffs directly, not by parsing these fields.
+
 ### Index entry
 
 `.runs/index.json` should reflect:

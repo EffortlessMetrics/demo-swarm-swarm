@@ -35,7 +35,7 @@ The orchestrator specifies the mode. Default is `create` if not specified.
 - `.runs/<run-id>/run_meta.json` (optional; for context)
 - `.runs/<run-id>/build/build_receipt.json` (optional; for test/coverage context)
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/review/review_worklist.md` (create mode)
 - `.runs/<run-id>/review/review_worklist.json` (create/apply/refresh modes)
@@ -520,6 +520,15 @@ The orchestrator updates statuses as work progresses. Child items under `RW-MD-S
 **When stuck:**
 - "Iteration 5: Same 2 items pending for 3+ cycles. Stuck signal: true."
 - Recommend: Route to **review-cleanup** to checkpoint progress. Human may need to resolve blockers.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **code-implementer**: Fix CORRECTNESS and ARCHITECTURE items requiring code changes (bugs, security issues, logic errors)
+- **test-author**: Address TESTS category items (missing tests, test failures, coverage gaps)
+- **fixer**: Handle STYLE category items and small targeted fixes from critiques
+- **doc-writer**: Update documentation for DOCS category items
 
 ## Handoff Targets
 

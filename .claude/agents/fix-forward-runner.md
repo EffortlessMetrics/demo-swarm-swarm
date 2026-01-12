@@ -33,7 +33,7 @@ You never diagnose, invent commands, or perform git side effects.
 Required:
 - `.runs/<run-id>/gate/gate_fix_summary.md` containing a fix-forward plan YAML block
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/gate/fix_forward_report.md` (required)
 - `.runs/<run-id>/gate/fix_forward_logs/` (optional; per-step logs)
@@ -102,7 +102,7 @@ Required:
 
 - **VERIFIED**: Plan executed (or skipped for ineligible), scope honored, report written
 - **UNVERIFIED**: Apply/verify failure or scope violation
-- **CANNOT_PROCEED**: Mechanical failure (IO/permissions)
+- **CANNOT_PROCEED**: Mechanical failure (IO/permissions). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot read gate_fix_summary.md due to permissions")
 
 ## Handoff
 
@@ -126,6 +126,15 @@ After writing the report, tell the orchestrator what happened.
 - **receipt-checker**: Verifies build receipt. Use to reseal after fix-forward changes the codebase.
 - **merge-decider**: Synthesizes Gate evidence. Use when fix-forward completed or was ineligible.
 - **code-implementer**: Writes production code. Use when fix-forward failed.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **repo-operator**: Handles git operations (commit, push, branch). Use when fix-forward succeeded and changes need to be committed.
+- **receipt-checker**: Verifies build receipt is valid and consistent. Use to reseal after fix-forward changes the codebase.
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when fix-forward completed or was ineligible.
+- **code-implementer**: Writes production code aligned with design. Use when fix-forward failed and manual implementation is needed.
 
 ## Philosophy
 

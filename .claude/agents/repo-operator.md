@@ -73,7 +73,7 @@ Optional:
 - `.runs/<run-id>/gate/merge_decision.md` (deploy decision)
 - `demo-swarm.config.json` (custom layout paths)
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/<flow>/git_status.md` (when anomaly detected)
 - `.runs/<run-id>/deploy/deployment_log.md` (Flow 6 only)

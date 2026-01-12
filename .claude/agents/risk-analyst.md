@@ -56,7 +56,7 @@ Identify the current flow from context (the orchestrator invocation). Then read 
 
 If an input is missing, proceed best-effort and record it in `missing_required` (do not fail unless you cannot read/write due to IO/permissions).
 
-## Output (single source of truth)
+## Output
 
 Write (or update) exactly one file:
 - `.runs/<run-id>/<current-flow>/risk_assessment.md`
@@ -116,7 +116,7 @@ Each risk must have:
 7. **Write `.runs/<run-id>/<current-flow>/risk_assessment.md`** using the template below.
 8. **Do not "invent certainty."** If you cannot ground a claim in an input artifact, mark it as a concern and keep severity conservative.
 
-## Output format (write exactly)
+## Output Format
 
 ```markdown
 # Risk Assessment

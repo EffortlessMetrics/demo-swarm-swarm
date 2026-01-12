@@ -24,6 +24,11 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
 
+**Quick links for reviewers:**
+- [What is quality here?](docs/reference/pr-quality-scorecard.md) — the multi-sensor trust panel
+- [How do I review a swarm PR?](docs/how-to/review-a-swarm-pr.md) — the decision procedure
+- [Show me examples](docs/examples/) — sample artifacts
+
 ---
 
 ## Core Philosophy
@@ -32,7 +37,31 @@ Then proceed in order (unless you are intentionally running out-of-order):
 
 The pack is a **build pipeline with guardrails**, not a guardrail pipeline that sometimes builds. Agents explore, implement, and iterate freely. Gates engage only at publish boundaries (commit, push, GitHub post).
 
+**The thesis:** Humans author intent. Swarms manufacture verified change. Reviewers audit the cockpit, not the diff.
+
+**The ratio:** Quality per DevLT (PR quality achieved per minute of developer attention). Compute is cheap; architect attention is expensive. Trade accordingly.
+
 See: [docs/explanation/why-ops-first.md](docs/explanation/why-ops-first.md)
+
+---
+
+## Rules (The Constitution)
+
+Claude Code rules live in `.claude/rules/`. They encode the physics and vibe that shape all behavior.
+
+| Rule | What It Governs |
+|------|-----------------|
+| `00-doctrine.md` | Core thesis, the triangle, anti-austerity |
+| `10-operating-model.md` | PM + IC swarm, when to spawn agents |
+| `20-intent-to-narrative.md` | The pipeline from intent to PR |
+| `30-autonomy-and-boundaries.md` | Default-allow + strict gates |
+| `40-evidence-and-quality.md` | Claims require pointers, the quality panel |
+| `50-agent-contract.md` | Agent prompts (scoped to `.claude/agents/`) |
+| `60-flow-orchestrators.md` | Flow commands (scoped to `.claude/commands/flow-*`) |
+| `70-docs-and-teaching.md` | Documentation (scoped to `docs/`) |
+| `80-developer-experience.md` | UX, accessibility, investing in quality |
+
+Rules are the constitution Claude loads reliably. CLAUDE.md is the contract. Docs are the textbook.
 
 ---
 
@@ -94,6 +123,8 @@ Most reviewers will only read the GitHub PR description. Treat it as the cockpit
 - Avoid "dev vs machine" framing. This is a developer enablement system: cheap iteration buys verification so humans spend time on decisions
 
 See: [docs/reference/pr-review-interface.md](docs/reference/pr-review-interface.md) for the template and guidelines.
+
+See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audit.md) for the philosophy.
 
 ---
 
@@ -214,11 +245,21 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 
 | Topic | Location |
 |-------|----------|
+| **Rules (constitution)** | `.claude/rules/*.md` |
+| The Thesis | `docs/explanation/the-thesis.md` |
 | Architecture & Philosophy | `docs/explanation/` |
+| The Physics | `docs/explanation/the-physics.md` |
+| Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
+| Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
+| Org Design as Code | `docs/explanation/org-design-as-code.md` |
+| Reviewing as Audit | `docs/explanation/reviewing-as-audit.md` |
+| Codebase as Mold | `docs/explanation/codebase-as-mold.md` |
 | Control-plane blocks, schemas | `docs/reference/contracts.md` |
+| Schemas | `docs/reference/schemas.md` |
 | Run state schemas | `docs/reference/run-state.md` |
 | Stable markers | `docs/reference/stable-markers.md` |
 | Trust model | `docs/reference/trust-model.md` |
+| Calibration | `docs/reference/calibration.md` |
 | CLI commands | `docs/reference/demoswarm-cli.md` |
 | How-to guides | `docs/how-to/` |
 | Flow commands | `.claude/commands/flow-*.md` |

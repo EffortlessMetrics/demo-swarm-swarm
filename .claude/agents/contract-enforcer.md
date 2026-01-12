@@ -48,7 +48,7 @@ If contract files are missing, this is **UNVERIFIED**, not mechanical failure.
 
 - `VERIFIED`: No CRITICAL/MAJOR findings and contract endpoint checks are complete enough to trust.
 - `UNVERIFIED`: Any CRITICAL/MAJOR findings, contract missing/incomplete, or endpoints cannot be verified reliably.
-- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure).
+- `CANNOT_PROCEED`: Mechanical failure only (cannot read/write required paths due to IO/permissions/tooling failure). When returning CANNOT_PROCEED, include `missing_required` listing what's missing (e.g., "cannot read api_contracts.yaml due to permissions").
 
 ## Evidence discipline
 
@@ -141,7 +141,7 @@ Use these patterns:
 
 The merge decision is owned by **merge-decider**.
 
-## Output Format (`contract_compliance.md`)
+## Output Format
 
 Write a human-readable report with these sections:
 
@@ -216,6 +216,15 @@ If contracts are missing entirely, document what you can verify and route to int
 - **code-implementer**: Fixes implementation when it violates the declared contract.
 - **interface-designer**: Creates or updates API contracts when missing or incomplete.
 - **coverage-enforcer**: Verifies test coverage. Next Gate check after contract compliance.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when contracts are compliant or violations are documented.
+- **code-implementer**: Writes production code aligned with design. Use when implementation violates the declared contract.
+- **interface-designer**: Designs API contracts and interface specs. Use when contracts are missing or incomplete.
+- **coverage-enforcer**: Verifies test coverage meets Plan thresholds. Use as the next Gate check after contract compliance.
 
 ## Philosophy
 

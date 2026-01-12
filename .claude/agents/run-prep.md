@@ -26,7 +26,7 @@ Preserve identity/trust fields from upstream: `run_id_kind`, `issue_binding`, `g
 - Current branch name (read-only)
 - Existing `.runs/<run-id>/run_meta.json` and `.runs/index.json` if present
 
-## Outputs
+## Output
 
 Directories:
 - `.runs/`

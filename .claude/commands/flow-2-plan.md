@@ -1,4 +1,5 @@
 ---
+name: flow-2-plan
 description: Run Flow 2 (Spec to Design): produce ADR, contracts, observability spec, test/work plans, design validation.
 ---
 
@@ -116,6 +117,7 @@ Flow 2 uses infrastructure + domain agents + cross-cutting agents:
 
 ### Cross-cutting agents
 - clarifier (Plan-local open questions)
+- intent-auditor (audit ADR/BDD/REQ coherence; optional, when coherence issues suspected)
 - risk-analyst (if risk patterns identified)
 - policy-analyst (policy compliance check)
 - plan-cleanup (seal receipt, update index)
@@ -281,6 +283,8 @@ Read the critic's integrative report. This is the final quality check before pol
 - If the critic says "no further improvement possible" → proceed with documented issues
 
 Your agents produce reports and recommendations. You decide what happens next based on their guidance.
+
+**Reseal-if-modified:** If the design-critic's feedback loop causes artifact modifications (interface-designer rerun, adr-author amendment, etc.), you must call `plan-cleanup` again to regenerate `plan_receipt.json` before the final seal. The receipt must reflect the final state of artifacts, not an intermediate state.
 
 ### Step 11: Check policy compliance
 - Use `policy-analyst` for policy compliance.

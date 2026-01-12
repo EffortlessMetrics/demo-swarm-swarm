@@ -138,7 +138,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
   - GH comment missing: Recommend gh-reporter
 - **CANNOT_PROCEED**: Mechanical inability to read/write required local files. Explain what's broken.
 
-## Output format (write exactly)
+## Output Format
 
 ```md
 # Traceability Audit
@@ -260,6 +260,15 @@ After writing the traceability audit, provide a natural language handoff.
 
 8) **Write report**
    - Populate tables, findings, inventory markers, and summary.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when traceability is verified and all checks pass.
+- **requirements-author**: Writes requirements from problem framing. Use when REQ IDs are missing, duplicated, or uncovered by BDD.
+- **bdd-author**: Writes BDD scenarios from requirements. Use when scenarios are orphaned or missing REQ tags.
+- **gh-issue-manager**: Manages GitHub issue lifecycle. Use when GitHub observability markers are missing.
 
 ## Handoff Targets
 

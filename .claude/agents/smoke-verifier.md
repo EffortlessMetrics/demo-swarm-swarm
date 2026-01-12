@@ -145,9 +145,17 @@ smoke_signal: STABLE | INVESTIGATE | ROLLBACK
 
 ## Handoff
 
-After writing/appending the smoke verification section, tell the orchestrator what happened:
+After writing/appending the smoke verification section, tell the orchestrator what happened.
 
-**Examples:**
+### Routing by Smoke Signal
+
+- **If STABLE:** Route to **deploy-decider** with confidence. All checks passed or returned expected values. The deployment appears healthy and ready for final decision.
+
+- **If INVESTIGATE:** Route to **deploy-decider** to evaluate available evidence. Some checks were inconclusive or returned unexpected values, but no clear failure. Alternatively, route to **deploy-monitor** if you believe fresh monitoring data would clarify the situation.
+
+- **If ROLLBACK:** Route to **deploy-decider** with strong recommendation to investigate before proceeding. If the decider confirms rollback is needed, the next step is **repo-operator** to initiate rollback. Clear failures detected (health endpoints returning errors, version mismatches, etc.).
+
+### Examples
 
 *Clean verification:*
 > "Ran non-destructive smoke checks. Release v1.2.3 exists and is not a draft. Health endpoint returns 200 in <100ms. Version endpoint reports v1.2.3 matching expected tag. Smoke signal: STABLE. Route to **deploy-decider**."

@@ -28,7 +28,7 @@ Build artifacts:
 - `.runs/<run-id>/build/build_receipt.json` (for status summary)
 - `.runs/<run-id>/build/impl_changes_summary.md` (for PR body context)
 
-## Outputs
+## Output
 
 - Draft PR on GitHub (if created)
 - `.runs/<run-id>/build/pr_creation_status.md`
@@ -209,6 +209,15 @@ After writing outputs, provide a natural language handoff to the orchestrator.
 - Skipped (auth): "gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
 
 **Your default recommendation:** Route to **build-cleanup** (if this is the last step of Flow 3) or **pr-feedback-harvester** (if Flow 4 will harvest feedback).
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **pr-feedback-harvester**: Harvest PR feedback from CodeRabbit, GitHub Actions, and human reviewers once the PR is created and bots have posted
+- **repo-operator**: Push changes to remote if branch not yet pushed (pr-creator needs pushed branch)
+- **build-cleanup**: Finalize the Build flow receipt if PR creation was the last step of Flow 3
+- **review-worklist-writer**: Convert harvested feedback into actionable Work Items (after pr-feedback-harvester runs)
 
 ## Hard Rules
 

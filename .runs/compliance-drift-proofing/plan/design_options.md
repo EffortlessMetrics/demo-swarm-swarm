@@ -291,7 +291,7 @@ What would change this:
 - Q: Does the existing --strict_warnings flag behavior match REQ-005 exactly (exit code 1 when warnings + strict)? — default if unanswered: Assume yes; verify during implementation
 - Q: Is check 49 sufficient for REQ-002 or does it need enhancement? — default if unanswered: Verify via grep audit; enhance if gaps found
 - Q: Will there be more than 5 compliance rules in the next year? — default if unanswered: Assume no; OPT-001 is sufficient
-- Q: Is PLN/BLD canonical for OpenQ prefixes (OQ-PLN-004)? — default if unanswered: Yes per openq-tools/SKILL.md; update docs to match
+- Q: Is PLN/BLD canonical for OpenQ prefixes (OQ-PLAN-004)? — default if unanswered: Yes per openq-tools/SKILL.md; update docs to match
 
 ---
 

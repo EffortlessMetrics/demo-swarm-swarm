@@ -57,11 +57,9 @@ fn check_smoke_verifier(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()>
     if !cx.re.smoke_signal.is_match(&content) {
         issues.push("smoke_signal enum line drifted (expected: STABLE | INVESTIGATE | ROLLBACK)");
     }
-    if !cx.re.canon_action.is_match(&content) {
-        issues.push(
-            "recommended_action drifted (expected: recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV)",
-        );
-    }
+    // NOTE: recommended_action field removed in favor of prose routing.
+    // Routing decisions are now in the Handoff section as natural language,
+    // not as machine-parseable fields. See: .claude/rules/60-flow-orchestrators.md
     if !content.contains(headings::SMOKE_VERIFIER_RESULT_H2) {
         issues.push("## Smoke Verifier Result block missing");
     }
@@ -77,7 +75,7 @@ fn check_smoke_verifier(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()>
 
 /// Check 41: Flow 6 regression markers match wisdom-cleanup (grep-stable).
 fn check_regression_markers(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    if let Some(flow6_wisdom) = cx.inv.command("flow-6-wisdom") {
+    if let Some(flow6_wisdom) = cx.inv.command("flow-7-wisdom") {
         let content = cx.ctx.read_utf8(flow6_wisdom)?;
         if content.contains(cx.c.reg_marker_literal) {
             rep.pass(format!(
@@ -92,7 +90,7 @@ fn check_regression_markers(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result
             rep.warn("Flow 6 may be missing stable regression marker documentation");
         }
     } else {
-        rep.warn("flow-6-wisdom.md not found (cannot validate regression marker docs)");
+        rep.warn("flow-7-wisdom.md not found (cannot validate regression marker docs)");
     }
 
     if let Some(wisdom_cleanup) = cx.inv.agent("wisdom-cleanup") {

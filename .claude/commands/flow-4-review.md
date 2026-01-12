@@ -1,4 +1,5 @@
 ---
+name: flow-4-review
 description: "Run Flow 4 (Review): harvest PR feedback, apply fixes, flip Draft to Ready when complete."
 ---
 
@@ -117,6 +118,7 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 
 **Polish and wrap-up**:
 - build-cleanup -- reseal build receipt after code changes
+- review-cockpit-designer -- design PR description for reviewer efficiency (optional, before pr-commenter)
 - review-cleanup -- write review_receipt.json, update index
 
 **Cleanup + Reporting (End of Flow)**:

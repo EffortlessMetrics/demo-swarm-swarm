@@ -52,7 +52,14 @@ The seven laws that prevent execution drift:
 - Workers maintain the ledger
 - Research-first autonomy
 
-### 4. Deep Dive on Principles (Optional)
+### 4. Key Mental Model Shifts
+**[Reviewing as Audit](explanation/reviewing-as-audit.md)** - How code review changes from diff-reading to evidence evaluation
+
+**[Codebase as Mold](explanation/codebase-as-mold.md)** - Why the existing codebase shapes all future generation
+
+These documents explain the fundamental shifts in how work gets done when using the swarm.
+
+### 5. Deep Dive on Principles (Optional)
 Individual principle docs for deeper understanding:
 
 - [PM/Junior Model](explanation/principles/pm-junior-model.md)
@@ -63,7 +70,7 @@ Individual principle docs for deeper understanding:
 - [Artifacts with Substance](explanation/principles/artifacts-with-substance.md)
 - [Real Cognitive Work](explanation/principles/real-cognitive-work.md)
 
-### 5. Practical Guides
+### 6. Practical Guides
 When you're ready to do work:
 
 - [How to Design Agents](how-to/design-agents.md) - Creating/modifying agent prompts
@@ -77,6 +84,8 @@ When you're ready to do work:
 | Understand the core design | [Claude-Native Design](explanation/claude-native-design.md) |
 | Learn how agents should behave | [Agent Philosophy](explanation/agent-philosophy.md) |
 | Understand the architecture laws | [Architecture](explanation/architecture.md) |
+| Learn how to review swarm PRs | [Reviewing as Audit](explanation/reviewing-as-audit.md) |
+| Understand why codebase quality matters | [Codebase as Mold](explanation/codebase-as-mold.md) |
 | Create or modify an agent | [How to Design Agents](how-to/design-agents.md) |
 | Check if my code follows patterns | [Agent Patterns](reference/agent-patterns.md) |
 | Deep dive on a specific principle | [Principles](explanation/principles/) |

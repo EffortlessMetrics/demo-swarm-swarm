@@ -1,4 +1,5 @@
 ---
+name: flow-5-gate
 description: Run Flow 5 (Code -> Artifact): verify receipts, contracts, security, policies; decide merge vs bounce; execute bounded fix-forward lane when eligible.
 ---
 
@@ -122,6 +123,7 @@ Cross-cutting agents:
 - risk-analyst
 - policy-analyst
 - traceability-auditor (run-level coherence + spec traceability before merge decision)
+- evidence-sufficiency-critic (evaluate if evidence panel is sufficient for risk level; optional, before merge-decider)
 
 Cleanup + Reporting (End of Flow):
 - gate-cleanup -- writes gate_receipt.json, updates index.json status
@@ -256,6 +258,8 @@ Treat fix-forward as a **subroutine station**, not a per-call checklist.
 If the runner reports `changes_detected: true`, update build receipt + stage + secrets gate + commit/push the runner-touched scope, then run the confirm pass.
 
 If the runner reports UNVERIFIED or scope violation, proceed with remaining Gate stations; `merge-decider` should BOUNCE to Flow 3 with the runner report as evidence.
+
+**Non-convergence guard:** The fix-forward lane runs at most twice. If `modified_files` persists after the second pass (indicating non-convergent fixes), proceed to merge-decider with the issues documented. Do not enter an infinite reseal loop chasing formatting drift.
 
 ### Step 8: Traceability audit
 - `traceability-auditor` -> `.runs/<run-id>/gate/traceability_audit.md`

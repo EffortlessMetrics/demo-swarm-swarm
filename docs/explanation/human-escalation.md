@@ -438,6 +438,7 @@ Only when you reach the end of this chain AND the answer matters AND it's not de
 
 ## See Also
 
+- [authority-not-difficulty.md](authority-not-difficulty.md) — The critical DEFAULTED vs NEEDS_HUMAN distinction
 - [agent-philosophy.md](agent-philosophy.md) — Research-first autonomy
 - [architecture.md](architecture.md) — Law 5: Research-First Autonomy
 - [contracts.md](../reference/contracts.md) — Handoff patterns

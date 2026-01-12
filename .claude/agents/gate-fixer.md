@@ -147,6 +147,15 @@ After writing the summary, report back with what you found and your recommendati
 - **merge-decider**: Synthesizes Gate evidence. Use when no fix-forward is needed or plan is ineligible.
 - **code-implementer**: Writes production code. Use when non-mechanical issues require implementation changes.
 
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **fix-forward-runner**: Executes the FIX_FORWARD_PLAN_V1 block. Use when fix-forward is eligible and mechanical fixes can be applied.
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when no fix-forward is needed or plan is ineligible.
+- **code-implementer**: Writes production code aligned with design. Use when non-mechanical issues require implementation changes.
+- **standards-enforcer**: Applies formatting and linting standards. Use when format/lint issues need manual intervention in Build.
+
 ## Philosophy
 
 Gate is for decision support, not iteration. The fix-forward lane is a **bounded** hygiene path. You provide deterministic instructions; others execute and reseal.

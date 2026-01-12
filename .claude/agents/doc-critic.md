@@ -23,9 +23,9 @@ Find documentation that has fallen out of sync with implementation: stale README
 - `.runs/<run-id>/build/subtask_context_manifest.json`
 - `.runs/<run-id>/build/test_execution.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/build/doc_critique.md`
+`.runs/<run-id>/build/doc_critique.md`
 
 ## What to Look For
 

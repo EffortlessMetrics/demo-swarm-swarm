@@ -31,7 +31,7 @@ Signals that affect confidence:
 Optional repo context (tight scope only):
 - Search for mentioned systems/modules/endpoints via repo-root-relative grep (no deep dives).
 
-## Outputs
+## Output
 
 Write all outputs under `.runs/<run-id>/signal/`:
 - `stakeholders.md`
@@ -200,6 +200,15 @@ Your handoff should explain:
 - Key counts you derived (REQs, scenarios, integration points, risks by severity)
 - Any missing inputs or gaps that affected your assessment
 - Your recommendation for which agent should handle this next
+
+## Handoff Targets
+
+Your default recommendation is **spec-auditor**. After scope assessment, the spec needs holistic validation before Flow 2.
+
+Other targets when conditions apply:
+- **requirements-author**: Use when requirements are missing and scope cannot be accurately assessed.
+- **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
+- **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
 
 ## Handoff Targets
 

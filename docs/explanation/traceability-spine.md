@@ -23,6 +23,21 @@ Each link points to the next. Each artifact references its source. The whole jou
 
 ---
 
+## The Core Principle
+
+**We start from intent, but we arbitrate truth from evidence.**
+
+Requirements, designs, and plans express what we *intend* to build. But when it comes time to decide whether something is done, working, or safe to ship — evidence wins.
+
+This means:
+- **Intent drives direction** — Requirements tell us where to go
+- **Evidence determines reality** — Receipts, tests, and artifacts tell us where we are
+- **Conflict reveals drift** — When intent and evidence disagree, we investigate rather than paper over
+
+A requirement claiming "fully tested" is just a claim. The build receipt with passing test counts is evidence. The merge decision trusts evidence, not claims.
+
+---
+
 ## The Traceability Chain
 
 Every merged change should be traceable through these artifacts:
@@ -332,6 +347,91 @@ See test_auth.py  # But test_auth.py was deleted
 ```
 
 The value of traceability is accuracy. False traceability is worse than none because it creates unjustified confidence.
+
+---
+
+## DEFAULTED vs NEEDS_HUMAN
+
+Open questions can surface at any point in a flow. A requirement might be ambiguous. A design decision might have multiple valid approaches. Test coverage might be unclear for an edge case.
+
+**Flows don't stop for questions.** Instead, questions are classified:
+
+| Classification | Meaning | Action |
+|----------------|---------|--------|
+| **DEFAULTED** | Safe default exists, low risk | Apply default, document it, continue |
+| **NEEDS_HUMAN** | No safe default, or high stakes | Document clearly, continue with placeholder, escalate at boundary |
+
+### Why Flows Continue
+
+Stopping mid-flow for every question would make the system unusable. Instead:
+
+1. **Questions are captured** — Logged in `open_questions.md` with context and impact
+2. **Safe defaults are applied** — When a reasonable default exists, use it and document the assumption
+3. **Boundaries are checkpoints** — At flow transitions (Plan complete, Build complete, Gate decision), open questions surface
+4. **Humans decide at boundaries** — The gate flow is where NEEDS_HUMAN questions must be resolved before merge
+
+### Example
+
+During Build, a question surfaces: "Should the API return 200 or 201 on resource creation?"
+
+- **If conventions exist:** DEFAULTED to 201 (REST convention), documented in assumptions
+- **If domain-specific:** NEEDS_HUMAN, placeholder response implemented, question surfaces at Gate
+
+The merge decision cannot proceed with unresolved NEEDS_HUMAN questions. But Build doesn't wait — it produces working code with documented assumptions.
+
+### Traceability Impact
+
+Questions that were DEFAULTED must be traceable:
+- The assumption is documented in the artifact where it was made
+- The receipt notes "assumptions made: 2" or similar
+- If the default later proves wrong, the trace shows when and why it was chosen
+
+This is how the system remains both responsive (flows continue) and honest (assumptions are explicit, not hidden).
+
+---
+
+## Evidence Freshness
+
+Receipts are historical documents. They capture what was true at a specific moment — when the tests ran, when the critique was written, when the gate decided.
+
+**The repo moves.** Commits land, files change, branches merge. A receipt from yesterday describes yesterday's state.
+
+### The Freshness Problem
+
+```
+build_receipt.json says: "5 tests passing"
+But now: test file was modified, 1 test is failing
+```
+
+Which truth matters? Both, but differently:
+- **The receipt** tells us what was verified at build time
+- **The current state** tells us what we're shipping now
+
+### Handling Divergence
+
+When evidence and current state diverge:
+
+1. **Note the divergence** — "Receipt claims X, but current state shows Y"
+2. **Don't pretend** — A stale receipt is not evidence of current behavior
+3. **Re-verify or document gap** — Either re-run verification or explicitly note the gap
+
+### When Divergence Is Expected
+
+Some divergence is normal:
+- **Post-review fixes** — Build receipt predates review feedback fixes
+- **Merge conflicts** — Resolution may change verified code
+- **Dependency updates** — External changes after verification
+
+The gate flow must check: "Does the receipt still describe what we're merging?"
+
+### Timestamp Discipline
+
+Every receipt has timestamps. When reading evidence:
+- Check when it was generated
+- Consider what changed since
+- Weight recent evidence higher than stale evidence
+
+A receipt from 10 minutes ago on the current branch is strong evidence. A receipt from last week on a rebased branch is context, not proof.
 
 ---
 

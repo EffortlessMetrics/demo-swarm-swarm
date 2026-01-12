@@ -76,14 +76,16 @@ proceed_to_github_ops: true | false
 ...
 ```
 
-### Status/routing enums
+### Status concepts (for receipts)
 
-Keep these closed:
+Keep these enum values in receipts (for audit purposes):
 
 ```
 status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV
 ```
+
+Note: These are audit vocabulary for receipts. Agents communicate via prose handoffs; cleanup agents derive these values when writing receipts.
 
 ### Reseal loop
 

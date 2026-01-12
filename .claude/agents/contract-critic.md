@@ -25,9 +25,9 @@ Find issues in API contracts and schemas that would block implementation or caus
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/features/*.feature`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/plan/contract_critique.md`
+`.runs/<run-id>/plan/contract_critique.md`
 
 ## What to Look For
 

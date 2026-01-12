@@ -19,6 +19,25 @@ You summarize what happened in Flow 5 (Gate). Read the verification artifacts, u
 
 Compress the Gate flow into a meaningful summary. Seal the envelope with the merge verdict clearly recorded.
 
+## Required Inputs
+
+Before you can proceed, verify these exist:
+
+| Required | Path | What It Contains |
+|----------|------|------------------|
+| Run directory | `.runs/<run-id>/gate/` | The gate flow artifact directory |
+| Write access | `.runs/<run-id>/gate/gate_receipt.json` | Must be writable for receipt output |
+| Index file | `.runs/index.json` | Must exist for status updates |
+
+**CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
+
+- **Missing run directory:** "CANNOT_PROCEED: Run directory `.runs/<run-id>/gate/` does not exist. Create the run directory or verify run-id is correct."
+- **No write access:** "CANNOT_PROCEED: Cannot write to `.runs/<run-id>/gate/gate_receipt.json`. Check file permissions or disk space."
+- **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
+- **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
+
+These are mechanical failures. Missing *artifacts* (like `merge_decision.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+
 ## Receipt Supremacy
 
 `gate_receipt.json` supersedes `build_receipt.json` as the authoritative evidence. If fix-forward ran in Gate, the world has changed since Build. Record what's true now.
@@ -75,6 +94,7 @@ The receipt should answer:
     "coverage_audit": { "ran": true, "line_percent": 85, "branch_percent": 72 },
     "policy_analysis": { "ran": false }
   },
+  "missing_required": [],
   "blockers": [],
   "concerns": [],
   "evidence_sha": "<current HEAD>",

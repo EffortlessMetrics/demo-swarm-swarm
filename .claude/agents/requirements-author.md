@@ -17,7 +17,7 @@ Primary:
 Feedback loop (if present):
 - `.runs/<run-id>/signal/requirements_critique.md` (latest critic verdict + required changes)
 
-## Output (only)
+## Output
 
 Write exactly one file:
 - `.runs/<run-id>/signal/requirements.md`

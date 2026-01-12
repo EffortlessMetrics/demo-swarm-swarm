@@ -31,7 +31,7 @@ Also useful (if present):
   - `go.sum`
   - etc.
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/gate/security_scan.md`
 
@@ -157,6 +157,15 @@ After writing the security scan report, tell the orchestrator what happened:
 
 *Incomplete scan:*
 > "Changed surface unknown (impl_changes_summary.md missing). Scanned obvious security-sensitive files as fallback. No findings in what I could check. Route to **merge-decider** with scan limitations documented."
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when scan is clean or findings are documented.
+- **code-implementer**: Writes production code aligned with design. Use when security vulnerabilities need remediation in code.
+- **secrets-sanitizer**: Scans for secrets before publish operations. Use when suspected secrets are found that need redaction.
+- **traceability-auditor**: Verifies run coherence and spec traceability. Use as the next Gate check after security scan.
 
 ## Handoff Targets
 

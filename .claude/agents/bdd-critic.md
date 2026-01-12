@@ -21,9 +21,9 @@ Find issues in BDD scenarios that would break automation or leave requirements u
 - `.runs/<run-id>/signal/example_matrix.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/signal/bdd_critique.md`
+`.runs/<run-id>/signal/bdd_critique.md`
 
 ## What to Look For
 

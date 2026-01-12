@@ -32,7 +32,7 @@ Feedback loops (if present):
 Existing tests:
 - Project test files in **project-defined locations** (do not assume `tests/`)
 
-## Outputs
+## Output
 
 - Test files in **project-defined locations** (follow repo conventions; do not assume `tests/`)
 - `.runs/<run-id>/build/test_changes_summary.md`

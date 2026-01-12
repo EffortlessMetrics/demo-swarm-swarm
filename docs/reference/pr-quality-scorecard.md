@@ -10,6 +10,8 @@
 
 The goal is not exhaustive measurement. The goal is honest communication about what was verified, what was estimated, and what remains unknown.
 
+**We start from intent, but we arbitrate truth from evidence.** Intent (BDD, ADR, contracts) defines what we're trying to build. Evidence (test results, mutation scores, exit codes) proves whether we built it. When narrative claims conflict with evidence, evidence wins.
+
 ---
 
 ## The Five Quality Surfaces
@@ -84,6 +86,33 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 **Evidence pointers:** The PR description itself.
 
 **No claim without a pointer.** "Tests pass" means nothing without a link to test results.
+
+---
+
+## The Panel Beats Goodhart
+
+Any single metric can be gamed:
+
+| If You Optimize For... | You Risk... |
+|------------------------|-------------|
+| Coverage | Hollow tests that touch lines without asserting |
+| Mutation score | Over-specific assertions that kill mutants but miss edge cases |
+| Green CI | Untested surfaces, flaky test hiding |
+| Clean lint | Compliant but complex code |
+| Fast review | Rubber-stamping without reading |
+
+The quality panel uses multiple sensors that fail in different ways. If you game one, another goes red.
+
+This is deliberate. The panel collectively approximates "good engineering" in a way no single metric can.
+
+### Trust Decay Prevention
+
+Over time, reliable systems become less scrutinized. Prevent trust decay with:
+- Periodic calibration (inject known defects, verify gates catch them)
+- Explicit "not measured" (force attention to gaps)
+- Red flags (patterns that force slowdown)
+
+See [calibration.md](calibration.md) for the full calibration protocol.
 
 ---
 
@@ -211,3 +240,4 @@ The scorecard can appear in section 4 (Quality events) or as a standalone sectio
 - [economics.md](../explanation/economics.md) — Quality:DevLT ratio and token economics
 - [contracts.md](contracts.md) — Receipt schemas and evidence formats
 - [stable-markers.md](stable-markers.md) — Markers for scorecard sections
+- [reviewing-as-audit.md](../explanation/reviewing-as-audit.md) — The skill shift from diff-reading to evidence evaluation

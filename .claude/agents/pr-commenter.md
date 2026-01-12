@@ -29,7 +29,7 @@ Review artifacts:
 - `.runs/<run-id>/review/review_worklist.json` (for item counts)
 - `.runs/<run-id>/review/review_actions.md` (for changes made)
 
-## Outputs
+## Output
 
 - PR comment updated on GitHub (if allowed)
 - `.runs/<run-id>/review/pr_comment_status.md`
@@ -207,6 +207,15 @@ github_repo: <repo>
 **When skipped (auth):**
 - "Skipped PR comment — gh not authenticated or github_ops_allowed is false."
 - Recommend: Proceed with flow (expected when GitHub access is disabled).
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **pr-status-manager**: Transition PR from Draft to Ready for Review once worklist is complete
+- **review-cleanup**: Finalize the Review flow receipt after all PR operations are done
+- **pr-creator**: Create the PR first if no PR exists yet (pr-commenter requires an existing PR)
+- **secrets-sanitizer**: Scan for secrets before any GitHub publishing operations
 
 ## Handoff Targets
 

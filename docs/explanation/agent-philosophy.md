@@ -418,6 +418,7 @@ We intentionally avoid hardcoding model tiers into the pack.
 
 ## See Also
 
+- [authority-not-difficulty.md](authority-not-difficulty.md) — DEFAULTED vs NEEDS_HUMAN distinction
 - [architecture.md](architecture.md) — System design and architectural laws
 - [why-ops-first.md](why-ops-first.md) — Engineering default-allow philosophy
 - [trust-model.md](../reference/trust-model.md) — Evidence hierarchy

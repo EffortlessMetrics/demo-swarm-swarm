@@ -104,7 +104,7 @@ Write to `.runs/<run-id>/signal/`:
 
 ### Step 4: Write `spec_audit.md`
 
-## Output Format (`spec_audit.md`)
+## Output Format
 
 ```markdown
 # Specification Audit Report for <run-id>
@@ -215,6 +215,17 @@ Your handoff should include:
 - What you audited and the issue counts
 - Whether the spec is ready for Flow 2
 - Which agent should work next and why
+
+## Handoff Targets
+
+Your default recommendation depends on the audit verdict:
+- **If audit passes**: Route to **signal-cleanup** to finalize Flow 1.
+- **If issues found**: Route to the appropriate author agent to fix them.
+
+Other targets when conditions apply:
+- **requirements-author**: Use when audit finds unaddressed requirements issues.
+- **bdd-author**: Use when audit finds unaddressed BDD issues.
+- **problem-framer**: Use when problem framing is unclear or incomplete.
 
 ## Handoff Targets
 

@@ -118,6 +118,62 @@ Some surfaces require manual review regardless of verification status. If these 
 
 ---
 
+## Trust Signals
+
+These let you move fast with confidence:
+
+### Strong trust signals
+
+- **Clean receipts:** All stations show VERIFIED with no blockers
+- **Green mutation testing:** Mutations were killed; tests are meaningful
+- **Hotspots called out:** PR Brief explicitly identifies risky files
+- **Critiques addressed:** code_critique.md and test_critique.md findings resolved
+- **ADR alignment:** Implementation matches the architectural decision record
+- **BDD scenarios pass:** Feature files execute successfully against the code
+- **Contract compliance:** API contracts verified against implementation
+
+### Supporting signals
+
+- **Small, focused scope:** Single responsibility, easy to understand
+- **Reversible changes:** Feature-flagged or easy rollback
+- **Existing patterns:** Code follows established repo conventions
+- **Clear handoff:** Agents explain what was done and why
+
+**When you see strong trust signals, approve after hotspot check.** The verification has done its job.
+
+---
+
+## Red Flags
+
+These make you slow down and dig deeper:
+
+### Blocking red flags
+
+- **Missing verification on security surfaces:** Auth, crypto, or input validation changed without verification
+- **"Not measured" on risky areas:** Mutation testing skipped for new logic
+- **UNVERIFIED with no explanation:** Receipt shows status but not why
+- **Contract violations:** Implementation contradicts api_contracts.yaml
+- **Critique items unaddressed:** CRITICAL findings still open
+
+### Warning flags (need attention)
+
+- **Large scope without clear decomposition:** Many files, unclear boundaries
+- **New dependencies without audit:** Package added without justification
+- **Schema migrations without reversibility check:** Data at risk
+- **Concurrency changes without race analysis:** Deadlock potential
+- **Secrets surface touched:** Any code handling credentials
+
+### Process flags (investigate)
+
+- **Receipts missing entirely:** Build didn't produce evidence
+- **Hotspots not called out:** PR Brief doesn't identify risky files
+- **ADR doesn't match implementation:** Architectural drift
+- **BDD scenarios missing for new behavior:** No specification tests
+
+**When you see red flags, read the affected code yourself.** Don't delegate to verification that doesn't exist.
+
+---
+
 ## The Decision
 
 Three outcomes:
@@ -165,6 +221,14 @@ Traditional review: read every line, understand every change, form mental model 
 
 Swarm review: trust verification, spot-check risk, review intent.
 
+**The core principle: We start from intent, but we arbitrate truth from evidence.**
+
+Reviewers check two things:
+1. **Intent** — ADR explains the architecture, BDD scenarios define behavior, PR Brief summarizes scope
+2. **Evidence** — Receipts prove verification ran, tests prove behavior works, critiques prove quality review happened
+
+You don't need to read every line because the evidence chain tells you what was verified. The diff is for spot-checking and audit, not primary understanding.
+
 **You're reviewing:**
 - Intent: Does the PR Brief explain what and why?
 - Evidence: Do receipts and tests verify the claims?
@@ -179,6 +243,11 @@ Swarm review: trust verification, spot-check risk, review intent.
 - Machine cycles buy verification (tests, critiques, receipts)
 - Human attention goes to judgment calls (must-read surfaces, risk assessment)
 - Diff is for audit, not primary review
+
+**Intent vs. Evidence in practice:**
+- Intent (ADR) says "use JWT for auth" — check that JWT library is used, not custom crypto
+- Evidence (receipts) says "mutation testing passed" — trust that tests are meaningful
+- Mismatch? Evidence wins. If the code doesn't match the ADR, either the code or the ADR is wrong
 
 **Analogy:** You don't read object code to approve a binary. You check the build receipts, run the tests, and spot-check the source. Same model, different scale.
 

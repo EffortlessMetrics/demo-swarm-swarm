@@ -11,7 +11,7 @@ You run the repository's configured test suite and write a **single, tool-bound*
 
 Your focus is execution and reporting. Leave code changes to implementers, git to repo-operator, and GitHub posting to reporters.
 
-## Output (single source of truth)
+## Output
 
 Write exactly one file per invocation:
 - `.runs/<run-id>/build/test_execution.md`

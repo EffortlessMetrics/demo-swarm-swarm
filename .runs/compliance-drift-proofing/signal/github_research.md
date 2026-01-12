@@ -124,7 +124,7 @@ Already enforced by existing pack-check checks:
 ### 3. OpenQ Prefix Contract (from openq-tools/SKILL.md, stable-markers.md)
 
 Current state has **documented inconsistency** (OQ-SIG-002 open):
-- **Canonical format**: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-BLD-042`)
+- **Canonical format**: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-BUILD-042`)
 - **Flow codes (abbreviated)**: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS` (per stable-markers.md)
 - **Flow codes (alternate)**: Some docs say `PLAN`, `BUILD`, `GATE` (full names)
 - **Requirement**: REQ-003 assumes PLN is canonical; open question OQ-SIG-002 asks if this is intentional

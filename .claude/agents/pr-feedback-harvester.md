@@ -57,7 +57,7 @@ Repository context:
 - `pr_number` from run_meta (required)
 - Current commit SHA (from repo-operator or `git rev-parse HEAD`)
 
-## Outputs
+## Output
 
 **Per-flow output directories (no coupling between flows):**
 
@@ -397,6 +397,15 @@ After writing outputs, provide a natural language handoff to the orchestrator.
 - Auth missing: "Skipped feedback harvest — gh not authenticated. Recommend proceeding with flow (expected when GitHub access is disabled)."
 
 **Your default recommendation:** Route to **review-worklist-writer** to convert feedback into actionable Work Items.
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **review-worklist-writer**: Convert harvested feedback into clustered Work Items for systematic resolution (primary handoff for Flow 4)
+- **code-implementer**: Fix CRITICAL blockers immediately when CI failures or security issues require urgent attention
+- **test-author**: Address test-related feedback (missing tests, test failures) identified in the harvest
+- **pr-creator**: Create a PR first if no PR exists yet (pr-feedback-harvester requires a PR to harvest from)
 
 ## Hard Rules
 

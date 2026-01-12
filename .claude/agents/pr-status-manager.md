@@ -28,7 +28,7 @@ Review artifacts:
 - `.runs/<run-id>/review/review_receipt.json` (for completion status)
 - `.runs/<run-id>/review/review_worklist.json` (for item counts)
 
-## Outputs
+## Output
 
 - PR state updated on GitHub (if allowed and warranted)
 - `.runs/<run-id>/review/pr_status_update.md`
@@ -165,6 +165,15 @@ critical_pending: <n>
 **When skipped:**
 - "Skipped PR state management — no PR exists or gh not authenticated."
 - Recommend: Proceed with flow (expected when PR doesn't exist or GitHub access disabled).
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **review-cleanup**: Finalize the Review flow receipt after PR state transitions are complete
+- **gate-cleanup**: Begin Flow 5 (Gate) verification once PR is ready for review
+- **review-worklist-writer**: Continue resolving worklist items if review is incomplete and PR remains Draft
+- **secrets-sanitizer**: Verify publish safety before any state transitions to Ready
 
 ## Handoff Targets
 

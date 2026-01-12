@@ -77,11 +77,10 @@ bash .claude/scripts/demoswarm.sh ms get --file "code_critique.md" --key "status
 ### Mechanical Approach (Bad)
 
 ```
-1. Extract status from code_critique.md Machine Summary
-2. Extract status from test_critique.md Machine Summary
-3. Count issues from severity_summary fields
-4. Copy to receipt fields
-5. If all statuses are VERIFIED, receipt status = VERIFIED
+1. Extract status fields from critique artifacts
+2. Parse structured blocks for counts
+3. Copy fields to receipt
+4. If all fields are "good", receipt status = VERIFIED
 ```
 
 The agent is just a data pipeline.
@@ -137,7 +136,7 @@ else:
 ```markdown
 ### Step 3: Extract quality gate status
 
-Extract status from Machine Summary blocks:
+Parse structured blocks from critiques:
 - code_critique.md → quality_gates.code_critic
 - test_critique.md → quality_gates.test_critic
 ```

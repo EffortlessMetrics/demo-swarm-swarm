@@ -30,9 +30,9 @@ Find issues in design artifacts that would cause expensive rework: missing bindi
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/early_risks.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/plan/design_validation.md`
+output_file: .runs/<run-id>/plan/design_validation.md
 
 ## What to Look For
 
@@ -145,6 +145,24 @@ Write findings that explain the binding gap and who can fix it.
 ## Strengths
 - <what's solid and shouldn't be churned>
 
+## Inventory
+
+- DC_CRITICAL: DC-CRIT-001
+- DC_MAJOR: DC-MAJ-001
+- DC_MINOR: DC-MIN-001
+
+## Machine Summary
+status: VERIFIED | PARTIAL | UNVERIFIED
+critical_count: <int>
+major_count: <int>
+minor_count: <int>
+traceability_gaps: <int>
+artifacts_validated: <int>
+missing_inputs: []
+concerns: []
+observations:
+  - "<cross-cutting insight>"
+
 ## Handoff
 
 **What I found:** <summary of validation - what was checked, issue counts>
@@ -201,6 +219,32 @@ At the end of your critique, include a machine-parseable inventory:
 ```
 
 Use these exact prefixes for countable items. Only include IDs you actually raised in the critique.
+
+## Machine Summary (append after Inventory)
+
+After the Inventory section, include this machine-parseable block:
+
+```yaml
+## Machine Summary
+status: VERIFIED | UNVERIFIED | PARTIAL
+critical_count: <int>
+major_count: <int>
+minor_count: <int>
+traceability_gaps: <int>
+artifacts_validated: <int>
+missing_inputs: []
+concerns: []
+observations:
+  - "<cross-cutting insight noticed during design validation>"
+  - "<pattern or friction worth noting for future runs>"
+```
+
+**Status values:**
+- `VERIFIED`: All expected plan artifacts validated, bindings checked, no CRITICAL issues blocking implementation
+- `PARTIAL`: Validation completed but some artifacts missing or issues need fixing before Build
+- `UNVERIFIED`: Cannot validate due to missing required inputs or mechanical failures
+
+**Observations field:** Capture cross-cutting insights that don't fit in the critique itself - patterns noticed, friction encountered, things the Build phase or future runs should know. These are harvested by `learning-synthesizer` for Wisdom extraction.
 
 ## Handoff
 

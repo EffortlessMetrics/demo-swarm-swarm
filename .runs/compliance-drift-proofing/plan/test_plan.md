@@ -226,7 +226,7 @@ All fixtures should be located at: `tools/demoswarm-pack-check/tests/fixtures/`
 
 | Fixture | Purpose | Contents |
 |---------|---------|----------|
-| `open_questions_valid.md` | Valid QIDs | OQ-SIG-001, OQ-PLN-002, etc. |
+| `open_questions_valid.md` | Valid QIDs | OQ-SIG-001, OQ-PLAN-002, etc. |
 | `open_questions_invalid_code.md` | Non-canonical flow code | OQ-PLAN-001, OQ-BUILD-002 |
 | `open_questions_bad_padding.md` | Invalid numeric suffix | OQ-SIG-1, OQ-SIG-1234 |
 | `open_questions_mixed.md` | Valid and invalid QIDs | For multi-match testing |
@@ -285,9 +285,9 @@ Based on `early_risks.md`:
 
 ## Gaps and Questions
 
-- Q: Which 4 agents are missing Skills sections? Suggested default: Enumerate via audit during build (grep demoswarm.sh minus grep "## Skills"). Impact: If intentionally exempt, need exemption list in validation rule rather than adding sections. (OQ-SIG-004, OQ-PLN-009)
+- Q: Which 4 agents are missing Skills sections? Suggested default: Enumerate via audit during build (grep demoswarm.sh minus grep "## Skills"). Impact: If intentionally exempt, need exemption list in validation rule rather than adding sections. (OQ-SIG-004, OQ-PLAN-009)
 
-- Q: Is PLN or PLAN canonical for OpenQ flow codes? Suggested default: PLN/BLD per openq-tools (implementation). Impact: REQ-003 regex pattern depends on this resolution. (OQ-SIG-002, OQ-PLN-004)
+- Q: Is PLN or PLAN canonical for OpenQ flow codes? Suggested default: PLN/BLD per openq-tools (implementation). Impact: REQ-003 regex pattern depends on this resolution. (OQ-SIG-002, OQ-PLAN-004)
 
 - Q: Should test fixtures be committed or generated dynamically? Suggested default: Committed to repo for reviewability. Impact: Dynamic generation adds CI complexity. (OQ-SIG-010)
 

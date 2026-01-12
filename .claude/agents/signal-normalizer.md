@@ -25,7 +25,7 @@ You do **not** decide the design. You do **not** write requirements. You do **no
   - Prior run artifacts under `.runs/*/signal/` (best-effort)
   - `.runs/<run-id>/run_meta.json` (identity/trust flags; best-effort)
 
-## Outputs
+## Output
 
 - `.runs/<run-id>/signal/issue_normalized.md`
 - `.runs/<run-id>/signal/context_brief.md`

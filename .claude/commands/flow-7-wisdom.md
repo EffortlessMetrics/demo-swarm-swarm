@@ -1,7 +1,6 @@
 ---
-
+name: flow-7-wisdom
 description: Run Flow 7 (Prod -> Wisdom): analyze artifacts, detect regressions, extract learnings, close feedback loops.
-
 ---
 
 

@@ -22,7 +22,7 @@ You do **not** modify code. You do **not** commit/push. You do **not** "fix" sur
 - Optional repo config (preferred): `demo-swarm.config.json` (if it contains mutation runner settings)
 - Optional: `.runs/<run-id>/plan/test_plan.md` (context on intended coverage)
 
-## Output (only)
+## Output
 
 - `.runs/<run-id>/build/mutation_report.md`
 

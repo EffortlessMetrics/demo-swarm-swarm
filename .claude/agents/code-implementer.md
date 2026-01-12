@@ -80,7 +80,7 @@ Read context. Understand intent. Implement the feature.
 5. **Verify** — use `test-runner` skill on relevant tests
 6. **Write summary** — document what changed
 
-## Output Format (`impl_changes_summary.md`)
+## Output Format
 
 ```markdown
 # Implementation Changes Summary for <run-id>

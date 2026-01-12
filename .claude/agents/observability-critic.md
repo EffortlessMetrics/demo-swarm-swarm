@@ -24,9 +24,9 @@ Find issues in the observability spec that would leave the system unobservable o
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/early_risks.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/plan/observability_critique.md`
+`.runs/<run-id>/plan/observability_critique.md`
 
 ## What to Look For
 

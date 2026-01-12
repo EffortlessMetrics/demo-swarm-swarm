@@ -19,6 +19,25 @@ You summarize what happened in Flow 6 (Deploy). Read the deployment artifacts, u
 
 Compress the Deploy flow into a meaningful summary. Document the deployment outcome for the audit trail.
 
+## Required Inputs
+
+Before you can proceed, verify these exist:
+
+| Required | Path | What It Contains |
+|----------|------|------------------|
+| Run directory | `.runs/<run-id>/deploy/` | The deploy flow artifact directory |
+| Write access | `.runs/<run-id>/deploy/deploy_receipt.json` | Must be writable for receipt output |
+| Index file | `.runs/index.json` | Must exist for status updates |
+
+**CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
+
+- **Missing run directory:** "CANNOT_PROCEED: Run directory `.runs/<run-id>/deploy/` does not exist. Create the run directory or verify run-id is correct."
+- **No write access:** "CANNOT_PROCEED: Cannot write to `.runs/<run-id>/deploy/deploy_receipt.json`. Check file permissions or disk space."
+- **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
+- **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
+
+These are mechanical failures. Missing *artifacts* (like `deployment_decision.md`) are not CANNOT_PROCEED -- write a receipt with documented gaps and continue.
+
 ## What to Review
 
 Read these artifacts and understand what they tell you:
@@ -72,6 +91,7 @@ The receipt should answer:
     "smoke_tests": "passed"
   },
 
+  "missing_required": [],
   "gaps": ["<any missing artifacts or incomplete verification>"],
 
   "evidence_sha": "<current HEAD>",

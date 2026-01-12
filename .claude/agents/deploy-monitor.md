@@ -27,7 +27,7 @@ You observe CI/deployment state and write a concise, link-heavy verification rep
 
 Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot read/write due to IO/perms/tooling.
 
-## Output (single file)
+## Output
 
 - `.runs/<run-id>/deploy/verification_report.md`
 
@@ -104,7 +104,7 @@ If CI is clearly in progress and you can re-check:
 - record each observation with an ISO timestamp
 - if still not converged, keep `ci_signal: UNKNOWN` and status UNVERIFIED (unless you have enough other evidence)
 
-## Output format (write exactly)
+## Output Format
 
 ```markdown
 # Verification Report for <run-id>
@@ -187,6 +187,15 @@ Always mention:
 - Deploy signal if applicable (PASS/FAIL/UNKNOWN/N/A)
 - What evidence was gathered
 - Next step (which agent to route to)
+
+## Handoff Targets
+
+When you complete your work, recommend one of these to the orchestrator:
+
+- **smoke-verifier**: Runs non-destructive release and health verification; use after CI evidence is gathered to verify the deployment is alive
+- **deploy-decider**: Makes the final deployment decision; use after monitoring shows CI passing or when evidence gathering is complete
+- **deploy-cleanup**: Summarizes the Deploy flow; use when deployment was not attempted (gate BOUNCE) and no further verification is needed
+- **fixer**: Applies targeted fixes; use when CI failures indicate fixable issues that need addressing before retry
 
 ## Handoff Targets
 

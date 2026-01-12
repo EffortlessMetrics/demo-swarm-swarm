@@ -30,7 +30,7 @@ You are **not** a code author. You are **not** a git operator. You do not commit
 * Repository root directory (current working directory)
 * User responses (only if required; see "Question policy")
 
-## Outputs
+## Output
 
 * `demo-swarm.config.json` (machine-readable; single source of truth)
 * `docs/CUSTOMIZATION_RECEIPT.md` (human-readable audit trail)

@@ -427,19 +427,19 @@ Reference: `.runs/align-doc-ownership/plan/open_questions.md`
 
 The following questions are OPEN and may affect implementation:
 
-* **OQ-PLN-001**: Should pack-check boundary rules be implemented in Rust or shell scripts?
+* **OQ-PLAN-001**: Should pack-check boundary rules be implemented in Rust or shell scripts?
   - Default: Rust implementation in pack-check
   - Needs answer by: Flow 3 (Build)
 
-* **OQ-PLN-002**: What specific regex patterns should pack-check use to detect skill plumbing?
+* **OQ-PLAN-002**: What specific regex patterns should pack-check use to detect skill plumbing?
   - Default: Match `demoswarm\.sh`, skill names, CLI flag patterns
   - Needs answer by: Flow 3 (Build)
 
-* **OQ-PLN-003**: Should archive-over-delete apply to inline CLI examples being removed?
+* **OQ-PLAN-003**: Should archive-over-delete apply to inline CLI examples being removed?
   - Default: No, only entire files/sections need archiving
   - Needs answer by: Flow 3 (Build)
 
-* **OQ-PLN-004**: What defines "brief inline example" vs "excessive CLI duplication"?
+* **OQ-PLAN-004**: What defines "brief inline example" vs "excessive CLI duplication"?
   - Default: Single-line patterns acceptable; multi-line with all flags is excessive
   - Needs answer by: Flow 3 (Build)
 
@@ -478,7 +478,7 @@ missing_required:
 concerns:
   - ST-004 carries heavier scope than other subtasks
   - Judgment calls on minimal examples may drift
-  - OQ-PLN-001 through OQ-PLN-004 have defaults but remain open
+  - OQ-PLAN-001 through OQ-PLAN-004 have defaults but remain open
 subtasks_total: 6
 estimates: [M, M, M, L, S, M]
 ```

@@ -61,7 +61,7 @@ Prefer surgical fixes: localized changes, small diffs, focused on the specific i
 
 If a fix would require new abstractions, cross-module refactors, or new files, create a HANDOFF to the appropriate agent rather than forcing a large change. Small and correct beats ambitious and risky.
 
-## Output Structure (`fix_summary.md`)
+## Output Structure
 
 ```markdown
 # Fix Summary for <run-id>

@@ -16,7 +16,7 @@ Your job is to **enable forward progress** by identifying ambiguities, researchi
 4. **Escalate only when boxed in** (no safe default, irreversible consequences)
 5. **Append to the question register** for this flow
 
-## Output Location
+## Output
 
 Write to the current flow's question register:
 - Flow 1: `.runs/<run-id>/signal/open_questions.md`

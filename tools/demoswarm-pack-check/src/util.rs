@@ -18,6 +18,9 @@ pub fn contains_ignore_ascii_case(haystack: &str, needle: &str) -> bool {
         .contains(&needle.to_ascii_lowercase())
 }
 
+/// Check if any line in content starts with the given prefix.
+/// Currently only used in tests; kept as a utility for future checks.
+#[allow(dead_code)]
 pub fn has_line_starting_with(content: &str, prefix: &str) -> bool {
     content.lines().any(|l| l.starts_with(prefix))
 }

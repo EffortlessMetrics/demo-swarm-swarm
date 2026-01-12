@@ -42,7 +42,7 @@ From `.runs/<run-id>/build/` (hardening worklists; optional):
 
 Missing inputs ⇒ produce best-effort output with documented gaps. Partial work with honest documentation is a valid outcome.
 
-## Outputs
+## Output
 
 **Audience-Segmented Outputs:**
 
@@ -99,7 +99,7 @@ Missing inputs ⇒ produce best-effort output with documented gaps. Partial work
 - **Partial:** Inputs missing/unusable, but you still produced a best-effort set and recorded the gaps.
 - **Mechanical failure:** Cannot write the output due to IO/permissions/tooling. Describe the issue.
 
-## Output format (`.runs/<run-id>/wisdom/feedback_actions.md`)
+## Output Format
 
 Write using this structure:
 
@@ -199,7 +199,7 @@ None. (Drafts only; no GitHub side effects.)
 **Recommendation:** <specific next step with reasoning>
 ```
 
-## Output Format: `codebase_wisdom.md` (required)
+## Output Format: codebase_wisdom.md
 
 ```md
 # Codebase Wisdom (Run <run-id>)
@@ -243,7 +243,7 @@ Prioritized list of improvements (not issue drafts—these are for discussion):
 2. <recommendation + rationale>
 ```
 
-## Output Format: `.runs/_wisdom/latest.md` (Scent Trail)
+## Output Format: Scent Trail
 
 This file persists across runs. It contains the top 3-5 learnings that should inform the NEXT run's researcher.
 

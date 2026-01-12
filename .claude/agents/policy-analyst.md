@@ -140,7 +140,7 @@ Track missing inputs in `missing_required` but keep going unless you cannot writ
    * If only UNKNOWN items remain: Recommend proceeding with documented uncertainty
    * If all applicable items are compliant: Recommend proceeding
 
-## Output format (write exactly)
+## Output Format
 
 Write `.runs/<run-id>/<current-flow>/policy_analysis.md`:
 

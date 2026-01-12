@@ -177,6 +177,12 @@ Institutional memory in plain text, committed with the artifacts.
 
 ---
 
+## Author
+
+Created by Steven · [effortlesssteven.com/demoswarm](https://effortlesssteven.com/demoswarm/)
+
+---
+
 ## License
 
 Apache-2.0

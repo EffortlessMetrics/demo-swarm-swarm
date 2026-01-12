@@ -47,7 +47,7 @@ Optional excerpt hygiene (applies only if you include it):
   - `Bearer <long>` -> `Bearer [REDACTED:token]`
   - DB URLs with inline password (`postgres|mysql|mongodb://user:pass@`) -> `scheme://[REDACTED]@`
   - URLs with inline creds (`https://user:pass@...`) -> strip the credential portion.
-- Keep excerpts short (1–2 snippets). If they add little or feel risky, omit them. Excerpt choice must never change `status`, `recommended_action`, or `github_ops_allowed`.
+- Keep excerpts short (1–2 snippets). If they add little or feel risky, omit them. Excerpt choice must never change the verdict or GitHub ops allowance.
 
 ## Behavior
 
@@ -149,7 +149,7 @@ EOF
 
 - Labels (optional routing): `flow:signal`, `needs:spec`, `area:demoswarm` if available.
 - Create the issue, compute `run_id = gh-<new_issue_number>`, set `run_id_kind: GH_ISSUE`, `issue_binding: IMMEDIATE`, then **edit the issue body (or add a short comment)** to set the concrete `run_id: gh-<n>`.
-- Result -> `action_taken: CREATED`, `status: VERIFIED`.
+- Once created and verified, proceed with the run_id.
 
 5) **Closed issue handling**
 - If the requested issue is CLOSED and github_ops_allowed: treat closed as inaccessible by default. Create a new tracking issue instead, note the reference to the closed issue, and return the new run-id. Only reuse a closed issue if the user explicitly asked to reopen.

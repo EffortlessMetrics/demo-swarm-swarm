@@ -19,9 +19,9 @@ Find issues in requirements that would cause problems downstream: untestable cri
 **Context (improves traceability checks):**
 - `.runs/<run-id>/signal/problem_statement.md`
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/signal/requirements_critique.md`
+`.runs/<run-id>/signal/requirements_critique.md`
 
 ## What to Look For
 

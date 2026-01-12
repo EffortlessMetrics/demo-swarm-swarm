@@ -33,11 +33,13 @@ It's not just one ratio—it's multiple angles that add up:
 | **Human Time** | Minimal architect attention required |
 | **Scope of Automation** | Planning + testing + verification, not just coding |
 
-**The vibe:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
+**In practice:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
 
-### The Trade-Off That Matters
+### Verification Arbitrage
 
-Machine time is cheap. Dev time is expensive. Trade accordingly.
+**Burn cheap compute to buy back expensive attention.**
+
+Machine time is cheap. Dev time is expensive. The arbitrage: spend infinite cheap tokens to save scarce human minutes.
 
 | Option A | Option B | Winner |
 |----------|----------|--------|
@@ -45,7 +47,9 @@ Machine time is cheap. Dev time is expensive. Trade accordingly.
 | 2 hrs machine, 45 min dev | 6 hrs machine, 20 min dev | **B** (definitely) |
 | 1 hr machine, 60 min dev | 4 hrs machine, 15 min dev | **B** (absolutely) |
 
-More verification loops, more critic passes, more evidence generation = more machine time but less dev review time. That's almost always the right trade.
+We don't care if the AI generates 500,000 lines of garbage to produce 100,000 lines of gold. The garbage costs nothing. The gold is verified.
+
+More verification loops, more critic passes, more evidence generation = more machine time but less dev review time. That's the arbitrage.
 
 **Within reason:** There's a point of diminishing returns. You wouldn't spend 100 hours of machine time to save 5 minutes of dev time. But in the typical range (hours of machine time vs tens of minutes of dev time), lean toward more machine grinding.
 
@@ -69,6 +73,68 @@ A 2000-line PR that's fully tested, mutation-verified, and critic-approved—rev
 **DevLT** = Minutes of developer attention per trusted change
 
 Not lines generated. Not tokens consumed. Not calendar time. Developer minutes.
+
+---
+
+## The Manufacturing Thesis
+
+The factory produces trust, not code.
+
+Code is a byproduct. The actual product is a PR that is boring to approve because its review surface is self-evidently trustworthy. A 70k-line PR becomes boring not because it's simple, but because the verification panel answers every question the reviewer would have asked.
+
+### What We Actually Make
+
+| What People Think | What We Actually Produce |
+|-------------------|-------------------------|
+| Code | Evidence that code is correct |
+| Features | Verified changes with clear intent |
+| PRs | Review surfaces that compress decision time |
+| Automation | Trust on demand |
+
+### The Process Inversion
+
+Traditional development works forward from code:
+
+```
+Write code → Hope it's correct → Review catches problems → Fix → Ship
+```
+
+Swarm development works forward from intent:
+
+```
+Define intent → Generate candidates → Verify exhaustively → Ship what passes
+```
+
+The verification IS the product. Code is the artifact that verification produces.
+
+This inverts the review conversation. Instead of "is this code correct?" the question becomes "does the evidence satisfy me?" The reviewer audits the cockpit, not the diff.
+
+### The Triangle (No Tradeoffs)
+
+```
+      Quality + Maintainability
+              /\
+             /  \
+            /    \
+           /      \
+    DevLT -------- Velocity
+```
+
+Traditional systems pick two. We reject the tradeoff.
+
+The trick: machine time is the knob. Spend it to buy the other two.
+
+This is why "The Trade-Off That Matters" above isn't really a tradeoff—it's an arbitrage. Machine time is cheap and getting cheaper. Dev time is expensive and staying expensive. Converting one to the other at favorable rates is just good economics.
+
+### Quality:DevLT as the Lens
+
+Quality:DevLT (PR quality achieved per minute of developer attention) is the north star metric because it captures the manufacturing thesis in one ratio. Everything else serves it:
+
+- More verification loops → higher quality, same dev time
+- Better cockpit → faster review, same quality
+- Mutation testing → higher confidence, same review burden
+
+When evaluating any change to the system, ask: does this improve Quality:DevLT? If yes, it's probably worth the machine time. If no, reconsider.
 
 ---
 

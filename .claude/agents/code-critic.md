@@ -23,9 +23,9 @@ Find issues in the implementation: missing REQ coverage, ADR violations, contrac
 
 **AC-scoped invocation:** When invoked with `ac_id`, focus on implementation for that specific AC.
 
-## What You Produce
+## Output
 
-One file: `.runs/<run-id>/build/code_critique.md`
+`.runs/<run-id>/build/code_critique.md`
 
 ## What to Look For
 

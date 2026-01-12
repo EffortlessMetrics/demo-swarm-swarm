@@ -29,21 +29,21 @@ The following Signal-phase questions have been resolved by detailed user guidanc
 
 #### Category: Technical
 
-- QID: OQ-PLN-001
+- QID: OQ-PLAN-001
   - Q: Should pack-check boundary rules be implemented in Rust (tools/demoswarm-pack-check) or as shell script checks (scripts/check-*.sh)? [OPEN]
   - Suggested default: Rust implementation in pack-check, following the established pattern for structural validation
   - Impact if different: Shell scripts would be faster to implement but harder to maintain; Rust keeps all pack validation in one tool
   - Needs answer by: Flow 3 (Build)
   - Evidence: requirements.md -> NFR-TEST-001 MET-3 (new pack-check rules), ASM-004 (pack-check extensibility assumed)
 
-- QID: OQ-PLN-002
+- QID: OQ-PLAN-002
   - Q: What specific regex patterns should pack-check use to detect skill plumbing in flow commands? [OPEN]
   - Suggested default: Match patterns: `demoswarm\.sh`, `runs-derive`, `runs-index`, `openq-tools`, `secrets-tools`, `test-runner`, `auto-linter`, `policy-runner`, plus CLI flag patterns `--file`, `--prefix`, `--run-id`
   - Impact if different: Broader patterns catch more drift but may false-positive on legitimate documentation; narrower patterns may miss edge cases
   - Needs answer by: Flow 3 (Build)
   - Evidence: REQ-001 AC-1, AC-2 (defines what constitutes skill plumbing in flows)
 
-- QID: OQ-PLN-003
+- QID: OQ-PLAN-003
   - Q: Should the archive-over-delete pattern apply to inline CLI examples being removed from agent docs, or only to entire files/sections? [OPEN]
   - Suggested default: Only entire files/sections need archiving. Inline CLI examples can be replaced with skill references without archiving the original examples.
   - Impact if different: If all CLI examples need archiving, creates significant archive overhead; if not, we lose the audit trail of what was removed
@@ -52,7 +52,7 @@ The following Signal-phase questions have been resolved by detailed user guidanc
 
 #### Category: Product
 
-- QID: OQ-PLN-004
+- QID: OQ-PLAN-004
   - Q: What is the definition of "brief inline example" that is acceptable in agent docs vs "excessive CLI duplication" that must be moved to skill docs? [OPEN]
   - Suggested default: Acceptable: single-line invocations showing the command pattern (e.g., `bash .claude/scripts/demoswarm.sh count pattern ...`). Excessive: multi-line examples with all flags documented, or the same command shown in multiple places within one agent doc.
   - Impact if different: Stricter definition removes more content from agents (more DRY but more indirection); looser definition keeps agents more self-contained
@@ -68,8 +68,8 @@ The following Signal-phase questions have been resolved by detailed user guidanc
 
 - Assumption: pack-check can be extended without major refactoring because boundary checks are similar to existing structural validation.
   - Rationale: Stated in ASM-004; pack-check already validates pack structure using pattern matching.
-  - Impact if wrong: May need shell script fallback for boundary checks, affecting OQ-PLN-001.
-  - Linked question: OQ-PLN-001
+  - Impact if wrong: May need shell script fallback for boundary checks, affecting OQ-PLAN-001.
+  - Linked question: OQ-PLAN-001
 
 - Assumption: The flow code for Plan in QID format is "PLN" (not "PLAN" or "PL").
   - Rationale: Per openq-tools SKILL.md, flow codes are 3-letter abbreviations: SIG, PLN, BLD, GAT, DEP, WIS.
@@ -93,7 +93,7 @@ assumptions_added: 4
 missing_required: []
 blockers: []
 concerns:
-  - All new Plan questions (OQ-PLN-001 through OQ-PLN-004) have defaults and do not block
+  - All new Plan questions (OQ-PLAN-001 through OQ-PLAN-004) have defaults and do not block
   - Six Signal questions resolved based on user guidance - verify interpretation is correct
-  - OQ-PLN-001 (Rust vs shell) may need user confirmation before Build phase
+  - OQ-PLAN-001 (Rust vs shell) may need user confirmation before Build phase
 ```

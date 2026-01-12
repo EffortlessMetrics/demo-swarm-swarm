@@ -24,7 +24,7 @@ Optional:
 - `.runs/<run-id>/build/test_critique.md` (context)
 - `.runs/<run-id>/run_meta.json` (context)
 
-## Output (only)
+## Output
 
 - `.runs/<run-id>/build/flakiness_report.md`
 
