@@ -26,8 +26,8 @@ Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the buil
 
 | Status | When | What It Means |
 |--------|------|---------------|
-| **VERIFIED** | Evidence says done | Tests pass, critics satisfied, evidence fresh |
-| **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable |
+| **VERIFIED** | Evidence says done | Build stations complete (tests pass, critics satisfied), evidence fresh |
+| **UNVERIFIED** | External constraint hit | Checkpointed: artifacts written, state captured, resumable (continue via routing) |
 
 Everything else is "keep grinding."
 
@@ -50,7 +50,7 @@ The orchestrator's job is to keep things moving. When progress stalls, route to 
 - Critics satisfied → AC is complete
 - Any step fails → route and retry, change approach, keep going
 
-**"3 tries then proceed as if done" is forbidden.** 3 tries → run it again. Still failing → try a different approach. Budget exhausted → complete UNVERIFIED with honest state.
+**"3 tries then proceed as if done" is forbidden.** 3 tries → run it again. Still failing? Try a different approach. Budget exhausted → complete UNVERIFIED with honest state.
 
 ## Working Directory + Paths
 

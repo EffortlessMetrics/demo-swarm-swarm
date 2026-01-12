@@ -192,9 +192,9 @@ Flows run to completion. Counts are not exit criteria. Almost everything is rout
 
 ### Stagnation Is Evidence-Based
 
-**Stagnation is lack of new signal:** same failure signature, same evidence, no meaningful diff change.
+**Definition:** no new signal (same failure signature, same evidence, no meaningful diff change).
 
-Stagnation triggers rerouting, not stopping:
+Response: reroute, don't stop:
 - **Same failure, no new signal** → route to a different agent, change approach
 - **Oscillation** (toggling between states) → break the cycle by routing differently
 
