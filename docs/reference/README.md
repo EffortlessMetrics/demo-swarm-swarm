@@ -11,6 +11,7 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | See agent capabilities and handoffs | [Agent Matrix](agent-matrix.md) |
 | See agent routing patterns per flow | [Agent Handoff Graph](agent-handoff-graph.md) |
 | Understand agent dependencies | [Agent Data Flows](agent-data-flows.md) |
+| Compare all 7 flows side-by-side | [Flow Comparison](flow-comparison.md) |
 | Check a control-plane schema | [Contracts](contracts.md) |
 | Look up a data schema | [Schemas](schemas.md) |
 | Understand run identity + state | [Run State](run-state.md) |
