@@ -57,6 +57,9 @@ These documents explain *why* things work the way they do. Understanding-oriente
 |----------|----------|
 | "Why default-allow?" | [Why Ops First](why-ops-first.md) |
 | "How do boundaries work?" | [Boundary Physics](boundary-physics.md) |
+| "What are publish boundaries and how do gates work?" | [Publish Boundaries](publish-boundaries.md) |
+| "What is the shadow fork (.runs/) sandbox?" | [Shadow Fork](shadow-fork.md) |
+| "How does bounded fix-forward work in Gate?" | [Bounded Fix-Forward](bounded-fix-forward.md) |
 | "Why two gates?" | [Why Two Gates](why-two-gates.md) |
 | "How do claims work?" | [Claims and Evidence](claims-and-evidence.md) |
 | "How does raw LLM output become trusted?" | [Candidates to Artifacts](candidates-to-artifacts.md) |

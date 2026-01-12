@@ -12,7 +12,7 @@
 
 **Related workflows:**
 - [run-topology.md](run-topology.md) — Swarm repo setup and branch model
-- [adopt-fork-workflow.md](adopt-fork-workflow.md) — Fork-based swarm workflow (coming soon)
+- [adopt-fork-workflow.md](adopt-fork-workflow.md) — Fork-based swarm workflow
 
 **Core reference:**
 - [CLAUDE.md](../../CLAUDE.md) — Full pack reference, Flow 6 (Deploy) semantics
