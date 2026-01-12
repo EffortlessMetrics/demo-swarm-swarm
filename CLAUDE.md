@@ -248,7 +248,7 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 | **Rules (constitution)** | `.claude/rules/*.md` |
 | The Thesis | `docs/explanation/the-thesis.md` |
 | Architecture & Philosophy | `docs/explanation/` |
-| The Physics | `docs/explanation/the-five-physics.md` |
+| The Physics | `docs/explanation/the-physics.md` |
 | Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
 | Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
 | Org Design as Code | `docs/explanation/org-design-as-code.md` |

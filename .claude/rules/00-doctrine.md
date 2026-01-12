@@ -129,7 +129,7 @@ These are non-negotiable invariants. Violating them breaks the system.
 5. **Adversarial Pressure** — Single agents lie to please. Two agents fighting surfaces truth.
 6. **Scoped Context** — Short focused threads cost less. Pay only for relevant tokens.
 
-See [the-physics.md](../../docs/explanation/the-five-physics.md) for full explanations.
+See [the-physics.md](../../docs/explanation/the-physics.md) for full explanations.
 
 ---
 

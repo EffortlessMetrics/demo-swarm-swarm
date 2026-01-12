@@ -258,5 +258,5 @@ This is the most common failure mode in AI-native systems: the agent claims a to
 ## See Also
 
 - [trust-model.md](../reference/trust-model.md) — Evidence hierarchy and verification boundaries
-- [the-five-physics.md](the-five-physics.md) — Mechanical Truth as a physics
+- [the-physics.md](the-physics.md) — Mechanical Truth as a physics
 - [claims-and-evidence.md](claims-and-evidence.md) — Evidence discipline

@@ -339,6 +339,6 @@ Architects architect. The system grinds.
 ## See Also
 
 - [economics.md](economics.md) — The math behind verification arbitrage
-- [the-five-physics.md](the-five-physics.md) — The constraints that make it work
+- [the-physics.md](the-physics.md) — The constraints that make it work
 - [agent-philosophy.md](agent-philosophy.md) — How agents operate
 - [why-ops-first.md](why-ops-first.md) — Default-allow philosophy

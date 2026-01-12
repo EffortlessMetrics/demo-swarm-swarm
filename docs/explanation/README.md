@@ -10,7 +10,7 @@ These documents explain *why* things work the way they do. Understanding-oriente
 |----------|----------|
 | "What is this? Why does it exist?" | [The Thesis](the-thesis.md) |
 | "What's the core philosophy?" | [Doctrine](../../.claude/rules/00-doctrine.md) |
-| "What are the constraints that make it work?" | [The Physics](the-five-physics.md) |
+| "What are the constraints that make it work?" | [The Physics](the-physics.md) |
 | "What are the immutable rules?" | [Laws of the Swarm](laws-of-the-swarm.md) |
 | "How does the swarm make decisions?" | [Agent Philosophy](agent-philosophy.md) |
 | "What makes this different?" | [What Makes This Different](what-makes-this-different.md) |
