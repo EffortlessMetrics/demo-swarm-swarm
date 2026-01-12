@@ -130,4 +130,4 @@ Both are required. Neither alone is sufficient.
 - [publish-boundaries.md](../publish-boundaries.md) --- The three gates in detail
 - [why-ops-first.md](../why-ops-first.md) --- The philosophy behind default-allow
 - [gate-pattern.md](gate-pattern.md) --- Comprehensive gate mechanics
-- [laws-of-the-swarm.md](../laws-of-the-swarm.md) --- All ten laws
+- [laws-of-the-swarm.md](../laws-of-the-swarm.md) --- All eleven laws

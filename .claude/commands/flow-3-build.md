@@ -20,6 +20,36 @@ This is the Stubborn Loop: implement → test → critique → fix → repeat un
 
 Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the build. Route CRITICAL blockers immediately. Defer the full worklist to Flow 4.
 
+## Convergence Discipline
+
+**The loop ends for exactly two reasons:**
+
+1. **Converged** — Evidence panel green (tests pass, critics satisfied, evidence fresh)
+2. **Budget exhausted** — External constraint. Complete what you have, document where you are, finish UNVERIFIED.
+
+Everything else is "keep grinding."
+
+### Routing to Unstick
+
+**Counts are not conditions. Signal is.**
+
+"We've run 3 times" → run it again. A count alone justifies nothing.
+
+- **Stagnation** (same failure, no new signal) → route to a different agent, change approach. This is orchestration, not stopping.
+- **Oscillation** (code toggling between states) → break the cycle by routing differently.
+
+The orchestrator's job is to keep things moving. When progress stalls, route to unstick.
+
+### No Early Exit
+
+"Done" is mechanical, not felt:
+- Agent claims done → verify with test-executor
+- Test-executor passes → verify with critics
+- Critics satisfied → AC is complete
+- Any step fails → route and retry, change approach, keep going
+
+**"3 tries then proceed as if done" is forbidden.** 3 tries → run it again. Still failing → try a different approach. Budget exhausted → complete UNVERIFIED with honest state.
+
 ## Working Directory + Paths
 
 - All commands run from **repo root**
@@ -101,15 +131,19 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is rigorous verification.
 
 ```
-writer → critic → [if more work needed] → writer → critic → ... → [proceed]
+writer → critic → [if more work needed] → writer → critic → ... → [converged]
 ```
 
 Route on the critic's handoff:
 - If the critic recommends improvements → run the writer with their feedback
-- If the critic says "proceed" or "ready" → move forward
-- If the critic says "no further improvement possible" → proceed with documented issues
+- If the critic says "proceed" or "ready" → move forward (converged)
+- If the critic says "no further improvement possible" → proceed with documented issues (partial convergence)
 
-Trust the critic's judgment on when work is done.
+**When not making progress:**
+- Same critique repeated → route to a different agent or change approach (unstick, don't stop)
+- Critic alternating between contradictory recommendations → break the cycle by routing differently
+
+The orchestrator's job is to keep things moving. Stagnation triggers routing, not stopping.
 
 **Handling Logic Mismatches (Law 7: Local Resolution):**
 
@@ -205,7 +239,11 @@ After all ACs complete:
 
 **Reseal-if-modified:** If the self-reviewer identifies issues that require fixes (and you run `fixer`, `code-implementer`, or `test-author` to address them), you must call `build-cleanup` again to regenerate `build_receipt.json` before the final seal. The receipt must reflect the final state of code and tests, not an intermediate state.
 
-**Non-convergence guard:** Reseal at most twice. If `modified_files` persists after the second reseal pass, proceed with the receipt as-is and document the non-convergent state in `build_receipt.json.observations[]`. Do not enter an infinite reseal loop.
+**Reseal limit:** Reseal at most twice. If `modified_files` persists after the second reseal pass:
+- Document the state in `build_receipt.json.observations[]`
+- Route to Flow 4 (Review) to address remaining issues — this is routing, not giving up
+- Do NOT enter an infinite reseal loop
+- Do NOT claim the build is complete when it is not converged
 
 ### Step 8: Flow Boundary Harvest
 
@@ -307,12 +345,17 @@ Plus code/test changes in project-defined locations.
 
 ## Flow Outcomes
 
-- **VERIFIED**: Tests pass, diff is honest, ready for Flow 4
-- **PARTIAL**: Progress made, documented honestly, flow is resumable
-- **UNVERIFIED**: Gaps documented, proceed with blockers
+- **VERIFIED**: Tests pass, diff is honest, evidence panel green, ready for Flow 4
+- **PARTIAL**: Progress made, documented honestly, flow is resumable (valid checkpoint)
+- **UNVERIFIED**: External constraint hit or gaps exist, checkpointed with honest state
 - **CANNOT_PROCEED**: Mechanical failure (IO/permissions/tooling)
 
 All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is better than a false VERIFIED.
+
+**Key distinction:**
+- VERIFIED = converged (evidence says done)
+- UNVERIFIED = not converged, but checkpointed (artifacts written, state captured, resumable)
+- False VERIFIED (claiming done when not) = system failure
 
 ## TodoWrite (copy exactly)
 

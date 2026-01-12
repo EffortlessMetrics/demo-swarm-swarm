@@ -118,6 +118,39 @@ Agents can and should debug. The goal is trust, not purity.
 
 ---
 
+## Completion Semantics
+
+"Done" is a mechanical state, not a feeling.
+
+| Status | Meaning |
+|--------|---------|
+| `VERIFIED` | Converged. Evidence panel green, evidence fresh, blockers empty. |
+| `UNVERIFIED` | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down. |
+
+**UNVERIFIED is not failure. It's honest state.**
+
+### Flows Run to Completion
+
+Flows never stop mid-execution. They run to the boundary and checkpoint.
+
+- **VERIFIED** = Evidence says done (panel green, evidence fresh, blockers empty)
+- **UNVERIFIED** = External constraint hit (artifacts written, state captured, resumable)
+
+The only external constraints (all rare):
+
+| Constraint | What It Means | How Rare |
+|------------|---------------|----------|
+| **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
+| **Access** | Tooling broken, permissions missing, infra down | Rare |
+| **Authority** | Business decision requiring human judgment | Very rare |
+
+**Everything else is routing.** Stagnation → route differently. Oscillation → break the cycle. Failure → route to fixer. "Blocked" is almost always just "route to the right agent."
+
+Counts are not exit criteria. "3 tries" means run it again. Stagnation triggers rerouting, not stopping.
+
+---
+
 ## The Physics
 
 These are non-negotiable invariants. Violating them breaks the system.
@@ -263,7 +296,7 @@ This approach draws from:
 
 ## The Laws Are Physics
 
-The ten laws in `docs/explanation/laws-of-the-swarm.md` are not preferences. They are the physics that makes the system work. Violating them breaks the system in predictable ways.
+The eleven laws in `docs/explanation/laws-of-the-swarm.md` are not preferences. They are the physics that makes the system work. Violating them breaks the system in predictable ways.
 
 When proposing a change, ask:
 - Does this violate any law?
@@ -274,7 +307,7 @@ When proposing a change, ask:
 
 ## See Also
 
-- [laws-of-the-swarm.md](../../docs/explanation/laws-of-the-swarm.md) — The ten immutable rules
+- [laws-of-the-swarm.md](../../docs/explanation/laws-of-the-swarm.md) — The eleven immutable rules
 - [economics.md](../../docs/explanation/economics.md) — The math that makes this work
 - [stochastic-compiler.md](../../docs/explanation/stochastic-compiler.md) — The compiler mental model
 - [why-ops-first.md](../../docs/explanation/why-ops-first.md) — Default-allow philosophy

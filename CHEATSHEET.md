@@ -132,13 +132,14 @@ If you have extra repo scripts, run them as optional checks (they must not be re
 
 | Status | Meaning |
 |--------|---------|
-| `VERIFIED` | Adequate for purpose; blockers empty |
-| `UNVERIFIED` | Gaps/concerns remain; artifacts still written |
-| `CANNOT_PROCEED` | Mechanical failure only (IO/perms/tooling) |
+| `VERIFIED` | Converged. Evidence panel green, evidence fresh, blockers empty. |
+| `UNVERIFIED` | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down. |
 
 Notes:
 
-* "BLOCKED" is **not** a pack-level status. Some agents (e.g., repo-operator) have their own internal status domain.
+* "BLOCKED" is **not** a pack-level status. "Blocked" is almost always just routing.
+* UNVERIFIED is not failure—it's honest state. The flow ran to completion with a checkpoint.
 
 ---
 

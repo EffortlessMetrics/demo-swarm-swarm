@@ -24,6 +24,55 @@ Uncertainty is fine when labeled. Certainty without evidence is the failure mode
 
 ---
 
+## Mechanical Completion
+
+"Done" is not a feeling. It is a mechanical state.
+
+| Status | Meaning |
+|--------|---------|
+| `VERIFIED` | Converged. Evidence panel green, evidence fresh, blockers empty. |
+| `UNVERIFIED` | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down. |
+
+### What Evidence Shows
+
+| Condition | Status |
+|-----------|--------|
+| Evidence exists AND passes | GREEN |
+| Evidence exists AND fails | RED |
+| Evidence does not exist | UNKNOWN |
+| Evidence is stale (SHA mismatch) | UNKNOWN |
+| Agent claims done, no evidence | UNKNOWN |
+
+**UNKNOWN is not PASS.** Missing evidence is not passing evidence.
+
+### The Rule
+
+- **If evidence doesn't exist, status is UNKNOWN**
+- **If evidence is stale, status is UNKNOWN**
+- **Green checks are necessary, not sufficient** (panel beats single sensor)
+
+### Why This Matters
+
+The default failure mode in stochastic systems is "absence feels like success." An agent that doesn't find a problem may have:
+1. Found no problems (correct)
+2. Failed to look (incorrect)
+3. Looked in the wrong place (incorrect)
+
+Only captured evidence distinguishes case 1 from cases 2 and 3.
+
+### Completion Checklist
+
+Before marking work complete:
+- [ ] Evidence artifact exists on disk
+- [ ] Evidence artifact is tied to current HEAD (fresh)
+- [ ] Evidence shows explicit pass/fail, not silence
+- [ ] Panel criteria satisfied (not just one sensor)
+
+If any checkbox is unchecked, the work is UNKNOWN, not DONE.
+
+---
+
 ## Evidence Freshness
 
 Receipts are historical. Current state is NOW.
