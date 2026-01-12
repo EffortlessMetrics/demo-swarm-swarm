@@ -133,7 +133,7 @@ Humans are asked at flow boundaries, with context, with options, with recommenda
 
 ---
 
-## Convergence Discipline
+## Completion Discipline
 
 **Flows run to completion. They never stop mid-execution.**
 
@@ -153,6 +153,8 @@ Orchestrators do not accept "DONE" prose as completion. Completion requires:
 - **External constraint** forces checkpoint (complete UNVERIFIED with honest state)
 
 "Feels done" is not done. "Agent said done" is not done. **Evidence says done.**
+
+**Any agent claiming completion without producing evidence is automatically treated as UNKNOWN and routed to the evidence producer** (test-runner, linter, mutation, etc.). This is the stop-hook that prevents early exit.
 
 ### The Loop Body
 
@@ -220,7 +222,9 @@ When an external constraint forces UNVERIFIED completion, document:
 **Recommended next step:** <what to do when constraint clears>
 ```
 
-This makes the flow resumable. External constraints are checkpoints, not failures. The work continues when the constraint clears.
+**Checkpoint means: save state, publish artifacts, recommend next route. Work continues when constraint clears.**
+
+This makes the flow resumable. External constraints are checkpoints, not failures. UNVERIFIED is not failure—it's unmerged state.
 
 ---
 

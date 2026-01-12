@@ -22,10 +22,12 @@ Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the buil
 
 ## Convergence Discipline
 
-**The loop ends for exactly two reasons:**
+**Build completes with one of two statuses:**
 
-1. **Converged** — Evidence panel green (tests pass, critics satisfied, evidence fresh)
-2. **Budget exhausted** — External constraint. Complete what you have, document where you are, finish UNVERIFIED.
+| Status | When | What It Means |
+|--------|------|---------------|
+| **VERIFIED** | Evidence says done | Tests pass, critics satisfied, evidence fresh |
+| **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable |
 
 Everything else is "keep grinding."
 
@@ -239,10 +241,10 @@ After all ACs complete:
 
 **Reseal-if-modified:** If the self-reviewer identifies issues that require fixes (and you run `fixer`, `code-implementer`, or `test-author` to address them), you must call `build-cleanup` again to regenerate `build_receipt.json` before the final seal. The receipt must reflect the final state of code and tests, not an intermediate state.
 
-**Reseal limit:** Reseal at most twice. If `modified_files` persists after the second reseal pass:
+**Reseal routing:** After two reseal passes, if `modified_files` persists, this lane isn't converging—route out:
 - Document the state in `build_receipt.json.observations[]`
-- Route to Flow 4 (Review) to address remaining issues — this is routing, not giving up
-- Do NOT enter an infinite reseal loop
+- Route to Flow 4 (Review) to address remaining issues
+- The reseal lane stops; the flow continues via Review
 - Do NOT claim the build is complete when it is not converged
 
 ### Step 8: Flow Boundary Harvest

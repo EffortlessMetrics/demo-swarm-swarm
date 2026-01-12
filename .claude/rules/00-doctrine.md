@@ -143,7 +143,7 @@ The only external constraints (all rare):
 |------------|---------------|----------|
 | **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
 | **Access** | Tooling broken, permissions missing, infra down | Rare |
-| **Authority** | Business decision requiring human judgment | Very rare |
+| **Authority** | Non-derivable decision with no safe default | Very rare (prefer DEFAULTED + log) |
 
 **Everything else is routing.** Stagnation → route differently. Oscillation → break the cycle. Failure → route to fixer. "Blocked" is almost always just "route to the right agent."
 

@@ -292,10 +292,10 @@ If the runner reports `changes_detected: true`, update build receipt + stage + s
 
 If the runner reports UNVERIFIED or scope violation, proceed with remaining Gate stations; `merge-decider` should BOUNCE to Flow 3 with the runner report as evidence.
 
-**Fix-forward limit:** The fix-forward lane runs at most twice. If `modified_files` persists after the second pass (indicating non-convergent fixes):
+**Fix-forward routing:** After two passes, if `modified_files` persists (non-convergent fixes), this lane isn't converging—route out:
 - Document the state in `gate_fix_summary.md`
-- BOUNCE to Flow 3 to address remaining issues — this is routing, not giving up
-- Do NOT enter an infinite reseal loop chasing formatting drift
+- BOUNCE to Flow 3 to address remaining issues
+- The fix-forward lane stops; the flow continues via Build
 - Do NOT mark MERGE when fix-forward has not converged
 
 ### Step 8: Traceability audit

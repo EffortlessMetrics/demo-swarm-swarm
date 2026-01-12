@@ -189,13 +189,16 @@ Flows run to completion. Counts are not exit criteria. Almost everything is rout
 
 - **Counts are never completion criteria.** "We've run 3 times" justifies nothing.
 - **Counts are never "move on" criteria.** You don't proceed because you're tired of trying.
-- **Counts can signal stagnation.** Same failure, no new information → route differently (not stop).
 
-### When Stagnation Happens
+### Stagnation Is Evidence-Based
+
+**Stagnation is lack of new signal:** same failure signature, same evidence, no meaningful diff change.
 
 Stagnation triggers rerouting, not stopping:
 - **Same failure, no new signal** → route to a different agent, change approach
 - **Oscillation** (toggling between states) → break the cycle by routing differently
+
+Counts alone don't detect stagnation. Evidence does.
 
 The orchestrator's job is to keep things moving. When progress stalls, route to unstick. That's orchestration.
 
@@ -205,7 +208,7 @@ The orchestrator's job is to keep things moving. When progress stalls, route to 
 |------------|---------------|----------|
 | **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
 | **Access** | Tooling broken, permissions missing, infra down | Rare |
-| **Authority** | Business decision requiring human judgment | Very rare |
+| **Authority** | Non-derivable decision with no safe default | Very rare (prefer DEFAULTED + log) |
 
 When an external constraint hits, checkpoint UNVERIFIED and continue when the constraint clears. The flow still runs to completion—it just ends with honest state instead of green evidence.
 

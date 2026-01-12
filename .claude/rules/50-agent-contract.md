@@ -170,7 +170,9 @@ When making claims:
 
 ## The Authority Line
 
-NEEDS_HUMAN is about authority, not difficulty.
+NEEDS_HUMAN is about authority, not difficulty. **It's rare by design.**
+
+**Authority** = non-derivable decision with no safe default. Prefer DEFAULTED + log unless it's unsafe.
 
 | Agent Can Handle (DEFAULTED) | Requires Human (NEEDS_HUMAN) |
 |------------------------------|------------------------------|
@@ -182,7 +184,9 @@ NEEDS_HUMAN is about authority, not difficulty.
 The test: Does the decision require someone's **authority** or just someone's **knowledge**?
 
 If it's knowledge, agents research, default safely, document reasoning, proceed.
-If it's authority, agents surface options, explain trade-offs, and wait for boundary.
+If it's authority, agents surface options, explain trade-offs, wait for boundary.
+
+**The bias is toward DEFAULTED.** Most questions have safe defaults. Research first, default if safe, escalate only when you're truly boxed in.
 
 See [authority-not-difficulty.md](../../docs/explanation/authority-not-difficulty.md) for the full explanation.
 
