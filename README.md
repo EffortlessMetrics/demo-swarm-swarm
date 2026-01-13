@@ -10,6 +10,22 @@ SDLC pack for Claude Code.
 
 ---
 
+## Truth Surfaces
+
+Where the real answers live:
+
+| Surface | Location | What It Proves |
+|---------|----------|----------------|
+| **Gate verdict** | `gate/merge_decision.md` | Ship or no-ship decision |
+| **Test proof** | `build/test_execution.md` | Tests actually passed (exit codes, not claims) |
+| **Critiques** | `build/*_critique.md` | What the critics found |
+| **Receipts** | `*_receipt.json` | Mechanical summaries with evidence pointers |
+| **Diff** | The PR | Final audit surface when evidence raises doubt |
+
+If something looks off, these surfaces tell you why. The receipts are the truth; the chat is just navigation.
+
+---
+
 ## Start Here
 
 ```text
@@ -29,7 +45,7 @@ If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a
 
 ## How to Review What DemoSwarm Produces
 
-**The PR description is your primary interface.** Most reviewers won't drill into `.runs/` artifacts unless something looks wrong. The swarm produces a PR Brief in the description with: what changed, review hotspots, quality events, and proof pointers. The artifacts below are drill-down evidence when you need them.
+**The PR description is your primary interface.** Most reviewers won't drill into `.runs/` artifacts unless something looks off. The swarm produces a PR Brief in the description with: what changed, review hotspots, quality events, and proof pointers. The artifacts below are drill-down evidence when you need them.
 
 If you're reviewing a run (or a PR produced by the swarm), start here:
 
@@ -37,13 +53,15 @@ If you're reviewing a run (or a PR produced by the swarm), start here:
 2. **Test proof:** `.runs/<run-id>/build/test_execution.md` — did tests actually pass
 3. **Critiques:** `.runs/<run-id>/build/code_critique.md`, `test_critique.md` — what the critics found
 4. **Receipts:** `.runs/<run-id>/*/*_receipt.json` — mechanical summaries with evidence pointers
-5. **The diff:** the PR diff is the final audit surface
+5. **The diff:** the PR diff — your final audit surface when evidence raises doubt
 
 If you're evaluating quickly, these four files tell the whole story:
 - `signal/requirements.md` — what we intended
 - `plan/adr.md` — how we decided to build it
 - `build/build_receipt.json` — what actually ran
 - `gate/merge_decision.md` — ship or bounce
+
+**What about "Not Measured"?** Good receipts are honest about gaps. If mutation testing was skipped or coverage wasn't run, the receipt says so explicitly. Silent gaps are the failure mode—explicit "not measured" is acceptable and expected.
 
 Artifacts are the handoff. Chat is transient.
 
@@ -75,7 +93,12 @@ Agents are treated like capable peers: autonomous, productive, and occasionally 
 - **Verify with executed evidence** — tests, diffs, receipts are proof; prose is navigation
 - **Catch problems early** — critics run inside build loops, not just at the end
 
-If a flow exits **PARTIAL**, that's a save point: state is on disk, next steps are documented, and rerunning the same flow resumes where it left off.
+**Completion states:**
+- **VERIFIED** — Evidence panel green, evidence fresh, blockers empty. Done.
+- **UNVERIFIED** — Checkpointed state. Artifacts written, next steps documented, resumable.
+- **CANNOT_PROCEED** — Mechanical failure (tooling broken, permissions missing).
+
+If a flow exits UNVERIFIED, that's a save point, not a failure. State is on disk, next steps are documented, and rerunning the same flow resumes where it left off. UNVERIFIED is honest—it means "not yet merged" not "something went wrong."
 
 ---
 
@@ -134,6 +157,8 @@ Traditional tooling tracks what humans decided. DemoSwarm also records what the 
 - Gates → governance (secrets, anomalies, merge criteria)
 - `.runs/` as committed state → reproducibility (resume, audit, replay)
 
+**Want a UI for runs and receipts?** See [Flow Studio](https://github.com/EffortlessMetrics/flow-studio-swarm) — the harness that gives you a visual cockpit for this pack.
+
 ---
 
 ## Operating Model
@@ -144,6 +169,12 @@ Traditional tooling tracks what humans decided. DemoSwarm also records what the 
 - **Publish is gated:** sanitize content before commit/push/post
 
 Gates constrain what leaves the workspace, not what the model can analyze.
+
+### Routing Is Prose
+
+Agents recommend next steps in plain language. Orchestrators route by reading what agents say and deciding what makes sense. No structured routing blocks to parse, no rigid state machines. Claude understands language—we use that.
+
+This means handoffs sound like: *"Implemented 3 of 5 endpoints. The remaining 2 need the User schema. Recommend routing to code-implementer with User schema as first task."* The orchestrator reads that and acts.
 
 ### Shadow Fork Topology
 
@@ -180,6 +211,8 @@ Institutional memory in plain text, committed with the artifacts.
 ## Author
 
 Created by Steven · [effortlesssteven.com/demoswarm](https://effortlesssteven.com/demoswarm/)
+
+This pack encodes the AgOps posture: trade cheap compute for expensive senior review time. The verification IS the product.
 
 ---
 
