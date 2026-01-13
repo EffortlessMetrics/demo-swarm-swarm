@@ -2,196 +2,132 @@
 
 SDLC pack for Claude Code.
 
-**The economics shift:** Open-weight coding models can now produce a first pass that's often comparable to what you'd expect from a solid junior engineer for many scoped tasks. More importantly, they can generate and revise code far faster than humans can review it, and cheaply enough that multiple passes (tests, critique, refactors, mutation/fuzz where it matters) are economical.
+---
 
-**Operating principle:** Spend machine iteration to buy down human uncertainty.
+## The Shift
 
-**What it produces:** A PR with evidence (tests, receipts, critiques) you can review in minutes, not hours.
+Models now produce nearly-working code faster than humans can review it—10x to 500x human reading speed. A model can generate, test, critique, and revise a change in the time it takes a human to read the first draft.
+
+This changes the economics. Generation and iteration are cheap. Human review time is expensive. The bottleneck isn't "how fast can we produce code"—it's "how fast can a human decide yes or no with confidence."
+
+Most AI coding tools optimize the wrong thing. They make generation faster, which just produces more code for humans to review. The backlog grows.
+
+DemoSwarm optimizes for what actually matters: **better PR per dev touchpoint**. Spend tokens on iteration—critics, tests, revision loops—so by the time a human sees the PR, it's already been through the wringer. Review becomes confirmation, not discovery.
 
 ---
 
-## Truth Surfaces
+## How It Works
 
-Where the real answers live:
+You dispatch a flow. The flow spawns agents. Agents do focused work and hand off. Each step is scoped to what the model handles well. State accumulates on disk. By the end, you have a Draft PR that's been through:
 
-| Surface | Location | What It Proves |
-|---------|----------|----------------|
-| **Gate verdict** | `gate/merge_decision.md` | Ship or no-ship decision |
-| **Test proof** | `build/test_execution.md` | Tests actually passed (exit codes, not claims) |
-| **Critiques** | `build/*_critique.md` | What the critics found |
-| **Receipts** | `*_receipt.json` | Mechanical summaries with evidence pointers |
-| **Diff** | The PR | Final audit surface when evidence raises doubt |
+- **Requirements** — shaped from your initial request
+- **Design** — ADR, contracts, work plan
+- **Implementation** — code written against the design
+- **Testing** — tests written from BDD scenarios
+- **Critics** — code-critic and test-critic reviewing the output
+- **Self-review** — final check before surfacing to you
 
-If something looks off, these surfaces tell you why. The receipts are the truth; the chat is just navigation.
+The iteration happens in tokens, not in your calendar. When you review, you're reviewing the output of a process, not the first draft of a prompt.
 
 ---
 
-## Start Here
+## Why Orchestration
+
+LLMs do well on small, scoped tasks. Give a model a clear, contained problem and it produces reasonable code. But larger tasks—multi-file features, end-to-end flows, anything that requires holding multiple constraints in mind—lose coherence in a single prompt.
+
+The model forgets earlier constraints. It produces pieces that don't fit together. It drifts from the original intent. This isn't a model quality problem; it's a context problem. The task exceeds what fits in a single generation.
+
+The fix isn't better prompts or larger context windows. It's breaking the work down:
+
+1. **Scope each step** — give the model what it needs for this task, nothing more
+2. **Accumulate state** — write artifacts to disk so nothing gets lost
+3. **Run critics in the loop** — surface issues early, when fixing is cheap
+4. **Hand off clearly** — each agent says what it did and what should happen next
+
+This is how you get larger changes through without the model losing the thread.
+
+---
+
+## Oppositional Validation
+
+Single-pass generation lies to please. The model produces something plausible, you accept it, problems surface later.
+
+DemoSwarm runs critics inside the build loop. `code-critic` reviews implementation. `test-critic` reviews tests. They're adversarial—their job is to find problems, not to agree.
+
+When a critic finds issues, the orchestrator routes to a fixer. The fixer addresses the issues. The critic runs again. This continues until the critic passes or the orchestrator decides to surface the remaining issues to a human.
+
+The result: problems that would have shown up in human review—or worse, in production—get caught and fixed in the loop. The PR that reaches you has already survived scrutiny.
+
+---
+
+## Try It
 
 ```text
 /customize-pack                              # once per repo
-/flow-1-signal "Add a health check endpoint" # first run
+/flow-1-signal "Add a health check endpoint" # start a run
 ```
 
-Then open:
-- `.runs/<run-id>/signal/requirements.md` — the contract
-- `.runs/<run-id>/signal/open_questions.md` — assumptions needing validation
+Continue with `/flow-2-plan` → `/flow-3-build` to get a Draft PR.
 
-If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a bad build.
-
-**Full setup:** [Quickstart](docs/tutorials/quickstart.md) · **Reference:** [CLAUDE.md](CLAUDE.md)
-
----
-
-## How to Review What DemoSwarm Produces
-
-**The PR description is your primary interface.** Most reviewers won't drill into `.runs/` artifacts unless something looks off. The swarm produces a PR Brief in the description with: what changed, review hotspots, quality events, and proof pointers. The artifacts below are drill-down evidence when you need them.
-
-If you're reviewing a run (or a PR produced by the swarm), start here:
-
-1. **Gate verdict:** `.runs/<run-id>/gate/merge_decision.md` — ship or no-ship
-2. **Test proof:** `.runs/<run-id>/build/test_execution.md` — did tests actually pass
-3. **Critiques:** `.runs/<run-id>/build/code_critique.md`, `test_critique.md` — what the critics found
-4. **Receipts:** `.runs/<run-id>/*/*_receipt.json` — mechanical summaries with evidence pointers
-5. **The diff:** the PR diff — your final audit surface when evidence raises doubt
-
-If you're evaluating quickly, these four files tell the whole story:
-- `signal/requirements.md` — what we intended
-- `plan/adr.md` — how we decided to build it
-- `build/build_receipt.json` — what actually ran
-- `gate/merge_decision.md` — ship or bounce
-
-**What about "Not Measured"?** Good receipts are honest about gaps. If mutation testing was skipped or coverage wasn't run, the receipt says so explicitly. Silent gaps are the failure mode—explicit "not measured" is acceptable and expected.
-
-Artifacts are the handoff. Chat is transient.
-
----
-
-## What This Actually Is
-
-DemoSwarm is a `.claude/` pack (flows + agents + skills) that turns Claude Code into a repeatable build pipeline. It's a reference implementation of a mentality: the bottleneck was always *how long until the code is trusted*. LLMs just changed the economics — generation and verification are now cheap and fast.
-
-You dispatch flows explicitly. Agents do work and write artifacts to disk. The filesystem is the record; chat is transient.
-
-This is not "AI that codes for you." It's a system for producing **review-ready changes** — code plus the evidence needed to trust it. The artifact trail is what lets a reviewer skim receipts and approve with confidence, rather than re-auditing everything the model claimed to do.
-
-### The Mentality Shift
-
-Most AI coding tools optimize for **generation speed** — how fast can the model produce code?
-
-DemoSwarm optimizes for **verification speed** — how quickly can a human decide yes/no with confidence?
-
-The output isn't just code. It's code + tests + receipts + critiques + a clear audit trail.
-
-Open-weight models are now good enough that, for many well-scoped changes, their first draft is at least "junior-quality" — and often cleaner once you add tests and basic cleanup. Since generation is faster than review and cheap enough to repeat, the winning strategy isn't one big prompt. It's many small loops: research → plan → implement → test → critique → harden.
-
-### Trust and Verify
-
-Agents are treated like capable peers: autonomous, productive, and occasionally wrong.
-
-- **Trust agents to act** — research, decide, implement, fix issues they encounter
-- **Verify with executed evidence** — tests, diffs, receipts are proof; prose is navigation
-- **Catch problems early** — critics run inside build loops, not just at the end
-
-**Completion states:**
-- **VERIFIED** — Evidence panel green, evidence fresh, blockers empty. Done.
-- **UNVERIFIED** — Checkpointed state. Artifacts written, next steps documented, resumable.
-- **CANNOT_PROCEED** — Mechanical failure (tooling broken, permissions missing).
-
-If a flow exits UNVERIFIED, that's a save point, not a failure. State is on disk, next steps are documented, and rerunning the same flow resumes where it left off. UNVERIFIED is honest—it means "not yet merged" not "something went wrong."
-
----
-
-## Repo Layout
-
-| Location | What It Is |
-|----------|------------|
-| `.claude/commands/` | Flow playbooks (routing tables) |
-| `.claude/agents/` | Stations: workers, critics, auditors, operators |
-| `.claude/skills/` | Deterministic helpers (test-runner, auto-linter, etc.) |
-| `tools/` | Rust CLI tooling (pack-check, runs-derive) |
-| `.runs/` | Run artifacts (in the target repo) |
+**[Quickstart](docs/tutorials/quickstart.md)** · [CLAUDE.md](CLAUDE.md)
 
 ---
 
 ## The Seven Flows
 
-| Flow | Purpose | Key Outputs |
-|------|---------|-------------|
-| **1. Signal** | Shape intent into contract | requirements, BDD scenarios, risks |
-| **2. Plan** | Design the solution | ADR, contracts, AC matrix, work plan |
-| **3. Build** | Implement AC-by-AC | code, tests, Draft PR, build receipt |
-| **4. Review** | Harvest feedback, fix | drained worklist, Ready PR |
-| **5. Gate** | Forensic audit | MERGE or BOUNCE verdict |
-| **6. Deploy** | Merge to swarm mainline | CI verification |
-| **7. Wisdom** | Extract learnings | feedback actions, scent trail |
+| Flow | Purpose | Output |
+|------|---------|--------|
+| **1. Signal** | Shape intent into contract | requirements, BDD scenarios |
+| **2. Plan** | Design before code | ADR, contracts, work plan |
+| **3. Build** | Implement with critics in the loop | code, tests, Draft PR |
+| **4. Review** | Harvest PR feedback, fix | Ready PR |
+| **5. Gate** | Final checks | MERGE or BOUNCE |
+| **6. Deploy** | Merge to main | CI verification |
+| **7. Wisdom** | Extract learnings | feedback for next run |
+
+Each flow breaks work into focused tasks. Agents handle one thing—`code-implementer` writes code, `test-author` writes tests, `code-critic` reviews—then hand off. State accumulates on disk, so larger changes don't exceed what the model can hold in context.
 
 ---
 
-## How This Differs
+## What You Review
 
-### From AI Coding Assistants
+The PR description is your interface. The swarm produces a summary: what changed, what was tested, what to look at if something seems off.
 
-Most tools optimize the interactive loop (prompt → answer → prompt). DemoSwarm optimizes the review loop (run → evidence → decision).
+For most reviews: read the description, skim the diff, approve or comment. That's the goal—a PR that's ready enough that review is confirmation, not discovery.
 
-You dispatch a flow, it runs (batch-oriented; can run for a while), and you come back to a finished artifact with evidence.
-
-### From Autonomous Agents
-
-DemoSwarm doesn't ship to prod. It produces a review-ready PR and leaves the merge decision to humans, backed by evidence.
-
-### From Typical SDLC Tooling
-
-Traditional tooling tracks what humans decided. DemoSwarm also records what the machine did, what it checked, and what evidence exists.
+If you need to debug or audit:
+- `.runs/<run-id>/` contains the working artifacts (requirements, plans, critiques)
+- Receipts summarize what each flow did
+- **[Flow Studio](https://github.com/EffortlessMetrics/flow-studio-swarm)** renders `.runs/` into a visual cockpit
 
 ---
 
-## Where This Fits
+## How Agents Work
 
-**Stack position:** Workflow layer on Claude Code. The pack defines flows (orchestration), agents (workers), and skills (deterministic helpers). Claude Code provides the runtime.
+Agents are specialists. Each does one thing well:
 
-**Platform engineering:** A golden path for AI-assisted development. Opinionated workflow, consistent outputs, self-service dispatch. The `.runs/` directory is the contract between the swarm and the reviewer.
+| Agent | What It Does |
+|-------|--------------|
+| `code-implementer` | Writes implementation code |
+| `test-author` | Writes tests from BDD scenarios |
+| `code-critic` | Reviews code, finds issues |
+| `test-critic` | Reviews tests for coverage gaps |
+| `repo-operator` | Handles git operations |
 
-**Agent operations:** The same concerns apply to operating AI agents as to operating services — observability, governance, reproducibility. DemoSwarm maps these:
-- Receipts → observability (what ran, what it produced, what evidence exists)
-- Gates → governance (secrets, anomalies, merge criteria)
-- `.runs/` as committed state → reproducibility (resume, audit, replay)
+They work autonomously—research, decide, implement, fix what they encounter—then hand off with a clear recommendation: *"Did X, found Y, recommend routing to Z next."*
 
-**Want a UI for runs and receipts?** See [Flow Studio](https://github.com/EffortlessMetrics/flow-studio-swarm) — the harness that gives you a visual cockpit for this pack.
+If a flow can't finish (missing info, failing tests), it checkpoints. Rerun the same flow to resume where it left off.
 
 ---
 
-## Operating Model
+## Repo Layout
 
-### Work vs. Publish
-
-- **Work is default-allow:** explore, implement, run tests, iterate freely
-- **Publish is gated:** sanitize content before commit/push/post
-
-Gates constrain what leaves the workspace, not what the model can analyze.
-
-### Routing Is Prose
-
-Agents recommend next steps in plain language. Orchestrators route by reading what agents say and deciding what makes sense. No structured routing blocks to parse, no rigid state machines. Claude understands language—we use that.
-
-This means handoffs sound like: *"Implemented 3 of 5 endpoints. The remaining 2 need the User schema. Recommend routing to code-implementer with User schema as first task."* The orchestrator reads that and acts.
-
-### Shadow Fork Topology
-
-Recommended: run flows in a dedicated `*-swarm` repo.
-
-```
-my-project/        # human workspace
-my-project-swarm/  # swarm workspace (commits freely)
-```
-
-The pack's "Deploy" (Flow 6) merges into the swarm repo's `main`. Upstream export is a separate step.
-
-### Learning Loop
-
-Flow 7 writes learnings to `.runs/_wisdom/latest.md`. Flow 1 reads it before starting research.
-
-Institutional memory in plain text, committed with the artifacts.
+| Location | What's There |
+|----------|--------------|
+| `.claude/commands/` | Flow orchestrators |
+| `.claude/agents/` | Agent prompts (specialists) |
+| `.claude/skills/` | Deterministic tools (test-runner, linter) |
+| `.runs/` | Run artifacts (in your repo) |
 
 ---
 
@@ -210,9 +146,7 @@ Institutional memory in plain text, committed with the artifacts.
 
 ## Author
 
-Created by Steven · [effortlesssteven.com/demoswarm](https://effortlesssteven.com/demoswarm/)
-
-This pack encodes the AgOps posture: trade cheap compute for expensive senior review time. The verification IS the product.
+Created by Steven Zimmerman (@EffortlessSteven) · [effortlesssteven.com/demoswarm](https://effortlesssteven.com/demoswarm/)
 
 ---
 
