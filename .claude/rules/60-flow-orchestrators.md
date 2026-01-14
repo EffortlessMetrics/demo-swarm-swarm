@@ -170,6 +170,17 @@ For each station:
 3. If critic finds issues → run fixer → run verifier
 4. Repeat until critic says "proceed"
 
+### Two-Pass Minimum for Stability
+
+When fixing an issue, **re-review at least once** to confirm stability. "Two passes" is a minimum observation window, not a maximum retry count.
+
+| Good | Bad |
+|------|-----|
+| Fix → re-review → stable → proceed | Fix → assume stable → proceed |
+| Critic found nothing twice → proceed | Critic found nothing once → proceed |
+
+If re-review finds the same issue, you're not stable. Route to a different approach or escalate.
+
 ### Routing to Unstick
 
 **Counts are not conditions. Signal is.**
@@ -256,3 +267,4 @@ Try local resolution first. Bounce only when truly necessary.
 - [flow-composition.md](../../docs/explanation/flow-composition.md) — How flows compose
 - [operating-model.md](../../docs/explanation/operating-model.md) — Full operating model
 - [laws-of-the-swarm.md](../../docs/explanation/laws-of-the-swarm.md) — The immutable rules
+- [90-voice-and-tone.md](90-voice-and-tone.md) — How to communicate findings

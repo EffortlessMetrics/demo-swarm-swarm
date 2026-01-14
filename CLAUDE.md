@@ -60,6 +60,7 @@ Claude Code rules live in `.claude/rules/`. They encode the physics and vibe tha
 | `60-flow-orchestrators.md` | Flow commands (scoped to `.claude/commands/flow-*`) |
 | `70-docs-and-teaching.md` | Documentation (scoped to `docs/`) |
 | `80-developer-experience.md` | UX, accessibility, investing in quality |
+| `90-voice-and-tone.md` | How we communicate: industrial clarity, human warmth |
 
 Rules are the constitution Claude loads reliably. CLAUDE.md is the contract. Docs are the textbook.
 
