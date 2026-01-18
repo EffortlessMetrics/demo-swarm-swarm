@@ -32,11 +32,13 @@ Write exactly one file: `.runs/<run-id>/plan/impact_map.json`
 ## Inputs
 
 Primary:
+
 - `.runs/<run-id>/run_meta.json`
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/problem_statement.md`
 
 Plan artifacts (if present):
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml`
 
@@ -57,6 +59,7 @@ Use stable identifiers (function names, class names) rather than line numbers.
 ## Behavior
 
 **1. Derive search terms:**
+
 - From requirements: `REQ-` IDs, key nouns, component names, data entities
 - From problem statement: domain terms, user flows, error strings
 - From api_contracts: endpoint paths, operationIds, schema names
@@ -64,11 +67,13 @@ Use stable identifiers (function names, class names) rather than line numbers.
 Record these in `context.search_terms[]`.
 
 **2. Search the repo:**
+
 - Search for extracted terms, endpoint paths, schema names
 - For each candidate file, capture evidence (what you found)
 
 **3. Build the affected register:**
 Each item has:
+
 - `kind`: code | test | config | doc | infra | data
 - `change_type`: NEW | MODIFIED | DELETED | UNKNOWN
 - `risk`: HIGH | MEDIUM | LOW
@@ -78,11 +83,13 @@ Each item has:
 Use sequential IDs: `IMP-001`, `IMP-002`, etc.
 
 **4. Identify interface impact:**
+
 - API endpoints from contracts or code search
 - Data: migrations, schemas, tables
 - Events/queues if discovered
 
 **5. Identify test/config impact:**
+
 - Tests that reference affected components
 - Configs that may need changes
 
@@ -152,18 +159,23 @@ Use sequential IDs: `IMP-001`, `IMP-002`, etc.
 ## Handoff Examples
 
 **Impact is clear and bounded:**
+
 > "Analyzed blast radius for REQ-001 through REQ-003. Found 12 affected files (3 high risk, 5 medium, 4 low). Impact is bounded to auth module + related tests. Flow 2 can proceed."
 
 **Scope creep detected:**
+
 > "Blast radius is larger than spec implies. REQ-002 touches 8 files across 4 modules including payment processing (not mentioned in requirements). Recommend scope-assessor review before continuing."
 
 **Design gaps found:**
+
 > "Found impact on 6 code files but missing interface decisions for the session store. ADR does not specify persistence layer. Recommend design-optioneer review."
 
 **Partial (sparse inputs):**
+
 > "Analyzed with limited inputs (requirements.md only, no contracts). Found 5 likely affected files based on grep. Confidence is LOW for 3 items. Proceed with documented assumptions."
 
 **Blocked:**
+
 > "Cannot write impact_map.json due to permissions. Fix file system access and rerun."
 
 ## Handoff Targets

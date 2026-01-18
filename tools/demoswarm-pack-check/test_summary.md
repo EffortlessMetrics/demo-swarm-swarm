@@ -5,19 +5,19 @@
 ## Test Counts
 
 | Category | Count |
-|----------|-------|
-| Passed | 374 |
-| Failed | 0 |
-| Skipped | 0 |
-| Xfailed | 0 |
-| Xpassed | 0 |
+| -------- | ----- |
+| Passed   | 374   |
+| Failed   | 0     |
+| Skipped  | 0     |
+| Xfailed  | 0     |
+| Xpassed  | 0     |
 
 ## Breakdown
 
-| Test Suite | Passed |
-|------------|--------|
-| Unit tests (lib.rs) | 333 |
-| Integration tests | 41 |
+| Test Suite          | Passed |
+| ------------------- | ------ |
+| Unit tests (lib.rs) | 333    |
+| Integration tests   | 41     |
 
 ## Scope
 
@@ -26,6 +26,7 @@ Full test run of demoswarm-pack-check crate including all unit and integration t
 ## New Tests Added (This Session)
 
 ### reporter.rs (33 new tests)
+
 - `test_level_debug_and_clone` - Level enum Debug and Clone
 - `test_level_serialize` - Level enum serialization
 - `test_diagnostic_debug_and_clone` - Diagnostic struct Debug and Clone
@@ -61,6 +62,7 @@ Full test run of demoswarm-pack-check crate including all unit and integration t
 - `test_reporter_debug` - Reporter Debug trait
 
 ### runner.rs (8 new tests)
+
 - `test_cli_default_values` - Cli struct defaults
 - `test_cli_json_format` - Cli struct JSON configuration
 - `test_run_fails_without_claude_dir` - run() error without .claude

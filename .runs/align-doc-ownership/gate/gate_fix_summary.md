@@ -3,16 +3,19 @@
 ## Scope & Evidence
 
 Gate artifacts consulted:
+
 - `.runs/align-doc-ownership/gate/receipt_audit.md` (status: UNVERIFIED)
 - `.runs/align-doc-ownership/gate/contract_compliance.md` (status: VERIFIED)
 - `.runs/align-doc-ownership/gate/security_scan.md` (status: VERIFIED)
 - `.runs/align-doc-ownership/gate/coverage_audit.md` (status: VERIFIED)
 
 Additional evidence gathered:
+
 - `bash .claude/scripts/pack-check.sh --no-color` - All 49 checks passed
 - `cargo fmt --check` in `tools/demoswarm-pack-check/` - Formatting issues detected
 
 Missing optional inputs:
+
 - `.runs/align-doc-ownership/gate/lint_issues.md` - not present
 - `.runs/align-doc-ownership/gate/policy_analysis.md` - not present
 - `.runs/align-doc-ownership/build/build_receipt.json` - permission denied (cannot verify)

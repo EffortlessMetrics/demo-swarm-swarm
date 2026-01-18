@@ -1,6 +1,7 @@
 # Option Critique for local-alignment-audit-aba1c6
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -9,25 +10,28 @@ blockers: []
 missing_required: []
 concerns: []
 observations:
-  - Option phasing model (OPT-003) aligns well with pack hierarchy design (CLAUDE.md as authoritative source)
-  - Decision criteria are explicit and tied to concrete trade-offs
-  - All three options acknowledge test fixture risk but handle it differently
-  - Comparison matrix provides clear decision axis
-can_further_iteration_help: no
+
+- Option phasing model (OPT-003) aligns well with pack hierarchy design (CLAUDE.md as authoritative source)
+- Decision criteria are explicit and tied to concrete trade-offs
+- All three options acknowledge test fixture risk but handle it differently
+- Comparison matrix provides clear decision axis
+  can_further_iteration_help: no
 
 ## Metrics
+
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 3
+critical: 0
+major: 0
+minor: 3
 options_summary:
-  options_found: 3
-  options_with_comparable_axes: 3
-  options_missing_risks: 0
-  options_missing_rollout: 0
-  decision_criteria_present: yes
+options_found: 3
+options_with_comparable_axes: 3
+options_missing_risks: 0
+options_missing_rollout: 0
+decision_criteria_present: yes
 
 ## Summary
+
 - All three options satisfy the 7 functional requirements (REQ-001 through REQ-007)
 - Options are genuinely distinct in scope and phasing approach (minimal vs comprehensive vs layered)
 - Trade-offs are accurately assessed across structure, velocity, governance, and cost dimensions
@@ -36,6 +40,7 @@ options_summary:
 - Decision-readiness is high; ADR can proceed with clear choice criteria
 
 ## Decision Readiness
+
 - Ready for ADR: yes
 - What's missing to be ADR-ready (if any):
   - None; all three options are comparable, risks are identified, and decision criteria are explicit
@@ -43,6 +48,7 @@ options_summary:
 ## Findings
 
 ### Distinctness
+
 - **PASS**: All three options are genuinely different in scope and phasing strategy:
   - OPT-001: Minimal touch (5 primary files only)
   - OPT-002: Comprehensive sweep (all 14 files in one pass)
@@ -51,6 +57,7 @@ options_summary:
 - No "variations of the same idea" detected
 
 ### Comparability / Criteria
+
 - **PASS**: Options are comparable on consistent axes:
   - Requirements fit table (7 REQs + 3 NFRs) present for all options
   - Trade-offs table (Structure, Velocity, Governance, Ops, Cost) present for all options
@@ -61,6 +68,7 @@ options_summary:
 - [MINOR] OPT-MIN-001: Comparison matrix could include "Time to decision-ready" and "Follow-up work required" rows for sharper differentiation
 
 ### Traceability to Requirements / Constraints
+
 - **PASS**: All options trace back to requirements:
   - REQ-001 through REQ-007 explicitly mapped in Requirements Fit tables
   - NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001 explicitly addressed
@@ -75,6 +83,7 @@ options_summary:
 - [MINOR] OPT-MIN-002: OPT-002's NFR-TRACE-001 "TRADE_OFF" verdict could be clearer — the trade-off is "test fixture updates may be needed" not "tests might fail"; suggest rephrasing to "SATISFIED (with test fixture updates required)"
 
 ### Risks / Failure Modes / Operability
+
 - **PASS**: All options include concrete risks:
   - OPT-001 risks: secondary docs inconsistency (High/Low), reviewer expectations (Med/Low), grep failures (High/Low)
   - OPT-002 risks: test fixture breaks (Med/Med), merge conflicts (Med/Low), scope creep (Low/Low), structure.rs assertion (Med/Med)
@@ -84,6 +93,7 @@ options_summary:
 - [MINOR] OPT-MIN-003: OPT-002 risk "structure.rs 'Six Flows' string is test assertion" overlaps with impact_map.json concern (IMP-010); consider referencing IMP-010 explicitly for cross-artifact traceability
 
 ### Rollout / Migration / Backout
+
 - **PASS**: All options address rollout and reversibility:
   - Reversibility rated "Easy" for all options
   - Switch effort described (incremental follow-up for OPT-001, independent revert for OPT-002, per-phase revert for OPT-003)
@@ -92,6 +102,7 @@ options_summary:
 - No migration path needed (documentation-only work)
 
 ### Testability / Verification Strategy
+
 - **PASS**: Verification implicit in NFR metrics:
   - NFR-DOC-001 MET-1: automated grep for "six flows" (all options)
   - NFR-SEC-001 MET-1/MET-2: security claims reference code evidence (all options)
@@ -101,6 +112,7 @@ options_summary:
 - Verification notes (verification_notes.md) provide detailed verification steps for all NFRs
 
 ## Notes for ADR Author (only when recommended_action: PROCEED)
+
 - **Default recommendation is sound**: OPT-003 (Layered Approach) aligns with pack hierarchy where CLAUDE.md is authoritative; allows incremental merge after Phase 2 if time-constrained
 - **Trade-off is clear**: OPT-001 fastest but leaves secondary docs inconsistent; OPT-002 most comprehensive but highest coordination overhead; OPT-003 balances both
 - **Decision axis**: If NFR-DOC-001 is strictly mandatory for merge → choose OPT-002; if time-constrained and follow-up acceptable → choose OPT-001; if pack hierarchy and incremental merge valued → choose OPT-003
@@ -112,6 +124,7 @@ options_summary:
   - NFR-DOC-001 strictness (OPT-002 if zero tolerance for inconsistency)
 
 ## Inventory (machine countable)
+
 - OPT_CRITICAL: (none)
 - OPT_MAJOR: (none)
 - OPT_MINOR: OPT-MIN-001, OPT-MIN-002, OPT-MIN-003

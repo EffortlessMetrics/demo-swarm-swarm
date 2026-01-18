@@ -25,23 +25,23 @@ This is system-level health, not PR-level quality.
 
 ### Positive Signals (System Is Working)
 
-| Signal | How to Measure | What It Means |
-|--------|----------------|---------------|
-| First-pass Gate rate | % of runs that pass Gate without bouncing | High = quality work upstream |
-| Critic finding rate | Findings per run, trending down | Agents learning from feedback |
-| Reviewer time | Minutes to approve, trending down | Better explanations, less archaeology |
-| Fix-forward vs bounce | % routed to fixer vs bounced to Plan | High fix-forward = minor issues only |
-| "Not measured" shrinking | Fewer unknowns over time | Verification coverage growing |
+| Signal                   | How to Measure                            | What It Means                         |
+| ------------------------ | ----------------------------------------- | ------------------------------------- |
+| First-pass Gate rate     | % of runs that pass Gate without bouncing | High = quality work upstream          |
+| Critic finding rate      | Findings per run, trending down           | Agents learning from feedback         |
+| Reviewer time            | Minutes to approve, trending down         | Better explanations, less archaeology |
+| Fix-forward vs bounce    | % routed to fixer vs bounced to Plan      | High fix-forward = minor issues only  |
+| "Not measured" shrinking | Fewer unknowns over time                  | Verification coverage growing         |
 
 ### Negative Signals (System Needs Attention)
 
-| Signal | How to Measure | What It Means |
-|--------|----------------|---------------|
-| Same critic findings | Same issues appearing across runs | Prompt not learning |
-| Bounce loops | Work bouncing A to B to A to B | Routing problem or unclear spec |
-| Growing review time | Reviewer spending more time | Quality declining or complexity growing |
-| Stale learnings | Wisdom produces learnings, nothing changes | Flywheel stalled |
-| Gate failures increasing | More runs failing Gate | Upstream quality declining |
+| Signal                   | How to Measure                             | What It Means                           |
+| ------------------------ | ------------------------------------------ | --------------------------------------- |
+| Same critic findings     | Same issues appearing across runs          | Prompt not learning                     |
+| Bounce loops             | Work bouncing A to B to A to B             | Routing problem or unclear spec         |
+| Growing review time      | Reviewer spending more time                | Quality declining or complexity growing |
+| Stale learnings          | Wisdom produces learnings, nothing changes | Flywheel stalled                        |
+| Gate failures increasing | More runs failing Gate                     | Upstream quality declining              |
 
 ---
 
@@ -96,13 +96,13 @@ This is system-level health, not PR-level quality.
 
 Signs an agent needs tuning:
 
-| Agent Type | Needs Tuning When |
-|------------|-------------------|
-| Authors | Output frequently rejected by critics |
-| Critics | Findings ignored as noise OR missing real issues |
-| Implementers | Code requires extensive fixes |
-| Cleanup | Missing important summary points |
-| Gate | Passing things that fail in prod OR blocking good work |
+| Agent Type   | Needs Tuning When                                      |
+| ------------ | ------------------------------------------------------ |
+| Authors      | Output frequently rejected by critics                  |
+| Critics      | Findings ignored as noise OR missing real issues       |
+| Implementers | Code requires extensive fixes                          |
+| Cleanup      | Missing important summary points                       |
+| Gate         | Passing things that fail in prod OR blocking good work |
 
 See [Agents Index](agents-index.md) for the full agent listing by role.
 
@@ -112,13 +112,13 @@ See [Agents Index](agents-index.md) for the full agent listing by role.
 
 ### When to Update an Agent Prompt
 
-| Trigger | Action |
-|---------|--------|
-| Same mistake 3+ times | Add explicit guidance |
+| Trigger                | Action                    |
+| ---------------------- | ------------------------- |
+| Same mistake 3+ times  | Add explicit guidance     |
 | False positive pattern | Add "don't do X" guidance |
-| Missing context | Add relevant background |
-| Wrong handoff target | Update handoff guidance |
-| Verbosity issues | Add length/focus guidance |
+| Missing context        | Add relevant background   |
+| Wrong handoff target   | Update handoff guidance   |
+| Verbosity issues       | Add length/focus guidance |
 
 ### When NOT to Update
 
@@ -132,12 +132,12 @@ See [Agents Index](agents-index.md) for the full agent listing by role.
 
 Signs the pack structure needs work:
 
-| Signal | Possible Cause | Potential Fix |
-|--------|----------------|---------------|
-| Flows always run out-of-order | Flow boundaries wrong | Restructure flows |
-| Agent keeps being skipped | Agent not useful | Remove or merge |
-| Constant manual intervention | Automation gaps | Add missing agent |
-| Routing confusion | Too many similar agents | Consolidate |
+| Signal                        | Possible Cause          | Potential Fix     |
+| ----------------------------- | ----------------------- | ----------------- |
+| Flows always run out-of-order | Flow boundaries wrong   | Restructure flows |
+| Agent keeps being skipped     | Agent not useful        | Remove or merge   |
+| Constant manual intervention  | Automation gaps         | Add missing agent |
+| Routing confusion             | Too many similar agents | Consolidate       |
 
 ---
 
@@ -145,12 +145,12 @@ Signs the pack structure needs work:
 
 What NOT to optimize for:
 
-| Anti-Metric | Why It Fails |
-|-------------|--------------|
-| Speed at cost of quality | Fast garbage is still garbage |
-| Metric gaming | "100% Gate pass" by lowering standards |
-| Activity over outcome | Lines of code, number of runs |
-| Process compliance | Following steps vs delivering value |
+| Anti-Metric              | Why It Fails                           |
+| ------------------------ | -------------------------------------- |
+| Speed at cost of quality | Fast garbage is still garbage          |
+| Metric gaming            | "100% Gate pass" by lowering standards |
+| Activity over outcome    | Lines of code, number of runs          |
+| Process compliance       | Following steps vs delivering value    |
 
 The goal is quality software delivered efficiently. Metrics are proxies, not goals.
 
@@ -178,11 +178,11 @@ The goal is quality software delivered efficiently. Metrics are proxies, not goa
 
 If you track nothing else, track these three:
 
-| Signal | Question It Answers |
-|--------|---------------------|
+| Signal                   | Question It Answers            |
+| ------------------------ | ------------------------------ |
 | **First-pass Gate rate** | Are we producing quality work? |
-| **Bounce rate** | How much rework? |
-| **Reviewer feedback** | Human ground truth |
+| **Bounce rate**          | How much rework?               |
+| **Reviewer feedback**    | Human ground truth             |
 
 Everything else is refinement.
 

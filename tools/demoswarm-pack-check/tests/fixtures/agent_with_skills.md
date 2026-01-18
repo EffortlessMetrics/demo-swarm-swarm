@@ -19,5 +19,6 @@ bash .claude/scripts/demoswarm.sh index upsert-status --run-id test-run --status
 ## Notes
 
 This agent is compliant because it:
+
 1. Uses demoswarm.sh for skill operations
 2. Has a ## Skills section documenting skill usage

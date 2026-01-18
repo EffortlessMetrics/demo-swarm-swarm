@@ -22,41 +22,41 @@ concerns:
 
 ## Artifact Verification
 
-| Artifact | Status |
-|----------|--------|
-| merge_decision.md | ✓ Found |
-| receipt_audit.md | ✓ Found |
+| Artifact               | Status  |
+| ---------------------- | ------- |
+| merge_decision.md      | ✓ Found |
+| receipt_audit.md       | ✓ Found |
 | contract_compliance.md | ✓ Found |
-| security_scan.md | ✓ Found |
-| coverage_audit.md | ✓ Found |
-| policy_analysis.md | ✓ Found |
-| risk_assessment.md | ✓ Found |
-| gate_fix_summary.md | ✓ Found |
-| traceability_audit.md | ✓ Found |
+| security_scan.md       | ✓ Found |
+| coverage_audit.md      | ✓ Found |
+| policy_analysis.md     | ✓ Found |
+| risk_assessment.md     | ✓ Found |
+| gate_fix_summary.md    | ✓ Found |
+| traceability_audit.md  | ✓ Found |
 
 ## Extracted Gate Statuses (Machine Summary)
 
-| Check | Status | Source |
-|------|--------|--------|
-| merge_decider | VERIFIED | merge_decision.md (verdict: MERGE) |
-| receipt_audit | VERIFIED | receipt_audit.md |
-| contract_compliance | VERIFIED | contract_compliance.md |
-| security_scan | VERIFIED | security_scan.md |
-| coverage_audit | VERIFIED | coverage_audit.md |
+| Check               | Status   | Source                             |
+| ------------------- | -------- | ---------------------------------- |
+| merge_decider       | VERIFIED | merge_decision.md (verdict: MERGE) |
+| receipt_audit       | VERIFIED | receipt_audit.md                   |
+| contract_compliance | VERIFIED | contract_compliance.md             |
+| security_scan       | VERIFIED | security_scan.md                   |
+| coverage_audit      | VERIFIED | coverage_audit.md                  |
 
 ## Counts Derived (Stable Markers)
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| receipt_checks_total | 11 | receipt_audit.md (Machine Summary: checks_total) |
-| receipt_checks_passed | 11 | receipt_audit.md (Machine Summary: checks_passed) |
-| contract_violations | 0 | contract_compliance.md (Machine Summary: violations_total) |
-| security_findings | 0 | security_scan.md (Machine Summary: findings_total) |
-| policy_violations | 0 | policy_analysis.md (Machine Summary: compliance_summary.non_compliant) |
-| coverage_line_percent | null | coverage_audit.md (not applicable for documentation-only run) |
-| coverage_branch_percent | null | coverage_audit.md (not applicable for documentation-only run) |
-| ac_total | 35 | receipt_audit.md (passthrough from build_receipt.json) |
-| ac_completed | 35 | receipt_audit.md (passthrough from build_receipt.json) |
+| Metric                  | Value | Source                                                                 |
+| ----------------------- | ----- | ---------------------------------------------------------------------- |
+| receipt_checks_total    | 11    | receipt_audit.md (Machine Summary: checks_total)                       |
+| receipt_checks_passed   | 11    | receipt_audit.md (Machine Summary: checks_passed)                      |
+| contract_violations     | 0     | contract_compliance.md (Machine Summary: violations_total)             |
+| security_findings       | 0     | security_scan.md (Machine Summary: findings_total)                     |
+| policy_violations       | 0     | policy_analysis.md (Machine Summary: compliance_summary.non_compliant) |
+| coverage_line_percent   | null  | coverage_audit.md (not applicable for documentation-only run)          |
+| coverage_branch_percent | null  | coverage_audit.md (not applicable for documentation-only run)          |
+| ac_total                | 35    | receipt_audit.md (passthrough from build_receipt.json)                 |
+| ac_completed            | 35    | receipt_audit.md (passthrough from build_receipt.json)                 |
 
 ## Merge Verdict Analysis
 

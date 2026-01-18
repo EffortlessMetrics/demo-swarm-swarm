@@ -1,6 +1,7 @@
 # Security Scan Report
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -38,6 +39,7 @@ scan_scope:
 ## Findings
 
 ### Secrets Exposure
+
 No suspected secrets detected in scanned surface.
 
 The following files were scanned for credential patterns (AWS keys `AKIA...`, GitHub tokens `ghp_...`, private keys `-----BEGIN PRIVATE KEY-----`, `password=`, `secret=`, `api_key=`, `token=`):
@@ -55,6 +57,7 @@ The following files were scanned for credential patterns (AWS keys `AKIA...`, Gi
 References to secret patterns in `.claude/` are documentation examples (e.g., in `secrets-tools/SKILL.md`, `security-scanner.md`, `secrets-sanitizer.md`) that teach agents how to detect and redact secrets. These are pattern definitions, not actual credentials.
 
 ### SAST / Code Patterns
+
 No high-signal vulnerability patterns detected in scanned surface.
 
 **Shell Scripts Analysis:**
@@ -82,6 +85,7 @@ No high-signal vulnerability patterns detected in scanned surface.
 **Flow Commands and Agent Prompts:**
 
 All flow commands (flow-1-signal.md through flow-7-wisdom.md) are Markdown documentation files that:
+
 - Define orchestration instructions for Claude Code agents
 - Reference paths using safe templated patterns (`.runs/<run-id>/...`)
 - Do not contain executable code that could be exploited
@@ -89,12 +93,14 @@ All flow commands (flow-1-signal.md through flow-7-wisdom.md) are Markdown docum
 **Contract File Analysis:**
 
 `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml`:
+
 - Pure OpenAPI 3.1.0 schema definitions
 - No executable content
 - Corrects stale references (removing non-existent command files)
 - No security impact from these documentation alignment changes
 
 ### Dependency Risk
+
 ```yaml
 dependency_audit:
   status: not_run
@@ -103,6 +109,7 @@ dependency_audit:
 ```
 
 The repository contains Rust tools under `tools/`:
+
 - `tools/demoswarm-pack-check/Cargo.lock`
 - `tools/demoswarm-runs-tools/Cargo.lock`
 

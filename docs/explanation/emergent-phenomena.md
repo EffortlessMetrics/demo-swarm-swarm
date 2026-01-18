@@ -13,6 +13,7 @@ But when the system operates at scale---hundreds of runs, thousands of changes, 
 These are **emergent phenomena**. Not bugs. Not features. Consequences of the underlying mechanics that become visible only in the aggregate.
 
 Understanding them matters because:
+
 - Some are beneficial and worth encouraging
 - Some are risks and need countermeasures
 - All are predictable once you see the mechanism
@@ -26,6 +27,7 @@ Understanding them matters because:
 Over time, swarm-generated code becomes more consistent than human code.
 
 Each run:
+
 - Reads existing patterns from the codebase
 - Generates code that matches those patterns
 - Gets critiqued against a consistent standard
@@ -57,21 +59,22 @@ Three reinforcing mechanisms:
 
 **Humans lose mechanical sympathy.**
 
-When all code looks the same and is generated automatically, humans can audit but may struggle to manually fix edge cases. They understand the *what* but lose intuition for the *why*.
+When all code looks the same and is generated automatically, humans can audit but may struggle to manually fix edge cases. They understand the _what_ but lose intuition for the _why_.
 
 This matters when:
+
 - The system encounters a genuinely novel situation
 - Manual intervention is required
 - The automated path is broken or unavailable
 
 ### Counter-Measures
 
-| Approach | How It Helps |
-|----------|--------------|
-| **Preserve design docs** | ADRs explain why, not just what. Keep them current. |
-| **Maintain human-written examples** | Keep some manually-crafted code as reference implementations. |
-| **Rotate human reviewers** | Ensure multiple humans maintain familiarity with core modules. |
-| **Periodic manual exercises** | Occasionally implement features manually to maintain skills. |
+| Approach                            | How It Helps                                                   |
+| ----------------------------------- | -------------------------------------------------------------- |
+| **Preserve design docs**            | ADRs explain why, not just what. Keep them current.            |
+| **Maintain human-written examples** | Keep some manually-crafted code as reference implementations.  |
+| **Rotate human reviewers**          | Ensure multiple humans maintain familiarity with core modules. |
+| **Periodic manual exercises**       | Occasionally implement features manually to maintain skills.   |
 
 **Detection:** Track the ratio of generated-to-human code. If it exceeds 90%, schedule explicit knowledge-transfer sessions.
 
@@ -84,6 +87,7 @@ This matters when:
 When verification passes 50 times in a row, humans stop reading it.
 
 The pattern:
+
 1. First few runs: Human reads evidence carefully
 2. Next ten runs: Human scans for red flags
 3. After 50 runs: Human rubber-stamps without reading
@@ -112,13 +116,13 @@ The system's error rate may be low, but it is not zero. When humans stop checkin
 
 ### Counter-Measures
 
-| Approach | How It Helps |
-|----------|--------------|
-| **Periodic calibration** | Inject known defects deliberately. Verify the gate catches them. If humans don't notice the calibration, trust has decayed too far. |
-| **Explicit "not measured"** | Force attention by requiring humans to acknowledge gaps. |
-| **Red flags force slowdown** | When anomalies appear, require explicit acknowledgment before proceeding. |
-| **Rotate reviewers** | Fresh eyes are more attentive. |
-| **Vary the cockpit** | Occasionally change the summary format to break pattern recognition. |
+| Approach                     | How It Helps                                                                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Periodic calibration**     | Inject known defects deliberately. Verify the gate catches them. If humans don't notice the calibration, trust has decayed too far. |
+| **Explicit "not measured"**  | Force attention by requiring humans to acknowledge gaps.                                                                            |
+| **Red flags force slowdown** | When anomalies appear, require explicit acknowledgment before proceeding.                                                           |
+| **Rotate reviewers**         | Fresh eyes are more attentive.                                                                                                      |
+| **Vary the cockpit**         | Occasionally change the summary format to break pattern recognition.                                                                |
 
 **Detection:** Track time-to-approval. If it trends toward seconds, trust decay is likely. Inject a calibration defect and see if it gets caught.
 
@@ -131,6 +135,7 @@ The system's error rate may be low, but it is not zero. When humans stop checkin
 As runs get longer and more complex, the narrative drifts from the evidence.
 
 The chain:
+
 1. Agent produces evidence (specific, grounded)
 2. Cleanup agent summarizes (compressed, abstracted)
 3. Orchestrator cites summary (further compressed)
@@ -151,6 +156,7 @@ Each compression loses fidelity. By the time a claim reaches the human, it may b
 Summaries are useful. They compress 70,000 lines into 5 bullets. But they are snapshots. The underlying reality moves on while the summaries persist.
 
 Additionally:
+
 - Handoffs compress context
 - Artifacts accumulate but are not always pruned
 - References become stale as files change
@@ -164,13 +170,13 @@ A claim that was once true becomes false, but the claim persists. Reviewers trus
 
 ### Counter-Measures
 
-| Approach | How It Helps |
-|----------|--------------|
-| **Evidence freshness tracking** | Compare receipt SHA to current HEAD. Flag stale references. |
-| **Pointers required** | Do not accept claims without file:line pointers. Stale pointers are detectable. |
-| **Staleness labels** | Visibly mark evidence older than N commits. |
-| **Re-verification on demand** | When in doubt, re-run verification rather than trusting old results. |
-| **Prune old artifacts** | Archive runs beyond a retention window. Old evidence is not better than no evidence---it is misleading. |
+| Approach                        | How It Helps                                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Evidence freshness tracking** | Compare receipt SHA to current HEAD. Flag stale references.                                             |
+| **Pointers required**           | Do not accept claims without file:line pointers. Stale pointers are detectable.                         |
+| **Staleness labels**            | Visibly mark evidence older than N commits.                                                             |
+| **Re-verification on demand**   | When in doubt, re-run verification rather than trusting old results.                                    |
+| **Prune old artifacts**         | Archive runs beyond a retention window. Old evidence is not better than no evidence---it is misleading. |
 
 **Detection:** Periodically audit receipt pointers. If more than 20% point to changed or missing content, evidence drift is occurring.
 
@@ -197,6 +203,7 @@ Over time, the prompt accumulates constraints that do not correspond to real pro
 ### Why This Happens
 
 The learning mechanism cannot distinguish:
+
 - Real failure (code was wrong) --- learn from this
 - Flaky failure (test was unreliable) --- do not learn from this
 - Environmental failure (network was down) --- do not learn from this
@@ -212,13 +219,13 @@ The system becomes increasingly cautious about things that are not actually dang
 
 ### Counter-Measures
 
-| Approach | How It Helps |
-|----------|--------------|
-| **Patch log** | Record what changed, why, and the evidence. Enable audit and rollback. |
-| **Staleness rule** | Patches expire unless reaffirmed by subsequent evidence. Old constraints need new justification. |
-| **False failure detection** | Identify flaky tests, transient errors, environmental issues. Do not learn from them. |
-| **Periodic prompt pruning** | Review accumulated constraints. Remove those without recent supporting evidence. |
-| **Constraint sunset** | After N runs without the constraint triggering, remove it or require re-justification. |
+| Approach                    | How It Helps                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Patch log**               | Record what changed, why, and the evidence. Enable audit and rollback.                           |
+| **Staleness rule**          | Patches expire unless reaffirmed by subsequent evidence. Old constraints need new justification. |
+| **False failure detection** | Identify flaky tests, transient errors, environmental issues. Do not learn from them.            |
+| **Periodic prompt pruning** | Review accumulated constraints. Remove those without recent supporting evidence.                 |
+| **Constraint sunset**       | After N runs without the constraint triggering, remove it or require re-justification.           |
 
 **Detection:** Track prompt length over time. If it grows monotonically, overfitting is likely. Review the newest constraints for false-positive origins.
 
@@ -263,13 +270,13 @@ You believe you have verified quality because the numbers are good. But the numb
 
 The primary defense is the **quality panel**: multiple sensors that fail in different ways.
 
-| Approach | How It Helps |
-|----------|--------------|
-| **Multiple sensors** | No single metric determines quality. Coverage AND mutation AND critics AND production signals. |
-| **Diverse failure modes** | If you game one metric, another goes red. Hard to game all simultaneously. |
-| **Production feedback** | Ultimately, production behavior is the truth. Include it in the panel. |
-| **Metric rotation** | Periodically emphasize different metrics. Prevents entrenchment in one optimization target. |
-| **Qualitative review** | Humans spot-check whether metrics match reality. The cockpit shows numbers; humans verify meaning. |
+| Approach                  | How It Helps                                                                                       |
+| ------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Multiple sensors**      | No single metric determines quality. Coverage AND mutation AND critics AND production signals.     |
+| **Diverse failure modes** | If you game one metric, another goes red. Hard to game all simultaneously.                         |
+| **Production feedback**   | Ultimately, production behavior is the truth. Include it in the panel.                             |
+| **Metric rotation**       | Periodically emphasize different metrics. Prevents entrenchment in one optimization target.        |
+| **Qualitative review**    | Humans spot-check whether metrics match reality. The cockpit shows numbers; humans verify meaning. |
 
 **Detection:** Compare metric trends to production incident trends. If metrics improve but incidents do not decrease, the metrics are being gamed.
 
@@ -285,6 +292,7 @@ All five phenomena share a common structure:
 4. **Counter-intuitive fixes** --- The solution is not "try harder" but "change the structure"
 
 The antidote in each case involves:
+
 - **Diversity** --- Multiple sensors, multiple reviewers, multiple mechanisms
 - **Expiration** --- Old evidence, old constraints, old trust decay over time
 - **Calibration** --- Periodic checks that the system matches reality
@@ -296,13 +304,13 @@ The antidote in each case involves:
 
 Run these checks periodically (quarterly or after major milestones):
 
-| Check | What to Look For | Action If Found |
-|-------|------------------|-----------------|
-| **Dialect drift** | >90% generated code; declining human modification rate | Schedule manual implementation exercises |
-| **Trust decay** | Approval time <30 seconds; no PR comments | Inject calibration defect |
-| **Evidence drift** | >20% stale pointers in recent receipts | Implement freshness tracking |
-| **Wisdom overfitting** | Prompt length growing; phantom constraints | Review and prune constraints |
-| **Verification ceiling** | Metrics improving but incidents stable | Add production signals to panel |
+| Check                    | What to Look For                                       | Action If Found                          |
+| ------------------------ | ------------------------------------------------------ | ---------------------------------------- |
+| **Dialect drift**        | >90% generated code; declining human modification rate | Schedule manual implementation exercises |
+| **Trust decay**          | Approval time <30 seconds; no PR comments              | Inject calibration defect                |
+| **Evidence drift**       | >20% stale pointers in recent receipts                 | Implement freshness tracking             |
+| **Wisdom overfitting**   | Prompt length growing; phantom constraints             | Review and prune constraints             |
+| **Verification ceiling** | Metrics improving but incidents stable                 | Add production signals to panel          |
 
 ---
 

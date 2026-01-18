@@ -15,12 +15,14 @@ The pack is a build pipeline with guardrails, not a guardrail pipeline that some
 ## Default-Allow Work Plane
 
 Inside the sandbox / run directories:
+
 - Move fast
 - Fix forward
 - Retry freely
 - Do not stop mid-flow to ask permission
 
 Agents can:
+
 - Read any file
 - Write any code
 - Run any test
@@ -36,18 +38,19 @@ No permission checks inside the workspace. Permission theater kills throughput.
 ## Strict Boundaries (The Real Gates)
 
 When crossing a boundary (commit, push, publish, release):
+
 - Require evidence
 - Prefer deterministic checks
 - Do not "trust the agent's claim"
 
 ### The Boundaries
 
-| Boundary | Gate | What It Checks |
-|----------|------|----------------|
-| **Commit** | secrets-sanitizer | No credentials in staged changes |
-| **Push** | repo-operator | Clean state, no anomalies |
-| **GitHub post** | content restrictions | Safe to publish |
-| **Release** | deploy-decider | All gates passed |
+| Boundary        | Gate                 | What It Checks                   |
+| --------------- | -------------------- | -------------------------------- |
+| **Commit**      | secrets-sanitizer    | No credentials in staged changes |
+| **Push**        | repo-operator        | Clean state, no anomalies        |
+| **GitHub post** | content restrictions | Safe to publish                  |
+| **Release**     | deploy-decider       | All gates passed                 |
 
 ### Canonical Boundary Order (Save Game)
 
@@ -64,11 +67,13 @@ This order is mandatory. You cannot sanitize what you have not staged. You canno
 ## Questions Don't Stop Flows
 
 Agents can record questions anytime:
+
 - OpenQ register for tracked questions
 - Assumptions in handoffs
 - Notes in artifacts
 
 But flows continue with best-effort assumptions:
+
 1. Make the safest reasonable choice
 2. Record it as an assumption or defaulted question
 3. Proceed
@@ -77,6 +82,7 @@ But flows continue with best-effort assumptions:
 ### The Flow Boundary Ask
 
 At the end of a flow, surface:
+
 - What was done
 - What was found
 - What assumptions were made (with reasoning)
@@ -91,6 +97,7 @@ Humans decide at boundaries, not mid-flow.
 Merge conflicts are high-cognitive-load / low-value work.
 
 Handle them by:
+
 1. Route to an agent to reconcile
 2. Verify with compiler/tests
 3. Continue
@@ -108,6 +115,7 @@ Most "blocked" is just routing. True halt requires:
 3. **Unsafe boundary** — Would expose secrets, requires remediation before any publish
 
 Even when halted:
+
 - Work often continues in parallel
 - The halt is scoped to the specific boundary
 - Other flows may proceed
@@ -116,12 +124,12 @@ Even when halted:
 
 ## What This Enables
 
-| Without This Principle | With This Principle |
-|------------------------|---------------------|
+| Without This Principle                 | With This Principle                           |
+| -------------------------------------- | --------------------------------------------- |
 | Agents ask permission for every action | Agents work freely, gates check at boundaries |
-| Flows stop constantly for approval | Flows complete, humans decide at boundaries |
-| Security theater everywhere | Real security at real boundaries |
-| Slow, frustrating, permission-obsessed | Fast, productive, appropriately controlled |
+| Flows stop constantly for approval     | Flows complete, humans decide at boundaries   |
+| Security theater everywhere            | Real security at real boundaries              |
+| Slow, frustrating, permission-obsessed | Fast, productive, appropriately controlled    |
 
 ---
 

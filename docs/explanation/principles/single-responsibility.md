@@ -11,12 +11,14 @@ Every agent should have exactly one clear responsibility. When you can describe 
 ### Depth Over Breadth
 
 An agent with one job can:
+
 - Understand the task deeply
 - Apply full attention to it
 - Produce quality output
 - Be expert at that thing
 
 An agent with seven jobs:
+
 - Does everything shallowly
 - Misses nuances
 - Produces mediocre output across the board
@@ -45,20 +47,20 @@ A focused prompt is easier to write, understand, and maintain than a sprawling o
 
 If you can't describe the agent's job in one sentence, split it.
 
-| Good | Bad |
-|------|-----|
-| "Write tests for the implementation" | "Write tests, check coverage, update docs, fix lint" |
-| "Find issues in the code" | "Review code, validate security, check contracts, update receipt" |
-| "Decide if we should merge" | "Check tests, scan security, verify contracts, decide merge, post to GitHub" |
+| Good                                 | Bad                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| "Write tests for the implementation" | "Write tests, check coverage, update docs, fix lint"                         |
+| "Find issues in the code"            | "Review code, validate security, check contracts, update receipt"            |
+| "Decide if we should merge"          | "Check tests, scan security, verify contracts, decide merge, post to GitHub" |
 
 ### Agent Categories
 
-| Category | Job |
-|----------|-----|
+| Category    | Job                                |
+| ----------- | ---------------------------------- |
 | **Workers** | Do one type of implementation work |
-| **Critics** | Review one aspect of quality |
-| **Cleanup** | Summarize one flow |
-| **Gate** | Make one decision |
+| **Critics** | Review one aspect of quality       |
+| **Cleanup** | Summarize one flow                 |
+| **Gate**    | Make one decision                  |
 
 ### Splitting Agents
 
@@ -75,8 +77,10 @@ If an agent is doing too much:
 ## Anti-Patterns
 
 ### ❌ The Kitchen Sink Agent
+
 ```markdown
 ## Your Responsibilities
+
 1. Review the implementation
 2. Check contract compliance
 3. Validate security
@@ -85,31 +89,40 @@ If an agent is doing too much:
 6. Maintain the index
 7. Report to GitHub
 ```
+
 This agent does too much. Split it.
 
 ### ❌ "While You're There..."
+
 Don't add "also do X" to an agent. If X is important, make it a separate agent.
 
 ### ❌ Coupling Unrelated Work
+
 Updating the index and reviewing code are unrelated. Don't combine them.
 
 ## Examples
 
 ### Good: Focused Critic
+
 ```markdown
 ## Your Job
+
 Review the implementation against the spec. Find issues that matter.
 ```
 
 ### Good: Focused Worker
+
 ```markdown
 ## Your Job
+
 Write tests for the acceptance criteria. Cover happy path and error cases.
 ```
 
 ### Bad: Sprawling Agent
+
 ```markdown
 ## Your Job
+
 Review the implementation, then update the receipt with your findings,
 then check if the index needs updating, then post a summary to GitHub.
 ```

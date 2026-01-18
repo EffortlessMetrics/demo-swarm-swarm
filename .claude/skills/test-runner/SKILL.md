@@ -22,6 +22,7 @@ Execute the repository's test suite with appropriate scoping and capture structu
 - Handles framework-specific invocation patterns
 
 **What this skill does NOT do:**
+
 - Write or modify tests (that's test-author)
 - Judge test quality (that's test-critic)
 - Make decisions about what to test (that's orchestrator / test-strategist)
@@ -31,13 +32,13 @@ Execute the repository's test suite with appropriate scoping and capture structu
 
 ## When to Use
 
-| Context | Selection Strategy | Example |
-|---------|-------------------|---------|
-| **AC loop (Flow 3)** | AC-scoped, fail-fast | Run only tests for AC-001 |
-| **Post-AC verification** | Changed-file scope | Tests for files touched in this AC |
-| **Global hardening (Flow 3)** | Full suite | All tests after all ACs complete |
-| **Gate verification (Flow 5)** | Full suite, no fail-fast | Comprehensive verification |
-| **Quick sanity check** | Smoke tests only | Fast feedback during iteration |
+| Context                        | Selection Strategy       | Example                            |
+| ------------------------------ | ------------------------ | ---------------------------------- |
+| **AC loop (Flow 3)**           | AC-scoped, fail-fast     | Run only tests for AC-001          |
+| **Post-AC verification**       | Changed-file scope       | Tests for files touched in this AC |
+| **Global hardening (Flow 3)**  | Full suite               | All tests after all ACs complete   |
+| **Gate verification (Flow 5)** | Full suite, no fail-fast | Comprehensive verification         |
+| **Quick sanity check**         | Smoke tests only         | Fast feedback during iteration     |
 
 ---
 
@@ -78,12 +79,14 @@ git diff --name-only origin/main...HEAD
 Use when: Implementation changed, need to run tests that exercise that code.
 
 For Rust:
+
 ```bash
 cargo test -p <crate> -- <test-name-pattern>
 cargo test --test <integration-test-name>
 ```
 
 For pytest:
+
 ```bash
 pytest tests/unit/test_<module>.py -v
 pytest -k "auth or login"
@@ -94,6 +97,7 @@ pytest -k "auth or login"
 Use when: Verifying a specific Acceptance Criterion in the AC loop.
 
 Test naming conventions for AC filtering:
+
 - `test_ac_001_*` (name prefix)
 - `@AC-001` marker/tag
 - File-based: `tests/ac_001_*.py`
@@ -224,11 +228,13 @@ Save parsed summary to `test_summary.md` with this structure:
 # Test Summary
 
 ## Overall Status
+
 - **Result:** PASS | FAIL
 - **Exit Code:** <int>
 - **Duration:** <time>
 
 ## Counts
+
 - Passed: <int>
 - Failed: <int>
 - Skipped: <int>
@@ -236,13 +242,17 @@ Save parsed summary to `test_summary.md` with this structure:
 - xpassed: <int>
 
 ## Failing Tests (if any)
+
 - `path::to::test_name` - <short error>
 - `path::to::other_test` - <short error>
 
 ## Top Error Snippets
 ```
+
 <first 5-10 lines of first failure>
+
 ```
+
 ```
 
 ### Canonical Summary Line
@@ -261,15 +271,16 @@ Use `null` for any count that cannot be reliably extracted.
 
 ### Exit Codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | All tests passed |
-| 1+ | One or more tests failed |
+| Code | Meaning                   |
+| ---- | ------------------------- |
+| 0    | All tests passed          |
+| 1+   | One or more tests failed  |
 | null | Command could not execute |
 
 ### Failure Output
 
 When tests fail:
+
 1. Capture the full output to `test_output.log`
 2. Extract failing test names to `test_summary.md`
 3. Include up to 20 lines of the most relevant error output
@@ -290,6 +301,7 @@ The test-runner itself does not classify flakiness. However, it should:
 3. **Note any timeout or intermittent signals** - In the summary notes
 
 For actual flakiness classification, the orchestrator routes to `flakiness-detector`, which:
+
 - Re-runs failures with a budget
 - Classifies: DETERMINISTIC_REGRESSION vs FLAKY vs ENV_TOOLING
 - Produces a worklist for routing
@@ -301,9 +313,11 @@ For actual flakiness classification, the orchestrator routes to `flakiness-detec
 ### Called by: test-executor
 
 The `test-executor` agent invokes this skill and writes the formal artifact:
+
 - `.runs/<run-id>/build/test_execution.md`
 
 The test-executor handles:
+
 - Mode selection (verify vs verify_ac)
 - Fail-fast decisions based on flow context
 - Formal handoff to orchestrator
@@ -311,6 +325,7 @@ The test-executor handles:
 ### Called by: test-author
 
 The `test-author` agent may invoke this skill to verify tests work:
+
 - Quick run of newly written tests
 - Scope to just the tests being authored
 - Not a formal execution report
@@ -345,6 +360,7 @@ If `demo-swarm.config.json` exists, read test commands from:
 ### Fallback Detection
 
 If no config exists, detect the stack:
+
 - `Cargo.toml` present → Rust/cargo test
 - `package.json` with test script → npm test
 - `pytest.ini` or `pyproject.toml` → pytest
@@ -364,20 +380,24 @@ cargo test ac_001 -- --test-threads=1
 ```
 
 Output in `test_summary.md`:
+
 ```markdown
 # Test Summary
 
 ## Overall Status
+
 - **Result:** FAIL
 - **Exit Code:** 1
 - **Duration:** 4.2s
 
 ## Counts
+
 - Passed: 3
 - Failed: 1
 - Skipped: 0
 
 ## Failing Tests
+
 - `auth::tests::test_ac_001_invalid_password` - assertion failed: expected 401, got 200
 ```
 
@@ -388,15 +408,18 @@ cargo test --workspace --tests --color=always
 ```
 
 Output:
+
 ```markdown
 # Test Summary
 
 ## Overall Status
+
 - **Result:** PASS
 - **Exit Code:** 0
 - **Duration:** 45.3s
 
 ## Counts
+
 - Passed: 127
 - Failed: 0
 - Skipped: 3
@@ -404,6 +427,7 @@ Output:
 - xpassed: 0
 
 ## Notes
+
 - 3 tests skipped: require external service
 - 2 xfail tests: known issues tracked in #123, #124
 ```

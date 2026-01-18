@@ -1,6 +1,7 @@
 # Contract Compliance Report for align-doc-ownership
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -61,23 +62,23 @@ The "contracts" are structural validation rules enforced by pack-check, not REST
 
 ### What This Run Actually Contracts
 
-| Contract | Description | Enforcement Location |
-|----------|-------------|---------------------|
-| flow_command_boundary | Flow commands must not contain skill plumbing | Check 45: `check_flow_skill_plumbing()` |
+| Contract                | Description                                        | Enforcement Location                       |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------ |
+| flow_command_boundary   | Flow commands must not contain skill plumbing      | Check 45: `check_flow_skill_plumbing()`    |
 | agent_skill_declaration | Agents using demoswarm.sh must have Skills section | Check 46: `check_missing_skills_section()` |
-| agent_enum_consistency | Agents must use canonical status/action enums | Check 37: `check_control_plane_agents()` |
-| claudemd_skills_table | CLAUDE.md Skills table must be summary-level | (advisory/manual) |
+| agent_enum_consistency  | Agents must use canonical status/action enums      | Check 37: `check_control_plane_agents()`   |
+| claudemd_skills_table   | CLAUDE.md Skills table must be summary-level       | (advisory/manual)                          |
 
 ## Validation Rules Checked
 
-| Rule ID | Contract Section | Implementation | Result | Notes |
-|---------|-----------------|----------------|--------|-------|
-| FLOW_VIO_001 | flow_command_boundary | Check 45, `demoswarm_shim_ref` regex | OK | No `demoswarm.sh` in flow commands |
-| FLOW_VIO_002 | flow_command_boundary | Check 45, `skill_names_in_prose` regex | OK | No skill names in flow commands |
-| FLOW_VIO_003 | flow_command_boundary | (CLI flags) | OK | No CLI flag syntax detected |
-| AGENT_VIO_001 | agent_skill_declaration | Check 46 | OK | Agents using skills have Skills section |
-| AGENT_VIO_002 | agent_enum_consistency | Check 37 | OK | Status enum canonical |
-| AGENT_VIO_003 | agent_enum_consistency | Check 37 | OK | Action enum canonical |
+| Rule ID       | Contract Section        | Implementation                         | Result | Notes                                   |
+| ------------- | ----------------------- | -------------------------------------- | ------ | --------------------------------------- |
+| FLOW_VIO_001  | flow_command_boundary   | Check 45, `demoswarm_shim_ref` regex   | OK     | No `demoswarm.sh` in flow commands      |
+| FLOW_VIO_002  | flow_command_boundary   | Check 45, `skill_names_in_prose` regex | OK     | No skill names in flow commands         |
+| FLOW_VIO_003  | flow_command_boundary   | (CLI flags)                            | OK     | No CLI flag syntax detected             |
+| AGENT_VIO_001 | agent_skill_declaration | Check 46                               | OK     | Agents using skills have Skills section |
+| AGENT_VIO_002 | agent_enum_consistency  | Check 37                               | OK     | Status enum canonical                   |
+| AGENT_VIO_003 | agent_enum_consistency  | Check 37                               | OK     | Action enum canonical                   |
 
 ## Findings
 
@@ -98,6 +99,7 @@ The "contracts" are structural validation rules enforced by pack-check, not REST
 ### Check 45: Flow Skill Plumbing Boundary
 
 **Contract says:**
+
 ```yaml
 flow_command_boundary:
   violation_patterns:
@@ -108,6 +110,7 @@ flow_command_boundary:
 ```
 
 **Implementation in `flow.rs`:**
+
 ```rust
 fn check_flow_skill_plumbing(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
     // Check for skill names in prose
@@ -122,6 +125,7 @@ fn check_flow_skill_plumbing(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Resul
 ```
 
 **Regex patterns in `contracts.rs`:**
+
 ```rust
 skill_names_in_prose: Regex::new(r"\b(runs-derive|runs-index|openq-tools|secrets-tools|test-runner|auto-linter|policy-runner)\b")?,
 demoswarm_shim_ref: Regex::new(r"demoswarm\.sh")?,
@@ -132,6 +136,7 @@ demoswarm_shim_ref: Regex::new(r"demoswarm\.sh")?,
 ### Check 46: Agent Skills Section
 
 **Contract says:**
+
 ```yaml
 agent_skill_declaration:
   detection_rule:
@@ -142,6 +147,7 @@ agent_skill_declaration:
 ```
 
 **Implementation in `flow.rs`:**
+
 ```rust
 fn check_missing_skills_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
     if cx.re.demoswarm_shim_ref.is_match(&content) {

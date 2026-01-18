@@ -18,7 +18,7 @@ All demos use the same goal:
 
 > Add a `demoswarm version` CLI subcommand that prints JSON with tool version info.
 
-This goal is **self-referential**: you're building a feature *for the pack's own CLI tooling*. It's deterministic, offline-friendly, and exercises the pack's core primitives (receipts, mechanical derivation, gating) without inventing a separate "product."
+This goal is **self-referential**: you're building a feature _for the pack's own CLI tooling_. It's deterministic, offline-friendly, and exercises the pack's core primitives (receipts, mechanical derivation, gating) without inventing a separate "product."
 
 ---
 
@@ -37,6 +37,7 @@ cp -r /path/to/demo-swarm/.claude .
 ### Open in Claude Code
 
 Open the sandbox repo in Claude Code. It will discover:
+
 - `.claude/commands/` — slash commands
 - `.claude/agents/` — subagents
 - `.claude/skills/` — skills
@@ -48,11 +49,13 @@ Open the sandbox repo in Claude Code. It will discover:
 **You say:** "Let's start a new feature. Flow 1 captures the intent and produces requirements."
 
 **You run:**
+
 ```
 /flow-1-signal "Add a demoswarm version CLI subcommand that prints JSON with tool version info. Constraints: Must work via bash .claude/scripts/demoswarm.sh version. Output is JSON to stdout. No network calls. Include demoswarm_version, pack_version (if available), git_sha (optional/null-safe)."
 ```
 
 **What happens:**
+
 1. `signal-run-prep` establishes the run directory
 2. `signal-normalizer` parses the input
 3. `requirements-author` writes requirements
@@ -62,6 +65,7 @@ Open the sandbox repo in Claude Code. It will discover:
 7. `gh-reporter` posts a summary
 
 **You show:**
+
 - `.runs/<run-id>/signal/` directory with artifacts
 - `signal_receipt.json` with status and counts
 - GitHub issue (if `gh` is authenticated)
@@ -73,11 +77,13 @@ Open the sandbox repo in Claude Code. It will discover:
 **You say:** "Now we design the solution. Flow 2 produces architecture and contracts."
 
 **You run:**
+
 ```
 /flow-2-plan
 ```
 
 **What happens:**
+
 1. `run-prep` locks onto the existing run
 2. `design-optioneer` proposes options
 3. `adr-author` writes the architecture decision
@@ -85,6 +91,7 @@ Open the sandbox repo in Claude Code. It will discover:
 5. `plan-cleanup` computes the receipt
 
 **You show:**
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `plan_receipt.json`
@@ -96,11 +103,13 @@ Open the sandbox repo in Claude Code. It will discover:
 **You say:** "Flow 3 implements via test/code microloops until the critic is satisfied."
 
 **You run:**
+
 ```
 /flow-3-build
 ```
 
 **What happens:**
+
 1. `test-author` writes tests
 2. `test-critic` reviews and provides a prose handoff with recommendation
 3. Orchestrator reads the handoff and routes accordingly (rerun, bounce to another agent, or proceed)
@@ -111,11 +120,13 @@ Open the sandbox repo in Claude Code. It will discover:
 8. `repo-operator` commits changes
 
 **You show:**
+
 - Test and code files
 - `build_receipt.json` with microloop counts
 - Git commit history
 
 **Feature verification:**
+
 ```bash
 # The implemented feature should now work
 bash .claude/scripts/demoswarm.sh version
@@ -129,17 +140,20 @@ bash .claude/scripts/demoswarm.sh version
 **You say:** "Flow 4 drains all PR feedback—CodeRabbit, CI, human reviews—until the worklist is empty."
 
 **You run:**
+
 ```
 /flow-4-review
 ```
 
 **What happens:**
+
 1. `pr-feedback-harvester` collects all feedback (full severity range)
 2. `review-worklist-writer` creates actionable worklist
 3. Worklist loop: fix items, push, re-harvest (may run multiple times if `PARTIAL`)
 4. `review-cleanup` computes the receipt
 
 **You show:**
+
 - `.runs/<run-id>/review/review_worklist.md`
 - `review_receipt.json` with status (VERIFIED/PARTIAL)
 
@@ -150,11 +164,13 @@ bash .claude/scripts/demoswarm.sh version
 **You say:** "Flow 5 verifies the build and recommends merge or bounce."
 
 **You run:**
+
 ```
 /flow-5-gate
 ```
 
 **What happens:**
+
 1. `receipt-checker` validates build receipt
 2. `coverage-enforcer` checks coverage
 3. `security-scanner` runs SAST
@@ -162,6 +178,7 @@ bash .claude/scripts/demoswarm.sh version
 5. `gate-cleanup` computes the receipt
 
 **You show:**
+
 - `merge_decision.md` with the verdict
 - `gate_receipt.json`
 
@@ -172,11 +189,13 @@ bash .claude/scripts/demoswarm.sh version
 **You say:** "Flow 6 merges to mainline and verifies."
 
 **You run:**
+
 ```
 /flow-6-deploy
 ```
 
 **What happens:**
+
 1. Verifies gate passed
 2. `deploy-decider` confirms deployment readiness
 3. `deploy-monitor` watches CI/deployment
@@ -190,17 +209,20 @@ bash .claude/scripts/demoswarm.sh version
 **You say:** "Flow 7 extracts learnings and closes feedback loops."
 
 **You run:**
+
 ```
 /flow-7-wisdom
 ```
 
 **What happens:**
+
 1. `regression-analyst` analyzes for regressions
 2. `learning-synthesizer` extracts lessons
 3. `feedback-applier` suggests improvements
 4. `wisdom-cleanup` computes the final receipt
 
 **You show:**
+
 - `learnings.md`
 - `wisdom_receipt.json`
 - Complete run history in `.runs/<run-id>/`
@@ -259,6 +281,7 @@ This demonstrates the core value: **"prompt → structured artifacts → receipt
 See [Quickstart troubleshooting](quickstart.md#troubleshooting) for common issues.
 
 **Critic keeps bouncing?** Read the critic's prose handoff:
+
 - If it recommends another agent or flow, route there
 - If it suggests another pass, rerun the critic
 - If it says "proceed," continue to the next station
@@ -268,8 +291,8 @@ See [Quickstart troubleshooting](quickstart.md#troubleshooting) for common issue
 
 ## Next Steps
 
-| Goal | Doc |
-|------|-----|
+| Goal                     | Doc                                              |
+| ------------------------ | ------------------------------------------------ |
 | Customize for your stack | [customize-pack.md](../how-to/customize-pack.md) |
-| Full reference | [CLAUDE.md](../../CLAUDE.md) |
-| Validate pack contracts | [validation-run.md](validation-run.md) |
+| Full reference           | [CLAUDE.md](../../CLAUDE.md)                     |
+| Validate pack contracts  | [validation-run.md](validation-run.md)           |

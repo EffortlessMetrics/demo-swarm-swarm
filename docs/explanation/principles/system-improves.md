@@ -11,6 +11,7 @@ The swarm is not a static machine. It learns from every run. Flow 7 (Wisdom) ext
 ### Repetition Is Waste
 
 When the same failure occurs across runs:
+
 - Developer attention is spent on the same fix repeatedly
 - The factory produces the same defects
 - Trust erodes ("we keep hitting this")
@@ -20,6 +21,7 @@ A learning system converts failures into guardrails.
 ### Institutional Memory
 
 Individual agents have no memory across sessions. Disk is memory. But patterns that recur across runs need to become part of the pack itself:
+
 - Agent prompts encode lessons
 - Templates include hard-won checklists
 - Flow commands route around known pitfalls
@@ -66,16 +68,19 @@ The system is not learning. Same failure mode, no improvement.
 **Run 2:** Same pattern emerges.
 
 **feedback-applier produces a ready-to-apply diff:**
-```markdown
+
+````markdown
 ### PACK-001: bdd-critic empty input guidance
 
 **Pattern observed:** Empty input edge cases missed in 2 runs
 **Evidence:** run-feat-auth, run-feat-session
 
 **File:** `.claude/agents/bdd-critic.md`
+
 ```diff
 +- For each happy path, verify empty/null/missing input scenarios exist
 ```
+````
 
 Human applies the diff. Next run benefits.
 
@@ -88,6 +93,7 @@ This is noise. No specific change. No diff. No issue draft.
 ### Correct: Bound Advice to Action
 
 Every learning must produce either:
+
 1. A diff (ready to apply)
 2. An issue draft (for larger work)
 3. A discussion item (explicitly labeled, with options)
@@ -109,18 +115,19 @@ Track recurrence. Escalate repeated failures.
 **learning-synthesizer** reads all flow artifacts and extracts what worked, what failed, and pack/flow observations. Produces actionable learnings with evidence pointers.
 
 **feedback-applier** converts learnings into:
+
 - `pack_improvements.md`: Ready-to-apply diffs
 - `feedback_actions.md`: Issue drafts for larger work
 - `.runs/_wisdom/latest.md`: Scent trail for future runs
 
 ## Anti-Patterns
 
-| Anti-Pattern | Symptom | Fix |
-|--------------|---------|-----|
-| Ignoring repeated failures | Same flake in 3 runs, no action | Require action after second occurrence |
-| Vibe dumps | "Could be better at X" | Map every observation to diff or issue |
-| Backlog never clears | 100 improvements unreviewed | Small, focused; review regularly |
-| Over-generalization | One failure = 10 checklist items | One failure = one targeted fix |
+| Anti-Pattern               | Symptom                          | Fix                                    |
+| -------------------------- | -------------------------------- | -------------------------------------- |
+| Ignoring repeated failures | Same flake in 3 runs, no action  | Require action after second occurrence |
+| Vibe dumps                 | "Could be better at X"           | Map every observation to diff or issue |
+| Backlog never clears       | 100 improvements unreviewed      | Small, focused; review regularly       |
+| Over-generalization        | One failure = 10 checklist items | One failure = one targeted fix         |
 
 ## See Also
 

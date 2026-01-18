@@ -23,15 +23,18 @@ bash .claude/scripts/demoswarm.sh openq <command> [options]
 ## Operating Invariants
 
 ### Repo root only
+
 - Assume working directory is repo root.
 - All paths are repo-root-relative.
 
 ### QID format
+
 - Pattern: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-PLAN-002`, `OQ-BUILD-003`)
 - Flow codes: `SIG` (signal), `PLAN` (plan), `BUILD` (build), `REVIEW` (review), `GATE` (gate), `DEPLOY` (deploy), `WISDOM` (wisdom)
 - Sequential within flow (auto-incremented from existing entries)
 
 ### Append-only
+
 - Never modifies existing entries
 - Only appends new questions at the end
 
@@ -40,20 +43,22 @@ bash .claude/scripts/demoswarm.sh openq <command> [options]
 ## Allowed Users
 
 Primary:
+
 - `clarifier`
 - Flow orchestrators (when questions arise mid-flow)
 
 Secondary:
+
 - Any agent that needs to register an open question rather than guessing
 
 ---
 
 ## Command Reference
 
-| Command | Purpose |
-|---------|---------|
-| `openq next-id` | Generate next QID for a flow |
-| `openq append` | Append question entry to file |
+| Command         | Purpose                       |
+| --------------- | ----------------------------- |
+| `openq next-id` | Generate next QID for a flow  |
+| `openq append`  | Append question entry to file |
 
 ---
 
@@ -139,13 +144,13 @@ echo "Registered question: $QID"
 
 ## Flow Codes Reference
 
-| Flow | Code | Example QID |
-|------|------|-------------|
-| signal | SIG | OQ-SIG-001 |
-| plan | PLAN | OQ-PLAN-001 |
-| build | BUILD | OQ-BUILD-001 |
+| Flow   | Code   | Example QID   |
+| ------ | ------ | ------------- |
+| signal | SIG    | OQ-SIG-001    |
+| plan   | PLAN   | OQ-PLAN-001   |
+| build  | BUILD  | OQ-BUILD-001  |
 | review | REVIEW | OQ-REVIEW-001 |
-| gate | GATE | OQ-GATE-001 |
+| gate   | GATE   | OQ-GATE-001   |
 | deploy | DEPLOY | OQ-DEPLOY-001 |
 | wisdom | WISDOM | OQ-WISDOM-001 |
 
@@ -160,6 +165,7 @@ cargo install --path tools/demoswarm-runs-tools --root .demoswarm
 ```
 
 The shim will automatically resolve in order:
+
 1. `.demoswarm/bin/demoswarm` (repo-local install, preferred)
 2. `demoswarm` on PATH (global install)
 3. `cargo run` fallback (dev environments)

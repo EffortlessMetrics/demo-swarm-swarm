@@ -20,6 +20,7 @@ You surface risks early, track them through the lifecycle, and communicate findi
 Identify the current flow from context (the orchestrator invocation). Then read what exists:
 
 ### Always try
+
 - `.runs/<run-id>/run_meta.json`
 - Prior risk assessments if present:
   - `.runs/<run-id>/signal/risk_assessment.md`
@@ -30,12 +31,14 @@ Identify the current flow from context (the orchestrator invocation). Then read 
   - `.runs/<run-id>/wisdom/risk_assessment.md`
 
 ### Flow 1 (Signal)
+
 - `.runs/<run-id>/signal/problem_statement.md`
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/early_risks.md` (if present)
 - `.runs/<run-id>/signal/open_questions.md` (if present)
 
 ### Flow 2 (Plan)
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml` (if present)
 - `.runs/<run-id>/plan/schema.md` (if present)
@@ -43,6 +46,7 @@ Identify the current flow from context (the orchestrator invocation). Then read 
 - `.runs/<run-id>/plan/test_plan.md` (if present)
 
 ### Flow 5 (Gate)
+
 - `.runs/<run-id>/build/build_receipt.json` (if present)
 - `.runs/<run-id>/build/test_critique.md` (if present)
 - `.runs/<run-id>/build/code_critique.md` (if present)
@@ -51,6 +55,7 @@ Identify the current flow from context (the orchestrator invocation). Then read 
 - `.runs/<run-id>/gate/coverage_audit.md` (if present)
 
 ### Flow 7 (Wisdom)
+
 - `.runs/<run-id>/wisdom/regression_report.md` (if present)
 - `.runs/<run-id>/wisdom/artifact_audit.md` (if present)
 
@@ -59,6 +64,7 @@ If an input is missing, proceed best-effort and record it in `missing_required` 
 ## Output
 
 Write (or update) exactly one file:
+
 - `.runs/<run-id>/<current-flow>/risk_assessment.md`
 
 Do not append into other artifacts. This avoids cross-agent merge conflicts.
@@ -66,6 +72,7 @@ Do not append into other artifacts. This avoids cross-agent merge conflicts.
 ## Status model
 
 Use:
+
 - `VERIFIED` — the risk register is complete for available inputs; no unmitigated CRITICAL/HIGH risks remain without an explicit accept/mitigate plan
 - `UNVERIFIED` — missing inputs, or CRITICAL/HIGH risks exist without a mitigation/acceptance plan, or evidence is insufficient
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
@@ -73,6 +80,7 @@ Use:
 ### Routing Guidance
 
 Use natural language in your handoff to communicate next steps:
+
 - All CRITICAL/HIGH risks mitigated or accepted → recommend proceeding
 - CRITICAL/HIGH risks need spec/design changes → recommend routing to Flow 1 or 2
 - CRITICAL/HIGH risks need implementation fixes → recommend routing to Flow 3 (code-implementer)
@@ -82,6 +90,7 @@ Use natural language in your handoff to communicate next steps:
 ## Risk taxonomy
 
 Each risk must have:
+
 - `id` (RSK-###)
 - `category`: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 - `severity`: `CRITICAL | HIGH | MEDIUM | LOW`
@@ -124,22 +133,26 @@ Each risk must have:
 ## Risk Summary
 
 | Severity | Count |
-|----------|-------|
+| -------- | ----- |
 | Critical | <int> |
-| High | <int> |
-| Medium | <int> |
-| Low | <int> |
+| High     | <int> |
+| Medium   | <int> |
+| Low      | <int> |
 
 **Blockers:**
+
 - <must change to proceed (e.g., "mitigation plan required for RSK-002")>
 
 **Missing:**
+
 - <path or tool>
 
 **Concerns:**
+
 - <non-gating issues>
 
 ## Context
+
 - flow: <signal|plan|build|gate|deploy|wisdom>
 - run_id: <run-id>
 - inputs_used:
@@ -149,15 +162,16 @@ Each risk must have:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | SECURITY | HIGH | OPEN | Missing authz check on admin endpoint | backend |
-| RSK-002 | DATA | MEDIUM | MITIGATED | Migration is additive, backfill idempotent | data |
-| ... | ... | ... | ... | ... | ... |
+| ID      | Category | Severity | Status    | Summary                                    | Owner   |
+| ------- | -------- | -------- | --------- | ------------------------------------------ | ------- |
+| RSK-001 | SECURITY | HIGH     | OPEN      | Missing authz check on admin endpoint      | backend |
+| RSK-002 | DATA     | MEDIUM   | MITIGATED | Migration is additive, backfill idempotent | data    |
+| ...     | ...      | ...      | ...       | ...                                        | ...     |
 
 ## Risk Details
 
 ### RSK-001: <short title>
+
 - Category: SECURITY
 - Severity: HIGH
 - Status: OPEN
@@ -174,11 +188,13 @@ Each risk must have:
   - <what should happen next and why>
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-003, RSK-005]
 - CHANGED: [RSK-001]
 - CLOSED: [RSK-002]
 
 ## Recommended Next
+
 - <1-5 bullets explaining what should happen next>
 ```
 

@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -93,6 +94,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
   - stable-markers.md and contracts.md should be updated to match (covered by ST-006)
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -103,6 +105,7 @@ assumptions_added: 5
 missing_required: []
 blockers: []
 concerns:
-  - CRITICAL: ADR/work_plan check IDs (50, 51) collide with existing drift.rs check 50; must use 52, 53 instead
-  - Check ID overlap exists across drift.rs and flow.rs modules (IDs 45-50 used differently in each); appears intentional
-  - tests directory does not exist and must be created from scratch
+
+- CRITICAL: ADR/work_plan check IDs (50, 51) collide with existing drift.rs check 50; must use 52, 53 instead
+- Check ID overlap exists across drift.rs and flow.rs modules (IDs 45-50 used differently in each); appears intentional
+- tests directory does not exist and must be created from scratch

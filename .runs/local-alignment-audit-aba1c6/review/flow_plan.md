@@ -27,6 +27,7 @@
 ## Human Review Checklist
 
 Before proceeding to Flow 5, humans should review:
+
 - [x] PR is ready for review (not draft)
 - [x] All critical worklist items are resolved
 - [ ] CI checks are passing (verify after push)
@@ -34,28 +35,31 @@ Before proceeding to Flow 5, humans should review:
 
 ## Worklist Progress
 
-| Item | Category | Severity | Status |
-|------|----------|----------|--------|
-| RW-001 | CORRECTNESS | CRITICAL | RESOLVED |
-| RW-002 | CORRECTNESS | MAJOR | SKIPPED (not a bug) |
-| RW-003 | DOCS | MAJOR | RESOLVED |
-| RW-004 | DOCS | MAJOR | RESOLVED |
-| RW-005 | DOCS | MAJOR | RESOLVED |
-| RW-006 | STYLE | MAJOR | RESOLVED |
-| RW-007..RW-030 | STYLE | MINOR | RESOLVED (style sweep) |
+| Item           | Category    | Severity | Status                 |
+| -------------- | ----------- | -------- | ---------------------- |
+| RW-001         | CORRECTNESS | CRITICAL | RESOLVED               |
+| RW-002         | CORRECTNESS | MAJOR    | SKIPPED (not a bug)    |
+| RW-003         | DOCS        | MAJOR    | RESOLVED               |
+| RW-004         | DOCS        | MAJOR    | RESOLVED               |
+| RW-005         | DOCS        | MAJOR    | RESOLVED               |
+| RW-006         | STYLE       | MAJOR    | RESOLVED               |
+| RW-007..RW-030 | STYLE       | MINOR    | RESOLVED (style sweep) |
 
 ## Progress Notes
 
 ### 2025-12-20T12:20 - Run infrastructure established
+
 - Created `.runs/local-alignment-audit-aba1c6/review/`
 - Updated run_meta.json and index.json
 
 ### 2025-12-20T12:25 - Feedback harvested
+
 - PR #2 exists (Draft)
 - Harvested feedback from CodeRabbit, Gemini, GitHub Actions
 - 30 items identified (1 CRITICAL, 5 MAJOR, 24 MINOR)
 
 ### 2025-12-20T12:30 - Worklist loop completed
+
 - **RW-001 [CRITICAL]:** Fixed api_contracts.yaml command registry - updated counts from 10->7, removed deleted file references
 - **RW-002 [MAJOR]:** Skipped - boolean is correct per CLAUDE.md contract
 - **RW-003 [MAJOR]:** Fixed architecture.md "flow variants" section - rewrote as accurate 7-command table
@@ -64,6 +68,7 @@ Before proceeding to Flow 5, humans should review:
 - **RW-006 [MAJOR]:** Fixed "immeidate" typo in all 7 flow command files
 
 ### Style Sweep
+
 All remaining MINOR Markdown formatting issues (RW-007 through RW-030) are resolved.
 
 ## Files Modified This Flow
@@ -78,4 +83,3 @@ All remaining MINOR Markdown formatting issues (RW-007 through RW-030) are resol
 8. `.claude/commands/flow-5-gate.md`
 9. `.claude/commands/flow-6-deploy.md`
 10. `.claude/commands/flow-7-wisdom.md`
-

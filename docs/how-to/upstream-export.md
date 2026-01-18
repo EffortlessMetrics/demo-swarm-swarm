@@ -11,10 +11,12 @@
 ## See Also
 
 **Related workflows:**
+
 - [run-topology.md](run-topology.md) — Swarm repo setup and branch model
 - [adopt-fork-workflow.md](adopt-fork-workflow.md) — Fork-based swarm workflow
 
 **Core reference:**
+
 - [CLAUDE.md](../../CLAUDE.md) — Full pack reference, Flow 6 (Deploy) semantics
 
 ---
@@ -53,12 +55,14 @@ Should I export this run?
 ```
 
 **Keep in swarm only when:**
+
 - Experimenting with ideas
 - Building throwaway prototypes
 - Running learning exercises
 - Work is still in draft state
 
 **Export to human repo when:**
+
 - Production feature is complete and verified
 - Team needs to review and integrate
 - Work must be deployed from human repo
@@ -69,21 +73,25 @@ Should I export this run?
 ## Common export scenarios
 
 ### Scenario A: Solo developer, clean feature
+
 - **Context:** You've completed a feature, Gate says MERGE, you want it in human repo
 - **Best approach:** Cherry-pick (Option 1)
 - **Why:** Direct, clean history, minimal overhead
 
 ### Scenario B: Team review required
+
 - **Context:** Team uses GitHub PR review workflow
 - **Best approach:** PR from swarm branch (Option 2)
 - **Why:** Fits existing team process, visibility, discussion thread
 
 ### Scenario C: Complex change, selective merge
+
 - **Context:** Swarm made extra changes you don't want, or you need to adapt the diff
 - **Best approach:** Diff and apply (Option 3)
 - **Why:** Manual control, selective application, adaptation as needed
 
 ### Scenario D: Multiple small fixes
+
 - **Context:** Several independent runs completed, want to batch export
 - **Best approach:** Cherry-pick multiple commits (Option 1) or create a consolidation branch
 - **Why:** Efficient batching, clean history
@@ -137,13 +145,13 @@ git apply changes.patch
 
 ## What to export vs. what to keep
 
-| Content | Export? | Notes |
-|---------|---------|-------|
-| Code changes | Yes | The actual implementation |
-| Test changes | Yes | Tests that validate the implementation |
-| `.runs/` | No | Keep in swarm repo only |
-| `run_meta.json` | No | Swarm-internal |
-| Receipts | No | Audit trail stays in swarm |
+| Content         | Export? | Notes                                  |
+| --------------- | ------- | -------------------------------------- |
+| Code changes    | Yes     | The actual implementation              |
+| Test changes    | Yes     | Tests that validate the implementation |
+| `.runs/`        | No      | Keep in swarm repo only                |
+| `run_meta.json` | No      | Swarm-internal                         |
+| Receipts        | No      | Audit trail stays in swarm             |
 
 ---
 

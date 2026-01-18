@@ -129,12 +129,16 @@ subtasks:
     scope_hints:
       code_roots: []
       test_roots: []
-      doc_paths: ["docs/reference/stable-markers.md", "docs/reference/contracts.md"]
+      doc_paths:
+        ["docs/reference/stable-markers.md", "docs/reference/contracts.md"]
       allow_new_files_under: []
     touches:
       - "docs/reference/stable-markers.md"
       - "docs/reference/contracts.md"
-    tests: ["grep -E 'PLAN|BUILD' docs/reference/stable-markers.md docs/reference/contracts.md"]
+    tests:
+      [
+        "grep -E 'PLAN|BUILD' docs/reference/stable-markers.md docs/reference/contracts.md",
+      ]
     observability: []
     estimate: S
 

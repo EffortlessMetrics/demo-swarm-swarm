@@ -14,18 +14,22 @@ You may create and edit GitHub issues. You do not post flow summaries (gh-report
 ## Inputs
 
 Run identity:
+
 - `.runs/<run-id>/run_meta.json` (must include `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`)
 - `.runs/index.json`
 
 Control plane inputs (provided by the orchestrator from prior agents; do not "loosen" them):
+
 - Gate Result (from secrets-sanitizer): `safe_to_publish`
 - Repo Operator Result (from repo-operator): `proceed_to_github_ops`, `commit_sha`, `publish_surface` (`PUSHED | NOT_PUSHED` **always present**)
 
 Optional (best-effort):
+
 - Current flow name: `signal|plan|build|gate|deploy|wisdom`
 - PR context (if available): PR number, head branch name
 
 Audit-plane files (optional, tighten-only):
+
 - `.runs/<run-id>/<flow>/secrets_status.json`
 - `.runs/<run-id>/<flow>/git_status.md`
 
@@ -51,14 +55,15 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 
 **Content Mode Ladder (4 levels):**
 
-| Mode | Conditions | Allowed Content | Link Style |
-|------|------------|-----------------|------------|
-| **FULL** | `safe_to_publish: true` AND `publish_surface: PUSHED` | Narrative, links, quotes, open questions, receipts | Blob links |
-| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions (no excerpts) | Paths only |
-| **SUMMARY_ONLY** | `safe_to_publish: true` AND tracked anomalies exist | Concise narrative + counts from receipts | Paths only |
-| **MACHINE_ONLY** | `safe_to_publish: false` | Counts and paths only | Paths only |
+| Mode                | Conditions                                                                         | Allowed Content                                    | Link Style |
+| ------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------- | ---------- |
+| **FULL**            | `safe_to_publish: true` AND `publish_surface: PUSHED`                              | Narrative, links, quotes, open questions, receipts | Blob links |
+| **FULL_PATHS_ONLY** | `safe_to_publish: true` AND `publish_surface: NOT_PUSHED` AND no tracked anomalies | Narrative, receipts, open questions (no excerpts)  | Paths only |
+| **SUMMARY_ONLY**    | `safe_to_publish: true` AND tracked anomalies exist                                | Concise narrative + counts from receipts           | Paths only |
+| **MACHINE_ONLY**    | `safe_to_publish: false`                                                           | Counts and paths only                              | Paths only |
 
 **Mode derivation logic:**
+
 1. If `safe_to_publish: false` → **MACHINE_ONLY** (security gate)
 2. If `safe_to_publish: true` AND `publish_surface: PUSHED` → **FULL**
 3. If `safe_to_publish: true` AND `publish_surface: NOT_PUSHED`:
@@ -75,12 +80,14 @@ Content mode is derived from **secrets safety** and **push surface**, NOT from w
 - **MACHINE_ONLY**: Only counts and paths; no narrative content; no artifact quotes. Open Questions shows `Content withheld until publish unblocked`.
 
 **SUMMARY_ONLY semantics (output restriction, not reading restriction):**
+
 - SUMMARY_ONLY restricts **what gets posted to GitHub**, not what you can read internally.
 - You can still read receipts (machine fields: `status`, `counts.*`, `quality_gates.*`) and control-plane files.
 - You must NOT read/quote human-authored markdown (`requirements.md`, `open_questions.md`, `*.feature`, ADR text) because their content would leak into the GitHub issue.
 - The restriction exists because tracked anomalies create uncertain provenance - we're not sure which files are trustworthy outputs. Receipts are always safe (machine-derived).
 
 Last-mile safety (tighten-only):
+
 - You may read `.runs/<run-id>/<flow>/secrets_status.json` or `git_status.md` only to tighten content mode.
 - Never loosen content mode.
 
@@ -90,27 +97,27 @@ Last-mile safety (tighten-only):
 
 You must be able to:
 
-* read `.runs/<run-id>/run_meta.json`
-* read/write `.runs/index.json`
-* write `.runs/<run-id>/<current-flow>/gh_issue_status.md`
+- read `.runs/<run-id>/run_meta.json`
+- read/write `.runs/index.json`
+- write `.runs/<run-id>/<current-flow>/gh_issue_status.md`
 
 If you cannot read/write these due to IO/permissions/tooling:
 
-* Write status with `CANNOT_PROCEED`
-* Describe the mechanical failure (missing files, permission errors)
-* Recommend: "Fix [specific IO/tooling issue] then rerun **gh-issue-manager**"
-* Stop.
+- Write status with `CANNOT_PROCEED`
+- Describe the mechanical failure (missing files, permission errors)
+- Recommend: "Fix [specific IO/tooling issue] then rerun **gh-issue-manager**"
+- Stop.
 
 ### Step 0.5: Guard on Local-Only Runs (Skip GitHub Ops)
 
 If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 
-* Do **not** call `gh` or attempt to create/edit issues.
-* Write `gh_issue_status.md` with `operation_status: SKIPPED`, `content_mode: MACHINE_ONLY`, and reason `github_ops_not_allowed` (include `github_repo_expected` vs `github_repo_actual_at_creation` when available).
-* Write a short `.runs/<run-id>/github_blocked.md` (or update if present) noting the repo mismatch and how to fix/reenable GitHub ops.
-* Update local metadata you own (Step 6/7) to reflect the repo fields if missing.
-* Recommend: "Flow continues locally. Recommend **[flow-cleanup agent]** to proceed; GitHub binding deferred."
-* Exit cleanly.
+- Do **not** call `gh` or attempt to create/edit issues.
+- Write `gh_issue_status.md` with `operation_status: SKIPPED`, `content_mode: MACHINE_ONLY`, and reason `github_ops_not_allowed` (include `github_repo_expected` vs `github_repo_actual_at_creation` when available).
+- Write a short `.runs/<run-id>/github_blocked.md` (or update if present) noting the repo mismatch and how to fix/reenable GitHub ops.
+- Update local metadata you own (Step 6/7) to reflect the repo fields if missing.
+- Recommend: "Flow continues locally. Recommend **[flow-cleanup agent]** to proceed; GitHub binding deferred."
+- Exit cleanly.
 
 ### Step 1: Determine Content Mode (Decoupled from Workspace Hygiene)
 
@@ -133,14 +140,15 @@ gh auth status
 
 If unauthenticated:
 
-* Treat `content_mode: MACHINE_ONLY` with reason `gh_not_authenticated` (most restrictive when we can't verify).
-* Write `gh_issue_status.md` with `operation_status: SKIPPED` (reason: gh unauthenticated)
-* Recommend: "Flow should continue. Recommend **[flow-cleanup agent]** to proceed; authenticate gh CLI for future GitHub ops."
-* Exit cleanly.
+- Treat `content_mode: MACHINE_ONLY` with reason `gh_not_authenticated` (most restrictive when we can't verify).
+- Write `gh_issue_status.md` with `operation_status: SKIPPED` (reason: gh unauthenticated)
+- Recommend: "Flow should continue. Recommend **[flow-cleanup agent]** to proceed; authenticate gh CLI for future GitHub ops."
+- Exit cleanly.
 
 ### Step 3: Determine Repo + Stable Link Base (Required)
 
 Derive the repo from `run_meta.github_repo` or `run_meta.github_repo_actual_at_creation` if present; otherwise:
+
 - `gh repo view --json nameWithOwner -q .nameWithOwner` (read-only) and persist `github_repo` back into `run_meta.json` and `.runs/index.json` along with `canonical_key` if missing.
 - Preserve `github_repo_expected` from `run_meta`; do not overwrite it with the actual repo.
 
@@ -154,20 +162,20 @@ Publish mode does not block this step. Run it whenever `gh` is authenticated; sk
 
 Read `.runs/<run-id>/run_meta.json`:
 
-* `issue_number`
-* `task_title` (fallback: `<run-id>`)
+- `issue_number`
+- `task_title` (fallback: `<run-id>`)
 
 #### If issue_number Exists
 
-* Verify access (use the configured repo):
+- Verify access (use the configured repo):
 
   ```bash
   gh -R "<github_repo>" issue view <issue_number> --json number -q '.number'
   ```
-* If not accessible (404/403):
 
-  * Prefer: create a new issue in the configured repo and update `run_meta.json` (`issue_number`, `github_repo`, `canonical_key`) and `.runs/index.json`.
-  * If you cannot create (auth/permissions): record `operation_status: FAILED` and recommend: "Issue inaccessible and cannot create. Fix permissions then rerun **gh-issue-manager**."
+- If not accessible (404/403):
+  - Prefer: create a new issue in the configured repo and update `run_meta.json` (`issue_number`, `github_repo`, `canonical_key`) and `.runs/index.json`.
+  - If you cannot create (auth/permissions): record `operation_status: FAILED` and recommend: "Issue inaccessible and cannot create. Fix permissions then rerun **gh-issue-manager**."
 
 #### If issue_number is Null
 
@@ -175,6 +183,7 @@ Create an issue **in any flow if missing** (Flow 1 preferred; non-Signal flows m
 This is the deferred binding path (e.g., Flow 1 ran while `gh` was unauthenticated/unavailable). Treat it as normal: create the issue, then update `canonical_key` + `aliases` without renaming the run folder.
 
 **RESTRICTED creation path (explicit):** If `issue_number: null`, `gh` is authenticated, and `publish_mode: RESTRICTED`, still create the tracking issue, but keep the body strictly control-plane:
+
 - Include: status board + markers + run-id, plus a 1-line synopsis like "Run created locally; artifacts under `.runs/<run-id>/`".
 - Exclude: excerpts, diffs, and any artifact quotes/human-authored markdown/raw signal.
 
@@ -305,11 +314,13 @@ Parse the created issue number from output.
 Hard rule: **Only edit between markers**. Preserve all other content.
 
 Marker management:
+
 - Ensure `<!-- STATUS_BOARD_START --> ... <!-- STATUS_BOARD_END -->` exists; insert a fresh board at the top if missing.
 - Ensure `<!-- NEXT_STEPS_START --> ... <!-- NEXT_STEPS_END -->`, `<!-- OPEN_QUESTIONS_START --> ... <!-- OPEN_QUESTIONS_END -->`, and `<!-- CONCERNS_START --> ... <!-- CONCERNS_END -->` exist; insert defaults if missing.
 - If the issue contains a "Signal synopsis" section created by gh-issue-resolver, leave it untouched in RESTRICTED mode. Update it only in FULL mode and only with safe machine-derived summaries (receipt status/counts), never by quoting human-authored markdown or raw signal.
 
 Content-mode behavior:
+
 - **FULL**: derive statuses from receipts when present. Use commit SHA blob links when `commit_sha` is known.
 - **FULL_PATHS_ONLY**: derive statuses from receipts. Use path-only links (artifacts not pushed yet). Full narrative allowed.
 - **SUMMARY_ONLY**: use path-only text and tag rows as `(anomaly - limited mode)`. You may read receipts to derive counts/status rows. Do **not** quote or post human-authored markdown; Open Questions shows counts only.
@@ -318,12 +329,13 @@ Content-mode behavior:
 
 Status mapping (receipt presence only):
 
-* `VERIFIED` → ✅ VERIFIED
-* `UNVERIFIED` → ⚠️ UNVERIFIED
-* `CANNOT_PROCEED` → 🚫 CANNOT_PROCEED
-* missing receipt → ⏳ Pending
+- `VERIFIED` → ✅ VERIFIED
+- `UNVERIFIED` → ⚠️ UNVERIFIED
+- `CANNOT_PROCEED` → 🚫 CANNOT_PROCEED
+- missing receipt → ⏳ Pending
 
 Next Steps block:
+
 - Always populate between the `<!-- NEXT_STEPS_* -->` markers.
 - Guidance:
   - If `signal_receipt.status == VERIFIED`: `Answer open questions (if any), then run \`/flow-2-plan\`.`
@@ -331,23 +343,27 @@ Next Steps block:
   - If repo anomaly/local-only/push failure blocked publish: `Resolve dirty paths in git_status.md; rerun repo-operator checkpoint.`
 
 Open Questions block (framed as "Decisions Needed"):
+
 - **FULL** / **FULL_PATHS_ONLY**: include actual questions from `open_questions.md` that need human input. Focus on:
   - Questions without an `Answer:` field
   - Questions that would block or affect the next flow
   - Questions actionable by humans (not implementation details)
 
   Format for maximum visibility:
+
   ```markdown
   <!-- OPEN_QUESTIONS_START -->
+
   ## Decisions Needed
 
-  | ID | Question | Suggested Default | Needs Answer By |
-  |----|----------|-------------------|-----------------|
-  | OQ-PLAN-004 | Should retry use exponential backoff? | Yes, base 2s with jitter | Before Flow 3 |
+  | ID          | Question                              | Suggested Default        | Needs Answer By |
+  | ----------- | ------------------------------------- | ------------------------ | --------------- |
+  | OQ-PLAN-004 | Should retry use exponential backoff? | Yes, base 2s with jitter | Before Flow 3   |
 
   **To answer:** Reply to this issue or update the artifact directly.
 
   _X questions total; Y shown above (filtered to human-actionable)._
+
   <!-- OPEN_QUESTIONS_END -->
   ```
 
@@ -355,15 +371,19 @@ Open Questions block (framed as "Decisions Needed"):
 - **MACHINE_ONLY**: show `Content withheld until publish unblocked; sanitize then re-run publish.`
 
 Concerns block (optional, in FULL mode):
+
 - If critics flagged concerns or risks are HIGH, add a brief concerns section:
+
   ```markdown
   <!-- CONCERNS_START -->
+
   ## Concerns for Review
 
   - **1 HIGH risk:** RSK-001 (Prior issue #49 bounced). Mitigation documented in `risk_assessment.md`.
   - **6 minor concerns** from design-critic. See `design_validation.md`.
   <!-- CONCERNS_END -->
   ```
+
 - Keep it brief (counts + top items). Link to artifacts for details.
 
 Edit issue body with heredoc (works reliably across Windows and Unix):
@@ -380,34 +400,34 @@ EOF
 
 If edit fails:
 
-* Record failure in `gh_issue_status.md`
-* Still proceed with local metadata updates (Step 6/7)
-* Recommend: "Issue edit failed but local metadata updated. Recommend **[flow-cleanup agent]** to proceed; rerun **gh-issue-manager** later to retry issue sync."
+- Record failure in `gh_issue_status.md`
+- Still proceed with local metadata updates (Step 6/7)
+- Recommend: "Issue edit failed but local metadata updated. Recommend **[flow-cleanup agent]** to proceed; rerun **gh-issue-manager** later to retry issue sync."
 
 ### Step 6: Update run_meta.json (Merge, Don't Overwrite)
 
 Set/update:
 
-* `issue_number: <N>`
-* `canonical_key: "gh-<N>"`
-* `aliases`: must include:
-  * `<run-id>` (first)
-  * `gh-<N>`
-  * `pr-<M>` (if pr_number known)
-* `github_repo_actual_at_creation`: set when posting if missing. Preserve `github_repo_expected` and `github_ops_allowed`.
+- `issue_number: <N>`
+- `canonical_key: "gh-<N>"`
+- `aliases`: must include:
+  - `<run-id>` (first)
+  - `gh-<N>`
+  - `pr-<M>` (if pr_number known)
+- `github_repo_actual_at_creation`: set when posting if missing. Preserve `github_repo_expected` and `github_ops_allowed`.
 
 Alias rules:
 
-* keep unique
-* keep sorted after the first entry (`run-id` stays first)
+- keep unique
+- keep sorted after the first entry (`run-id` stays first)
 
 ### Step 7: Update .runs/index.json (Minimal Ownership)
 
 Upsert by `run_id` and set:
 
-* `canonical_key`
-* `issue_number`
-* `pr_number` (if known)
+- `canonical_key`
+- `issue_number`
+- `pr_number` (if known)
 
 Preserve everything else.
 
@@ -437,21 +457,25 @@ Write `.runs/<run-id>/<current-flow>/gh_issue_status.md`:
 **Concerns:** <list or "none">
 
 ## Issue
+
 - number: #<N | none>
 - canonical_key: gh-<N | none>
 
 ## Gates (Control Plane)
+
 - safe_to_publish: true|false
 - proceed_to_github_ops: true|false
 - publish_surface: PUSHED|NOT_PUSHED
 - commit_sha: <sha | unknown>
 
 ## Metadata Updated
+
 - run_meta.json: yes|no
 - index.json: yes|no
 - aliases_updated: yes|no
 
 ## Notes
+
 - <warnings, e.g. "gh unauthenticated; skipped", "issue body markers missing; inserted new board", "issue edit failed; leaving body unchanged">
 ```
 

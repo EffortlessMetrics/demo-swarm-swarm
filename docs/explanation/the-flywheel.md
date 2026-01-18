@@ -66,13 +66,13 @@ This path is how the system improves itself.
 
 ## Wisdom to Signal: The Specific Connections
 
-| Wisdom Produces | Flows Back To | How It Gets There |
-|-----------------|---------------|-------------------|
-| `learnings.md` | Agent prompts | Pattern becomes prompt guidance via feedback-applier |
+| Wisdom Produces        | Flows Back To   | How It Gets There                                     |
+| ---------------------- | --------------- | ----------------------------------------------------- |
+| `learnings.md`         | Agent prompts   | Pattern becomes prompt guidance via feedback-applier  |
 | `regression_report.md` | Risk assessment | Known failure mode informs `early_risks.md` in Signal |
-| Quality observations | Test strategy | Quality gaps inform `test_plan.md` in Plan |
-| Process friction | Flow design | Inefficiencies lead to pack updates |
-| Pack observations | Agent prompts | PACK_OBS markers become diffs to agent files |
+| Quality observations   | Test strategy   | Quality gaps inform `test_plan.md` in Plan            |
+| Process friction       | Flow design     | Inefficiencies lead to pack updates                   |
+| Pack observations      | Agent prompts   | PACK_OBS markers become diffs to agent files          |
 
 ---
 
@@ -108,18 +108,23 @@ The explicit mechanisms reduce the burden. But humans remain in the loop for jud
 A flywheel gains momentum. Each turn makes the next easier.
 
 **Turn 1:** Run produces learnings
+
 - "Agent X kept missing pattern Y"
 
 **Turn 2:** Learnings improve prompts
+
 - feedback-applier adds instruction to Agent X
 
 **Turn 3:** Better prompts produce better artifacts
+
 - Agent X now catches pattern Y
 
 **Turn 4:** Better artifacts produce richer learnings
+
 - Wisdom notices Agent X improved; captures what worked
 
 **Turn 5:** Richer learnings improve prompts further
+
 - Pattern Y handling refined based on new evidence
 
 The system gets better at its job over time. Not from magic, but from deliberately closing the loop.

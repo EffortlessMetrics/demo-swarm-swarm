@@ -4,13 +4,13 @@ This document specifies the CLI helper surface for mechanical operations in `.ru
 
 ## Contract Summary
 
-| Principle | Rule |
-|-----------|------|
-| Null over guess | Missing file/pattern -> `null`, not `0` |
-| Single scalar stdout | Each command prints exactly one value |
-| Exit code 0 | Always exit 0 (errors expressed via `null`) |
-| No git/GitHub | These helpers never touch git or gh |
-| Repo-root paths | All paths are repo-root-relative |
+| Principle            | Rule                                        |
+| -------------------- | ------------------------------------------- |
+| Null over guess      | Missing file/pattern -> `null`, not `0`     |
+| Single scalar stdout | Each command prints exactly one value       |
+| Exit code 0          | Always exit 0 (errors expressed via `null`) |
+| No git/GitHub        | These helpers never touch git or gh         |
+| Repo-root paths      | All paths are repo-root-relative            |
 
 **Strict mode (optional):** set `DEMOSWARM_STRICT=1` to return non-zero exit codes on parse/exec errors. Agents never set this; it is for human debugging only. Note: `.claude/scripts/demoswarm.sh` unsets `DEMOSWARM_STRICT` to keep agent behavior stable; use direct `demoswarm ...` invocation for strict debugging.
 
@@ -29,6 +29,7 @@ Never invoke the binary directly or manipulate PATH.
 ### Resolution Order
 
 The shim resolves in order:
+
 1. `.demoswarm/bin/demoswarm` (Rust, repo-local install, preferred)
 2. `demoswarm` on PATH (global install)
 3. `cargo run` fallback (dev only, if `tools/` exists)
@@ -36,10 +37,10 @@ The shim resolves in order:
 
 ### Implementations
 
-| Implementation | Location | Notes |
-|----------------|----------|-------|
-| Rust (demoswarm) | `.demoswarm/bin/` | Preferred; install via cargo |
-| Python | `.claude/skills/*/bin/` | Legacy fallback |
+| Implementation   | Location                | Notes                        |
+| ---------------- | ----------------------- | ---------------------------- |
+| Rust (demoswarm) | `.demoswarm/bin/`       | Preferred; install via cargo |
+| Python           | `.claude/skills/*/bin/` | Legacy fallback              |
 
 ## Command Reference
 
@@ -48,23 +49,25 @@ The shim resolves in order:
 Count lines matching a regex in a file.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--fallback-regex <ere>] [--null-if-missing] [--null-if-zero]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | File to search |
-| `--regex <ere>` | Yes | Extended regex pattern |
-| `--fallback-regex <ere>` | No | Try if primary returns 0 |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
-| `--null-if-zero` | No | Return `null` instead of `0` when no matches |
+| Flag                     | Required | Description                                                                           |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------- |
+| `--file <path>`          | Yes      | File to search                                                                        |
+| `--regex <ere>`          | Yes      | Extended regex pattern                                                                |
+| `--fallback-regex <ere>` | No       | Try if primary returns 0                                                              |
+| `--null-if-missing`      | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| `--null-if-zero`         | No       | Return `null` instead of `0` when no matches                                          |
 
 **Stdout:** `null` | integer
 
 **Semantics:**
+
 - File missing -> `null`
 - File exists, pattern matches N lines -> `N`
 - File exists, no matches -> `0`
@@ -73,6 +76,7 @@ bash .claude/scripts/demoswarm.sh count pattern --file <path> --regex <ere> [--f
 - With `--null-if-zero`: `null` instead of `0` when no matches
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/feat-auth/signal/requirements.md" \
@@ -87,25 +91,28 @@ bash .claude/scripts/demoswarm.sh count pattern \
 Count BDD scenarios across feature files.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count bdd --dir <path> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--dir <path>` | Yes | Features directory |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| Flag                | Required | Description                                                                           |
+| ------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `--dir <path>`      | Yes      | Features directory                                                                    |
+| `--null-if-missing` | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 
 **Semantics:**
+
 - Dir missing -> `null`
 - Dir exists, no `.feature` files -> `0`
 - Counts lines matching `^\s*(Scenario:|Scenario Outline:)`
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count bdd \
   --dir ".runs/feat-auth/signal/features"
@@ -119,21 +126,23 @@ bash .claude/scripts/demoswarm.sh count bdd \
 Extract a field from a `## Machine Summary` block.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh ms get --file <path> --section <header> --key <name> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Markdown file |
-| `--section <header>` | Yes | Section header (always `## Machine Summary`) |
-| `--key <name>` | Yes | Field name (e.g., `status`) |
+| Flag                 | Required | Description                                  |
+| -------------------- | -------- | -------------------------------------------- |
+| `--file <path>`      | Yes      | Markdown file                                |
+| `--section <header>` | Yes      | Section header (always `## Machine Summary`) |
+| `--key <name>`       | Yes      | Field name (e.g., `status`)                  |
 
 **Stdout:** `null` | string (the field value)
 
 **Semantics:**
+
 - File missing -> `null`
 - Section not found -> `null`
 - Key not found in section -> `null`
@@ -141,6 +150,7 @@ bash .claude/scripts/demoswarm.sh ms get --file <path> --section <header> --key 
 - Otherwise -> the value (first word after `key:`)
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh ms get \
   --file ".runs/feat-auth/signal/requirements_critique.md" \
@@ -156,26 +166,29 @@ bash .claude/scripts/demoswarm.sh ms get \
 Extract a field from a fenced YAML block at the start of a file.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh yaml get --file <path> --key <name> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Markdown file with YAML block |
-| `--key <name>` | Yes | YAML key to extract |
+| Flag            | Required | Description                   |
+| --------------- | -------- | ----------------------------- |
+| `--file <path>` | Yes      | Markdown file with YAML block |
+| `--key <name>`  | Yes      | YAML key to extract           |
 
 **Stdout:** `null` | string
 
 **Semantics:**
+
 - File missing -> `null`
 - No YAML block (no ` ```yaml ``` `) -> `null`
 - Key not in YAML -> `null`
 - Otherwise -> the value
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh yaml get \
   --file ".runs/feat-auth/deploy/deployment_decision.md" \
@@ -190,26 +203,29 @@ bash .claude/scripts/demoswarm.sh yaml get \
 Count items matching a pattern in a YAML block.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh yaml count-items --file <path> --item-regex <ere> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Markdown file with YAML block |
-| `--item-regex <ere>` | Yes | Pattern to count within YAML |
+| Flag                 | Required | Description                   |
+| -------------------- | -------- | ----------------------------- |
+| `--file <path>`      | Yes      | Markdown file with YAML block |
+| `--item-regex <ere>` | Yes      | Pattern to count within YAML  |
 
 **Stdout:** `null` | integer
 
 **Semantics:**
+
 - File missing -> `null`
 - No YAML block -> `null`
 - Counts lines matching pattern within YAML block only
 - POSIX character classes like `[[:space:]]` are supported
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh yaml count-items \
   --file ".runs/feat-auth/deploy/deployment_decision.md" \
@@ -224,26 +240,29 @@ bash .claude/scripts/demoswarm.sh yaml count-items \
 Extract value from an inventory marker line.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh inv get --file <path> --marker <name> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | File to search |
-| `--marker <name>` | Yes | Marker prefix (e.g., `DEP_CI_SIGNAL`) |
+| Flag              | Required | Description                           |
+| ----------------- | -------- | ------------------------------------- |
+| `--file <path>`   | Yes      | File to search                        |
+| `--marker <name>` | Yes      | Marker prefix (e.g., `DEP_CI_SIGNAL`) |
 
 **Stdout:** `null` | string
 
 **Semantics:**
+
 - Looks for `^- <MARKER>: <value>`
 - Returns first match's value
 - File missing -> `null`
 - No matching marker -> `null`
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh inv get \
   --file ".runs/feat-auth/deploy/verification_report.md" \
@@ -258,27 +277,30 @@ bash .claude/scripts/demoswarm.sh inv get \
 Extract value from a line with a known prefix.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh line get --file <path> --prefix <text> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | File to search |
-| `--prefix <text>` | Yes | Line prefix (e.g., `Mutation Score:`) |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| Flag                | Required | Description                                                                           |
+| ------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `--file <path>`     | Yes      | File to search                                                                        |
+| `--prefix <text>`   | Yes      | Line prefix (e.g., `Mutation Score:`)                                                 |
+| `--null-if-missing` | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | string
 
 **Semantics:**
+
 - File missing -> `null`
 - No matching prefix -> `null`
 - Empty value after prefix -> `null`
 - Otherwise returns trimmed value after prefix
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh line get \
   --file ".runs/feat-auth/build/mutation_report.md" \
@@ -293,25 +315,28 @@ bash .claude/scripts/demoswarm.sh line get \
 Count prior flow receipts in a run directory.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh receipts count --run-dir <path> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--run-dir <path>` | Yes | Run directory path |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| Flag                | Required | Description                                                                           |
+| ------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `--run-dir <path>`  | Yes      | Run directory path                                                                    |
+| `--null-if-missing` | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 
 **Semantics:**
+
 - Counts known receipt files (signal, plan, build, gate, deploy, wisdom)
 - Max is 6
 - Run directory missing -> `null`
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh receipts count \
   --run-dir ".runs/feat-auth"
@@ -325,21 +350,23 @@ bash .claude/scripts/demoswarm.sh receipts count \
 Read a field from a receipt JSON file.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh receipt get --file <path> --key <name> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Receipt JSON file |
-| `--key <name>` | Yes | Top-level key to extract |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| Flag                | Required | Description                                                                           |
+| ------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `--file <path>`     | Yes      | Receipt JSON file                                                                     |
+| `--key <name>`      | Yes      | Top-level key to extract                                                              |
+| `--null-if-missing` | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | string
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh receipt get \
   --file ".runs/feat-auth/gate/gate_receipt.json" \
@@ -354,25 +381,28 @@ bash .claude/scripts/demoswarm.sh receipt get \
 Count API paths in an OpenAPI YAML file.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openapi count-paths --file <path> [--null-if-missing]
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | OpenAPI YAML file |
-| `--null-if-missing` | No | Provided for API consistency; functionally redundant (missing already returns `null`) |
+| Flag                | Required | Description                                                                           |
+| ------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `--file <path>`     | Yes      | OpenAPI YAML file                                                                     |
+| `--null-if-missing` | No       | Provided for API consistency; functionally redundant (missing already returns `null`) |
 
 **Stdout:** `null` | integer
 
 **Semantics:**
+
 - Counts top-level keys under `paths:`
 - Best-effort; returns `null` if unparseable or paths section missing
 - File missing -> `null`
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openapi count-paths \
   --file ".runs/feat-auth/plan/api_contracts.yaml"
@@ -386,6 +416,7 @@ bash .claude/scripts/demoswarm.sh openapi count-paths \
 Update a run's status in `.runs/index.json`.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index <path> --run-id <id> --status <status> --last-flow <flow> [--updated-at <iso>]
@@ -393,17 +424,18 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--index <path>` | Yes | Path to index.json |
-| `--run-id <id>` | Yes | Run ID to update |
-| `--status <status>` | Yes | VERIFIED, UNVERIFIED, or CANNOT_PROCEED |
-| `--last-flow <flow>` | Yes | signal, plan, build, gate, deploy, or wisdom |
-| `--updated-at <iso>` | No | ISO8601 timestamp (defaults to now) |
+| Flag                 | Required | Description                                  |
+| -------------------- | -------- | -------------------------------------------- |
+| `--index <path>`     | Yes      | Path to index.json                           |
+| `--run-id <id>`      | Yes      | Run ID to update                             |
+| `--status <status>`  | Yes      | VERIFIED, UNVERIFIED, or CANNOT_PROCEED      |
+| `--last-flow <flow>` | Yes      | signal, plan, build, gate, deploy, or wisdom |
+| `--updated-at <iso>` | No       | ISO8601 timestamp (defaults to now)          |
 
 **Stdout:** `ok` | `SKIPPED_MISSING_INDEX` | `SKIPPED_RUN_NOT_FOUND`
 
 **Semantics:**
+
 - Index missing -> print `SKIPPED_MISSING_INDEX`, exit 0
 - Updates only: `status`, `last_flow`, `updated_at`
 - Preserves all other fields
@@ -411,6 +443,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 - Atomic write (temp file + rename)
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index ".runs/index.json" \
@@ -428,6 +461,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 Print current UTC timestamp in ISO8601 format.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh time now
 ```
@@ -437,6 +471,7 @@ bash .claude/scripts/demoswarm.sh time now
 **Stdout:** ISO8601 timestamp
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh time now
 # stdout: 2025-01-15T10:30:00Z
@@ -453,26 +488,29 @@ These are used by skills or scripts, not typically called directly by agents.
 Generate the next open question ID in sequence.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openq next-id --file <path> --prefix <prefix>
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Path to open_questions.md file |
-| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`) |
+| Flag                | Required | Description                              |
+| ------------------- | -------- | ---------------------------------------- |
+| `--file <path>`     | Yes      | Path to open_questions.md file           |
+| `--prefix <prefix>` | Yes      | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`) |
 
 **Stdout:** `OQ-<PREFIX>-NNN` (e.g., `OQ-SIG-001`)
 
 **Semantics:**
+
 - Scans file for existing IDs matching `OQ-<PREFIX>-NNN` pattern
 - Returns next sequential ID (zero-padded to 3 digits)
 - If file missing or no existing IDs -> returns `OQ-<PREFIX>-001`
 - Never returns `null`; always generates a valid ID
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openq next-id \
   --file ".runs/feat-auth/signal/open_questions.md" \
@@ -487,6 +525,7 @@ bash .claude/scripts/demoswarm.sh openq next-id \
 Append an open question entry to a file.
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openq append \
   --file <path> --prefix <prefix> --question <text> \
@@ -495,23 +534,25 @@ bash .claude/scripts/demoswarm.sh openq append \
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | Path to open_questions.md file |
-| `--prefix <prefix>` | Yes | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`) |
-| `--question <text>` | Yes | The open question text |
-| `--default <text>` | Yes | Suggested default answer/assumption |
-| `--impact <text>` | Yes | Impact description if assumption is wrong |
+| Flag                | Required | Description                               |
+| ------------------- | -------- | ----------------------------------------- |
+| `--file <path>`     | Yes      | Path to open_questions.md file            |
+| `--prefix <prefix>` | Yes      | ID prefix (e.g., `SIG`, `PLAN`, `BUILD`)  |
+| `--question <text>` | Yes      | The open question text                    |
+| `--default <text>`  | Yes      | Suggested default answer/assumption       |
+| `--impact <text>`   | Yes      | Impact description if assumption is wrong |
 
 **Stdout:** The generated QID (e.g., `OQ-SIG-003`)
 
 **Semantics:**
+
 - Generates next ID using `openq next-id` logic
 - Appends formatted entry with: QID, question, suggested default, impact, and ISO8601 timestamp
 - Creates file if it does not exist
 - Returns the assigned QID on success
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh openq append \
   --file ".runs/feat-auth/signal/open_questions.md" \
@@ -529,20 +570,22 @@ bash .claude/scripts/demoswarm.sh openq append \
 Scan for secrets (locations only, never content).
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh secrets scan --path <path> --output <path>
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--path <path>` | Yes | File or directory to scan |
-| `--output <path>` | Yes | Path to write JSON findings |
+| Flag              | Required | Description                 |
+| ----------------- | -------- | --------------------------- |
+| `--path <path>`   | Yes      | File or directory to scan   |
+| `--output <path>` | Yes      | Path to write JSON findings |
 
 **Stdout:** `CLEAN` | `SECRETS_FOUND` | `SCAN_PATH_MISSING`
 
 **Semantics:**
+
 - Scans recursively for common secret patterns (tokens, keys, credentials)
 - Writes JSON findings to `--output` path (not stdout)
 - Stdout returns only the status signal
@@ -550,6 +593,7 @@ bash .claude/scripts/demoswarm.sh secrets scan --path <path> --output <path>
 - Never prints secret content (only file locations and types)
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh secrets scan \
   --path ".runs/feat-auth/build" \
@@ -565,30 +609,33 @@ bash .claude/scripts/demoswarm.sh secrets scan \
 Redact a specific secret type in a file (in-place).
 
 **Usage:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh secrets redact --file <path> --type <type>
 ```
 
 **Arguments:**
 
-| Flag | Required | Description |
-|------|----------|-------------|
-| `--file <path>` | Yes | File to redact secrets from |
-| `--type <type>` | Yes | Type of secret to redact |
+| Flag            | Required | Description                 |
+| --------------- | -------- | --------------------------- |
+| `--file <path>` | Yes      | File to redact secrets from |
+| `--type <type>` | Yes      | Type of secret to redact    |
 
 **Valid `--type` values:**
 
-| Type | Description |
-|------|-------------|
-| `github-token` | GitHub personal access tokens (ghp_*, gho_*, etc.) |
-| `aws-access-key` | AWS access key IDs (AKIA*) |
-| `stripe-key` | Stripe API keys (sk_live_*, sk_test_*) |
-| `jwt-token` | JSON Web Tokens (eyJ*) |
-| `private-key` | Private key blocks (-----BEGIN * PRIVATE KEY-----) |
+| Type             | Description                                          |
+| ---------------- | ---------------------------------------------------- |
+| `github-token`   | GitHub personal access tokens (ghp*\*, gho*\*, etc.) |
+| `aws-access-key` | AWS access key IDs (AKIA\*)                          |
+<!-- markdownlint-disable-next-line MD060 -->
+| `stripe-key`     | Stripe API keys (`sk_live_`, `sk_test_`)            |
+| `jwt-token`      | JSON Web Tokens (eyJ\*)                              |
+| `private-key`    | Private key blocks (-----BEGIN \* PRIVATE KEY-----)  |
 
 **Stdout:** `ok` | `FILE_NOT_FOUND` | `null`
 
 **Semantics:**
+
 - Redacts in-place (modifies the file directly)
 - Replaces secret content with `[REDACTED:<type>]` placeholder
 - Returns `ok` on successful redaction
@@ -596,6 +643,7 @@ bash .claude/scripts/demoswarm.sh secrets redact --file <path> --type <type>
 - Returns `null` on other errors
 
 **Example:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh secrets redact \
   --file ".runs/feat-auth/build/config_sample.md" \
@@ -629,14 +677,15 @@ bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 
 Different skills own different command families:
 
-| Skill | Commands Owned |
-|-------|----------------|
-| `runs-derive` | `count`, `ms get`, `yaml get/count-items`, `inv get`, `line get`, `receipts count`, `receipt get`, `openapi count-paths`, `time now` |
-| `runs-index` | `index upsert-status` |
-| `openq-tools` | `openq next-id`, `openq append` |
-| `secrets-tools` | `secrets scan`, `secrets redact` |
+| Skill           | Commands Owned                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `runs-derive`   | `count`, `ms get`, `yaml get/count-items`, `inv get`, `line get`, `receipts count`, `receipt get`, `openapi count-paths`, `time now` |
+| `runs-index`    | `index upsert-status`                                                                                                                |
+| `openq-tools`   | `openq next-id`, `openq append`                                                                                                      |
+| `secrets-tools` | `secrets scan`, `secrets redact`                                                                                                     |
 
 See individual skill docs for usage contracts:
+
 - `.claude/skills/runs-derive/SKILL.md`
 - `.claude/skills/runs-index/SKILL.md`
 - `.claude/skills/openq-tools/SKILL.md`

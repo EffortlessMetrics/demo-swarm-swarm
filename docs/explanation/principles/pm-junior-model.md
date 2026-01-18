@@ -5,6 +5,7 @@
 ## The Principle
 
 In Claude Code, the orchestrator (Claude itself) acts as a project manager directing a team of specialist agents. Each agent is like a well-trained junior developer who:
+
 - Has a specific job they're good at
 - Does real work
 - Reports back clearly
@@ -15,6 +16,7 @@ In Claude Code, the orchestrator (Claude itself) acts as a project manager direc
 ### Claude Is Capable
 
 The orchestrator doesn't need training wheels. It can:
+
 - Read natural language reports
 - Understand context and nuance
 - Make judgment calls
@@ -33,6 +35,7 @@ The PM reads this, understands it, decides. No parsing needed.
 ### Trust and Autonomy
 
 Well-trained juniors don't need micromanagement. They:
+
 - Understand their job
 - Do it competently
 - Ask for help when stuck
@@ -43,6 +46,7 @@ The same applies to agents.
 ## How It Works
 
 ### Orchestrator Responsibilities
+
 - Read flow command (the project plan)
 - Spawn agents for specific tasks
 - Read agent handoffs
@@ -50,6 +54,7 @@ The same applies to agents.
 - Keep the flow moving
 
 ### Agent Responsibilities
+
 - Do the assigned work
 - Write meaningful artifacts
 - Report back with findings
@@ -58,37 +63,46 @@ The same applies to agents.
 ### Communication Pattern
 
 **Orchestrator → Agent:**
+
 > "Review the implementation against the spec. Find issues. Report back."
 
 **Agent → Orchestrator:**
+
 > "Found 2 issues. Session timeout wrong, missing error handling. Recommend code-implementer fix both, then re-run me."
 
 **Orchestrator decision:**
+
 > "Okay, code-implementer — fix those issues."
 
 ## Anti-Patterns
 
 ### ❌ Treating Claude Like a Parser
+
 ```yaml
 status: UNVERIFIED
 recommended_action: RERUN
 route_to_agent: code-implementer
 ```
+
 The orchestrator doesn't need structured fields to route.
 
 ### ❌ Micromanaging Agents
+
 Don't specify every step. Give them the job and let them figure out how.
 
 ### ❌ Removing Agent Judgment
+
 Agents should make recommendations, not just report facts.
 
 ## Examples
 
 ### Good PM Behavior
+
 Orchestrator reads: "Critic found 3 issues, recommends fixes before proceeding"
 Orchestrator decides: Route to implementer with the issues
 
 ### Good Junior Behavior
+
 Agent finds a problem, explains it clearly, suggests a solution, recommends next steps
 
 ## See Also

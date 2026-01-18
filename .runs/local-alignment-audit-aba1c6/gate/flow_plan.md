@@ -36,6 +36,7 @@
 ## Human Review Checklist
 
 Before proceeding:
+
 - [x] `.runs/local-alignment-audit-aba1c6/gate/merge_decision.md` - MERGE approved
 - [x] `.runs/local-alignment-audit-aba1c6/gate/security_scan.md` - 0 findings
 - [x] `.runs/local-alignment-audit-aba1c6/gate/policy_analysis.md` - 0 violations

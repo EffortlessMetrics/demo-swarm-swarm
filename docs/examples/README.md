@@ -4,12 +4,12 @@ These are synthetic but realistic examples of swarm-generated artifacts. They de
 
 **Why these examples matter:** You learn this system by seeing the artifacts. The PR cockpit, the merge decision, the critiques—these are what review actually looks like. Read them to understand the posture.
 
-| Example | Shows | What to Notice |
-|---------|-------|----------------|
-| [pr-cockpit.md](pr-cockpit.md) | PR description format | The cockpit is your primary UI, not the diff |
-| [code-critique.md](code-critique.md) | Critique severities | CRITICAL/MAJOR/MINOR/SUGGESTION have clear semantics |
-| [open-questions.md](open-questions.md) | Uncertainty tracking | DEFAULTED = safe assumption made; NEEDS_HUMAN = requires authority |
-| [merge-decision.md](merge-decision.md) | Gate decision memo | Receipt chain audit shows how verification flows through |
+| Example                                | Shows                 | What to Notice                                                     |
+| -------------------------------------- | --------------------- | ------------------------------------------------------------------ |
+| [pr-cockpit.md](pr-cockpit.md)         | PR description format | The cockpit is your primary UI, not the diff                       |
+| [code-critique.md](code-critique.md)   | Critique severities   | CRITICAL/MAJOR/MINOR/SUGGESTION have clear semantics               |
+| [open-questions.md](open-questions.md) | Uncertainty tracking  | DEFAULTED = safe assumption made; NEEDS_HUMAN = requires authority |
+| [merge-decision.md](merge-decision.md) | Gate decision memo    | Receipt chain audit shows how verification flows through           |
 
 ---
 

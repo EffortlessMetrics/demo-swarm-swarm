@@ -14,12 +14,13 @@ blockers: []
 missing_required: []
 
 concerns:
-  - Build receipt reported CANNOT_PROCEED due to directory permissions during write, but all required build artifacts (ac_status.json, test_execution.md, self_review.md, doc_critique.md) are accessible and verified independently
+
+- Build receipt reported CANNOT_PROCEED due to directory permissions during write, but all required build artifacts (ac_status.json, test_execution.md, self_review.md, doc_critique.md) are accessible and verified independently
 
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+critical: 0
+major: 0
+minor: 0
 
 checks_total: 11
 checks_passed: 11
@@ -65,16 +66,19 @@ checks_passed: 11
 ## Cross-Reference Results (best-effort)
 
 **Against test_execution.md (Machine Summary):**
+
 - Canonical summary: "Pack contents: Agents: 73, Commands: 8, Skills: 7. Passed with 2 warning(s)."
 - Test counts match: passed=53, failed=0, skipped=0, xfailed=0, xpassed=0
 - Status: CONSISTENT.
 
 **Against doc_critique.md (Machine Summary):**
+
 - Critic verdict: VERIFIED
 - Blockers: none
 - Status: CONSISTENT.
 
 **Against self_review.md (Machine Summary):**
+
 - Status: VERIFIED
 - Recommended action: PROCEED
 - AC loop complete: YES (35/35)
@@ -82,6 +86,7 @@ checks_passed: 11
 - Status: CONSISTENT.
 
 **Against impl_changes_summary.md:**
+
 - Phase 1-4 verification results: All checks passed
 - Subtasks ST-001 through ST-010: All completed
 - Grep verification: 0 matches for "six flows" in public docs (PASS)
@@ -93,6 +98,7 @@ checks_passed: 11
 ## Review Completion Check
 
 **review_receipt.json status:**
+
 - exists: YES
 - status: VERIFIED
 - recommended_action: PROCEED
@@ -103,6 +109,7 @@ checks_passed: 11
 - worklist_pending: 0
 
 **Blocking conditions assessment:**
+
 - Critical pending: NO (has_critical_pending: false)
 - Major pending: NO (has_major_pending: false)
 - Review complete: YES (review_complete: true)
@@ -125,24 +132,28 @@ checks_passed: 11
 ## Cross-Flow Artifact Chain
 
 **Signal Receipt (.runs/local-alignment-audit-aba1c6/signal/signal_receipt.json):**
+
 - status: VERIFIED
 - completed_at: 2025-12-20T03:52:42Z
 - bdd_scenarios: 32
 - All critics: VERIFIED
 
 **Plan Receipt (.runs/local-alignment-audit-aba1c6/plan/plan_receipt.json):**
+
 - status: VERIFIED
 - completed_at: 2025-12-20T04:56:31Z
 - ac_count: 32 (plan stage; later 35 in build after detailed verification)
 - All critics: VERIFIED
 
 **Build Receipt (.runs/local-alignment-audit-aba1c6/build/build_receipt.json):**
+
 - status: CANNOT_PROCEED (mechanical I/O)
 - completed_at: 2025-12-20T12:15:00Z
 - ac_completed: 35/35
 - All substantive artifacts present and verified
 
 **Review Receipt (.runs/local-alignment-audit-aba1c6/review/review_receipt.json):**
+
 - status: VERIFIED
 - completed_at: 2025-12-20T13:25:00Z
 - critical_items resolved: 1/1
@@ -150,6 +161,7 @@ checks_passed: 11
 - blocking_items_resolved: true
 
 **Run Metadata (.runs/local-alignment-audit-aba1c6/run_meta.json):**
+
 - run_id: local-alignment-audit-aba1c6
 - flows_started: [signal, plan, build, review, gate]
 - issue_number: 1
@@ -163,6 +175,7 @@ checks_passed: 11
 **No CRITICAL or MAJOR issues detected.**
 
 **MINOR concerns:**
+
 - Build receipt CANNOT_PROCEED is a permissions artifact, not a content defect. All required build artifacts are accessible via git and substantively verified.
 - No review worklist items pending (style sweep complete).
 
@@ -188,4 +201,3 @@ This Gate audit verifies that the documentation alignment audit run (`local-alig
 - **PR readiness:** PR #2 is open, CI passing, feedback harvested, transitioned to ready status.
 
 **Gate verdict: PROCEED to Flow 6 (Deploy) for merge and closure.**
-

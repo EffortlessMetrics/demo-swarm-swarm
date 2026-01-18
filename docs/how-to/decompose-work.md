@@ -11,6 +11,7 @@
 When you have a feature request, ask: **"What discrete jobs need doing, and who does each one?"**
 
 This guide helps you slice work into agent-sized pieces that are:
+
 - **Focused** — one responsibility per agent
 - **Bounded** — clear success criteria
 - **Evidence-backed** — tests or checks to verify completion
@@ -28,22 +29,24 @@ This guide helps you slice work into agent-sized pieces that are:
 
 Think of the swarm as an org structure:
 
-| Role | Maps To | Responsibility | Decision Authority |
-|------|---------|----------------|-------------------|
-| **PM / Dispatcher** | Orchestrator | Scope, sequence, route | What to do next |
-| **ICs (Workers)** | Worker agents | Execute discrete work | How to implement |
-| **Staff Review** | Critics + Cleanup | Quality gates, compression | Whether work meets bar |
-| **Change Management** | Gate agents | Boundary control | Whether to ship |
+| Role                  | Maps To           | Responsibility             | Decision Authority     |
+| --------------------- | ----------------- | -------------------------- | ---------------------- |
+| **PM / Dispatcher**   | Orchestrator      | Scope, sequence, route     | What to do next        |
+| **ICs (Workers)**     | Worker agents     | Execute discrete work      | How to implement       |
+| **Staff Review**      | Critics + Cleanup | Quality gates, compression | Whether work meets bar |
+| **Change Management** | Gate agents       | Boundary control           | Whether to ship        |
 
 ### Orchestrators (PMs)
 
 Orchestrators **route and sequence**. They:
+
 - Read artifacts and understand context
 - Decide which agent handles what
 - Route based on agent Result blocks
 - Manage the TodoWrite checklist
 
 Orchestrators **do not**:
+
 - Write code or tests
 - Parse files for routing decisions
 - Do work that should be delegated
@@ -51,12 +54,14 @@ Orchestrators **do not**:
 ### Worker Agents (ICs)
 
 Worker agents **do focused work**. They:
+
 - Execute one specific type of task
 - Report back honestly (including partial progress)
 - Recommend next steps
 - Update their own tracking artifacts
 
 Workers **do not**:
+
 - Route to other agents
 - Make cross-cutting decisions
 - Do work outside their specialty
@@ -64,6 +69,7 @@ Workers **do not**:
 ### Critics and Cleanup (Staff Review)
 
 Critics and cleanup agents **compress and verify**. They:
+
 - Review work harshly but fairly
 - Summarize large contexts into small signals
 - Verify claims match evidence
@@ -74,6 +80,7 @@ Critics **never fix**. They report issues for workers to address.
 ### Gate Agents (Change Management)
 
 Gate agents **control boundaries**. They:
+
 - Read evidence and decide go/no-go
 - Enforce publish-time constraints (secrets, hygiene)
 - Produce decision documents
@@ -89,6 +96,7 @@ Before spawning an agent, ask: **Why?**
 ### Reason 1: Work Needs Doing
 
 The task requires focused expertise:
+
 - `code-implementer` writes code that satisfies ACs
 - `test-author` writes tests that verify behavior
 - `requirements-author` shapes vague ideas into testable specs
@@ -98,6 +106,7 @@ The task requires focused expertise:
 ### Reason 2: Context Needs Compressing
 
 The conversation has accumulated too much context:
+
 - `build-cleanup` compresses flow artifacts into a receipt
 - `code-critic` distills a codebase into "what's wrong and where"
 - `pr-feedback-harvester` compresses GitHub API firehose into actionable blockers
@@ -107,6 +116,7 @@ The conversation has accumulated too much context:
 ### That's It
 
 No other reasons. If a task doesn't fit either category:
+
 - Maybe the orchestrator can handle it directly
 - Maybe it's mechanical work for a skill (not an agent)
 - Maybe it's not a task at all (just routing)
@@ -121,12 +131,12 @@ Start with a feature request. Slice it into jobs by asking: **"What distinct typ
 
 **Job:** Turn vague ideas into testable contracts.
 
-| Agent | Work |
-|-------|------|
-| `requirements-author` | Write requirements with atomic ACs |
+| Agent                 | Work                                 |
+| --------------------- | ------------------------------------ |
+| `requirements-author` | Write requirements with atomic ACs   |
 | `requirements-critic` | Review for testability, completeness |
-| `bdd-author` | Write Gherkin scenarios |
-| `bdd-critic` | Review scenarios for coverage |
+| `bdd-author`          | Write Gherkin scenarios              |
+| `bdd-critic`          | Review scenarios for coverage        |
 
 **Output:** `requirements.md`, `features/*.feature`, `open_questions.md`
 
@@ -136,13 +146,13 @@ Start with a feature request. Slice it into jobs by asking: **"What distinct typ
 
 **Job:** Make architectural decisions and define boundaries.
 
-| Agent | Work |
-|-------|------|
-| `design-optioneer` | Propose design options with trade-offs |
-| `option-critic` | Review options for feasibility |
-| `adr-author` | Capture decisions in ADR format |
-| `interface-designer` | Define API contracts |
-| `work-planner` | Break work into subtasks with dependencies |
+| Agent                | Work                                       |
+| -------------------- | ------------------------------------------ |
+| `design-optioneer`   | Propose design options with trade-offs     |
+| `option-critic`      | Review options for feasibility             |
+| `adr-author`         | Capture decisions in ADR format            |
+| `interface-designer` | Define API contracts                       |
+| `work-planner`       | Break work into subtasks with dependencies |
 
 **Output:** `adr.md`, `api_contracts.yaml`, `work_plan.md`
 
@@ -152,19 +162,20 @@ Start with a feature request. Slice it into jobs by asking: **"What distinct typ
 
 **Job:** Implement small slices with test coverage.
 
-| Agent | Work |
-|-------|------|
-| `test-author` | Write tests for the AC |
-| `test-critic` | Review tests for coverage |
+| Agent              | Work                            |
+| ------------------ | ------------------------------- |
+| `test-author`      | Write tests for the AC          |
+| `test-critic`      | Review tests for coverage       |
 | `code-implementer` | Write code that satisfies tests |
-| `code-critic` | Review code for correctness |
-| `test-executor` | Run tests, report results |
+| `code-critic`      | Review code for correctness     |
+| `test-executor`    | Run tests, report results       |
 
 **Output:** Code changes, tests, `impl_changes_summary.md`
 
 **Evidence lane:** Do tests pass? Does code satisfy the AC?
 
 **Loop pattern:**
+
 ```
 test-author → test-critic → code-implementer → code-critic → test-executor
                   ↑__________________________________|
@@ -175,13 +186,13 @@ test-author → test-critic → code-implementer → code-critic → test-execut
 
 **Job:** Find issues in specific domains.
 
-| Critic Type | Focus |
-|-------------|-------|
-| `code-critic` | Logic, correctness, ADR compliance |
-| `test-critic` | Coverage, validity, maintainability |
+| Critic Type       | Focus                                  |
+| ----------------- | -------------------------------------- |
+| `code-critic`     | Logic, correctness, ADR compliance     |
+| `test-critic`     | Coverage, validity, maintainability    |
 | `contract-critic` | Interface compliance, breaking changes |
-| `security-critic` | Vulnerabilities, credential exposure |
-| `doc-critic` | Accuracy, completeness |
+| `security-critic` | Vulnerabilities, credential exposure   |
+| `doc-critic`      | Accuracy, completeness                 |
 
 **Output:** `*_critique.md` with worklist
 
@@ -191,13 +202,13 @@ test-author → test-critic → code-implementer → code-critic → test-execut
 
 **Job:** Summarize what happened for downstream consumers.
 
-| Agent | Work |
-|-------|------|
-| `signal-cleanup` | Compress Signal artifacts into receipt |
-| `plan-cleanup` | Compress Plan artifacts into receipt |
-| `build-cleanup` | Compress Build artifacts into receipt + PR cockpit draft |
-| `review-cleanup` | Compress Review artifacts into receipt |
-| `gate-cleanup` | Compress Gate artifacts into receipt |
+| Agent            | Work                                                     |
+| ---------------- | -------------------------------------------------------- |
+| `signal-cleanup` | Compress Signal artifacts into receipt                   |
+| `plan-cleanup`   | Compress Plan artifacts into receipt                     |
+| `build-cleanup`  | Compress Build artifacts into receipt + PR cockpit draft |
+| `review-cleanup` | Compress Review artifacts into receipt                   |
+| `gate-cleanup`   | Compress Gate artifacts into receipt                     |
 
 **Output:** `*_receipt.json`, summary documents
 
@@ -207,10 +218,10 @@ test-author → test-critic → code-implementer → code-critic → test-execut
 
 **Job:** Decide go/no-go at boundaries.
 
-| Agent | Work |
-|-------|------|
-| `merge-decider` | Read evidence, decide merge/bounce |
-| `deploy-decider` | Read verification, decide deploy/hold |
+| Agent               | Work                                     |
+| ------------------- | ---------------------------------------- |
+| `merge-decider`     | Read evidence, decide merge/bounce       |
+| `deploy-decider`    | Read verification, decide deploy/hold    |
 | `secrets-sanitizer` | Scan for secrets, decide safe-to-publish |
 
 **Output:** `merge_decision.md`, `gate_receipt.json`
@@ -226,45 +237,53 @@ A task is safe for an agent when it has:
 ### 1. Crisp Success Definition
 
 **Agent-safe:**
+
 > "Write tests for AC-001 (user login). Cover happy path, invalid credentials, and rate limiting."
 
 **Not agent-safe:**
+
 > "Make sure the tests are good."
 
 ### 2. Bounded Surface Area
 
 **Agent-safe:**
+
 > "Implement the `/users` POST endpoint per the API contract."
 
 **Not agent-safe:**
+
 > "Clean up the API layer."
 
 ### 3. Evidence Lane
 
 **Agent-safe:**
+
 > "Tests in `tests/auth/` should pass. Contract compliance checked by `contract-enforcer`."
 
 **Not agent-safe:**
+
 > "Code should be high quality." (No measurable check)
 
 ### 4. Graceful Failure Mode
 
 **Agent-safe:**
+
 > "If the database schema doesn't exist, log the blocker in `open_questions.md` and continue with remaining ACs."
 
 **Not agent-safe:**
+
 > "Complete all work or fail." (No partial completion allowed)
 
 ### The Four-Part Checklist
 
 Before assigning a task to an agent, verify:
 
-| Criterion | Question | Bad Sign |
-|-----------|----------|----------|
-| **Crisp** | Can I write a test for "done"? | "Make it better" |
-| **Bounded** | Can I list the files likely touched? | "Fix everything" |
-| **Evidenced** | What check proves completion? | "Trust me" |
-| **Fail-graceful** | What if this blocks? | "Must complete" |
+| Criterion         | Question                             | Bad Sign         |
+| ----------------- | ------------------------------------ | ---------------- |
+| **Crisp**         | Can I write a test for "done"?       | "Make it better" |
+| **Bounded**       | Can I list the files likely touched? | "Fix everything" |
+| **Evidenced**     | What check proves completion?        | "Trust me"       |
+| **Fail-graceful** | What if this blocks?                 | "Must complete"  |
 
 ---
 
@@ -276,50 +295,50 @@ Before assigning a task to an agent, verify:
 
 ### Step 1: Signal Jobs
 
-| Task | Agent | Success Criteria |
-|------|-------|------------------|
-| Write auth requirements | `requirements-author` | REQs have atomic ACs; no vague terms |
-| Review requirements | `requirements-critic` | All REQs are testable |
-| Write auth scenarios | `bdd-author` | Scenarios cover login, logout, token refresh |
-| Review scenarios | `bdd-critic` | No missing edge cases |
+| Task                    | Agent                 | Success Criteria                             |
+| ----------------------- | --------------------- | -------------------------------------------- |
+| Write auth requirements | `requirements-author` | REQs have atomic ACs; no vague terms         |
+| Review requirements     | `requirements-critic` | All REQs are testable                        |
+| Write auth scenarios    | `bdd-author`          | Scenarios cover login, logout, token refresh |
+| Review scenarios        | `bdd-critic`          | No missing edge cases                        |
 
 ### Step 2: Plan Jobs
 
-| Task | Agent | Success Criteria |
-|------|-------|------------------|
-| Propose JWT vs session options | `design-optioneer` | Trade-offs documented |
-| Review options | `option-critic` | Feasibility confirmed |
-| Write auth ADR | `adr-author` | Decision rationale clear |
-| Define auth API contract | `interface-designer` | OpenAPI spec valid |
-| Break into subtasks | `work-planner` | Dependency graph valid |
+| Task                           | Agent                | Success Criteria         |
+| ------------------------------ | -------------------- | ------------------------ |
+| Propose JWT vs session options | `design-optioneer`   | Trade-offs documented    |
+| Review options                 | `option-critic`      | Feasibility confirmed    |
+| Write auth ADR                 | `adr-author`         | Decision rationale clear |
+| Define auth API contract       | `interface-designer` | OpenAPI spec valid       |
+| Break into subtasks            | `work-planner`       | Dependency graph valid   |
 
 ### Step 3: Build Jobs (per AC)
 
-**AC-001: User can login with credentials**
+#### AC-001: User can login with credentials
 
-| Task | Agent | Evidence |
-|------|-------|----------|
-| Write login tests | `test-author` | Tests exist in `tests/auth/login.test.ts` |
-| Review login tests | `test-critic` | Coverage includes happy + error paths |
-| Implement login | `code-implementer` | Tests pass; contract satisfied |
-| Review implementation | `code-critic` | No ADR violations |
-| Verify tests pass | `test-executor` | Green CI |
+| Task                  | Agent              | Evidence                                  |
+| --------------------- | ------------------ | ----------------------------------------- |
+| Write login tests     | `test-author`      | Tests exist in `tests/auth/login.test.ts` |
+| Review login tests    | `test-critic`      | Coverage includes happy + error paths     |
+| Implement login       | `code-implementer` | Tests pass; contract satisfied            |
+| Review implementation | `code-critic`      | No ADR violations                         |
+| Verify tests pass     | `test-executor`    | Green CI                                  |
 
-**AC-002: User can logout**
+#### AC-002: User can logout
 
 (Same pattern)
 
-**AC-003: Tokens expire and refresh**
+#### AC-003: Tokens expire and refresh
 
 (Same pattern)
 
 ### Step 4: Cleanup and Gate
 
-| Task | Agent | Output |
-|------|-------|--------|
-| Seal build receipt | `build-cleanup` | `build_receipt.json` |
-| Decide merge | `merge-decider` | `merge_decision.md` |
-| Scan for secrets | `secrets-sanitizer` | `safe_to_publish: true` |
+| Task               | Agent               | Output                  |
+| ------------------ | ------------------- | ----------------------- |
+| Seal build receipt | `build-cleanup`     | `build_receipt.json`    |
+| Decide merge       | `merge-decider`     | `merge_decision.md`     |
+| Scan for secrets   | `secrets-sanitizer` | `safe_to_publish: true` |
 
 ### The Full Task Graph
 
@@ -352,6 +371,7 @@ Gate:
 ### 1. Tasks Too Broad
 
 **Mistake:**
+
 > "Implement the authentication system"
 
 **Fix:** Break into AC-sized chunks. Each AC is one microloop.
@@ -361,6 +381,7 @@ Gate:
 ### 2. Tasks Overlap
 
 **Mistake:**
+
 > Agent A: "Write the login code"
 > Agent B: "Write the auth module"
 
@@ -373,6 +394,7 @@ Both touch the same files. Who owns `auth/login.ts`?
 ### 3. No Evidence Lane
 
 **Mistake:**
+
 > "Refactor the database layer for better performance"
 
 How do we know when this is done? "Better" isn't measurable.
@@ -384,6 +406,7 @@ How do we know when this is done? "Better" isn't measurable.
 ### 4. No Graceful Failure
 
 **Mistake:**
+
 > "Complete all 5 ACs before reporting back"
 
 What if AC-3 requires a schema that doesn't exist?
@@ -395,6 +418,7 @@ What if AC-3 requires a schema that doesn't exist?
 ### 5. Mixing Responsibilities
 
 **Mistake:**
+
 > "Write the code and review it"
 
 Critics never fix. Authors never critique. Self-review doesn't work.
@@ -406,6 +430,7 @@ Critics never fix. Authors never critique. Self-review doesn't work.
 ### 6. Mechanical Work in Agents
 
 **Mistake:**
+
 > Spawning an agent to run `npm test` and report results.
 
 **Fix:** Use the `test-runner` skill instead.
@@ -430,14 +455,14 @@ Before assigning work to agents:
 
 ## Quick Reference: Job Types
 
-| Job Type | Example Agents | Output | Evidence |
-|----------|---------------|--------|----------|
-| **Shaping** | requirements-author, bdd-author | Specs, scenarios | Testability review |
-| **Design** | design-optioneer, adr-author | ADRs, contracts | Feasibility review |
-| **Implementation** | code-implementer, test-author | Code, tests | Test execution |
-| **Critique** | code-critic, test-critic | Worklists | Specificity of issues |
-| **Compression** | *-cleanup | Receipts | Downstream usability |
-| **Decision** | merge-decider, secrets-sanitizer | Go/no-go docs | Traceability |
+| Job Type           | Example Agents                   | Output           | Evidence              |
+| ------------------ | -------------------------------- | ---------------- | --------------------- |
+| **Shaping**        | requirements-author, bdd-author  | Specs, scenarios | Testability review    |
+| **Design**         | design-optioneer, adr-author     | ADRs, contracts  | Feasibility review    |
+| **Implementation** | code-implementer, test-author    | Code, tests      | Test execution        |
+| **Critique**       | code-critic, test-critic         | Worklists        | Specificity of issues |
+| **Compression**    | \*-cleanup                       | Receipts         | Downstream usability  |
+| **Decision**       | merge-decider, secrets-sanitizer | Go/no-go docs    | Traceability          |
 
 ---
 

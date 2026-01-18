@@ -9,6 +9,7 @@
 We are building **developer enablement**: cheap iteration buys verification so humans spend time on decisions, not toil.
 
 The goal is not "replace devs." The goal is:
+
 - Remove toil
 - Ship a healthier codebase
 - Make review time valuable, not exhausting
@@ -19,6 +20,7 @@ The goal is not "replace devs." The goal is:
 ## Write for Humans
 
 When writing docs, prompts, or outputs:
+
 - Explain "why," not just "what"
 - Avoid shaming or gatekeeping
 - Prefer clear headings + short sections
@@ -27,11 +29,11 @@ When writing docs, prompts, or outputs:
 
 ### The Standard
 
-| Good | Bad |
-|------|-----|
-| "This pattern helps because..." | "Obviously you should..." |
-| "If you're seeing X, try Y" | "You shouldn't have done X" |
-| "Here's how to get started" | Wall of text with no entry point |
+| Good                            | Bad                              |
+| ------------------------------- | -------------------------------- |
+| "This pattern helps because..." | "Obviously you should..."        |
+| "If you're seeing X, try Y"     | "You shouldn't have done X"      |
+| "Here's how to get started"     | Wall of text with no entry point |
 
 ---
 
@@ -49,6 +51,7 @@ The PR cockpit is a UI. Treat it like one.
 ### Design for Decisions
 
 Reviewers need to decide: merge or not merge. Give them:
+
 - What changed (summary)
 - Why it changed (intent link)
 - What was verified (evidence)
@@ -72,6 +75,7 @@ The cockpit should be usable by everyone, not just people with perfect vision an
 ## Open Source Sensibility
 
 This pack exists to be:
+
 - **Teachable** — Learn by using, not by studying first
 - **Portable** — Adapt to different stacks and contexts
 - **Kind** — Welcoming to the next contributor
@@ -79,6 +83,7 @@ This pack exists to be:
 ### For Contributors
 
 When someone new arrives:
+
 - The README tells them where to start
 - The first flow works out of the box
 - Errors are explanatory, not cryptic
@@ -87,6 +92,7 @@ When someone new arrives:
 ### For Maintainers
 
 When evolving the pack:
+
 - Explain changes in commit messages
 - Update docs with the code
 - Run pack-check before pushing

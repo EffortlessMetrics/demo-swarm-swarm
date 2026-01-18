@@ -8,18 +8,18 @@
 
 ## Summary
 
-| Source | Items | Critical | Major | Minor | Info |
-|--------|-------|----------|-------|-------|------|
-| Gemini Code Assist | 5 | 1 | 4 | 0 | 0 |
-| CodeRabbit | 25 | 0 | 1 | 24 | 0 |
-| Human Reviews | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **30** | **1** | **5** | **24** | **0** |
+| Source             | Items  | Critical | Major | Minor  | Info  |
+| ------------------ | ------ | -------- | ----- | ------ | ----- |
+| Gemini Code Assist | 5      | 1        | 4     | 0      | 0     |
+| CodeRabbit         | 25     | 0        | 1     | 24     | 0     |
+| Human Reviews      | 0      | 0        | 0     | 0      | 0     |
+| **Total**          | **30** | **1**    | **5** | **24** | **0** |
 
 ## CI Status
 
-| Check | Status | Conclusion | Summary |
-|-------|--------|------------|---------|
-| CodeRabbit | pass | success | Review completed |
+| Check      | Status | Conclusion | Summary          |
+| ---------- | ------ | ---------- | ---------------- |
+| CodeRabbit | pass   | success    | Review completed |
 
 ## Reviews
 
@@ -54,13 +54,16 @@
 #### Minor Issues (Formatting & Style - 24 items)
 
 **Duplicate Headings:**
+
 - **FB-007:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/flow_plan.md:64` - Duplicate "Summary" heading (also at line 3). Rename second to "Final Summary" or "Outcome".
 
 **Bare URLs:**
+
 - **FB-008:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6` - Bare URL should be wrapped in angle brackets or Markdown link syntax (MD034).
 - **FB-009:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/pr_creation_status.md:5` - Bare URL needs wrapping (MD034).
 
 **Missing Blank Lines (MD022/MD058):**
+
 - **FB-010:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/open_questions.md:29` - Add blank line before "Machine Summary" heading.
 - **FB-011:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/secrets_scan.md` - Multiple headings/tables lack blank lines (lines 5-40).
 - **FB-012:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/secrets_scan.md` - Same formatting issues as build variant.
@@ -71,27 +74,33 @@
 - **FB-017:** [MINOR] `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md:35,41` - Headings need blank lines.
 
 **Other Formatting:**
+
 - **FB-018:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md:85-87` - Unordered list has incorrect indentation (MD007).
 - **FB-019:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/self_review.md:1` - Use hyphenated "Self-Review" heading.
 
 **Schema/Data Consistency:**
+
 - **FB-020:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml:96` - Consider adding `maxItems` constraint to `variant_commands` array.
 - **FB-021:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/schema.md:47` - Flow entity invariants inconsistent (says flows 4-7 may have variants, but only 4-6 actually do).
 - **FB-022:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/impact_map.json:146` - IMP-005 summary internally inconsistent about flow table state.
 
 **Grammar/Punctuation:**
+
 - **FB-023:** [MINOR] `.runs/local-alignment-audit-aba1c6/signal/bdd_critique.md:51` - Missing terminal punctuation.
 - **FB-024:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/self_review.md:54` - Clarify risk deferral strategy for RSK-002.
 - **FB-025:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md:54` - Test artifact path not fully qualified in VS-003.
 
 **Typos:**
+
 - **FB-026:** [MINOR] `.claude/commands/flow-*.md` - Typo "immeidate" → "immediate" in multiple flow command docs (directive text).
 
 **Template Issues:**
+
 - **FB-027:** [MINOR] Multiple `secrets_scan.md` files - Recurring formatting issues suggest generator/template needs updating.
 - **FB-028:** [MINOR] `.runs/local-alignment-audit-aba1c6/build/subtask_context_manifest.json` - Has null `generated_at` field.
 
 **Additional Items (FB-029 through FB-030):**
+
 - **FB-029:** [MINOR] `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md:127` - Emphasis used instead of heading (MD036).
 - **FB-030:** [MINOR] `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md` - Missing blank lines after section headings.
 
@@ -117,11 +126,11 @@ No general PR discussion comments found.
 
 ## Pre-merge Checks (CodeRabbit)
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Title check | ✅ Passed | Title clearly summarizes seven-flow model update |
-| Description check | ✅ Passed | PR description covers key sections |
-| Docstring Coverage | ✅ Passed | No functions to evaluate |
+| Check              | Status    | Notes                                            |
+| ------------------ | --------- | ------------------------------------------------ |
+| Title check        | ✅ Passed | Title clearly summarizes seven-flow model update |
+| Description check  | ✅ Passed | PR description covers key sections               |
+| Docstring Coverage | ✅ Passed | No functions to evaluate                         |
 
 ## Actionable Items by Priority
 

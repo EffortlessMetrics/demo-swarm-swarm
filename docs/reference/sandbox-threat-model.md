@@ -22,12 +22,12 @@ Running `bypassPermissions` means:
 
 ### Threats Addressed
 
-| Threat | Example | Mitigation |
-|--------|---------|------------|
-| Destructive commands | `rm -rf /`, `git push --force` | Workspace isolation, non-privileged user |
-| Credential exposure | Secrets in commits, env vars in logs | Credential hygiene, secrets scanning |
-| Scope creep | Changes outside intended area | Dedicated workspace, anomaly detection |
-| Data exfiltration | Posting secrets to external services | Scoped tokens, network controls |
+| Threat               | Example                              | Mitigation                               |
+| -------------------- | ------------------------------------ | ---------------------------------------- |
+| Destructive commands | `rm -rf /`, `git push --force`       | Workspace isolation, non-privileged user |
+| Credential exposure  | Secrets in commits, env vars in logs | Credential hygiene, secrets scanning     |
+| Scope creep          | Changes outside intended area        | Dedicated workspace, anomaly detection   |
+| Data exfiltration    | Posting secrets to external services | Scoped tokens, network controls          |
 
 ### Threats NOT Addressed
 
@@ -93,14 +93,14 @@ Partial compliance is not sufficient. The checklist is a unit.
 
 With all checklist items satisfied:
 
-| Layer | Protection |
-|-------|------------|
-| Workspace | Worst-case damage is contained to the clone |
-| Credentials | No secrets available to leak |
-| Privileges | Cannot escalate beyond the workspace |
-| Network | Scoped tokens limit external actions |
-| Publish gates | Secrets scanning prevents credential commits |
-| Merge gates | Human approval required for protected branches |
+| Layer         | Protection                                     |
+| ------------- | ---------------------------------------------- |
+| Workspace     | Worst-case damage is contained to the clone    |
+| Credentials   | No secrets available to leak                   |
+| Privileges    | Cannot escalate beyond the workspace           |
+| Network       | Scoped tokens limit external actions           |
+| Publish gates | Secrets scanning prevents credential commits   |
+| Merge gates   | Human approval required for protected branches |
 
 This is **infrastructure safety**, not **prompt safety**.
 
@@ -135,12 +135,12 @@ This is **infrastructure safety**, not **prompt safety**.
 
 Minimum permissions for GitHub operations:
 
-| Operation | Required Scope |
-|-----------|----------------|
+| Operation                    | Required Scope                            |
+| ---------------------------- | ----------------------------------------- |
 | Clone/push to feature branch | `repo` or fine-grained: `contents: write` |
-| Create PR | `pull_requests: write` |
-| Read CI status | `checks: read` |
-| Merge to protected branch | Requires human approval (cannot bypass) |
+| Create PR                    | `pull_requests: write`                    |
+| Read CI status               | `checks: read`                            |
+| Merge to protected branch    | Requires human approval (cannot bypass)   |
 
 Fine-grained tokens are preferred over classic PATs.
 

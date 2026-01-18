@@ -1870,7 +1870,10 @@ No observations field at all.
 
             check_critics_handoff_section(&cx, &mut rep).expect("Check failed");
             assert_eq!(rep.errors, 0, "Should have no errors");
-            assert_eq!(rep.warnings, 0, "Should have no warnings with Handoff section");
+            assert_eq!(
+                rep.warnings, 0,
+                "Should have no warnings with Handoff section"
+            );
         }
 
         #[test]

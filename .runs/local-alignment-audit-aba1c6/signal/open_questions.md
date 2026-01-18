@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -95,6 +96,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
 (none yet)
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: 2
@@ -105,6 +107,7 @@ assumptions_added: 5
 missing_required: []
 blockers: []
 concerns:
-  - Six-Flow vs Seven-Flow discrepancy is the most impactful question (affects all public documentation)
-  - All questions have suggested defaults allowing work to proceed
-  - output_path was provided by orchestrator context (not inferred)
+
+- Six-Flow vs Seven-Flow discrepancy is the most impactful question (affects all public documentation)
+- All questions have suggested defaults allowing work to proceed
+- output_path was provided by orchestrator context (not inferred)

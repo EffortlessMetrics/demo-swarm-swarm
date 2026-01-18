@@ -10,27 +10,27 @@
 
 ## Files Scanned
 
-| # | File | Size | Result |
-|---|------|------|--------|
-| 1 | `.runs/local-alignment-audit-aba1c6/wisdom/flow_history.json` | 30 KB | CLEAN |
-| 2 | `.runs/local-alignment-audit-aba1c6/wisdom/regression_report.md` | 6.3 KB | CLEAN |
-| 3 | `.runs/local-alignment-audit-aba1c6/wisdom/artifact_audit.md` | 8 KB | CLEAN |
-| 4 | `.runs/local-alignment-audit-aba1c6/wisdom/feedback_actions.md` | 6 KB | CLEAN |
-| 5 | `.runs/local-alignment-audit-aba1c6/wisdom/traceability_audit.md` | 14.8 KB | CLEAN |
-| 6 | `.runs/local-alignment-audit-aba1c6/wisdom/learnings.md` | 8 KB | CLEAN |
-| 7 | `.runs/local-alignment-audit-aba1c6/wisdom/risk_assessment.md` | 17 KB | CLEAN |
-| 8 | `.runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json` | 1.5 KB | CLEAN |
-| 9 | `.runs/local-alignment-audit-aba1c6/wisdom/cleanup_report.md` | 8 KB | CLEAN |
-| 10 | `.runs/local-alignment-audit-aba1c6/wisdom/github_report.md` | 4 KB | CLEAN |
-| 11 | `.runs/local-alignment-audit-aba1c6/wisdom/flow_plan.md` | 1.5 KB | CLEAN |
-| 12 | `.runs/local-alignment-audit-aba1c6/run_meta.json` | 1 KB | CLEAN |
-| 13 | `.runs/index.json` | 1 KB | CLEAN |
+| #   | File                                                              | Size    | Result |
+| --- | ----------------------------------------------------------------- | ------- | ------ |
+| 1   | `.runs/local-alignment-audit-aba1c6/wisdom/flow_history.json`     | 30 KB   | CLEAN  |
+| 2   | `.runs/local-alignment-audit-aba1c6/wisdom/regression_report.md`  | 6.3 KB  | CLEAN  |
+| 3   | `.runs/local-alignment-audit-aba1c6/wisdom/artifact_audit.md`     | 8 KB    | CLEAN  |
+| 4   | `.runs/local-alignment-audit-aba1c6/wisdom/feedback_actions.md`   | 6 KB    | CLEAN  |
+| 5   | `.runs/local-alignment-audit-aba1c6/wisdom/traceability_audit.md` | 14.8 KB | CLEAN  |
+| 6   | `.runs/local-alignment-audit-aba1c6/wisdom/learnings.md`          | 8 KB    | CLEAN  |
+| 7   | `.runs/local-alignment-audit-aba1c6/wisdom/risk_assessment.md`    | 17 KB   | CLEAN  |
+| 8   | `.runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json`   | 1.5 KB  | CLEAN  |
+| 9   | `.runs/local-alignment-audit-aba1c6/wisdom/cleanup_report.md`     | 8 KB    | CLEAN  |
+| 10  | `.runs/local-alignment-audit-aba1c6/wisdom/github_report.md`      | 4 KB    | CLEAN  |
+| 11  | `.runs/local-alignment-audit-aba1c6/wisdom/flow_plan.md`          | 1.5 KB  | CLEAN  |
+| 12  | `.runs/local-alignment-audit-aba1c6/run_meta.json`                | 1 KB    | CLEAN  |
+| 13  | `.runs/index.json`                                                | 1 KB    | CLEAN  |
 
 ## Findings (redacted)
 
-| # | Type | File | Line | Action |
-|---|------|------|------|--------|
-| (none) | - | - | - | - |
+| #      | Type | File | Line | Action |
+| ------ | ---- | ---- | ---- | ------ |
+| (none) | -    | -    | -    | -      |
 
 No secrets detected on the publish surface.
 

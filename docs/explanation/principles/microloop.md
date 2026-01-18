@@ -11,6 +11,7 @@ Quality comes from iteration. A writer produces work, a critic finds flaws, the 
 ### First Drafts Aren't Final
 
 No one writes perfect code on the first try. The microloop acknowledges this:
+
 - Writers focus on getting something working
 - Critics focus on finding what's wrong
 - Iteration closes the gap
@@ -25,6 +26,7 @@ These are different mindsets. Separating them improves both.
 ### Rigorous Verification
 
 "Trust but verify" in action:
+
 - We trust the writer to do good work
 - We verify by having a critic review
 - We trust the fix, then verify again
@@ -32,6 +34,7 @@ These are different mindsets. Separating them improves both.
 ### Bounded Iteration
 
 The loop doesn't run forever:
+
 - Critic says "proceed" when satisfied
 - Critic says "no further iteration helps" when stuck
 - Orchestrator can cap iterations
@@ -55,16 +58,19 @@ Proceed to next step
 ### Roles
 
 **Writer** (code-implementer, test-author, fixer):
+
 - Produces or modifies artifacts
 - Responds to critic feedback
 - Focuses on making it work
 
 **Critic** (code-critic, test-critic, etc.):
+
 - Reviews against spec/requirements
 - Finds issues, explains why they matter
 - Recommends whether to proceed or iterate
 
 **Orchestrator** (Claude PM):
+
 - Routes based on critic recommendation
 - Decides when to proceed despite imperfections
 - Caps runaway iteration
@@ -74,14 +80,17 @@ Proceed to next step
 Critics end with a clear recommendation:
 
 **"Proceed"** - Work is good enough
+
 - No blocking issues
 - Minor issues can be deferred
 
 **"Rerun writer"** - Fixable issues found
+
 - Specific issues identified
 - Writer can address them
 
 **"No further iteration helps"** - Stuck
+
 - Issues require human decision
 - Or architectural change needed
 - Or external dependency
@@ -89,6 +98,7 @@ Critics end with a clear recommendation:
 ### The Handoff
 
 Critic to orchestrator:
+
 ```markdown
 ## Handoff
 
@@ -153,32 +163,39 @@ Critic recommends: "No further iteration helps.
 ## When to Exit
 
 ### Green Path: Critic Says Proceed
+
 Work meets quality bar. Continue to next step.
 
 ### Yellow Path: Max Iterations
+
 Orchestrator decides good enough. Proceed with documented issues.
 
 ### Red Path: Stuck
+
 Critic says no fix possible at this level. Bounce to design or human.
 
 ## Anti-Patterns
 
 ### Infinite Loop
+
 No exit condition. Writer and critic bounce forever.
 
 **Fix:** Critic explicitly recommends proceed or escalate.
 
 ### Single Pass
+
 No iteration. Writer produces, immediately move on.
 
 **Fix:** Always have critic review. Iterate if needed.
 
 ### Critic Fixes
+
 Critic finds issues AND fixes them.
 
 **Fix:** Critics find, writers fix. Separation of concerns.
 
 ### Orchestrator Ignores Critic
+
 Critic says iterate, orchestrator proceeds anyway.
 
 **Fix:** Route on critic recommendation. Trust their judgment.
@@ -186,6 +203,7 @@ Critic says iterate, orchestrator proceeds anyway.
 ## The Quality Ratchet
 
 Each iteration should improve:
+
 - Critic finds issues
 - Writer fixes them
 - Those issues don't recur
@@ -196,12 +214,12 @@ If issues recur, something is wrong with the feedback loop.
 
 ## Applying to Different Domains
 
-| Domain | Writer | Critic | Loop On |
-|--------|--------|--------|---------|
-| Tests | test-author | test-critic | Coverage, assertions, edge cases |
-| Code | code-implementer | code-critic | Correctness, maintainability |
-| Docs | doc-writer | doc-critic | Accuracy, completeness |
-| Design | design-optioneer | option-critic | Distinctness, comparability |
+| Domain | Writer           | Critic        | Loop On                          |
+| ------ | ---------------- | ------------- | -------------------------------- |
+| Tests  | test-author      | test-critic   | Coverage, assertions, edge cases |
+| Code   | code-implementer | code-critic   | Correctness, maintainability     |
+| Docs   | doc-writer       | doc-critic    | Accuracy, completeness           |
+| Design | design-optioneer | option-critic | Distinctness, comparability      |
 
 Same pattern, different specialists.
 

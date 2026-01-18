@@ -7,11 +7,13 @@ This guide explains how to add a new agent to the DemoSwarm pack.
 ## When to Create an Agent
 
 Create a new agent when you need:
+
 - A **distinct responsibility** not covered by existing agents
 - A **fresh context** for token-heavy work
 - A **different model tier** (haiku for mechanical work, sonnet for synthesis)
 
 Do NOT create a new agent for:
+
 - Work that fits naturally in an existing agent's context (add to that agent instead)
 - One-off customization (use [customize-pack.md](customize-pack.md))
 
@@ -21,13 +23,13 @@ Do NOT create a new agent for:
 
 Before creating an agent, ask: **Does this need its own context?**
 
-| Consideration | New Agent | Existing Agent |
-|---------------|-----------|----------------|
-| Token budget > 50K for inputs | ✓ | |
-| Different model tier needed | ✓ | |
-| Distinct responsibility | ✓ | |
-| Work shares same loaded files | | ✓ |
-| Work is 1-2 additional steps | | ✓ |
+| Consideration                 | New Agent | Existing Agent |
+| ----------------------------- | --------- | -------------- |
+| Token budget > 50K for inputs | ✓         |                |
+| Different model tier needed   | ✓         |                |
+| Distinct responsibility       | ✓         |                |
+| Work shares same loaded files |           | ✓              |
+| Work is 1-2 additional steps  |           | ✓              |
 
 **Context Affinity Principle:** If an agent has files open and budget to process them, it should do related work rather than spinning up a new agent.
 
@@ -38,6 +40,7 @@ Before creating an agent, ask: **Does this need its own context?**
 Agents live at `.claude/agents/<agent-name>.md`.
 
 Naming conventions:
+
 - Use lowercase with hyphens: `migration-planner.md`
 - Pair critics with authors: `<thing>-author.md` + `<thing>-critic.md`
 - Cleanup agents: `<flow>-cleanup.md`
@@ -58,11 +61,13 @@ color: <purple|red|green|blue|orange|cyan|pink>
 ```
 
 **Model guidance:**
+
 - `haiku` — Mechanical work (cleanup, counting, formatting)
 - `sonnet` — Almost-Haiku tasks needing slightly more reasoning
 - `inherit` — Core creative work (user chooses Sonnet or Opus)
 
 **Color conventions:**
+
 - `purple` — Spec/authoring (requirements, BDD, contracts)
 - `red` — Critics (never fix, only assess)
 - `green` — Implementation (code, tests, docs)
@@ -81,14 +86,17 @@ You are the **<Agent Name>** (<Flow context>).
 ## Inputs (best-effort)
 
 Primary:
+
 - `.runs/<run-id>/<flow>/<input-file>.md`
 
 Feedback loop (if present):
+
 - `.runs/<run-id>/<flow>/<critique>.md`
 
 ## Output (only)
 
 Write exactly:
+
 - `.runs/<run-id>/<flow>/<output-file>.md`
 
 ## Lane + hygiene (non-negotiable)
@@ -100,20 +108,24 @@ Write exactly:
 ## Handoff Targets
 
 When you complete your work, recommend one of these agents:
+
 - <agent-1>: <what it does> — <when to route there>
 - <agent-2>: <what it does> — <when to route there>
 
 ## Behavior
 
 ### Step 0: Preflight
+
 <Mechanical checks>
 
 ### Step 1-N: Work
+
 <Domain-specific steps>
 
 ### Final Step: Handoff
 
 Write a prose handoff with:
+
 1. **What I did** — summary of work completed
 2. **What's left** — remaining work or blockers
 3. **Recommendation** — specific next agent with reasoning
@@ -145,14 +157,17 @@ Every agent has a "lane" — what it can and cannot do.
 ### Additional Constraints by Type
 
 **Authors:**
+
 - No critique. Write content; critic evaluates.
 - No design decisions (ADR owns "how").
 
 **Critics:**
+
 - Never fix. Write assessment only.
 - Indicate in prose whether further iteration would help.
 
 **Cleanup:**
+
 - Counts are mechanical. If you can't derive safely, output `null`.
 - Use `demoswarm` shim for all derivations.
 
@@ -180,12 +195,12 @@ Your job is to take the user's vague ideas and transform them into crystal-clear
 
 ### Principles
 
-| Principle | Example |
-|-----------|---------|
-| **Factual, not theatrical** | "You critique. You do not fix." |
-| **Constraint-first** | Open with what the agent does and doesn't do |
-| **Paths, not abstractions** | `.runs/<run-id>/signal/requirements.md` |
-| **No scripts** | Describe behavior, don't prescribe dialogue |
+| Principle                   | Example                                      |
+| --------------------------- | -------------------------------------------- |
+| **Factual, not theatrical** | "You critique. You do not fix."              |
+| **Constraint-first**        | Open with what the agent does and doesn't do |
+| **Paths, not abstractions** | `.runs/<run-id>/signal/requirements.md`      |
+| **No scripts**              | Describe behavior, don't prescribe dialogue  |
 
 See [Documentation Conventions](../reference/documentation-conventions.md) for voice guidance.
 
@@ -237,14 +252,14 @@ Cleanup agents write receipts with structured Machine Summary for audit purposes
 
 Use stable markers for countable items:
 
-| Domain | Marker Pattern | Example |
-|--------|----------------|---------|
-| Requirements | `### REQ-NNN` | `### REQ-001: User Login` |
-| NFRs | `### NFR-DOMAIN-NNN` | `### NFR-SEC-001: Auth Tokens` |
-| Acceptance Criteria | `- AC-N:` | `- AC-1: Returns 200` |
-| Risks | `- RSK-NNN [SEVERITY]` | `- RSK-001 [HIGH] [SECURITY]` |
-| Open Questions | `- QID: OQ-XXX-NNN` | `- QID: OQ-SIG-001` |
-| Review Items | `- [ ] RW-NNN` | `- [ ] RW-001` |
+| Domain              | Marker Pattern         | Example                        |
+| ------------------- | ---------------------- | ------------------------------ |
+| Requirements        | `### REQ-NNN`          | `### REQ-001: User Login`      |
+| NFRs                | `### NFR-DOMAIN-NNN`   | `### NFR-SEC-001: Auth Tokens` |
+| Acceptance Criteria | `- AC-N:`              | `- AC-1: Returns 200`          |
+| Risks               | `- RSK-NNN [SEVERITY]` | `- RSK-001 [HIGH] [SECURITY]`  |
+| Open Questions      | `- QID: OQ-XXX-NNN`    | `- QID: OQ-SIG-001`            |
+| Review Items        | `- [ ] RW-NNN`         | `- [ ] RW-001`                 |
 
 These markers enable mechanical counting by cleanup agents.
 
@@ -254,7 +269,7 @@ These markers enable mechanical counting by cleanup agents.
 
 Critics follow a specific contract:
 
-```markdown
+````markdown
 ---
 name: <thing>-critic
 description: Harsh review of <thing> vs <standard> → <flow>/<thing>_critique.md.
@@ -283,24 +298,30 @@ You critique. You do not fix. You do not perform git ops.
 ## Behavior
 
 ### Step 1: Review against standards
+
 <What to check>
 
 ### Step 2: Categorize findings
 
 ```markdown
 ## Critical Issues
+
 <Must fix to proceed>
 
 ## Major Issues
+
 <Should fix for quality>
 
 ## Minor Issues
+
 <Nice to fix>
 ```
+````
 
 ### Step 3: Handoff
 
 Write a prose handoff:
+
 - Summarize what you found
 - Say whether another iteration would help
 - Recommend specific next steps
@@ -310,10 +331,11 @@ Example:
 Recommend running <thing>-author again with this critique. Another pass should resolve
 the blocking issues."
 
-## Philosophy
+### Philosophy
 
 Critics are harsh and specific. Vague criticism is useless.
-```
+
+````
 
 ---
 
@@ -321,7 +343,7 @@ Critics are harsh and specific. Vague criticism is useless.
 
 Cleanup agents seal the flow and translate prose handoffs into structured receipts:
 
-```markdown
+````markdown
 ---
 name: <flow>-cleanup
 description: Finalizes Flow N by deriving counts, writing receipt, updating index.
@@ -349,17 +371,20 @@ Use demoswarm shim:
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file "<file>" --regex "<pattern>" --null-if-missing
-```
+````
 
 ### Step 3: Quality gates
+
 Read critic prose handoffs and derive status.
 
 ### Step 4: Write receipt
+
 JSON with counts, gates, stations, evidence_sha.
 
 The receipt includes routing fields (`recommended_action`, `route_to_flow`, `route_to_agent`) for audit trail purposes. Derive these from the agent prose handoffs — they are not used for live routing.
 
 ### Step 5: Update index
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index ".runs/index.json" \
@@ -369,13 +394,15 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 ```
 
 ### Step 6: Write cleanup_report.md
+
 Evidence of derivation.
 
 ## Philosophy
 
 Cleanup does not interpret. Prefer `null` + evidence over invented precision.
 Receipts are audit logs — the orchestrator routes on prose handoffs, not receipt fields.
-```
+
+````
 
 ---
 
@@ -388,7 +415,7 @@ After creating the agent file:
    - Add to station order
    - Add to TodoWrite template
 
-2. **Add to settings.json** — If the agent should be available as a Task tool target:
+1. **Add to settings.json** — If the agent should be available as a Task tool target:
    ```json
    {
      "agents": {
@@ -400,7 +427,7 @@ After creating the agent file:
    }
    ```
 
-3. **Update pack-check** — If the agent has a contract that should be validated, add checks to pack-check.
+1. **Update pack-check** — If the agent has a contract that should be validated, add checks to pack-check.
 
 ---
 
@@ -458,9 +485,11 @@ You plan migrations. You do not critique or implement.
 ## Behavior
 
 ### Step 1: Analyze schema changes
+
 ...
 
 ### Step 2: Design migration steps
+
 ...
 
 ### Step 3: Handoff
@@ -498,14 +527,17 @@ You critique. You never fix.
 ## Behavior
 
 ### Step 1: Check for rollback strategy
+
 ...
 
 ### Step 2: Check for data safety
+
 ...
 
 ### Step 3: Handoff
 
 Write a prose handoff:
+
 - Summarize findings with severity markers
 - Say whether another iteration would help
 - Recommend next step (rerun planner or proceed to rollback-designer)

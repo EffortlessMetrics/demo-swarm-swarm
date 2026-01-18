@@ -3,6 +3,7 @@
 <!-- DEMOSWARM_RUN:compliance-drift-proofing FLOW:plan -->
 
 ## Status
+
 **VERIFIED** — Plan design and decision artifacts completed
 
 ## Decision Summary
@@ -18,18 +19,19 @@ The plan selects a pragmatic approach to implement compliance drift-proofing by 
 
 ## Requirements Traceability
 
-| Requirement | Status | Implementation Path |
-|-------------|--------|---------------------|
-| REQ-001: Flow Boundary Enforcement | SATISFIED | Add check 50 to drift.rs: scan flow-*.md for demoswarm.sh and skill CLI subcommands |
-| REQ-002: Skills Section Enforcement | SATISFIED | Verify check 49 coverage; enhance if needed |
-| REQ-003: OpenQ Prefix Validation | SATISFIED | Add check 51 to drift.rs: validate QID patterns in open_questions.md |
-| REQ-004: Build-to-Gate Test Fixtures | SATISFIED | Create standard Rust fixtures in tests/fixtures/ |
-| REQ-005: Warning-First Mode | SATISFIED | Verify --strict_warnings flag behavior; adjust exit codes if needed |
-| REQ-006: No False Positives | SATISFIED | Run pack-check baseline; verify no regressions |
+| Requirement                          | Status    | Implementation Path                                                                  |
+| ------------------------------------ | --------- | ------------------------------------------------------------------------------------ |
+| REQ-001: Flow Boundary Enforcement   | SATISFIED | Add check 50 to drift.rs: scan flow-\*.md for demoswarm.sh and skill CLI subcommands |
+| REQ-002: Skills Section Enforcement  | SATISFIED | Verify check 49 coverage; enhance if needed                                          |
+| REQ-003: OpenQ Prefix Validation     | SATISFIED | Add check 51 to drift.rs: validate QID patterns in open_questions.md                 |
+| REQ-004: Build-to-Gate Test Fixtures | SATISFIED | Create standard Rust fixtures in tests/fixtures/                                     |
+| REQ-005: Warning-First Mode          | SATISFIED | Verify --strict_warnings flag behavior; adjust exit codes if needed                  |
+| REQ-006: No False Positives          | SATISFIED | Run pack-check baseline; verify no regressions                                       |
 
 ## Quality Gates
 
 All critic gates **VERIFIED**:
+
 - Design Critic: VERIFIED
 - Option Critic: VERIFIED (3 minor observations)
 - Contract Critic: VERIFIED (3 minor observations)
@@ -66,4 +68,3 @@ Run: `/flow-3-build`
 **Completed at:** 2025-12-18T20:46:18Z
 **Run ID:** compliance-drift-proofing
 **Issue:** #8
-

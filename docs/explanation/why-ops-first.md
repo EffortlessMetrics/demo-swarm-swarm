@@ -18,6 +18,7 @@ System: "Prove you're allowed."
 ```
 
 The result:
+
 - **Token waste:** More tokens spent on justification than engineering
 - **Friction cascade:** Every step requires permission negotiation
 - **False security:** The gates don't actually prevent bad outcomes—they just slow down good ones
@@ -27,17 +28,17 @@ The result:
 
 ## The Insight: Where Does Risk Actually Live?
 
-Risk doesn't live in *thinking* or *working*. Risk lives in *publishing*.
+Risk doesn't live in _thinking_ or _working_. Risk lives in _publishing_.
 
-| Action | Risk Level | Why |
-|--------|------------|-----|
-| Reading a file | None | Information doesn't leave the session |
-| Writing a test | None | It's not committed yet |
-| Running tests locally | None | Results don't leave the session |
-| Exploring code | None | No side effects |
-| **Committing secrets** | **High** | Secrets enter git history |
-| **Pushing to remote** | **High** | Changes become public |
-| **Posting to GitHub** | **High** | Content becomes visible |
+| Action                 | Risk Level | Why                                   |
+| ---------------------- | ---------- | ------------------------------------- |
+| Reading a file         | None       | Information doesn't leave the session |
+| Writing a test         | None       | It's not committed yet                |
+| Running tests locally  | None       | Results don't leave the session       |
+| Exploring code         | None       | No side effects                       |
+| **Committing secrets** | **High**   | Secrets enter git history             |
+| **Pushing to remote**  | **High**   | Changes become public                 |
+| **Posting to GitHub**  | **High**   | Content becomes visible               |
 
 The insight: **Gate the boundary, not the interior.**
 
@@ -45,7 +46,7 @@ The insight: **Gate the boundary, not the interior.**
 
 ## The Solution: Work Plane vs Publish Plane
 
-> **Terminology note:** This is about *where gates engage* (Work vs Publish). For *how routing works* (Control vs Audit), see [Why Two Planes](why-two-planes.md).
+> **Terminology note:** This is about _where gates engage_ (Work vs Publish). For _how routing works_ (Control vs Audit), see [Why Two Planes](why-two-planes.md).
 
 ### Work Plane (Default-Allow)
 
@@ -55,19 +56,19 @@ Everything up to `git add` runs without friction:
 - Write code, tests, documentation
 - Run tests, linters, formatters
 - Search, analyze, explore
-- Security scans produce *findings* (advisory), not *blocks*
+- Security scans produce _findings_ (advisory), not _blocks_
 
-**Posture:** Trust the agent to do its job. It's working *for* you.
+**Posture:** Trust the agent to do its job. It's working _for_ you.
 
 ### Publish Plane (Gated)
 
 Gates engage only when crossing the boundary:
 
-| Boundary | Gate | What It Checks |
-|----------|------|----------------|
-| Commit | `secrets-sanitizer` | No secrets in staged changes |
-| Push | `repo-operator` | No anomalies, no test deletions |
-| GitHub post | Content mode | What can be quoted/linked |
+| Boundary    | Gate                | What It Checks                  |
+| ----------- | ------------------- | ------------------------------- |
+| Commit      | `secrets-sanitizer` | No secrets in staged changes    |
+| Push        | `repo-operator`     | No anomalies, no test deletions |
+| GitHub post | Content mode        | What can be quoted/linked       |
 
 **Posture:** Verify before sharing. Publishing has consequences.
 
@@ -106,6 +107,7 @@ Build starts
 ### 2. Human Collaboration
 
 Developers often jump in during a swarm run:
+
 - Fix a typo in README
 - Tweak a config value
 - Add a comment
@@ -117,12 +119,14 @@ Developers often jump in during a swarm run:
 ### 3. Honest Reporting
 
 When security findings are advisory (Work Plane), agents can:
+
 - Report what they find honestly
 - Continue working on the actual task
 - Fix issues as they go
 - Only escalate truly blocking issues
 
 When security findings are gates (everywhere), agents:
+
 - Fear reporting findings (might block progress)
 - Game the system to avoid triggers
 - Waste tokens on justification
@@ -155,25 +159,27 @@ When security findings are gates (everywhere), agents:
 
 Each flow has a **Publish Surface** (what it's allowed to commit/push):
 
-| Flow | Publish Surface |
-|------|-----------------|
-| Signal | `.runs/<run-id>/signal/` |
-| Plan | `.runs/<run-id>/plan/` |
-| Build | `.runs/<run-id>/build/` + project code/tests |
+| Flow   | Publish Surface                               |
+| ------ | --------------------------------------------- |
+| Signal | `.runs/<run-id>/signal/`                      |
+| Plan   | `.runs/<run-id>/plan/`                        |
+| Build  | `.runs/<run-id>/build/` + project code/tests  |
 | Review | `.runs/<run-id>/review/` + project code/tests |
-| Gate | `.runs/<run-id>/gate/` |
-| Deploy | `.runs/<run-id>/deploy/` |
-| Wisdom | `.runs/<run-id>/wisdom/` |
+| Gate   | `.runs/<run-id>/gate/`                        |
+| Deploy | `.runs/<run-id>/deploy/`                      |
+| Wisdom | `.runs/<run-id>/wisdom/`                      |
 
 ### In Agents
 
 **repo-operator** implements the Publish boundary:
+
 - Intent-based staging (flow tells it what to include)
 - Extras detection (includes ad-hoc human fixes)
 - Anti-reward-hacking guard (blocks test deletion)
 - Anomaly classification (warns vs blocks)
 
 **secrets-sanitizer** implements the secrets gate:
+
 - Scans only the Publish Surface
 - Fix-first (redact in place when possible)
 - Block only when remediation requires human judgment
@@ -181,6 +187,7 @@ Each flow has a **Publish Surface** (what it's allowed to commit/push):
 ### In Gating
 
 The two-gate rule for GitHub operations:
+
 1. `safe_to_publish: true` (secrets gate)
 2. `proceed_to_github_ops: true` (repo hygiene gate)
 

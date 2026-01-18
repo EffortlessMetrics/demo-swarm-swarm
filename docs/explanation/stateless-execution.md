@@ -21,6 +21,7 @@ This is not a limitation—it's the foundation of the pack's reliability.
 **The Problem:** Carrying context forward is expensive.
 
 If Flow 2 inherited Flow 1's context:
+
 - Flow 1: 50K tokens (requirements analysis)
 - Flow 2: 50K (Flow 1) + 80K (plan generation) = 130K tokens
 - Flow 3: 130K (Flow 1+2) + 200K (build) = 330K tokens
@@ -75,6 +76,7 @@ Each flow reads the **canonical artifact**, not a degraded summary from 10 turns
 **The Problem:** Hidden state is unverifiable.
 
 If decisions live only in context history:
+
 - What requirements drove this design?
 - Why did we choose this approach?
 - What tests were planned?
@@ -98,6 +100,7 @@ You have to trust the LLM's "memory" of 200 turns ago.
 ```
 
 Every decision is on disk. You can:
+
 - **Review it** (open the file)
 - **Audit it** (git blame, git log)
 - **Reproduce it** (rerun from the same inputs)
@@ -124,6 +127,7 @@ todos:
 ```
 
 **Properties:**
+
 - Lives only in the current session
 - Updates in real-time as work progresses
 - Helps the orchestrator track "where am I in the flow?"
@@ -137,6 +141,7 @@ todos:
 # Flow 2 Plan
 
 ## Stations
+
 - [x] run-prep
 - [x] adr-author
 - [ ] contracts-author
@@ -144,11 +149,14 @@ todos:
 - [ ] plan-cleanup
 
 ## Status: in_progress
+
 ## Last Station: adr-author
+
 ## Next Station: contracts-author
 ```
 
 **Properties:**
+
 - Written to `.runs/<run-id>/plan/flow_plan.md`
 - Committed to git
 - Survives session death
@@ -172,18 +180,19 @@ Flows communicate via **artifacts on disk**.
 ### The Contract
 
 Each flow has:
+
 - **Input expectations** (what artifacts it needs to read)
 - **Output commitments** (what artifacts it will write)
 
-| Flow | Reads | Writes |
-|------|-------|--------|
-| Signal | User input | `requirements.md`, `features/*.feature`, `signal_receipt.json` |
-| Plan | Signal outputs | `adr.md`, `test_plan.md`, `plan_receipt.json` |
-| Build | Plan outputs | Code/tests, `build_receipt.json`, Draft PR |
-| Review | Build outputs + PR | `pr_feedback.md`, `review_receipt.json` |
-| Gate | Review outputs | `merge_decision.md`, `gate_receipt.json` |
-| Deploy | Gate outputs | `deployment_log.md`, `deploy_receipt.json` |
-| Wisdom | All outputs | `learnings.md`, `wisdom_receipt.json` |
+| Flow   | Reads              | Writes                                                         |
+| ------ | ------------------ | -------------------------------------------------------------- |
+| Signal | User input         | `requirements.md`, `features/*.feature`, `signal_receipt.json` |
+| Plan   | Signal outputs     | `adr.md`, `test_plan.md`, `plan_receipt.json`                  |
+| Build  | Plan outputs       | Code/tests, `build_receipt.json`, Draft PR                     |
+| Review | Build outputs + PR | `pr_feedback.md`, `review_receipt.json`                        |
+| Gate   | Review outputs     | `merge_decision.md`, `gate_receipt.json`                       |
+| Deploy | Gate outputs       | `deployment_log.md`, `deploy_receipt.json`                     |
+| Wisdom | All outputs        | `learnings.md`, `wisdom_receipt.json`                          |
 
 ### Out-of-Order Execution
 
@@ -195,6 +204,7 @@ Flows **can** run out of order. The pack adapts:
 ```
 
 Result:
+
 - Plan sees: No `signal_receipt.json`, no `requirements.md`
 - Plan does: Makes assumptions, writes `plan_receipt.json` with `status: UNVERIFIED`
 - Plan documents: `missing_required: ["requirements.md"]` in receipt
@@ -234,6 +244,7 @@ Read Fresh → Do Work → Write State → Die
 - **File system is the only communication channel**
 
 **Benefits:**
+
 - Zero context entropy (no degradation through stations)
 - Reproducibility (rerun by reading same inputs)
 - Testability (mock inputs are just files)
@@ -262,6 +273,7 @@ Wait for completion.
 ```
 
 Human decision:
+
 - **Good?** Proceed to next flow
 - **Needs changes?** Edit the artifacts, rerun
 - **Wrong direction?** Delete `.runs/feat-auth/`, start over
@@ -273,6 +285,7 @@ Human decision:
 ```
 
 The orchestrator:
+
 - Finds the run (from `run_id` or current branch)
 - Reads Signal outputs from disk
 - Proceeds
@@ -294,12 +307,12 @@ Repeat for Flow 3, 4, 5, 6, 7.
 
 ## What This Enables
 
-| Capability | How |
-|------------|-----|
-| **Resilience** | Flow crashes? Rerun it. Inputs are on disk. |
-| **Cherry-picking** | Run Flow 1+2 only, review plan, implement manually. |
-| **Human collaboration** | Edit `requirements.md` after Flow 1? Flow 2 sees the fix. |
-| **Debugging** | Read `.runs/` artifacts to see exactly what each flow saw and produced. |
+| Capability              | How                                                                     |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Resilience**          | Flow crashes? Rerun it. Inputs are on disk.                             |
+| **Cherry-picking**      | Run Flow 1+2 only, review plan, implement manually.                     |
+| **Human collaboration** | Edit `requirements.md` after Flow 1? Flow 2 sees the fix.               |
+| **Debugging**           | Read `.runs/` artifacts to see exactly what each flow saw and produced. |
 
 The entire state machine is **inspectable**.
 

@@ -24,9 +24,9 @@ Flow 3 grabs external feedback (PR, CI, bots) when available to unblock the buil
 
 **Build completes with one of two statuses:**
 
-| Status | When | What It Means |
-|--------|------|---------------|
-| **VERIFIED** | Evidence says done | Build stations complete (tests pass, critics satisfied), evidence fresh |
+| Status         | When                    | What It Means                                                                     |
+| -------------- | ----------------------- | --------------------------------------------------------------------------------- |
+| **VERIFIED**   | Evidence says done      | Build stations complete (tests pass, critics satisfied), evidence fresh           |
 | **UNVERIFIED** | External constraint hit | Checkpointed: artifacts written, state captured, resumable (continue via routing) |
 
 Everything else is "keep grinding."
@@ -45,6 +45,7 @@ The orchestrator's job is to keep things moving. When progress stalls, route to 
 ### No Early Exit
 
 "Done" is mechanical, not felt:
+
 - Agent claims done → verify with test-executor
 - Test-executor passes → verify with critics
 - Critics satisfied → AC is complete
@@ -80,6 +81,7 @@ Create TodoWrite immediately. Write `flow_plan.md` after `run-prep` creates the 
 ### On Rerun
 
 If `.runs/<run-id>/build/` exists:
+
 - Read `flow_plan.md` for navigation state
 - **Call `build-cleanup`** to understand AC completion status
 - The agent will tell you what's done and where to resume in their handoff
@@ -130,18 +132,20 @@ Read `.runs/<run-id>/plan/ac_matrix.md` for the ordered AC list.
 
 **Rigorous Microloop (writer ↔ critic):**
 
-The critic's job is to *find the flaw*. The writer's job is to *fix it*. This is rigorous verification.
+The critic's job is to _find the flaw_. The writer's job is to _fix it_. This is rigorous verification.
 
 ```
 writer → critic → [if more work needed] → writer → critic → ... → [converged]
 ```
 
 Route on the critic's handoff:
+
 - If the critic recommends improvements → run the writer with their feedback
 - If the critic says "proceed" or "ready" → move forward (converged)
 - If the critic says "no further improvement possible" → proceed with documented issues (partial convergence)
 
 **When not making progress:**
+
 - Same critique repeated → route to a different agent or change approach (unstick, don't stop)
 - Critic alternating between contradictory recommendations → break the cycle by routing differently
 
@@ -165,6 +169,7 @@ This is the "Stubborn PM" posture: exhaust local options before interrupting the
 **AC Termination (Law 4: Green + Orchestrator Agreement):**
 
 An AC is complete when BOTH conditions are met:
+
 1. **test-executor returns Green** for that AC's scope
 2. **Orchestrator agrees** there's nothing left worth fixing
 
@@ -206,6 +211,7 @@ After **any** AC completion, execute the Save Game Routine in this order:
 **Why this order matters:** The sanitizer must scan what's actually staged, not an empty or stale index. Staging first ensures the scan is accurate.
 
 **Resume-safe Pulse Check:** If a run resumes mid-flow:
+
 - Check: `ac_completed >= 1` AND `pr_number` is null (in `run_meta.json`)
 - If true: Execute Save Game Routine immediately (ensures PR exists even on resume)
 - If false (PR already exists): Continue with normal loop
@@ -242,6 +248,7 @@ After all ACs complete:
 **Reseal-if-modified:** If the self-reviewer identifies issues that require fixes (and you run `fixer`, `code-implementer`, or `test-author` to address them), you must call `build-cleanup` again to regenerate `build_receipt.json` before the final seal. The receipt must reflect the final state of code and tests, not an intermediate state.
 
 **Reseal routing:** After two reseal passes, if `modified_files` persists, this lane isn't converging—route out:
+
 - Document the state in `build_receipt.json.observations[]`
 - Route to Flow 4 (Review) to address remaining issues
 - The reseal lane stops; the flow continues via Review
@@ -250,6 +257,7 @@ After all ACs complete:
 ### Step 8: Flow Boundary Harvest
 
 **Call `pr-feedback-harvester`** one last time (if PR exists):
+
 - Route CRITICAL blockers only (bounded)
 - Record unresolved items for Flow 4
 
@@ -269,12 +277,12 @@ Update `flow_plan.md` with completion status.
 
 Read the agent's handoff and follow their guidance:
 
-| What the Agent Says | What You Do |
-|---------------------|-------------|
-| "Ready" / "Proceed" / "Complete" | Move to the next station |
-| "Needs X" / "Fix Y" / "Another pass" | Run the agent or fix they specify |
-| "Route to Flow N" / "Design issue" | Bounce to the flow they recommend |
-| "Blocked" / "Cannot proceed" | Stop - mechanical failure needs environment fix |
+| What the Agent Says                  | What You Do                                     |
+| ------------------------------------ | ----------------------------------------------- |
+| "Ready" / "Proceed" / "Complete"     | Move to the next station                        |
+| "Needs X" / "Fix Y" / "Another pass" | Run the agent or fix they specify               |
+| "Route to Flow N" / "Design issue"   | Bounce to the flow they recommend               |
+| "Blocked" / "Cannot proceed"         | Stop - mechanical failure needs environment fix |
 
 **Trust your team.** Agents are specialists. They explain their reasoning. Follow their guidance.
 
@@ -283,25 +291,31 @@ Read the agent's handoff and follow their guidance:
 ## Agents
 
 **Infrastructure:**
+
 - `run-prep` - establish run directory
 
 **Git:**
+
 - `repo-operator` - branch, stage, commit, push
 
 **Context:**
+
 - `context-loader` - curate working set
 - `clarifier` - document ambiguities (non-blocking)
 
 **Test loop:**
+
 - `test-author` - write tests
 - `test-critic` - verify tests
 
 **Code loop:**
+
 - `code-implementer` - implement code
 - `code-critic` - verify implementation
 - `mold-improver` - identify pattern improvements (optional, when critic flags recurring pattern issues)
 
 **Hardening:**
+
 - `test-executor` - run tests
 - `standards-enforcer` - format/lint + honest diff check
 - `flakiness-detector` - classify test failures
@@ -310,11 +324,13 @@ Read the agent's handoff and follow their guidance:
 - `fixer` - targeted fixes
 
 **Polish:**
+
 - `doc-writer` - update docs
 - `doc-critic` - review docs
 - `self-reviewer` - final consistency check
 
 **Cleanup:**
+
 - `build-cleanup` - write receipt, update index
 - `secrets-sanitizer` - pre-publish sweep
 - `pr-creator` - create Draft PR
@@ -325,6 +341,7 @@ Read the agent's handoff and follow their guidance:
 ## Upstream Inputs
 
 Read from `.runs/<run-id>/plan/` (if available):
+
 - `adr.md`, `api_contracts.yaml`, `schema.md`
 - `test_plan.md`, `ac_matrix.md`, `work_plan.md`
 
@@ -333,6 +350,7 @@ Read from `.runs/<run-id>/plan/` (if available):
 ## Output Artifacts
 
 After completion, `.runs/<run-id>/build/` contains:
+
 - `flow_plan.md` - execution plan with checkboxes
 - `ac_status.json` - AC completion tracker
 - `test_changes_summary.md`, `test_critique.md`
@@ -355,6 +373,7 @@ Plus code/test changes in project-defined locations.
 All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is better than a false VERIFIED.
 
 **Key distinction:**
+
 - VERIFIED = converged (evidence says done)
 - UNVERIFIED = not converged, but checkpointed (artifacts written, state captured, resumable)
 - False VERIFIED (claiming done when not) = system failure

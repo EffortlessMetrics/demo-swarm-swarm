@@ -1,6 +1,7 @@
 # Mutation Report
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -8,15 +9,16 @@ route_to_agent: null
 blockers: []
 missing_required: []
 counts:
-  killed: null
-  survived: null
-  errors: null
-  timeouts: null
+killed: null
+survived: null
+errors: null
+timeouts: null
 budget_seconds: 300
 duration_seconds: 0
 mutation_command: null
 
 ## Run Notes
+
 - Tool/config selection: Mutation testing skipped (cargo-mutants not available in environment). Non-error reason: mutation_required: false per test_plan.md. Comprehensive integration test suite provides high confidence in implementation correctness.
 - Exit status: N/A (not executed)
 - Limits: Mutation testing deferred; tool not installed. Per test_plan.md, mutation testing is recommended but not required for non-critical validation code.
@@ -109,18 +111,21 @@ The codebase includes 41 integration tests covering checks 49, 50 (formerly 52),
 The test fixtures in `tools/demoswarm-pack-check/tests/fixtures/` cover critical boundary cases:
 
 **Flow Boundary Enforcement (Check 52 / Check 50):**
+
 - Clean flow commands without demoswarm.sh or skill CLI syntax
 - Flow commands containing `demoswarm.sh` (violation)
 - Flow commands containing skill CLI subcommands (count, ms get, yaml, etc.)
 - Prose contexts mentioning these terms naturally (false positive prevention)
 
 **OpenQ Prefix Validation (Check 53):**
+
 - Valid canonical flow codes (SIG, PLN, BLD, GAT, DEP, WIS)
 - Non-canonical codes (SIGNAL, PLAN, BUILD, GATE, DEPLOY, WISDOM)
 - Invalid numeric padding (1 digit, 4 digits instead of 3)
 - Mixed valid/invalid QIDs in same file
 
 **Build Receipt Validation (Check 50):**
+
 - Valid receipt with all required fields
 - Invalid status enum value
 - Missing required field (run_id)
@@ -129,12 +134,14 @@ The test fixtures in `tools/demoswarm-pack-check/tests/fixtures/` cover critical
 ### Strength of Assertion Coverage
 
 Test fixtures use **exact value assertion** patterns:
+
 - Fixture content validation: `content.contains(X)` for required patterns
 - Absence validation: `!content.contains(X)` for forbidden patterns
 - Structure validation: JSON schema checks for required fields
 - Enum validation: Explicit status value verification
 
 The tests assert on:
+
 1. **Presence/Absence of patterns**: demoswarm.sh, skill CLI subcommands, canonical codes
 2. **Boundary values**: numeric padding (1, 3, 4 digits), flow code lengths
 3. **Schema contracts**: required fields, valid enum values
@@ -167,12 +174,15 @@ If cargo-mutants were available, the highest-value mutations to target would be:
 **Status: VERIFIED** - Mutation testing skipped per explicit requirement (mutation_required: false). High-confidence test suite (36/41 passing, 5 TDD) provides adequate assurance for validation tooling code.
 
 If stakeholders later require mutation testing for this module, recommend:
+
 1. Install cargo-mutants: `cargo install cargo-mutants`
 2. Run: `cargo mutants --package demoswarm-pack-check --file src/checks/drift.rs --tests check_integration_test`
 3. Expected outcome: <2 survivors (simple pattern matching, well-tested)
 
 ## Survivor Worklist (Deferred)
+
 None - mutation testing not executed.
 
 ## Inventory (machine countable)
+
 None - no mutations executed.

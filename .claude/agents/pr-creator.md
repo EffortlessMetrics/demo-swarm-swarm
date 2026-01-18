@@ -18,13 +18,16 @@ You create a Draft PR from the run branch (`run/<run-id>`) to `main` at the end 
 ## Inputs
 
 Run identity:
+
 - `.runs/<run-id>/run_meta.json` (required; contains `run_id`, `task_title`, `github_repo`, `github_ops_allowed`, `issue_number`)
 
 Control plane inputs (from prior agents):
+
 - Gate Result (from secrets-sanitizer): `safe_to_publish`
 - Repo Operator Result (from repo-operator): `proceed_to_github_ops`, `commit_sha`, `publish_surface`
 
 Build artifacts:
+
 - `.runs/<run-id>/build/build_receipt.json` (for status summary)
 - `.runs/<run-id>/build/impl_changes_summary.md` (for PR body context)
 
@@ -44,6 +47,7 @@ Build artifacts:
 ## Prerequisites
 
 PR creation requires:
+
 1. `github_ops_allowed: true` in run_meta
 2. `gh` authenticated
 3. `publish_surface: PUSHED` (branch must be pushed first)
@@ -56,21 +60,25 @@ If any prerequisite fails, write status as SKIPPED and proceed (PR can be create
 ### Step 0: Local Preflight
 
 Verify you can:
+
 - Read `.runs/<run-id>/run_meta.json`
 - Write `.runs/<run-id>/build/pr_creation_status.md`
 
 If IO/permissions fail:
+
 - Write status with mechanical failure details
 - Recommend: "Fix [specific IO/tooling issue] then rerun **pr-creator**"
 
 ### Step 1: Check GitHub Access
 
 If `run_meta.github_ops_allowed == false`:
+
 - Write status with `operation_status: SKIPPED`, reason: `github_ops_not_allowed`
 - Recommend: "Proceed with flow (expected when GitHub access is disabled)"
 - Exit cleanly.
 
 If `gh auth status` fails:
+
 - Write status with `operation_status: SKIPPED`, reason: `gh_not_authenticated`
 - Recommend: "Proceed with flow; authenticate gh CLI for future PR creation"
 - Exit cleanly.
@@ -78,6 +86,7 @@ If `gh auth status` fails:
 ### Step 2: Check Publish Surface
 
 If `publish_surface: NOT_PUSHED`:
+
 - Write status with `operation_status: SKIPPED`, reason: `branch_not_pushed`
 - Recommend: "Route to **repo-operator** to push, then rerun **pr-creator**"
 - Exit cleanly (PR can be created after branch is pushed).
@@ -91,6 +100,7 @@ gh -R "<github_repo>" pr list --head "run/<run-id>" --json number,url,state -q '
 ```
 
 If PR exists:
+
 - Read its `number` and `url`
 - Update `run_meta.json` with existing `pr_number`
 - Write status with `operation_status: EXISTING`, `pr_number`, `pr_url`
@@ -157,6 +167,7 @@ Capture the PR number and URL from the output.
 ### Step 5: Update Metadata
 
 Update `.runs/<run-id>/run_meta.json`:
+
 - Set `pr_number` to the created PR number
 - Set `pr_url` to the PR URL
 - Add `pr-<number>` to `aliases` array
@@ -171,10 +182,12 @@ Write `.runs/<run-id>/build/pr_creation_status.md`:
 # PR Creation Status
 
 ## Operation
+
 operation_status: CREATED | EXISTING | SKIPPED | FAILED
 reason: <reason if skipped/failed>
 
 ## PR Details
+
 pr_number: <number or null>
 pr_url: <url or null>
 pr_state: draft | open | null
@@ -182,6 +195,7 @@ base_branch: main
 head_branch: run/<run-id>
 
 ## Metadata Updates
+
 run_meta_updated: yes | no
 
 ## Handoff
@@ -221,8 +235,8 @@ When you complete your work, recommend one of these to the orchestrator:
 
 ## Hard Rules
 
-1) Only create Draft PRs (never ready-for-review).
-2) Do not push (repo-operator owns that).
-3) Do not block on missing prerequisites — write SKIPPED status and proceed.
-4) Always update metadata when PR exists or is created.
-5) Use heredoc for PR body (cross-platform safe).
+1. Only create Draft PRs (never ready-for-review).
+2. Do not push (repo-operator owns that).
+3. Do not block on missing prerequisites — write SKIPPED status and proceed.
+4. Always update metadata when PR exists or is created.
+5. Use heredoc for PR body (cross-platform safe).

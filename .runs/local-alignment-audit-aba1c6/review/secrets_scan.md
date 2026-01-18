@@ -14,9 +14,9 @@
 
 ## Findings (redacted)
 
-| # | Type | File | Line | Action |
-|---|------|------|------|--------|
-| - | (none) | - | - | - |
+| #   | Type   | File | Line | Action |
+| --- | ------ | ---- | ---- | ------ |
+| -   | (none) | -    | -    | -      |
 
 No secrets detected on publish surface.
 

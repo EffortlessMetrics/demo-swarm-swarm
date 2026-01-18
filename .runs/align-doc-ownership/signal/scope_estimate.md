@@ -1,6 +1,7 @@
 # Scope Estimate
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,15 +13,15 @@ blockers: []
 missing_required: []
 
 counts:
-  functional_requirements: 7
-  non_functional_requirements: 3
-  bdd_scenarios: 31
-  open_questions: 6
-  integration_points: 4
+functional_requirements: 7
+non_functional_requirements: 3
+bdd_scenarios: 31
+open_questions: 6
+integration_points: 4
 
 scope:
-  tshirt_size: M
-  confidence: High
+tshirt_size: M
+confidence: High
 
 ## Rationale (why this size)
 
@@ -79,6 +80,7 @@ scope:
   - Subtask partitioning (REQ-005) provides clean decomposition with minimal overlap.
 
 ## Scope Assessor Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null

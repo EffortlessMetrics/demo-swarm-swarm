@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -90,6 +91,7 @@ The following Plan-phase questions have been resolved by detailed user guidance 
   - Linked question: OQ-BUILD-005
 
 ### Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

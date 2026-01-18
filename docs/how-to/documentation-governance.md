@@ -7,6 +7,7 @@ How to prevent documentation drift and duplication as the pack grows.
 ## The Problem
 
 As documentation grows:
+
 - Same concept gets explained in multiple places
 - Explanations drift and contradict
 - Nobody knows which doc is authoritative
@@ -20,16 +21,16 @@ This doc establishes rules to prevent that.
 
 Every concept has ONE authoritative location. Everything else links to it.
 
-| Concept | Canonical Location | Everything Else Does |
-|---------|-------------------|---------------------|
-| Run state schema | `docs/reference/run-state.md` | Links to it |
-| Trust model | `docs/reference/trust-model.md` | Links to it |
-| Agent philosophy | `docs/explanation/agent-philosophy.md` | Links to it |
-| Flow commands | `CLAUDE.md` + `.claude/commands/` | Links to it |
-| Quality surfaces | `docs/reference/pr-quality-scorecard.md` | Links to it |
-| Stable markers | `docs/reference/stable-markers.md` | Links to it |
-| Contracts and handoffs | `docs/reference/contracts.md` | Links to it |
-| CLI commands | `docs/reference/demoswarm-cli.md` | Links to it |
+| Concept                | Canonical Location                       | Everything Else Does |
+| ---------------------- | ---------------------------------------- | -------------------- |
+| Run state schema       | `docs/reference/run-state.md`            | Links to it          |
+| Trust model            | `docs/reference/trust-model.md`          | Links to it          |
+| Agent philosophy       | `docs/explanation/agent-philosophy.md`   | Links to it          |
+| Flow commands          | `CLAUDE.md` + `.claude/commands/`        | Links to it          |
+| Quality surfaces       | `docs/reference/pr-quality-scorecard.md` | Links to it          |
+| Stable markers         | `docs/reference/stable-markers.md`       | Links to it          |
+| Contracts and handoffs | `docs/reference/contracts.md`            | Links to it          |
+| CLI commands           | `docs/reference/demoswarm-cli.md`        | Links to it          |
 
 **When you want to explain something already documented:**
 
@@ -43,11 +44,11 @@ Don't re-explain. Link.
 
 ## Doc Types and Their Purpose
 
-| Type | Location | Purpose | Updates When |
-|------|----------|---------|--------------|
-| Reference | `docs/reference/` | Precise definitions, schemas, contracts | Implementation changes |
-| Explanation | `docs/explanation/` | Why things work the way they do | Understanding evolves |
-| How-to | `docs/how-to/` | Step-by-step procedures | Process changes |
+| Type        | Location            | Purpose                                 | Updates When           |
+| ----------- | ------------------- | --------------------------------------- | ---------------------- |
+| Reference   | `docs/reference/`   | Precise definitions, schemas, contracts | Implementation changes |
+| Explanation | `docs/explanation/` | Why things work the way they do         | Understanding evolves  |
+| How-to      | `docs/how-to/`      | Step-by-step procedures                 | Process changes        |
 
 **Don't mix types.** A reference doc shouldn't have tutorials. A how-to shouldn't define schemas.
 
@@ -58,11 +59,13 @@ For voice and style within each type, see [Documentation Conventions](../referen
 ## CLAUDE.md Is Special
 
 CLAUDE.md is:
+
 - Attached to every agent thread
 - The repo-level policy document
 - The entry point for agents
 
 Rules for CLAUDE.md:
+
 - Keep it concise (it's read constantly)
 - Define policy, link to details
 - If it gets long, extract to a linked doc
@@ -121,6 +124,7 @@ When something is no longer accurate:
 ## The Index Files
 
 Each doc folder has a README.md that indexes its contents:
+
 - `docs/reference/README.md`
 - `docs/explanation/README.md`
 - `docs/how-to/README.md`
@@ -150,12 +154,12 @@ The [trust model](../reference/trust-model.md) explains how...
 
 ## Common Violations
 
-| Violation | Fix |
-|-----------|-----|
-| Explaining the trust model in three different docs | Pick one canonical location, link from others |
+| Violation                                                | Fix                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Explaining the trust model in three different docs       | Pick one canonical location, link from others                                         |
 | CLAUDE.md has a 500-word explanation of agent philosophy | Keep summary in CLAUDE.md, full explanation in `docs/explanation/agent-philosophy.md` |
-| How-to doc defines the receipt schema | Reference doc defines schema, how-to links to it |
-| New doc created without updating index | Always update the relevant README.md |
+| How-to doc defines the receipt schema                    | Reference doc defines schema, how-to links to it                                      |
+| New doc created without updating index                   | Always update the relevant README.md                                                  |
 
 ---
 
@@ -176,13 +180,13 @@ Periodic doc hygiene (monthly or before major releases):
 
 Quick reference for where to find authoritative definitions of key concepts.
 
-| Concept | Authoritative Location | Description |
-|---------|------------------------|-------------|
-| Quality definition | `docs/reference/pr-quality-scorecard.md` | What "quality" means, how to measure it |
-| Review procedure | `docs/how-to/review-a-swarm-pr.md` | Step-by-step PR review process |
-| Run state | `docs/reference/run-state.md` | Schemas for run artifacts and metadata |
-| Trust model | `docs/reference/trust-model.md` | How evidence creates trust, verification hierarchy |
-| Agent philosophy | `docs/explanation/agent-philosophy.md` | Why agents work the way they do |
+| Concept            | Authoritative Location                   | Description                                        |
+| ------------------ | ---------------------------------------- | -------------------------------------------------- |
+| Quality definition | `docs/reference/pr-quality-scorecard.md` | What "quality" means, how to measure it            |
+| Review procedure   | `docs/how-to/review-a-swarm-pr.md`       | Step-by-step PR review process                     |
+| Run state          | `docs/reference/run-state.md`            | Schemas for run artifacts and metadata             |
+| Trust model        | `docs/reference/trust-model.md`          | How evidence creates trust, verification hierarchy |
+| Agent philosophy   | `docs/explanation/agent-philosophy.md`   | Why agents work the way they do                    |
 
 When in doubt about which doc owns a concept, consult this table first. If a concept is missing, propose adding it here before documenting elsewhere.
 
@@ -193,12 +197,14 @@ When in doubt about which doc owns a concept, consult this table first. If a con
 Some documentation surfaces are tightly coupled. Changing one requires updating others.
 
 **When changing any of these:**
+
 - PR cockpit format
 - Quality scorecard
 - Review procedure
 - Boundary/trust model
 
 **You must also update:**
+
 1. **README links** - Ensure CLAUDE.md and top-level README point to current locations
 2. **Docs index** - Update the relevant `docs/*/README.md` index file
 3. **Examples** - If `docs/examples/` contains related examples, update them to match

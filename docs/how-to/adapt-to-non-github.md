@@ -30,13 +30,14 @@ This is more work but gives you automation.
 
 If you choose Option 2, these agents need provider-specific versions:
 
-| Agent | Purpose | What changes |
-|-------|---------|--------------|
-| `gh-issue-manager` | Create/update issues | API calls, issue format |
-| `gh-reporter` | Post comments | Comment API, formatting |
-| `gh-researcher` | Read existing issues/PRs | Search/query API |
+| Agent              | Purpose                  | What changes            |
+| ------------------ | ------------------------ | ----------------------- |
+| `gh-issue-manager` | Create/update issues     | API calls, issue format |
+| `gh-reporter`      | Post comments            | Comment API, formatting |
+| `gh-researcher`    | Read existing issues/PRs | Search/query API        |
 
 Additionally:
+
 - `repo-operator` merge/release behaviors (Flow 5)
 - `deploy-monitor` CI querying
 
@@ -68,7 +69,6 @@ status: CLEAN | FIXED | BLOCKED
 safe_to_commit: true | false
 safe_to_publish: true | false
 ...
-
 ## Repo Operator Result
 operation: checkpoint | build | stage | merge | other
 status: COMPLETED | COMPLETED_WITH_WARNING | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
@@ -129,6 +129,7 @@ Update pack-check to recognize the new agents.
 Use `az boards` CLI or REST API.
 
 Key mappings:
+
 - GitHub Issue → Azure Work Item
 - GitHub Comment → Work Item Discussion
 - GitHub PR → Azure PR

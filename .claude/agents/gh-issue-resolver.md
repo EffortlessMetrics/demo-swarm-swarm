@@ -35,10 +35,12 @@ You are the **gh-issue-resolver** agent. You must run **before any run directory
 ## Signal synopsis + key excerpts (optional)
 
 The issue body is synopsis-first:
+
 - Always write a short **Signal synopsis** in your own words (automation-owned).
 - Add **key excerpts only when they add clarity** beyond the synopsis. Default to omitting them.
 
 Optional excerpt hygiene (applies only if you include it):
+
 - Bound first: at most the first ~500 chars / ~10 lines.
 - Redact obvious tokens/keys **inside that bounded slice only** (no scanning/hunting):
   - `-----BEGIN .*PRIVATE KEY-----` -> `[REDACTED:private-key]`
@@ -51,7 +53,8 @@ Optional excerpt hygiene (applies only if you include it):
 
 ## Behavior
 
-1) **Repo trust + GitHub ops allowance (required)**
+1. **Repo trust + GitHub ops allowance (required)**
+
 - Derive `repo_actual` from git remote origin (preferred) or `gh repo view --json nameWithOwner -q '.nameWithOwner'`.
 - Derive `repo_expected`:
   - If `issue_ref` is a URL, parse owner/repo from it (authoritative).
@@ -68,19 +71,22 @@ Optional excerpt hygiene (applies only if you include it):
   - Add a note: issue binding deferred; later handled by `gh-issue-manager` when access allows.
 - If `repo_actual` cannot be determined due to mechanical failure: cannot proceed, describe the failure and recommend fixing the environment.
 
-2) **Rerun path (if run_id provided and run_meta exists)**
+2. **Rerun path (if run_id provided and run_meta exists)**
+
 - If `.runs/<run_id>/run_meta.json` exists:
   - Read `issue_number`, `github_ops_allowed`, `github_repo_expected`, `github_repo_actual_at_creation`, `run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`.
   - If `run_id_kind: LOCAL_ONLY` or `github_ops_allowed: false` -> return those values (reused from run_meta) and do not call GitHub.
   - If `issue_number` is present -> treat as reused from run_meta and verify issue exists (when github_ops_allowed).
   - If missing -> fall back to explicit issue_ref path; if none, create a new issue (when github_ops_allowed).
 
-3) **Explicit issue path (issue_ref provided, github_ops_allowed: true)**
+3. **Explicit issue path (issue_ref provided, github_ops_allowed: true)**
+
 - Parse the number; verify with `gh issue view`.
 - Success -> bound to existing issue, `run_id: gh-<issue_number>`, `run_id_kind: GH_ISSUE`, `issue_binding: IMMEDIATE`.
 - 404/403 or wrong repo -> create a new issue in the current repo, note the requested reference in the issue body (e.g., "Requested #123 not accessible from this environment; created this issue instead"), and return that new `run_id`.
 
-4) **Create path (no usable issue_ref, github_ops_allowed: true)**
+4. **Create path (no usable issue_ref, github_ops_allowed: true)**
+
 - Title: concise first strong line from `signal_text` (<= ~80 chars).
 - Body template (Flow 1 Work Item Tracking with automation-owned markers + bounded signal excerpt):
 
@@ -151,14 +157,17 @@ EOF
 - Create the issue, compute `run_id = gh-<new_issue_number>`, set `run_id_kind: GH_ISSUE`, `issue_binding: IMMEDIATE`, then **edit the issue body (or add a short comment)** to set the concrete `run_id: gh-<n>`.
 - Once created and verified, proceed with the run_id.
 
-5) **Closed issue handling**
+5. **Closed issue handling**
+
 - If the requested issue is CLOSED and github_ops_allowed: treat closed as inaccessible by default. Create a new tracking issue instead, note the reference to the closed issue, and return the new run-id. Only reuse a closed issue if the user explicitly asked to reopen.
 
-6) **Local-only path (github_ops_allowed: false due to repo mismatch)**
+6. **Local-only path (github_ops_allowed: false due to repo mismatch)**
+
 - Compute `run_id = local-<slug>-<hash6>` from `signal_text` (hash = first 6 chars of SHA256).
 - Set `run_id_kind: LOCAL_ONLY`, `issue_binding: DEFERRED`, `github_ops_allowed: false`, and describe how to enable GitHub ops (fix repo mismatch and rerun).
 
-7) **Output summary (only output)**
+7. **Output summary (only output)**
+
 - Return the summary block below. Do not touch the filesystem.
 
 ## Output Summary
@@ -183,6 +192,7 @@ Provide this information in your response for the orchestrator:
 **GitHub ops allowed:** <true | false>
 
 **Notes:**
+
 - <short notes about any special conditions>
 ```
 

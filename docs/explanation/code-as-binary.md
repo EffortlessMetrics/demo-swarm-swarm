@@ -8,13 +8,17 @@
 
 Traditional development follows a hands-on sequence:
 
-**Write code -> Test code -> Review code -> Ship code**
+```
+Write code -> Test code -> Review code -> Ship code
+```
 
 Every line is authored by a human. Every line is read by a reviewer. Quality depends on human attention at every step.
 
 AgOps development inverts this:
 
-**Write specs -> Generate code -> Verify code -> Review evidence -> Ship**
+```
+Write specs -> Generate code -> Verify code -> Review evidence -> Ship
+```
 
 Humans define intent. Machines generate and verify. Humans review the evidence and make the call.
 
@@ -28,24 +32,30 @@ We used to program in assembly. Then we moved to C. Then Python. Now we move aga
 
 ### The Abstraction Ladder
 
-| Era | Source | Compiler | Binary |
-|-----|--------|----------|--------|
-| 1960s | Assembly | Assembler | Machine code |
-| 1980s | C | cc | Assembly |
-| 2000s | Python | Interpreter | Bytecode |
-| Now | **Specs** | **Swarm** | **Implementation** |
+| Era   | Source    | Compiler    | Binary             |
+| ----- | --------- | ----------- | ------------------ |
+| 1960s | Assembly  | Assembler   | Machine code       |
+| 1980s | C         | cc          | Assembly           |
+| 2000s | Python    | Interpreter | Bytecode           |
+| Now   | **Specs** | **Swarm**   | **Implementation** |
 
 ### What This Means
 
-**Source code:** BDD scenarios, requirements, ADRs, API contracts
+#### Source code
+
+BDD scenarios, requirements, ADRs, API contracts
 
 These artifacts capture intent. They're human-authored, human-reviewed, and human-owned. They define what we're building and why.
 
-**Compiler:** The swarm (Signal -> Plan -> Build flows)
+#### Compiler
+
+The swarm (Signal -> Plan -> Build flows)
 
 The swarm transforms intent into implementation. It explores the codebase, makes implementation decisions, writes code, writes tests, and verifies results.
 
-**Binary:** Implementation code (Rust/Python/TypeScript)
+#### Binary
+
+Implementation code (Rust/Python/TypeScript)
 
 The output. Just like we don't read x86 instructions to understand what a program does, we don't read every line of generated code. We read the specs and verify the evidence.
 
@@ -85,13 +95,13 @@ Trusted Artifact
 
 ### Station Specialization
 
-| Station | Specialists | Output |
-|---------|-------------|--------|
-| **Signal** | requirements-author, requirements-critic | Testable requirements, BDD scenarios |
-| **Plan** | design-optioneer, plan-critic | ADR, API contracts, work breakdown |
-| **Build** | code-implementer, test-author, code-critic | Working code, tests, critiques |
-| **Review** | pr-feedback-harvester, fixer | Addressed feedback, clean code |
-| **Gate** | merge-decider, secrets-sanitizer | Ship/no-ship decision with evidence |
+| Station    | Specialists                                | Output                               |
+| ---------- | ------------------------------------------ | ------------------------------------ |
+| **Signal** | requirements-author, requirements-critic   | Testable requirements, BDD scenarios |
+| **Plan**   | design-optioneer, plan-critic              | ADR, API contracts, work breakdown   |
+| **Build**  | code-implementer, test-author, code-critic | Working code, tests, critiques       |
+| **Review** | pr-feedback-harvester, fixer               | Addressed feedback, clean code       |
+| **Gate**   | merge-decider, secrets-sanitizer           | Ship/no-ship decision with evidence  |
 
 ### The Developer's View
 
@@ -107,19 +117,20 @@ Catch issues early by front-loading quality. Every problem found earlier is chea
 
 ### The Cost Curve
 
-| Phase | Cost to Fix |
-|-------|-------------|
-| Requirements | Cheap (change a sentence) |
-| Design | Moderate (update the ADR) |
-| Implementation | Expensive (rewrite code) |
-| Review | Very expensive (code already exists) |
-| Production | Catastrophic (users affected) |
+| Phase          | Cost to Fix                          |
+| -------------- | ------------------------------------ |
+| Requirements   | Cheap (change a sentence)            |
+| Design         | Moderate (update the ADR)            |
+| Implementation | Expensive (rewrite code)             |
+| Review         | Very expensive (code already exists) |
+| Production     | Catastrophic (users affected)        |
 
 ### BDD First
 
 Before writing code, write the behavior.
 
 **Scenarios define expected behavior:**
+
 ```gherkin
 Scenario: User logs in with valid credentials
   Given a registered user with email "user@example.com"
@@ -148,15 +159,18 @@ When tests pass, we have evidence that implementation matches intent. When tests
 The extreme shift-left: prove tests actually test the code.
 
 **The process:**
+
 1. Inject mutations (break the code deliberately)
 2. Run tests
 3. Evaluate results
 
 **The interpretation:**
+
 - If tests fail on mutant: Tests catch the breakage (good)
 - If tests pass on mutant: Tests don't actually verify that behavior (hollow)
 
 **Example:**
+
 ```
 Original: if (balance > 0) { allow_withdrawal(); }
 Mutant:   if (balance >= 0) { allow_withdrawal(); }
@@ -233,22 +247,26 @@ Reading all generated code is like reading compiled assembly. Theoretically poss
 ### What the Dev DOES Read
 
 **Specs:** What we intended to build
+
 - Requirements with REQ/NFR markers
 - BDD scenarios defining behavior
 - ADR explaining design decisions
 - API contracts specifying interfaces
 
 **Evidence:** Test results, critic findings, receipts
+
 - Test execution summaries (47 passed, 0 failed)
 - Critic findings (2 MAJOR issues found, addressed)
 - Gate decisions (PASS: all evidence thresholds met)
 
 **Analysis:** Summaries, hotspots, risk areas
+
 - Implementation summary (what changed and why)
 - Hotspots (where to look if spot-checking)
 - Known limitations (what wasn't verified)
 
 **Decisions:** Ship/no-ship memos with reasoning
+
 - Merge decision with evidence citations
 - Explicit gaps and their assessed risk
 - Recommendation with rationale
@@ -257,12 +275,12 @@ Reading all generated code is like reading compiled assembly. Theoretically poss
 
 Just like we don't read assembly anymore:
 
-| Surface | Purpose | Audience |
-|---------|---------|----------|
-| **Specs** | Define intent | Human review (primary) |
-| **Evidence** | Prove verification | Human audit |
-| **Summaries** | Compress findings | Human review |
-| **Code diff** | Spot-check/audit | Human when needed |
+| Surface       | Purpose            | Audience               |
+| ------------- | ------------------ | ---------------------- |
+| **Specs**     | Define intent      | Human review (primary) |
+| **Evidence**  | Prove verification | Human audit            |
+| **Summaries** | Compress findings  | Human review           |
+| **Code diff** | Spot-check/audit   | Human when needed      |
 
 The PR description is the product. Evidence tables show verification. Hotspots guide spot-checks. The diff is for audit, not primary review.
 
@@ -274,18 +292,19 @@ The PR description is the product. Evidence tables show verification. Hotspots g
 
 **Cost comparison:**
 
-| Activity | Cost |
-|----------|------|
-| Code generation | Cheap (tokens) |
-| Code verification | Cheap (machine time) |
-| Human review of code | Expensive (attention) |
-| Human review of evidence | Cheap (compressed) |
+| Activity                 | Cost                  |
+| ------------------------ | --------------------- |
+| Code generation          | Cheap (tokens)        |
+| Code verification        | Cheap (machine time)  |
+| Human review of code     | Expensive (attention) |
+| Human review of evidence | Cheap (compressed)    |
 
 The equation is simple: spend machine iteration to buy human confidence.
 
 A 2000-line change reviewed line-by-line costs hours of senior attention. The same change reviewed via evidence summary costs minutes. The quality is the same (often better, since machine verification is exhaustive). The attention cost is radically different.
 
 **The trade:**
+
 - Machine cycles are cheap and parallelizable
 - Human attention is expensive and serialized
 - Convert cheap cycles into expensive confidence
@@ -323,27 +342,27 @@ The quality comes from the system (verification, criticism, evidence), not from 
 
 Consider a typical feature implementation:
 
-| Activity | Token Cost | Attention Cost |
-|----------|------------|----------------|
-| Generate code | ~50K tokens | 0 minutes |
-| Run tests | ~5K tokens | 0 minutes |
-| Critic review | ~20K tokens | 0 minutes |
-| Fix issues | ~30K tokens | 0 minutes |
-| Generate evidence | ~10K tokens | 0 minutes |
-| **Human review of evidence** | 0 tokens | **5 minutes** |
-| **Ship decision** | 0 tokens | **2 minutes** |
+| Activity                     | Token Cost  | Attention Cost |
+| ---------------------------- | ----------- | -------------- |
+| Generate code                | ~50K tokens | 0 minutes      |
+| Run tests                    | ~5K tokens  | 0 minutes      |
+| Critic review                | ~20K tokens | 0 minutes      |
+| Fix issues                   | ~30K tokens | 0 minutes      |
+| Generate evidence            | ~10K tokens | 0 minutes      |
+| **Human review of evidence** | 0 tokens    | **5 minutes**  |
+| **Ship decision**            | 0 tokens    | **2 minutes**  |
 
 Total: ~115K tokens, 7 minutes of attention.
 
 Compare to traditional:
 
-| Activity | Token Cost | Attention Cost |
-|----------|------------|----------------|
-| Write code | 0 tokens | 120 minutes |
-| Run tests | 0 tokens | 5 minutes |
-| Self-review | 0 tokens | 30 minutes |
-| Respond to review | 0 tokens | 45 minutes |
-| **Total** | 0 tokens | **200 minutes** |
+| Activity          | Token Cost | Attention Cost  |
+| ----------------- | ---------- | --------------- |
+| Write code        | 0 tokens   | 120 minutes     |
+| Run tests         | 0 tokens   | 5 minutes       |
+| Self-review       | 0 tokens   | 30 minutes      |
+| Respond to review | 0 tokens   | 45 minutes      |
+| **Total**         | 0 tokens   | **200 minutes** |
 
 Tokens are cheap. Attention is expensive. The math is obvious.
 
@@ -392,21 +411,25 @@ The specification is the creative work. The implementation is mechanical. Let ma
 ### What Changes for the Developer
 
 **Before starting:**
+
 - Define the problem clearly
 - Write acceptance criteria
 - Consider edge cases upfront
 
 **During development:**
+
 - Review evidence as it accumulates
 - Respond to genuine ambiguity when agents escalate
 - Make design decisions that agents can't derive
 
 **At completion:**
+
 - Review the evidence summary
 - Spot-check hotspots
 - Make the ship decision
 
 **What doesn't change:**
+
 - Ultimate responsibility for quality
 - Design judgment
 - Ship/no-ship authority

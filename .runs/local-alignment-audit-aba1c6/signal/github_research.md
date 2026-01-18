@@ -3,12 +3,14 @@
 ## Search Inputs
 
 **Run context:**
+
 - `run_id`: `local-alignment-audit-aba1c6`
 - `run_id_kind`: `LOCAL_ONLY` (no GitHub binding)
 - `github_ops_allowed`: `false` (read-only research only, no API calls)
 - **Task**: DemoSwarm documentation-code alignment audit (focus: Six-Flow vs Seven-Flow discrepancies, test metrics)
 
 **Search terms used (local, no API):**
+
 1. `Six-Flow | Seven-Flow` (exact term matching for flow count)
 2. `flow.*count | total.*flow` (broader pattern for references to flow totals)
 3. `/flow-[0-9]` (command existence check)
@@ -25,17 +27,20 @@
 ## Access & Limitations
 
 **GitHub CLI Status**: `gh` commands **not invoked** (per `github_ops_allowed: false` in run_meta)
+
 - This is a `LOCAL_ONLY` run with deferred GitHub binding
 - All research is conducted via local file inspection, git history, and codebase grep
 - **Outcome**: UNVERIFIED on GitHub context (no issue/PR data fetched), but VERIFIED on local code structure
 
 **Scope of this research**:
+
 - Local pack documentation consistency check
 - Flow command count verification from disk
 - Commit history for context on recent changes
 - Cross-file terminology audit
 
 **What was NOT checked** (due to read-only, no GitHub API):
+
 - GitHub issue tracker (EffortlessMetrics/demo-swarm-swarm has issues disabled)
 - PR status or history (would require `gh pr list`)
 - External references or issue links
@@ -48,12 +53,14 @@
 ### The Discrepancy
 
 **Documentation Claims (Read):**
+
 - `README.md` line 67: "### The six flows"
 - `DEMO_RUN.md` line 14: "Run all six flows with commentary"
 - `docs/explanation/architecture.md` line 62: "## The six flows"
 - `CHANGELOG.md` v1.0.0 line 24: "**6 flow commands**: `/flow-1-signal` through `/flow-6-wisdom`"
 
 **Code Reality (on disk):**
+
 ```
 .claude/commands/
   flow-1-signal.md
@@ -69,6 +76,7 @@
 ```
 
 **Total actual flows**: 10 command files implementing overlapping flow semantics:
+
 - Flow 1: 1 variant (signal)
 - Flow 2: 1 variant (plan)
 - Flow 3: 1 variant (build)
@@ -95,6 +103,7 @@
 ### `align-doc-ownership` Run
 
 Located at `.runs/align-doc-ownership/`:
+
 - **Scope**: Alignment of documentation ownership boundaries (Flow commands ≠ Agent docs ≠ Skill docs)
 - **Status**: Gates completed with bounce (plan/build/gate all executed; gate verdict was BOUNCE)
 - **Key constraints established**:
@@ -107,6 +116,7 @@ Located at `.runs/align-doc-ownership/`:
 ### `compliance-drift-proofing` Run
 
 Located at `.runs/compliance-drift-proofing/`:
+
 - **Scope**: Mechanical enforcement of DemoSwarm compliance contracts
 - **Parent issue**: `gh-49` ("Align doc ownership boundaries"), `gh-8` (compliance enforcement)
 - **Key artifact**: `signal/requirements.md` (REQ-005 subtask partitioning):
@@ -121,30 +131,32 @@ Located at `.runs/compliance-drift-proofing/`:
 
 ### 1. Six-Flow Claims (Outdated)
 
-| File | Location | Claim | Status |
-|------|----------|-------|--------|
-| README.md | L67 | "### The six flows" | **STALE** — should say "Seven flows" |
-| DEMO_RUN.md | L14 | "Run all six flows with commentary" | **STALE** — should enumerate flows 1-7 |
-| docs/explanation/architecture.md | L62 | "## The six flows" | **STALE** — should list 7 + explain overlap |
-| CHANGELOG.md v1.0.0 | L24 | "**6 flow commands**: /flow-1-signal through /flow-6-wisdom" | **MISLEADING** — actually 10 command files |
+| File                             | Location | Claim                                                        | Status                                      |
+| -------------------------------- | -------- | ------------------------------------------------------------ | ------------------------------------------- |
+| README.md                        | L67      | "### The six flows"                                          | **STALE** — should say "Seven flows"        |
+| DEMO_RUN.md                      | L14      | "Run all six flows with commentary"                          | **STALE** — should enumerate flows 1-7      |
+| docs/explanation/architecture.md | L62      | "## The six flows"                                           | **STALE** — should list 7 + explain overlap |
+| CHANGELOG.md v1.0.0              | L24      | "**6 flow commands**: /flow-1-signal through /flow-6-wisdom" | **MISLEADING** — actually 10 command files  |
 
 ### 2. Flow Overlap Not Documented
 
-| Pattern | Actual Commands | Documentation Status |
-|---------|-----------------|----------------------|
-| Flow 4 split | `/flow-4-gate`, `/flow-4-review` | Not explained in README/DEMO_RUN |
-| Flow 5 split | `/flow-5-gate`, `/flow-5-deploy` | Not explained in README/DEMO_RUN |
-| Flow 6 split | `/flow-6-deploy`, `/flow-6-wisdom` | Not explained in README/DEMO_RUN |
-| Flow 7 standalone | `/flow-7-wisdom` | **Completely undocumented in public docs** |
+| Pattern           | Actual Commands                    | Documentation Status                       |
+| ----------------- | ---------------------------------- | ------------------------------------------ |
+| Flow 4 split      | `/flow-4-gate`, `/flow-4-review`   | Not explained in README/DEMO_RUN           |
+| Flow 5 split      | `/flow-5-gate`, `/flow-5-deploy`   | Not explained in README/DEMO_RUN           |
+| Flow 6 split      | `/flow-6-deploy`, `/flow-6-wisdom` | Not explained in README/DEMO_RUN           |
+| Flow 7 standalone | `/flow-7-wisdom`                   | **Completely undocumented in public docs** |
 
 ### 3. CLAUDE.md Inconsistency
 
 **Correct (CLAUDE.md L13-14):**
+
 ```markdown
 - **7 flows**: Signal → Plan → Build → Review → Gate → Deploy → Wisdom
 ```
 
 **Outdated (CLAUDE.md L68 flow table):**
+
 ```markdown
 | 1. Signal | `/flow-1-signal` | Intent -> requirements, BDD, risks, receipt |
 | 2. Plan | `/flow-2-plan` | Spec -> ADR, contracts, observability, plans, receipt |
@@ -153,6 +165,7 @@ Located at `.runs/compliance-drift-proofing/`:
 | 5. Deploy | `/flow-5-deploy` | Verdict -> promote to swarm mainline (or NOT_DEPLOYED) + deploy receipt |
 | 6. Wisdom | `/flow-6-wisdom` | Run history -> regressions, learnings, feedback + terminal receipt |
 ```
+
 The table says "6" flows and maps them to numbered 1-6, but omits Flow 7 and doesn't explain the Flow 4/5/6 splits.
 
 ---
@@ -160,6 +173,7 @@ The table says "6" flows and maps them to numbered 1-6, but omits Flow 7 and doe
 ## Prior Art Pointers (Local Codebase)
 
 ### Flow Definition Files
+
 - `.claude/commands/flow-1-signal.md` — Entry point for requirements capture
 - `.claude/commands/flow-2-plan.md` — Design and planning
 - `.claude/commands/flow-3-build.md` — Implementation
@@ -172,15 +186,19 @@ The table says "6" flows and maps them to numbered 1-6, but omits Flow 7 and doe
 - `.claude/commands/flow-7-wisdom.md` — **STANDALONE** second-cycle wisdom (no documentation)
 
 ### Documentation Structure
+
 - `docs/explanation/architecture.md` — Claims 6 flows; should reflect actual 7-flow + multi-path design
 - `docs/tutorials/walkthrough.md` — Tutorial reference; canonical demo walkthrough
 - `CLAUDE.md` — **Most accurate** (lists 7 flows correctly, but flow table still says 6)
 
 ### Test Metrics
+
 No test count discrepancies found in available local artifacts. The compliance run (`compliance-drift-proofing`) references test metrics in:
+
 - `.runs/compliance-drift-proofing/plan/test_plan.md`
 
 ### Agent Inventory
+
 - `CHANGELOG.md` line 23: "**50+ agents** across 8 role families"
 - `CLAUDE.md` line 14: "**50+ agents**: narrow specialists"
 - **Status**: Using "50+" to avoid drift (correct pattern; no fixed count maintained)

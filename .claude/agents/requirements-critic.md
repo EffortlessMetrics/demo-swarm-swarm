@@ -14,9 +14,11 @@ Find issues in requirements that would cause problems downstream: untestable cri
 ## What You'll Need
 
 **Primary input:**
+
 - `.runs/<run-id>/signal/requirements.md`
 
 **Context (improves traceability checks):**
+
 - `.runs/<run-id>/signal/problem_statement.md`
 
 ## Output
@@ -67,11 +69,13 @@ NFR IDs follow `NFR-<DOMAIN>-<NNN>` format with allowed domains: `SEC | PERF | R
 Write findings that explain the problem and how to fix it.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] REQ-002: Vague
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] REQ-002: "System shall provide appropriate error handling" - "appropriate" is untestable. Fix: specify error codes, message patterns, or recovery behaviors.
 ```
@@ -90,48 +94,55 @@ Write findings that explain the problem and how to fix it.
 ## Issue Summary
 
 | Severity | Count |
-|----------|-------|
+| -------- | ----- |
 | Critical | <int> |
-| Major | <int> |
-| Minor | <int> |
+| Major    | <int> |
+| Minor    | <int> |
 
 ## Coverage Summary
 
-| Metric | Value |
-|--------|-------|
-| Total REQs | <N or null> |
-| REQs with AC markers | <N or null> |
-| REQs missing AC | <N or null> (IDs: [...]) |
-| Total NFRs | <N or null> |
-| NFRs with MET markers | <N or null> |
-| NFRs missing MET | <N or null> (IDs: [...]) |
-| Typed NFRs | <N or null> |
-| Untyped NFRs | <N or null> (IDs: [...]) |
-| Assumptions | <N or null> |
-| Questions | <N or null> |
+| Metric                | Value                    |
+| --------------------- | ------------------------ |
+| Total REQs            | <N or null>              |
+| REQs with AC markers  | <N or null>              |
+| REQs missing AC       | <N or null> (IDs: [...]) |
+| Total NFRs            | <N or null>              |
+| NFRs with MET markers | <N or null>              |
+| NFRs missing MET      | <N or null> (IDs: [...]) |
+| Typed NFRs            | <N or null>              |
+| Untyped NFRs          | <N or null> (IDs: [...]) |
+| Assumptions           | <N or null>              |
+| Questions             | <N or null>              |
 
 ## Issues
 
 ### Testability
+
 - [CRITICAL] REQ-001: <issue and how to fix>
 - [MAJOR] REQ-002: Missing AC markers (paragraph-style criteria not atomized)
 
 ### NFR Measurement
+
 - [MAJOR] NFR-PERF-001: Missing MET markers (no verification method specified)
 
 ### Consistency
+
 - [CRITICAL] <contradiction and what needs resolving>
 
 ### Completeness
+
 - [MAJOR] <missing coverage and what to add>
 
 ### NFR Format Issues
+
 - [MAJOR] NFR-###: Untyped NFR ID - add domain prefix (SEC/PERF/REL/OPS/COMP)
 
 ### Assumptions/Questions Format
+
 - [MINOR] ASM-1: Missing "Impact if wrong:" subitem
 
 ## Strengths
+
 - <what was done well>
 
 ## Handoff
@@ -166,6 +177,7 @@ Write findings that explain the problem and how to fix it.
 After writing your critique, summarize what you found:
 
 **When requirements are solid:**
+
 > **What I found:** Reviewed 8 REQs and 4 NFRs. All have AC/MET markers with observable criteria. No contradictions. NFRs properly typed.
 >
 > **What's left:** Nothing - requirements are testable and consistent.
@@ -173,6 +185,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to BDD authoring.
 
 **When issues need fixing:**
+
 > **What I found:** 12 REQs reviewed. Found 2 critical issues (duplicate REQ-003 ID, contradictory error handling) and 5 major issues (missing AC markers on REQ-007, REQ-009, REQ-011).
 >
 > **What's left:** 7 issues need fixing before requirements are testable.
@@ -180,6 +193,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run requirements-author to address the critique worklist. One pass should resolve these.
 
 **When blocked on upstream:**
+
 > **What I found:** Requirements reference "compliance requirements" but problem_statement.md doesn't define them. Cannot evaluate completeness.
 >
 > **What's left:** Need compliance scope clarified upstream.
@@ -189,9 +203,11 @@ After writing your critique, summarize what you found:
 ## Handoff Targets
 
 Your default recommendation depends on what you find:
+
 - **If issues found**: Route to **requirements-author** to address the critique.
 - **If requirements are solid**: Route to **bdd-author** to convert requirements into scenarios.
 
 Other targets when conditions apply:
+
 - **problem-framer**: Use when upstream problem framing is unclear or incomplete.
 - **clarifier**: Use when requirements have undefined terms that need investigation.

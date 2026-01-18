@@ -7,6 +7,7 @@
 ## Why markers exist
 
 Receipts derive counts mechanically (grep/wc/parse). Stable markers make this possible without:
+
 - Parsing prose
 - Guessing structure
 - Recomputing from source
@@ -20,11 +21,13 @@ Receipts derive counts mechanically (grep/wc/parse). Stable markers make this po
 Markers are for **mechanical counting and audit trails**, not for routing or communication.
 
 **Markers are FOR:**
+
 - Counting (how many REQs, how many tests, how many risks)
 - Audit trails (grep-able facts that prove what was produced)
 - Receipt generation (cleanup agents count markers to populate receipts)
 
 **Markers are NOT FOR:**
+
 - Routing decisions (orchestrator reads prose handoffs, not marker counts)
 - Status communication (agents use handoffs, not structured markers)
 - Agent-to-agent communication (prose, not data formats)
@@ -45,12 +48,12 @@ The orchestrator routes on natural language handoffs. Markers exist so that clea
 
 **Producer:** `requirements-author`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Requirement | `### REQ-###` | `### REQ-001` |
-| Acceptance criteria | `- AC-#:` | `- AC-1: User can log in` |
-| NFR | `### NFR-<DOMAIN>-###` | `### NFR-SECURITY-001` |
-| Metric | `- MET-#:` | `- MET-1: Response time < 200ms` |
+| Marker              | Pattern                | Example                          |
+| ------------------- | ---------------------- | -------------------------------- |
+| Requirement         | `### REQ-###`          | `### REQ-001`                    |
+| Acceptance criteria | `- AC-#:`              | `- AC-1: User can log in`        |
+| NFR                 | `### NFR-<DOMAIN>-###` | `### NFR-SECURITY-001`           |
+| Metric              | `- MET-#:`             | `- MET-1: Response time < 200ms` |
 
 ---
 
@@ -58,9 +61,9 @@ The orchestrator routes on natural language handoffs. Markers exist so that clea
 
 **Producer:** `scope-assessor`, `risk-analyst`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Risk | `RSK-### [SEVERITY] [CATEGORY]` | `RSK-001 HIGH SECURITY` |
+| Marker | Pattern                         | Example                 |
+| ------ | ------------------------------- | ----------------------- |
+| Risk   | `RSK-### [SEVERITY] [CATEGORY]` | `RSK-001 HIGH SECURITY` |
 
 Severity: `CRITICAL | HIGH | MEDIUM | LOW`
 Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
@@ -71,8 +74,8 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 **Producer:** `clarifier`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
+| Marker      | Pattern                 | Example             |
+| ----------- | ----------------------- | ------------------- |
 | Question ID | `^- QID: OQ-<FLOW>-###` | `- QID: OQ-SIG-001` |
 
 `<FLOW>` values: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM
@@ -83,24 +86,24 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 **Producer:** Various Plan agents
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Implementation item | `IMPL_*:` | `IMPL_ENDPOINT:` |
-| Documentation item | `DOC_*:` | `DOC_README:` |
-| Contract item | `CE_*:` | `CE_API_HEALTH:` |
-| Coverage item | `COV_*:` | `COV_UNIT_HEALTH:` |
-| Dependency | `DEP_*:` | `DEP_AUTH_LIB:` |
+| Marker              | Pattern   | Example            |
+| ------------------- | --------- | ------------------ |
+| Implementation item | `IMPL_*:` | `IMPL_ENDPOINT:`   |
+| Documentation item  | `DOC_*:`  | `DOC_README:`      |
+| Contract item       | `CE_*:`   | `CE_API_HEALTH:`   |
+| Coverage item       | `COV_*:`  | `COV_UNIT_HEALTH:` |
+| Dependency          | `DEP_*:`  | `DEP_AUTH_LIB:`    |
 
 ## Build inventory markers
 
 **Producer:** `code-implementer`, `test-author`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Impl file changed | `^- IMPL_FILE_CHANGED:` | `- IMPL_FILE_CHANGED: src/auth.rs` |
-| Impl file added | `^- IMPL_FILE_ADDED:` | `- IMPL_FILE_ADDED: src/new_module.rs` |
-| Test file changed | `^- TEST_FILE_CHANGED:` | `- TEST_FILE_CHANGED: tests/auth_test.py` |
-| Test file added | `^- TEST_FILE_ADDED:` | `- TEST_FILE_ADDED: tests/test_auth_flow.py` |
+| Marker            | Pattern                 | Example                                      |
+| ----------------- | ----------------------- | -------------------------------------------- |
+| Impl file changed | `^- IMPL_FILE_CHANGED:` | `- IMPL_FILE_CHANGED: src/auth.rs`           |
+| Impl file added   | `^- IMPL_FILE_ADDED:`   | `- IMPL_FILE_ADDED: src/new_module.rs`       |
+| Test file changed | `^- TEST_FILE_CHANGED:` | `- TEST_FILE_CHANGED: tests/auth_test.py`    |
+| Test file added   | `^- TEST_FILE_ADDED:`   | `- TEST_FILE_ADDED: tests/test_auth_flow.py` |
 
 ---
 
@@ -108,11 +111,13 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 **Producer:** `regression-analyst`, `learning-synthesizer`, `feedback-applier`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Regression | `^### REG-[0-9]{3}:` | `### REG-001: Performance degradation` |
-| Learning | `^## Learning: ` | `## Learning: Caching improves latency` |
-| Action | `^- ISSUE: ` | `- ISSUE: Add rate limiting` |
+<!-- markdownlint-disable MD038 -->
+| Marker     | Pattern              | Example                                 |
+| ---------- | -------------------- | --------------------------------------- |
+| Regression | `^### REG-[0-9]{3}:` | `### REG-001: Performance degradation`  |
+| Learning   | `^## Learning: `     | `## Learning: Caching improves latency` |
+| Action     | `^- ISSUE: `         | `- ISSUE: Add rate limiting`            |
+<!-- markdownlint-enable MD038 -->
 
 **Note:** These patterns are anchored (`^`) and require exact casing.
 
@@ -122,10 +127,10 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 **Producer:** `bdd-author`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Feature file | `*.feature` | `login.feature` |
-| Scenario | `Scenario:` | `Scenario: User logs in successfully` |
+| Marker       | Pattern     | Example                               |
+| ------------ | ----------- | ------------------------------------- |
+| Feature file | `*.feature` | `login.feature`                       |
+| Scenario     | `Scenario:` | `Scenario: User logs in successfully` |
 
 ---
 
@@ -133,9 +138,9 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 **Producer:** `test-author`, `test-strategist`
 
-| Marker | Pattern | Example |
-|--------|---------|---------|
-| Test type | `TYPE_*:` | `TYPE_UNIT:` |
+| Marker          | Pattern     | Example              |
+| --------------- | ----------- | -------------------- |
+| Test type       | `TYPE_*:`   | `TYPE_UNIT:`         |
 | Coverage target | `TARGET_*:` | `TARGET_90_PERCENT:` |
 
 ---
@@ -150,6 +155,7 @@ When you need a new count:
 4. **Update pack-check:** If it's a contract marker
 
 **Don't:**
+
 - Invent ad-hoc patterns in cleanup agents
 - Parse prose to extract counts
 - Rely on heading structure alone

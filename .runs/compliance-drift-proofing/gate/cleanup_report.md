@@ -1,9 +1,11 @@
 # Gate Cleanup Report
 
 ## Run: compliance-drift-proofing
+
 ## Cleanup Completed: 2025-12-19T08:50:30Z
 
 ## Machine Summary
+
 status: UNVERIFIED
 recommended_action: BOUNCE
 route_to_flow: 3
@@ -12,69 +14,77 @@ merge_verdict: BOUNCE
 missing_required: []
 missing_optional: []
 blockers:
-  - "Receipt fabrication: build_receipt.json claims 420 tests vs 294 actual (42.8% inflation); 89.29% coverage claimed vs 75.12% actual (14.17% gap)"
-  - "Coverage threshold not met: 75.12% actual < 80% required per test_plan.md"
-  - "Policy violations: POL-003 (counts not mechanical), POL-004 (quality_gates not from Machine Summaries), POL-015 (quality_gates misrepresent artifact state)"
-concerns:
-  - "Reseal operation (commit bacacfe) updated receipt without updating test_execution.md - audit trail gap"
-  - "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
-  - "cargo-audit could not run due to CVSS 4.0 incompatibility; manual review substituted"
+
+- "Receipt fabrication: build_receipt.json claims 420 tests vs 294 actual (42.8% inflation); 89.29% coverage claimed vs 75.12% actual (14.17% gap)"
+- "Coverage threshold not met: 75.12% actual < 80% required per test_plan.md"
+- "Policy violations: POL-003 (counts not mechanical), POL-004 (quality_gates not from Machine Summaries), POL-015 (quality_gates misrepresent artifact state)"
+  concerns:
+- "Reseal operation (commit bacacfe) updated receipt without updating test_execution.md - audit trail gap"
+- "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
+- "cargo-audit could not run due to CVSS 4.0 incompatibility; manual review substituted"
 
 ## Artifact Verification
-| Artifact | Status |
-|----------|--------|
-| merge_decision.md | ✓ Found |
-| receipt_audit.md | ✓ Found |
+
+| Artifact               | Status  |
+| ---------------------- | ------- |
+| merge_decision.md      | ✓ Found |
+| receipt_audit.md       | ✓ Found |
 | contract_compliance.md | ✓ Found |
-| security_scan.md | ✓ Found |
-| coverage_audit.md | ✓ Found |
-| policy_analysis.md | ✓ Found |
-| risk_assessment.md | ✓ Found |
-| gate_fix_summary.md | ✓ Found |
-| flow_plan.md | ✓ Found |
-| traceability_audit.md | ✓ Found |
+| security_scan.md       | ✓ Found |
+| coverage_audit.md      | ✓ Found |
+| policy_analysis.md     | ✓ Found |
+| risk_assessment.md     | ✓ Found |
+| gate_fix_summary.md    | ✓ Found |
+| flow_plan.md           | ✓ Found |
+| traceability_audit.md  | ✓ Found |
 
 ## Extracted Gate Statuses (Machine Summary)
-| Check | Status | Source |
-|------|--------|--------|
-| merge_decider (verdict) | BOUNCE | merge_decision.md (Machine Summary) |
-| merge_decider (status) | UNVERIFIED | merge_decision.md (Machine Summary) |
-| receipt_audit | UNVERIFIED | receipt_audit.md (Machine Summary) |
-| contract_compliance | VERIFIED | contract_compliance.md (Machine Summary) |
-| security_scan | VERIFIED | security_scan.md (Machine Summary) |
-| coverage_audit | UNVERIFIED | coverage_audit.md (Machine Summary) |
-| policy_analysis | UNVERIFIED | policy_analysis.md (Machine Summary) |
+
+| Check                   | Status     | Source                                   |
+| ----------------------- | ---------- | ---------------------------------------- |
+| merge_decider (verdict) | BOUNCE     | merge_decision.md (Machine Summary)      |
+| merge_decider (status)  | UNVERIFIED | merge_decision.md (Machine Summary)      |
+| receipt_audit           | UNVERIFIED | receipt_audit.md (Machine Summary)       |
+| contract_compliance     | VERIFIED   | contract_compliance.md (Machine Summary) |
+| security_scan           | VERIFIED   | security_scan.md (Machine Summary)       |
+| coverage_audit          | UNVERIFIED | coverage_audit.md (Machine Summary)      |
+| policy_analysis         | UNVERIFIED | policy_analysis.md (Machine Summary)     |
 
 ## Counts Derived (Stable Markers - Mechanical Extraction)
-| Metric | Value | Source | Method |
-|--------|-------|--------|--------|
-| receipt_checks_total | 12 | receipt_audit.md (Machine Summary checks_total) | demoswarm ms get |
-| receipt_checks_passed | 8 | receipt_audit.md (Machine Summary checks_passed) | demoswarm ms get |
-| contract_violations | 0 | contract_compliance.md (violations_total) | demoswarm ms get |
-| security_findings | 0 | security_scan.md (findings_total) | demoswarm ms get |
-| policy_violations | 3 | policy_analysis.md (compliance_summary.non_compliant at L30) | manual YAML parsing |
-| coverage_line_percent | null | coverage_audit.md (Machine Summary) | demoswarm ms get → null |
-| coverage_branch_percent | null | coverage_audit.md (Machine Summary) | demoswarm ms get → null |
+
+| Metric                  | Value | Source                                                       | Method                  |
+| ----------------------- | ----- | ------------------------------------------------------------ | ----------------------- |
+| receipt_checks_total    | 12    | receipt_audit.md (Machine Summary checks_total)              | demoswarm ms get        |
+| receipt_checks_passed   | 8     | receipt_audit.md (Machine Summary checks_passed)             | demoswarm ms get        |
+| contract_violations     | 0     | contract_compliance.md (violations_total)                    | demoswarm ms get        |
+| security_findings       | 0     | security_scan.md (findings_total)                            | demoswarm ms get        |
+| policy_violations       | 3     | policy_analysis.md (compliance_summary.non_compliant at L30) | manual YAML parsing     |
+| coverage_line_percent   | null  | coverage_audit.md (Machine Summary)                          | demoswarm ms get → null |
+| coverage_branch_percent | null  | coverage_audit.md (Machine Summary)                          | demoswarm ms get → null |
 
 ## Key Findings
 
 ### Verdict: BOUNCE (to Flow 3)
+
 - Merge decision: BOUNCE based on critical gate check failures
 - Target flow: 3 (Build)
 - Reason: Receipt integrity failure, coverage not measured, policy violation POL-004
 
 ### Status: UNVERIFIED
+
 - Overall status reflects BOUNCE verdict and unresolved gate blockers
 - Required gates: receipt_audit=UNVERIFIED, coverage_audit=UNVERIFIED
 - Passing gates: contract_compliance=VERIFIED, security_scan=VERIFIED
 
 ### Security: VERIFIED
+
 - security_scan found 0 vulnerabilities
 - No secrets detected in 115 changed files
 - SAST patterns clear; no injection vectors
 - Dependency audit inconclusive (cargo-audit tool incompatibility with CVSS 4.0)
 
 ### Traceability: VERIFIED
+
 - Traceability audit confirmed complete spec traceability (6 REQs, 40 BDD scenarios, 6 NFRs)
 - All requirements have verification strategies
 
@@ -103,6 +113,7 @@ concerns:
 ## Index Update
 
 Using demoswarm shim to update .runs/index.json:
+
 - run_id: compliance-drift-proofing
 - status: UNVERIFIED
 - last_flow: gate
@@ -133,6 +144,7 @@ Using demoswarm shim to update .runs/index.json:
 **Iteration 5**: Contract_compliance.md incorrectly reported check ID mismatch (contract declared 50/51 vs implementation 52/53). Re-reading showed the contract correctly declares checks 49, 50, 52, 53; drift.rs implements exactly these IDs. **Iteration 6 (current)** corrected this analysis — contract is now VERIFIED. The contract mismatch was a misreading, not an actual alignment issue.
 
 ---
+
 _Generated by gate-cleanup at 2025-12-19T08:50:30Z_
 _Counts are mechanically derived via demoswarm.sh ms get from stable markers in Machine Summary blocks_
 _All gate statuses, verdict, and blockers sourced directly from flow artifacts_

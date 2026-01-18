@@ -37,6 +37,7 @@ missing_required: []
 concerns: []
 questions_resolved: 3
 assumptions_added: 3
+
 - QID: OQ-BUILD-001
   - Q: What specific phrasing should be used for the CHANGELOG v1.0.0 annotation to clarify the evolution from 6 to 7 flows? [OPEN]
   - Suggested default: Add parenthetical annotation noting evolution to seven flows with 10 command files
@@ -66,7 +67,6 @@ assumptions_added: 3
   - Suggested default: Reference as test_output.log per issue_normalized.md; actual path may be ephemeral CI artifact
   - Impact if different: If no persistent artifact exists, test count claim may be unverifiable; may need to document as of specific date
   - Added: 2025-12-20T11:59:09Z
-
 
 ### Additional Assumptions
 
@@ -111,6 +111,7 @@ assumptions_added: 5
 missing_required: []
 blockers: []
 concerns:
-  - OQ-SIG-004 (path traversal) and OQ-SIG-006 (test count story) remain open from Signal; assumed forward per defaults
-  - OQ-PLAN-001/002/003 remain open from Plan; will use suggested defaults during implementation
-  - Line number references (L186-196) in work_plan.md should be verified before editing
+
+- OQ-SIG-004 (path traversal) and OQ-SIG-006 (test count story) remain open from Signal; assumed forward per defaults
+- OQ-PLAN-001/002/003 remain open from Plan; will use suggested defaults during implementation
+- Line number references (L186-196) in work_plan.md should be verified before editing

@@ -9,25 +9,25 @@
 
 ## Merge Details
 
-| Field | Value |
-|-------|-------|
-| Merge Method | merge commit |
+| Field            | Value                                      |
+| ---------------- | ------------------------------------------ |
+| Merge Method     | merge commit                               |
 | Merge Commit SHA | `ed9b9c98b7a353a29671d489148fef3ba08d933e` |
-| Merged At | 2025-12-20T17:06:14Z |
-| Merged By | EffortlessSteven (Steven Zimmerman, CPA) |
-| Source Branch | run/local-alignment-audit-aba1c6 |
-| Target Branch | main |
-| Branch Deleted | yes |
+| Merged At        | 2025-12-20T17:06:14Z                       |
+| Merged By        | EffortlessSteven (Steven Zimmerman, CPA)   |
+| Source Branch    | run/local-alignment-audit-aba1c6           |
+| Target Branch    | main                                       |
+| Branch Deleted   | yes                                        |
 
 ## Tag Details
 
-| Field | Value |
-|-------|-------|
-| Tag Name | `v1.0.0-local-alignment-audit-aba1c6` |
-| Tag Type | annotated |
-| Tagged Commit | `ed9b9c98b7a353a29671d489148fef3ba08d933e` |
-| Tag Message | Release: local-alignment-audit-aba1c6 - Pack documentation alignment to seven-flow model |
-| Tag Pushed | yes |
+| Field         | Value                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| Tag Name      | `v1.0.0-local-alignment-audit-aba1c6`                                                    |
+| Tag Type      | annotated                                                                                |
+| Tagged Commit | `ed9b9c98b7a353a29671d489148fef3ba08d933e`                                               |
+| Tag Message   | Release: local-alignment-audit-aba1c6 - Pack documentation alignment to seven-flow model |
+| Tag Pushed    | yes                                                                                      |
 
 ## Gate Verdict
 
@@ -43,11 +43,11 @@
 
 ## Timeline
 
-| Timestamp (UTC) | Event |
-|-----------------|-------|
-| 2025-12-20T17:06:14Z | PR #2 merged to main |
+| Timestamp (UTC)      | Event                                           |
+| -------------------- | ----------------------------------------------- |
+| 2025-12-20T17:06:14Z | PR #2 merged to main                            |
 | 2025-12-20T17:15:00Z | Tag v1.0.0-local-alignment-audit-aba1c6 created |
-| 2025-12-20T17:15:00Z | Tag pushed to origin |
+| 2025-12-20T17:15:00Z | Tag pushed to origin                            |
 
 ## Notes
 

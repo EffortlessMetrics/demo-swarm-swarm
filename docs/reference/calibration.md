@@ -9,6 +9,7 @@
 [Calibration Signals](calibration-signals.md) tells you how to track whether the system is healthy.
 
 This document tells you how to **actively prevent** the system from becoming unhealthy:
+
 - Detecting trust decay before it causes problems
 - Preventing single-metric gaming (Goodhart's law)
 - Running calibration exercises to verify gates work
@@ -37,6 +38,7 @@ This is not human failure---it is predictable psychology. Systems that appear re
 ### Why This Matters
 
 The swarm's value proposition depends on the gates being real:
+
 - If gates always pass, they provide no information
 - If humans always approve, the review provides no value
 - If problems only surface in production, the system has failed its purpose
@@ -53,12 +55,12 @@ Inject known defects into a shadow fork. Verify gates catch them.
 
 **What to inject:**
 
-| Defect Type | Example | Expected Detection |
-|-------------|---------|-------------------|
-| Security issue | Credential in code | secrets-sanitizer |
-| Test gap | Code that mutation would catch | test-critic |
-| Contract violation | API does not match spec | interface-designer, code-critic |
-| Style violation | Naming, structure issues | auto-linter, code-critic |
+| Defect Type        | Example                        | Expected Detection              |
+| ------------------ | ------------------------------ | ------------------------------- |
+| Security issue     | Credential in code             | secrets-sanitizer               |
+| Test gap           | Code that mutation would catch | test-critic                     |
+| Contract violation | API does not match spec        | interface-designer, code-critic |
+| Style violation    | Naming, structure issues       | auto-linter, code-critic        |
 
 **What to verify:**
 
@@ -73,11 +75,11 @@ Inject known defects into a shadow fork. Verify gates catch them.
 
 Force attention by requiring explicit gaps in the [PR Quality Scorecard](pr-quality-scorecard.md).
 
-| Good | Bad |
-|------|-----|
-| "Mutation: not measured (no budget for this run)" | Silent omission |
-| "Security: not measured (no changed attack surface)" | "Security: clean" without evidence |
-| "Boundary: unknown (contract checker not configured)" | Blank field |
+| Good                                                  | Bad                                |
+| ----------------------------------------------------- | ---------------------------------- |
+| "Mutation: not measured (no budget for this run)"     | Silent omission                    |
+| "Security: not measured (no changed attack surface)"  | "Security: clean" without evidence |
+| "Boundary: unknown (contract checker not configured)" | Blank field                        |
 
 When reviewers see explicit gaps, they cannot assume everything was checked. This forces conscious acknowledgment of verification boundaries.
 
@@ -87,14 +89,14 @@ When reviewers see explicit gaps, they cannot assume everything was checked. Thi
 
 Patterns that should force slowdown, even when gates pass.
 
-| Red Flag | Response |
-|----------|----------|
-| Missing verification on security-relevant changes | Route to security review |
+| Red Flag                                               | Response                              |
+| ------------------------------------------------------ | ------------------------------------- |
+| Missing verification on security-relevant changes      | Route to security review              |
 | "Not measured" on risky surfaces (auth, payments, PII) | Require explicit human acknowledgment |
-| UNVERIFIED status without explanation | Block until explained |
-| Contract violations in any receipt | Route to interface-designer |
-| Unaddressed CRITICAL critiques | Route to fixer |
-| 100% pass rate for 20+ runs | Trigger calibration exercise |
+| UNVERIFIED status without explanation                  | Block until explained                 |
+| Contract violations in any receipt                     | Route to interface-designer           |
+| Unaddressed CRITICAL critiques                         | Route to fixer                        |
+| 100% pass rate for 20+ runs                            | Trigger calibration exercise          |
 
 Red flags do not block automatically---they force human attention. The goal is to interrupt the rubber-stamping pattern.
 
@@ -102,13 +104,13 @@ Red flags do not block automatically---they force human attention. The goal is t
 
 Track over time to detect decay.
 
-| Signal | What It Shows | Decay Indicator |
-|--------|---------------|-----------------|
-| Gate catch rate | Defects found by gates / total defects | Declining |
-| Calibration pass rate | Injected defects caught / total injections | Below 90% |
-| False positive rate | Bounces that were overridden | Rising |
-| Time to detection | When in flow defects are caught | Moving right (later) |
-| Review time | Minutes to approve | Declining suspiciously |
+| Signal                | What It Shows                              | Decay Indicator        |
+| --------------------- | ------------------------------------------ | ---------------------- |
+| Gate catch rate       | Defects found by gates / total defects     | Declining              |
+| Calibration pass rate | Injected defects caught / total injections | Below 90%              |
+| False positive rate   | Bounces that were overridden               | Rising                 |
+| Time to detection     | When in flow defects are caught            | Moving right (later)   |
+| Review time           | Minutes to approve                         | Declining suspiciously |
 
 Regression in any metric triggers investigation. Stable metrics are not proof of health---they require calibration exercises to verify.
 
@@ -122,25 +124,25 @@ Single metrics get gamed---not always intentionally. Optimization pressure finds
 
 ### The Gaming Vectors
 
-| Metric | Gaming Mode | Symptom |
-|--------|-------------|---------|
-| Coverage | Hollow tests (run but do not assert) | High coverage, mutation survivors |
-| Mutation score | Over-specific assertions | Brittle tests, low maintainability |
-| Green CI | Untested surfaces | Passes CI, fails in production |
-| Clean lint | Compliant but complex | No lint errors, unreadable code |
-| Fast review | Rubber-stamping | Low DevLT, high defect escape rate |
+| Metric         | Gaming Mode                          | Symptom                            |
+| -------------- | ------------------------------------ | ---------------------------------- |
+| Coverage       | Hollow tests (run but do not assert) | High coverage, mutation survivors  |
+| Mutation score | Over-specific assertions             | Brittle tests, low maintainability |
+| Green CI       | Untested surfaces                    | Passes CI, fails in production     |
+| Clean lint     | Compliant but complex                | No lint errors, unreadable code    |
+| Fast review    | Rubber-stamping                      | Low DevLT, high defect escape rate |
 
 ### The Defense: Multi-Sensor Panel
 
 The [PR Quality Scorecard](pr-quality-scorecard.md) uses multiple sensors that fail in different ways:
 
-| If You Game... | This Catches It |
-|----------------|-----------------|
-| Coverage (hollow tests) | Mutation testing |
+| If You Game...                      | This Catches It         |
+| ----------------------------------- | ----------------------- |
+| Coverage (hollow tests)             | Mutation testing        |
 | Mutation (over-specific assertions) | Maintainability sensors |
-| Green CI (untested surfaces) | Manual hotspot review |
-| Clean lint (compliant but complex) | Complexity deltas |
-| Fast review (rubber-stamping) | Calibration exercises |
+| Green CI (untested surfaces)        | Manual hotspot review   |
+| Clean lint (compliant but complex)  | Complexity deltas       |
+| Fast review (rubber-stamping)       | Calibration exercises   |
 
 No single metric is the target. The panel collectively approximates "good engineering."
 
@@ -154,23 +156,23 @@ No single metric is the target. The panel collectively approximates "good engine
 
 ### Wisdom Failure Modes
 
-| Problem | Mechanism | Guardrail |
-|---------|-----------|-----------|
-| Flaky test causes patch | learning-synthesizer sees failure, recommends change | False failure detection before patching |
-| One-off issue becomes permanent rule | Single data point extrapolated | Require 3+ occurrences before pattern |
-| Template drift from original intent | Incremental patches accumulate | Patch log with evidence requirements |
-| Overfitting to recent failures | Recent data weighted too heavily | Staleness rules (patches expire) |
+| Problem                              | Mechanism                                            | Guardrail                               |
+| ------------------------------------ | ---------------------------------------------------- | --------------------------------------- |
+| Flaky test causes patch              | learning-synthesizer sees failure, recommends change | False failure detection before patching |
+| One-off issue becomes permanent rule | Single data point extrapolated                       | Require 3+ occurrences before pattern   |
+| Template drift from original intent  | Incremental patches accumulate                       | Patch log with evidence requirements    |
+| Overfitting to recent failures       | Recent data weighted too heavily                     | Staleness rules (patches expire)        |
 
 ### Patch Discipline
 
 Wisdom-generated patches should be:
 
-| Property | Meaning |
-|----------|---------|
-| Evidence-backed | Cite the failures they address |
-| Scoped | Do not overgeneralize from one case |
-| Reversible | Can be rolled back if they cause problems |
-| Expiring | Require reaffirmation after N runs or M days |
+| Property        | Meaning                                      |
+| --------------- | -------------------------------------------- |
+| Evidence-backed | Cite the failures they address               |
+| Scoped          | Do not overgeneralize from one case          |
+| Reversible      | Can be rolled back if they cause problems    |
+| Expiring        | Require reaffirmation after N runs or M days |
 
 **The anti-pattern:** A learning from one unusual run becomes a permanent constraint that hurts normal runs.
 
@@ -189,11 +191,11 @@ Create a branch with known defects. Document what you injected and where.
 
 ## Injected Defects
 
-| ID | Type | Location | Expected Detection |
-|----|------|----------|-------------------|
-| CAL-001 | Credential | src/auth.ts:42 | secrets-sanitizer |
-| CAL-002 | Missing test | src/user.ts:88 | test-critic |
-| CAL-003 | Contract mismatch | api/routes.ts:15 | code-critic |
+| ID      | Type              | Location         | Expected Detection |
+| ------- | ----------------- | ---------------- | ------------------ |
+| CAL-001 | Credential        | src/auth.ts:42   | secrets-sanitizer  |
+| CAL-002 | Missing test      | src/user.ts:88   | test-critic        |
+| CAL-003 | Contract mismatch | api/routes.ts:15 | code-critic        |
 ```
 
 ### Step 2: Run the Flow
@@ -215,11 +217,11 @@ Compare actual detections against expected detections.
 ```markdown
 ## Results
 
-| ID | Expected | Actual | Status |
-|----|----------|--------|--------|
-| CAL-001 | secrets-sanitizer | secrets-sanitizer | PASS |
-| CAL-002 | test-critic | not detected | FAIL |
-| CAL-003 | code-critic | code-critic | PASS |
+| ID      | Expected          | Actual            | Status |
+| ------- | ----------------- | ----------------- | ------ |
+| CAL-001 | secrets-sanitizer | secrets-sanitizer | PASS   |
+| CAL-002 | test-critic       | not detected      | FAIL   |
+| CAL-003 | code-critic       | code-critic       | PASS   |
 
 ## Analysis
 
@@ -229,10 +231,10 @@ Compare actual detections against expected detections.
 
 ### Step 4: Act on Results
 
-| Outcome | Action |
-|---------|--------|
-| All defects caught | System is calibrated; schedule next check |
-| Some defects missed | Update prompts, retest |
+| Outcome             | Action                                        |
+| ------------------- | --------------------------------------------- |
+| All defects caught  | System is calibrated; schedule next check     |
+| Some defects missed | Update prompts, retest                        |
 | Many defects missed | Full prompt review; possible structural issue |
 
 ### Step 5: Document
@@ -248,13 +250,13 @@ Add results to the calibration log.
 
 ### Frequency
 
-| Situation | Recommended Frequency |
-|-----------|----------------------|
-| Active development | 1 in 20 runs |
-| Suspiciously clean metrics | Immediate |
-| After prompt updates | Within 3 runs |
-| After pack updates | Within 1 run |
-| Routine maintenance | Monthly |
+| Situation                  | Recommended Frequency |
+| -------------------------- | --------------------- |
+| Active development         | 1 in 20 runs          |
+| Suspiciously clean metrics | Immediate             |
+| After prompt updates       | Within 3 runs         |
+| After pack updates         | Within 1 run          |
+| Routine maintenance        | Monthly               |
 
 ---
 

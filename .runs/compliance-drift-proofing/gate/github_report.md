@@ -1,4 +1,5 @@
 <!-- DEMOSWARM_RUN:compliance-drift-proofing FLOW:gate -->
+
 # Flow 4: Gate Report
 
 **Status:** UNVERIFIED
@@ -8,25 +9,25 @@
 
 ## Summary
 
-| Check | Result |
-|-------|--------|
-| Merge Decision | BOUNCE |
-| Receipt Audit | UNVERIFIED |
-| Contract Compliance | VERIFIED |
-| Security Scan | VERIFIED |
-| Coverage Audit | UNVERIFIED |
-| Policy Analysis | UNVERIFIED |
+| Check               | Result     |
+| ------------------- | ---------- |
+| Merge Decision      | BOUNCE     |
+| Receipt Audit       | UNVERIFIED |
+| Contract Compliance | VERIFIED   |
+| Security Scan       | VERIFIED   |
+| Coverage Audit      | UNVERIFIED |
+| Policy Analysis     | UNVERIFIED |
 
 ## Counts
 
-| Metric | Value |
-|--------|-------|
-| Receipt Checks | 8/12 passed |
-| Contract Violations | 0 |
-| Security Findings | 0 |
-| Policy Violations | 3 (POL-003, POL-004, POL-015) |
-| Line Coverage | — (null from artifact) |
-| Branch Coverage | — (null from artifact) |
+| Metric              | Value                         |
+| ------------------- | ----------------------------- |
+| Receipt Checks      | 8/12 passed                   |
+| Contract Violations | 0                             |
+| Security Findings   | 0                             |
+| Policy Violations   | 3 (POL-003, POL-004, POL-015) |
+| Line Coverage       | — (null from artifact)        |
+| Branch Coverage     | — (null from artifact)        |
 
 ---
 
@@ -35,6 +36,7 @@
 ### 1. Receipt Fabrication (CRITICAL)
 
 **Issue:** build_receipt.json contains inflated test and coverage metrics that contradict the canonical test_execution.md artifact:
+
 - **Test count fabrication:** Receipt claims 420 tests (379 unit + 41 integration) but test_execution.md shows 294 tests (253 unit + 41 integration) = 42.8% inflation
 - **Coverage fabrication:** Receipt claims 89.29% line coverage but test_execution.md shows 75.12% coverage = 14.17 percentage-point gap
 - **Violation:** POL-003 (CLAUDE.md): counts are not mechanical; POL-004: quality_gates not from Machine Summaries; POL-015: quality_gates misrepresent artifact state
@@ -44,6 +46,7 @@
 ### 2. Coverage Threshold Not Met (CRITICAL)
 
 **Issue:** Actual line coverage 75.12% (from test_execution.md) is below the 80% threshold specified in test_plan.md.
+
 - **Required:** 80% line coverage per test_plan.md:40
 - **Actual:** 75.12% line coverage per test_execution.md (1386/1845 lines covered)
 - **Gap:** 4.88 percentage points below threshold
@@ -53,6 +56,7 @@
 ### 3. Policy Violations POL-003, POL-004, POL-015 (CRITICAL)
 
 **Issue:** Receipt integrity failure violates three pack-level policies:
+
 - **POL-003:** Test counts must be mechanical (not estimated). Receipt claims 420 but canonical shows 294.
 - **POL-004:** quality_gates must be sourced from artifact Machine Summaries. Receipt claims VERIFIED but test_execution.md is UNVERIFIED.
 - **POL-015:** quality_gates must reflect actual artifact state. Receipt misrepresents coverage metrics and test count.
@@ -89,12 +93,12 @@
 
 The following aspects require human judgment during Build rework:
 
-| Item | Question | Recommended Path | Impact if Unaddressed |
-|------|----------|------------------|----------------------|
-| Clippy fix priority | Should collapsible_if warning at drift.rs:666 be fixed now or deferred to post-merge cleanup? | Fix now (RECOMMENDED) to unblock gate | Receipt integrity remains unverified; blocks promotion |
-| Coverage instrumentation | Should coverage run at `cargo llvm-cov --lib` or via alternate coverage tooling? | cargo llvm-cov (matches Rust ecosystem convention) | Coverage metrics remain unmeasured; gate cannot verify thresholds |
-| Receipt discipline | Should build-cleanup validate that receipt quality_gates match underlying artifact Machine Summaries before sealing receipt? | Yes (enforce via build-cleanup) | Receipt drift recurs in future iterations |
-| TDD stub tests | Should the 5 ignored TDD tests be completed during Build rework, or is the current state acceptable for merge? | Recommend completion (but not blocking) | Coverage may remain incomplete even after instrumentation |
+| Item                     | Question                                                                                                                     | Recommended Path                                   | Impact if Unaddressed                                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------- |
+| Clippy fix priority      | Should collapsible_if warning at drift.rs:666 be fixed now or deferred to post-merge cleanup?                                | Fix now (RECOMMENDED) to unblock gate              | Receipt integrity remains unverified; blocks promotion            |
+| Coverage instrumentation | Should coverage run at `cargo llvm-cov --lib` or via alternate coverage tooling?                                             | cargo llvm-cov (matches Rust ecosystem convention) | Coverage metrics remain unmeasured; gate cannot verify thresholds |
+| Receipt discipline       | Should build-cleanup validate that receipt quality_gates match underlying artifact Machine Summaries before sealing receipt? | Yes (enforce via build-cleanup)                    | Receipt drift recurs in future iterations                         |
+| TDD stub tests           | Should the 5 ignored TDD tests be completed during Build rework, or is the current state acceptable for merge?               | Recommend completion (but not blocking)            | Coverage may remain incomplete even after instrumentation         |
 
 ---
 
@@ -188,5 +192,6 @@ coverage_branch_percent: null
 ---
 
 ---
+
 _Generated by gate-cleanup at 2025-12-19T08:50:30Z_
 _Counts derived mechanically via demoswarm.sh ms get from stable markers in gate artifact Machine Summaries_

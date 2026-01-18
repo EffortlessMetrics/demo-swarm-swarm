@@ -11,6 +11,7 @@ When gate agents make decisions (merge, deploy, release), they base those decisi
 ### Trust Doesn't Scale
 
 In a complex system:
+
 - Many agents contribute
 - Context resets happen
 - Memory is imperfect
@@ -20,6 +21,7 @@ In a complex system:
 ### Evidence Is Auditable
 
 When something goes wrong:
+
 - "Why did we ship this?"
 - Evidence answers: "Here's what the gate saw"
 - Trust can't answer: "I thought it was fine"
@@ -27,6 +29,7 @@ When something goes wrong:
 ### Evidence Survives Context Loss
 
 Across sessions:
+
 - Artifacts persist
 - Trust doesn't
 
@@ -54,25 +57,28 @@ Each flow produces evidence. Next flow consumes it.
 ### Gate Evidence
 
 Merge-decider reviews:
-| Evidence | What It Proves |
-|----------|----------------|
-| build_receipt.json | Build completed, counts captured |
-| test_execution.md | Tests ran, results known |
-| code_critique.md | Code was reviewed |
-| contract_compliance.md | Contracts honored |
-| security_scan.md | Security checked |
+
+| Evidence               | What It Proves                   |
+| ---------------------- | -------------------------------- |
+| build_receipt.json     | Build completed, counts captured |
+| test_execution.md      | Tests ran, results known         |
+| code_critique.md       | Code was reviewed                |
+| contract_compliance.md | Contracts honored                |
+| security_scan.md       | Security checked                 |
 
 Decision is based on this evidence, not assumption.
 
 ### Evidence Quality
 
 Good evidence:
+
 - Exists (artifact is there)
 - Is recent (from this run)
 - Is complete (has the data needed)
 - Is honest (reflects actual state)
 
 Questionable evidence:
+
 - Missing artifacts
 - Stale data
 - Incomplete reports
@@ -81,12 +87,14 @@ Questionable evidence:
 ### Handling Missing Evidence
 
 When evidence is missing:
+
 ```markdown
 ## Decision
 
 Cannot recommend MERGE.
 
 **Missing evidence:**
+
 - test_execution.md not found (tests may not have run)
 - security_scan.md not found (security not checked)
 
@@ -98,43 +106,55 @@ The gate doesn't assume tests passed. It notes evidence is missing.
 ## Evidence Types
 
 ### Existence Evidence
+
 "The artifact exists" proves the step ran.
+
 - test_execution.md exists → tests were executed
 - code_critique.md exists → code was reviewed
 
 ### Content Evidence
+
 "The artifact contains X" proves the outcome.
+
 - test_execution.md shows 47 passed → tests passed
 - code_critique.md shows 0 critical → no critical issues
 
 ### Derived Evidence
+
 "Counting markers" proves quantities.
+
 - 5 `### REQ-` markers → 5 requirements
 - 3 `[CRITICAL]` markers → 3 critical issues
 
 ### Absence Evidence
+
 "The artifact doesn't contain X" proves absence.
+
 - No findings in security_scan.md → no security issues found
 - Empty blockers in receipt → no blockers
 
 ## Anti-Patterns
 
 ### Assuming Success
+
 "Build said it was done, so tests probably passed."
 
 **Fix:** Check test_execution.md for actual results.
 
 ### Trusting Status Fields
+
 "The status says VERIFIED so we're good."
 
 **Fix:** Status is a summary. Check the underlying evidence.
 
 ### Ignoring Missing Artifacts
+
 "security_scan.md doesn't exist but let's merge anyway."
 
 **Fix:** Missing evidence = unknown state. Don't assume positive.
 
 ### Outdated Evidence
+
 Using evidence from a previous run or different branch.
 
 **Fix:** Evidence must be from this run, this branch.
@@ -148,16 +168,17 @@ Using evidence from a previous run or different branch.
 
 ## Evidence Reviewed
 
-| Artifact | Status | Key Data |
-|----------|--------|----------|
-| build_receipt.json | Present | status: VERIFIED |
-| test_execution.md | Present | 47 passed, 0 failed |
-| code_critique.md | Present | 0 critical, 2 minor |
-| security_scan.md | Present | No findings |
+| Artifact           | Status  | Key Data            |
+| ------------------ | ------- | ------------------- |
+| build_receipt.json | Present | status: VERIFIED    |
+| test_execution.md  | Present | 47 passed, 0 failed |
+| code_critique.md   | Present | 0 critical, 2 minor |
+| security_scan.md   | Present | No findings         |
 
 ## Analysis
 
 All evidence present and positive:
+
 - Tests pass (evidence: test_execution.md)
 - No critical issues (evidence: code_critique.md)
 - Security clear (evidence: security_scan.md)

@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,16 +13,18 @@ blockers: []
 missing_required: []
 
 concerns:
-  - RSK-001 (path traversal) requires threat modeling to confirm LOW severity assumption
-  - RSK-003 (pack-check drift) depends on OQ-SIG-001 resolution for Seven-Flow vs Six-Flow
+
+- RSK-001 (path traversal) requires threat modeling to confirm LOW severity assumption
+- RSK-003 (pack-check drift) depends on OQ-SIG-001 resolution for Seven-Flow vs Six-Flow
 
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 4
-  low: 3
+critical: 0
+high: 0
+medium: 4
+low: 3
 
 ## Context
+
 - flow: signal
 - run_id: local-alignment-audit-aba1c6
 - inputs_used:
@@ -35,19 +38,20 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | SECURITY | MEDIUM | OPEN | Path traversal in secrets.rs due to missing canonicalization | security |
-| RSK-002 | SECURITY | LOW | MITIGATED | ReDoS misconception in documentation (Rust regex is immune) | documentation |
-| RSK-003 | COMPLIANCE | MEDIUM | OPEN | pack-check may enforce stale Six-Flow constraints | tooling |
-| RSK-004 | DOCUMENTATION | MEDIUM | OPEN | Stale flow count claims causing user confusion | documentation |
-| RSK-005 | DOCUMENTATION | LOW | OPEN | Flow overlap semantics undocumented (variant commands) | documentation |
-| RSK-006 | OPS | MEDIUM | OPEN | Flow 7 completely undocumented leading to wrong flow selection | documentation |
-| RSK-007 | DOCUMENTATION | LOW | OPEN | Agent color coding purpose unclear (decorative vs functional) | documentation |
+| ID      | Category      | Severity | Status    | Summary                                                        | Owner         |
+| ------- | ------------- | -------- | --------- | -------------------------------------------------------------- | ------------- |
+| RSK-001 | SECURITY      | MEDIUM   | OPEN      | Path traversal in secrets.rs due to missing canonicalization   | security      |
+| RSK-002 | SECURITY      | LOW      | MITIGATED | ReDoS misconception in documentation (Rust regex is immune)    | documentation |
+| RSK-003 | COMPLIANCE    | MEDIUM   | OPEN      | pack-check may enforce stale Six-Flow constraints              | tooling       |
+| RSK-004 | DOCUMENTATION | MEDIUM   | OPEN      | Stale flow count claims causing user confusion                 | documentation |
+| RSK-005 | DOCUMENTATION | LOW      | OPEN      | Flow overlap semantics undocumented (variant commands)         | documentation |
+| RSK-006 | OPS           | MEDIUM   | OPEN      | Flow 7 completely undocumented leading to wrong flow selection | documentation |
+| RSK-007 | DOCUMENTATION | LOW      | OPEN      | Agent color coding purpose unclear (decorative vs functional)  | documentation |
 
 ## Risk Details
 
 ### RSK-001: Path Traversal in secrets.rs
+
 - Category: SECURITY
 - Severity: MEDIUM
 - Status: OPEN
@@ -73,6 +77,7 @@ severity_summary:
   - PROCEED with documentation work; escalate to separate security hardening run if threat model reveals higher risk
 
 ### RSK-002: ReDoS Misconception in Documentation
+
 - Category: SECURITY
 - Severity: LOW
 - Status: MITIGATED
@@ -97,6 +102,7 @@ severity_summary:
   - PROCEED; this is a documentation correction, not a code fix
 
 ### RSK-003: Pack-Check Drift from Stale Documentation
+
 - Category: COMPLIANCE
 - Severity: MEDIUM
 - Status: OPEN
@@ -122,6 +128,7 @@ severity_summary:
   - PROCEED; pack-check already validates Flow 7 (wisdom.rs exists); documentation alignment will remove confusion
 
 ### RSK-004: Stale Flow Count Claims in Public Documentation
+
 - Category: DOCUMENTATION
 - Severity: MEDIUM
 - Status: OPEN
@@ -149,6 +156,7 @@ severity_summary:
   - PROCEED; straightforward documentation update
 
 ### RSK-005: Flow Overlap Semantics Undocumented
+
 - Category: DOCUMENTATION
 - Severity: LOW
 - Status: OPEN
@@ -175,6 +183,7 @@ severity_summary:
   - PROCEED; documentation improvement
 
 ### RSK-006: Flow 7 Completely Undocumented
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -200,6 +209,7 @@ severity_summary:
   - PROCEED with suggested default; adjust if OQ-SIG-002 resolves differently
 
 ### RSK-007: Agent Color Coding Purpose Unclear
+
 - Category: DOCUMENTATION
 - Severity: LOW
 - Status: OPEN
@@ -224,11 +234,13 @@ severity_summary:
   - PROCEED with suggested default (advisory); adjust if evidence shows functional usage
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-001, RSK-002, RSK-003, RSK-004, RSK-005, RSK-006, RSK-007]
 - CHANGED: []
 - CLOSED: []
 
 ## Recommended Next
+
 - Proceed to Flow 2 (Plan) to design documentation updates addressing REQ-001 through REQ-007
 - Resolve OQ-SIG-001 (Seven-Flow vs Six-Flow) before finalizing plan; use suggested default if unresolved
 - Resolve OQ-SIG-002 (Flow 7 purpose) before finalizing Flow 7 documentation; use suggested default if unresolved

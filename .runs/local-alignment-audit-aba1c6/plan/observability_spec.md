@@ -24,6 +24,7 @@ Traditional runtime observability (latency metrics, trace spans, distributed SLO
 Documentation alignment verification is measured through deterministic checks:
 
 ### VS-001: Flow Count Consistency Check
+
 - **Purpose**: Verify "six flows" has been replaced with "seven flows"
 - **Command**: `grep -ri "six flows" README.md DEMO_RUN.md docs/explanation/architecture.md`
 - **Pass Criteria**: Zero matches returned
@@ -31,6 +32,7 @@ Documentation alignment verification is measured through deterministic checks:
 - **Traceability**: NFR-DOC-001 MET-1, REQ-001 AC-5
 
 ### VS-002: Pack-Check Validation
+
 - **Purpose**: Verify pack structural integrity after documentation changes
 - **Command**: `bash .claude/scripts/pack-check.sh --no-color`
 - **Pass Criteria**: Exit code 0, no FAIL entries in output
@@ -38,6 +40,7 @@ Documentation alignment verification is measured through deterministic checks:
 - **Traceability**: NFR-TRACE-001 MET-1, RSK-001 mitigation
 
 ### VS-003: Test Count Source Verification
+
 - **Purpose**: Verify 102 passing test count claim has valid source
 - **Command**: `grep -c "102 tests" ./test_output.log` or equivalent
 - **Pass Criteria**: Count matches documented claim
@@ -45,6 +48,7 @@ Documentation alignment verification is measured through deterministic checks:
 - **Traceability**: REQ-005 AC-4, RSK-002 mitigation
 
 ### VS-004: Security Claim Evidence Verification
+
 - **Purpose**: Verify each security claim references specific code evidence
 - **Checks**:
   - ReDoS immunity claim references Rust regex crate usage
@@ -57,6 +61,7 @@ Documentation alignment verification is measured through deterministic checks:
 For documentation changes, "logs" are the durable audit artifacts:
 
 ### LOG-001: Phase Checkpoint Commits
+
 - **Purpose**: Record before/after state for each documentation phase
 - **Format**: Git commit with descriptive message per phase
 - **Fields**:
@@ -68,6 +73,7 @@ For documentation changes, "logs" are the durable audit artifacts:
 - **Traceability**: ADR OPT-003 (granular revert capability)
 
 ### LOG-002: Pack-Check Execution Log
+
 - **Purpose**: Record pack-check results for audit
 - **Output Path**: `.runs/local-alignment-audit-aba1c6/build/pack_check_output.log`
 - **Fields**:
@@ -77,6 +83,7 @@ For documentation changes, "logs" are the durable audit artifacts:
 - **Traceability**: NFR-TRACE-001
 
 ### LOG-003: Grep Verification Log
+
 - **Purpose**: Record "six flows" elimination verification
 - **Output Path**: `.runs/local-alignment-audit-aba1c6/gate/grep_verification.log`
 - **Fields**:
@@ -91,6 +98,7 @@ For documentation changes, "logs" are the durable audit artifacts:
 For documentation work, "traces" represent the derivation chain from authoritative source to downstream docs:
 
 ### TRACE-001: Authority Chain
+
 ```
 CLAUDE.md (L13: "7 flows")
   -> docs/explanation/architecture.md (flow enumeration)
@@ -100,6 +108,7 @@ CLAUDE.md (L13: "7 flows")
 ```
 
 ### TRACE-002: Requirement Coverage Chain
+
 ```
 REQ-001..REQ-007 (requirements.md)
   -> Phase 1: CLAUDE.md, architecture.md (authoritative)
@@ -109,6 +118,7 @@ REQ-001..REQ-007 (requirements.md)
 ```
 
 ### Span Model (Document Update Lineage)
+
 - **Root Span**: ADR decision (OPT-003 chosen)
 - **Child Spans**: Phase 1 updates, Phase 2 updates, Phase 3 updates (optional), Phase 4 updates (if needed)
 - **Attributes**: `phase_number`, `files_updated`, `verification_result`
@@ -118,6 +128,7 @@ REQ-001..REQ-007 (requirements.md)
 Documentation alignment has pass/fail criteria rather than percentage targets:
 
 ### SLO-001: Flow Count Accuracy
+
 - **SLI**: Count of "six flows" occurrences in public docs
 - **Target**: 0 occurrences
 - **Window**: Point-in-time at Gate
@@ -125,6 +136,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: NFR-DOC-001, REQ-001
 
 ### SLO-002: Pack-Check Continuity
+
 - **SLI**: Pack-check exit code
 - **Target**: Exit code 0
 - **Window**: Post Phase 2, Pre-merge
@@ -132,6 +144,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: NFR-TRACE-001
 
 ### SLO-003: Security Claims Verifiable
+
 - **SLI**: Percentage of security claims with code evidence references
 - **Target**: 100%
 - **Window**: Gate verification
@@ -139,6 +152,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: NFR-SEC-001
 
 ### SLO-004: Test Count Accuracy
+
 - **SLI**: Documented test count matches test_output.log
 - **Target**: Exact match (102 passing)
 - **Window**: Gate verification
@@ -148,6 +162,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 ## Alerts (Verification Failures)
 
 ### ALERT-001: Six-Flow Reference Found
+
 - **Condition**: `grep -ri "six flows"` returns non-zero exit code (matches found)
 - **Severity**: BLOCKING
 - **Runbook**: Fix remaining "six flows" references in identified files; rerun verification
@@ -155,6 +170,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: REQ-001 AC-5
 
 ### ALERT-002: Pack-Check Failure
+
 - **Condition**: `pack-check.sh` returns non-zero exit code
 - **Severity**: BLOCKING
 - **Runbook**:
@@ -165,6 +181,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: NFR-TRACE-001, RSK-001
 
 ### ALERT-003: Test Count Mismatch
+
 - **Condition**: Documented count != test_output.log count
 - **Severity**: MAJOR
 - **Runbook**: Update documentation to match actual test execution results
@@ -172,6 +189,7 @@ Documentation alignment has pass/fail criteria rather than percentage targets:
 - **Traceability**: REQ-005, RSK-002
 
 ### ALERT-004: Security Claim Without Evidence
+
 - **Condition**: Security claim in docs lacks file:line reference
 - **Severity**: MAJOR
 - **Runbook**: Add specific code evidence reference (e.g., "secrets.rs line 14")
@@ -184,12 +202,12 @@ For documentation work, the "dashboard" is the Gate verification summary:
 
 ### Dashboard: Alignment Audit Gate Summary
 
-| Check | Status | Details |
-|-------|--------|---------|
-| Six-flow grep | PASS/FAIL | 0 matches in public docs |
-| Pack-check | PASS/FAIL | All checks green |
-| Test count | PASS/FAIL | 102 matches test_output.log |
-| Security evidence | PASS/FAIL | All claims have code refs |
+| Check             | Status    | Details                     |
+| ----------------- | --------- | --------------------------- |
+| Six-flow grep     | PASS/FAIL | 0 matches in public docs    |
+| Pack-check        | PASS/FAIL | All checks green            |
+| Test count        | PASS/FAIL | 102 matches test_output.log |
+| Security evidence | PASS/FAIL | All claims have code refs   |
 
 **Why This Matters**: Provides single-view verification that alignment is complete before merge.
 
@@ -197,51 +215,54 @@ For documentation work, the "dashboard" is the Gate verification summary:
 
 ### Requirements to Signals Map
 
-| Requirement | Signal | Alert |
-|-------------|--------|-------|
-| REQ-001 (flow count in docs) | VS-001 | ALERT-001 |
-| REQ-002 (flow overlap docs) | Manual review | None (no automated check) |
-| REQ-003 (Flow 7 docs) | Manual review | None |
-| REQ-004 (CLAUDE.md table) | Manual review | None |
-| REQ-005 (test count) | VS-003 | ALERT-003 |
-| REQ-006 (security posture) | VS-004 | ALERT-004 |
-| REQ-007 (agent colors) | Manual review | None |
+| Requirement                  | Signal        | Alert                     |
+| ---------------------------- | ------------- | ------------------------- |
+| REQ-001 (flow count in docs) | VS-001        | ALERT-001                 |
+| REQ-002 (flow overlap docs)  | Manual review | None (no automated check) |
+| REQ-003 (Flow 7 docs)        | Manual review | None                      |
+| REQ-004 (CLAUDE.md table)    | Manual review | None                      |
+| REQ-005 (test count)         | VS-003        | ALERT-003                 |
+| REQ-006 (security posture)   | VS-004        | ALERT-004                 |
+| REQ-007 (agent colors)       | Manual review | None                      |
 
 ### NFRs to Signals Map
 
-| NFR | Signal | SLO |
-|-----|--------|-----|
-| NFR-DOC-001 (consistency) | VS-001 | SLO-001 |
-| NFR-SEC-001 (evidence) | VS-004 | SLO-003 |
+| NFR                        | Signal | SLO     |
+| -------------------------- | ------ | ------- |
+| NFR-DOC-001 (consistency)  | VS-001 | SLO-001 |
+| NFR-SEC-001 (evidence)     | VS-004 | SLO-003 |
 | NFR-TRACE-001 (pack-check) | VS-002 | SLO-002 |
 
 ### Risks to Detection Map
 
-| Risk | Detection Mechanism |
-|------|---------------------|
-| RSK-001 (pack-check drift) | VS-002 (pack-check execution) |
-| RSK-002 (test count drift) | VS-003 (count verification) |
-| RSK-003 (path traversal) | Out of scope (code, not docs) |
-| RSK-004 (flow variant drift) | Manual review (no automation) |
-| RSK-005 (color coding) | Manual review |
-| RSK-006 (Flow 7 undocumented) | Manual review |
-| RSK-007 (security claims) | VS-004 |
+| Risk                          | Detection Mechanism           |
+| ----------------------------- | ----------------------------- |
+| RSK-001 (pack-check drift)    | VS-002 (pack-check execution) |
+| RSK-002 (test count drift)    | VS-003 (count verification)   |
+| RSK-003 (path traversal)      | Out of scope (code, not docs) |
+| RSK-004 (flow variant drift)  | Manual review (no automation) |
+| RSK-005 (color coding)        | Manual review                 |
+| RSK-006 (Flow 7 undocumented) | Manual review                 |
+| RSK-007 (security claims)     | VS-004                        |
 
 ## Drift Detection (Future Observability)
 
 Recommendations for preventing future documentation drift:
 
 ### DDR-001: Automated Flow Count Check
+
 - **Proposal**: Add pack-check rule that verifies flow count consistency across docs
 - **Implementation**: grep-based check in pack-check.sh
 - **Owner**: Tooling maintainers
 
 ### DDR-002: Test Count CI Integration
+
 - **Proposal**: CI job that updates test count documentation or fails if mismatch
 - **Implementation**: Post-test step that compares documented count to actual
 - **Owner**: CI/CD maintainers
 
 ### DDR-003: Security Claim Registry
+
 - **Proposal**: Structured file listing all security claims with code evidence pointers
 - **Implementation**: YAML or JSON file checked by pack-check
 - **Owner**: Security reviewers

@@ -16,18 +16,22 @@ Decide whether we're ready to deploy. Verify that governance protections are in 
 ## What to Review
 
 **Gate verdict** (required):
+
 - `.runs/<run-id>/gate/merge_decision.md` - What did the merge decider conclude?
 
 **Governance evidence** (important):
+
 - CI workflows in `.github/workflows/` - Are tests running on PRs?
 - Branch protection - Are merges gated on checks?
 - Organization rulesets - Alternative governance mechanism
 
 **Deployment verification** (if available):
+
 - `.runs/<run-id>/deploy/verification_report.md` - Any runtime verification?
 - `.runs/<run-id>/deploy/branch_protection.md` - Manual governance snapshot
 
 **Context** (helpful):
+
 - `.pre-commit-config.yaml` - Local development guardrails
 - `CONTRIBUTING.md`, `README.md` - Documentation quality
 
@@ -40,6 +44,7 @@ Think through two questions:
 Start with the gate verdict. If the merge decider said "bounce," there's nothing to deploy. Note why and move on.
 
 If the merge decider said "merge," consider:
+
 - Is the reasoning sound?
 - Are there any late-breaking concerns?
 
@@ -48,14 +53,17 @@ If the merge decider said "merge," consider:
 This is about verifying that the branch is protected — that merges require passing checks. Check for:
 
 **CI workflows:**
+
 - Do they exist?
 - Do they run tests? (Look for `pytest`, `npm test`, `cargo test`, etc.)
 
 **Branch protection:**
+
 - Is the default branch protected?
 - Are required status checks configured?
 
 Three ways to verify this:
+
 1. **GitHub API (classic protection):** `gh api repos/<owner>/<repo>/branches/<branch>/protection`
 2. **GitHub API (rulesets):** Check both repository and organization rulesets
 3. **Manual snapshot:** If `.runs/<run-id>/deploy/branch_protection.md` exists with clear assertions
@@ -63,11 +71,13 @@ Three ways to verify this:
 If you can verify protection, great. If you can't verify it (permissions issue, API unavailable), note that uncertainty. Unverified governance isn't a blocker, but it's worth flagging.
 
 **What "protection verified" means:**
+
 - You found evidence of required status checks on the default branch
 - Either via classic branch protection rules OR repository/organization rulesets
 - The checks are actually configured (not just "protection enabled with no checks")
 
 **Common situations:**
+
 - 404 with permission hint: You lack admin access to see protection settings. Check rulesets as fallback.
 - 200 but no checks: Branch is "protected" but merges aren't gated on anything useful.
 - No protection found: The branch has no merge gates.
@@ -103,6 +113,7 @@ Walk through what you found. Be specific about which checks are required, which 
 **Deploy** or **Don't deploy** — and why.
 
 For governance:
+
 - **Verified:** You confirmed branch protection with required checks
 - **Unverifiable:** You couldn't verify (permissions, API issues) but no evidence of problems
 - **Not configured:** You confirmed protection doesn't exist
@@ -115,16 +126,19 @@ For governance:
 ## If Evidence Is Incomplete
 
 **Can't verify governance but gate says merge:**
+
 - You can still proceed — just note the governance uncertainty
 - "Governance unverifiable" is different from "governance missing"
 - If you're concerned, recommend addressing governance before future deploys
 
 **Gate verdict missing or unclear:**
+
 - Document that gate verdict is missing and proceed with "NOT_DEPLOYED" decision
 - Note the gap; don't block the flow waiting for clarification
 - The cleanup agent will capture this as an incomplete deploy attempt
 
 **API access issues:**
+
 - Try rulesets as fallback for classic protection
 - Check for manual snapshot
 - If all else fails, note what you couldn't verify and why
@@ -140,6 +154,7 @@ After writing the decision file, report back with a natural language summary:
 **Recommendation:** Proceed to deploy-cleanup (default). Always provide reasoning.
 
 Examples:
+
 - "Gate says merge, governance verified. Decision: deploy. Proceed to deploy-cleanup to close the flow."
 - "Gate says merge, but couldn't verify branch protection (permission issue). Decision: deploy with governance unverifiable. Proceed to deploy-cleanup."
 - "Gate says bounce. Decision: not deployed. Proceed to deploy-cleanup to summarize the non-deployment."

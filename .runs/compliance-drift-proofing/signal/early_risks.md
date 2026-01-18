@@ -1,6 +1,7 @@
 # Early Risks
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null
@@ -11,8 +12,9 @@ blockers: []
 missing_required: []
 
 concerns:
-  - RSK-001 (HIGH) remains highest risk due to empirical evidence from #49 bounce
-  - 10 open questions indicate some design uncertainty, but all have suggested defaults
+
+- RSK-001 (HIGH) remains highest risk due to empirical evidence from #49 bounce
+- 10 open questions indicate some design uncertainty, but all have suggested defaults
 
 ## Risks
 

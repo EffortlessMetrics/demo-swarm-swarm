@@ -1,6 +1,7 @@
 # Option Critique for compliance-drift-proofing
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -10,16 +11,17 @@ missing_required: []
 concerns: []
 
 ## Metrics
+
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 3
+critical: 0
+major: 0
+minor: 3
 options_summary:
-  options_found: 3
-  options_with_comparable_axes: 3
-  options_missing_risks: 0
-  options_missing_rollout: 0
-  decision_criteria_present: yes
+options_found: 3
+options_with_comparable_axes: 3
+options_missing_risks: 0
+options_missing_rollout: 0
+decision_criteria_present: yes
 
 ## Summary
 
@@ -39,6 +41,7 @@ Minor improvements identified relate to testability coverage, rollout specificit
 Ready for ADR: **yes**
 
 The document provides everything needed for ADR authoring:
+
 - Clear default recommendation (OPT-001) with high confidence
 - Well-articulated "when to choose" guidance for each option
 - Explicit conditions that would change the recommendation
@@ -99,6 +102,7 @@ Each option includes a risk table with likelihood, impact, and mitigation column
 Risks are specific enough to be actionable (e.g., "Check ID collision" mitigated by "Review mod.rs comments before assigning IDs 50, 51").
 
 **Operational concerns are explicitly covered in trade-off tables:**
+
 - OPT-001: "Operability (on-call, monitoring, failure modes)" = Low impact
 - OPT-002: "Operability" = Med impact due to "New failure modes (rule registration, trait dispatch)"
 - OPT-003: "Operability" = Med impact due to "Two scripts to run in CI; two failure modes to handle"
@@ -149,6 +153,7 @@ This gap is acceptable for options evaluation but should be addressed in impleme
 6. **Risk RSK-001 from early_risks.md**: Prior work (issue #49) bounced at Gate. All options mitigate via warning-first mode and narrower scope (syntactic vs semantic checks), but ADR should explicitly acknowledge this historical context.
 
 ## Inventory (machine countable)
+
 - OPT_CRITICAL: (none)
 - OPT_MAJOR: (none)
 - OPT_MINOR: OPT-MIN-001, OPT-MIN-002, OPT-MIN-003

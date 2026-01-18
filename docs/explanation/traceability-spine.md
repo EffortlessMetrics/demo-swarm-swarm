@@ -9,6 +9,7 @@
 Six months from now, someone asks: "Why does this code exist?"
 
 Without traceability, you're stuck:
+
 - Reading commit messages that say "fix auth"
 - Grepping for comments that may not exist
 - Hoping someone remembers the original discussion
@@ -27,9 +28,10 @@ Each link points to the next. Each artifact references its source. The whole jou
 
 **We start from intent, but we arbitrate truth from evidence.**
 
-Requirements, designs, and plans express what we *intend* to build. But when it comes time to decide whether something is done, working, or safe to ship — evidence wins.
+Requirements, designs, and plans express what we _intend_ to build. But when it comes time to decide whether something is done, working, or safe to ship — evidence wins.
 
 This means:
+
 - **Intent drives direction** — Requirements tell us where to go
 - **Evidence determines reality** — Receipts, tests, and artifacts tell us where we are
 - **Conflict reveals drift** — When intent and evidence disagree, we investigate rather than paper over
@@ -42,17 +44,17 @@ A requirement claiming "fully tested" is just a claim. The build receipt with pa
 
 Every merged change should be traceable through these artifacts:
 
-| Stage | Artifact | Location | Answers |
-|-------|----------|----------|---------|
-| Problem | `problem_statement.md` | `.runs/<id>/signal/` | Why are we doing this? |
-| Requirements | `requirements.md` | `.runs/<id>/signal/` | What must be true? |
-| BDD Scenarios | `*.feature` | `.runs/<id>/signal/features/` | How do we verify it? |
-| Design | `adr.md`, `api_contracts.yaml` | `.runs/<id>/plan/` | How will we build it? |
-| Tests | Test files | Project `tests/` dir | Does it work? |
-| Code | Source files | Project `src/` dir | The implementation |
-| Critiques | `*_critique.md` | `.runs/<id>/build/` | Is it good enough? |
-| Receipt | `build_receipt.json` | `.runs/<id>/build/` | What was verified? |
-| Decision | `merge_decision.md` | `.runs/<id>/gate/` | Should it ship? |
+| Stage         | Artifact                       | Location                      | Answers                |
+| ------------- | ------------------------------ | ----------------------------- | ---------------------- |
+| Problem       | `problem_statement.md`         | `.runs/<id>/signal/`          | Why are we doing this? |
+| Requirements  | `requirements.md`              | `.runs/<id>/signal/`          | What must be true?     |
+| BDD Scenarios | `*.feature`                    | `.runs/<id>/signal/features/` | How do we verify it?   |
+| Design        | `adr.md`, `api_contracts.yaml` | `.runs/<id>/plan/`            | How will we build it?  |
+| Tests         | Test files                     | Project `tests/` dir          | Does it work?          |
+| Code          | Source files                   | Project `src/` dir            | The implementation     |
+| Critiques     | `*_critique.md`                | `.runs/<id>/build/`           | Is it good enough?     |
+| Receipt       | `build_receipt.json`           | `.runs/<id>/build/`           | What was verified?     |
+| Decision      | `merge_decision.md`            | `.runs/<id>/gate/`            | Should it ship?        |
 
 The chain runs forward (requirement drives code) and backward (code traces to requirement). Both directions are useful.
 
@@ -86,6 +88,7 @@ The marker `REQ-001` appears in every artifact. Grep finds all references. Impac
 ### Marker Discipline
 
 Markers must be:
+
 - **Stable** — REQ-001 stays REQ-001 forever
 - **Grep-able** — Anchored patterns, no wrapping
 - **Referenced forward** — Downstream artifacts cite upstream markers
@@ -106,6 +109,7 @@ grep -r "REQ-003" .runs/ src/ tests/
 ```
 
 This returns:
+
 - The original requirement definition
 - Scenarios that verify it
 - Tests that exercise it
@@ -159,11 +163,13 @@ Each flow adds links to the chain.
 **Input:** Issue, idea, bug report
 
 **Output:**
+
 - Problem statement (the "why")
 - Requirements (REQ-001, NFR-001)
 - BDD scenarios (reference REQs)
 
 **Traceability established:**
+
 - Each REQ/NFR gets a stable marker
 - Scenarios cite the markers they verify
 - The problem statement explains what drove the requirements
@@ -173,11 +179,13 @@ Each flow adds links to the chain.
 **Input:** Requirements and scenarios
 
 **Output:**
+
 - ADR (design decisions)
 - API contracts
 - Work plan
 
 **Traceability established:**
+
 - ADR decisions reference REQs they support
 - Contracts describe interfaces that implement REQs
 - Work plan maps tasks to requirements
@@ -187,12 +195,14 @@ Each flow adds links to the chain.
 **Input:** Plan artifacts
 
 **Output:**
+
 - Code implementing the design
 - Tests verifying the scenarios
 - Critiques evaluating quality
 - Receipt summarizing coverage
 
 **Traceability established:**
+
 - Tests cite scenarios/REQs in names or comments
 - Code comments reference REQs where non-obvious
 - Critiques reference specific issues with specific code
@@ -203,10 +213,12 @@ Each flow adds links to the chain.
 **Input:** PR and feedback
 
 **Output:**
+
 - Review worklist (issues to fix)
 - Fixes applied
 
 **Traceability established:**
+
 - Worklist items link to critique findings or PR comments
 - Each fix traces to the feedback that requested it
 
@@ -215,10 +227,12 @@ Each flow adds links to the chain.
 **Input:** Build receipt and evidence
 
 **Output:**
+
 - Merge decision (MERGE or BOUNCE)
 - Gate receipt
 
 **Traceability established:**
+
 - Decision cites which REQs verified
 - Decision cites which surfaces checked (security, coverage, etc.)
 - Bounced decisions explain what's missing
@@ -228,10 +242,12 @@ Each flow adds links to the chain.
 **Input:** Merged code
 
 **Output:**
+
 - Deployment decision
 - Verification report
 
 **Traceability established:**
+
 - Report confirms deployed SHA matches verified SHA
 - Deployment events are timestamped and logged
 
@@ -240,10 +256,12 @@ Each flow adds links to the chain.
 **Input:** All prior artifacts
 
 **Output:**
+
 - Learnings
 - Feedback actions
 
 **Traceability established:**
+
 - Learnings cite specific runs, decisions, outcomes
 - Feedback actions trace to the events that triggered them
 
@@ -319,6 +337,7 @@ When gaps exist, document them:
 
 ```markdown
 ## Coverage Gaps
+
 - REQ-003 has no automated test (requires hardware integration)
   - Risk: MEDIUM
   - Mitigation: Manual verification documented in test_plan.md
@@ -332,18 +351,21 @@ A gap you know about is safer than false confidence.
 ### Anti-Patterns
 
 **Fake traceability:**
+
 ```markdown
-REQ-001: Fully covered  # No pointer to evidence
+REQ-001: Fully covered # No pointer to evidence
 ```
 
 **Gap hiding:**
+
 ```markdown
-All requirements verified  # When some weren't
+All requirements verified # When some weren't
 ```
 
 **Stale references:**
+
 ```markdown
-See test_auth.py  # But test_auth.py was deleted
+See test_auth.py # But test_auth.py was deleted
 ```
 
 The value of traceability is accuracy. False traceability is worse than none because it creates unjustified confidence.
@@ -356,9 +378,9 @@ Open questions can surface at any point in a flow. A requirement might be ambigu
 
 **Flows don't stop for questions.** Instead, questions are classified:
 
-| Classification | Meaning | Action |
-|----------------|---------|--------|
-| **DEFAULTED** | Safe default exists, low risk | Apply default, document it, continue |
+| Classification  | Meaning                         | Action                                                            |
+| --------------- | ------------------------------- | ----------------------------------------------------------------- |
+| **DEFAULTED**   | Safe default exists, low risk   | Apply default, document it, continue                              |
 | **NEEDS_HUMAN** | No safe default, or high stakes | Document clearly, continue with placeholder, escalate at boundary |
 
 ### Why Flows Continue
@@ -382,6 +404,7 @@ The merge decision cannot proceed with unresolved NEEDS_HUMAN questions. But Bui
 ### Traceability Impact
 
 Questions that were DEFAULTED must be traceable:
+
 - The assumption is documented in the artifact where it was made
 - The receipt notes "assumptions made: 2" or similar
 - If the default later proves wrong, the trace shows when and why it was chosen
@@ -404,6 +427,7 @@ But now: test file was modified, 1 test is failing
 ```
 
 Which truth matters? Both, but differently:
+
 - **The receipt** tells us what was verified at build time
 - **The current state** tells us what we're shipping now
 
@@ -418,6 +442,7 @@ When evidence and current state diverge:
 ### When Divergence Is Expected
 
 Some divergence is normal:
+
 - **Post-review fixes** — Build receipt predates review feedback fixes
 - **Merge conflicts** — Resolution may change verified code
 - **Dependency updates** — External changes after verification
@@ -427,6 +452,7 @@ The gate flow must check: "Does the receipt still describe what we're merging?"
 ### Timestamp Discipline
 
 Every receipt has timestamps. When reading evidence:
+
 - Check when it was generated
 - Consider what changed since
 - Weight recent evidence higher than stale evidence
@@ -445,6 +471,7 @@ A receipt from 10 minutes ago on the current branch is strong evidence. A receip
 **Description:** Users can authenticate with email and password.
 
 **Acceptance Criteria:**
+
 - AC-1: Valid credentials return a session token
 - AC-2: Invalid credentials return 401
 
@@ -480,9 +507,14 @@ class LoginHandler:
 ```json
 {
   "requirements_coverage": {
-    "REQ-001": {"status": "covered", "tests": 5, "scenarios": 3},
-    "REQ-002": {"status": "covered", "tests": 2, "scenarios": 1},
-    "REQ-003": {"status": "partial", "tests": 0, "scenarios": 1, "note": "manual verification only"}
+    "REQ-001": { "status": "covered", "tests": 5, "scenarios": 3 },
+    "REQ-002": { "status": "covered", "tests": 2, "scenarios": 1 },
+    "REQ-003": {
+      "status": "partial",
+      "tests": 0,
+      "scenarios": 1,
+      "note": "manual verification only"
+    }
   }
 }
 ```

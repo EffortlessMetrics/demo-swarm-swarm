@@ -1,6 +1,7 @@
 # Implementation Changes Summary for local-alignment-audit-aba1c6
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -22,7 +23,7 @@ scope_manifest_used: no
 
 ## What Changed
 
-* `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml` - Updated command registry to match 7-command reality
+- `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml` - Updated command registry to match 7-command reality
   - Changed `command_count` from 10 to 7 in FlowModel schema (L60)
   - Updated FlowCommandRegistry description and constraints from 10 to 7 commands (L116, L124-131)
   - Removed variant command references from variant_commands descriptions (L94-96)
@@ -37,35 +38,35 @@ scope_manifest_used: no
 
 ## REQ/NFR -> Implementation Map
 
-| ID           | Implementation Pointer | Notes               |
-| ------------ | ---------------------- | ------------------- |
-| RW-001       | `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml` | CRITICAL fix - removed stale command file references |
+| ID     | Implementation Pointer                                       | Notes                                                |
+| ------ | ------------------------------------------------------------ | ---------------------------------------------------- |
+| RW-001 | `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml` | CRITICAL fix - removed stale command file references |
 
 ## Contract / Interface Notes
 
-* Updated OpenAPI 3.1.0 contract to reflect actual command file enumeration
-* Contract now correctly states 7 flows = 7 command files (no variants)
-* Removed references to deleted files: `flow-4-gate.md`, `flow-5-deploy.md`, `flow-6-wisdom.md`
-* Actual command files verified via glob: flow-1-signal.md through flow-7-wisdom.md
+- Updated OpenAPI 3.1.0 contract to reflect actual command file enumeration
+- Contract now correctly states 7 flows = 7 command files (no variants)
+- Removed references to deleted files: `flow-4-gate.md`, `flow-5-deploy.md`, `flow-6-wisdom.md`
+- Actual command files verified via glob: flow-1-signal.md through flow-7-wisdom.md
 
 ## Observability Notes
 
-* N/A - documentation contract update only
+- N/A - documentation contract update only
 
 ## Tests
 
-* Intended tests: N/A - contract alignment verification
-* Test-runner result: Not applicable for YAML contract file
-* Remaining failures: None expected
+- Intended tests: N/A - contract alignment verification
+- Test-runner result: Not applicable for YAML contract file
+- Remaining failures: None expected
 
 ## Known Issues / Handoffs
 
-* None - implementation complete
+- None - implementation complete
 
 ## Assumptions Made
 
-* Assumed the 7 command files returned by glob are the authoritative source of truth
-* Verified files: flow-1-signal.md, flow-2-plan.md, flow-3-build.md, flow-4-review.md, flow-5-gate.md, flow-6-deploy.md, flow-7-wisdom.md
+- Assumed the 7 command files returned by glob are the authoritative source of truth
+- Verified files: flow-1-signal.md, flow-2-plan.md, flow-3-build.md, flow-4-review.md, flow-5-gate.md, flow-6-deploy.md, flow-7-wisdom.md
 
 ## Inventory (machine countable)
 

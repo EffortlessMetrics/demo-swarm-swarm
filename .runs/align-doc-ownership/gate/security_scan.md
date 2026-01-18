@@ -1,6 +1,7 @@
 # Security Scan Report
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -11,44 +12,48 @@ blockers: []
 missing_required: []
 
 concerns:
-  - cargo audit could not complete due to CVSS 4.0 parsing issue in advisory database (external tooling limitation, not project issue)
+
+- cargo audit could not complete due to CVSS 4.0 parsing issue in advisory database (external tooling limitation, not project issue)
 
 sources:
-  - git diff main --name-only (changed file surface)
-  - tools/demoswarm-pack-check/src/checks/flow.rs
-  - tools/demoswarm-pack-check/src/checks/mod.rs
-  - tools/demoswarm-pack-check/src/contracts.rs
-  - tools/demoswarm-pack-check/Cargo.toml
-  - tools/demoswarm-pack-check/Cargo.lock
-  - .claude/commands/flow-1-signal.md
-  - .claude/commands/flow-2-plan.md
-  - .claude/commands/flow-3-build.md
-  - .claude/commands/flow-4-gate.md
-  - .claude/commands/flow-6-wisdom.md
-  - .claude/agents/lint-executor.md
-  - .claude/agents/test-executor.md
-  - .claude/agents/repo-operator.md
+
+- git diff main --name-only (changed file surface)
+- tools/demoswarm-pack-check/src/checks/flow.rs
+- tools/demoswarm-pack-check/src/checks/mod.rs
+- tools/demoswarm-pack-check/src/contracts.rs
+- tools/demoswarm-pack-check/Cargo.toml
+- tools/demoswarm-pack-check/Cargo.lock
+- .claude/commands/flow-1-signal.md
+- .claude/commands/flow-2-plan.md
+- .claude/commands/flow-3-build.md
+- .claude/commands/flow-4-gate.md
+- .claude/commands/flow-6-wisdom.md
+- .claude/agents/lint-executor.md
+- .claude/agents/test-executor.md
+- .claude/agents/repo-operator.md
 
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+critical: 0
+major: 0
+minor: 0
 
 scan_scope:
-  changed_files_count: 73
-  changed_files_source: git_diff
+changed_files_count: 73
+changed_files_source: git_diff
 
 dependency_audit:
-  status: not_run
-  tool: cargo-audit
-  reason: Advisory database parsing error (CVSS 4.0 not supported by installed cargo-audit version)
+status: not_run
+tool: cargo-audit
+reason: Advisory database parsing error (CVSS 4.0 not supported by installed cargo-audit version)
 
 ## Findings
 
 ### Secrets Exposure
+
 No suspected secrets detected in scanned surface.
 
 All changed files reviewed:
+
 - Flow command documentation (.md files): No credentials, tokens, or secrets
 - Rust source code (flow.rs, mod.rs, contracts.rs): No hardcoded credentials
 - Agent documentation (.md files): No secrets
@@ -81,6 +86,7 @@ No high-signal vulnerability patterns detected in scanned surface.
    - No ReDoS risk: patterns use bounded alternation and non-nested quantifiers
 
 **Documentation changes analysis:**
+
 - Flow command files (flow-1-signal.md through flow-6-wisdom.md): Removed skill name references from prose
 - Agent files (lint-executor.md, test-executor.md, repo-operator.md): Added/clarified Skills sections and control-plane routing
 
@@ -91,6 +97,7 @@ All documentation changes are low-risk prose updates with no executable content.
 **Audit status:** Could not complete automated scan.
 
 **Manual review of Cargo.lock dependencies:**
+
 - `anyhow 1.0.100` - Error handling, well-maintained
 - `clap 4.5.53` - CLI parsing, well-maintained
 - `regex 1.12.2` - Pattern matching, well-maintained

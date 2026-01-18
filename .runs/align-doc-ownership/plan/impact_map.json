@@ -37,10 +37,33 @@
       ".runs/align-doc-ownership/signal/problem_statement.md"
     ],
     "search_terms": [
-      "REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007",
-      "demoswarm.sh", "runs-derive", "runs-index", "openq-tools", "secrets-tools",
-      "VERIFIED", "UNVERIFIED", "CANNOT_PROCEED", "PROCEED", "RERUN", "BOUNCE", "ESCALATE", "FIX_ENV",
-      "Skills", "flow-1-signal", "flow-2-plan", "flow-3-build", "flow-4-gate", "flow-5-deploy", "flow-6-wisdom"
+      "REQ-001",
+      "REQ-002",
+      "REQ-003",
+      "REQ-004",
+      "REQ-005",
+      "REQ-006",
+      "REQ-007",
+      "demoswarm.sh",
+      "runs-derive",
+      "runs-index",
+      "openq-tools",
+      "secrets-tools",
+      "VERIFIED",
+      "UNVERIFIED",
+      "CANNOT_PROCEED",
+      "PROCEED",
+      "RERUN",
+      "BOUNCE",
+      "ESCALATE",
+      "FIX_ENV",
+      "Skills",
+      "flow-1-signal",
+      "flow-2-plan",
+      "flow-3-build",
+      "flow-4-gate",
+      "flow-5-deploy",
+      "flow-6-wisdom"
     ]
   },
 
@@ -53,9 +76,18 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 command - verify no skill plumbing present (REQ-001)",
-      "evidence": ["grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-1-signal.md"],
+      "evidence": [
+        "grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-1-signal.md"
+      ],
       "depends_on": [],
-      "depended_on_by": ["IMP-007", "IMP-008", "IMP-009", "IMP-010", "IMP-011", "IMP-012"],
+      "depended_on_by": [
+        "IMP-007",
+        "IMP-008",
+        "IMP-009",
+        "IMP-010",
+        "IMP-011",
+        "IMP-012"
+      ],
       "tests_referencing": [],
       "notes": ["ST-001 scope: Flow 1 command file"]
     },
@@ -67,9 +99,21 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 command - verify no skill plumbing present (REQ-001)",
-      "evidence": ["grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-2-plan.md"],
+      "evidence": [
+        "grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-2-plan.md"
+      ],
       "depends_on": [],
-      "depended_on_by": ["IMP-013", "IMP-014", "IMP-015", "IMP-016", "IMP-017", "IMP-018", "IMP-019", "IMP-020", "IMP-021"],
+      "depended_on_by": [
+        "IMP-013",
+        "IMP-014",
+        "IMP-015",
+        "IMP-016",
+        "IMP-017",
+        "IMP-018",
+        "IMP-019",
+        "IMP-020",
+        "IMP-021"
+      ],
       "tests_referencing": [],
       "notes": ["ST-002 scope: Flow 2 command file"]
     },
@@ -81,9 +125,24 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 command - verify no skill plumbing present (REQ-001)",
-      "evidence": ["grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-3-build.md"],
+      "evidence": [
+        "grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-3-build.md"
+      ],
       "depends_on": [],
-      "depended_on_by": ["IMP-022", "IMP-023", "IMP-024", "IMP-025", "IMP-026", "IMP-027", "IMP-028", "IMP-029", "IMP-030", "IMP-031", "IMP-032", "IMP-033"],
+      "depended_on_by": [
+        "IMP-022",
+        "IMP-023",
+        "IMP-024",
+        "IMP-025",
+        "IMP-026",
+        "IMP-027",
+        "IMP-028",
+        "IMP-029",
+        "IMP-030",
+        "IMP-031",
+        "IMP-032",
+        "IMP-033"
+      ],
       "tests_referencing": [],
       "notes": ["ST-003 scope: Flow 3 command file"]
     },
@@ -95,9 +154,22 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 4 command - verify no skill plumbing present (REQ-001), cross-cutting scope in ST-004",
-      "evidence": ["grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-4-gate.md"],
+      "evidence": [
+        "grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-4-gate.md"
+      ],
       "depends_on": [],
-      "depended_on_by": ["IMP-034", "IMP-035", "IMP-036", "IMP-037", "IMP-038", "IMP-039", "IMP-040", "IMP-041", "IMP-042", "IMP-043"],
+      "depended_on_by": [
+        "IMP-034",
+        "IMP-035",
+        "IMP-036",
+        "IMP-037",
+        "IMP-038",
+        "IMP-039",
+        "IMP-040",
+        "IMP-041",
+        "IMP-042",
+        "IMP-043"
+      ],
       "tests_referencing": [],
       "notes": ["ST-004 scope: Flow 4 command file + cross-cutting enforcement"]
     },
@@ -113,7 +185,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-044", "IMP-045", "IMP-046", "IMP-047", "IMP-048"],
       "tests_referencing": [],
-      "notes": ["ST-005 scope: Flow 5 command file; no skill plumbing grep hits observed"]
+      "notes": [
+        "ST-005 scope: Flow 5 command file; no skill plumbing grep hits observed"
+      ]
     },
     {
       "id": "IMP-006",
@@ -123,9 +197,18 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 command - verify no skill plumbing present (REQ-001)",
-      "evidence": ["grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-6-wisdom.md"],
+      "evidence": [
+        "grep:runs-derive|runs-index|openq-tools|secrets-tools hit at .claude/commands/flow-6-wisdom.md"
+      ],
       "depends_on": [],
-      "depended_on_by": ["IMP-049", "IMP-050", "IMP-051", "IMP-052", "IMP-053", "IMP-054"],
+      "depended_on_by": [
+        "IMP-049",
+        "IMP-050",
+        "IMP-051",
+        "IMP-052",
+        "IMP-053",
+        "IMP-054"
+      ],
       "tests_referencing": [],
       "notes": ["ST-006 scope: Flow 6 command file + validation run"]
     },
@@ -137,7 +220,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -151,7 +237,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -165,7 +254,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -179,7 +271,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -193,7 +288,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -207,7 +305,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -221,7 +322,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -235,7 +339,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 1 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -249,11 +356,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 1 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/signal-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/signal-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-001 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-001 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-016",
@@ -277,7 +389,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -291,7 +406,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -305,7 +423,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Infrastructure agent - verify status/action enums, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -319,7 +440,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -333,7 +457,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -347,7 +474,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -361,7 +491,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -375,7 +508,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -389,7 +525,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -403,7 +542,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -417,7 +559,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 2 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -431,7 +576,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -445,11 +593,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 2 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/plan-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/plan-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-002 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-002 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-030",
@@ -459,7 +612,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -473,7 +629,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -487,7 +646,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -501,7 +663,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -515,7 +680,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -529,7 +697,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -543,7 +714,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -557,7 +731,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -571,7 +748,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 3 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -585,11 +765,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 3 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/build-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/build-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-003 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-003 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-040",
@@ -599,7 +784,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -613,7 +801,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -627,7 +818,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -641,7 +835,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -655,7 +852,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -669,7 +869,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 4 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -683,11 +886,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 4 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/gate-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/gate-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-004 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-004 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-047",
@@ -697,7 +905,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -711,7 +922,10 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - uses demoswarm.sh, needs Skills section (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/secrets-sanitizer.md", "grep:Skills section hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/secrets-sanitizer.md",
+        "grep:Skills section hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -725,7 +939,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -739,7 +956,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Cross-cutting agent - verify status/action enums, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -753,7 +973,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 5 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -767,7 +990,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 5 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -781,7 +1007,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 5 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -795,11 +1024,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 5 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/deploy-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/deploy-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-005 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-005 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-055",
@@ -809,7 +1043,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -823,7 +1060,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -837,7 +1077,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -851,7 +1094,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -865,7 +1111,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Flow 6 agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -879,11 +1128,16 @@
       "risk": "MEDIUM",
       "confidence": "HIGH",
       "summary": "Flow 6 cleanup agent - uses demoswarm.sh, needs Skills section, reference skill docs (REQ-002 AC-3, AC-5)",
-      "evidence": ["grep:demoswarm.sh hit at .claude/agents/wisdom-cleanup.md", "grep:runs-derive|runs-index hit"],
+      "evidence": [
+        "grep:demoswarm.sh hit at .claude/agents/wisdom-cleanup.md",
+        "grep:runs-derive|runs-index hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-006 scope; cleanup agents have heavier refactoring due to skill usage"]
+      "notes": [
+        "ST-006 scope; cleanup agents have heavier refactoring due to skill usage"
+      ]
     },
     {
       "id": "IMP-061",
@@ -893,7 +1147,10 @@
       "risk": "LOW",
       "confidence": "HIGH",
       "summary": "Utility agent - verify status/action enums, Skills section, file-write rules (REQ-002)",
-      "evidence": ["grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit", "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"],
+      "evidence": [
+        "grep:VERIFIED|UNVERIFIED|CANNOT_PROCEED hit",
+        "grep:PROCEED|RERUN|BOUNCE|ESCALATE|FIX_ENV hit"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -909,9 +1166,18 @@
       "summary": "Skill doc - ensure complete CLI reference, examples (REQ-003)",
       "evidence": ["file exists at .claude/skills/runs-derive/SKILL.md"],
       "depends_on": [],
-      "depended_on_by": ["IMP-015", "IMP-029", "IMP-039", "IMP-046", "IMP-054", "IMP-060"],
+      "depended_on_by": [
+        "IMP-015",
+        "IMP-029",
+        "IMP-039",
+        "IMP-046",
+        "IMP-054",
+        "IMP-060"
+      ],
       "tests_referencing": [],
-      "notes": ["Skill docs are source of truth for CLI; agents should reference them"]
+      "notes": [
+        "Skill docs are source of truth for CLI; agents should reference them"
+      ]
     },
     {
       "id": "IMP-063",
@@ -923,9 +1189,18 @@
       "summary": "Skill doc - ensure complete CLI reference, examples (REQ-003)",
       "evidence": ["file exists at .claude/skills/runs-index/SKILL.md"],
       "depends_on": [],
-      "depended_on_by": ["IMP-015", "IMP-029", "IMP-039", "IMP-046", "IMP-054", "IMP-060"],
+      "depended_on_by": [
+        "IMP-015",
+        "IMP-029",
+        "IMP-039",
+        "IMP-046",
+        "IMP-054",
+        "IMP-060"
+      ],
       "tests_referencing": [],
-      "notes": ["Skill docs are source of truth for CLI; agents should reference them"]
+      "notes": [
+        "Skill docs are source of truth for CLI; agents should reference them"
+      ]
     },
     {
       "id": "IMP-064",
@@ -939,7 +1214,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-016"],
       "tests_referencing": [],
-      "notes": ["Skill docs are source of truth for CLI; agents should reference them"]
+      "notes": [
+        "Skill docs are source of truth for CLI; agents should reference them"
+      ]
     },
     {
       "id": "IMP-065",
@@ -953,7 +1230,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-048"],
       "tests_referencing": [],
-      "notes": ["Skill docs are source of truth for CLI; agents should reference them"]
+      "notes": [
+        "Skill docs are source of truth for CLI; agents should reference them"
+      ]
     },
     {
       "id": "IMP-066",
@@ -1005,11 +1284,15 @@
       "risk": "HIGH",
       "confidence": "HIGH",
       "summary": "Entry point - normalize Skills table to summary level, remove duplicate CLI flags (REQ-004)",
-      "evidence": ["file read confirms Skills table and CLI reference content present"],
+      "evidence": [
+        "file read confirms Skills table and CLI reference content present"
+      ],
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["ST-004 cross-cutting scope; high-touch file, careful review required"]
+      "notes": [
+        "ST-004 cross-cutting scope; high-touch file, careful review required"
+      ]
     },
     {
       "id": "IMP-070",
@@ -1019,11 +1302,15 @@
       "risk": "HIGH",
       "confidence": "MEDIUM",
       "summary": "pack-check module - add new boundary enforcement checks (REQ-005, NFR-TEST-001)",
-      "evidence": ["file exists at tools/demoswarm-pack-check/src/checks/mod.rs"],
+      "evidence": [
+        "file exists at tools/demoswarm-pack-check/src/checks/mod.rs"
+      ],
       "depends_on": [],
       "depended_on_by": ["IMP-071", "IMP-072", "IMP-073"],
       "tests_referencing": [],
-      "notes": ["ST-004 cross-cutting scope; Rust development required; may add new check modules"]
+      "notes": [
+        "ST-004 cross-cutting scope; Rust development required; may add new check modules"
+      ]
     },
     {
       "id": "IMP-071",
@@ -1033,7 +1320,9 @@
       "risk": "MEDIUM",
       "confidence": "MEDIUM",
       "summary": "pack-check drift checks - add boundary violation detection (flow skill plumbing, enum consistency)",
-      "evidence": ["file exists at tools/demoswarm-pack-check/src/checks/drift.rs"],
+      "evidence": [
+        "file exists at tools/demoswarm-pack-check/src/checks/drift.rs"
+      ],
       "depends_on": ["IMP-070"],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -1047,7 +1336,9 @@
       "risk": "MEDIUM",
       "confidence": "MEDIUM",
       "summary": "pack-check flow checks - add skill plumbing detection in flow commands",
-      "evidence": ["file exists at tools/demoswarm-pack-check/src/checks/flow.rs"],
+      "evidence": [
+        "file exists at tools/demoswarm-pack-check/src/checks/flow.rs"
+      ],
       "depends_on": ["IMP-070"],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -1061,7 +1352,9 @@
       "risk": "MEDIUM",
       "confidence": "MEDIUM",
       "summary": "pack-check structure checks - add Skills section verification for agents using skills",
-      "evidence": ["file exists at tools/demoswarm-pack-check/src/checks/structure.rs"],
+      "evidence": [
+        "file exists at tools/demoswarm-pack-check/src/checks/structure.rs"
+      ],
       "depends_on": ["IMP-070"],
       "depended_on_by": [],
       "tests_referencing": [],
@@ -1079,7 +1372,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Inferred: script may need additional checks; depends on whether pack-check or shell handles enforcement"]
+      "notes": [
+        "Inferred: script may need additional checks; depends on whether pack-check or shell handles enforcement"
+      ]
     },
     {
       "id": "IMP-075",
@@ -1103,11 +1398,15 @@
       "risk": "LOW",
       "confidence": "LOW",
       "summary": "pack-check inventory - may need updates if new check categories added",
-      "evidence": ["file exists at tools/demoswarm-pack-check/src/inventory.rs"],
+      "evidence": [
+        "file exists at tools/demoswarm-pack-check/src/inventory.rs"
+      ],
       "depends_on": ["IMP-070"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Inferred LOW confidence: depends on scope of pack-check changes"]
+      "notes": [
+        "Inferred LOW confidence: depends on scope of pack-check changes"
+      ]
     },
     {
       "id": "IMP-077",
@@ -1121,7 +1420,9 @@
       "depends_on": ["IMP-070"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Inferred LOW confidence: depends on scope of pack-check changes"]
+      "notes": [
+        "Inferred LOW confidence: depends on scope of pack-check changes"
+      ]
     }
   ],
 

@@ -110,16 +110,16 @@ flowchart LR
 
 These agents are called across multiple flows:
 
-| Agent | Purpose | Typical Callers |
-|-------|---------|-----------------|
-| `repo-operator` | Git operations (branch, stage, commit, push) | All flow orchestrators |
-| `secrets-sanitizer` | Pre-publish secrets scan | All flow orchestrators (before commit) |
-| `clarifier` | Capture open questions, research answers | Flows 1-3 |
-| `fixer` | Apply targeted fixes from critiques | Flows 3-4 |
-| `risk-analyst` | Risk assessment | Flows 1, 2, 5, 7 |
-| `policy-analyst` | Policy compliance checks | Flows 2, 5 |
-| `gh-issue-manager` | Update GitHub issue status | All flow orchestrators |
-| `gh-reporter` | Post summaries to GitHub | All flow orchestrators |
+| Agent               | Purpose                                      | Typical Callers                        |
+| ------------------- | -------------------------------------------- | -------------------------------------- |
+| `repo-operator`     | Git operations (branch, stage, commit, push) | All flow orchestrators                 |
+| `secrets-sanitizer` | Pre-publish secrets scan                     | All flow orchestrators (before commit) |
+| `clarifier`         | Capture open questions, research answers     | Flows 1-3                              |
+| `fixer`             | Apply targeted fixes from critiques          | Flows 3-4                              |
+| `risk-analyst`      | Risk assessment                              | Flows 1, 2, 5, 7                       |
+| `policy-analyst`    | Policy compliance checks                     | Flows 2, 5                             |
+| `gh-issue-manager`  | Update GitHub issue status                   | All flow orchestrators                 |
+| `gh-reporter`       | Post summaries to GitHub                     | All flow orchestrators                 |
 
 ## Per-Flow Agent Sequences
 
@@ -352,16 +352,16 @@ flowchart LR
     C -->|"proceed"| Next[Next Station]
 ```
 
-| Microloop | Writer | Critic |
-|-----------|--------|--------|
-| Requirements | requirements-author | requirements-critic |
-| BDD Scenarios | bdd-author | bdd-critic |
-| Design Options | design-optioneer | option-critic |
-| Contracts | interface-designer | contract-critic |
-| Observability | observability-designer | observability-critic |
-| Tests | test-author | test-critic |
-| Code | code-implementer | code-critic |
-| Documentation | doc-writer | doc-critic |
+| Microloop      | Writer                 | Critic               |
+| -------------- | ---------------------- | -------------------- |
+| Requirements   | requirements-author    | requirements-critic  |
+| BDD Scenarios  | bdd-author             | bdd-critic           |
+| Design Options | design-optioneer       | option-critic        |
+| Contracts      | interface-designer     | contract-critic      |
+| Observability  | observability-designer | observability-critic |
+| Tests          | test-author            | test-critic          |
+| Code           | code-implementer       | code-critic          |
+| Documentation  | doc-writer             | doc-critic           |
 
 ### Checkpoint Pattern (Sanitize -> Commit -> Report)
 
@@ -393,37 +393,37 @@ flowchart LR
 
 ### Critics -> Fixers
 
-| Critic | Default Target | When Issues Found |
-|--------|----------------|-------------------|
-| requirements-critic | requirements-author | requirements-author |
-| bdd-critic | bdd-author | bdd-author |
-| option-critic | design-optioneer | design-optioneer |
-| contract-critic | interface-designer | interface-designer |
-| observability-critic | observability-designer | observability-designer |
-| test-critic | code-implementer | test-author or fixer |
-| code-critic | test-critic | code-implementer or fixer |
-| doc-critic | doc-writer | doc-writer |
+| Critic               | Default Target         | When Issues Found         |
+| -------------------- | ---------------------- | ------------------------- |
+| requirements-critic  | requirements-author    | requirements-author       |
+| bdd-critic           | bdd-author             | bdd-author                |
+| option-critic        | design-optioneer       | design-optioneer          |
+| contract-critic      | interface-designer     | interface-designer        |
+| observability-critic | observability-designer | observability-designer    |
+| test-critic          | code-implementer       | test-author or fixer      |
+| code-critic          | test-critic            | code-implementer or fixer |
+| doc-critic           | doc-writer             | doc-writer                |
 
 ### Infrastructure Agents
 
-| Agent | Hands Off To | Condition |
-|-------|--------------|-----------|
-| repo-operator | gh-issue-manager | proceed_to_github_ops: true |
-| repo-operator | caller | proceed_to_github_ops: false |
-| secrets-sanitizer | repo-operator | safe_to_publish: true |
-| secrets-sanitizer | code-implementer | needs code fix |
+| Agent             | Hands Off To     | Condition                    |
+| ----------------- | ---------------- | ---------------------------- |
+| repo-operator     | gh-issue-manager | proceed_to_github_ops: true  |
+| repo-operator     | caller           | proceed_to_github_ops: false |
+| secrets-sanitizer | repo-operator    | safe_to_publish: true        |
+| secrets-sanitizer | code-implementer | needs code fix               |
 
 ### Cleanup Agents
 
 Each flow has a cleanup agent that finalizes receipts and updates index:
 
-| Flow | Cleanup Agent | Hands Off To |
-|------|---------------|--------------|
+| Flow   | Cleanup Agent  | Hands Off To      |
+| ------ | -------------- | ----------------- |
 | Signal | signal-cleanup | secrets-sanitizer |
-| Plan | plan-cleanup | secrets-sanitizer |
-| Build | build-cleanup | secrets-sanitizer |
+| Plan   | plan-cleanup   | secrets-sanitizer |
+| Build  | build-cleanup  | secrets-sanitizer |
 | Review | review-cleanup | secrets-sanitizer |
-| Gate | gate-cleanup | secrets-sanitizer |
+| Gate   | gate-cleanup   | secrets-sanitizer |
 | Deploy | deploy-cleanup | secrets-sanitizer |
 | Wisdom | wisdom-cleanup | secrets-sanitizer |
 
@@ -431,50 +431,50 @@ Each flow has a cleanup agent that finalizes receipts and updates index:
 
 ### From code-critic
 
-| Finding | Route To |
-|---------|----------|
-| Implementation solid | test-critic |
-| Small surgical fixes | fixer |
-| Large implementation gaps | code-implementer |
+| Finding                     | Route To         |
+| --------------------------- | ---------------- |
+| Implementation solid        | test-critic      |
+| Small surgical fixes        | fixer            |
+| Large implementation gaps   | code-implementer |
 | ADR interpretation question | design-optioneer |
 
 ### From test-executor
 
-| Result | Route To |
-|--------|----------|
-| All pass | Next station |
-| Failures in new code | code-implementer |
-| Failures in tests | test-author |
-| Flaky tests | flakiness-detector |
+| Result               | Route To           |
+| -------------------- | ------------------ |
+| All pass             | Next station       |
+| Failures in new code | code-implementer   |
+| Failures in tests    | test-author        |
+| Flaky tests          | flakiness-detector |
 
 ### From merge-decider
 
-| Decision | Route To |
-|----------|----------|
-| MERGE | gate-cleanup (then Flow 6) |
-| BOUNCE (code issues) | Flow 3 |
-| BOUNCE (review issues) | Flow 4 |
-| BOUNCE (design issues) | Flow 2 |
+| Decision               | Route To                   |
+| ---------------------- | -------------------------- |
+| MERGE                  | gate-cleanup (then Flow 6) |
+| BOUNCE (code issues)   | Flow 3                     |
+| BOUNCE (review issues) | Flow 4                     |
+| BOUNCE (design issues) | Flow 2                     |
 
 ### From secrets-sanitizer
 
-| Status | Route To |
-|--------|----------|
-| CLEAN/FIXED | repo-operator |
+| Status                | Route To         |
+| --------------------- | ---------------- |
+| CLEAN/FIXED           | repo-operator    |
 | BLOCKED (code secret) | code-implementer |
-| BLOCKED (mechanical) | Fix environment |
+| BLOCKED (mechanical)  | Fix environment  |
 
 ## Agent Count by Flow
 
-| Flow | Primary Agents | Critics | Infrastructure |
-|------|----------------|---------|----------------|
-| Signal | 8 | 3 | 5 |
-| Plan | 9 | 4 | 5 |
-| Build | 11 | 4 | 6 |
-| Review | 6 | 0 | 5 |
-| Gate | 9 | 1 | 5 |
-| Deploy | 4 | 0 | 5 |
-| Wisdom | 12 | 0 | 5 |
+| Flow   | Primary Agents | Critics | Infrastructure |
+| ------ | -------------- | ------- | -------------- |
+| Signal | 8              | 3       | 5              |
+| Plan   | 9              | 4       | 5              |
+| Build  | 11             | 4       | 6              |
+| Review | 6              | 0       | 5              |
+| Gate   | 9              | 1       | 5              |
+| Deploy | 4              | 0       | 5              |
+| Wisdom | 12             | 0       | 5              |
 
 Cross-flow agents (shared): 8
 

@@ -17,7 +17,7 @@ This is Law 8 of the swarm. It is physics, not preference.
 
 ## Why This Matters
 
-### Agents Can Hallucinate. Tools Cannot.
+### Agents Can Hallucinate. Tools Cannot
 
 LLMs generate plausible text. Under completion pressure, they may claim success without evidence. They may "remember" running tests they did not run.
 
@@ -129,20 +129,20 @@ This is not distrust of agents. Tools provide mechanical truth; agents provide i
 
 ## Practical Application
 
-| Role | What To Do |
-|------|------------|
-| **Agents** | Run tools, cite outputs. "Not measured" beats false certainty. |
-| **Gates** | Verify claims against tool outputs. Missing evidence = UNKNOWN. |
-| **Orchestrators** | Verify at boundaries. Narrative is context, not truth. |
+| Role              | What To Do                                                      |
+| ----------------- | --------------------------------------------------------------- |
+| **Agents**        | Run tools, cite outputs. "Not measured" beats false certainty.  |
+| **Gates**         | Verify claims against tool outputs. Missing evidence = UNKNOWN. |
+| **Orchestrators** | Verify at boundaries. Narrative is context, not truth.          |
 
 ### Anti-Patterns
 
-| Anti-Pattern | What Goes Wrong |
-|--------------|-----------------|
+| Anti-Pattern                        | What Goes Wrong                  |
+| ----------------------------------- | -------------------------------- |
 | Trusting narrative over tool output | Hallucinated success passes gate |
-| Inventing evidence | Claims without running tools |
-| Ignoring the hierarchy | Implementation overrides intent |
-| Stale evidence | Evidence from previous run used |
+| Inventing evidence                  | Claims without running tools     |
+| Ignoring the hierarchy              | Implementation overrides intent  |
+| Stale evidence                      | Evidence from previous run used  |
 
 ---
 

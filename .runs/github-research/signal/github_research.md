@@ -7,6 +7,7 @@
 The most recent flow (local-alignment-audit-aba1c6) completed with full verification. Key learnings that inform this research:
 
 **Positive Patterns:**
+
 - Explicit priority classification (HIGH/MEDIUM/LOW) enabled clear triage during review
 - Requirements linked to explicit acceptance criteria enabled mechanical verification
 - Layered approach (updating authoritative sources first, then deriving downstream) reduced coordination overhead
@@ -14,6 +15,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 - Open questions register with documented defaults reduced cycle time
 
 **Constraints & Pitfalls:**
+
 - "7 flows via 10 command files" ambiguity caused bot reviewer confusion (FB-003, FB-004, FB-005)
 - No automation exists for deriving downstream docs from authoritative sources (CLAUDE.md)
 - Open questions remained OPEN even when evidence resolved them (OQ-SIG-001)
@@ -22,6 +24,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 - "immeidate" typo across 7 flow command files (caught and fixed, but preventable)
 
 **Pack/Flow Observations Needing Address:**
+
 1. Build receipt write failed due to directory permissions (needed git fallback in Gate)
 2. No automation for deriving downstream docs from authoritative sources
 3. Open questions resolution tracking missing
@@ -31,13 +34,13 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 
 ## Search Inputs
 
-| Search Type | Terms Used | Rationale |
-|-------------|-----------|-----------|
-| Issue List | state:all, limit:100 | Exhaustive search of all issues (open/closed) |
-| PR List | state:all, limit:100 | Exhaustive search of all PRs (merged/open/closed) |
-| Milestone List | API call | Identify roadmap structure and grouping |
-| Label Search | Built-in GitHub + custom labels | Inventory of categorization taxonomy |
-| Discussion Search | Attempted via gh CLI | Disabled for this repo (confirmed) |
+| Search Type       | Terms Used                      | Rationale                                         |
+| ----------------- | ------------------------------- | ------------------------------------------------- |
+| Issue List        | state:all, limit:100            | Exhaustive search of all issues (open/closed)     |
+| PR List           | state:all, limit:100            | Exhaustive search of all PRs (merged/open/closed) |
+| Milestone List    | API call                        | Identify roadmap structure and grouping           |
+| Label Search      | Built-in GitHub + custom labels | Inventory of categorization taxonomy              |
+| Discussion Search | Attempted via gh CLI            | Disabled for this repo (confirmed)                |
 
 **Terminology:** None. This is a complete inventory run examining roadmap-level issues (#9-#26).
 
@@ -46,12 +49,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ## Access & Limitations
 
 **GitHub CLI Status:** VERIFIED
+
 - `gh` version: 2.83.1, available and authenticated
 - Account: EffortlessSteven (keyring auth)
 - Token scopes: admin:public_key, gist, read:org, repo
 - Git protocol: SSH
 
 **Available Resources:**
+
 - Issue list: FULL (18 issues total: 1 closed, 17 open)
 - PR list: FULL (7 PRs retrieved, all merged)
 - Labels: FULL (9 custom labels defined + GitHub defaults)
@@ -67,27 +72,27 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 
 ### Summary Table
 
-| Issue | Title | State | Milestone | Priority | Created | Updated | Relevance |
-|-------|-------|-------|-----------|----------|---------|---------|-----------|
-| #26 | Add Rust dependency caching to CI | OPEN | v1.3.0 | LOW | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #25 | Add cargo-audit job to CI workflow | OPEN | v1.1.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #24 | Document 'command count vs flow count' phrasing | OPEN | v1.3.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #23 | Atomic write pattern for receipt generation | OPEN | v1.3.0 | LOW | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #22 | Add run-prep pre-flight for branch protection | OPEN | v1.3.0 | LOW | 2025-12-31 | 2025-12-31 | **LOW** |
-| #21 | Add question resolution tracking to signal-cleanup | OPEN | v1.3.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #20 | Git-based fallback for receipt reading | OPEN | v1.3.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #19 | Add flow count validation rule to pack-check | OPEN | v1.3.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #18 | Add spell-check to pack-check or pre-commit | OPEN | v1.3.0 | LOW | 2025-12-31 | 2025-12-31 | **LOW** |
-| #17 | Fix markdown template formatting (MD022/MD058) | OPEN | v1.3.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #16 | Warning-first mode (--strict flag) for pack-check | OPEN | v1.2.0 | HIGH | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #15 | Build-to-Gate receipt test fixtures | OPEN | v1.2.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #14 | OpenQ prefix normalization | OPEN | v1.2.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #13 | Skills section enforcement for agents using demoswarm.sh | OPEN | v1.2.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **MEDIUM** |
-| #12 | Flow boundary enforcement in pack-check | OPEN | v1.2.0 | HIGH | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #11 | Update cargo-audit for CVSS 4.0 support | OPEN | v1.1.0 | MEDIUM | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #10 | Enable branch protection on main branch | OPEN | v1.1.0 | HIGH | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #9 | Fix path traversal vulnerability in secrets.rs | OPEN | v1.1.0 | HIGH | 2025-12-31 | 2025-12-31 | **HIGH** |
-| #1 | DemoSwarm Documentation-Code Alignment Audit | CLOSED | none | HIGH | 2025-12-20 | 2025-12-31 | HISTORICAL |
+| Issue | Title                                                    | State  | Milestone | Priority | Created    | Updated    | Relevance  |
+| ----- | -------------------------------------------------------- | ------ | --------- | -------- | ---------- | ---------- | ---------- |
+| #26   | Add Rust dependency caching to CI                        | OPEN   | v1.3.0    | LOW      | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #25   | Add cargo-audit job to CI workflow                       | OPEN   | v1.1.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #24   | Document 'command count vs flow count' phrasing          | OPEN   | v1.3.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #23   | Atomic write pattern for receipt generation              | OPEN   | v1.3.0    | LOW      | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #22   | Add run-prep pre-flight for branch protection            | OPEN   | v1.3.0    | LOW      | 2025-12-31 | 2025-12-31 | **LOW**    |
+| #21   | Add question resolution tracking to signal-cleanup       | OPEN   | v1.3.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #20   | Git-based fallback for receipt reading                   | OPEN   | v1.3.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #19   | Add flow count validation rule to pack-check             | OPEN   | v1.3.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #18   | Add spell-check to pack-check or pre-commit              | OPEN   | v1.3.0    | LOW      | 2025-12-31 | 2025-12-31 | **LOW**    |
+| #17   | Fix markdown template formatting (MD022/MD058)           | OPEN   | v1.3.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #16   | Warning-first mode (--strict flag) for pack-check        | OPEN   | v1.2.0    | HIGH     | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #15   | Build-to-Gate receipt test fixtures                      | OPEN   | v1.2.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #14   | OpenQ prefix normalization                               | OPEN   | v1.2.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #13   | Skills section enforcement for agents using demoswarm.sh | OPEN   | v1.2.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **MEDIUM** |
+| #12   | Flow boundary enforcement in pack-check                  | OPEN   | v1.2.0    | HIGH     | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #11   | Update cargo-audit for CVSS 4.0 support                  | OPEN   | v1.1.0    | MEDIUM   | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #10   | Enable branch protection on main branch                  | OPEN   | v1.1.0    | HIGH     | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #9    | Fix path traversal vulnerability in secrets.rs           | OPEN   | v1.1.0    | HIGH     | 2025-12-31 | 2025-12-31 | **HIGH**   |
+| #1    | DemoSwarm Documentation-Code Alignment Audit             | CLOSED | none      | HIGH     | 2025-12-20 | 2025-12-31 | HISTORICAL |
 
 ### Issue Details and Analysis
 
@@ -98,6 +103,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Purpose:** Security hardening and governance enforcement
 
 ##### Issue #9: Fix path traversal vulnerability in secrets.rs
+
 **Type:** Security/Bug Fix
 **Priority:** HIGH
 **Dependencies:** NONE (independent)
@@ -105,12 +111,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Add path canonicalization to secrets.rs path handling
 2. Add unit tests for path traversal rejection (`../`, absolute paths)
 3. Document threat model assumptions in code comments
 4. Pass existing pack-check and runs-tools-tests
 
 **Technical Notes:**
+
 - Source code: `tools/demoswarm-runs-tools/src/commands/secrets.rs`
 - Security context: Local execution (low risk) but path handling is foundational
 - Relevant evidence: `.runs/local-alignment-audit-aba1c6/gate/risk_assessment.md#RSK-001`
@@ -120,6 +128,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #10: Enable branch protection on main branch
+
 **Type:** Governance/Configuration
 **Priority:** HIGH
 **Dependencies:** NONE (org-level setting)
@@ -127,22 +136,26 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 0.5 hours
 
 **Acceptance Criteria:**
+
 1. Enable branch protection via GitHub repository settings UI
 2. Configure required status checks (lint, pack-check, runs-tools-tests)
 3. Verify subsequent runs achieve `deployment_verdict=STABLE`
 4. Document branch protection requirements in CONTRIBUTING.md
 
 **Technical Notes:**
+
 - This is a repository settings change, not code
 - **Blocks:** Future runs will see `NOT_DEPLOYED` verdicts until resolved
 - Governance constraint preventing stable deployments (documented in wisdom)
 
 **Blocks Other Work:**
+
 - #22 (run-prep branch protection check) can proceed, but this must be fixed for meaningful verdicts
 
 ---
 
 ##### Issue #11: Update cargo-audit for CVSS 4.0 support
+
 **Type:** Tooling/Dependency
 **Priority:** MEDIUM
 **Dependencies:** NONE (but will unblock #25)
@@ -150,22 +163,26 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Upgrade cargo-audit to version supporting CVSS 4.0 (if available)
 2. If no upgrade available, document workaround (cargo-deny, cargo-vet)
 3. Verify `cargo audit` runs successfully on both Rust crates
 4. Add cargo-audit check to CI workflow
 
 **Technical Notes:**
+
 - Prerequisite for #25 (cargo-audit CI job)
 - May require evaluating alternative tools (cargo-deny, cargo-vet)
 - Current issue: cargo-audit 0.21.2 cannot parse CVSS 4.0 scores
 
 **Blocks Other Work:**
+
 - **Unblocks #25** (Add cargo-audit job to CI workflow)
 
 ---
 
 ##### Issue #25: Add cargo-audit job to CI workflow
+
 **Type:** Tooling/CI
 **Priority:** MEDIUM
 **Dependencies:** #11 (cargo-audit CVSS 4.0 support)
@@ -173,12 +190,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1 hour
 
 **Acceptance Criteria:**
+
 1. Add `cargo-audit` job to `.github/workflows/pack.yml`
 2. Run on both Rust crates (demoswarm-pack-check, demoswarm-runs-tools)
 3. Add ignore list for known false positives (if any)
 4. Job fails on CRITICAL/HIGH severity findings
 
 **Technical Notes:**
+
 - Depends on #11 (need working cargo-audit first)
 - Implementation provided in issue body (ready to implement)
 - Integrates with existing pack.yml workflow
@@ -194,6 +213,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Purpose:** Mechanical compliance enforcement in pack-check
 
 ##### Issue #16: Warning-first mode (--strict flag) for pack-check
+
 **Type:** Tooling/CLI Enhancement
 **Priority:** HIGH
 **Dependencies:** NONE (foundational for other enforcement issues)
@@ -201,22 +221,26 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 3-4 hours
 
 **Acceptance Criteria:**
+
 1. Add `--strict` flag to pack-check CLI
 2. New rules emit warnings by default
 3. `--strict` flag converts warnings to errors
 4. Update docs/reference/pack-check.md
 
 **Technical Notes:**
+
 - Foundational: enables other pack-check issues (#12, #13, #14, #19) without breaking CI
 - This should be done FIRST before other pack-check enhancements
 - Allows incremental adoption of compliance rules
 
 **Blocks Other Work:**
+
 - **Enables all other pack-check compliance issues** (#12, #13, #14, #19)
 
 ---
 
 ##### Issue #12: Flow boundary enforcement in pack-check
+
 **Type:** Tooling/Compliance
 **Priority:** HIGH
 **Dependencies:** #16 (warning-first mode)
@@ -224,12 +248,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Add pack-check rule blocking demoswarm.sh invocations in flow commands
 2. Add pack-check rule blocking skill-layer CLI syntax in flows
 3. No false positives on existing valid commands
 4. Update docs/reference/pack-check.md
 
 **Technical Notes:**
+
 - Part of three-tier ownership model enforcement (Flows → Agents → Skills)
 - Source: `compliance-drift-proofing` signal analysis (REQ-001)
 - Implementation reference: `tools/demoswarm-pack-check/src/checks/drift.rs`
@@ -240,6 +266,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #13: Skills section enforcement for agents using demoswarm.sh
+
 **Type:** Tooling/Compliance
 **Priority:** MEDIUM
 **Dependencies:** #16 (warning-first mode)
@@ -247,12 +274,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1-2 hours
 
 **Acceptance Criteria:**
+
 1. Add pack-check rule validating agents using demoswarm.sh have Skills section
 2. Surface validation warnings
 3. Document intentionally exempt agents (if any)
 4. Update docs/reference/pack-check.md
 
 **Technical Notes:**
+
 - Current state: 10 of 14 demoswarm.sh-using agents have Skills sections
 - Source: `compliance-drift-proofing` signal analysis (REQ-002)
 
@@ -262,6 +291,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #14: OpenQ prefix normalization
+
 **Type:** Tooling/Compliance
 **Priority:** MEDIUM
 **Dependencies:** #16 (warning-first mode)
@@ -269,12 +299,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1-2 hours
 
 **Acceptance Criteria:**
+
 1. Document canonical OpenQ prefix format (PLN, BLD, GAT, etc.)
 2. Add validation in openq-tools enforcing normalized prefixes
 3. Update clarifier agent to emit normalized prefixes
 4. Add pack-check or documentation drift rule catching deviations
 
 **Technical Notes:**
+
 - Issue: PLN vs PLAN inconsistency in open question markers
 - Canonical format should match stable-markers.md
 - This is a documentation + tool consistency issue
@@ -285,6 +317,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #15: Build-to-Gate receipt test fixtures
+
 **Type:** Tooling/Testing
 **Priority:** MEDIUM
 **Dependencies:** NONE (independent but related to #16 context)
@@ -292,12 +325,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Create test fixture for valid Build receipt → Gate consumption
 2. Create test fixture for invalid/missing receipt handling
 3. Add integration test verifying receipt-checker agent behavior
 4. Commit fixtures to `tools/demoswarm-pack-check/tests/fixtures/`
 
 **Technical Notes:**
+
 - Validates receipt contract between Build and Gate flows
 - Source: `compliance-drift-proofing` signal analysis (REQ-004)
 - Reference: `.claude/agents/receipt-checker.md`, `docs/reference/contracts.md`
@@ -313,6 +348,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Purpose:** DX improvements, template fixes, documentation automation, error resilience
 
 ##### Issue #17: Fix markdown template formatting (MD022/MD058)
+
 **Type:** Bug Fix/Quality
 **Priority:** MEDIUM
 **Dependencies:** NONE (independent)
@@ -320,12 +356,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1-2 hours
 
 **Acceptance Criteria:**
+
 1. Update secrets_scan.md template with blank lines around headings
 2. Update secrets_scan.md template with blank lines around tables
 3. Audit other generator templates for same issues
 4. Verify generated artifacts pass markdownlint
 
 **Technical Notes:**
+
 - 24 violations per run (fixing template eliminates them)
 - Current violations: MD022 (missing blank lines), MD058 (line too long)
 - Impact: High ROI (one fix in template = 24 per-run savings)
@@ -335,6 +373,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #20: Git-based fallback for receipt reading
+
 **Type:** Error Handling/Resilience
 **Priority:** MEDIUM
 **Dependencies:** NONE (independent)
@@ -342,12 +381,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Add git-based fallback to receipt reading in Gate agents
 2. Pattern: if direct read fails, try `git show HEAD:<path>`
 3. Add permission check before receipt write in Build agents
 4. Emit warning if directory is read-only
 
 **Technical Notes:**
+
 - Addresses: Build permission failures seen in local-alignment-audit-aba1c6
 - Pattern: Read from disk → fallback to `git show` → error
 - Enables resilience against directory permission issues
@@ -357,6 +398,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #21: Add question resolution tracking to signal-cleanup
+
 **Type:** Workflow/Process
 **Priority:** MEDIUM
 **Dependencies:** NONE (but improves overall flow)
@@ -364,12 +406,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Add resolution tracking to openq-tools (OPEN → RESOLVED status)
 2. Mark questions RESOLVED when answer is derived from evidence
 3. Add "question resolution ceremony" to signal-cleanup agent
 4. Before proceeding to Plan, verify each question has: (a) resolution, (b) default, or (c) escalation
 
 **Technical Notes:**
+
 - Addresses wisdom finding: OQ-SIG-001 never closed despite resolution
 - Improves signal phase closure
 - Flow 1 should emit "recommended defaults" document
@@ -379,6 +423,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #19: Add flow count validation rule to pack-check
+
 **Type:** Tooling/Compliance
 **Priority:** MEDIUM
 **Dependencies:** #16 (warning-first mode)
@@ -386,12 +431,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1-2 hours
 
 **Acceptance Criteria:**
+
 1. Extract flow count from CLAUDE.md "The Seven Flows" section
 2. Validate README.md, architecture.md, DEMO_RUN.md match count
 3. Emit warning on mismatch (warning-first mode)
 4. Update docs/reference/pack-check.md
 
 **Technical Notes:**
+
 - Prevents documentation drift (captured in wisdom)
 - Canonical: 7 flows (CLAUDE.md L13)
 - Bot reviewers confused by "7 flows via 10 command files" phrasing
@@ -402,6 +449,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #24: Document 'command count vs flow count' phrasing
+
 **Type:** Documentation
 **Priority:** MEDIUM
 **Dependencies:** NONE (independent)
@@ -409,12 +457,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1 hour
 
 **Acceptance Criteria:**
+
 1. Add explicit phrasing guidance to documentation
 2. Canonical phrasing: "7 flows exposed via 10 slash commands"
 3. Update architecture.md with variant relationships
 4. Document when to use each variant
 
 **Technical Notes:**
+
 - Bot reviewers (FB-003, FB-004, FB-005) showed confusion
 - Related: #19 (flow count validation)
 - This is pure documentation; can be done immediately
@@ -424,6 +474,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #22: Add run-prep pre-flight for branch protection
+
 **Type:** Workflow/Process
 **Priority:** LOW
 **Dependencies:** NONE (but meaningful only after #10)
@@ -431,12 +482,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1 hour
 
 **Acceptance Criteria:**
+
 1. Add branch protection status check to run-prep pre-flight
 2. Warn (don't block) if branch protection is not enabled
 3. Add to early_risks.md in risk-analyst agent
 4. Document in CONTRIBUTING.md
 
 **Technical Notes:**
+
 - Surfacees ORG_CONSTRAINT early (current: only visible at deploy time)
 - Only meaningful after #10 is resolved
 - Low priority (informational only)
@@ -446,6 +499,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #23: Atomic write pattern for receipt generation
+
 **Type:** Robustness/Quality
 **Priority:** LOW
 **Dependencies:** NONE (independent)
@@ -453,12 +507,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1-2 hours
 
 **Acceptance Criteria:**
+
 1. Implement atomic write pattern for receipt generation
 2. Write to temp file, then rename to final location
 3. Handle rename failures gracefully
 4. Add unit tests for atomic write behavior
 
 **Technical Notes:**
+
 - Prevents partial writes on permission errors
 - Pattern: write to `.tmp`, rename to final
 - Low impact but good defensive programming
@@ -468,6 +524,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #26: Add Rust dependency caching to CI
+
 **Type:** Performance/CI Optimization
 **Priority:** LOW
 **Dependencies:** NONE (independent)
@@ -475,11 +532,13 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 1 hour
 
 **Acceptance Criteria:**
+
 1. Add Rust caching using `Swatinem/rust-cache@v2`
 2. Cache per-job cargo registry, git, target/
 3. Verify cache hit rates
 
 **Technical Notes:**
+
 - Performance optimization (no functional impact)
 - Can be added independently
 - Implementation reference provided in issue
@@ -489,6 +548,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ---
 
 ##### Issue #18: Add spell-check to pack-check or pre-commit
+
 **Type:** Quality/DX
 **Priority:** LOW
 **Dependencies:** NONE (independent)
@@ -496,12 +556,14 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 **Estimated Effort:** 2-3 hours
 
 **Acceptance Criteria:**
+
 1. Evaluate spell-check options (cspell, typos-cli, etc.)
 2. Add to pack-check OR pre-commit hooks
 3. Create custom dictionary for pack-specific terms
 4. Verify no false positives
 
 **Technical Notes:**
+
 - Prevents typos like "immeidate" (found in 7 flow files)
 - Low priority (QoL improvement)
 - Choose spell-checker integration point carefully
@@ -513,6 +575,7 @@ The most recent flow (local-alignment-audit-aba1c6) completed with full verifica
 ### Closed Issues
 
 #### Issue #1: DemoSwarm Documentation-Code Alignment Audit
+
 **Type:** Historical (tracking artifact)
 **State:** CLOSED
 **Priority:** Completed (observability-only)
@@ -525,15 +588,15 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 
 ### Summary Table
 
-| PR | Title | State | Merged | Author | Created | Relevance |
-|----|-------|-------|--------|--------|---------|-----------|
-| #8 | refactor: README improvements and documentation clarity | MERGED | 2025-12-27 | swarm | 2025-12-27 | **HIGH** |
-| #7 | refactor: DemoSwarm v2.1 directive handoffs alignment | MERGED | 2025-12-27 | swarm | 2025-12-27 | **HIGH** |
-| #6 | refactor: standardize agent handoffs to natural language | MERGED | 2025-12-26 | swarm | 2025-12-26 | **HIGH** |
-| #5 | refactor: Enhance agent documentation and workflows for clarity and consistency | MERGED | 2025-12-26 | swarm | 2025-12-25 | **HIGH** |
-| #4 | feat: Comprehensive documentation enhancements for DemoSwarm pack | MERGED | 2025-12-23 | swarm | 2025-12-23 | **HIGH** |
-| #3 | feat: Local alignment audit - Ops-First philosophy and pack consistency improvements | MERGED | 2025-12-22 | swarm | 2025-12-22 | **HIGH** |
-| #2 | docs: update pack documentation to seven-flow model | MERGED | 2025-12-20 | swarm | 2025-12-20 | **HIGH** |
+| PR  | Title                                                                                | State  | Merged     | Author | Created    | Relevance |
+| --- | ------------------------------------------------------------------------------------ | ------ | ---------- | ------ | ---------- | --------- |
+| #8  | refactor: README improvements and documentation clarity                              | MERGED | 2025-12-27 | swarm  | 2025-12-27 | **HIGH**  |
+| #7  | refactor: DemoSwarm v2.1 directive handoffs alignment                                | MERGED | 2025-12-27 | swarm  | 2025-12-27 | **HIGH**  |
+| #6  | refactor: standardize agent handoffs to natural language                             | MERGED | 2025-12-26 | swarm  | 2025-12-26 | **HIGH**  |
+| #5  | refactor: Enhance agent documentation and workflows for clarity and consistency      | MERGED | 2025-12-26 | swarm  | 2025-12-25 | **HIGH**  |
+| #4  | feat: Comprehensive documentation enhancements for DemoSwarm pack                    | MERGED | 2025-12-23 | swarm  | 2025-12-23 | **HIGH**  |
+| #3  | feat: Local alignment audit - Ops-First philosophy and pack consistency improvements | MERGED | 2025-12-22 | swarm  | 2025-12-22 | **HIGH**  |
+| #2  | docs: update pack documentation to seven-flow model                                  | MERGED | 2025-12-20 | swarm  | 2025-12-20 | **HIGH**  |
 
 **Status:** All 7 PRs have been merged. No open PRs at this time. Roadmap for issues #9-#26 has not yet started implementation.
 
@@ -600,6 +663,7 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 ### Recommended Sequencing by Milestone
 
 **v1.1.0 (Security & Governance):**
+
 - #10 (Enable branch protection) — DO FIRST, org setting, 0.5 hours
 - #9 (Fix path traversal) — PARALLEL, 2-3 hours
 - #11 (cargo-audit CVSS) — PARALLEL, 2-3 hours
@@ -608,6 +672,7 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 **Sequencing Rationale:** #10 is org-level (immediate), others are independent code work. #11→#25 is strict dependency.
 
 **v1.2.0 (Compliance Enforcement):**
+
 - #16 (--strict flag) — DO FIRST, 3-4 hours (unblocks others)
 - #12 (flow boundary rules) — AFTER #16, 2-3 hours
 - #13 (Skills section rules) — AFTER #16 or PARALLEL, 1-2 hours
@@ -617,6 +682,7 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 **Sequencing Rationale:** #16 is foundational, enables others. #15 is independent.
 
 **v1.3.0 (Developer Experience):**
+
 - #17 (markdown fixes) — IMMEDIATE, high ROI, 1-2 hours
 - #24 (flow count phrasing) — IMMEDIATE, pure docs, 1 hour
 - #20 (git fallback) — EARLY, resilience, 2-3 hours
@@ -713,30 +779,37 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 ### Issues Needing More Detail
 
 **Issue #9 (Path Traversal):**
+
 - Missing: Specific test cases (e.g., `../../../etc/passwd`, `/etc/passwd`, `//network/share`)
 - Missing: Canonicalization library recommendation (recommend `std::fs::canonicalize()`)
 
 **Issue #11 (Cargo-Audit CVSS):**
+
 - Missing: Version constraint (e.g., "cargo-audit >=0.22.0")
 - Missing: Fallback tooling evaluation criteria
 
 **Issue #13 (Skills Section):**
+
 - Missing: Definition of "valid Skills section" (specific fields required?)
 - Missing: List of intentionally exempt agents (are any OK to skip?)
 
 **Issue #15 (Receipt Fixtures):**
+
 - Missing: Specific receipt format requirements
 - Missing: Invalid receipt scenarios to test (missing fields, wrong type, etc.)
 
 **Issue #20 (Git Fallback):**
+
 - Missing: Fallback chain specifics (disk read → git show → error on both?)
 - Missing: Warning format for read-only directories
 
 **Issue #21 (Question Resolution):**
+
 - Missing: Criteria for "evidence resolves question" (is inference enough?)
 - Missing: Format of resolution ceremony output
 
 **Issue #24 (Flow Count Phrasing):**
+
 - Missing: Specification of "when to use each variant" (conditions for flow-4-review vs flow-4-gate?)
 
 ---
@@ -745,17 +818,17 @@ This issue tracked the `local-alignment-audit-aba1c6` run. All referenced findin
 
 **Implementation Reference Map:**
 
-| Path | Pattern | Evidence |
-|------|---------|----------|
-| `.claude/commands/flow-*.md` | 10 flow command files | Examples of valid/invalid phrasing (flow-4-review, flow-4-gate variants documented) |
-| `.claude/agents/*.md` | Agent specs with Skills sections | 10 of 14 have Skills sections; audit shows which lack them |
-| `tools/demoswarm-pack-check/src/checks/` | Rule implementations | `drift.rs` shows pattern checking; can reference for #12, #19 implementation |
-| `tools/demoswarm-runs-tools/src/commands/secrets.rs` | Current path handling | Target for #9 (path traversal fix) |
-| `docs/reference/stable-markers.md` | Canonical marker definitions | OpenQ prefix specification (PLN vs PLAN) for #14 |
-| `docs/reference/pack-check.md` | Pack-check rule documentation | Reference format for updating in #12, #13, #14, #16, #19 |
-| `.github/workflows/pack.yml` | Current CI configuration | Target for #25 (cargo-audit job) and #26 (rust caching) |
-| `CLAUDE.md` | Authoritative pack spec | L13 "The Seven Flows" for #19 validation |
-| `.runs/local-alignment-audit-aba1c6/` | Prior wisdom artifacts | Evidence for all issues #9-#26 |
+| Path                                                 | Pattern                          | Evidence                                                                            |
+| ---------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| `.claude/commands/flow-*.md`                         | 10 flow command files            | Examples of valid/invalid phrasing (flow-4-review, flow-4-gate variants documented) |
+| `.claude/agents/*.md`                                | Agent specs with Skills sections | 10 of 14 have Skills sections; audit shows which lack them                          |
+| `tools/demoswarm-pack-check/src/checks/`             | Rule implementations             | `drift.rs` shows pattern checking; can reference for #12, #19 implementation        |
+| `tools/demoswarm-runs-tools/src/commands/secrets.rs` | Current path handling            | Target for #9 (path traversal fix)                                                  |
+| `docs/reference/stable-markers.md`                   | Canonical marker definitions     | OpenQ prefix specification (PLN vs PLAN) for #14                                    |
+| `docs/reference/pack-check.md`                       | Pack-check rule documentation    | Reference format for updating in #12, #13, #14, #16, #19                            |
+| `.github/workflows/pack.yml`                         | Current CI configuration         | Target for #25 (cargo-audit job) and #26 (rust caching)                             |
+| `CLAUDE.md`                                          | Authoritative pack spec          | L13 "The Seven Flows" for #19 validation                                            |
+| `.runs/local-alignment-audit-aba1c6/`                | Prior wisdom artifacts           | Evidence for all issues #9-#26                                                      |
 
 ---
 
@@ -819,27 +892,27 @@ If you are starting **pack maintenance** or **roadmap planning** work:
 
 ## Assumptions Made to Proceed
 
-| Assumption | Basis | Impact if Wrong |
-|-----------|-------|-----------------|
-| Issues #9-#26 are current roadmap | All created 2025-12-31, all labeled "roadmap" | If roadmap is external, these issues may be planned but not authoritative |
-| Milestones are enforced sequencing | 3 milestones (v1.1.0, v1.2.0, v1.3.0) are defined, no due dates | If milestones are cosmetic, work can be parallelized differently |
-| Branch protection is currently disabled | Issue #10 states "Branch not protected", ORG_CONSTRAINT documented | If already enabled, #10 is complete and #22 is immediately useful |
-| Cargo-audit CVSS 4.0 is not yet supported | Issue #11 states "parser limitation in cargo-audit 0.21.2" | If newer version available, #11 is quicker than assumed |
-| All issues have accurate acceptance criteria | Issues were created with detailed bodies | If criteria are incomplete, work scope may be larger |
-| GitHub CLI tool availability will persist | Currently authenticated and working | If gh becomes unavailable, monitoring/automation may need fallbacks |
+| Assumption                                   | Basis                                                              | Impact if Wrong                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| Issues #9-#26 are current roadmap            | All created 2025-12-31, all labeled "roadmap"                      | If roadmap is external, these issues may be planned but not authoritative |
+| Milestones are enforced sequencing           | 3 milestones (v1.1.0, v1.2.0, v1.3.0) are defined, no due dates    | If milestones are cosmetic, work can be parallelized differently          |
+| Branch protection is currently disabled      | Issue #10 states "Branch not protected", ORG_CONSTRAINT documented | If already enabled, #10 is complete and #22 is immediately useful         |
+| Cargo-audit CVSS 4.0 is not yet supported    | Issue #11 states "parser limitation in cargo-audit 0.21.2"         | If newer version available, #11 is quicker than assumed                   |
+| All issues have accurate acceptance criteria | Issues were created with detailed bodies                           | If criteria are incomplete, work scope may be larger                      |
+| GitHub CLI tool availability will persist    | Currently authenticated and working                                | If gh becomes unavailable, monitoring/automation may need fallbacks       |
 
 ---
 
 ## Questions / Clarifications Needed
 
-| Question | Impact | Suggested Resolution |
-|----------|--------|----------------------|
-| Should #10 (branch protection) be completed before other v1.1.0 work? | Blocks meaningful deploy verdicts | Recommend: yes, do first (0.5 hours) |
-| Is v1.1.0 complete before starting v1.2.0? | Sequencing constraint | Define: "v1.1.0 complete" = all 4 issues closed |
-| Should #16 (--strict flag) be one issue or broken into sub-ACs? | Scope clarity | Current scope is appropriate (3-4 hours) |
-| Are there any intentionally exempt agents from #13 (Skills section)? | Acceptance criteria clarity | Audit and document explicitly |
-| What is the "evidence threshold" for question resolution (#21)? | Workflow clarity | Define: derivable from repo state or inference allowed? |
-| Should spell-check (#18) integrate with pre-commit or pack-check? | Implementation clarity | Recommend: pack-check (aligned with other rules) |
+| Question                                                              | Impact                            | Suggested Resolution                                    |
+| --------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------- |
+| Should #10 (branch protection) be completed before other v1.1.0 work? | Blocks meaningful deploy verdicts | Recommend: yes, do first (0.5 hours)                    |
+| Is v1.1.0 complete before starting v1.2.0?                            | Sequencing constraint             | Define: "v1.1.0 complete" = all 4 issues closed         |
+| Should #16 (--strict flag) be one issue or broken into sub-ACs?       | Scope clarity                     | Current scope is appropriate (3-4 hours)                |
+| Are there any intentionally exempt agents from #13 (Skills section)?  | Acceptance criteria clarity       | Audit and document explicitly                           |
+| What is the "evidence threshold" for question resolution (#21)?       | Workflow clarity                  | Define: derivable from repo state or inference allowed? |
+| Should spell-check (#18) integrate with pre-commit or pack-check?     | Implementation clarity            | Recommend: pack-check (aligned with other rules)        |
 
 ---
 
@@ -1005,22 +1078,24 @@ v1.3.0 (Developer Experience)
 ### Parallelization Opportunities
 
 **v1.1.0 (can run in parallel):**
+
 - Start #10 immediately (org setting, 0.5h)
 - Parallel: #9 (2-3h), #11 (2-3h)
 - Sequential: #25 after #11 (1h)
 - **Minimum elapsed time:** 3-4 hours (not 5-7 if serialized)
 
 **v1.2.0 (requires #16 first, then parallel):**
+
 - Start #16 immediately (3-4h)
 - After #16, parallel: #12 (2-3h), #13 (1-2h), #14 (1-2h), #19 (1-2h)
 - Parallel throughout: #15 (2-3h)
 - **Minimum elapsed time:** ~3-4h + ~3h = 6-8 hours (not 8-14 if serialized)
 
 **v1.3.0 (mostly independent):**
+
 - Start immediately: #17 (1-2h), #24 (1h), #26 (1h), #20 (2-3h), #21 (2-3h), #23 (1-2h)
 - Parallel: #18 (2-3h)
 - Dependent on #10: #22 (1h after #10 complete)
 - **Minimum elapsed time:** ~2-3h (quick wins first) + ~2-3h (longer work) = 4-6 hours (not 16-19 if serialized)
 
 ---
-

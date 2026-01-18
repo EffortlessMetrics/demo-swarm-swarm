@@ -18,10 +18,10 @@ Agents read from `.runs/` to understand what happened. They write to `.runs/` to
 
 Claude sessions end. Context windows fill up. Conversations reset. These are not edge cases — they are the normal operating condition.
 
-| If state lives in chat | If state lives on disk |
-|------------------------|------------------------|
-| Session timeout = work lost | Session timeout = resume from disk |
-| Context overflow = work lost | Context overflow = compress and continue |
+| If state lives in chat         | If state lives on disk                    |
+| ------------------------------ | ----------------------------------------- |
+| Session timeout = work lost    | Session timeout = resume from disk        |
+| Context overflow = work lost   | Context overflow = compress and continue  |
 | User closes window = work lost | User returns tomorrow = artifacts waiting |
 
 ### Context Windows Have Limits
@@ -33,6 +33,7 @@ The solution is not "fit it all in context" — it is "write the important parts
 ### Every Call Is a Resume
 
 When you invoke `/flow-3-build`, the orchestrator does not remember `/flow-2-plan`. It reads artifacts from disk. This enables:
+
 - No telephone game (context drift through paraphrasing)
 - No compound token tax (reading artifacts is cheaper than carrying context)
 - No hidden state (everything is inspectable)
@@ -50,6 +51,7 @@ Agent starts → Reads .runs/<run-id>/ → Sees what exists → Decides what to 
 ```
 
 The agent does not ask "what's my assignment?" It looks at the artifacts:
+
 - Does `ac_status.json` exist? What does it say?
 - Does `requirements.md` exist? What constraints does it define?
 - Does `build_receipt.json` exist? (Flow complete or not?)
@@ -58,13 +60,13 @@ The agent does not ask "what's my assignment?" It looks at the artifacts:
 
 Every agent writes its work to known locations:
 
-| Agent | Writes |
-|-------|--------|
+| Agent               | Writes                                                |
+| ------------------- | ----------------------------------------------------- |
 | requirements-author | `signal/requirements.md`, `signal/features/*.feature` |
-| adr-author | `plan/adr.md` |
-| code-implementer | Source files, `build/impl_changes_summary.md` |
-| code-critic | `build/code_critique.md` |
-| *-cleanup | `*_receipt.json` |
+| adr-author          | `plan/adr.md`                                         |
+| code-implementer    | Source files, `build/impl_changes_summary.md`         |
+| code-critic         | `build/code_critique.md`                              |
+| \*-cleanup          | `*_receipt.json`                                      |
 
 Artifacts persist. Chat history does not.
 
@@ -130,6 +132,7 @@ If a flow crashes mid-execution: some artifacts exist, some are missing. Next ru
 ### Auditability
 
 Every decision is on disk. You can:
+
 - **Review it** — open the file
 - **Audit it** — git blame, git log
 - **Reproduce it** — rerun from the same inputs

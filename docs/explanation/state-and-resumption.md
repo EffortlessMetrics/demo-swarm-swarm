@@ -11,6 +11,7 @@ All state is persisted to disk in `.runs/`. There's no in-memory state that woul
 ### Interruption Is Normal
 
 Long-running operations get interrupted:
+
 - Context limits hit
 - User stops and restarts
 - Errors occur mid-flow
@@ -21,6 +22,7 @@ If state is in memory, interruption means starting over. If state is on disk, yo
 ### No "Mode" Flags
 
 Agents don't check "am I in build mode?" They check disk:
+
 - "Does build_receipt.json exist?"
 - "What ACs are marked complete in ac_status.json?"
 - "What artifacts have been produced?"
@@ -30,6 +32,7 @@ State IS the disk contents.
 ### Collaboration Across Sessions
 
 Multiple sessions can work on the same run:
+
 - Session 1 completes Signal
 - Session 2 picks up and runs Plan
 - Session 3 finishes Build
@@ -63,6 +66,7 @@ They collaborate through shared disk state.
 ### Run Identity
 
 `run_meta.json` tracks identity:
+
 ```json
 {
   "run_id": "feat-auth-abc123",
@@ -77,6 +81,7 @@ They collaborate through shared disk state.
 ### Index Registry
 
 `index.json` tracks all runs:
+
 ```json
 {
   "runs": [
@@ -95,6 +100,7 @@ They collaborate through shared disk state.
 ### Every Call Checks Disk
 
 When an agent starts:
+
 1. Check what artifacts exist
 2. Determine what's been done
 3. Pick up where things left off
@@ -132,6 +138,7 @@ Acts: Completes whatever is unfinished
 ### What Receipts Capture
 
 Receipts summarize flow completion:
+
 - What ran
 - What was found
 - Counts and metrics
@@ -150,6 +157,7 @@ No receipt = flow incomplete or never started.
 ### Partial Receipts
 
 If a flow is interrupted mid-receipt-write:
+
 - Next run detects incomplete receipt
 - Cleanup agent re-runs to complete it
 - Artifacts are re-examined
@@ -159,6 +167,7 @@ If a flow is interrupted mid-receipt-write:
 ### The Problem
 
 A run might be known by many names:
+
 - Issue #456
 - Branch `feat/auth`
 - Run ID `feat-auth-abc123`
@@ -179,6 +188,7 @@ A run might be known by many names:
 ### Run Directories Never Rename
 
 If identity changes (issue linked to PR), we update:
+
 - `canonical_key` in run_meta.json
 - `aliases[]` in run_meta.json
 
@@ -189,6 +199,7 @@ We do NOT rename the run directory.
 ### Agent Failure Mid-Flow
 
 Agent crashes after writing some files:
+
 1. Next invocation checks disk
 2. Sees partial state
 3. Completes remaining work
@@ -197,6 +208,7 @@ Agent crashes after writing some files:
 ### Disk Corruption
 
 Some file is corrupted:
+
 1. Agent detects unreadable file
 2. Reports CANNOT_PROCEED
 3. Lists missing_required
@@ -206,6 +218,7 @@ Some file is corrupted:
 ### Lost Artifacts
 
 Required upstream artifact missing:
+
 1. Agent checks for artifact
 2. Notes absence in handoff
 3. Proceeds with assumption OR
@@ -215,17 +228,18 @@ Required upstream artifact missing:
 
 ### Who Writes What
 
-| State | Owner |
-|-------|-------|
-| run_meta.json | run-prep, signal-run-prep |
-| index.json | cleanup agents |
-| *_receipt.json | cleanup agents |
-| ac_status.json | build-cleanup |
-| Artifacts | Worker agents |
+| State            | Owner                     |
+| ---------------- | ------------------------- |
+| run_meta.json    | run-prep, signal-run-prep |
+| index.json       | cleanup agents            |
+| \*\_receipt.json | cleanup agents            |
+| ac_status.json   | build-cleanup             |
+| Artifacts        | Worker agents             |
 
 ### Exclusive Ownership
 
 Each file has one writer:
+
 - Cleanup agents own receipts
 - Worker agents own artifacts
 - Prep agents own run metadata
@@ -237,8 +251,10 @@ No conflicts. Clear ownership.
 ### For Agent Prompts
 
 Tell agents to check disk first:
+
 ```markdown
 ## On Start
+
 Check if your artifacts already exist.
 If partially complete, resume from where you left off.
 ```
@@ -246,8 +262,10 @@ If partially complete, resume from where you left off.
 ### For Flow Commands
 
 Tell orchestrators state is on disk:
+
 ```markdown
 ## On Rerun
+
 Read flow_plan.md for navigation state.
 Check receipts to see what's complete.
 Route based on current disk state.
@@ -256,6 +274,7 @@ Route based on current disk state.
 ### For Debugging
 
 State is inspectable:
+
 ```bash
 cat .runs/feat-auth/build/build_receipt.json
 ls .runs/feat-auth/build/

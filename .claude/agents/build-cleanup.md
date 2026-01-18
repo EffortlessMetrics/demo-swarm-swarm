@@ -21,11 +21,11 @@ Compress the Build flow into a meaningful summary. You're the forensic auditor -
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/build/` | The build flow artifact directory |
-| Write access | `.runs/<run-id>/build/build_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                      | What It Contains                    |
+| ------------- | ----------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/build/`                   | The build flow artifact directory   |
+| Write access  | `.runs/<run-id>/build/build_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                        | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -34,35 +34,41 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `impl_changes_summary.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `impl_changes_summary.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Implementation Summary (`impl_changes_summary.md`)**
+
 - What code was written or changed?
 - Which requirements were implemented?
 - Were there any issues or assumptions?
 
 **Test Summary (`test_changes_summary.md`)**
+
 - What tests were written?
 - Do they cover the implementation?
 
 **Test Execution (`test_execution.md`)**
+
 - Did tests actually run? What were the results?
 - How many passed/failed/skipped?
 - Any flaky tests or concerning patterns?
 
 **Self Review (`self_review.md`)**
+
 - Did the self-reviewer find issues?
 - Were there quality concerns?
 
 **Critiques (`code_critique.md`, `test_critique.md`)**
+
 - What did critics find?
 - Were there critical issues that need fixing?
 
 **AC Status (`ac_status.json`)**
+
 - Which acceptance criteria were completed?
 - Are any still pending?
 
@@ -80,12 +86,14 @@ On mismatch: Add to blockers, set status UNVERIFIED. Don't silently override.
 Write `.runs/<run-id>/build/build_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What was built? Does it match the plan?
 - Did tests run and pass?
 - Did critics approve the implementation?
 - Is this ready for Gate, or does it need more work?
 
 **Status determination:**
+
 - `VERIFIED`: Implementation exists AND tests ran and passed AND critics approved
 - `UNVERIFIED`: Missing artifacts OR tests failed OR critics found critical issues OR forensic mismatch
 - `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
@@ -161,6 +169,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/build/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - What was implemented and why it matters
 - Test results and what they tell us
 - What critics found (or that they passed)
@@ -186,12 +195,15 @@ If critics are missing, note that code wasn't reviewed. Status is UNVERIFIED.
 After writing the receipt and reports, report back with a natural language summary.
 
 **Example (ready for Gate):**
+
 > Build summary complete. 8 files changed implementing REQ-001 through REQ-003. Tests: 25 passed, 0 failed. All 5 ACs completed. Code and test critics both passed. Route to **secrets-sanitizer** before Gate.
 
 **Example (forensic mismatch):**
+
 > Found forensic mismatch: ac_status.json claims AC-003 passed but test_execution.md shows 3 failures. Route to **code-implementer** to fix AC-003 implementation.
 
 **Example (missing artifacts):**
+
 > test_execution.md is missing -- tests were not run. Route to **test-executor** to run tests before sealing the receipt.
 
 ## Handoff Targets (reference)

@@ -21,9 +21,9 @@ You are the PM orchestrating Flow 2 of the SDLC swarm. Your team of specialist a
 
 #### Artifact visibility rule
 
-* Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
-* Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
+- Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
+- If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
+- Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
 
 ## Your Goals
 
@@ -88,6 +88,7 @@ If you intentionally proceed while a critic still has an open worklist (e.g., yo
 ### On Rerun
 
 If running `/flow-2-plan` on an existing run-id:
+
 - Read `.runs/<run-id>/plan/flow_plan.md`
 - Create TodoWrite from the checklist
 - Pre-mark items done if artifacts exist and look current
@@ -100,9 +101,11 @@ If you encounter ambiguity or missing information, **document it and continue**.
 Flow 2 uses infrastructure + domain agents + cross-cutting agents:
 
 ### Infrastructure (Step 0)
+
 - run-prep (establish run directory)
 
 ### Domain agents (in order)
+
 - impact-analyzer
 - design-optioneer
 - option-critic
@@ -116,6 +119,7 @@ Flow 2 uses infrastructure + domain agents + cross-cutting agents:
 - design-critic
 
 ### Cross-cutting agents
+
 - clarifier (Plan-local open questions)
 - intent-auditor (audit ADR/BDD/REQ coherence; optional, when coherence issues suspected)
 - risk-analyst (if risk patterns identified)
@@ -129,6 +133,7 @@ Flow 2 uses infrastructure + domain agents + cross-cutting agents:
 ## Upstream Inputs
 
 Read from `.runs/<run-id>/signal/` (if available):
+
 - `problem_statement.md`
 - `requirements.md`
 - `requirements_critique.md`
@@ -152,6 +157,7 @@ Read from `.runs/<run-id>/signal/` (if available):
 **Call `run-prep` first.**
 
 This agent will:
+
 - Derive or confirm the `<run-id>` from context, branch name, or user input
 - Create `.runs/<run-id>/plan/` directory structure
 - Update `.runs/<run-id>/run_meta.json` with "plan" in `flows_started`
@@ -211,16 +217,20 @@ Create or update `.runs/<run-id>/plan/flow_plan.md`:
 Call `clarifier` to create the Plan-local questions register. Signal's `open_questions.md` is upstream input; Plan gets its own register for design-phase questions.
 
 ### Step 3: Map impact
+
 - Use `impact-analyzer` to map impact and blast radius.
 
 ### Step 4: Propose design options
+
 - Use `design-optioneer` to propose design options.
 
 ### Step 4b: Critique design options (microloop; recommended)
+
 - Use `option-critic` to critique `design_options.md` and write `option_critique.md`.
 
 **Route on the critic's handoff:**
 Read the critic's report. They will tell you what they found and what they recommend:
+
 - If the critic recommends "proceed" or says options are ready → move forward
 - If the critic recommends fixes → run the optioneer with their feedback, then ask the critic again
 - If the critic reports a mechanical failure → stop and address the environment issue
@@ -228,9 +238,11 @@ Read the critic's report. They will tell you what they found and what they recom
 When you defer issues the critic raised, record why in the Decision Log.
 
 ### Step 5: Write ADR
+
 - Use `adr-author` to write the ADR.
 
 ### Step 6: Define contracts and schema (FIRST - others depend on this)
+
 - Use `interface-designer` for contracts/schema/migrations (planned migrations live under the run directory; actual migrations move during Build).
 - **This must complete before Steps 8-9** because:
   - `test-strategist` reads `schema.md` to plan test data/fixture updates
@@ -238,10 +250,12 @@ When you defer issues the critic raised, record why in the Decision Log.
   - `work-planner` reads `migrations/` to schedule infrastructure subtasks (ST-000)
 
 ### Step 6b: Validate contracts (microloop; recommended)
+
 - Use `contract-critic` to validate `api_contracts.yaml` + `schema.md` and write `contract_critique.md`.
 
 **Route on the critic's handoff:**
 Read the critic's report. They will tell you what they found and what they recommend:
+
 - If the critic recommends "proceed" or says contracts are ready → move forward
 - If the critic recommends fixes → run the designer with their feedback, then ask the critic again
 - If the critic reports a mechanical failure → stop and address the environment issue
@@ -249,13 +263,16 @@ Read the critic's report. They will tell you what they found and what they recom
 When the critic recommends changes, that becomes your active worklist for this lane. Resolve it or defer it (with a Decision Log entry explaining why).
 
 ### Step 7: Plan observability (parallel)
+
 - Use `observability-designer` to define observability.
 
 ### Step 7b: Validate observability (microloop; recommended)
+
 - Use `observability-critic` to validate `observability_spec.md` and write `observability_critique.md`.
 
 **Route on the critic's handoff:**
 Read the critic's report. They will tell you what they found and what they recommend:
+
 - If the critic recommends "proceed" or says observability spec is ready → move forward
 - If the critic recommends fixes → run the designer with their feedback, then ask the critic again
 - If the critic reports a mechanical failure → stop and address the environment issue
@@ -263,21 +280,26 @@ Read the critic's report. They will tell you what they found and what they recom
 When the critic recommends changes, that becomes your active worklist for this lane. Resolve it or defer it (with a Decision Log entry explaining why).
 
 ### Step 8: Plan testing (after interface-designer)
+
 - Use `test-strategist` to write the test plan (incorporate Signal BDD + verification notes).
 - **Requires:** `schema.md` (for fixture planning) and `api_contracts.yaml` (for contract-to-AC binding)
 
 ### Step 9: Plan work (after interface-designer)
+
 - Use `work-planner` — "produce subtask index + work plan".
 - **Requires:** `migrations/` (to sequence infrastructure subtasks as ST-000 prerequisites)
 
 ### Step 10: Validate design (microloop)
+
 - Use `design-critic` to validate the design.
 
 **Conflict handling (default):**
+
 - If a targeted critic still recommends fixes or changes, keep that lane's worklist open until resolved or explicitly deferred (Decision Log entry in `flow_plan.md`). You can still run `design-critic` for an integration read.
 
 **Route on the design-critic's handoff:**
 Read the critic's integrative report. This is the final quality check before policy. Trust their assessment:
+
 - If the critic recommends "proceed" → move to policy check
 - If the critic recommends improvements and believes another iteration will help → address the specific areas they name
 - If the critic says "no further improvement possible" → proceed with documented issues
@@ -287,12 +309,15 @@ Your agents produce reports and recommendations. You decide what happens next ba
 **Reseal-if-modified:** If the design-critic's feedback loop causes artifact modifications (interface-designer rerun, adr-author amendment, etc.), you must call `plan-cleanup` again to regenerate `plan_receipt.json` before the final seal. The receipt must reflect the final state of artifacts, not an intermediate state.
 
 ### Step 11: Check policy compliance
+
 - Use `policy-analyst` for policy compliance.
 
 ### Step 12: Finalize Plan (receipt + index)
+
 - Use `plan-cleanup` to seal the receipt, verify artifacts, and update index counts mechanically.
 
 ### Step 13: Sanitize secrets (publish gate)
+
 - Use `secrets-sanitizer` (publish gate).
 
 **Secrets-sanitizer reports status in its handoff.** Example:
@@ -300,6 +325,7 @@ Your agents produce reports and recommendations. You decide what happens next ba
 > Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
 For audit purposes, it also writes `secrets_status.json` with fields:
+
 - `status`: CLEAN, FIXED, or BLOCKED (descriptive — never infer permissions from it)
 - `safe_to_commit` / `safe_to_publish`: authoritative permissions
 - `modified_files`: whether artifact files were changed
@@ -309,6 +335,7 @@ For audit purposes, it also writes `secrets_status.json` with fields:
 The handoff is the routing signal. `secrets_status.json` is the durable audit record.
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+
 - The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 13c)
 - If `safe_to_commit: false`:
@@ -322,6 +349,7 @@ The handoff is the routing signal. `secrets_status.json` is the durable audit re
 Checkpoint the audit trail **before** any GitHub operations.
 
 **Call `repo-operator`** in checkpoint mode. The agent handles:
+
 1. Resets staging and stages allowlist only
 2. Enforces allowlist/anomaly interlock mechanically
 3. Writes `.runs/<run-id>/plan/git_status.md` if anomaly detected
@@ -329,6 +357,7 @@ Checkpoint the audit trail **before** any GitHub operations.
 5. Returns **Repo Operator Result** (control plane)
 
 **Allowlist for Flow 2:**
+
 - `.runs/<run-id>/plan/`
 - `.runs/<run-id>/run_meta.json`
 - `.runs/index.json`
@@ -337,6 +366,7 @@ Checkpoint the audit trail **before** any GitHub operations.
 
 ```md
 ## Repo Operator Result
+
 operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
@@ -348,11 +378,13 @@ anomaly_paths: []
 **Note:** `commit_sha` is always populated (current HEAD on no-op), never null. `publish_surface` must always be present (PUSHED or NOT_PUSHED), even on no-op commits, anomalies, `safe_to_commit: false`, push skipped, or push failure.
 
 **Routing logic (from Repo Operator Result):**
+
 - `status: COMPLETED` + `proceed_to_github_ops: true` → proceed to GitHub ops
 - `status: COMPLETED_WITH_ANOMALY` → allowlist committed, anomaly documented in `git_status.md`; `proceed_to_github_ops: false`
 - `status: FAILED` or `status: CANNOT_PROCEED` → mechanical failure; stop and require human intervention
 
 **Gating interaction with secrets-sanitizer:**
+
 - `repo-operator` reads `safe_to_commit` and `safe_to_publish` from the prior Gate Result
 - If `safe_to_commit: false`: skips commit entirely
 - If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
@@ -364,6 +396,7 @@ anomaly_paths: []
 **Call `gh-issue-manager`** then **`gh-reporter`** to update the issue.
 
 See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+
 - Skip if `github_ops_allowed: false` or `gh` unauthenticated
 - Content mode is derived from secrets gate + push surface (not workspace hygiene)
 - Issue-first: flow summaries go to the issue, never the PR
@@ -371,6 +404,7 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 ### Step 16: Finalize flow_plan.md
 
 Update `flow_plan.md`:
+
 - Mark all steps as complete
 - Add final summary section:
 
@@ -385,6 +419,7 @@ Update `flow_plan.md`:
 ## Human Review Checklist
 
 Before proceeding to Flow 3, humans should review:
+
 - [ ] `.runs/<run-id>/plan/adr.md` - Is this the right architecture decision?
 - [ ] `.runs/<run-id>/plan/api_contracts.yaml` - Are the contracts correct?
 - [ ] `.runs/<run-id>/plan/work_plan.md` - Is the breakdown reasonable?
@@ -438,33 +473,33 @@ Your agents report what they did and what they recommend. Read their prose and f
 
 All written to `.runs/<run-id>/plan/`:
 
-| Artifact | Source Agent | Description |
-|----------|--------------|-------------|
-| `flow_plan.md` | orchestrator | Execution plan and progress |
-| `open_questions.md` | clarifier | Plan-local questions register |
-| `impact_map.json` | impact-analyzer | Affected services, modules, data |
-| `design_options.md` | design-optioneer | 2-3 architecture options |
-| `option_critique.md` | option-critic | Options critique + worklist |
-| `adr.md` | adr-author | Chosen option with rationale |
-| `api_contracts.yaml` | interface-designer | Endpoints, schemas, errors |
-| `schema.md` | interface-designer | Data models, relationships |
-| `migrations/*.sql` | interface-designer | Draft migrations (if needed) |
-| `contract_critique.md` | contract-critic | Contract validation critique (optional) |
-| `observability_spec.md` | observability-designer | Metrics, logs, traces, SLOs |
-| `observability_critique.md` | observability-critic | Observability validation critique (optional) |
-| `test_plan.md` | test-strategist | BDD to test types mapping |
-| `ac_matrix.md` | test-strategist | AC-driven build contract (Build creates `build/ac_status.json`) |
-| `work_plan.md` | work-planner | Subtasks, ordering, dependencies |
-| `design_validation.md` | design-critic | Feasibility assessment |
-| `policy_analysis.md` | policy-analyst | Policy compliance check |
-| `plan_receipt.json` | plan-cleanup | Receipt for downstream |
-| `cleanup_report.md` | plan-cleanup | Cleanup status and evidence |
-| `secrets_scan.md` | secrets-sanitizer | Secrets scan report |
-| `secrets_status.json` | secrets-sanitizer | Publish gate status |
-| `gh_issue_status.md` | gh-issue-manager | Issue board update status |
-| `gh_report_status.md` | gh-reporter | GitHub posting status |
-| `github_report.md` | gh-reporter | Report content (local copy) |
-| `git_status.md` | repo-operator | Git tree status (if anomaly detected) |
+| Artifact                    | Source Agent           | Description                                                     |
+| --------------------------- | ---------------------- | --------------------------------------------------------------- |
+| `flow_plan.md`              | orchestrator           | Execution plan and progress                                     |
+| `open_questions.md`         | clarifier              | Plan-local questions register                                   |
+| `impact_map.json`           | impact-analyzer        | Affected services, modules, data                                |
+| `design_options.md`         | design-optioneer       | 2-3 architecture options                                        |
+| `option_critique.md`        | option-critic          | Options critique + worklist                                     |
+| `adr.md`                    | adr-author             | Chosen option with rationale                                    |
+| `api_contracts.yaml`        | interface-designer     | Endpoints, schemas, errors                                      |
+| `schema.md`                 | interface-designer     | Data models, relationships                                      |
+| `migrations/*.sql`          | interface-designer     | Draft migrations (if needed)                                    |
+| `contract_critique.md`      | contract-critic        | Contract validation critique (optional)                         |
+| `observability_spec.md`     | observability-designer | Metrics, logs, traces, SLOs                                     |
+| `observability_critique.md` | observability-critic   | Observability validation critique (optional)                    |
+| `test_plan.md`              | test-strategist        | BDD to test types mapping                                       |
+| `ac_matrix.md`              | test-strategist        | AC-driven build contract (Build creates `build/ac_status.json`) |
+| `work_plan.md`              | work-planner           | Subtasks, ordering, dependencies                                |
+| `design_validation.md`      | design-critic          | Feasibility assessment                                          |
+| `policy_analysis.md`        | policy-analyst         | Policy compliance check                                         |
+| `plan_receipt.json`         | plan-cleanup           | Receipt for downstream                                          |
+| `cleanup_report.md`         | plan-cleanup           | Cleanup status and evidence                                     |
+| `secrets_scan.md`           | secrets-sanitizer      | Secrets scan report                                             |
+| `secrets_status.json`       | secrets-sanitizer      | Publish gate status                                             |
+| `gh_issue_status.md`        | gh-issue-manager       | Issue board update status                                       |
+| `gh_report_status.md`       | gh-reporter            | GitHub posting status                                           |
+| `github_report.md`          | gh-reporter            | Report content (local copy)                                     |
+| `git_status.md`             | repo-operator          | Git tree status (if anomaly detected)                           |
 
 ---
 
@@ -510,9 +545,9 @@ All written to `.runs/<run-id>/plan/`:
 
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
-1) **Writer pass:** call the writer agent
-2) **Critique pass:** call the critic agent, read their handoff
-3) **Route on the critic's recommendation:**
+1. **Writer pass:** call the writer agent
+2. **Critique pass:** call the critic agent, read their handoff
+3. **Route on the critic's recommendation:**
    - If the critic says "ready" or "proceed" → move forward
    - If the critic recommends improvements → run the writer with their feedback, then ask the critic again
    - If the critic says "no further improvement possible" → proceed with documented blockers
@@ -520,6 +555,7 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 **Termination:** Trust the critic's judgment. They will tell you when to proceed. If context is exhausted, exit PARTIAL with an honest checkpoint.
 
 ### TodoWrite (copy exactly)
+
 - [ ] run-prep
 - [ ] repo-operator (ensure `run/<run-id>` branch)
 - [ ] clarifier (plan open questions)

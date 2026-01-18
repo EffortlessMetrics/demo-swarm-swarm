@@ -9,6 +9,7 @@ You are guiding the user through customizing the DemoSwarm pack for their specif
 ## Purpose
 
 This command helps newcomers adapt the pack to their codebase by:
+
 1. Detecting existing patterns in the repository
 2. Asking targeted questions about stack and preferences
 3. Updating skill files and agent prompts accordingly
@@ -73,24 +74,29 @@ Use the AskUserQuestion tool to gather this information.
 Based on answers, update the following files:
 
 **`.claude/skills/test-runner/SKILL.md`**:
+
 - Replace the test command with the user's command
 - Update any language-specific patterns
 
 **`.claude/skills/auto-linter/SKILL.md`**:
+
 - Replace format and lint commands
 - Update file patterns if needed
 
 **`.claude/skills/policy-runner/SKILL.md`**:
+
 - Update policy check commands if the user has them
 
 ### Step 4: Update Agent Prompts (If Needed)
 
 If source layout differs from default (`src/`, `tests/`, `features/`), update:
+
 - `code-implementer.md` - Where to write code
 - `test-author.md` - Where to write tests
 - `bdd-author.md` - Where to write features
 
 If Git provider is not GitHub, update:
+
 - `gh-issue-manager.md`
 - `gh-reporter.md`
 - `gh-researcher.md`
@@ -170,10 +176,10 @@ Create `docs/CUSTOMIZATION_RECEIPT.md`:
 
 ## Files Modified
 
-| File | Change |
-|------|--------|
+| File                                  | Change                          |
+| ------------------------------------- | ------------------------------- |
 | `.claude/skills/test-runner/SKILL.md` | Updated test command to `<cmd>` |
-| `.claude/skills/auto-linter/SKILL.md` | Updated lint commands |
+| `.claude/skills/auto-linter/SKILL.md` | Updated lint commands           |
 
 ## Next Steps
 
@@ -185,6 +191,7 @@ Create `docs/CUSTOMIZATION_RECEIPT.md`:
 ## Completion
 
 Report to the user:
+
 1. Summary of changes made
 2. List of modified files
 3. Suggested next step: run a test flow

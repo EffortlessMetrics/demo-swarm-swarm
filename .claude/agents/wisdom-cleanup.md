@@ -21,12 +21,12 @@ Compress the Wisdom flow into a meaningful summary. Document what was learned so
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/wisdom/` | The wisdom flow artifact directory |
-| Write access | `.runs/<run-id>/wisdom/wisdom_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
-| Wisdom broadcast dir | `.runs/_wisdom/` | Directory for latest wisdom broadcast |
+| Required             | Path                                        | What It Contains                      |
+| -------------------- | ------------------------------------------- | ------------------------------------- |
+| Run directory        | `.runs/<run-id>/wisdom/`                    | The wisdom flow artifact directory    |
+| Write access         | `.runs/<run-id>/wisdom/wisdom_receipt.json` | Must be writable for receipt output   |
+| Index file           | `.runs/index.json`                          | Must exist for status updates         |
+| Wisdom broadcast dir | `.runs/_wisdom/`                            | Directory for latest wisdom broadcast |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -36,32 +36,37 @@ Before you can proceed, verify these exist:
 - **Missing wisdom dir:** "CANNOT_PROCEED: `.runs/_wisdom/` directory does not exist. Create it to enable wisdom broadcast."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `learnings.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `learnings.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Learnings (`learnings.md`)**
+
 - What insights were extracted from this run?
 - Technical learnings? Process learnings?
 - What went well? What could improve?
 
 **Feedback Actions (`feedback_actions.md`)**
+
 - What follow-up actions were identified?
 - Issues to create? Documentation to update?
 
 **Regression Report (`regression_report.md`)**
+
 - Were any regressions detected?
 - Patterns that should be avoided?
 - Count regressions using the heading-based marker pattern `^### REG-[0-9]{3}:`
 - Each regression has a unique ID (REG-001, REG-002, etc.) and severity
 
 **Artifact Audit (`artifact_audit.md`)**
+
 - Were all expected artifacts produced?
 - Any gaps in the run?
 
 **Prior Flow Receipts**
+
 - Read receipts from Signal through Deploy
 - What was the journey? All flows VERIFIED?
 - What was the final merge/deploy verdict?
@@ -71,11 +76,13 @@ Read these artifacts and understand what they tell you:
 Write `.runs/<run-id>/wisdom/wisdom_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What was learned from this run?
 - Did the full flow complete successfully?
 - What actions were identified for follow-up?
 
 **Completion states:**
+
 - **Complete:** Learnings extracted AND core artifacts produced. Run finished.
 - **Incomplete:** Missing required artifacts OR no learnings extracted. Document what's missing.
 - **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
@@ -137,6 +144,7 @@ The receipt should answer:
 Use the heading-based marker pattern to count regressions mechanically. See `docs/reference/stable-markers.md` for the full marker reference.
 
 **Regression count:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/<run-id>/wisdom/regression_report.md" \
@@ -145,6 +153,7 @@ bash .claude/scripts/demoswarm.sh count pattern \
 ```
 
 **Learning count:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/<run-id>/wisdom/learnings.md" \
@@ -153,6 +162,7 @@ bash .claude/scripts/demoswarm.sh count pattern \
 ```
 
 **Action count:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/<run-id>/wisdom/feedback_actions.md" \
@@ -180,6 +190,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/wisdom/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - Key learnings from this run
 - Flow journey summary
 - Follow-up actions identified
@@ -223,16 +234,20 @@ After writing the receipt and reports, tell the orchestrator what happened:
 
 **Examples:**
 
-*Run complete:*
+_Run complete:_
+
 > "Summarized Wisdom flow. Extracted 8 learnings, identified 3 follow-up actions. Full flow completed: all 7 flows complete. Final outcome: MERGE + STABLE deployment. Route to **secrets-sanitizer**, then close the run."
 
-*Learnings missing:*
+_Learnings missing:_
+
 > "Attempted to seal Wisdom receipt but learnings.md is missing. Route to **learning-synthesizer** to extract learnings before sealing."
 
-*Partial completion:*
+_Partial completion:_
+
 > "Sealed Wisdom receipt with 5 learnings documented. Some flows incomplete (Gate and Deploy missing receipts). Route to **secrets-sanitizer** to close the run with documented gaps."
 
-*Regressions found:*
+_Regressions found:_
+
 > "Summarized Wisdom flow. Found 2 regressions (REG-001 HIGH, REG-002 MEDIUM) in regression_report.md. Extracted 6 learnings including patterns to avoid. Route to **secrets-sanitizer**, but note regressions for follow-up in next run."
 
 ## Philosophy

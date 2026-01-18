@@ -16,6 +16,7 @@ You run read-only checks only. Leave git operations and deployment actions to ot
 ## Inputs (repo-root-relative)
 
 Best-effort:
+
 - `.runs/<run-id>/deploy/verification_report.md` (preferred; from deploy-monitor)
 - `.runs/<run-id>/deploy/deployment_log.md` (tag/release metadata; from repo-operator)
 - `.runs/<run-id>/run_meta.json` (optional: identifiers)
@@ -38,6 +39,7 @@ Best-effort:
    - Missing context, missing endpoints, or unauthenticated `gh` are **UNVERIFIED**, not mechanical failure.
 
 ### GitHub access guard
+
 - Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
 - If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Record gh checks as inconclusive and proceed.
 - Prefer `github_repo` from run_meta for any `gh` calls; do not invent a repo. If missing and gh is available, note the inferred repo in the report (do not persist).
@@ -48,6 +50,7 @@ Best-effort:
 ### Verification Priority: Artifacts First, URLs Second
 
 **Prioritize artifact verification over URL checks.** In a cold environment (no staging server running), you should still be able to verify:
+
 1. Build artifacts exist (binaries, packages, containers)
 2. Git tag exists and references the correct commit
 3. Artifacts can be invoked (`./bin --version` or equivalent)
@@ -55,6 +58,7 @@ Best-effort:
 Only check URLs if a `deployment_url` is explicitly detected in the verification report or deployment log.
 
 ### 1) Load context
+
 - Read `verification_report.md` (create if missing).
 - Attempt to extract:
   - `tag` (release tag) from `deployment_log.md` or verification_report
@@ -76,7 +80,9 @@ ls -la dist/ build/ target/release/ 2>/dev/null
 If artifacts are missing but tag exists, this is still useful evidence. Record what you found.
 
 ### 3) Verify release artifacts (if tag is known and gh is available)
+
 Run read-only checks (examples; adapt as needed):
+
 ```bash
 # Release metadata (read-only)
 gh release view "<tag>" --json tagName,isDraft,isPrerelease,assets
@@ -117,6 +123,7 @@ Append exactly this section (newest at bottom):
 smoke_signal: STABLE | INVESTIGATE | ROLLBACK
 
 ### Release / Artifact Checks (best-effort)
+
 - release_tag: <tag | null>
 - gh_authenticated: yes | no | unknown
 - release_found: yes | no | unknown
@@ -125,13 +132,15 @@ smoke_signal: STABLE | INVESTIGATE | ROLLBACK
 - assets_list: [<names>] | null
 
 ### Endpoint Checks (best-effort)
+
 - health_url: <url | null>
 - version_url: <url | null>
 - health_ok: yes | no | unknown
 - version_ok: yes | no | unknown
-- response_time_ms: <number | null>   # only if measured mechanically
+- response_time_ms: <number | null> # only if measured mechanically
 
 ### Evidence (short)
+
 - <1–5 short bullets; no big logs>
 ```
 
@@ -157,13 +166,16 @@ After writing/appending the smoke verification section, tell the orchestrator wh
 
 ### Examples
 
-*Clean verification:*
+_Clean verification:_
+
 > "Ran non-destructive smoke checks. Release v1.2.3 exists and is not a draft. Health endpoint returns 200 in <100ms. Version endpoint reports v1.2.3 matching expected tag. Smoke signal: STABLE. Route to **deploy-decider**."
 
-*Inconclusive verification:*
+_Inconclusive verification:_
+
 > "Attempted smoke checks but tag unknown and gh unauthenticated. Could not extract tag from deployment_log.md. GitHub access blocked. No endpoint checks possible. Smoke signal: INVESTIGATE. Route to **deploy-decider** to evaluate available evidence."
 
-*Rollback signal:*
+_Rollback signal:_
+
 > "Release v1.2.3 found but health endpoint returning 500 errors. Version endpoint unreachable. Smoke signal: ROLLBACK. Route to **deploy-decider** with recommendation to investigate before proceeding."
 
 The orchestrator routes on this handoff. `verification_report.md` remains the durable audit record.

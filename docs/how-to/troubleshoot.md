@@ -6,14 +6,14 @@
 
 ## Quick Diagnosis Ladder
 
-| Symptom | First Check | Likely Cause |
-|---------|-------------|--------------|
-| Nothing posted to GitHub | `gh auth status` + check gates | Auth missing OR `safe_to_publish: false` OR `proceed_to_github_ops: false` |
-| `CANNOT_PROCEED` | Check tooling (`jq`, `gh`, etc.) | Mechanical failure (IO/perms/missing tool) |
-| Counts are `null` | Check `cleanup_report.md` | Stable markers missing in producer artifact |
-| Microloop won't stop | Check critic's handoff recommendation | Read the prose to understand if iteration should continue |
-| Anomaly detected | Check `anomaly_paths` | Unexpected files outside allowlist |
-| Command not found | Check `.claude/` exists at repo root | Pack not discovered |
+| Symptom                  | First Check                           | Likely Cause                                                               |
+| ------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
+| Nothing posted to GitHub | `gh auth status` + check gates        | Auth missing OR `safe_to_publish: false` OR `proceed_to_github_ops: false` |
+| `CANNOT_PROCEED`         | Check tooling (`jq`, `gh`, etc.)      | Mechanical failure (IO/perms/missing tool)                                 |
+| Counts are `null`        | Check `cleanup_report.md`             | Stable markers missing in producer artifact                                |
+| Microloop won't stop     | Check critic's handoff recommendation | Read the prose to understand if iteration should continue                  |
+| Anomaly detected         | Check `anomaly_paths`                 | Unexpected files outside allowlist                                         |
+| Command not found        | Check `.claude/` exists at repo root  | Pack not discovered                                                        |
 
 **Always start with:**
 
@@ -42,6 +42,7 @@ Look in `.runs/<run-id>/<flow>/secrets_status.json`:
 ```
 
 If `safe_to_publish: false`:
+
 - Secrets were detected
 - Check `secrets_scan.md` for what was flagged
 - Fix the source, don't just redact
@@ -56,6 +57,7 @@ proceed_to_github_ops: true
 ```
 
 If `proceed_to_github_ops: false`:
+
 - Anomaly detected (dirty tree outside allowlist)
 - Check `anomaly_paths` field
 - Review `git_status.md` for details
@@ -69,8 +71,9 @@ gh auth status
 If not authenticated, GH agents (`gh-issue-manager`, `gh-reporter`) skip gracefully.
 
 **Important:** This is separate from the two gates above:
-- **Gates** determine whether GH ops *should* run (control plane)
-- **Auth** determines whether GH ops *can* run (availability)
+
+- **Gates** determine whether GH ops _should_ run (control plane)
+- **Auth** determines whether GH ops _can_ run (availability)
 
 Both gates can pass but GH ops still skip if `gh` isn't authenticated. The flow completes UNVERIFIED (external observability unavailable).
 
@@ -83,6 +86,7 @@ Both gates can pass but GH ops still skip if `gh` isn't authenticated. The flow 
 **Diagnosis:** This is often expected, not a failure.
 
 Counts are null when:
+
 - Upstream artifacts don't exist (out-of-order start)
 - Stable markers aren't present in artifacts
 - Artifacts are ambiguous (cleanup couldn't derive mechanically)
@@ -98,16 +102,19 @@ Counts are null when:
 **Diagnosis:** Reseal is stuck.
 
 **Normal behavior:**
+
 ```
 cleanup → sanitizer → modified_files: true → cleanup → sanitizer → modified_files: false → done
 ```
 
 **Stuck behavior:**
+
 ```
 cleanup → sanitizer → modified_files: true → cleanup → sanitizer → modified_files: true → ...
 ```
 
 **Fix:**
+
 1. Check what's being modified (look at `secrets_scan.md`)
 2. If legitimate (e.g., sensitive patterns in generated content), use safe-bail:
    - `repo-operator checkpoint_mode: local_only`
@@ -123,6 +130,7 @@ cleanup → sanitizer → modified_files: true → cleanup → sanitizer → mod
 **Diagnosis:** Read the critic's prose handoff to understand the recommendation.
 
 The orchestrator routes on the critic's handoff:
+
 - If the critic reports mechanical failure → stop (FIX_ENV)
 - If the critic recommends going back to an earlier flow → follow that recommendation
 - If the critic recommends another iteration → rerun the author/implementer
@@ -140,11 +148,13 @@ If a critic keeps recommending reruns but the issues are unfixable locally, the 
 **Diagnosis:** Unexpected paths exist outside the allowlist.
 
 **What happens:**
+
 - Allowlist is committed (audit trail preserved)
 - `proceed_to_github_ops: false`
 - Flow completes UNVERIFIED
 
 **Fix:**
+
 1. Check `anomaly_paths` in Repo Operator Result
 2. Review `git_status.md` for details
 3. Decide:
@@ -161,11 +171,13 @@ If a critic keeps recommending reruns but the issues are unfixable locally, the 
 **Diagnosis:** Mechanical failure only.
 
 CANNOT_PROCEED means:
+
 - IO error (can't read/write files)
 - Permission error
 - Tooling failure (e.g., `jq` not installed)
 
 It does **not** mean:
+
 - Quality issues (that's UNVERIFIED)
 - Missing artifacts (that's UNVERIFIED with `missing_required`)
 
@@ -180,12 +192,14 @@ It does **not** mean:
 **Diagnosis:** Check alias resolution.
 
 Runs are found via:
+
 1. `.runs/index.json` (`run_id`, `issue_number`, `canonical_key`)
 2. `run_meta.json.aliases[]`
 
 **NOT** by folder name (folders don't rename).
 
 **Fix:**
+
 - Check `.runs/index.json` for the run entry
 - Check `canonical_key` matches expected format (`gh-<issue_number>`)
 - Use explicit run-id if alias resolution fails
@@ -199,6 +213,7 @@ Runs are found via:
 **Diagnosis:** Pack not discovered.
 
 Ensure:
+
 - `.claude/` is at repo root
 - You're in a Claude Code session
 - `.claude/commands/` contains flow files
@@ -212,6 +227,7 @@ Ensure:
 **Diagnosis:** Possible reseal issue or commit timing.
 
 Receipts are sealed **after** reseal converges. If:
+
 - Modified files weren't restaged after sanitization
 - Commit happened before reseal completed
 

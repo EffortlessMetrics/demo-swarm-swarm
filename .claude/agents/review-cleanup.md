@@ -23,11 +23,11 @@ Compress the Review flow into a meaningful summary. You're the forensic auditor 
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/review/` | The review flow artifact directory |
-| Write access | `.runs/<run-id>/review/review_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                        | What It Contains                    |
+| ------------- | ------------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/review/`                    | The review flow artifact directory  |
+| Write access  | `.runs/<run-id>/review/review_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                          | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -36,23 +36,26 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `review_worklist.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `review_worklist.md`) are not CANNOT_PROCEED -- they result in incomplete status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **PR Feedback (`pr_feedback.md`)**
+
 - What feedback was received from reviewers?
 - How many items? What severity?
 - Any critical issues flagged?
 
 **Review Worklist (`review_worklist.md` or `review_worklist.json`)**
+
 - What items are on the worklist?
 - How many are resolved vs pending?
 - Any critical items still open?
 
 **Review Actions (`review_actions.md`)**
+
 - What actions were taken to address feedback?
 - Were changes made? Tests added?
 
@@ -70,12 +73,14 @@ On mismatch: Add to blockers, set status UNVERIFIED.
 Write `.runs/<run-id>/review/review_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What feedback was received?
 - How much was addressed?
 - Are there critical items still pending?
 - Is this ready for Gate, or does more work remain?
 
 **Completion states:**
+
 - **Complete:** All critical/major items resolved, worklist complete. Ready for Gate.
 - **Partial:** Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
 - **Incomplete:** Missing worklist OR critical items pending OR no progress made. Document what's missing.
@@ -135,6 +140,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/review/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - What feedback was received
 - How items were addressed
 - What remains (if anything)
@@ -158,13 +164,16 @@ After writing the receipt and reports, tell the orchestrator what happened:
 
 **Examples:**
 
-*Review complete:*
+_Review complete:_
+
 > "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred. Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5."
 
-*Work remains (partial):*
+_Work remains (partial):_
+
 > "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
 
-*Blocked on environment:*
+_Blocked on environment:_
+
 > "Cannot write review_receipt.json due to permissions. Need environment fix before retrying."
 
 ## Handoff Targets

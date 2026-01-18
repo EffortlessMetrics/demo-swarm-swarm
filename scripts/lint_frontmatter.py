@@ -27,7 +27,8 @@ def extract_frontmatter(path: Path) -> list[str]:
         raise ValueError("missing starting ---")
     try:
         end = next(
-            idx for idx, line in enumerate(lines[1:], start=1)
+            idx
+            for idx, line in enumerate(lines[1:], start=1)
             if line.strip().startswith("---")
         )
     except StopIteration:
@@ -61,7 +62,9 @@ def main() -> int:
             if not has_key(fm, "name"):
                 errors.append(f"{md.relative_to(ROOT)}: missing 'name:' in frontmatter")
             if not has_key(fm, "description"):
-                errors.append(f"{md.relative_to(ROOT)}: missing 'description:' in frontmatter")
+                errors.append(
+                    f"{md.relative_to(ROOT)}: missing 'description:' in frontmatter"
+                )
 
     # Commands: require description
     commands_dir = CLAUDE_DIR / "commands"
@@ -74,7 +77,9 @@ def main() -> int:
                 continue
 
             if not has_key(fm, "description"):
-                errors.append(f"{md.relative_to(ROOT)}: missing 'description:' in frontmatter")
+                errors.append(
+                    f"{md.relative_to(ROOT)}: missing 'description:' in frontmatter"
+                )
 
     # Skills: require name + description in SKILL.md
     skills_dir = CLAUDE_DIR / "skills"
@@ -90,13 +95,19 @@ def main() -> int:
             try:
                 fm = extract_frontmatter(skill_md)
             except ValueError as e:
-                errors.append(f"{skill_md.relative_to(ROOT)}: invalid frontmatter ({e})")
+                errors.append(
+                    f"{skill_md.relative_to(ROOT)}: invalid frontmatter ({e})"
+                )
                 continue
 
             if not has_key(fm, "name"):
-                errors.append(f"{skill_md.relative_to(ROOT)}: missing 'name:' in frontmatter")
+                errors.append(
+                    f"{skill_md.relative_to(ROOT)}: missing 'name:' in frontmatter"
+                )
             if not has_key(fm, "description"):
-                errors.append(f"{skill_md.relative_to(ROOT)}: missing 'description:' in frontmatter")
+                errors.append(
+                    f"{skill_md.relative_to(ROOT)}: missing 'description:' in frontmatter"
+                )
 
     if errors:
         print("Frontmatter lint failed:", file=sys.stderr)

@@ -49,15 +49,15 @@ None. All scenarios have exactly one primary @REQ-### tag at the scenario level.
 
 **Traceability verification:**
 
-| REQ | Scenario Count | Status |
-|-----|----------------|--------|
-| REQ-001 | 5 | Covered |
-| REQ-002 | 5 | Covered |
-| REQ-003 | 4 | Covered |
-| REQ-004 | 3 | Covered |
-| REQ-005 | 5 | Covered |
-| REQ-006 | 5 | Covered |
-| REQ-007 | 5 | Covered |
+| REQ     | Scenario Count | Status  |
+| ------- | -------------- | ------- |
+| REQ-001 | 5              | Covered |
+| REQ-002 | 5              | Covered |
+| REQ-003 | 4              | Covered |
+| REQ-004 | 3              | Covered |
+| REQ-005 | 5              | Covered |
+| REQ-006 | 5              | Covered |
+| REQ-007 | 5              | Covered |
 
 NFRs (NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001) are non-behavioral and appropriately covered in verification_notes.md with concrete verification strategies (grep searches, pack-check execution, manual review).
 
@@ -77,6 +77,7 @@ NFRs (NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001) are non-behavioral and appropriat
 ## Portability Issues
 
 None. All scenarios use domain-level steps appropriate for documentation verification:
+
 - "When the user reads <file>" - domain action
 - "Then documentation references <content>" - domain assertion
 - No HTTP verbs, status codes, URL paths, or interface-coupled patterns detected.
@@ -86,11 +87,13 @@ This is appropriate because the requirement domain is documentation alignment, n
 ## Coverage Gaps
 
 None identified. All functional requirements have:
+
 - Happy path coverage (smoke scenarios)
 - Edge case coverage where applicable (@edge tags)
 - Error case coverage where applicable (@error tags)
 
 Per example_matrix.md:
+
 - REQ-003 has no explicit edge case scenario, but edge cases for "Flow 7 documentation" are legitimately limited since it's a documentation existence requirement.
 - REQ-004 has no error case scenario, which is appropriate since the CLAUDE.md flow table is either correct or incorrect (no error mode distinct from the happy path).
 
@@ -107,6 +110,7 @@ Per example_matrix.md:
 None blocking. The scenarios are automatable with reasonable interpretation.
 
 **Non-blocking observations:**
+
 1. The phrase "is explained" in Then steps (BDD-MIN-001) could benefit from a step-definition convention specifying what text patterns constitute "explanation" (e.g., presence of key terms like "when to use", "entry point", etc.). Suggested default: step definitions check for presence of descriptive text mentioning both variants being compared.
 
 2. The disjunctive "is present or linked" (BDD-MIN-002) could be split for clarity. Suggested default: step definition accepts either condition as pass.

@@ -12,14 +12,14 @@ Agents work freely inside the development sandbox. No permission checks, no appr
 
 ### Risk Lives at Boundaries, Not Inside
 
-| Action | Risk | Why |
-|--------|------|-----|
-| Reading a file | None | Information stays in session |
-| Writing code | None | Not committed yet |
-| Running tests | None | Results are local |
-| **Committing secrets** | **High** | Secrets enter git history forever |
-| **Pushing to remote** | **High** | Changes become visible to the world |
-| **Posting to GitHub** | **High** | Content is permanent, notifications sent |
+| Action                 | Risk     | Why                                      |
+| ---------------------- | -------- | ---------------------------------------- |
+| Reading a file         | None     | Information stays in session             |
+| Writing code           | None     | Not committed yet                        |
+| Running tests          | None     | Results are local                        |
+| **Committing secrets** | **High** | Secrets enter git history forever        |
+| **Pushing to remote**  | **High** | Changes become visible to the world      |
+| **Posting to GitHub**  | **High** | Content is permanent, notifications sent |
 
 The insight: Thinking and working have no side effects. Publishing does. Gate accordingly.
 
@@ -35,20 +35,20 @@ This is exhausting and pointless. Every approval costs human attention for zero 
 
 ### The Economics
 
-| Approach | Human Cost |
-|----------|------------|
+| Approach                                                | Human Cost  |
+| ------------------------------------------------------- | ----------- |
 | Approval-per-action (50 ops x 30s + overhead + waiting) | ~65 minutes |
-| Gate pattern (0 approvals + 3 gates + 1 PR review) | ~5 minutes |
+| Gate pattern (0 approvals + 3 gates + 1 PR review)      | ~5 minutes  |
 
-The gate pattern is 13x more efficient while providing *better* security.
+The gate pattern is 13x more efficient while providing _better_ security.
 
 ## The Three Boundaries
 
-| Boundary | Gate | What It Checks | Why Here |
-|----------|------|----------------|----------|
-| **Commit** | secrets-sanitizer | API keys, tokens, private keys, passwords, credentials | Secrets in git history are permanent; rotation is expensive |
-| **Push** | repo-operator | Expected paths only, no anomalies, no test deletions | Changes become visible to collaborators, CI, the world |
-| **GitHub post** | Content restrictions | No secrets in PR/issue content, safe to publish | Posts trigger notifications, appear in search, cannot be deleted |
+| Boundary        | Gate                 | What It Checks                                         | Why Here                                                         |
+| --------------- | -------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| **Commit**      | secrets-sanitizer    | API keys, tokens, private keys, passwords, credentials | Secrets in git history are permanent; rotation is expensive      |
+| **Push**        | repo-operator        | Expected paths only, no anomalies, no test deletions   | Changes become visible to collaborators, CI, the world           |
+| **GitHub post** | Content restrictions | No secrets in PR/issue content, safe to publish        | Posts trigger notifications, appear in search, cannot be deleted |
 
 ## Correct vs Incorrect Behavior
 
@@ -90,12 +90,14 @@ Every commit gets scanned. Every push gets checked. No exceptions. Gates that ru
 The key insight is that safety and velocity are not in tension when boundaries are properly defined.
 
 **Safety comes from the gates**, not from restricting interior actions:
+
 - Gates are deterministic (same input = same output)
 - Gates are fast (seconds, not minutes)
 - Gates provide actionable feedback when they fail
 - Gates catch real problems at the moment they matter
 
 **Velocity comes from freedom inside**, not from approvals:
+
 - Try approaches without permission
 - Run tests immediately
 - Fix issues as discovered
@@ -105,11 +107,11 @@ A feature that takes 10 approval cycles over 2 hours can be built in 15 minutes 
 
 ## What This Enables
 
-| Without Law 6 | With Law 6 |
-|---------------|------------|
-| Agents ask permission for every action | Agents work freely |
-| Flows stop constantly for approval | Flows complete smoothly |
-| Security theater everywhere | Real security at real boundaries |
+| Without Law 6                          | With Law 6                                 |
+| -------------------------------------- | ------------------------------------------ |
+| Agents ask permission for every action | Agents work freely                         |
+| Flows stop constantly for approval     | Flows complete smoothly                    |
+| Security theater everywhere            | Real security at real boundaries           |
 | Slow, frustrating, permission-obsessed | Fast, productive, appropriately controlled |
 
 The freedom inside the sandbox is what makes the gates effective. When agents can work freely, they have no incentive to bypass the gates.

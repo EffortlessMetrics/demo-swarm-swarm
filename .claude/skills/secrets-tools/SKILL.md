@@ -36,14 +36,17 @@ Violations of this contract are security incidents.
 ## Operating Invariants
 
 ### Repo root only
+
 - Assume working directory is repo root.
 - All paths are repo-root-relative.
 
 ### Scan scope
+
 - Only scan the publish surface (current flow directory + staged files)
 - Never scan the entire repository
 
 ### No git / no GitHub
+
 This skill does not run `git` or `gh`. File lists are passed as arguments.
 
 ---
@@ -51,12 +54,15 @@ This skill does not run `git` or `gh`. File lists are passed as arguments.
 ## Allowed Users
 
 **Primary:**
+
 - `secrets-sanitizer` (the publish gate agent)
 
 **Secondary (read-only scan):**
+
 - `repo-operator` (for hygiene checks)
 
 **Not allowed:**
+
 - Cleanup agents (they read receipts, not scan for secrets)
 - Author agents
 - Critic agents
@@ -65,10 +71,10 @@ This skill does not run `git` or `gh`. File lists are passed as arguments.
 
 ## Command Reference
 
-| Command | Purpose |
-|---------|---------|
-| `secrets scan` | Scan files for secrets (locations only) |
-| `secrets redact` | Redact specific secret type in file |
+| Command          | Purpose                                 |
+| ---------------- | --------------------------------------- |
+| `secrets scan`   | Scan files for secrets (locations only) |
+| `secrets redact` | Redact specific secret type in file     |
 
 ---
 
@@ -86,6 +92,7 @@ bash .claude/scripts/demoswarm.sh secrets scan \
 ```
 
 Output JSON format:
+
 ```json
 {
   "status": "SECRETS_FOUND",
@@ -123,13 +130,13 @@ bash .claude/scripts/demoswarm.sh secrets redact \
 
 ## Secret Types
 
-| Type | Pattern | Replacement |
-|------|---------|-------------|
-| `github-token` | `gh[pousr]_[A-Za-z0-9_]{36,}` | `[REDACTED:github-token]` |
-| `aws-access-key` | `AKIA[0-9A-Z]{16}` | `[REDACTED:aws-access-key]` |
-| `stripe-key` | `sk_live_[0-9a-zA-Z]{24,}` | `[REDACTED:stripe-key]` |
-| `private-key` | `-----BEGIN .*PRIVATE KEY-----` | `[REDACTED:private-key]` |
-| `jwt-token` | `eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*` | `[REDACTED:jwt-token]` |
+| Type             | Pattern                                             | Replacement                 |
+| ---------------- | --------------------------------------------------- | --------------------------- |
+| `github-token`   | `gh[pousr]_[A-Za-z0-9_]{36,}`                       | `[REDACTED:github-token]`   |
+| `aws-access-key` | `AKIA[0-9A-Z]{16}`                                  | `[REDACTED:aws-access-key]` |
+| `stripe-key`     | `sk_live_[0-9a-zA-Z]{24,}`                          | `[REDACTED:stripe-key]`     |
+| `private-key`    | `-----BEGIN .*PRIVATE KEY-----`                     | `[REDACTED:private-key]`    |
+| `jwt-token`      | `eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*` | `[REDACTED:jwt-token]`      |
 
 ---
 
@@ -146,9 +153,11 @@ bash .claude/scripts/demoswarm.sh secrets redact \
 ## Error Handling
 
 ### Missing scan path
+
 ```bash
 # stdout: SCAN_PATH_MISSING
 ```
+
 ```json
 {
   "status": "SCAN_PATH_MISSING",
@@ -157,11 +166,13 @@ bash .claude/scripts/demoswarm.sh secrets redact \
 ```
 
 ### File not found (redact)
+
 ```bash
 # stdout: FILE_NOT_FOUND
 ```
 
 ### Read error (redact)
+
 ```bash
 # stdout: null
 ```

@@ -133,6 +133,7 @@ Runs are found via:
 **NOT** by folder name (folders don't rename).
 
 Example: Finding run for issue #456:
+
 - Check `index.json` for `issue_number: 456`
 - Or check `canonical_key: "gh-456"`
 - Or scan `run_meta.json.aliases[]` for `"gh-456"`
@@ -143,13 +144,13 @@ Example: Finding run for issue #456:
 
 Each flow produces a receipt with mechanical counts and quality gate verdicts.
 
-| Flow | Receipt File |
-|------|--------------|
+| Flow   | Receipt File                                |
+| ------ | ------------------------------------------- |
 | Signal | `.runs/<run-id>/signal/signal_receipt.json` |
-| Plan | `.runs/<run-id>/plan/plan_receipt.json` |
-| Build | `.runs/<run-id>/build/build_receipt.json` |
+| Plan   | `.runs/<run-id>/plan/plan_receipt.json`     |
+| Build  | `.runs/<run-id>/build/build_receipt.json`   |
 | Review | `.runs/<run-id>/review/review_receipt.json` |
-| Gate | `.runs/<run-id>/gate/gate_receipt.json` |
+| Gate   | `.runs/<run-id>/gate/gate_receipt.json`     |
 | Deploy | `.runs/<run-id>/deploy/deploy_receipt.json` |
 | Wisdom | `.runs/<run-id>/wisdom/wisdom_receipt.json` |
 
@@ -178,15 +179,15 @@ See: [contracts.md](contracts.md) for per-flow receipt schemas.
 
 What secrets-sanitizer scans and repo-operator checkpoints:
 
-| Flow | Publish Surface |
-|------|-----------------|
-| 1 | `.runs/<run-id>/signal/`, `run_meta.json`, `index.json` |
-| 2 | `.runs/<run-id>/plan/`, `run_meta.json`, `index.json` |
-| 3 | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, + code/tests |
-| 4 | `.runs/<run-id>/review/`, `run_meta.json`, `index.json`, + code/tests |
-| 5 | `.runs/<run-id>/gate/`, `run_meta.json`, `index.json` |
-| 6 | `.runs/<run-id>/deploy/`, `run_meta.json`, `index.json` |
-| 7 | `.runs/<run-id>/wisdom/`, `run_meta.json`, `index.json` |
+| Flow | Publish Surface                                                       |
+| ---- | --------------------------------------------------------------------- |
+| 1    | `.runs/<run-id>/signal/`, `run_meta.json`, `index.json`               |
+| 2    | `.runs/<run-id>/plan/`, `run_meta.json`, `index.json`                 |
+| 3    | `.runs/<run-id>/build/`, `run_meta.json`, `index.json`, + code/tests  |
+| 4    | `.runs/<run-id>/review/`, `run_meta.json`, `index.json`, + code/tests |
+| 5    | `.runs/<run-id>/gate/`, `run_meta.json`, `index.json`                 |
+| 6    | `.runs/<run-id>/deploy/`, `run_meta.json`, `index.json`               |
+| 7    | `.runs/<run-id>/wisdom/`, `run_meta.json`, `index.json`               |
 
 **Invariant:** secrets-sanitizer scans only the current flow's publish surface, not the entire `.runs/<run-id>/`.
 
@@ -202,6 +203,7 @@ my-project-swarm/     # Swarm workspace (commits freely)
 ```
 
 Benefits:
+
 - **Inspectability**: `.runs/` artifacts are committed and reviewable
 - **Isolation**: swarm activity doesn't disrupt human development
 - **Clean PRs**: open PR from swarm to origin when ready
@@ -217,6 +219,7 @@ Benefits:
 `.runs/` is committed by default — **do not gitignore it**.
 
 Size discipline:
+
 - Summaries over raw dumps
 - No pasting full issue bodies into artifacts
 - Keep artifacts "reviewable diff" sized
@@ -233,9 +236,9 @@ Receipts may include a `devlt` section for retrospective analysis:
     "flow_started_at": "2025-12-22T10:00:00Z",
     "flow_completed_at": "2025-12-22T10:45:00Z",
     "human_checkpoints": [
-      {"at": "2025-12-22T10:00:00Z", "action": "flow_start"},
-      {"at": "2025-12-22T10:30:00Z", "action": "question_answered"},
-      {"at": "2025-12-22T10:45:00Z", "action": "flow_approved"}
+      { "at": "2025-12-22T10:00:00Z", "action": "flow_start" },
+      { "at": "2025-12-22T10:30:00Z", "action": "question_answered" },
+      { "at": "2025-12-22T10:45:00Z", "action": "flow_approved" }
     ],
     "machine_duration_sec": 2700,
     "human_checkpoint_count": 3,
@@ -246,6 +249,7 @@ Receipts may include a `devlt` section for retrospective analysis:
 ```
 
 **Observable vs inferred:**
+
 - Timestamps and counts are **facts** (derived from logs/artifacts)
 - `estimated_human_attention_min` is an **inference** (labeled as such)
 

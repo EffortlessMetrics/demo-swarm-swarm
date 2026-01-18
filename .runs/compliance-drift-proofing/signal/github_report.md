@@ -14,21 +14,21 @@ Run `compliance-drift-proofing` (iteration 2) completed Signal analysis for **De
 
 ### Key Counts
 
-| Metric | Count |
-|--------|-------|
-| Functional Requirements | 6 |
-| Non-Functional Requirements | 6 |
-| BDD Scenarios | 40 |
-| Open Questions | 10 |
+| Metric                      | Count |
+| --------------------------- | ----- |
+| Functional Requirements     | 6     |
+| Non-Functional Requirements | 6     |
+| BDD Scenarios               | 40    |
+| Open Questions              | 10    |
 
 ### Risk Assessment
 
 | Severity | Count |
-|----------|-------|
-| Critical | 0 |
-| High | 1 |
-| Medium | 4 |
-| Low | 3 |
+| -------- | ----- |
+| Critical | 0     |
+| High     | 1     |
+| Medium   | 4     |
+| Low      | 3     |
 
 **Total:** 8 risks identified (1 high, 4 medium, 3 low).
 

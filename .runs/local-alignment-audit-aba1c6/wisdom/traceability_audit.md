@@ -1,6 +1,7 @@
 # Traceability Audit
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -9,40 +10,41 @@ route_to_agent: null
 missing_required: []
 blockers: []
 concerns:
-  - Build receipt not found (Flow 3 did not checkpoint receipt); Flow 3 artifacts exist but receipt mechanics differ from other flows
-  - Wisdom receipt not found (expected for Flow 7, but not yet created)
+
+- Build receipt not found (Flow 3 did not checkpoint receipt); Flow 3 artifacts exist but receipt mechanics differ from other flows
+- Wisdom receipt not found (expected for Flow 7, but not yet created)
 
 ## Run Identity
 
-| Field | Value | Status |
-|-------|-------|--------|
-| run_id | local-alignment-audit-aba1c6 | OK |
-| run_id_kind | LOCAL_ONLY | OK |
-| issue_binding | DEFERRED | OK (deferred_reason: null) |
-| canonical_key | gh-1 | OK |
-| issue_number | 1 | OK |
-| pr_number | 2 | OK (merged) |
-| github_repo | EffortlessMetrics/demo-swarm-swarm | OK |
-| github_ops_allowed | true | OK |
-| Index entry match | VERIFIED | OK |
-| run_id in index | Found | OK |
-| issue_number matches index | 1 == 1 | OK |
-| last_flow in index | wisdom | OK |
-| status in index | VERIFIED | OK |
+| Field                      | Value                              | Status                     |
+| -------------------------- | ---------------------------------- | -------------------------- |
+| run_id                     | local-alignment-audit-aba1c6       | OK                         |
+| run_id_kind                | LOCAL_ONLY                         | OK                         |
+| issue_binding              | DEFERRED                           | OK (deferred_reason: null) |
+| canonical_key              | gh-1                               | OK                         |
+| issue_number               | 1                                  | OK                         |
+| pr_number                  | 2                                  | OK (merged)                |
+| github_repo                | EffortlessMetrics/demo-swarm-swarm | OK                         |
+| github_ops_allowed         | true                               | OK                         |
+| Index entry match          | VERIFIED                           | OK                         |
+| run_id in index            | Found                              | OK                         |
+| issue_number matches index | 1 == 1                             | OK                         |
+| last_flow in index         | wisdom                             | OK                         |
+| status in index            | VERIFIED                           | OK                         |
 
 **Identity Coherence:** VERIFIED. Run identity is internally consistent and aligned with `.runs/index.json`. All aliases resolve correctly.
 
 ## Receipt Chain Matrix
 
-| Flow | Receipt Present | Status | Recommended Action | Completed At | Notes |
-|------|-----------------|--------|-------------------|--------------|-------|
-| Signal | YES | VERIFIED | PROCEED | 2025-12-20T03:52:42Z | 7 REQ, 3 NFR, 32 BDD scenarios |
-| Plan | YES | VERIFIED | PROCEED | 2025-12-20T04:56:31Z | 32 AC, 3 design options, decision spine intact |
-| Build | NO | N/A | N/A | N/A | Flow 3 completed (work_product commit fc924d2) but receipt not created |
-| Review | YES | VERIFIED | PROCEED | 2025-12-20T13:25:00Z | 30 feedback items, 29 resolved, 0 blocking, PR transitioned to ready |
-| Gate | YES | VERIFIED | PROCEED | 2025-12-20T15:13:38Z | Merge verdict: MERGE, 35 AC completed, 0 contract violations |
-| Deploy | YES | VERIFIED | PROCEED | 2025-12-20T17:16:49Z | PR merged (sha: ed9b9c9), deployment verdict: NOT_DEPLOYED (governance constraint) |
-| Wisdom | NO | N/A | N/A | N/A | Flow 7 (current flow) in progress; receipt not yet written |
+| Flow   | Receipt Present | Status   | Recommended Action | Completed At         | Notes                                                                              |
+| ------ | --------------- | -------- | ------------------ | -------------------- | ---------------------------------------------------------------------------------- |
+| Signal | YES             | VERIFIED | PROCEED            | 2025-12-20T03:52:42Z | 7 REQ, 3 NFR, 32 BDD scenarios                                                     |
+| Plan   | YES             | VERIFIED | PROCEED            | 2025-12-20T04:56:31Z | 32 AC, 3 design options, decision spine intact                                     |
+| Build  | NO              | N/A      | N/A                | N/A                  | Flow 3 completed (work_product commit fc924d2) but receipt not created             |
+| Review | YES             | VERIFIED | PROCEED            | 2025-12-20T13:25:00Z | 30 feedback items, 29 resolved, 0 blocking, PR transitioned to ready               |
+| Gate   | YES             | VERIFIED | PROCEED            | 2025-12-20T15:13:38Z | Merge verdict: MERGE, 35 AC completed, 0 contract violations                       |
+| Deploy | YES             | VERIFIED | PROCEED            | 2025-12-20T17:16:49Z | PR merged (sha: ed9b9c9), deployment verdict: NOT_DEPLOYED (governance constraint) |
+| Wisdom | NO              | N/A      | N/A                | N/A                  | Flow 7 (current flow) in progress; receipt not yet written                         |
 
 **Receipt Coherence:** VERIFIED (with notation). All present receipts are internally valid. Build receipt absence is workflow state (Flow 3 used different checkpoint model). Wisdom receipt not yet created (expected for in-progress Flow 7).
 
@@ -56,12 +58,12 @@ Checked: `last_flow` = "wisdom" matches current flow. Index `status` = "VERIFIED
 
 ### Requirements Summary
 
-| Artifact | Count | Status |
-|----------|-------|--------|
-| Functional Requirements (REQ) | 7 | All documented |
-| Non-Functional Requirements (NFR) | 3 | All documented |
-| BDD Scenarios (Scenario + Scenario Outline) | 32 | All tagged with @REQ-NNN |
-| Feature Files | 5 | All present |
+| Artifact                                    | Count | Status                   |
+| ------------------------------------------- | ----- | ------------------------ |
+| Functional Requirements (REQ)               | 7     | All documented           |
+| Non-Functional Requirements (NFR)           | 3     | All documented           |
+| BDD Scenarios (Scenario + Scenario Outline) | 32    | All tagged with @REQ-NNN |
+| Feature Files                               | 5     | All present              |
 
 ### REQ Coverage
 
@@ -93,13 +95,13 @@ All NFR metadata recorded in `verification_notes.md` with explicit "Verified in:
 
 ### AC Matrix Status
 
-| Metric | Count | Status |
-|--------|-------|--------|
-| Total AC in Matrix | 35 | Present (37 rows including NFR AC) |
-| AC with REQ source | 32 | All FRs mapped |
-| AC with BDD source (feature:line) | 32 | All FRs traced to scenarios |
-| AC-NFR entries | 3 | NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001 |
-| Build ac_status.json | NOT FOUND | Flow 3 did not create/commit this artifact |
+| Metric                            | Count     | Status                                     |
+| --------------------------------- | --------- | ------------------------------------------ |
+| Total AC in Matrix                | 35        | Present (37 rows including NFR AC)         |
+| AC with REQ source                | 32        | All FRs mapped                             |
+| AC with BDD source (feature:line) | 32        | All FRs traced to scenarios                |
+| AC-NFR entries                    | 3         | NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001    |
+| Build ac_status.json              | NOT FOUND | Flow 3 did not create/commit this artifact |
 
 ### AC Linkage Verification
 
@@ -124,6 +126,7 @@ All 35 AC entries in matrix have non-empty Source column linking to REQ tags and
 ### Gate Verification of AC Completion
 
 Gate receipt (`gate_receipt.json`) reports:
+
 - `ac_total: 35`
 - `ac_completed: 35`
 - All ACs marked complete
@@ -135,6 +138,7 @@ This indicates all acceptance criteria were satisfied during Flow 3 (Build) and 
 ## GitHub Observability (read-only, gated)
 
 ### Access Gate
+
 - `github_ops_allowed`: true
 - `gh` authentication: Assumed available (no explicit error in run artifacts)
 - Repo scope: EffortlessMetrics/demo-swarm-swarm (consistent across artifacts)
@@ -144,6 +148,7 @@ This indicates all acceptance criteria were satisfied during Flow 3 (Build) and 
 ### Issue Markers (GitHub Issue #1)
 
 Expected markers in issue body:
+
 - `<!-- STATUS_BOARD_START -->` / `END`
 - `<!-- NEXT_STEPS_START -->` / `END`
 - `<!-- OPEN_QUESTIONS_START -->` / `END`
@@ -154,15 +159,15 @@ Expected markers in issue body:
 
 Signal through Deploy flows posted comments with idempotency markers:
 
-| Flow | Comment Posted | Comment ID | Marker Check | Status |
-|------|-----------------|------------|--------------|--------|
-| Signal | YES | 3677358406 | DEMOSWARM_RUN:local-alignment-audit-aba1c6 FLOW:signal | OK |
-| Plan | YES | gh_comment_id.txt | (gh_comment_id.txt file exists) | OK |
-| Build | NO | N/A | Build did not post to GitHub | Expected (receipts optional) |
-| Review | YES | gh_comment_id.txt | (gh_comment_id.txt file exists) | OK |
-| Gate | YES | gh_comment_id.txt | (gh_comment_id.txt file exists) | OK |
-| Deploy | YES | 3677976122 | (gh_comment_id.txt file contains ID) | OK |
-| Wisdom | NO | N/A | Current flow; not yet posted | Expected |
+| Flow   | Comment Posted | Comment ID        | Marker Check                                           | Status                       |
+| ------ | -------------- | ----------------- | ------------------------------------------------------ | ---------------------------- |
+| Signal | YES            | 3677358406        | DEMOSWARM_RUN:local-alignment-audit-aba1c6 FLOW:signal | OK                           |
+| Plan   | YES            | gh_comment_id.txt | (gh_comment_id.txt file exists)                        | OK                           |
+| Build  | NO             | N/A               | Build did not post to GitHub                           | Expected (receipts optional) |
+| Review | YES            | gh_comment_id.txt | (gh_comment_id.txt file exists)                        | OK                           |
+| Gate   | YES            | gh_comment_id.txt | (gh_comment_id.txt file exists)                        | OK                           |
+| Deploy | YES            | 3677976122        | (gh_comment_id.txt file contains ID)                   | OK                           |
+| Wisdom | NO             | N/A               | Current flow; not yet posted                           | Expected                     |
 
 **Observability Status:** VERIFIED (all completed flows except Build have GitHub reporting artifacts)
 
@@ -239,6 +244,7 @@ Signal through Deploy flows posted comments with idempotency markers:
 ### End-to-End Traceability Example: REQ-001 → BDD → AC → Implementation
 
 **REQ-001** (Update Flow Count References in Public Documentation):
+
 - **BDD Coverage:** 5 scenarios in flow_count_alignment.feature (lines 10-41)
   - Scenario: README references seven flows (@REQ-001, @smoke)
   - Scenario: DEMO_RUN references seven flows with enumeration (@REQ-001)
@@ -260,6 +266,7 @@ Signal through Deploy flows posted comments with idempotency markers:
 ### Cross-Flow Traceability
 
 All flows maintain consistent run_id and reference prior flow artifacts:
+
 - Signal establishes requirements → Plan builds design → Build implements changes → Review harvests feedback → Gate merges → Deploy tags/releases → Wisdom extracts learnings
 - Each receipt cross-references prior flow receipt status
 - Gate receipt explicitly audits prior receipt coherence

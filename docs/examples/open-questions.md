@@ -4,7 +4,7 @@ This is an example of an open questions register showing how uncertainty is trac
 
 ---
 
-# Open Questions: feat-session-timeout
+## Open Questions: feat-session-timeout
 
 **Run ID:** feat-session-timeout
 **Updated:** 2024-01-15T14:30:00Z
@@ -48,7 +48,6 @@ Questions where an agent chose a reversible default and documented the reasoning
 - **Decided by:** interface-designer during Flow 2
 - **Evidence:** `src/config/schema.yaml:34` (field definition)
 
-
 ---
 
 ## NEEDS_HUMAN
@@ -84,10 +83,10 @@ Questions requiring human authority — things that genuinely cannot be derived,
 
 ## Format Reference
 
-| Status | Meaning | Blocks Flow |
-|--------|---------|-------------|
-| DEFAULTED | Agent chose a reversible default, documented reasoning | No |
-| NEEDS_HUMAN | True ambiguity requiring human decision | Depends on impact |
+| Status      | Meaning                                                | Blocks Flow       |
+| ----------- | ------------------------------------------------------ | ----------------- |
+| DEFAULTED   | Agent chose a reversible default, documented reasoning | No                |
+| NEEDS_HUMAN | True ambiguity requiring human decision                | Depends on impact |
 
 **Marker format:** `- QID: OQ-<FLOW>-NNN` where FLOW is SIGNAL, PLAN, BUILD, GATE, DEPLOY, or WISDOM.
 

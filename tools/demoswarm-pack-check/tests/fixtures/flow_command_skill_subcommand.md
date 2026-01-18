@@ -15,6 +15,7 @@ This flow incorrectly references skill CLI subcommands.
 ## Notes
 
 These subcommand patterns should be flagged:
+
 - count (as a CLI subcommand reference)
 - ms get
 - index upsert-status

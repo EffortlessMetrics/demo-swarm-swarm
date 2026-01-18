@@ -36,6 +36,7 @@ for coverage. Re-run me after both to verify fixes landed.
 ```
 
 Properties:
+
 - Natural language, contextual
 - Returned in agent response
 - The orchestrator (Claude) reads and understands it
@@ -51,6 +52,7 @@ Durable artifacts written to `.runs/<run-id>/`:
 - `*_receipt.json`
 
 Properties:
+
 - Rich, detailed, inspectable
 - Written to disk
 - Used for human review, reruns, debugging
@@ -110,6 +112,7 @@ Prose lets agents tell the truth. Claude understands nuance.
 ### Structure serves audit
 
 Receipts need structured fields for:
+
 - Mechanical processing (counting, aggregation)
 - Consistent audit trail
 - Index updates
@@ -158,6 +161,7 @@ The structured fields in receipts are **derived from prose**, not the other way 
 **What I did:** Reviewed implementation against the ADR and requirements.
 
 **Findings:**
+
 - [MAJOR] Session timeout uses 30m but ADR specifies 15m
 - [MAJOR] Missing error handling in auth refresh path
 - [MINOR] Inconsistent naming between UserSession and SessionUser

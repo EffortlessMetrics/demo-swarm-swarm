@@ -21,13 +21,14 @@ The goal is polish, not behavior change. Formatting is deterministic and safe. L
 
 ## When to Use
 
-| Flow | Purpose |
-|------|---------|
-| **Flow 3 (Build)** | Called by `standards-enforcer` after implementation to polish the diff |
-| **Flow 4 (Review)** | Called to verify code meets standards before merge decision |
-| **Ad-hoc** | When code hygiene sweep is needed before commit |
+| Flow                | Purpose                                                                |
+| ------------------- | ---------------------------------------------------------------------- |
+| **Flow 3 (Build)**  | Called by `standards-enforcer` after implementation to polish the diff |
+| **Flow 4 (Review)** | Called to verify code meets standards before merge decision            |
+| **Ad-hoc**          | When code hygiene sweep is needed before commit                        |
 
 Typical invocation chain:
+
 ```
 code-implementer (writes code)
   -> test-executor (verifies behavior)
@@ -39,12 +40,13 @@ code-implementer (writes code)
 
 ### Rust (Primary)
 
-| Tool | Purpose | Auto-fix |
-|------|---------|----------|
-| `cargo fmt` | Code formatting | Yes - always safe |
+| Tool           | Purpose                   | Auto-fix                           |
+| -------------- | ------------------------- | ---------------------------------- |
+| `cargo fmt`    | Code formatting           | Yes - always safe                  |
 | `cargo clippy` | Linting + static analysis | Report only (some `--fix` allowed) |
 
 **Commands:**
+
 ```bash
 # Format (modifies files)
 cargo fmt --all
@@ -61,13 +63,14 @@ cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged -- 
 
 ### JavaScript / TypeScript
 
-| Tool | Purpose | Auto-fix |
-|------|---------|----------|
-| `prettier` | Code formatting | Yes - always safe |
-| `eslint` | Linting | Yes for `--fix`, some manual |
-| `biome` | Format + lint | Yes for format, lint varies |
+| Tool       | Purpose         | Auto-fix                     |
+| ---------- | --------------- | ---------------------------- |
+| `prettier` | Code formatting | Yes - always safe            |
+| `eslint`   | Linting         | Yes for `--fix`, some manual |
+| `biome`    | Format + lint   | Yes for format, lint varies  |
 
 **Commands:**
+
 ```bash
 # Prettier format
 npx prettier --write "src/**/*.{js,ts,jsx,tsx}"
@@ -87,14 +90,15 @@ npx biome check --apply src/
 
 ### Python
 
-| Tool | Purpose | Auto-fix |
-|------|---------|----------|
-| `black` | Code formatting | Yes - always safe |
-| `ruff` | Fast linting + formatting | Yes for many rules |
-| `isort` | Import sorting | Yes - always safe |
-| `mypy` | Type checking | Report only |
+| Tool    | Purpose                   | Auto-fix           |
+| ------- | ------------------------- | ------------------ |
+| `black` | Code formatting           | Yes - always safe  |
+| `ruff`  | Fast linting + formatting | Yes for many rules |
+| `isort` | Import sorting            | Yes - always safe  |
+| `mypy`  | Type checking             | Report only        |
 
 **Commands:**
+
 ```bash
 # Black format
 black src/ tests/
@@ -117,13 +121,14 @@ mypy src/
 
 ### Go
 
-| Tool | Purpose | Auto-fix |
-|------|---------|----------|
-| `gofmt` / `goimports` | Code formatting | Yes - always safe |
-| `golangci-lint` | Meta-linter | Some rules fixable |
-| `staticcheck` | Static analysis | Report only |
+| Tool                  | Purpose         | Auto-fix           |
+| --------------------- | --------------- | ------------------ |
+| `gofmt` / `goimports` | Code formatting | Yes - always safe  |
+| `golangci-lint`       | Meta-linter     | Some rules fixable |
+| `staticcheck`         | Static analysis | Report only        |
 
 **Commands:**
+
 ```bash
 # Format
 gofmt -w .
@@ -138,12 +143,12 @@ golangci-lint run ./...
 
 ### Other Languages
 
-| Language | Format Tool | Lint Tool |
-|----------|-------------|-----------|
-| Java | `google-java-format` | `checkstyle`, `spotbugs` |
-| C/C++ | `clang-format` | `clang-tidy` |
-| Ruby | `rubocop --autocorrect` | `rubocop` |
-| Shell | `shfmt` | `shellcheck` |
+| Language | Format Tool             | Lint Tool                |
+| -------- | ----------------------- | ------------------------ |
+| Java     | `google-java-format`    | `checkstyle`, `spotbugs` |
+| C/C++    | `clang-format`          | `clang-tidy`             |
+| Ruby     | `rubocop --autocorrect` | `rubocop`                |
+| Shell    | `shfmt`                 | `shellcheck`             |
 
 ## Safe vs Manual Fixes
 
@@ -239,13 +244,13 @@ Report back with:
 
 Check for configuration files to determine which tools to use:
 
-| File | Stack | Tools |
-|------|-------|-------|
-| `Cargo.toml` | Rust | cargo fmt, clippy |
-| `package.json` | JS/TS | prettier, eslint, biome |
-| `pyproject.toml` | Python | black, ruff, mypy |
-| `go.mod` | Go | gofmt, golangci-lint |
-| `.tool-versions` | Multiple | Use specified versions |
+| File             | Stack    | Tools                   |
+| ---------------- | -------- | ----------------------- |
+| `Cargo.toml`     | Rust     | cargo fmt, clippy       |
+| `package.json`   | JS/TS    | prettier, eslint, biome |
+| `pyproject.toml` | Python   | black, ruff, mypy       |
+| `go.mod`         | Go       | gofmt, golangci-lint    |
+| `.tool-versions` | Multiple | Use specified versions  |
 
 ### Project-Specific Config
 
@@ -349,19 +354,23 @@ Exit code: 0
 # Lint Summary
 
 ## Tools Run
+
 - cargo fmt: PASS (0 files modified)
 - cargo clippy: PASS (0 errors, 2 warnings)
 
 ## Warnings
-| File | Line | Code | Message |
-|------|------|------|---------|
-| src/lib.rs | 42 | unused_variables | unused variable: `x` |
-| src/lib.rs | 87 | clippy::needless_return | unneeded `return` statement |
+
+| File       | Line | Code                    | Message                     |
+| ---------- | ---- | ----------------------- | --------------------------- |
+| src/lib.rs | 42   | unused_variables        | unused variable: `x`        |
+| src/lib.rs | 87   | clippy::needless_return | unneeded `return` statement |
 
 ## Files Modified by Formatting
+
 - (none)
 
 ## Manual Fixes Required
+
 - (none)
 ```
 

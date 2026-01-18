@@ -59,6 +59,7 @@ severity_summary:
 (None - all REQ and NFR identifiers from requirements.md are present in contract traceability sections)
 
 Verified coverage:
+
 - REQ-001: api_contracts.yaml x-traceability.REQ-001, x-checks.new.50
 - REQ-002: api_contracts.yaml x-traceability.REQ-002, x-checks.existing.49
 - REQ-003: api_contracts.yaml x-traceability.REQ-003, x-checks.new.51, OpenQId schema
@@ -91,6 +92,7 @@ Verified coverage:
 ### 1) Handshake Validity
 
 **api_contracts.yaml**
+
 - Parses as valid YAML: PASS
 - Contains `# CONTRACT_INVENTORY_V1` header at line 1: PASS
 - Inventory markers present:
@@ -102,6 +104,7 @@ Verified coverage:
   - `# SCHEMA: OpenQId` (line 7)
 
 **schema.md**
+
 - Contains `## Inventory (machine countable)` section: PASS
 - Inventory prefixes present:
   - 3 ENDPOINT markers
@@ -111,11 +114,13 @@ Verified coverage:
 ### 2) Contract Surface Completeness
 
 **CLI Interface (x-cli-interface)**
+
 - Arguments defined: repo_root, format, no_color, strict_warnings - COMPLETE
 - Exit codes defined: 0 (SUCCESS), 1 (FAILURE), 2 (RUNTIME_ERROR) - COMPLETE
 - Exit code semantics for --strict_warnings documented - COMPLETE
 
 **Schemas (components/schemas)**
+
 - Level enum: pass, warn, fail - COMPLETE
 - CheckDiagnostic: level, check_id, check_title, message - COMPLETE with required markers
 - PackCounts: agents, commands, skills - COMPLETE
@@ -124,16 +129,19 @@ Verified coverage:
 - OpenQId: String pattern ^OQ-(SIG|PLN|BLD|GAT|DEP|WIS)-[0-9]{3}$ - COMPLETE with examples
 
 **Error Model (x-error-model)**
+
 - Text format: symbol + message per level - COMPLETE
 - File location format: rel_path:line_number:line_content - COMPLETE
 - JSON provides structured diagnostics - COMPLETE
 
 **Check Definitions (x-checks)**
+
 - Check 49 (existing): Skills section enforcement, severity fail - COMPLETE
 - Check 50 (new): Flow boundary, severity warn/strict_severity fail, patterns defined - COMPLETE
 - Check 51 (new): OpenQ prefix, severity warn/strict_severity fail, patterns defined - COMPLETE
 
 **Constants (x-constants)**
+
 - FLOW_CODES: 6 codes defined (SIG, PLN, BLD, GAT, DEP, WIS) with Rust constant - COMPLETE
 - SKILL_SUBCOMMANDS: 12 subcommands defined with Rust constant - COMPLETE
 
@@ -153,6 +161,7 @@ Verified coverage:
 ### 5) Traceability + Testability Bindings
 
 **api_contracts.yaml x-traceability section**
+
 - REQ-001 -> check_id 50, validation_points defined
 - REQ-002 -> check_id 49, validation_points defined
 - REQ-003 -> check_id 51, validation_points defined
@@ -161,9 +170,11 @@ Verified coverage:
 - NFR-MAINT-001 -> contracts.rs constants
 
 **schema.md Requirements to Interfaces table**
+
 - All REQ/NFR identifiers mapped to interface elements and validation points
 
 **test_plan.md references contract surfaces**
+
 - 40 scenarios across 6 feature files
 - Contract Test Plan section references:
   - Receipt schema assertions

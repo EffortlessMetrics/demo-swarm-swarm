@@ -43,6 +43,7 @@ observations:
 - **iterations (index)**: 6
 
 **Identity Checks**:
+
 - ✓ run_meta.run_id matches directory name
 - ✓ issue_binding consistent with run_id_kind
 - ✓ issue_number matches canonical_key (8 vs gh-8)
@@ -51,20 +52,22 @@ observations:
 
 ## Receipt Matrix
 
-| Flow | Present | Status | Quality Gates | Notes |
-|------|---------|--------|---|---|
-| signal | YES | VERIFIED | all VERIFIED | 6 REQ, 6 NFR, 40 BDD scenarios |
-| plan | YES | VERIFIED | all VERIFIED | 3 design options; github_reporting=PENDING |
-| build | YES | CANNOT_READ | unknown | Permission denied on read |
-| gate | YES | UNVERIFIED | 3 UNVERIFIED, 2 VERIFIED | 9/11 checks passed; 3 blockers identified |
+| Flow   | Present | Status      | Quality Gates            | Notes                                      |
+| ------ | ------- | ----------- | ------------------------ | ------------------------------------------ |
+| signal | YES     | VERIFIED    | all VERIFIED             | 6 REQ, 6 NFR, 40 BDD scenarios             |
+| plan   | YES     | VERIFIED    | all VERIFIED             | 3 design options; github_reporting=PENDING |
+| build  | YES     | CANNOT_READ | unknown                  | Permission denied on read                  |
+| gate   | YES     | UNVERIFIED  | 3 UNVERIFIED, 2 VERIFIED | 9/11 checks passed; 3 blockers identified  |
 
 **Receipt Schema Validation**:
+
 - ✓ signal_receipt.json: valid (run_id, flow, status, counts, quality_gates, key_artifacts)
 - ✓ plan_receipt.json: valid (run_id, flow, status, counts, decision_spine)
 - ✓ gate_receipt.json: valid (status, merge_verdict, quality_gates, blockers, counts)
 - TRC_CANNOT_VERIFY: build_receipt.json (permission denied)
 
 **Index Coherence**:
+
 - ✓ index.json entry for run_id exists
 - ⚠️ index status=VERIFIED vs gate receipt status=UNVERIFIED (mismatch)
 - ⚠️ index iterations=6 vs run_meta iterations=7 (mismatch)
@@ -73,23 +76,27 @@ observations:
 ## GitHub Observability (gated)
 
 **GitHub Access**: OK
+
 - github_ops_allowed: true
 - gh authenticated and active
 - repo: EffortlessMetrics/demo-swarm-staging (verified)
 - issue #8 exists and OPEN
 
 **Issue Markers**: OK
+
 - STATUS_BOARD marker present and edited (gate row shows UNVERIFIED)
 - NEXT_STEPS marker present and edited (BOUNCE to Flow 3 instructions)
 - OPEN_QUESTIONS marker present (gate phase blockers added)
 - CONCERNS marker present (gate findings recorded)
 
 **Flow Comments**: OK
+
 - signal flow: comment ID 3671958145 logged in gh_comment_id.txt
 - gate flow: gh_report_status.md shows operation_status=UPDATED
 - All markers edited within boundaries; human content preserved
 
 **Publish Gates**: OK
+
 - safe_to_publish: true
 - proceed_to_github_ops: true
 - publish_surface: PUSHED
@@ -100,6 +107,7 @@ observations:
 ### Requirements Analysis
 
 **Functional Requirements**: 6 (unique)
+
 - REQ-001: Flow Boundary Enforcement
 - REQ-002: Skills Section Enforcement
 - REQ-003: OpenQ Prefix Pattern Validation
@@ -108,6 +116,7 @@ observations:
 - REQ-006: No False Positives on Existing Artifacts
 
 **Non-Functional Requirements**: 6 (documented with strategies)
+
 - NFR-PERF-001: CI Validation Runtime (timing assertion in CI pipeline)
 - NFR-REL-001: Deterministic Validation Output (byte-identical test in CI)
 - NFR-OPS-001: Diagnostic Clarity (manual review of output format)
@@ -118,6 +127,7 @@ observations:
 ### BDD Scenario Analysis
 
 **Feature Files**: 6 present
+
 - flow_boundary_enforcement.feature: 6 scenarios @REQ-001
 - skills_section_enforcement.feature: 6 scenarios @REQ-002
 - openq_prefix_validation.feature: 8 scenarios @REQ-003
@@ -129,15 +139,15 @@ observations:
 
 ### Coverage Analysis
 
-| REQ | Feature File | Scenarios | Coverage | Notes |
-|-----|--------------|-----------|----------|-------|
-| REQ-001 | flow_boundary_enforcement.feature | 6 | 100% | All tagged @REQ-001 |
-| REQ-002 | skills_section_enforcement.feature | 6 | 100% | All tagged @REQ-002 |
-| REQ-003 | openq_prefix_validation.feature | 8 | 100% | All tagged @REQ-003 |
-| REQ-004 | build_gate_handshake.feature | 5 | 100% | All tagged @REQ-004 |
-| REQ-005 | warning_first_mode.feature | 8 | 100% | All tagged @REQ-005 |
-| REQ-006 | no_false_positives.feature | 7 | 100% | All tagged @REQ-006 |
-| **TOTAL** | **6 files** | **40** | **100%** | **1:1 REQ-to-feature binding** |
+| REQ       | Feature File                       | Scenarios | Coverage | Notes                          |
+| --------- | ---------------------------------- | --------- | -------- | ------------------------------ |
+| REQ-001   | flow_boundary_enforcement.feature  | 6         | 100%     | All tagged @REQ-001            |
+| REQ-002   | skills_section_enforcement.feature | 6         | 100%     | All tagged @REQ-002            |
+| REQ-003   | openq_prefix_validation.feature    | 8         | 100%     | All tagged @REQ-003            |
+| REQ-004   | build_gate_handshake.feature       | 5         | 100%     | All tagged @REQ-004            |
+| REQ-005   | warning_first_mode.feature         | 8         | 100%     | All tagged @REQ-005            |
+| REQ-006   | no_false_positives.feature         | 7         | 100%     | All tagged @REQ-006            |
+| **TOTAL** | **6 files**                        | **40**    | **100%** | **1:1 REQ-to-feature binding** |
 
 ### Traceability Checks
 
@@ -203,6 +213,7 @@ observations:
 
 **Traceability Coherence**: VERIFIED
 The run is mechanically coherent across:
+
 1. Identity (folder, run_meta, index, aliases all consistent)
 2. Receipts (signal/plan/gate all present with valid schema)
 3. Spec bindings (6 REQ, 40 scenarios, 100% coverage, no orphans)
@@ -210,6 +221,7 @@ The run is mechanically coherent across:
 
 **Mechanical Failures (Not Traceability)**: DOCUMENTED
 Gate receipt identifies 3 critical blockers in Build phase:
+
 1. Coverage metrics absent (test-runner missing invocation)
 2. Lint status integrity failure (build_receipt field vs artifact mismatch)
 3. Quality gates not sourced from Machine Summaries (policy violation POL-004)

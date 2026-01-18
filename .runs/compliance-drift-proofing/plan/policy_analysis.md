@@ -1,6 +1,7 @@
 # Policy Analysis
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,18 +13,20 @@ blockers: []
 missing_required: []
 
 concerns:
-  - No dedicated policy documents found in standard roots (policies/, docs/policies/, .policies/); using CLAUDE.md as authoritative pack policy
+
+- No dedicated policy documents found in standard roots (policies/, docs/policies/, .policies/); using CLAUDE.md as authoritative pack policy
 
 compliance_summary:
-  policies_found: 1
-  policies_checked: 1
-  compliant: 8
-  non_compliant: 0
-  not_applicable: 1
-  unknown: 0
-  waivers_needed: 0
+policies_found: 1
+policies_checked: 1
+compliant: 8
+non_compliant: 0
+not_applicable: 1
+unknown: 0
+waivers_needed: 0
 
 ## Context
+
 - flow: plan
 - run_id: compliance-drift-proofing
 - policy_roots_searched:
@@ -44,25 +47,27 @@ compliance_summary:
   - CLAUDE.md
 
 ## Policies Reviewed
+
 - CLAUDE.md (pack-level policy) -- version: current HEAD
 
 ## Compliance Register
 
-| ID | Policy | Section | Requirement | Status | Severity | Evidence |
-|----|--------|---------|-------------|--------|----------|----------|
-| POL-001 | CLAUDE.md | Non-Negotiables #1 | Repo root only - All commands run from repo root; all paths are repo-root-relative | COMPLIANT | HIGH | adr.md:Section "What we are doing"; work_plan.md:Section "Scope Snapshot" |
-| POL-002 | CLAUDE.md | Non-Negotiables #2 | No raw git in flow commands or agent prompts | COMPLIANT | HIGH | adr.md:Section "What we are NOT doing" |
-| POL-003 | CLAUDE.md | Non-Negotiables #3 | Control plane vs audit plane - Orchestrators route on returned result blocks | COMPLIANT | MEDIUM | api_contracts.yaml:L229-310 (CheckDiagnostic/RunReport schemas) |
-| POL-004 | CLAUDE.md | Non-Negotiables #5 | run_id folders never rename | NOT-APPLICABLE | LOW | Change does not touch run identity or folder structure |
-| POL-005 | CLAUDE.md | Machine Summary Contract | Status enum is VERIFIED/UNVERIFIED/CANNOT_PROCEED only | COMPLIANT | HIGH | api_contracts.yaml:L342-344 (status enum definition) |
-| POL-006 | CLAUDE.md | Machine Summary Contract | recommended_action enum is PROCEED/RERUN/BOUNCE/FIX_ENV only | COMPLIANT | HIGH | api_contracts.yaml:L345-347 (recommended_action enum) |
-| POL-007 | CLAUDE.md | CLI Tooling Surface | Agents always invoke via shims (pack-check.sh, demoswarm.sh) | COMPLIANT | MEDIUM | adr.md:L43-49; observability_spec.md:L9 |
-| POL-008 | CLAUDE.md | Receipts | counts are mechanical (grep/wc/parse), never estimated | COMPLIANT | MEDIUM | requirements.md:Section NFR-REL-001; api_contracts.yaml:L422-439 (counts schema) |
-| POL-009 | CLAUDE.md | Canonical Status + Verdict Domains | Do not conflate status domains across contexts | COMPLIANT | HIGH | api_contracts.yaml:L229-234 (Level enum); schema.md:L45-57 (CheckResult entity) |
+| ID      | Policy    | Section                            | Requirement                                                                        | Status         | Severity | Evidence                                                                         |
+| ------- | --------- | ---------------------------------- | ---------------------------------------------------------------------------------- | -------------- | -------- | -------------------------------------------------------------------------------- |
+| POL-001 | CLAUDE.md | Non-Negotiables #1                 | Repo root only - All commands run from repo root; all paths are repo-root-relative | COMPLIANT      | HIGH     | adr.md:Section "What we are doing"; work_plan.md:Section "Scope Snapshot"        |
+| POL-002 | CLAUDE.md | Non-Negotiables #2                 | No raw git in flow commands or agent prompts                                       | COMPLIANT      | HIGH     | adr.md:Section "What we are NOT doing"                                           |
+| POL-003 | CLAUDE.md | Non-Negotiables #3                 | Control plane vs audit plane - Orchestrators route on returned result blocks       | COMPLIANT      | MEDIUM   | api_contracts.yaml:L229-310 (CheckDiagnostic/RunReport schemas)                  |
+| POL-004 | CLAUDE.md | Non-Negotiables #5                 | run_id folders never rename                                                        | NOT-APPLICABLE | LOW      | Change does not touch run identity or folder structure                           |
+| POL-005 | CLAUDE.md | Machine Summary Contract           | Status enum is VERIFIED/UNVERIFIED/CANNOT_PROCEED only                             | COMPLIANT      | HIGH     | api_contracts.yaml:L342-344 (status enum definition)                             |
+| POL-006 | CLAUDE.md | Machine Summary Contract           | recommended_action enum is PROCEED/RERUN/BOUNCE/FIX_ENV only                       | COMPLIANT      | HIGH     | api_contracts.yaml:L345-347 (recommended_action enum)                            |
+| POL-007 | CLAUDE.md | CLI Tooling Surface                | Agents always invoke via shims (pack-check.sh, demoswarm.sh)                       | COMPLIANT      | MEDIUM   | adr.md:L43-49; observability_spec.md:L9                                          |
+| POL-008 | CLAUDE.md | Receipts                           | counts are mechanical (grep/wc/parse), never estimated                             | COMPLIANT      | MEDIUM   | requirements.md:Section NFR-REL-001; api_contracts.yaml:L422-439 (counts schema) |
+| POL-009 | CLAUDE.md | Canonical Status + Verdict Domains | Do not conflate status domains across contexts                                     | COMPLIANT      | HIGH     | api_contracts.yaml:L229-234 (Level enum); schema.md:L45-57 (CheckResult entity)  |
 
 ## Compliance Details
 
 ### POL-001: Repo root only
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #1"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -72,6 +77,7 @@ compliance_summary:
 - Notes: All touchpoints in work_plan.md use repo-root-relative paths (e.g., tools/demoswarm-pack-check/src/checks/drift.rs)
 
 ### POL-002: No raw git in flow commands
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #2"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -81,6 +87,7 @@ compliance_summary:
 - Notes: This change is to pack-check validation tooling; it does not modify flow commands or add git operations
 
 ### POL-003: Control plane vs audit plane separation
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #3"
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -90,6 +97,7 @@ compliance_summary:
 - Notes: The planned changes maintain separation by outputting structured diagnostics (audit) separate from exit codes (control)
 
 ### POL-004: run_id folders never rename
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #5"
 - Status: NOT-APPLICABLE
 - Severity: LOW
@@ -99,6 +107,7 @@ compliance_summary:
 - Notes: This change adds validation checks to pack-check; does not affect run identity mechanics
 
 ### POL-005: Status enum frozen
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -108,6 +117,7 @@ compliance_summary:
 - Notes: ADR acknowledges constraint and new validation does not introduce non-canonical status values
 
 ### POL-006: recommended_action enum frozen
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -117,6 +127,7 @@ compliance_summary:
 - Notes: New validation checks produce warn/fail diagnostics; they do not introduce new action enums
 
 ### POL-007: Invoke tools via shims
+
 - Policy: CLAUDE.md, Section "CLI Tooling Surface"
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -127,6 +138,7 @@ compliance_summary:
 - Notes: All documentation and subtasks correctly reference shim invocation
 
 ### POL-008: Mechanical counts only
+
 - Policy: CLAUDE.md, Section "Receipts"
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -136,6 +148,7 @@ compliance_summary:
 - Notes: BuildReceipt schema enforces integer counts; determinism requirement (NFR-REL-001) ensures mechanical counting
 
 ### POL-009: Status domain separation
+
 - Policy: CLAUDE.md, Section "Canonical Status + Verdict Domains"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -145,13 +158,15 @@ compliance_summary:
 - Notes: Check diagnostics use their own Level enum; do not conflate with Machine Summary status or Gate verdicts
 
 ## Violations Summary
-| ID | Policy | Section | Severity | Remediation | Owner |
-|----|--------|---------|----------|------------|-------|
-| (none) | | | | | |
+
+| ID     | Policy | Section | Severity | Remediation | Owner |
+| ------ | ------ | ------- | -------- | ----------- | ----- |
+| (none) |        |         |          |             |       |
 
 No violations identified.
 
 ## Waivers Needed
+
 - None
 
 ## Security Analysis
@@ -178,6 +193,7 @@ The planned changes maintain backward compatibility per NFR-COMP-001:
 5. **--strict flag behavior**: Existing flag elevated warnings to errors; behavior preserved
 
 ## Recommended Next
+
 - Proceed to Flow 3 (Build) with confidence in policy compliance
 - Resolve OQ-PLAN-004 (PLN vs PLAN prefix) before implementing check 51 regex
 - Enumerate the 4 agents potentially missing Skills sections during ST-003

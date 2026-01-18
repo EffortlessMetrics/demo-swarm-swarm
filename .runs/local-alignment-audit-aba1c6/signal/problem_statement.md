@@ -1,6 +1,7 @@
 # Problem Statement
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null
@@ -11,9 +12,10 @@ blockers: []
 missing_required: []
 
 concerns:
-  - Path traversal concern in secrets.rs requires threat modeling to determine exploitability
-  - Integration test coverage (41 filtered tests) not included in test narrative
-  - Flow overlap semantics (alternate paths vs distinct flows) need authoritative decision
+
+- Path traversal concern in secrets.rs requires threat modeling to determine exploitability
+- Integration test coverage (41 filtered tests) not included in test narrative
+- Flow overlap semantics (alternate paths vs distinct flows) need authoritative decision
 
 confidence: High
 
@@ -78,19 +80,19 @@ Additionally, the pack implements a multi-path flow design (flow-4-gate vs flow-
 ## Assumptions Made to Proceed
 
 - **ASM-1**: The seven-flow model in CLAUDE.md line 13 is authoritative, and "six flow" references elsewhere are stale.
-  - *If wrong*: Would need to reconcile by removing Flow 7 or redefining what "flow" means (unlikely given flow-7-wisdom.md exists and is functional)
+  - _If wrong_: Would need to reconcile by removing Flow 7 or redefining what "flow" means (unlikely given flow-7-wisdom.md exists and is functional)
 
 - **ASM-2**: Flow variants (flow-4-gate vs flow-4-review, etc.) represent intentional alternate entry points, not bugs or duplicates.
-  - *If wrong*: Would need to deprecate or consolidate command files (unlikely given the re-entry pattern is consistent across multiple flow pairs)
+  - _If wrong_: Would need to deprecate or consolidate command files (unlikely given the re-entry pattern is consistent across multiple flow pairs)
 
 - **ASM-3**: The 102 passing unit tests in test_output.log represents the most recent authoritative test execution.
-  - *If wrong*: Would need to identify correct test execution artifact and reconcile counts
+  - _If wrong_: Would need to identify correct test execution artifact and reconcile counts
 
 - **ASM-4**: Path traversal in secrets.rs is a documentation/awareness issue, not an immediate exploitable vulnerability (depends on whether untrusted input reaches this code path).
-  - *If wrong*: Would escalate to security hardening work item with higher priority
+  - _If wrong_: Would escalate to security hardening work item with higher priority
 
 - **ASM-5**: Agent color coding is functional metadata used by tooling (routing, UI, etc.), not purely decorative.
-  - *If wrong*: Could downgrade to "cosmetic documentation" category
+  - _If wrong_: Could downgrade to "cosmetic documentation" category
 
 ## Questions / Clarifications Needed
 

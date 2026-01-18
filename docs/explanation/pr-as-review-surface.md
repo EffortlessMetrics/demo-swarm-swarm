@@ -9,6 +9,7 @@
 Devs get a **large, high-quality, well-tested change** they can **quickly review and approve from the PR interface itself**.
 
 Everything is:
+
 - **Tested and verified** (evidence exists)
 - **Well explained** (context is in the PR)
 - **Visually clear** (diagrams, structured sections)
@@ -54,6 +55,7 @@ graph TD
 ```
 
 Use these when:
+
 - Showing the affected flow path
 - Illustrating component relationships
 - Mapping request/response patterns
@@ -62,12 +64,12 @@ Use these when:
 
 Show verification state at a glance:
 
-| Check | Status | Evidence |
-|-------|--------|----------|
-| Tests | PASS 47/47 | `test_report.md` |
-| Security | PASS Clean | `security_scan.md` |
-| Mutation | WARN 87% | `mutation_report.md` |
-| Performance | -- | not measured |
+| Check       | Status     | Evidence             |
+| ----------- | ---------- | -------------------- |
+| Tests       | PASS 47/47 | `test_report.md`     |
+| Security    | PASS Clean | `security_scan.md`   |
+| Mutation    | WARN 87%   | `mutation_report.md` |
+| Performance | --         | not measured         |
 
 The table is scannable. Green/yellow/red status. Evidence pointers for drill-down.
 
@@ -113,11 +115,11 @@ This is **not** about reducing review quality. It's about focusing review effort
 
 Every claim links to evidence. No claim without a pointer.
 
-| Claim | Evidence Format |
-|-------|-----------------|
-| "Tests pass" | `test_report.md` or CI link |
-| "Security clean" | `security_scan.md` or scanner output |
-| "Matches spec" | `adr.md` + specific BDD scenarios |
+| Claim               | Evidence Format                      |
+| ------------------- | ------------------------------------ |
+| "Tests pass"        | `test_report.md` or CI link          |
+| "Security clean"    | `security_scan.md` or scanner output |
+| "Matches spec"      | `adr.md` + specific BDD scenarios    |
 | "Coverage adequate" | `coverage_report.md` with percentage |
 
 ### The Pointer Rule
@@ -126,6 +128,7 @@ If you claim it, point to it:
 
 ```markdown
 ### Proof (measured vs not measured)
+
 - Gate: PASS (evidence: `.runs/feat-auth/gate/gate_receipt.json`)
 - Tests: 47 passed (evidence: `.runs/feat-auth/build/test_execution.md`)
 - Mutation: 92% killed (evidence: `.runs/feat-auth/gate/mutation_report.md`)
@@ -137,6 +140,7 @@ Explicit gaps are better than hidden ones:
 
 ```markdown
 ### Not Measured
+
 - Performance: not measured (out of scope for this PR)
 - Accessibility: not measured (no a11y tests configured)
 - Integration tests: skipped (requires external service)
@@ -150,11 +154,11 @@ This tells the reviewer exactly what wasn't verified. They can decide if that ma
 
 Three surfaces exist:
 
-| Surface | Purpose | Audience |
-|---------|---------|----------|
-| **PR Description** | The cockpit | Reviewers making decisions |
-| **Diff** | Spot-check/audit | Reviewers validating specific claims |
-| **Receipts** | Evidence trail | Future auditors, debugging |
+| Surface            | Purpose          | Audience                             |
+| ------------------ | ---------------- | ------------------------------------ |
+| **PR Description** | The cockpit      | Reviewers making decisions           |
+| **Diff**           | Spot-check/audit | Reviewers validating specific claims |
+| **Receipts**       | Evidence trail   | Future auditors, debugging           |
 
 The PR description is primary. The diff is for spot-checking what the cockpit claims. Receipts are the underlying truth for anyone who needs to verify claims later.
 
@@ -173,6 +177,7 @@ The machine did the exhaustive checking. The human validates that the checking h
 ### 1. Large Changes Become Reviewable
 
 A 2000-line change is terrifying. But if you know:
+
 - Tests pass (here's the evidence)
 - Security clean (here's the scan)
 - Core logic is in 3 files (here are the hotspots)
@@ -183,6 +188,7 @@ A 2000-line change is terrifying. But if you know:
 ### 2. Quality is Proven, Not Trusted
 
 The PR doesn't say "we tested this thoroughly." It says:
+
 - 47 tests ran (evidence: test_report.md)
 - 3 new test files added
 - Mutation testing killed 92% of mutants
@@ -193,6 +199,7 @@ Proof over vibes. Evidence over narrative.
 ### 3. Context is Preserved
 
 Future readers understand why:
+
 - What problem was solved
 - What approach was taken
 - What constraints applied
@@ -203,6 +210,7 @@ The PR description is documentation for posterity, not just a merge gate.
 ### 4. Approval is Fast
 
 Everything needed is in one place:
+
 - What changed (summary)
 - Why it's safe (proof)
 - Where to look (hotspots)
@@ -214,37 +222,46 @@ The reviewer doesn't hunt for information. It's all in the cockpit.
 
 ## The Template
 
-```markdown
+````markdown
 ## Summary
+
 - [What changed, 1-3 bullets - user-visible or contract-visible]
 
 ## Review Map
+
 [Mermaid diagram or file tree showing affected areas]
 
 ### Hotspots
+
 - `src/auth/login.rs:45-67` - Core auth logic change
 - `src/auth/session.rs` - New session management
 - `tests/auth_test.rs` - New test coverage
 
 ## Verification
-| Check | Status | Evidence |
-|-------|--------|----------|
-| Tests | PASS | [test_report.md](link) |
-| Security | PASS | [security_scan.md](link) |
-| Lint | PASS | CI output |
+
+| Check    | Status | Evidence                 |
+| -------- | ------ | ------------------------ |
+| Tests    | PASS   | [test_report.md](link)   |
+| Security | PASS   | [security_scan.md](link) |
+| Lint     | PASS   | CI output                |
 
 ### Not Measured
+
 - [Explicit gaps - what wasn't verified and why]
 
 ## Reproduce
+
 ```bash
 npm test
 npm run security-scan
 ```
+````
 
 ## What's Left
+
 - [Future work, known limitations, follow-up items]
-```
+
+````
 
 ---
 
@@ -255,7 +272,7 @@ npm run security-scan
 ```markdown
 ## Summary
 - Updated code
-```
+````
 
 This tells the reviewer nothing. What code? Why? What changed for users?
 
@@ -263,6 +280,7 @@ This tells the reviewer nothing. What code? Why? What changed for users?
 
 ```markdown
 ## Verification
+
 All tests pass and the code is secure.
 ```
 
@@ -272,6 +290,7 @@ No evidence pointers. No specifics. This is a narrative claim, not proof.
 
 ```markdown
 ## Verification
+
 Tests pass. Security scan clean.
 ```
 
@@ -281,6 +300,7 @@ What about the things you didn't measure? Reviewers assume comprehensive checkin
 
 ```markdown
 ## Changes
+
 This PR implements the new authentication system by refactoring the
 existing login flow to use JWT tokens instead of session cookies. The
 session management was updated to handle token refresh and the security
@@ -308,12 +328,14 @@ This is the trade: cheap machine cycles buy expensive verification, so human rev
 > **The PR description is the product. Make it worth reading.**
 
 If the PR description is thorough, accurate, and well-organized:
+
 - Reviewers approve confidently
 - Future readers understand context
 - Audit trails are complete
 - Quality is proven, not assumed
 
 If the PR description is sparse or vague:
+
 - Reviewers dig through diffs
 - Quality is uncertain
 - Context is lost

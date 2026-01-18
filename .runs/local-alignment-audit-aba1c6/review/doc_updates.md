@@ -22,14 +22,15 @@ concerns: []
 
 ## Files Updated
 
-| File | Change Type | Summary |
-|------|-------------|---------|
-| `docs/explanation/architecture.md` | updated | Rewrote "Flow command variants" section to "Flow commands" |
-| `.runs/local-alignment-audit-aba1c6/build/test_execution.md` | updated | Updated flow count references to "7 flows, 7 commands" |
+| File                                                         | Change Type | Summary                                                    |
+| ------------------------------------------------------------ | ----------- | ---------------------------------------------------------- |
+| `docs/explanation/architecture.md`                           | updated     | Rewrote "Flow command variants" section to "Flow commands" |
+| `.runs/local-alignment-audit-aba1c6/build/test_execution.md` | updated     | Updated flow count references to "7 flows, 7 commands"     |
 
 ## What Changed
 
 ### RW-003: Flow command variants section
+
 - Renamed section from "Flow command variants" to "Flow commands" (lines 76-92)
 - Replaced misleading "variants" table with accurate 7-command table
 - Each flow now correctly shown with its one primary command
@@ -38,21 +39,25 @@ concerns: []
 - Table now shows all 7 commands: `/flow-1-signal` through `/flow-7-wisdom`
 
 ### RW-005: Build artifacts "6 flows" references
+
 Build artifacts were accessible and corrected:
+
 - Updated `.runs/local-alignment-audit-aba1c6/build/test_execution.md` to reference "7 flows, 7 commands"
 
 **Status:** RESOLVED
 
 ### RW-004: "7 flows" vs "10 commands" clarification - NO CHANGES NEEDED
+
 Verified the three target files already have consistent messaging:
 
-| File | Line | Current Text | Status |
-|------|------|--------------|--------|
-| `CHANGELOG.md` | L24 | "7 flow commands: `/flow-1-signal` through `/flow-7-wisdom`" | Correct |
-| `CONTRIBUTING.md` | L8 | "7 flows + customize" | Correct |
-| `docs/explanation/architecture.md` | L11 | "7 flows exposed as slash commands" | Correct |
+| File                               | Line | Current Text                                                 | Status  |
+| ---------------------------------- | ---- | ------------------------------------------------------------ | ------- |
+| `CHANGELOG.md`                     | L24  | "7 flow commands: `/flow-1-signal` through `/flow-7-wisdom`" | Correct |
+| `CONTRIBUTING.md`                  | L8   | "7 flows + customize"                                        | Correct |
+| `docs/explanation/architecture.md` | L11  | "7 flows exposed as slash commands"                          | Correct |
 
 The "10 commands" claim in review feedback (FB-003, FB-004, FB-005) was based on **stale Signal artifacts** from before flow renumbering. Current reality:
+
 - 7 flow command files: `flow-1-signal.md` through `flow-7-wisdom.md`
 - 1 utility command: `customize-pack.md`
 - Total: 8 command files, but only 7 are "flow commands"

@@ -61,25 +61,24 @@ severity_summary:
 
 All REQ and NFR identifiers have observability coverage:
 
-
-| Identifier | Coverage |
-|------------|----------|
-| REQ-001 | VS-001, SLO-001, ALERT-001 |
-| REQ-002 | Manual review (documented as such) |
-| REQ-003 | Manual review (documented as such) |
-| REQ-004 | VS-002 (pack-check), SLO-002, ALERT-002 |
-| REQ-005 | VS-003, SLO-004, ALERT-003 |
-| REQ-006 | VS-004, SLO-003, ALERT-004 |
-| REQ-007 | Manual review (documented as such) |
-| NFR-DOC-001 | VS-001, SLO-001 |
-| NFR-SEC-001 | VS-004, SLO-003 |
-| NFR-TRACE-001 | VS-002, SLO-002, ALERT-002 |
-| RSK-001 | VS-002 (pack-check detection) |
-| RSK-002 | VS-003 (test count verification) |
-| RSK-003 | Out of scope (code, not docs) |
-| RSK-004 | Manual review (future drift) |
-| RSK-005 | Manual review (color coding) |
-| RSK-007 | VS-004 (security claims) |
+| Identifier    | Coverage                                |
+| ------------- | --------------------------------------- |
+| REQ-001       | VS-001, SLO-001, ALERT-001              |
+| REQ-002       | Manual review (documented as such)      |
+| REQ-003       | Manual review (documented as such)      |
+| REQ-004       | VS-002 (pack-check), SLO-002, ALERT-002 |
+| REQ-005       | VS-003, SLO-004, ALERT-003              |
+| REQ-006       | VS-004, SLO-003, ALERT-004              |
+| REQ-007       | Manual review (documented as such)      |
+| NFR-DOC-001   | VS-001, SLO-001                         |
+| NFR-SEC-001   | VS-004, SLO-003                         |
+| NFR-TRACE-001 | VS-002, SLO-002, ALERT-002              |
+| RSK-001       | VS-002 (pack-check detection)           |
+| RSK-002       | VS-003 (test count verification)        |
+| RSK-003       | Out of scope (code, not docs)           |
+| RSK-004       | Manual review (future drift)            |
+| RSK-005       | Manual review (color coding)            |
+| RSK-007       | VS-004 (security claims)                |
 
 ## Questions for Humans
 
@@ -98,6 +97,7 @@ All REQ and NFR identifiers have observability coverage:
 ### 1) Handshake Validity
 
 **PASS**: The observability spec includes an `## Inventory (machine countable)` section at lines 273-295 with correctly prefixed markers:
+
 - 4 METRIC markers
 - 3 LOG_EVENT markers
 - 2 TRACE_SPAN markers
@@ -107,6 +107,7 @@ All REQ and NFR identifiers have observability coverage:
 ### 2) Measurability of Critical Journeys
 
 **PASS**: The critical journey (documentation alignment verification) is measurable via:
+
 - **Rate**: N/A for documentation (point-in-time verification)
 - **Errors**: VS-001 (stale references), VS-002 (pack-check failures), VS-003 (count mismatch), VS-004 (missing evidence)
 - **Duration**: N/A (verification is one-time at Gate)
@@ -119,6 +120,7 @@ The spec appropriately adapts runtime observability to documentation context whi
 **PASS (implicit)**: Documentation verification does not process user data. The spec correctly notes at line 20 that "Traditional runtime observability (latency metrics, trace spans, distributed SLOs) does not apply to this documentation-only change."
 
 Cardinality is inherently bounded:
+
 - `file_path` label is bounded to known documentation files
 - `run_id` is a single value per run
 - `claim_id` is bounded to security claims (2-3 maximum)
@@ -126,12 +128,14 @@ Cardinality is inherently bounded:
 ### 4) SLOs + Alerts are Actionable
 
 **PASS**: All four SLOs have clear targets:
+
 - SLO-001: 0 occurrences of "six flows"
 - SLO-002: Exit code 0 from pack-check
 - SLO-003: 100% security claims with code evidence
 - SLO-004: Exact match on test count
 
 All four alerts specify severity (BLOCKING or MAJOR) and include runbook guidance:
+
 - ALERT-001: Fix remaining references, rerun
 - ALERT-002: Review failures, proceed to Phase 4 if structure.rs
 - ALERT-003: Update documentation to match actual
@@ -142,18 +146,19 @@ All four alerts specify severity (BLOCKING or MAJOR) and include runbook guidanc
 ### 5) Traceability + Verification Hooks
 
 **PASS**: The spec includes comprehensive traceability in the "Traceability (REQ/NFR/Risk -> Signals)" section:
+
 - Requirements to Signals Map (lines 199-209)
 - NFRs to Signals Map (lines 213-217)
 - Risks to Detection Map (lines 221-229)
 
 **Verification hooks alignment with test_plan.md**:
 
-| Observability Signal | test_plan.md Verification |
-|---------------------|---------------------------|
-| VS-001 (grep six flows) | Verification Commands Reference (lines 164-177) |
-| VS-002 (pack-check) | Contract Test Plan (lines 116-121) |
-| VS-003 (test count) | Scenario matrix REQ-005 scenarios |
-| VS-004 (security evidence) | NFR-SEC-001 verification steps |
+| Observability Signal       | test_plan.md Verification                       |
+| -------------------------- | ----------------------------------------------- |
+| VS-001 (grep six flows)    | Verification Commands Reference (lines 164-177) |
+| VS-002 (pack-check)        | Contract Test Plan (lines 116-121)              |
+| VS-003 (test count)        | Scenario matrix REQ-005 scenarios               |
+| VS-004 (security evidence) | NFR-SEC-001 verification steps                  |
 
 The test_plan.md includes explicit verification commands that match the observability spec signals. No gaps identified.
 

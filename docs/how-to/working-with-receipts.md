@@ -10,13 +10,13 @@ Receipts are structured JSON artifacts produced by cleanup agents at the end of 
 
 Each flow produces a receipt:
 
-| Flow | Receipt Path |
-|------|--------------|
+| Flow   | Receipt Path                                |
+| ------ | ------------------------------------------- |
 | Signal | `.runs/<run-id>/signal/signal_receipt.json` |
-| Plan | `.runs/<run-id>/plan/plan_receipt.json` |
-| Build | `.runs/<run-id>/build/build_receipt.json` |
+| Plan   | `.runs/<run-id>/plan/plan_receipt.json`     |
+| Build  | `.runs/<run-id>/build/build_receipt.json`   |
 | Review | `.runs/<run-id>/review/review_receipt.json` |
-| Gate | `.runs/<run-id>/gate/gate_receipt.json` |
+| Gate   | `.runs/<run-id>/gate/gate_receipt.json`     |
 | Deploy | `.runs/<run-id>/deploy/deploy_receipt.json` |
 | Wisdom | `.runs/<run-id>/wisdom/wisdom_receipt.json` |
 
@@ -29,6 +29,7 @@ Each flow produces a receipt:
 **Core principle:** The repo's current state (HEAD + working tree + staged diff + actual tool results) is what you're shipping. Receipts help you investigate what happened — they are not the primary mechanism for verifying outcomes.
 
 **Trust hierarchy:**
+
 1. **Live repo state + executed evidence** (primary)
 2. **Receipts** (cached evidence of prior state)
 3. **Narrative summaries** (useful for humans, never a control input)
@@ -78,9 +79,9 @@ Receipts may include a `devlt` section for retrospective analysis of human vs ma
     "flow_started_at": "2025-12-22T10:00:00Z",
     "flow_completed_at": "2025-12-22T10:45:00Z",
     "human_checkpoints": [
-      {"at": "2025-12-22T10:00:00Z", "action": "flow_start"},
-      {"at": "2025-12-22T10:30:00Z", "action": "question_answered"},
-      {"at": "2025-12-22T10:45:00Z", "action": "flow_approved"}
+      { "at": "2025-12-22T10:00:00Z", "action": "flow_start" },
+      { "at": "2025-12-22T10:30:00Z", "action": "question_answered" },
+      { "at": "2025-12-22T10:45:00Z", "action": "flow_approved" }
     ],
     "machine_duration_sec": 2700,
     "human_checkpoint_count": 3,
@@ -92,17 +93,18 @@ Receipts may include a `devlt` section for retrospective analysis of human vs ma
 
 **Field semantics:**
 
-| Field | Type | Meaning |
-|-------|------|---------|
-| `flow_started_at` | Observable | ISO8601 timestamp when flow began |
-| `flow_completed_at` | Observable | ISO8601 timestamp when flow completed |
-| `human_checkpoints` | Observable | Array of human interaction points with timestamps and action types |
-| `machine_duration_sec` | Derived | Wall-clock time (not execution time) |
-| `human_checkpoint_count` | Observable | Count of human interactions |
-| `estimated_human_attention_min` | Inference | Rough estimate based on checkpoint count and typical review times |
-| `estimation_basis` | Metadata | Explanation of how the estimate was derived |
+| Field                           | Type       | Meaning                                                            |
+| ------------------------------- | ---------- | ------------------------------------------------------------------ |
+| `flow_started_at`               | Observable | ISO8601 timestamp when flow began                                  |
+| `flow_completed_at`             | Observable | ISO8601 timestamp when flow completed                              |
+| `human_checkpoints`             | Observable | Array of human interaction points with timestamps and action types |
+| `machine_duration_sec`          | Derived    | Wall-clock time (not execution time)                               |
+| `human_checkpoint_count`        | Observable | Count of human interactions                                        |
+| `estimated_human_attention_min` | Inference  | Rough estimate based on checkpoint count and typical review times  |
+| `estimation_basis`              | Metadata   | Explanation of how the estimate was derived                        |
 
 **Observable vs inferred:**
+
 - Timestamps and counts are **facts** (derived from logs/artifacts)
 - `estimated_human_attention_min` is an **inference** (labeled as such)
 - Token costs are **not tracked** here (unreliably available)
@@ -110,6 +112,7 @@ Receipts may include a `devlt` section for retrospective analysis of human vs ma
 **Purpose:** DevLT is for retrospective analysis in Flow 7 (Wisdom), not for gating or routing. It helps answer: "How much human attention did this run actually require?"
 
 **Common checkpoint actions:**
+
 - `flow_start` — Flow initiated
 - `question_answered` — Human responded to a clarifying question
 - `decision_made` — Human made a routing or design decision
@@ -118,11 +121,11 @@ Receipts may include a `devlt` section for retrospective analysis of human vs ma
 
 ### Status Values
 
-| Status | Meaning |
-|--------|---------|
-| `VERIFIED` | Flow completed successfully; artifacts exist and verification passed |
-| `UNVERIFIED` | Flow completed but with gaps, concerns, or missing verification |
-| `CANNOT_PROCEED` | Mechanical failure only (IO/permissions/tooling) |
+| Status           | Meaning                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| `VERIFIED`       | Flow completed successfully; artifacts exist and verification passed |
+| `UNVERIFIED`     | Flow completed but with gaps, concerns, or missing verification      |
+| `CANNOT_PROCEED` | Mechanical failure only (IO/permissions/tooling)                     |
 
 ### Stations Tracking
 
@@ -139,12 +142,12 @@ Receipts include per-station execution status:
 }
 ```
 
-| Result | Meaning |
-|--------|---------|
-| `PASS` | Station ran and succeeded |
-| `FAIL` | Station ran and failed |
+| Result    | Meaning                                          |
+| --------- | ------------------------------------------------ |
+| `PASS`    | Station ran and succeeded                        |
+| `FAIL`    | Station ran and failed                           |
 | `SKIPPED` | Station was skipped (optional or not configured) |
-| `UNKNOWN` | Station status is unclear |
+| `UNKNOWN` | Station status is unclear                        |
 
 ---
 
@@ -165,11 +168,16 @@ Receipts include per-station execution status:
     "requirements_critic": "VERIFIED",
     "bdd_critic": "VERIFIED"
   },
-  "key_artifacts": ["requirements.md", "features/*.feature", "open_questions.md"]
+  "key_artifacts": [
+    "requirements.md",
+    "features/*.feature",
+    "open_questions.md"
+  ]
 }
 ```
 
 **Key questions:**
+
 - How many requirements were captured? (`counts.functional_requirements`, `counts.non_functional_requirements`)
 - Are the requirements validated? (`quality_gates.requirements_critic`)
 - Are there open questions? (`counts.open_questions`)
@@ -203,6 +211,7 @@ Receipts include per-station execution status:
 ```
 
 **Key questions:**
+
 - Did tests pass? (`tests.passed`, `tests.failed`)
 - Were tests reviewed? (`quality_gates.test_critic`)
 - Was code reviewed? (`quality_gates.code_critic`)
@@ -233,6 +242,7 @@ Receipts include per-station execution status:
 ```
 
 **Key questions:**
+
 - Can this be merged? (`merge_verdict`)
 - Are there security issues? (`counts.security_findings`)
 - Is coverage adequate? (`counts.coverage_line_percent`, `counts.coverage_branch_percent`)
@@ -261,6 +271,7 @@ Receipts include per-station execution status:
 ```
 
 **Key questions:**
+
 - Is deployment stable? (`deployment_verdict`, `signals.smoke_signal`)
 - Did CI pass? (`signals.ci_signal`)
 - Is governance verified? (`governance_enforcement`)
@@ -328,11 +339,13 @@ bash .claude/scripts/demoswarm.sh count pattern \
 ## Evidence vs Format
 
 **If verification evidence exists but a receipt is malformed:**
+
 - Treat it as a **pack/tooling defect**, not an engineering failure
 - Ship based on the underlying evidence **if gates pass**
 - Record the defect: `status: UNVERIFIED`, `blockers: ["receipt_tooling_error: <details>"]`
 
 **If the evidence itself is missing:**
+
 - That's **unverified work**, not paperwork drift
 - Route back to run the missing verification
 
@@ -344,6 +357,7 @@ When a station is skipped, cleanup agents create explicit SKIPPED stubs:
 
 ```markdown
 # Mutation Report
+
 status: SKIPPED
 reason: Mutation testing not configured for this project
 evidence_sha: abc123...
@@ -392,6 +406,7 @@ bash .claude/scripts/demoswarm.sh receipts count \
 These examples show what receipts look like. Remember: these are **audit records**, not routing inputs. Cleanup agents derive the routing fields from agent prose handoffs.
 
 ### Healthy Flow
+
 ```json
 {
   "status": "VERIFIED",
@@ -404,6 +419,7 @@ These examples show what receipts look like. Remember: these are **audit records
 ```
 
 ### Issues But Proceeding
+
 ```json
 {
   "status": "UNVERIFIED",
@@ -419,6 +435,7 @@ These examples show what receipts look like. Remember: these are **audit records
 The `recommended_action: "PROCEED"` was derived from the agent's handoff which said something like "Ready to move forward despite the gap in integration tests."
 
 ### Needs Upstream Fix
+
 ```json
 {
   "status": "UNVERIFIED",
@@ -432,6 +449,7 @@ The `recommended_action: "PROCEED"` was derived from the agent's handoff which s
 The routing fields were derived from the agent's handoff which said something like "This needs to go back to Plan. The interface-designer should update the API contract."
 
 ### Mechanical Failure
+
 ```json
 {
   "status": "CANNOT_PROCEED",

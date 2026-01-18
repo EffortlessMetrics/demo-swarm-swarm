@@ -3,6 +3,7 @@
 This guide validates the DemoSwarm **pack-only** repo by running two small scenarios.
 
 The goal is not "does my app build", but "does the pack contract hold":
+
 - receipts are mechanical
 - `.runs/index.json` updates are stable
 - reseal-if-modified converges (or safe-bails correctly)
@@ -15,12 +16,14 @@ The goal is not "does my app build", but "does the pack contract hold":
 ## Prerequisites
 
 Required:
-1) A sandbox repo (fresh clone is ideal)
-2) DemoSwarm pack installed (`.claude/` present)
-3) Run `/customize-pack` if you haven't (or confirm skills are configured)
-4) Shell tooling for pack-check: `bash`, `git`, `grep`, `awk`, `sed`, `wc`, `jq`
+
+1. A sandbox repo (fresh clone is ideal)
+2. DemoSwarm pack installed (`.claude/` present)
+3. Run `/customize-pack` if you haven't (or confirm skills are configured)
+4. Shell tooling for pack-check: `bash`, `git`, `grep`, `awk`, `sed`, `wc`, `jq`
 
 Optional (for GitHub integration validation):
+
 - `gh` installed + authenticated (`gh auth status`)
 
 Note: If `gh` is not available/authenticated, GH steps are expected to be **SKIPPED** and local artifacts should still be written.
@@ -59,17 +62,17 @@ Use a deterministic run-id so reruns are comparable:
 
 ### A1) After Flow 1 completes, verify (local)
 
-* [ ] `.runs/val-a/run_meta.json` exists and contains `run_id: val-a` (or equivalent field)
-* [ ] `.runs/val-a/signal/signal_receipt.json` exists
-* [ ] `.runs/val-a/signal/requirements.md` contains REQ- identifiers
-* [ ] `.runs/val-a/signal/features/` contains at least one `*.feature`
-* [ ] `.runs/index.json` entry for `val-a` exists with `last_flow: "signal"`
+- [ ] `.runs/val-a/run_meta.json` exists and contains `run_id: val-a` (or equivalent field)
+- [ ] `.runs/val-a/signal/signal_receipt.json` exists
+- [ ] `.runs/val-a/signal/requirements.md` contains REQ- identifiers
+- [ ] `.runs/val-a/signal/features/` contains at least one `*.feature`
+- [ ] `.runs/index.json` entry for `val-a` exists with `last_flow: "signal"`
 
 Optional (if GH available and gates passed):
 
-* [ ] A GitHub issue exists for the run
-* [ ] Issue body contains a status board
-* [ ] There is a Flow 1 comment (or a recorded "posted/updated" status artifact)
+- [ ] A GitHub issue exists for the run
+- [ ] Issue body contains a status board
+- [ ] There is a Flow 1 comment (or a recorded "posted/updated" status artifact)
 
 ---
 
@@ -81,16 +84,16 @@ Run Flow 2 using the same run-id:
 
 ### A2) After Flow 2 completes, verify (local)
 
-* [ ] `.runs/val-a/plan/plan_receipt.json` exists
-* [ ] `.runs/val-a/plan/adr.md` exists
-* [ ] `.runs/val-a/plan/api_contracts.yaml` exists
-* [ ] `.runs/val-a/plan/observability_spec.md` exists
-* [ ] `.runs/index.json` updated for `val-a` with `last_flow: "plan"`
+- [ ] `.runs/val-a/plan/plan_receipt.json` exists
+- [ ] `.runs/val-a/plan/adr.md` exists
+- [ ] `.runs/val-a/plan/api_contracts.yaml` exists
+- [ ] `.runs/val-a/plan/observability_spec.md` exists
+- [ ] `.runs/index.json` updated for `val-a` with `last_flow: "plan"`
 
 Optional (if GH available and gates passed):
 
-* [ ] Issue status board updated
-* [ ] Flow 2 comment exists and is separate from Flow 1 comment (one-per-flow behavior)
+- [ ] Issue status board updated
+- [ ] Flow 2 comment exists and is separate from Flow 1 comment (one-per-flow behavior)
 
 ---
 
@@ -102,21 +105,21 @@ Run Flow 3:
 
 ### A3) After Flow 3 completes, verify (local)
 
-* [ ] `.runs/val-a/build/build_receipt.json` exists
-* [ ] `.runs/val-a/build/self_review.md` exists
-* [ ] `.runs/val-a/build/impl_changes_summary.md` exists
-* [ ] `.runs/val-a/build/test_changes_summary.md` exists (or the flow documented why it is absent)
-* [ ] `.runs/index.json` updated for `val-a` with `last_flow: "build"`
-* [ ] If reseal occurred: `.runs/val-a/build/cleanup_report.md` shows a reseal cycle occurred (evidence, not vibes)
+- [ ] `.runs/val-a/build/build_receipt.json` exists
+- [ ] `.runs/val-a/build/self_review.md` exists
+- [ ] `.runs/val-a/build/impl_changes_summary.md` exists
+- [ ] `.runs/val-a/build/test_changes_summary.md` exists (or the flow documented why it is absent)
+- [ ] `.runs/index.json` updated for `val-a` with `last_flow: "build"`
+- [ ] If reseal occurred: `.runs/val-a/build/cleanup_report.md` shows a reseal cycle occurred (evidence, not vibes)
 
 **Feature-specific verification:**
 
-* [ ] `demoswarm version` works via the shim: `bash .claude/scripts/demoswarm.sh version`
-* [ ] Output is valid JSON with expected keys (`demoswarm_version`, `pack_version`, `git_sha`)
+- [ ] `demoswarm version` works via the shim: `bash .claude/scripts/demoswarm.sh version`
+- [ ] Output is valid JSON with expected keys (`demoswarm_version`, `pack_version`, `git_sha`)
 
 Optional (if GH available and gates passed):
 
-* [ ] Flow 3 comment exists/updated
+- [ ] Flow 3 comment exists/updated
 
 ---
 
@@ -128,9 +131,9 @@ Run Flow 4 (Review):
 
 ### A4) After Flow 4 completes, verify (local)
 
-* [ ] `.runs/val-a/review/review_receipt.json` exists
-* [ ] `.runs/val-a/review/review_worklist.md` exists (or documented as empty)
-* [ ] `.runs/index.json` updated for `val-a` with `last_flow: "review"`
+- [ ] `.runs/val-a/review/review_receipt.json` exists
+- [ ] `.runs/val-a/review/review_worklist.md` exists (or documented as empty)
+- [ ] `.runs/index.json` updated for `val-a` with `last_flow: "review"`
 
 ---
 
@@ -142,15 +145,15 @@ Run Flow 5 (Gate):
 
 ### A5) After Flow 5 completes, verify (local)
 
-* [ ] `.runs/val-a/gate/gate_receipt.json` exists
-* [ ] `.runs/val-a/gate/merge_decision.md` exists and contains MERGE/BOUNCE (with reason)
-* [ ] `.runs/val-a/gate/contract_compliance.md` exists
-* [ ] `.runs/val-a/gate/coverage_audit.md` exists
-* [ ] `.runs/index.json` updated for `val-a` with `last_flow: "gate"`
+- [ ] `.runs/val-a/gate/gate_receipt.json` exists
+- [ ] `.runs/val-a/gate/merge_decision.md` exists and contains MERGE/BOUNCE (with reason)
+- [ ] `.runs/val-a/gate/contract_compliance.md` exists
+- [ ] `.runs/val-a/gate/coverage_audit.md` exists
+- [ ] `.runs/index.json` updated for `val-a` with `last_flow: "gate"`
 
 Optional (if GH available and gates passed):
 
-* [ ] Flow 5 comment exists/updated with verdict
+- [ ] Flow 5 comment exists/updated with verdict
 
 ---
 
@@ -164,16 +167,16 @@ Use a separate deterministic run-id:
 
 ### B1) After Flow 2 completes, verify (local)
 
-* [ ] `.runs/val-b/run_meta.json` exists
-* [ ] `.runs/val-b/plan/plan_receipt.json` exists
-* [ ] Plan artifacts exist with explicit assumptions (because Signal inputs are missing)
-* [ ] `.runs/index.json` has an entry for `val-b`
+- [ ] `.runs/val-b/run_meta.json` exists
+- [ ] `.runs/val-b/plan/plan_receipt.json` exists
+- [ ] Plan artifacts exist with explicit assumptions (because Signal inputs are missing)
+- [ ] `.runs/index.json` has an entry for `val-b`
 
 Optional (if GH available and gates passed):
 
-* [ ] GitHub issue exists
-* [ ] Issue body includes a **Signal pending** banner/note
-* [ ] The issue does not imply Signal was auto-run; it should instruct humans to run `/flow-1-signal` to backfill
+- [ ] GitHub issue exists
+- [ ] Issue body includes a **Signal pending** banner/note
+- [ ] The issue does not imply Signal was auto-run; it should instruct humans to run `/flow-1-signal` to backfill
 
 ---
 
@@ -185,8 +188,8 @@ Optional backfill:
 
 Verify:
 
-* [ ] `.runs/val-b/signal/` now exists with Signal artifacts
-* [ ] Issue is updated accordingly (banner removed/updated, Flow 1 comment posted/updated)
+- [ ] `.runs/val-b/signal/` now exists with Signal artifacts
+- [ ] Issue is updated accordingly (banner removed/updated, Flow 1 comment posted/updated)
 
 ---
 
@@ -200,7 +203,7 @@ This validates the reseal loop without needing GH.
 printf '\nDEMO_SECRET=REDACT_ME\n' >> ".runs/val-a/signal/test_secret.md"
 ```
 
-2. Run the reseal sequence by rerunning Flow 1 (simplest way to exercise the flow's own reseal logic):
+1. Run the reseal sequence by rerunning Flow 1 (simplest way to exercise the flow's own reseal logic):
 
 ```text
 /flow-1-signal val-a "Reseal test run"
@@ -208,9 +211,9 @@ printf '\nDEMO_SECRET=REDACT_ME\n' >> ".runs/val-a/signal/test_secret.md"
 
 Verify:
 
-* [ ] `.runs/val-a/signal/secrets_status.json` indicates `modified_files: true` occurred at least once
-* [ ] The secret-like string is redacted in the artifact
-* [ ] `signal_receipt.json` reflects the final post-redaction state (resealed)
+- [ ] `.runs/val-a/signal/secrets_status.json` indicates `modified_files: true` occurred at least once
+- [ ] The secret-like string is redacted in the artifact
+- [ ] `signal_receipt.json` reflects the final post-redaction state (resealed)
 
 Note: If reseal fails to converge, safe-bail must force `repo-operator checkpoint_mode: local_only` and prevent GH ops.
 
@@ -229,9 +232,9 @@ Goal: one comment per flow, updated on rerun (not duplicated).
 
 Verify:
 
-* [ ] The Flow 1 comment is updated (same "slot"), not duplicated
-* [ ] The flow directory contains a local record artifact of the post (e.g., `github_report.md`) and a posting status artifact (e.g., `gh_report_status.md`)
-* [ ] If the implementation uses a stored comment ID, it should be stable across reruns (do not rely on a specific filename unless explicitly contracted)
+- [ ] The Flow 1 comment is updated (same "slot"), not duplicated
+- [ ] The flow directory contains a local record artifact of the post (e.g., `github_report.md`) and a posting status artifact (e.g., `gh_report_status.md`)
+- [ ] If the implementation uses a stored comment ID, it should be stable across reruns (do not rely on a specific filename unless explicitly contracted)
 
 ---
 
@@ -278,8 +281,8 @@ Every `<flow>_receipt.json` should include at least:
 
 Expected when:
 
-* upstream artifacts don't exist (out-of-order start), or
-* stable markers aren't present / are ambiguous
+- upstream artifacts don't exist (out-of-order start), or
+- stable markers aren't present / are ambiguous
 
 Check the flow's `cleanup_report.md` for derivation details.
 
@@ -287,17 +290,17 @@ Check the flow's `cleanup_report.md` for derivation details.
 
 Check:
 
-* `gh auth status` (if you expected GH integration)
-* the secrets gate (`safe_to_publish: false` blocks external ops)
-* repo-operator gate (`proceed_to_github_ops: false` blocks external ops)
-* flow-local GH status artifacts for the skip reason
+- `gh auth status` (if you expected GH integration)
+- the secrets gate (`safe_to_publish: false` blocks external ops)
+- repo-operator gate (`proceed_to_github_ops: false` blocks external ops)
+- flow-local GH status artifacts for the skip reason
 
 ### "Reseal didn't happen"
 
 Check:
 
-* `secrets_status.json` for `modified_files: true`
-* that the flow command includes reseal logic (cleanup ↔ sanitizer)
+- `secrets_status.json` for `modified_files: true`
+- that the flow command includes reseal logic (cleanup ↔ sanitizer)
 
 ---
 

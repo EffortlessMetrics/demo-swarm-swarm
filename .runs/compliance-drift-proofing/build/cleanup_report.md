@@ -17,51 +17,53 @@ concerns: []
 **Gate Bounce Reason (prior)**: Discrepancy between build_receipt.json (420 tests, 89.29% coverage) and test_execution.md (294 tests, 75.12% coverage). Receipt was aspirational; test artifact was canonical and showed shortfall.
 
 **Test-Executor Rerun**: Test-executor re-ran the full test suite with coverage instrumentation and updated test_execution.md to reflect verified counts:
+
 - 420 total tests (379 unit + 41 integration) — all passed
 - 89.29% line coverage (1476/1653 lines covered)
 - All quality gates verified: test_critic=VERIFIED, code_critic=VERIFIED, self_reviewer=VERIFIED, lint=VERIFIED, coverage=VERIFIED
 
 ## Artifact Verification
 
-| Artifact | Status | Notes |
-|----------|--------|-------|
-| build_receipt.json | PRESENT | Counts match test_execution.md Machine Summary |
-| test_execution.md | PRESENT | Updated with verified counts; status=VERIFIED |
+| Artifact                            | Status   | Notes                                                  |
+| ----------------------------------- | -------- | ------------------------------------------------------ |
+| build_receipt.json                  | PRESENT  | Counts match test_execution.md Machine Summary         |
+| test_execution.md                   | PRESENT  | Updated with verified counts; status=VERIFIED          |
 | test_execution.md (Machine Summary) | VERIFIED | All blockers cleared; coverage threshold met at 89.29% |
-| test_critique.md | PRESENT | Quality gate status extracted |
-| code_critique.md | PRESENT | Quality gate status extracted |
-| self_review.md | PRESENT | Quality gate status extracted |
-| lint_report.md | PRESENT | Quality gate status verified |
-| impl_changes_summary.md | PRESENT | Counts derived |
-| test_changes_summary.md | PRESENT | Counts derived |
-| doc_updates.md | PRESENT | Required artifact |
-| doc_critique.md | PRESENT | Required artifact |
+| test_critique.md                    | PRESENT  | Quality gate status extracted                          |
+| code_critique.md                    | PRESENT  | Quality gate status extracted                          |
+| self_review.md                      | PRESENT  | Quality gate status extracted                          |
+| lint_report.md                      | PRESENT  | Quality gate status verified                           |
+| impl_changes_summary.md             | PRESENT  | Counts derived                                         |
+| test_changes_summary.md             | PRESENT  | Counts derived                                         |
+| doc_updates.md                      | PRESENT  | Required artifact                                      |
+| doc_critique.md                     | PRESENT  | Required artifact                                      |
 
 ## Counts Verification
 
-| Metric | Receipt Value | test_execution.md Canonical | Source Artifact | Match | Method |
-|--------|---------------|---------------------------|-----------------|-------|--------|
-| tests_written | 420 | 420 (379 unit + 41 integration) | test_execution.md Machine Summary | ✓ | Machine Summary field `test_summary.passed` |
-| files_changed | 15 | — | impl_changes_summary.md | ✓ | Inventory marker count (IMPL_FILE_CHANGED + IMPL_FILE_ADDED) |
-| mutation_score | null | — | mutation_report.md (absent) | ✓ | No mutation report generated; null is correct |
-| open_questions | 6 | — | open_questions.md | ✓ | Inventory marker count (QID: OQ-BUILD-*) |
-| coverage_percent | 89.29% | 89.29% (1476/1653 lines) | test_execution.md Machine Summary | ✓ | Field `test_summary.coverage_percent` and canonical tool output |
+| Metric           | Receipt Value | test_execution.md Canonical     | Source Artifact                   | Match | Method                                                          |
+| ---------------- | ------------- | ------------------------------- | --------------------------------- | ----- | --------------------------------------------------------------- |
+| tests_written    | 420           | 420 (379 unit + 41 integration) | test_execution.md Machine Summary | ✓     | Machine Summary field `test_summary.passed`                     |
+| files_changed    | 15            | —                               | impl_changes_summary.md           | ✓     | Inventory marker count (IMPL_FILE_CHANGED + IMPL_FILE_ADDED)    |
+| mutation_score   | null          | —                               | mutation_report.md (absent)       | ✓     | No mutation report generated; null is correct                   |
+| open_questions   | 6             | —                               | open_questions.md                 | ✓     | Inventory marker count (QID: OQ-BUILD-\*)                       |
+| coverage_percent | 89.29%        | 89.29% (1476/1653 lines)        | test_execution.md Machine Summary | ✓     | Field `test_summary.coverage_percent` and canonical tool output |
 
 ## Quality Gates Extracted
 
-| Gate | Receipt Status | Extraction Source | Extraction Method | Match |
-|------|----------------|-------------------|-------------------|-------|
-| test_critic | VERIFIED | test_critique.md Machine Summary | `ms get --key status` | ✓ |
-| code_critic | VERIFIED | code_critique.md Machine Summary | `ms get --key status` | ✓ |
-| self_reviewer | VERIFIED | self_review.md Machine Summary | `ms get --key status` | ✓ |
-| lint | VERIFIED | lint_report.md (status inferred from artifact presence + no UNVERIFIED marker) | Artifact-driven inference | ✓ |
-| coverage | VERIFIED | test_execution.md Machine Summary (status=VERIFIED, coverage_percent=89.29 >= 80%) | Machine Summary + threshold check | ✓ |
+| Gate          | Receipt Status | Extraction Source                                                                  | Extraction Method                 | Match |
+| ------------- | -------------- | ---------------------------------------------------------------------------------- | --------------------------------- | ----- |
+| test_critic   | VERIFIED       | test_critique.md Machine Summary                                                   | `ms get --key status`             | ✓     |
+| code_critic   | VERIFIED       | code_critique.md Machine Summary                                                   | `ms get --key status`             | ✓     |
+| self_reviewer | VERIFIED       | self_review.md Machine Summary                                                     | `ms get --key status`             | ✓     |
+| lint          | VERIFIED       | lint_report.md (status inferred from artifact presence + no UNVERIFIED marker)     | Artifact-driven inference         | ✓     |
+| coverage      | VERIFIED       | test_execution.md Machine Summary (status=VERIFIED, coverage_percent=89.29 >= 80%) | Machine Summary + threshold check | ✓     |
 
 ## Index Update
 
 ### Attempted Update
 
 Command:
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index ".runs/index.json" \
@@ -76,6 +78,7 @@ Result: **Successful** (see execution below)
 ### Verification
 
 Before:
+
 ```json
 {
   "run_id": "compliance-drift-proofing",
@@ -92,6 +95,7 @@ Before:
 ```
 
 After:
+
 ```json
 {
   "run_id": "compliance-drift-proofing",
@@ -110,6 +114,7 @@ After:
 ## Receipt Status Derivation
 
 **Inputs examined:**
+
 - `missing_required`: [] (empty)
 - `missing_optional`: [] (empty)
 - `quality_gates.test_critic`: VERIFIED
@@ -119,12 +124,14 @@ After:
 - `quality_gates.coverage`: VERIFIED
 
 **Derivation logic:**
+
 - No missing required artifacts → no UNVERIFIED barrier
 - All quality gates are VERIFIED → no UNVERIFIED barrier
 - No mechanical I/O/permissions failures → status is not CANNOT_PROCEED
 - **Result:** status = VERIFIED
 
 **Routing logic:**
+
 - status = VERIFIED and all gates VERIFIED → recommended_action = PROCEED
 - No cross-flow rerouting needed → route_to_flow = null, route_to_agent = null
 
@@ -170,7 +177,7 @@ After:
 
 ---
 
-*Build Cleanup Report*
-*Run: compliance-drift-proofing*
-*Generated: 2025-12-19T09:10:18Z*
-*Status: VERIFIED (all artifact counts match; all quality gates verified)*
+_Build Cleanup Report_
+_Run: compliance-drift-proofing_
+_Generated: 2025-12-19T09:10:18Z_
+_Status: VERIFIED (all artifact counts match; all quality gates verified)_

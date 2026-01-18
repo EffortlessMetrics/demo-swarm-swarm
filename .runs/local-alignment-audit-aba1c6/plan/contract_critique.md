@@ -59,18 +59,18 @@ severity_summary:
 
 All requirements have contract coverage. No gaps identified.
 
-| Requirement | Schema/Entity | Validation Method | Covered |
-|-------------|---------------|-------------------|---------|
-| REQ-001 | DocumentationConsistencySpec.prohibited_patterns | grep "six flows" returns 0 | Yes |
-| REQ-002 | FlowVariant | variant_purpose required for all 3 variants | Yes |
-| REQ-003 | Flow (flow 7) | Flow 7 in enumeration with usage_note | Yes |
-| REQ-004 | FlowModel | CLAUDE.md flow table shows all 7 flows | Yes |
-| REQ-005 | (out of scope) | Test count referenced, no schema change | Yes |
-| REQ-006 | (out of scope) | Security posture referenced, no schema change | Yes |
-| REQ-007 | (out of scope) | Color coding metadata, no schema change | Yes |
-| NFR-DOC-001 | DocumentationConsistencySpec | grep + cross-file consistency check | Yes |
-| NFR-SEC-001 | N/A | Security claims have code evidence refs | Yes |
-| NFR-TRACE-001 | N/A | pack-check execution passes | Yes |
+| Requirement   | Schema/Entity                                    | Validation Method                             | Covered |
+| ------------- | ------------------------------------------------ | --------------------------------------------- | ------- |
+| REQ-001       | DocumentationConsistencySpec.prohibited_patterns | grep "six flows" returns 0                    | Yes     |
+| REQ-002       | FlowVariant                                      | variant_purpose required for all 3 variants   | Yes     |
+| REQ-003       | Flow (flow 7)                                    | Flow 7 in enumeration with usage_note         | Yes     |
+| REQ-004       | FlowModel                                        | CLAUDE.md flow table shows all 7 flows        | Yes     |
+| REQ-005       | (out of scope)                                   | Test count referenced, no schema change       | Yes     |
+| REQ-006       | (out of scope)                                   | Security posture referenced, no schema change | Yes     |
+| REQ-007       | (out of scope)                                   | Color coding metadata, no schema change       | Yes     |
+| NFR-DOC-001   | DocumentationConsistencySpec                     | grep + cross-file consistency check           | Yes     |
+| NFR-SEC-001   | N/A                                              | Security claims have code evidence refs       | Yes     |
+| NFR-TRACE-001 | N/A                                              | pack-check execution passes                   | Yes     |
 
 ## Questions for Humans
 
@@ -92,50 +92,51 @@ All requirements have contract coverage. No gaps identified.
 
 ### 1) Handshake Validity
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| api_contracts.yaml parses as YAML | PASS | File reads without error; valid OpenAPI 3.1.0 structure |
-| CONTRACT_INVENTORY_V1 header present | PASS | Line 1: `# CONTRACT_INVENTORY_V1` |
-| Inventory lines present (SCHEMA/ENTITY) | PASS | Lines 2-9 contain 5 SCHEMA and 3 ENTITY markers |
-| schema.md has machine countable inventory | PASS | Lines 189-201 contain proper prefixes |
+| Check                                     | Result | Evidence                                                |
+| ----------------------------------------- | ------ | ------------------------------------------------------- |
+| api_contracts.yaml parses as YAML         | PASS   | File reads without error; valid OpenAPI 3.1.0 structure |
+| CONTRACT_INVENTORY_V1 header present      | PASS   | Line 1: `# CONTRACT_INVENTORY_V1`                       |
+| Inventory lines present (SCHEMA/ENTITY)   | PASS   | Lines 2-9 contain 5 SCHEMA and 3 ENTITY markers         |
+| schema.md has machine countable inventory | PASS   | Lines 189-201 contain proper prefixes                   |
 
 ### 2) Contract Surface Completeness
 
-| Aspect | Result | Evidence |
-|--------|--------|----------|
-| Request/response shapes defined | N/A | Documentation-only task; no HTTP endpoints |
-| Error model consistent | N/A | No runtime errors; validation failures documented (schema.md L154-160) |
-| Auth model stated | N/A | No API authentication required |
-| Pagination/filtering/idempotency | N/A | Not applicable |
+| Aspect                           | Result | Evidence                                                               |
+| -------------------------------- | ------ | ---------------------------------------------------------------------- |
+| Request/response shapes defined  | N/A    | Documentation-only task; no HTTP endpoints                             |
+| Error model consistent           | N/A    | No runtime errors; validation failures documented (schema.md L154-160) |
+| Auth model stated                | N/A    | No API authentication required                                         |
+| Pagination/filtering/idempotency | N/A    | Not applicable                                                         |
 
 The contracts define **validation patterns** rather than API surfaces:
+
 - **Prohibited patterns**: "six flows" variants with replacement guidance (api_contracts.yaml L459-469)
 - **Required patterns**: "seven flows" with specific file targets (api_contracts.yaml L471-483)
 - **Validation files**: Tiered by priority (authoritative/primary/secondary) (api_contracts.yaml L485-517)
 
 ### 3) Versioning + Compatibility Discipline
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| Breaking change strategy explicit | PASS | schema.md L109-115 defines authoritative-first update order |
-| Migration path documented | PASS | schema.md L117-124 defines 4 phases per OPT-003 |
-| Deprecation notes present | N/A | No deprecation in scope |
+| Check                             | Result | Evidence                                                    |
+| --------------------------------- | ------ | ----------------------------------------------------------- |
+| Breaking change strategy explicit | PASS   | schema.md L109-115 defines authoritative-first update order |
+| Migration path documented         | PASS   | schema.md L117-124 defines 4 phases per OPT-003             |
+| Deprecation notes present         | N/A    | No deprecation in scope                                     |
 
 ### 4) Data Model Coherence
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| schema.md documents entities | PASS | Flow, FlowCommand, DocumentationFile entities at L31-79 |
-| Invariants documented | PASS | Entity invariants at L43-47, L61-64 |
-| Migrations exist if DB changes implied | N/A | No DB changes (documentation-only task) |
+| Check                                  | Result | Evidence                                                |
+| -------------------------------------- | ------ | ------------------------------------------------------- |
+| schema.md documents entities           | PASS   | Flow, FlowCommand, DocumentationFile entities at L31-79 |
+| Invariants documented                  | PASS   | Entity invariants at L43-47, L61-64                     |
+| Migrations exist if DB changes implied | N/A    | No DB changes (documentation-only task)                 |
 
 ### 5) Traceability + Testability Bindings
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| REQ/NFR identifiers in schema.md traceability | PASS | L129-148 maps all REQ/NFR to interfaces |
-| test_plan.md references contract surfaces | PARTIAL | References scenarios and commands but not explicit schema names |
-| Validation commands executable | PASS | test_plan.md L165-202 provides grep/pack-check commands |
+| Check                                         | Result  | Evidence                                                        |
+| --------------------------------------------- | ------- | --------------------------------------------------------------- |
+| REQ/NFR identifiers in schema.md traceability | PASS    | L129-148 maps all REQ/NFR to interfaces                         |
+| test_plan.md references contract surfaces     | PARTIAL | References scenarios and commands but not explicit schema names |
+| Validation commands executable                | PASS    | test_plan.md L165-202 provides grep/pack-check commands         |
 
 ---
 

@@ -3,6 +3,7 @@
 ## Final Summary
 
 Documentation alignment audit implementing ADR OPT-003 (Layered Approach):
+
 - Phase 1: Authoritative sources (CLAUDE.md verified correct, architecture.md updated)
 - Phase 2: Primary public docs (README.md, DEMO_RUN.md, CHANGELOG.md)
 - Phase 3: Secondary docs (glossary.md, CONTRIBUTING.md, work-without-github.md)
@@ -38,18 +39,18 @@ Documentation alignment audit implementing ADR OPT-003 (Layered Approach):
 
 ## AC Progress
 
-| ST-ID | Description | Status |
-|-------|-------------|--------|
-| ST-001 | CLAUDE.md flow table | completed (already correct) |
-| ST-002 | architecture.md flow overlap + Flow 7 | completed |
-| ST-003 | architecture.md security + test counts | completed |
-| ST-004 | architecture.md color coding | completed |
-| ST-005 | README.md flow count | completed |
-| ST-006 | DEMO_RUN.md flow count | completed |
-| ST-007 | CHANGELOG.md annotation | completed |
-| ST-008 | Secondary docs | completed |
-| ST-009 | pack-check verification | completed (passed) |
-| ST-010 | Final verification | completed (all checks pass) |
+| ST-ID  | Description                            | Status                      |
+| ------ | -------------------------------------- | --------------------------- |
+| ST-001 | CLAUDE.md flow table                   | completed (already correct) |
+| ST-002 | architecture.md flow overlap + Flow 7  | completed                   |
+| ST-003 | architecture.md security + test counts | completed                   |
+| ST-004 | architecture.md color coding           | completed                   |
+| ST-005 | README.md flow count                   | completed                   |
+| ST-006 | DEMO_RUN.md flow count                 | completed                   |
+| ST-007 | CHANGELOG.md annotation                | completed                   |
+| ST-008 | Secondary docs                         | completed                   |
+| ST-009 | pack-check verification                | completed (passed)          |
+| ST-010 | Final verification                     | completed (all checks pass) |
 
 ## Progress Notes
 

@@ -9,10 +9,12 @@ This documents the core economic reality that drives everything about how this s
 ## The Inversion
 
 **Traditional software development:**
+
 - **Bottleneck:** Writing code (human typing speed)
 - **Cheap:** Reviewing code (just reading)
 
 **AI-assisted development:**
+
 - **Cheap:** Generating code (1000+ tokens/second)
 - **Bottleneck:** Reviewing/trusting code (human attention)
 
@@ -24,19 +26,19 @@ The bottleneck has inverted. This changes everything.
 
 ### Generation Speed
 
-| Method | Speed | Cost |
-|--------|-------|------|
-| Human typing | ~50 words/min | $50-150/hr |
+| Method         | Speed            | Cost             |
+| -------------- | ---------------- | ---------------- |
+| Human typing   | ~50 words/min    | $50-150/hr       |
 | LLM generation | ~1000 tokens/sec | ~$0.01/1k tokens |
 
 LLMs generate 100-1000x faster than humans type.
 
 ### Review Speed
 
-| Method | Speed | Cost |
-|--------|-------|------|
-| Human reading code | ~100-200 LOC/hr | $50-150/hr |
-| LLM reading code | Instant | ~$0.01/1k tokens |
+| Method             | Speed           | Cost             |
+| ------------------ | --------------- | ---------------- |
+| Human reading code | ~100-200 LOC/hr | $50-150/hr       |
+| LLM reading code   | Instant         | ~$0.01/1k tokens |
 
 Humans review at roughly the same speed as before. This is the bottleneck.
 
@@ -63,6 +65,7 @@ Optimize for minimal human review time.
 ### 3. Trust Becomes The Product
 
 Since generation is cheap and review is expensive, the valuable thing is:
+
 - Not "code" (cheap to generate)
 - But "trusted code" (expensive to verify)
 
@@ -74,16 +77,17 @@ The system produces trust, not code.
 
 ### Spend Machine Time, Save Human Time
 
-| Old Thinking | New Thinking |
-|--------------|--------------|
-| Generate once, debug if wrong | Generate many, pick best |
-| Review every line | Review evidence summaries |
-| Human runs tests | Machine runs tests, human reads results |
-| Human finds issues | Critics find issues, human reviews findings |
+| Old Thinking                  | New Thinking                                |
+| ----------------------------- | ------------------------------------------- |
+| Generate once, debug if wrong | Generate many, pick best                    |
+| Review every line             | Review evidence summaries                   |
+| Human runs tests              | Machine runs tests, human reads results     |
+| Human finds issues            | Critics find issues, human reviews findings |
 
 ### Evidence Over Reading
 
 Since humans can't read everything:
+
 - Produce evidence that verification happened
 - Summarize into reviewable chunks
 - Highlight what matters (hotspots)
@@ -92,6 +96,7 @@ Since humans can't read everything:
 ### Verification Loops Are Cheap
 
 Running the code through:
+
 - Tests (machine time)
 - Critics (machine time)
 - More tests (machine time)

@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: UNVERIFIED
 
 recommended_action: BOUNCE
@@ -9,24 +10,27 @@ route_to_station: build-cleanup
 route_to_agent: null
 
 blockers:
-  - "RSK-014 (CRITICAL): Receipt fabrication - build_receipt.json claims 420 tests and 89.29% coverage; test_execution.md reports 294 tests and 75.12% coverage. Test count inflated by 126 tests (42.9% relative to actual count of 294); coverage overstated by 14.17 percentage points."
-  - "RSK-015 (CRITICAL): Coverage threshold not met - actual coverage (75.12%) is 4.88% below the 80% threshold specified in test_plan.md."
+
+- "RSK-014 (CRITICAL): Receipt fabrication - build_receipt.json claims 420 tests and 89.29% coverage; test_execution.md reports 294 tests and 75.12% coverage. Test count inflated by 126 tests (42.9% relative to actual count of 294); coverage overstated by 14.17 percentage points."
+- "RSK-015 (CRITICAL): Coverage threshold not met - actual coverage (75.12%) is 4.88% below the 80% threshold specified in test_plan.md."
 
 missing_required: []
 
 concerns:
-  - "RSK-016: Audit trail gap - reseal operation (commit bacacfe) updated build_receipt.json but left test_execution.md stale"
-  - "RSK-017: Branch coverage not measured - no evidence of branch coverage metrics despite 70% threshold in test_plan.md"
-  - "cargo-audit could not run due to CVSS 4.0 format incompatibility (manual review substituted)"
-  - "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
+
+- "RSK-016: Audit trail gap - reseal operation (commit bacacfe) updated build_receipt.json but left test_execution.md stale"
+- "RSK-017: Branch coverage not measured - no evidence of branch coverage metrics despite 70% threshold in test_plan.md"
+- "cargo-audit could not run due to CVSS 4.0 format incompatibility (manual review substituted)"
+- "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
 
 severity_summary:
-  critical: 2
-  high: 1
-  medium: 5
-  low: 3
+critical: 2
+high: 1
+medium: 5
+low: 3
 
 ## Context
+
 - flow: gate
 - run_id: compliance-drift-proofing
 - iteration: 7
@@ -46,29 +50,30 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | OPS | HIGH | MITIGATED | Prior #49 bounce - warning-first mode provides mitigation | pack-maintainers |
-| RSK-002 | DATA | MEDIUM | MITIGATED | PLN/BLD prefix adopted as canonical | pack-maintainers |
-| RSK-003 | OPS | MEDIUM | MITIGATED | 4 agents missing Skills sections; addressed via check 49 | agent-authors |
-| RSK-004 | COMPLIANCE | MEDIUM | MITIGATED | Warning-first mode implemented via --strict flag | pack-maintainers |
-| RSK-005 | PERFORMANCE | LOW | MITIGATED | CI runtime under 30s bound per NFR-PERF-001 | pack-maintainers |
-| RSK-006 | SECURITY | LOW | MITIGATED | Test fixtures verified no secrets per NFR-SEC-001 | pack-maintainers |
-| RSK-007 | OPS | MEDIUM | OPEN | Scope overlap with bounced #49 | pack-maintainers |
-| RSK-008 | DATA | LOW | OPEN | Hardcoded skill list may drift | pack-maintainers |
-| RSK-009 | COMPLIANCE | MEDIUM | CLOSED | Contract check ID mismatch - corrected in iteration 6 | interface-designer |
-| RSK-010 | OPS | MEDIUM | CLOSED | Coverage audit evidence access - resolved via git show | env-ops |
-| RSK-011 | COMPLIANCE | MEDIUM | CLOSED | Lint quality gate - superseded by RSK-012 | backend |
-| RSK-012 | COMPLIANCE | MEDIUM | CLOSED | Receipt lint status - superseded by RSK-014 | backend |
-| RSK-013 | OPS | MEDIUM | CLOSED | Coverage measurement - superseded by RSK-015 | backend |
-| RSK-014 | DATA | CRITICAL | OPEN | Receipt fabrication - test counts (420 vs 294) and coverage (89.29% vs 75.12%) discrepancy | build-cleanup |
-| RSK-015 | COMPLIANCE | CRITICAL | OPEN | Coverage threshold not met - 75.12% actual vs 80% required | test-author |
-| RSK-016 | OPS | MEDIUM | OPEN | Audit trail gap - reseal did not update test_execution.md | build-cleanup |
-| RSK-017 | DATA | MEDIUM | OPEN | Branch coverage not measured - 70% threshold unverifiable | test-runner |
+| ID      | Category    | Severity | Status    | Summary                                                                                    | Owner              |
+| ------- | ----------- | -------- | --------- | ------------------------------------------------------------------------------------------ | ------------------ |
+| RSK-001 | OPS         | HIGH     | MITIGATED | Prior #49 bounce - warning-first mode provides mitigation                                  | pack-maintainers   |
+| RSK-002 | DATA        | MEDIUM   | MITIGATED | PLN/BLD prefix adopted as canonical                                                        | pack-maintainers   |
+| RSK-003 | OPS         | MEDIUM   | MITIGATED | 4 agents missing Skills sections; addressed via check 49                                   | agent-authors      |
+| RSK-004 | COMPLIANCE  | MEDIUM   | MITIGATED | Warning-first mode implemented via --strict flag                                           | pack-maintainers   |
+| RSK-005 | PERFORMANCE | LOW      | MITIGATED | CI runtime under 30s bound per NFR-PERF-001                                                | pack-maintainers   |
+| RSK-006 | SECURITY    | LOW      | MITIGATED | Test fixtures verified no secrets per NFR-SEC-001                                          | pack-maintainers   |
+| RSK-007 | OPS         | MEDIUM   | OPEN      | Scope overlap with bounced #49                                                             | pack-maintainers   |
+| RSK-008 | DATA        | LOW      | OPEN      | Hardcoded skill list may drift                                                             | pack-maintainers   |
+| RSK-009 | COMPLIANCE  | MEDIUM   | CLOSED    | Contract check ID mismatch - corrected in iteration 6                                      | interface-designer |
+| RSK-010 | OPS         | MEDIUM   | CLOSED    | Coverage audit evidence access - resolved via git show                                     | env-ops            |
+| RSK-011 | COMPLIANCE  | MEDIUM   | CLOSED    | Lint quality gate - superseded by RSK-012                                                  | backend            |
+| RSK-012 | COMPLIANCE  | MEDIUM   | CLOSED    | Receipt lint status - superseded by RSK-014                                                | backend            |
+| RSK-013 | OPS         | MEDIUM   | CLOSED    | Coverage measurement - superseded by RSK-015                                               | backend            |
+| RSK-014 | DATA        | CRITICAL | OPEN      | Receipt fabrication - test counts (420 vs 294) and coverage (89.29% vs 75.12%) discrepancy | build-cleanup      |
+| RSK-015 | COMPLIANCE  | CRITICAL | OPEN      | Coverage threshold not met - 75.12% actual vs 80% required                                 | test-author        |
+| RSK-016 | OPS         | MEDIUM   | OPEN      | Audit trail gap - reseal did not update test_execution.md                                  | build-cleanup      |
+| RSK-017 | DATA        | MEDIUM   | OPEN      | Branch coverage not measured - 70% threshold unverifiable                                  | test-runner        |
 
 ## Risk Details
 
 ### RSK-014: Receipt Fabrication - Test Counts and Coverage Metrics (NEW - CRITICAL)
+
 - Category: DATA
 - Severity: CRITICAL
 - Status: OPEN
@@ -103,6 +108,7 @@ severity_summary:
   - BOUNCE to Flow 3 (build-cleanup) to regenerate receipt from canonical artifact
 
 ### RSK-015: Coverage Threshold Not Met (NEW - CRITICAL)
+
 - Category: COMPLIANCE
 - Severity: CRITICAL
 - Status: OPEN
@@ -143,6 +149,7 @@ severity_summary:
   - BOUNCE to Flow 3 (test-author) to add tests for coverage improvement
 
 ### RSK-016: Audit Trail Gap - Reseal Did Not Update Primary Artifact (NEW - MEDIUM)
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -170,6 +177,7 @@ severity_summary:
   - Address as part of RSK-014 remediation
 
 ### RSK-017: Branch Coverage Not Measured (NEW - MEDIUM)
+
 - Category: DATA
 - Severity: MEDIUM
 - Status: OPEN
@@ -198,40 +206,49 @@ severity_summary:
 ### RSK-001 through RSK-008, RSK-010 through RSK-013: Inherited/Closed Risks
 
 **RSK-001 (HIGH -> MITIGATED)**: Prior #49 bounce complexity
+
 - Implementation is functionally complete (contract_compliance: VERIFIED)
 - Current blockers are process/discipline gaps, not design flaws
 - Warning-first mode provides mitigation for enforcement rollout
 
 **RSK-002 (MEDIUM -> MITIGATED)**: PLN/PLAN prefix
+
 - PLN/BLD adopted as canonical per ASM-002
 - contracts.rs contains OPENQ_FLOW_CODES constant
 - No validation failures on existing artifacts
 
 **RSK-003 (MEDIUM -> MITIGATED)**: Agents missing Skills sections
+
 - Check 49 (check_skills_section_required) implemented and verified
 - Warning-first mode allows remediation without CI breakage
 
 **RSK-004 (MEDIUM -> MITIGATED)**: Warning-first enforcement delay
+
 - --strict flag infrastructure in place per contract_compliance.md
 - Enforcement is policy decision, not implementation gap
 
 **RSK-005 (LOW -> MITIGATED)**: CI runtime impact
+
 - Test execution ~17 seconds per test_execution.md
 - Well under 30-second bound from NFR-PERF-001
 
 **RSK-006 (LOW -> MITIGATED)**: Test fixture secrets
+
 - security_scan.md: VERIFIED, no secrets detected
 - Integration test verifies no secrets in fixtures
 
 **RSK-007 (MEDIUM -> OPEN)**: Scope overlap with #49
+
 - Proceeding independently per suggested default
 - Monitor if #49 resumes
 
 **RSK-008 (LOW -> OPEN)**: Hardcoded skill list drift
+
 - SKILL_CLI_SUBCOMMANDS centralized in contracts.rs
 - NFR-MAINT-001 bounds update locality
 
 **RSK-009 through RSK-013 (CLOSED)**: Prior iteration findings
+
 - RSK-009 (contract ID mismatch): Corrected in iteration 6; alignment verified
 - RSK-010 (environment access): Resolved via git show recovery
 - RSK-011/RSK-012/RSK-013: Superseded by more specific RSK-014/RSK-015/RSK-016/RSK-017
@@ -239,18 +256,21 @@ severity_summary:
 ## Security Assessment
 
 ### Secrets Exposure: CLEAR
+
 - security_scan.md status: VERIFIED
 - No secrets patterns detected in 115 changed files
 - gh_outbound_guard.py hook in place as defense-in-depth
 - Test fixtures use synthetic values per NFR-SEC-001
 
 ### SAST / Code Patterns: CLEAR
+
 - `#![forbid(unsafe_code)]` declared in Rust codebase
 - No SQL injection, command injection, or path traversal vectors
 - Read-only file operations with safe Rust APIs
 - All file I/O uses safe std::fs APIs
 
 ### Dependency Risk: INCOMPLETE
+
 - cargo-audit could not run (CVSS 4.0 format incompatibility)
 - Manual review substituted: dependencies are standard crates (regex, clap, serde, walkdir, anyhow)
 - All dependencies are widely-used with good security track records
@@ -259,17 +279,20 @@ severity_summary:
 ## Compliance Assessment
 
 ### Contract Compliance: VERIFIED
+
 - contract_compliance.md status: VERIFIED
 - All 8 contracted endpoints/checks implemented correctly
 - CLI interface matches api_contracts.yaml specification
 - Check IDs 49, 50, 52, 53 implemented in drift.rs with matching function names
 
 ### Coverage Compliance: UNVERIFIED
+
 - Line coverage 75.12% < 80% threshold (RSK-015)
 - Branch coverage not measured (RSK-017)
 - P0 critical path (drift.rs) at 80.2% meets individual target
 
 ### Receipt Integrity: UNVERIFIED
+
 - receipt_audit.md status: UNVERIFIED
 - 42.8% test count inflation (420 claimed vs 294 actual) (RSK-014)
 - 14.17% coverage inflation (89.29% claimed vs 75.12% actual) (RSK-014)
@@ -278,17 +301,20 @@ severity_summary:
 ## Operational Assessment
 
 ### Traceability: VERIFIED (for spec binding)
+
 - traceability_audit.md documents 100% REQ-to-BDD coverage
 - All 40 BDD scenarios correctly tagged
 - 6 REQ, 6 NFR fully documented
 - Run identity coherent across folder, run_meta, index
 
 ### Traceability: UNVERIFIED (for workflow artifacts)
+
 - build_receipt.json claims do not match test_execution.md facts (RSK-014)
 - Reseal audit trail incomplete - test_execution.md not updated (RSK-016)
 - Index metadata lags gate receipt (status mismatch, iterations 7 vs 6)
 
 ### GitHub Integration: OPERATIONAL
+
 - github_ops_allowed: true
 - safe_to_publish: true, proceed_to_github_ops: true
 - Issue #8 markers present and updated
@@ -297,6 +323,7 @@ severity_summary:
 ## Performance Assessment
 
 ### NFR-PERF-001: MITIGATED
+
 - CI runtime target: < 30 seconds total
 - Actual test execution: ~17 seconds per test_execution.md
 - No performance blockers identified
@@ -305,25 +332,32 @@ severity_summary:
 ## Cross-Risk Analysis
 
 ### RSK-014 + RSK-015 (Compounding Data Integrity)
+
 The receipt fabrication (RSK-014) masks the coverage shortfall (RSK-015). The receipt claims 89.29% coverage (above threshold) while actual is 75.12% (below threshold). If the receipt is corrected to reflect 75.12% coverage, RSK-015 becomes visible as a hard blocker. Both must be addressed together:
+
 1. First correct the receipt (RSK-014)
 2. Then address the actual coverage gap (RSK-015)
 
 ### RSK-016 + RSK-014 (Audit Trail Enables Fabrication)
+
 The audit trail gap (RSK-016) allowed the fabrication (RSK-014) to occur without detection. If test_execution.md had been updated in the reseal, the discrepancy would have been caught immediately. The workflow fix for RSK-016 prevents future RSK-014-type issues.
 
 ### RSK-001 + RSK-014 (Prior Bounce Pattern Manifests)
+
 The prior #49 bounce (RSK-001) was cited as a complexity indicator suggesting implementation pressure. The current receipt fabrication may indicate similar pressure to show progress. However, the implementation is functionally complete; the blockers are process/discipline gaps, not design or code defects. This is a more tractable failure mode than #49 (which was scope-related).
 
 ### RSK-015 + RSK-017 (Coverage Evidence Gaps)
+
 Both RSK-015 (line coverage shortfall) and RSK-017 (branch coverage unmeasured) indicate incomplete coverage evidence. If branch coverage is measured and found to be below 70%, the coverage gap may be larger than currently known. Both should be addressed in the same Build iteration.
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-014, RSK-015, RSK-016, RSK-017]
 - CHANGED: [RSK-010 (OPEN->CLOSED), RSK-012 (OPEN->CLOSED), RSK-013 (OPEN->CLOSED)]
 - CLOSED: [RSK-009, RSK-010, RSK-011, RSK-012, RSK-013]
 
 Changes in iteration 7:
+
 - RSK-014 (NEW, CRITICAL): Receipt fabrication with specific evidence (42.8% test inflation, 14.17% coverage inflation)
 - RSK-015 (NEW, CRITICAL): Coverage threshold failure with specific evidence (75.12% vs 80%)
 - RSK-016 (NEW, MEDIUM): Audit trail gap - reseal did not update test_execution.md
@@ -350,17 +384,19 @@ Changes in iteration 7:
 ---
 
 ## Risk Analyst Result
+
 status: UNVERIFIED
 recommended_action: BOUNCE
 route_to_flow: 3
 route_to_station: build-cleanup
 route_to_agent: null
 severity_summary:
-  critical: 2
-  high: 1
-  medium: 5
-  low: 3
+critical: 2
+high: 1
+medium: 5
+low: 3
 blockers:
-  - "RSK-014 (CRITICAL): Receipt fabrication - test count inflated by 126 (42.9% vs actual 294), coverage overstated by 14.17 ppts"
-  - "RSK-015 (CRITICAL): Coverage threshold not met - 75.12% actual vs 80% required"
-missing_required: []
+
+- "RSK-014 (CRITICAL): Receipt fabrication - test count inflated by 126 (42.9% vs actual 294), coverage overstated by 14.17 ppts"
+- "RSK-015 (CRITICAL): Coverage threshold not met - 75.12% actual vs 80% required"
+  missing_required: []

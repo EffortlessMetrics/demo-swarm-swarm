@@ -37,4 +37,3 @@ pack-check --format json
 
 - The tool discovers the repo root by walking upward from the current directory until it finds `.claude/`.
 - Output is intentionally close to the original shell script to make diffs and operator muscle-memory easy.
-

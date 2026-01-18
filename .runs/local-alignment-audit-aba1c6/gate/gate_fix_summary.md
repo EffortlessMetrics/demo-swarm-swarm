@@ -5,12 +5,14 @@
 This summary analyzes mechanical issues identified in Flow 4 (Review) and consolidated in the Gate phase for run `local-alignment-audit-aba1c6`.
 
 **Gate artifacts consulted:**
+
 - `.runs/local-alignment-audit-aba1c6/review/review_worklist.md` (30 items: 1 critical, 5 major, 24 minor)
 - `.runs/local-alignment-audit-aba1c6/review/pr_feedback.md` (source feedback from Gemini Code Assist + CodeRabbit)
 - `.runs/local-alignment-audit-aba1c6/gate/receipt_audit.md` (build & review completeness)
 - `.runs/local-alignment-audit-aba1c6/gate/contract_compliance.md` (contract verification)
 
 **Run context:**
+
 - This is a documentation alignment audit (ADR OPT-003 implementation)
 - Changes target: CLAUDE.md, docs/, .claude/commands/, .claude/agents/, and related run artifacts
 - Review outcome: 1 CRITICAL (resolved), 5 MAJOR (4 resolved, 1 skipped), 24 MINOR (style/formatting, resolved via style sweep)
@@ -23,11 +25,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-001: Markdown formatting – missing blank lines before headings (MD022)
 
 **Evidence:**
+
 - Review Worklist RW-009, RW-010, RW-012, RW-013, RW-014, RW-015, RW-017, RW-030
 - Affects: `.runs/*/build/open_questions.md:29`, `.runs/*/plan/secrets_scan.md:5-40`, `.runs/*/plan/cleanup_report.md:35,41`, `.runs/*/plan/observability_critique.md:149`, `.runs/*/plan/observability_spec.md:3,74,85`, `.runs/*/signal/cleanup_report.md:35,41`
 - Pattern: Missing blank line before heading elements; detected by markdownlint MD022
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/build/open_questions.md`
 - `.runs/local-alignment-audit-aba1c6/build/secrets_scan.md`
 - `.runs/local-alignment-audit-aba1c6/plan/secrets_scan.md`
@@ -47,11 +51,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-002: Markdown formatting – missing blank lines before/after tables (MD058)
 
 **Evidence:**
+
 - Review Worklist RW-011, RW-012, RW-014, RW-016
 - Affects: `.runs/*/plan/cleanup_report.md`, `.runs/*/plan/observability_critique.md:149`, `.runs/*/signal/bdd_critique.md:51`
 - Pattern: Tables lacking blank lines before/after; detected by markdownlint MD058
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md`
 - `.runs/local-alignment-audit-aba1c6/plan/observability_critique.md`
 - `.runs/local-alignment-audit-aba1c6/signal/bdd_critique.md`
@@ -67,11 +73,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-003: Markdown formatting – bare URLs not wrapped (MD034)
 
 **Evidence:**
+
 - Review Worklist RW-008 (FB-008, FB-009)
 - Affects: `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md:6`, `.runs/local-alignment-audit-aba1c6/build/pr_creation_status.md:5`
 - Pattern: URLs not wrapped in angle brackets or Markdown link syntax
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/build/gh_issue_status.md`
 - `.runs/local-alignment-audit-aba1c6/build/pr_creation_status.md`
 
@@ -86,11 +94,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-004: Markdown formatting – incorrect list indentation (MD007)
 
 **Evidence:**
+
 - Review Worklist RW-018 (FB-018)
 - Affects: `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md:85-87`
 - Pattern: Unordered list indentation violation
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md`
 
 **Category:** `format`
@@ -104,11 +114,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-005: Markdown formatting – duplicate heading
 
 **Evidence:**
+
 - Review Worklist RW-007 (FB-007)
 - Affects: `.runs/local-alignment-audit-aba1c6/build/flow_plan.md:64` (second "Summary" heading, also at line 3)
 - Pattern: MD024 duplicate heading violation
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/build/flow_plan.md`
 
 **Category:** `format`
@@ -122,11 +134,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-006: Markdown formatting – emphasis used instead of heading (MD036)
 
 **Evidence:**
+
 - Review Worklist RW-029 (FB-029)
 - Affects: `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md:127`
 - Pattern: Section emphasis (bold/italic) should use heading Markdown (MD036)
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/plan/cleanup_report.md`
 
 **Category:** `format`
@@ -140,11 +154,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-007: Typo in flow command documentation – "immeidate" → "immediate"
 
 **Evidence:**
+
 - Review Worklist RW-006 (FB-026)
 - Affects: `.claude/commands/flow-*.md` (multiple flow command files in directive text)
 - Pattern: Recurring typo across all flow command docs
 
 **Files/Paths:**
+
 - `.claude/commands/flow-1-signal.md`
 - `.claude/commands/flow-2-plan.md`
 - `.claude/commands/flow-3-build.md`
@@ -164,11 +180,13 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### MECH-008: Markdown formatting – missing blank lines after section headings (MD022)
 
 **Evidence:**
+
 - Review Worklist RW-028 (FB-030)
 - Affects: `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md:35,41`
 - Pattern: Missing blank line after section heading before content
 
 **Files/Paths:**
+
 - `.runs/local-alignment-audit-aba1c6/signal/cleanup_report.md`
 
 **Category:** `format`
@@ -184,6 +202,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-001: Contract compliance – deleted file references (RW-001, FB-001)
 
 **Evidence:**
+
 - Review Worklist RW-001 (CRITICAL)
 - Location: `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml:404`
 - Issue: `variant_commands` array references deleted command files (`flow-4-gate.md`, `flow-5-deploy.md`, `flow-6-wisdom.md`) that no longer exist after consolidation
@@ -198,6 +217,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-002: Data type inconsistency – boolean vs integer (RW-002, FB-006)
 
 **Evidence:**
+
 - Review Worklist RW-002 (MAJOR)
 - Location: `.runs/local-alignment-audit-aba1c6/build/secrets_status.json:10`
 - Issue: Field `modified_files` uses boolean (`false`) but should be integer (`0`) for semantic consistency (count metric)
@@ -212,6 +232,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-003: Documentation clarity – flow vs command count ambiguity (RW-004, FB-003, FB-004, FB-005)
 
 **Evidence:**
+
 - Review Worklist RW-004 (MAJOR, 3 related items)
 - Locations: `CHANGELOG.md:24`, `CONTRIBUTING.md:8`, `docs/explanation/architecture.md:11`
 - Issue: Phrases "7 flow commands" should be clarified to distinguish "7 flows" (conceptual) vs "10 command files" (slash command implementations including variants)
@@ -226,6 +247,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-004: Documentation clarity – flow variants table (RW-003, FB-002)
 
 **Evidence:**
+
 - Review Worklist RW-003 (MAJOR)
 - Location: `docs/explanation/architecture.md:85`
 - Issue: Flow variants table is misleading; lists primary commands in "Variant" column with inaccurate descriptions
@@ -240,6 +262,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-005: Run artifacts – stale flow count references (RW-005)
 
 **Evidence:**
+
 - Review Worklist RW-005 (MAJOR)
 - Location: `.runs/**/*.md` (multiple run artifact files)
 - Issue: Sweep for "six flows" references and missing `flow-6-wisdom.md` in build artifacts
@@ -254,6 +277,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-006: Schema consistency – maxItems constraint (RW-019, FB-020)
 
 **Evidence:**
+
 - Review Worklist RW-019 (MINOR)
 - Location: `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml:96`
 - Issue: Consider adding `maxItems` constraint to `variant_commands` array
@@ -268,6 +292,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-007: Documentation inconsistency – flow entity invariants (RW-020, FB-021)
 
 **Evidence:**
+
 - Review Worklist RW-020 (MINOR)
 - Location: `.runs/local-alignment-audit-aba1c6/plan/schema.md:47`
 - Issue: Flow entity invariants state flows 4-7 may have variants, but only 4-6 actually do
@@ -282,6 +307,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-008: Manifest metadata – null timestamp (RW-026, FB-028)
 
 **Evidence:**
+
 - Review Worklist RW-026 (MINOR)
 - Location: `.runs/local-alignment-audit-aba1c6/build/subtask_context_manifest.json`
 - Issue: Field `generated_at: null` should be populated with ISO8601 timestamp
@@ -296,6 +322,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-009: Documentation clarity – internal inconsistencies (RW-021, RW-022, RW-024, RW-025)
 
 **Evidence:**
+
 - Review Worklist RW-021 (MINOR, impact_map.json:146)
 - Review Worklist RW-022 (MINOR, missing punctuation in bdd_critique.md:51)
 - Review Worklist RW-024 (MINOR, path qualification in observability_spec.md:54)
@@ -311,6 +338,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ### NONMECH-010: Documentation – clarification and style (RW-023, RW-027)
 
 **Evidence:**
+
 - Review Worklist RW-023 (MINOR, clarify risk deferral strategy for RSK-002)
 - Review Worklist RW-027 (MINOR, heading style for "Self-Review")
 - Category: DOCS / STYLE
@@ -324,6 +352,7 @@ This summary analyzes mechanical issues identified in Flow 4 (Review) and consol
 ## Fix-forward Plan (machine readable)
 
 <!-- PACK-CONTRACT: FIX_FORWARD_PLAN_V1 START -->
+
 ```yaml
 version: 1
 fix_forward_eligible: false
@@ -356,6 +385,7 @@ on_failure:
   route_to_flow: 3
   route_to_agent: code-implementer
 ```
+
 <!-- PACK-CONTRACT: FIX_FORWARD_PLAN_V1 END -->
 
 **Plan rationale:**
@@ -427,4 +457,3 @@ non_mechanical_by_type:
   data_type_consistency: 0
   documentation_clarity: 0
 ```
-

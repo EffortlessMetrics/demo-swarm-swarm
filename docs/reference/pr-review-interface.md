@@ -9,6 +9,7 @@
 Most reviewers will only read the GitHub PR description. If the key information isn't there, they won't find it in `.runs/`.
 
 **Three surfaces:**
+
 1. **PR Brief (description)** — What changed, why, where to look, what was proven
 2. **Receipts** — Machine-readable truth with evidence pointers
 3. **Diff** — Audit surface for spot-checking hotspots
@@ -21,36 +22,44 @@ The PR Brief is the **primary human interface**. Everything else is drill-down.
 
 Every flow that produces a PR (Build/Review/Gate) must generate a PR Brief that gets posted to the PR description.
 
-```markdown
+````markdown
 ## PR Brief
 
 ### What changed
+
 - <1–3 bullets: user-visible or contract-visible changes>
 
 ### Why
+
 <1 short paragraph: goal + constraints + approach>
 
 ### Review map (hotspots)
+
 - `path/to/core_change.rs` — <why it matters>
 - `path/to/contract_or_schema.*` — <interface surface>
 - `path/to/tests/*` — <verification surface>
 
 ### Quality events
+
 - **Interface lock:** <no API/schema drift | breaking + version bump>
 - **Boundaries / coupling:** <new module boundary | deps unchanged>
 - **Verification depth:** <mutation-on-diff pass | fuzz added | edge-case tests>
 - **Security airbag:** <secrets/vulns/unsafe drift: none | details>
 
 ### Proof (measured vs not measured)
+
 - Gate: PASS|BOUNCE (evidence: `.runs/.../gate_receipt.json`)
 - Tests: <summary> (evidence: `.runs/.../test_execution.md`)
 - Mutation/fuzz: <ran | not run + reason>
 - **Not measured:** <explicit list — unknown is normal>
 
 ### Reproduce
+
 ```bash
 <one command>  # e.g., just gate / ./scripts/gate.sh
 ```
+````
+
 ```
 
 ---
@@ -107,7 +116,9 @@ If you include review time estimates, follow these rules:
 
 Example:
 ```
+
 Review time: 20–40m (estimated; basis: 3 hotspots + mutation pass; confidence: medium)
+
 ```
 
 Do NOT invent precision. If you don't have data, don't estimate.
@@ -120,3 +131,4 @@ Do NOT invent precision. If you don't have data, don't estimate.
 - [pr-quality-scorecard.md](pr-quality-scorecard.md) — The five quality surfaces and scorecard template
 - [contracts.md](contracts.md) — Receipt schemas
 - [stable-markers.md](stable-markers.md) — Marker prefixes for PR Brief sections
+```

@@ -21,15 +21,16 @@ You are the PM orchestrating Flow 6 of the SDLC swarm. Your team of specialist a
 
 #### Artifact visibility rule
 
-* Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
-* Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
+- Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
+- If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
+- Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
 
 ## Your Goals
 
 Execute the merge of the feature branch into swarm mainline (`origin/main`). Handle simple rebases if needed. Verify health. Create audit trail.
 
 **Flow 6 is always callable.** Its behavior depends on Gate's decision:
+
 - If Gate said MERGE: sanity check → handle rebase if needed → merge → verify → report.
 - If Gate said BOUNCE (including NEEDS_HUMAN_REVIEW): don't merge, write receipts explaining why.
 
@@ -72,6 +73,7 @@ Flow 6 uses **two complementary state machines**:
 ### On Rerun
 
 If running `/flow-6-deploy` on an existing run-id:
+
 - Read `.runs/<run-id>/deploy/flow_plan.md`
 - Create TodoWrite from the checklist
 - Pre-mark items done if artifacts exist and look current
@@ -83,21 +85,22 @@ This flow uses **git and GitHub** (via `gh` CLI). No external deployment platfor
 
 ## Agents to Use
 
-| Agent | Responsibility |
-|-------|----------------|
-| **run-prep** | MUST be called first to establish the run directory and `.runs/<run-id>/deploy/` |
-| repo-operator | Merge PR, create git tag/release (only if Gate approved MERGE) |
-| deploy-monitor | Watch CI and deployment events, write verification report |
-| smoke-verifier | Health checks, artifact verification, append to verification report |
-| deploy-decider | Synthesize verification into deployment decision |
-| **deploy-cleanup** | Write deploy receipt, update index.json status |
-| **secrets-sanitizer** | Publish gate before GitHub posting |
-| **gh-issue-manager** | Update issue body status board |
-| **gh-reporter** | Post deployment summary to issue |
+| Agent                 | Responsibility                                                                   |
+| --------------------- | -------------------------------------------------------------------------------- |
+| **run-prep**          | MUST be called first to establish the run directory and `.runs/<run-id>/deploy/` |
+| repo-operator         | Merge PR, create git tag/release (only if Gate approved MERGE)                   |
+| deploy-monitor        | Watch CI and deployment events, write verification report                        |
+| smoke-verifier        | Health checks, artifact verification, append to verification report              |
+| deploy-decider        | Synthesize verification into deployment decision                                 |
+| **deploy-cleanup**    | Write deploy receipt, update index.json status                                   |
+| **secrets-sanitizer** | Publish gate before GitHub posting                                               |
+| **gh-issue-manager**  | Update issue body status board                                                   |
+| **gh-reporter**       | Post deployment summary to issue                                                 |
 
 ## Upstream Inputs
 
 Read from `.runs/<run-id>/gate/` (if available):
+
 - `merge_decision.md`
 - `gate_receipt.json`
 
@@ -110,6 +113,7 @@ Read from `.runs/<run-id>/gate/` (if available):
 **Call `run-prep` first.**
 
 This agent will:
+
 - Derive or confirm the `<run-id>` from context, branch name, or user input
 - Create `.runs/<run-id>/deploy/` directory structure
 - Update `.runs/<run-id>/run_meta.json` with "deploy" in `flows_started`
@@ -155,6 +159,7 @@ Create or update `.runs/<run-id>/deploy/flow_plan.md`:
 **Call `deploy-decider` BEFORE any merge operations.**
 
 This agent reads the gate decision and tells you what to do:
+
 - If the agent recommends proceeding with merge → Path A (merge + verify)
 - If the agent recommends not deploying → Path B (NOT_DEPLOYED)
 
@@ -164,10 +169,10 @@ This agent reads the gate decision and tells you what to do:
 
 **Two operation types in Flow 6:**
 
-| Category | Operations | Gating |
-|----------|------------|--------|
-| **Release Ops** | Merge PR, create tag, create release | Gate decision = MERGE + repo-operator mechanics |
-| **Reporting Ops** | `gh-issue-manager`, `gh-reporter` | Two-gate prerequisites (secrets + repo hygiene) |
+| Category          | Operations                           | Gating                                          |
+| ----------------- | ------------------------------------ | ----------------------------------------------- |
+| **Release Ops**   | Merge PR, create tag, create release | Gate decision = MERGE + repo-operator mechanics |
+| **Reporting Ops** | `gh-issue-manager`, `gh-reporter`    | Two-gate prerequisites (secrets + repo hygiene) |
 
 Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting Ops use the same two-gate system as all other flows.
 
@@ -226,21 +231,24 @@ Release Ops execute only when Gate's `merge_decision.md` says MERGE. Reporting O
 
 6b. **Checkpoint Commit** (repo-operator)
 
-   Checkpoint the audit trail **before** any GitHub operations.
+Checkpoint the audit trail **before** any GitHub operations.
 
-   **Allowlist for Flow 6:**
-   - `.runs/<run-id>/deploy/`
-   - `.runs/<run-id>/run_meta.json`
-   - `.runs/index.json`
+**Allowlist for Flow 6:**
 
-   **Call `repo-operator`** with `checkpoint_mode: normal` (default). The agent:
-   1. Resets staging and stages only the allowlist (not `git add .`)
-   2. Enforces the allowlist/anomaly interlock mechanically
-   3. Writes `.runs/<run-id>/deploy/git_status.md` if anomaly detected
-   4. Handles no-op (nothing staged) gracefully—no empty commits
+- `.runs/<run-id>/deploy/`
+- `.runs/<run-id>/run_meta.json`
+- `.runs/index.json`
 
-   **Control plane:** `repo-operator` returns a Repo Operator Result block:
-   ```
+**Call `repo-operator`** with `checkpoint_mode: normal` (default). The agent:
+
+1.  Resets staging and stages only the allowlist (not `git add .`)
+2.  Enforces the allowlist/anomaly interlock mechanically
+3.  Writes `.runs/<run-id>/deploy/git_status.md` if anomaly detected
+4.  Handles no-op (nothing staged) gracefully—no empty commits
+
+**Control plane:** `repo-operator` returns a Repo Operator Result block:
+
+```
 ## Repo Operator Result
 operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
@@ -249,22 +257,25 @@ commit_sha: <sha>
 publish_surface: PUSHED | NOT_PUSHED
 anomaly_paths: []
 ```
-   **Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
 
-   Orchestrators route on this block, not by re-reading `git_status.md`.
+**Note:** `commit_sha` is always populated (current HEAD on no-op), never null.
 
-   **Gating logic (from prior secrets-sanitizer Gate Result + repo-operator result):**
-   - If `safe_to_commit: false` (from Gate Result): `repo-operator` skips commit entirely
-   - If anomaly detected: `repo-operator` commits allowlist only, skips push, returns `proceed_to_github_ops: false`
-   - If `safe_to_publish: true` and no anomaly: `repo-operator` commits and pushes, returns `proceed_to_github_ops: true`
-   - If `safe_to_publish: false`:
-     - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`; flow ends UNVERIFIED
-     - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
-     - Otherwise → UNVERIFIED; commit locally but skip push; returns `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`.
+Orchestrators route on this block, not by re-reading `git_status.md`.
+
+**Gating logic (from prior secrets-sanitizer Gate Result + repo-operator result):**
+
+- If `safe_to_commit: false` (from Gate Result): `repo-operator` skips commit entirely
+- If anomaly detected: `repo-operator` commits allowlist only, skips push, returns `proceed_to_github_ops: false`
+- If `safe_to_publish: true` and no anomaly: `repo-operator` commits and pushes, returns `proceed_to_github_ops: true`
+- If `safe_to_publish: false`:
+  - If `needs_upstream_fix: true` → **BOUNCE** to `route_to_agent` (and optionally `route_to_flow`) with pointer to `secrets_scan.md`; flow ends UNVERIFIED
+  - If `status: BLOCKED_PUBLISH` → **CANNOT_PROCEED** (mechanical failure); stop and require human intervention
+  - Otherwise → UNVERIFIED; commit locally but skip push; returns `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`.
 
 7. **GitHub Reporting** (gh-issue-manager → gh-reporter) - **Reporting Ops**
 
 See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+
 - Skip if `github_ops_allowed: false` or `gh` unauthenticated
 - Content mode is derived from secrets gate + push surface (not workspace hygiene)
 - Issue-first: flow summaries go to the issue, never the PR
@@ -294,34 +305,35 @@ See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick ref
 
 ## Output Artifacts
 
-| Artifact | Description |
-|----------|-------------|
-| `flow_plan.md` | Execution plan and progress |
-| `deployment_log.md` | Record of merge, tag, release actions (or why skipped) |
-| `verification_report.md` | CI status + smoke check results |
-| `deployment_decision.md` | Final verdict: STABLE / NOT_DEPLOYED / BLOCKED_BY_GATE |
-| `deploy_receipt.json` | Receipt for downstream |
-| `cleanup_report.md` | Cleanup status and evidence |
-| `secrets_scan.md` | Secrets scan report |
-| `secrets_status.json` | Publish gate status (audit record) |
-| `git_status.md` | Repository status and anomaly documentation (if anomaly detected) |
-| `gh_issue_status.md` | Issue board update status |
-| `gh_report_status.md` | Log of GitHub posting |
-| `github_report.md` | Report content (local copy) |
+| Artifact                 | Description                                                       |
+| ------------------------ | ----------------------------------------------------------------- |
+| `flow_plan.md`           | Execution plan and progress                                       |
+| `deployment_log.md`      | Record of merge, tag, release actions (or why skipped)            |
+| `verification_report.md` | CI status + smoke check results                                   |
+| `deployment_decision.md` | Final verdict: STABLE / NOT_DEPLOYED / BLOCKED_BY_GATE            |
+| `deploy_receipt.json`    | Receipt for downstream                                            |
+| `cleanup_report.md`      | Cleanup status and evidence                                       |
+| `secrets_scan.md`        | Secrets scan report                                               |
+| `secrets_status.json`    | Publish gate status (audit record)                                |
+| `git_status.md`          | Repository status and anomaly documentation (if anomaly detected) |
+| `gh_issue_status.md`     | Issue board update status                                         |
+| `gh_report_status.md`    | Log of GitHub posting                                             |
+| `github_report.md`       | Report content (local copy)                                       |
 
 ## deploy-decider Verdicts
 
-| `Verdict` | Meaning |
-|---------|---------|
-| STABLE | Merge succeeded and CI/smoke verification passes |
-| NOT_DEPLOYED | Merge failed, or CI failing, or smoke tests indicate issues |
-| BLOCKED_BY_GATE | Gate verdict was not MERGE; no deployment attempted |
+| `Verdict`       | Meaning                                                     |
+| --------------- | ----------------------------------------------------------- |
+| STABLE          | Merge succeeded and CI/smoke verification passes            |
+| NOT_DEPLOYED    | Merge failed, or CI failing, or smoke tests indicate issues |
+| BLOCKED_BY_GATE | Gate verdict was not MERGE; no deployment attempted         |
 
 **Note:** We trust the GitHub merge flow handles branch protection. Flow 6 doesn't re-verify governance—it executes the merge and verifies the result.
 
 ### Finalize Flow
 
 Update `flow_plan.md`:
+
 - Mark all steps as complete
 - Add final summary section:
 
@@ -340,6 +352,7 @@ Update `flow_plan.md`:
 ## Completion
 
 Flow 6 is complete when:
+
 - `deployment_log.md` exists (even if minimal for BOUNCE (including NEEDS_HUMAN_REVIEW))
 - `verification_report.md` exists
 - `deployment_decision.md` exists with valid verdict

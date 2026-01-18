@@ -26,21 +26,21 @@ blockers: []
 
 ### Required Artifacts
 
-| Artifact | Status | Notes |
-|----------|--------|-------|
-| `learnings.md` | VERIFIED | Present; 3 learning sections extracted |
+| Artifact              | Status   | Notes                                             |
+| --------------------- | -------- | ------------------------------------------------- |
+| `learnings.md`        | VERIFIED | Present; 3 learning sections extracted            |
 | `feedback_actions.md` | VERIFIED | Present; 4 issue drafts + 6 suggestions extracted |
 
 ### Optional Artifacts
 
-| Artifact | Status | Notes |
-|----------|--------|-------|
-| `artifact_audit.md` | VERIFIED | Present; 8 KB |
-| `regression_report.md` | VERIFIED | Present; 6.3 KB; 0 regressions found |
-| `flow_history.json` | VERIFIED | Present; 30 KB |
-| `traceability_audit.md` | VERIFIED | Present; 14.8 KB |
-| `risk_assessment.md` | VERIFIED | Present; 17 KB |
-| `flow_plan.md` | VERIFIED | Present; progress tracking complete |
+| Artifact                | Status   | Notes                                |
+| ----------------------- | -------- | ------------------------------------ |
+| `artifact_audit.md`     | VERIFIED | Present; 8 KB                        |
+| `regression_report.md`  | VERIFIED | Present; 6.3 KB; 0 regressions found |
+| `flow_history.json`     | VERIFIED | Present; 30 KB                       |
+| `traceability_audit.md` | VERIFIED | Present; 14.8 KB                     |
+| `risk_assessment.md`    | VERIFIED | Present; 17 KB                       |
+| `flow_plan.md`          | VERIFIED | Present; progress tracking complete  |
 
 **All required and optional artifacts present and readable.**
 
@@ -54,12 +54,15 @@ Derived using `bash .claude/scripts/demoswarm.sh` shim (single source of truth):
 
 **Pattern:** `^## Learning: ` in `learnings.md`
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/local-alignment-audit-aba1c6/wisdom/learnings.md" \
   --regex '^## Learning: '
 ```
+
 **Result:** 3 sections
+
 - Learning: Requirements
 - Learning: Design
 - Learning: Build
@@ -68,12 +71,15 @@ bash .claude/scripts/demoswarm.sh count pattern \
 
 **Pattern:** `^- ISSUE: ` in `feedback_actions.md`
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/local-alignment-audit-aba1c6/wisdom/feedback_actions.md" \
   --regex '^- ISSUE: '
 ```
+
 **Result:** 4 issue drafts
+
 - ISSUE-DRAFT-001: Path traversal in secrets.rs (RSK-001)
 - ISSUE-DRAFT-002: cargo-audit CVSS 4.0 support
 - ISSUE-DRAFT-003: Enable branch protection
@@ -83,35 +89,43 @@ bash .claude/scripts/demoswarm.sh count pattern \
 
 **Pattern:** `^\- \[ \] SUG-` in `feedback_actions.md`
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/local-alignment-audit-aba1c6/wisdom/feedback_actions.md" \
   --regex '^\- \[ \] SUG-'
 ```
+
 **Result:** 6 suggestions
+
 - SUG-001 through SUG-006
 
 ### Regressions Found
 
 **Pattern:** `^### REG-` in `regression_report.md`
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/local-alignment-audit-aba1c6/wisdom/regression_report.md" \
   --regex '^### REG-'
 ```
+
 **Result:** 0 (documentation-only run; no code regressions possible)
 
 ### Pack Observations
 
 **Pattern:** `^- PACK_OBS: ` in `learnings.md`
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh count pattern \
   --file ".runs/local-alignment-audit-aba1c6/wisdom/learnings.md" \
   --regex '^- PACK_OBS: '
 ```
+
 **Result:** 6 observations
+
 - Build receipt permissions issue
 - Markdown formatting violations (24 items)
 - Typo "immeidate" in flow files
@@ -122,11 +136,14 @@ bash .claude/scripts/demoswarm.sh count pattern \
 ### Flows Completed
 
 **Command:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh receipts count \
   --run-dir ".runs/local-alignment-audit-aba1c6"
 ```
+
 **Result:** 5 prior receipts
+
 - signal_receipt.json (VERIFIED)
 - plan_receipt.json (VERIFIED)
 - build_receipt.json (CANNOT_PROCEED — permissions artifact)
@@ -138,14 +155,14 @@ bash .claude/scripts/demoswarm.sh receipts count \
 
 ## Aggregated Prior Receipt Summary
 
-| Flow | Status | Key Outcome | Notes |
-|------|--------|------------|-------|
-| Signal | VERIFIED | 7 REQ, 6 OQ, 5 assumptions | All requirements tracked |
-| Plan | VERIFIED | 3 options evaluated, OPT-003 chosen | Phased ADR with incremental merge strategy |
-| Build | CANNOT_PROCEED | Pack-check: 53/53 assertions passed | Permissions issue during receipt write; content verified via git fallback |
-| Review | VERIFIED | 30 feedback items, 29 resolved | Bot feedback addressed; markdown formatting sweep completed |
-| Gate | VERIFIED | Verdict: MERGE (35/35 ACs complete) | All 11 receipt checks passed; 0 security findings |
-| Deploy | VERIFIED | Verdict: NOT_DEPLOYED (ORG_CONSTRAINT) | Merge operation succeeded; branch protection not enabled (governance constraint) |
+| Flow   | Status         | Key Outcome                            | Notes                                                                            |
+| ------ | -------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| Signal | VERIFIED       | 7 REQ, 6 OQ, 5 assumptions             | All requirements tracked                                                         |
+| Plan   | VERIFIED       | 3 options evaluated, OPT-003 chosen    | Phased ADR with incremental merge strategy                                       |
+| Build  | CANNOT_PROCEED | Pack-check: 53/53 assertions passed    | Permissions issue during receipt write; content verified via git fallback        |
+| Review | VERIFIED       | 30 feedback items, 29 resolved         | Bot feedback addressed; markdown formatting sweep completed                      |
+| Gate   | VERIFIED       | Verdict: MERGE (35/35 ACs complete)    | All 11 receipt checks passed; 0 security findings                                |
+| Deploy | VERIFIED       | Verdict: NOT_DEPLOYED (ORG_CONSTRAINT) | Merge operation succeeded; branch protection not enabled (governance constraint) |
 
 **Merge Decision:** MERGE (all blockers resolved, all ACs satisfied)
 **Deployment Verdict:** NOT_DEPLOYED (organizational constraint: branch protection not enabled on main)
@@ -157,11 +174,13 @@ bash .claude/scripts/demoswarm.sh receipts count \
 **Operation:** `bash .claude/scripts/demoswarm.sh index upsert-status`
 
 **Fields Updated:**
+
 - `status`: VERIFIED
 - `last_flow`: wisdom
 - `updated_at`: 2025-12-21T22:22:11Z
 
 **Verification:**
+
 ```json
 {
   "run_id": "local-alignment-audit-aba1c6",
@@ -184,6 +203,7 @@ File: `.runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json`
 **Run Complete:** true
 
 **Counts:**
+
 - learnings_extracted: 3
 - feedback_actions_created: 4
 - suggestions_created: 6
@@ -194,6 +214,7 @@ File: `.runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json`
 **Quality Gates:** All 7 wisdom agents reported VERIFIED
 
 **Final Outcomes:**
+
 - merge_decision: MERGE
 - deployment_verdict: NOT_DEPLOYED (governance constraint)
 

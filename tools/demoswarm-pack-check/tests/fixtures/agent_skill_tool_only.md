@@ -14,6 +14,7 @@ This agent invokes skills through the formal Skill tool:
 ## Notes
 
 This agent is compliant because:
+
 1. It does NOT contain the literal shim script reference
 2. It invokes skills through the Skill() tool mechanism
 3. Therefore it is NOT required to have a ## Skills section

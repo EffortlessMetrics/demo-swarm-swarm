@@ -52,54 +52,69 @@ Incomplete evidence is not a blocker. Document it and continue.
 ## Behavior
 
 ### Step 0: Preflight writeability
+
 - You must be able to write `.runs/<run-id>/deploy/verification_report.md`.
 - If you cannot write (permissions/IO), describe the issue and stop. The environment needs fixing.
 
 ### Step 0.5: GitHub access guard (read-only)
+
 - Best-effort read `.runs/<run-id>/run_meta.json` for `github_ops_allowed` and `github_repo` **before** any gh call.
 - If `github_ops_allowed: false`: do **not** call `gh` (even read-only). Write the report with limitations noted and proceed.
 - Prefer `github_repo` from run_meta for any `gh` calls. Do not invent a repo; if missing and gh is available, record the inferred repo in the report rather than writing back.
 - If `gh` is unauthenticated, note the limitation in the report and continue without gh calls.
 
 ### Step 1: Determine whether a deployment should exist (best-effort)
+
 Best-effort parse:
+
 - Gate decision from `.runs/<run-id>/gate/merge_decision.md` (MERGE | BOUNCE | UNKNOWN)
 - Merge performed from `.runs/<run-id>/deploy/deployment_log.md` (yes | no | unknown)
 
 If gate decision is not MERGE **or** deployment_log indicates merge was skipped:
+
 - Write a NOT_DEPLOYED report (no CI/deploy probing required).
 - Status can be `VERIFIED` (because "not deployed" is the correct state), unless inputs are missing/ambiguous (then UNVERIFIED with concerns).
 
 ### Step 2: Gather CI evidence (best-effort; read-only)
+
 Only if:
+
 - gate decision is MERGE, and
 - merge_performed is yes (or strongly implied)
 
 Best-effort extract from deployment_log:
+
 - merge_commit_sha (if present)
 - tag (if present)
 - release_url (if present)
 
 If `gh` is available and authenticated, collect workflow evidence (prefer summaries, not logs):
+
 - list recent runs on default branch (typically main)
 - for the most relevant run(s), capture JSON fields:
   - workflowName, status, conclusion, createdAt/updatedAt, url, headSha (if available)
 
 If `gh` is missing or unauthenticated:
+
 - mark UNVERIFIED
 - add a blocker/concern: "Cannot obtain CI evidence (gh unavailable/auth)"
 - continue writing the report with what you can infer from deployment_log
 
 ### Step 3: Gather deployment evidence (optional; best-effort)
+
 If GitHub Deployments are used and accessible:
+
 - query recent deployments (best-effort)
 - record environment, state, timestamp, url/notes
 
 If deployments evidence is not available:
+
 - record "no deployment API evidence available" as a concern (not a failure by itself).
 
 ### Step 4: Bounded re-check (optional)
+
 If CI is clearly in progress and you can re-check:
+
 - re-check at most 3 times total
 - record each observation with an ISO timestamp
 - if still not converged, keep `ci_signal: UNKNOWN` and status UNVERIFIED (unless you have enough other evidence)
@@ -118,43 +133,43 @@ deploy_signal: PASS | FAIL | UNKNOWN | N/A
 
 ## Context
 
-* run_id: <run-id>
-* inputs_used:
-  * <repo-relative path>
-* tools:
-  * gh: available|missing|unauthenticated|unknown
+- run_id: <run-id>
+- inputs_used:
+  - <repo-relative path>
+- tools:
+  - gh: available|missing|unauthenticated|unknown
 
 ## Gate + Release Context
 
-* gate_decision: <...> (source: `.runs/<run-id>/gate/merge_decision.md` or UNKNOWN)
-* merge_performed: <...> (source: `.runs/<run-id>/deploy/deployment_log.md` or unknown)
-* merge_commit_sha: <sha | unknown>
-* tag: <tag | unknown>
-* release_url: <url | unknown>
+- gate_decision: <...> (source: `.runs/<run-id>/gate/merge_decision.md` or UNKNOWN)
+- merge_performed: <...> (source: `.runs/<run-id>/deploy/deployment_log.md` or unknown)
+- merge_commit_sha: <sha | unknown>
+- tag: <tag | unknown>
+- release_url: <url | unknown>
 
 ## CI Evidence (best-effort)
 
-| Workflow | Run ID | Status | Conclusion | URL | Notes |
-|----------|--------|--------|------------|-----|-------|
-| <name> | <id> | queued/in_progress/completed | success/failure/cancelled/neutral/unknown | <url> | headSha=<sha or unknown> |
+| Workflow | Run ID | Status                       | Conclusion                                | URL   | Notes                    |
+| -------- | ------ | ---------------------------- | ----------------------------------------- | ----- | ------------------------ |
+| <name>   | <id>   | queued/in_progress/completed | success/failure/cancelled/neutral/unknown | <url> | headSha=<sha or unknown> |
 
 ## Deployment Evidence (best-effort)
 
-| Environment | State | Timestamp | URL/Notes |
-|-------------|-------|-----------|-----------|
-| <env> | success/failure/in_progress/unknown | <time or unknown> | <url or "not available"> |
+| Environment | State                               | Timestamp         | URL/Notes                |
+| ----------- | ----------------------------------- | ----------------- | ------------------------ |
+| <env>       | success/failure/in_progress/unknown | <time or unknown> | <url or "not available"> |
 
 ## Observations (optional)
 
-* <ISO8601> — CI: <status>/<conclusion>; Deploy: <state>
+- <ISO8601> — CI: <status>/<conclusion>; Deploy: <state>
 
 ## Notes
 
-* <short, link-heavy notes; no big logs>
+- <short, link-heavy notes; no big logs>
 
 ## Limitations
 
-* <what evidence could not be gathered and why>
+- <what evidence could not be gathered and why>
 ```
 
 ## Completion guidance
@@ -169,19 +184,24 @@ After writing the file, tell the orchestrator what happened:
 
 **Examples:**
 
-*Evidence gathered, CI passing:*
+_Evidence gathered, CI passing:_
+
 > "Monitored CI for merge commit abc123: 3 workflows completed (tests, lint, build) with status=success. CI signal: PASS. Deployment evidence: production environment shows state=success. Route to **smoke-verifier**."
 
-*CI failing:*
+_CI failing:_
+
 > "CI monitoring detected failures: 'tests' workflow failed with 2 test failures. CI signal: FAIL. Full evidence in verification_report.md. Route to **smoke-verifier** to continue verification (failures are documented)."
 
-*Not deployed:*
+_Not deployed:_
+
 > "Gate decision was BOUNCE—deployment not attempted. Documented gate context in verification report. Route to **deploy-cleanup** (nothing to verify)."
 
-*Limited evidence:*
+_Limited evidence:_
+
 > "Cannot access CI evidence (gh unavailable). Verification report written with limitations documented. Route to **smoke-verifier** with gaps noted."
 
 Always mention:
+
 - Whether deployment was attempted
 - CI signal (PASS/FAIL/UNKNOWN/N/A)
 - Deploy signal if applicable (PASS/FAIL/UNKNOWN/N/A)

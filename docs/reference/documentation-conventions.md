@@ -19,14 +19,14 @@ The pack trades machine iteration for human verification time. Docs should do th
 
 ### Anti-Patterns
 
-| Pattern | Problem |
-|---------|---------|
-| Hype language ("revolutionary", "magical") | Ages poorly, invites skepticism |
-| Persona language ("rogue auditor") | Requires context outsiders don't have |
-| Proof-of-work flexing (commit counts, token spend) | Distracts from utility |
-| Dramatic terminology ("catastrophic failure") | Makes routine operations sound alarming |
-| Emojis | Undercuts operator-grade tone |
-| Dialogue scripts ("Start by stating X") | Over-constrains agent behavior |
+| Pattern                                            | Problem                                 |
+| -------------------------------------------------- | --------------------------------------- |
+| Hype language ("revolutionary", "magical")         | Ages poorly, invites skepticism         |
+| Persona language ("rogue auditor")                 | Requires context outsiders don't have   |
+| Proof-of-work flexing (commit counts, token spend) | Distracts from utility                  |
+| Dramatic terminology ("catastrophic failure")      | Makes routine operations sound alarming |
+| Emojis                                             | Undercuts operator-grade tone           |
+| Dialogue scripts ("Start by stating X")            | Over-constrains agent behavior          |
 
 ### Litmus Tests
 
@@ -41,12 +41,12 @@ Before committing doc changes:
 
 ## Where to Put Things (Diataxis)
 
-| Type | Purpose | Location | Voice |
-|------|---------|----------|-------|
-| **Tutorial** | Learning by doing | `docs/tutorials/` | "You run... You see..." |
-| **How-to** | Task completion | `docs/how-to/` | "To do X, run Y" |
-| **Reference** | Lookup (schemas, tables) | `docs/reference/` | Tables, no prose |
-| **Explanation** | Understanding "why" | `docs/explanation/` | Factual, no hype |
+| Type            | Purpose                  | Location            | Voice                   |
+| --------------- | ------------------------ | ------------------- | ----------------------- |
+| **Tutorial**    | Learning by doing        | `docs/tutorials/`   | "You run... You see..." |
+| **How-to**      | Task completion          | `docs/how-to/`      | "To do X, run Y"        |
+| **Reference**   | Lookup (schemas, tables) | `docs/reference/`   | Tables, no prose        |
+| **Explanation** | Understanding "why"      | `docs/explanation/` | Factual, no hype        |
 
 Don't mix types. A how-to shouldn't explain architecture; link to the explanation instead.
 
@@ -56,13 +56,13 @@ Don't mix types. A how-to shouldn't explain architecture; link to the explanatio
 
 Use these terms consistently:
 
-| Term | Meaning |
-|------|---------|
-| **Swarm mainline** | `origin/main` — Flow 6 merges here |
-| **Upstream** | The human repo (`upstream/main`) — export happens after Wisdom |
-| **Deploy** | Merge + verify in swarm, not production rollout |
-| **Flow 5 (Gate)** | Decides merge vs bounce |
-| **Flow 6 (Deploy)** | Executes the merge |
+| Term                | Meaning                                                        |
+| ------------------- | -------------------------------------------------------------- |
+| **Swarm mainline**  | `origin/main` — Flow 6 merges here                             |
+| **Upstream**        | The human repo (`upstream/main`) — export happens after Wisdom |
+| **Deploy**          | Merge + verify in swarm, not production rollout                |
+| **Flow 5 (Gate)**   | Decides merge vs bounce                                        |
+| **Flow 6 (Deploy)** | Executes the merge                                             |
 
 Common mistake: Flow 5 decides, Flow 6 executes. Don't confuse them.
 
@@ -74,9 +74,11 @@ Common mistake: Flow 5 decides, Flow 6 executes. Don't confuse them.
 
 ```markdown
 <!-- Good -->
+
 Open `.runs/<run-id>/signal/requirements.md` to review the contract.
 
 <!-- Bad -->
+
 Check the requirements file in the signal directory.
 ```
 
@@ -90,9 +92,11 @@ Exception: quoting compiler or test output that already includes line numbers.
 
 ```markdown
 <!-- Good -->
+
 See `.claude/agents/` for the current agent set.
 
 <!-- Bad -->
+
 The pack includes 73 agents across 8 families.
 ```
 
@@ -102,10 +106,12 @@ Link to sources instead of embedding values that drift:
 
 ```markdown
 <!-- Good -->
+
 Check [Anthropic pricing](https://www.anthropic.com/pricing) for current rates.
 Sonnet is ~10-15x Haiku cost.
 
 <!-- Bad -->
+
 Sonnet costs ~$3.00 per million tokens.
 Each run costs $5-10 in API calls.
 ```
@@ -125,9 +131,11 @@ Use relative comparisons ("cheap to rerun", "most agents") not absolutes ("$5", 
 
 ```markdown
 <!-- Good -->
+
 Test deletions may block push depending on policy.
 
 <!-- Bad -->
+
 Test deletions block push.
 ```
 
@@ -144,15 +152,15 @@ Exception: contract definitions in CLAUDE.md or reference docs.
 
 ## Flow Reference
 
-| Flow | Name | Purpose |
-|------|------|---------|
-| 1 | Signal | Intent → contract |
-| 2 | Plan | Contract → blueprint |
-| 3 | Build | AC-by-AC implementation |
-| 4 | Review | Harvest feedback, batch fixes |
-| 5 | Gate | Forensic audit → verdict |
-| 6 | Deploy | Merge to swarm mainline |
-| 7 | Wisdom | Close loops |
+| Flow | Name   | Purpose                       |
+| ---- | ------ | ----------------------------- |
+| 1    | Signal | Intent → contract             |
+| 2    | Plan   | Contract → blueprint          |
+| 3    | Build  | AC-by-AC implementation       |
+| 4    | Review | Harvest feedback, batch fixes |
+| 5    | Gate   | Forensic audit → verdict      |
+| 6    | Deploy | Merge to swarm mainline       |
+| 7    | Wisdom | Close loops                   |
 
 ---
 
@@ -175,20 +183,26 @@ Copy-paste patterns for consistency:
 
 ```markdown
 <!-- Economic anchor (README, architecture docs only) -->
+
 **Core constraint:** Tokens are cheap; reviewer attention is the bottleneck.
 
 <!-- What to skim pattern -->
+
 Then open:
+
 - `.runs/<run-id>/signal/requirements.md` — the contract
 - `.runs/<run-id>/signal/open_questions.md` — assumptions needing validation
 
 <!-- Rerun guidance -->
+
 If the contract is wrong, rerun Flow 1. Fixing the spec is cheaper than fixing a bad build.
 
 <!-- Gate language -->
+
 Gates engage at publish boundaries. If a gate blocks, keep working locally.
 
 <!-- Receipt philosophy -->
+
 Receipts are logs, not locks. The git log is the audit trail.
 ```
 

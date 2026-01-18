@@ -29,11 +29,13 @@ Preserve identity/trust fields from upstream: `run_id_kind`, `issue_binding`, `g
 ## Output
 
 Directories:
+
 - `.runs/`
 - `.runs/<run-id>/`
 - `.runs/<run-id>/<flow>/`
 
 Files:
+
 - `.runs/<run-id>/run_meta.json` (create or merge)
 - `.runs/index.json` (upsert entry)
 
@@ -56,6 +58,7 @@ Use the first matching source:
 **1. Explicit run-id:** If provided, sanitize and use it. If user requests restart/new/fresh, create `<run-id>-v2` and set `supersedes`.
 
 **2. Issue/PR reference:** If input includes `#123`, `gh-123`, or similar:
+
 - Check index.json for an existing run matching the issue/PR
 - If found, reuse that run_id
 - If not found, use `gh-N` or `pr-N` as candidate
@@ -67,6 +70,7 @@ Use the first matching source:
 If fallback was used, note the ambiguity in your handoff.
 
 ### Sanitization
+
 - Lowercase letters, numbers, hyphen only
 - Replace spaces/underscores/slashes with `-`
 - Collapse multiple `-`
@@ -84,6 +88,7 @@ If fallback was used, note the ambiguity in your handoff.
 ## Create Directories
 
 Ensure these exist:
+
 - `.runs/`
 - `.runs/<run-id>/`
 - `.runs/<run-id>/<flow>/`
@@ -128,6 +133,7 @@ Create or update `.runs/<run-id>/run_meta.json`:
 ```
 
 **Merge rules:**
+
 - Preserve existing fields you do not own (`canonical_key`, `issue_number`, `pr_number`, aliases)
 - Preserve identity/trust flags from upstream (`run_id_kind`, `issue_binding`, `github_ops_allowed`, `repo_mismatch`)
 - Never flip `github_ops_allowed` from `false` to `true`
@@ -161,6 +167,7 @@ Upsert by `run_id`:
 ```
 
 **Rules:**
+
 - Index is a pointer, not a receipt store
 - Preserve existing `status` if set by cleanup agent
 - Update: `updated_at`, `last_flow`, identity pointers when available
@@ -173,15 +180,19 @@ Note which flow directories are missing under `.runs/<run-id>/`. This is advisor
 ## Handoff Examples
 
 **Success (clean resolution):**
+
 > "Established run infrastructure for feat-auth flow plan. Created directories and merged run_meta.json. Resolved #456 -> feat-auth via index lookup. Ready for domain work."
 
 **Success (with notes):**
+
 > "Established run infrastructure for gh-123 flow build. Reusing existing run (iteration 3). Missing upstream flows: [signal] (out-of-order execution). Proceeding with documented gaps."
 
 **Partial (fallback used):**
+
 > "Established run infrastructure for run-plan-v2. Identity resolution used fallback (no explicit run-id, branch, or issue reference). Verify this is the intended run before proceeding."
 
 **Blocked:**
+
 > "Cannot create .runs/feat-auth/ due to permissions. Fix file system access and rerun."
 
 ## Handoff Targets

@@ -19,11 +19,11 @@ This document defines the observability contract for the `pack-check` CLI tool e
 
 ### Environments
 
-| Environment | Characteristics | Observability Priority |
-|-------------|-----------------|----------------------|
-| Local dev | Interactive, frequent runs, human reads output | Human-readable diagnostics |
-| CI runner | Automated, non-interactive, machine parses output | Structured JSON, exit codes |
-| Debug mode | Troubleshooting failures, verbose context needed | Extended context, file paths |
+| Environment | Characteristics                                   | Observability Priority       |
+| ----------- | ------------------------------------------------- | ---------------------------- |
+| Local dev   | Interactive, frequent runs, human reads output    | Human-readable diagnostics   |
+| CI runner   | Automated, non-interactive, machine parses output | Structured JSON, exit codes  |
+| Debug mode  | Troubleshooting failures, verbose context needed  | Extended context, file paths |
 
 ---
 
@@ -40,6 +40,7 @@ All diagnostic output follows this format (NFR-OPS-001 MET-1):
 ```
 
 Example:
+
 ```
 [WARN] CHECK-050 .claude/commands/flow-1-signal.md:42 - Flow command contains demoswarm.sh invocation
 [WARN] CHECK-051 .runs/foo/signal/open_questions.md:15 - Invalid OpenQ prefix: OQ-PLAN-001 (expected SIG|PLN|BLD|GAT|DEP|WIS)
@@ -47,11 +48,11 @@ Example:
 
 ### Severity Levels
 
-| Level | Usage | Exit Code Impact |
-|-------|-------|-----------------|
-| ERROR | Rule violation when --strict enabled | Exit 1 |
-| WARN | Rule violation (default mode) | Exit 0 (no --strict) |
-| INFO | Informational (file scanned, rule applied) | Exit 0 |
+| Level | Usage                                      | Exit Code Impact     |
+| ----- | ------------------------------------------ | -------------------- |
+| ERROR | Rule violation when --strict enabled       | Exit 1               |
+| WARN  | Rule violation (default mode)              | Exit 0 (no --strict) |
+| INFO  | Informational (file scanned, rule applied) | Exit 0               |
 
 ### Naming Convention
 
@@ -72,12 +73,12 @@ Rule IDs follow the pattern: `CHECK-NNN` where NNN is the check number in drift.
 
 ### Event Taxonomy
 
-| Event | Level | When Emitted | Required Fields |
-|-------|-------|--------------|-----------------|
-| `SCAN_START` | INFO | Beginning validation run | timestamp, version, flags |
-| `RULE_APPLIED` | DEBUG | Each rule execution | check_id, file_count |
-| `VIOLATION_FOUND` | WARN/ERROR | Rule violation detected | check_id, file, line, message |
-| `SCAN_COMPLETE` | INFO | Validation finished | total_files, total_violations, duration_ms |
+| Event             | Level      | When Emitted             | Required Fields                            |
+| ----------------- | ---------- | ------------------------ | ------------------------------------------ |
+| `SCAN_START`      | INFO       | Beginning validation run | timestamp, version, flags                  |
+| `RULE_APPLIED`    | DEBUG      | Each rule execution      | check_id, file_count                       |
+| `VIOLATION_FOUND` | WARN/ERROR | Rule violation detected  | check_id, file, line, message              |
+| `SCAN_COMPLETE`   | INFO       | Validation finished      | total_files, total_violations, duration_ms |
 
 ### Required Fields (all events)
 
@@ -205,11 +206,11 @@ For a CLI tool, "alerts" are CI pipeline failure conditions.
 
 ### Standard Exit Codes (REQ-005, OQ-PLAN-002)
 
-| Exit Code | Meaning | When |
-|-----------|---------|------|
-| 0 | Success | No violations, or warnings-only without --strict |
-| 1 | Failure | Errors present, or warnings present with --strict |
-| 2 | Reserved | Future: distinguish warnings-elevated-to-errors from native errors |
+| Exit Code | Meaning  | When                                                               |
+| --------- | -------- | ------------------------------------------------------------------ |
+| 0         | Success  | No violations, or warnings-only without --strict                   |
+| 1         | Failure  | Errors present, or warnings present with --strict                  |
+| 2         | Reserved | Future: distinguish warnings-elevated-to-errors from native errors |
 
 ### --strict Flag Behavior
 
@@ -260,9 +261,9 @@ For CI consumption, pack-check supports structured JSON output (NFR-OPS-001):
     }
   ],
   "checks_applied": [
-    {"check_id": "CHECK-049", "files_scanned": 14, "violations": 0},
-    {"check_id": "CHECK-050", "files_scanned": 6, "violations": 1},
-    {"check_id": "CHECK-051", "files_scanned": 8, "violations": 2}
+    { "check_id": "CHECK-049", "files_scanned": 14, "violations": 0 },
+    { "check_id": "CHECK-050", "files_scanned": 6, "violations": 1 },
+    { "check_id": "CHECK-051", "files_scanned": 8, "violations": 2 }
   ]
 }
 ```
@@ -291,6 +292,7 @@ Every error/warning message must include:
 ### Examples
 
 **Good:**
+
 ```
 [WARN] CHECK-050 .claude/commands/flow-1-signal.md:42 - Flow command contains 'demoswarm.sh' invocation.
        Flow commands should delegate CLI operations to agents/skills.
@@ -298,17 +300,18 @@ Every error/warning message must include:
 ```
 
 **Bad:**
+
 ```
 Warning: Invalid content in file
 ```
 
 ### Remediation Hints
 
-| Check | Standard Remediation |
-|-------|---------------------|
+| Check     | Standard Remediation                                                     |
+| --------- | ------------------------------------------------------------------------ |
 | CHECK-049 | Add `## Skills` section to agent file listing required skill invocations |
-| CHECK-050 | Remove demoswarm.sh reference; delegate to agent layer or skill doc |
-| CHECK-051 | Update QID to use canonical prefix (SIG/PLN/BLD/GAT/DEP/WIS) |
+| CHECK-050 | Remove demoswarm.sh reference; delegate to agent layer or skill doc      |
+| CHECK-051 | Update QID to use canonical prefix (SIG/PLN/BLD/GAT/DEP/WIS)             |
 
 ---
 
@@ -316,25 +319,25 @@ Warning: Invalid content in file
 
 ### Requirements to Signals
 
-| Requirement | SLI/Signal | Alert |
-|-------------|------------|-------|
-| REQ-001 (Flow Boundary) | CHECK-050 violations | ALERT-STRICT-001 |
-| REQ-002 (Skills Section) | CHECK-049 violations | ALERT-STRICT-001 |
-| REQ-003 (OpenQ Prefix) | CHECK-051 violations | ALERT-STRICT-001 |
-| REQ-005 (Warning-First) | Exit code behavior | ALERT-STRICT-001 |
-| REQ-006 (No False Positives) | Baseline comparison | ALERT-BASELINE-001 |
-| NFR-PERF-001 (Runtime) | stats.duration_ms | ALERT-PERF-001 |
-| NFR-REL-001 (Deterministic) | Output hash | CI test assertion |
-| NFR-OPS-001 (Diagnostics) | JSON structure | Schema validation |
+| Requirement                  | SLI/Signal           | Alert              |
+| ---------------------------- | -------------------- | ------------------ |
+| REQ-001 (Flow Boundary)      | CHECK-050 violations | ALERT-STRICT-001   |
+| REQ-002 (Skills Section)     | CHECK-049 violations | ALERT-STRICT-001   |
+| REQ-003 (OpenQ Prefix)       | CHECK-051 violations | ALERT-STRICT-001   |
+| REQ-005 (Warning-First)      | Exit code behavior   | ALERT-STRICT-001   |
+| REQ-006 (No False Positives) | Baseline comparison  | ALERT-BASELINE-001 |
+| NFR-PERF-001 (Runtime)       | stats.duration_ms    | ALERT-PERF-001     |
+| NFR-REL-001 (Deterministic)  | Output hash          | CI test assertion  |
+| NFR-OPS-001 (Diagnostics)    | JSON structure       | Schema validation  |
 
 ### Risks to Signals
 
-| Risk | Observable Signal | Mitigation Verification |
-|------|-------------------|------------------------|
-| RSK-001 (Prior Bounce) | Warning count trends | Decreasing over time indicates successful rollout |
-| RSK-004 (Enforcement Delay) | --strict adoption rate | CI configs using --strict |
-| RSK-005 (CI Runtime) | duration_ms in JSON | Stays under 30s bound |
-| RSK-008 (Skill List Drift) | CHECK-050 false negative rate | Manual audit when skills added |
+| Risk                        | Observable Signal             | Mitigation Verification                           |
+| --------------------------- | ----------------------------- | ------------------------------------------------- |
+| RSK-001 (Prior Bounce)      | Warning count trends          | Decreasing over time indicates successful rollout |
+| RSK-004 (Enforcement Delay) | --strict adoption rate        | CI configs using --strict                         |
+| RSK-005 (CI Runtime)        | duration_ms in JSON           | Stays under 30s bound                             |
+| RSK-008 (Skill List Drift)  | CHECK-050 false negative rate | Manual audit when skills added                    |
 
 ---
 

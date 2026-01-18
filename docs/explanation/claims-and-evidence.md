@@ -10,12 +10,12 @@ LLMs don't fail by producing nonsense. They fail by being **credibly wrong**.
 
 The failure mode isn't gibberish. It's plausible-sounding claims without backing:
 
-| Claim | Reality |
-|-------|---------|
-| "Tests passed" | Tests didn't run, or ran against wrong code |
-| "No security issues found" | Scanner ran on 3 files, not the codebase |
-| "Implementation matches spec" | Semantic drift between code and contract |
-| "Coverage is adequate" | Coverage was inferred, not measured |
+| Claim                         | Reality                                     |
+| ----------------------------- | ------------------------------------------- |
+| "Tests passed"                | Tests didn't run, or ran against wrong code |
+| "No security issues found"    | Scanner ran on 3 files, not the codebase    |
+| "Implementation matches spec" | Semantic drift between code and contract    |
+| "Coverage is adequate"        | Coverage was inferred, not measured         |
 
 This is **process confabulation**: confident assertions about what happened when the thing didn't happen, or happened differently than described.
 
@@ -47,11 +47,13 @@ Different claims require different evidence.
 ### Tests Passing
 
 **Required evidence:**
+
 - Command that was run (`npm test`, `pytest`, etc.)
 - Key output (pass count, failure count)
 - Exit code or artifact path
 
 **Example:**
+
 ```yaml
 test_execution:
   command: "npm test"
@@ -61,18 +63,21 @@ test_execution:
 ```
 
 **Not evidence:**
+
 ```yaml
-tests: "all passing"  # No command, no output, no artifact
+tests: "all passing" # No command, no output, no artifact
 ```
 
 ### Security/Quality Checks
 
 **Required evidence:**
+
 - Scanner that was run (tool name, version if relevant)
 - Coverage of what was scanned (files, directories)
 - Specific findings (or explicit "no findings")
 
 **Example:**
+
 ```yaml
 secrets_scan:
   tool: "secrets-tools"
@@ -82,18 +87,21 @@ secrets_scan:
 ```
 
 **Not evidence:**
+
 ```yaml
-security: "no issues"  # Which scanner? What scope?
+security: "no issues" # Which scanner? What scope?
 ```
 
 ### Spec Conformance
 
 **Required evidence:**
+
 - File:line references
 - Diff summaries
 - Specific assertions with locations
 
 **Example:**
+
 ```yaml
 spec_conformance:
   requirement: "REQ-001"
@@ -102,8 +110,9 @@ spec_conformance:
 ```
 
 **Not evidence:**
+
 ```yaml
-requirements: "all met"  # No references, no mapping
+requirements: "all met" # No references, no mapping
 ```
 
 ---
@@ -112,12 +121,12 @@ requirements: "all met"  # No references, no mapping
 
 Evidence pointers look like:
 
-| Type | Format | Example |
-|------|--------|---------|
-| Location | `file:line` | `src/auth.rs:142` |
-| Artifact | Relative path | `.runs/feat-auth/build/test_execution.md` |
-| Command | Command + result | `npm test (exit 0, 47 passed)` |
-| External | URL | `https://github.com/org/repo/actions/runs/123` |
+| Type     | Format           | Example                                        |
+| -------- | ---------------- | ---------------------------------------------- |
+| Location | `file:line`      | `src/auth.rs:142`                              |
+| Artifact | Relative path    | `.runs/feat-auth/build/test_execution.md`      |
+| Command  | Command + result | `npm test (exit 0, 47 passed)`                 |
+| External | URL              | `https://github.com/org/repo/actions/runs/123` |
 
 The pointer tells the reader: "If you want to verify this claim, look here."
 
@@ -137,6 +146,7 @@ It's perfectly acceptable to say:
 ### Examples
 
 **Honest:**
+
 ```yaml
 ## Proof (measured vs not measured)
 - Gate: PASS (evidence: `.runs/feat-auth/gate/gate_receipt.json`)
@@ -145,6 +155,7 @@ It's perfectly acceptable to say:
 ```
 
 **Dishonest:**
+
 ```yaml
 ## Proof
 - All checks passed
@@ -215,6 +226,7 @@ The ultimate evidence surface is the PR description. It's where claims meet revi
 
 ```markdown
 ### Proof (measured vs not measured)
+
 - Gate: PASS | BOUNCE (evidence: `.runs/.../gate_receipt.json`)
 - Tests: <summary> (evidence: `.runs/.../test_execution.md`)
 - Mutation/fuzz: <ran | not run + reason>
@@ -238,22 +250,24 @@ This isn't bureaucracy. It's discipline that enables trust.
 
 ### Where Enforcement Applies
 
-| Context | Requirement |
-|---------|-------------|
-| Gate decisions | Must cite evidence for PASS/BOUNCE |
-| PR Brief | Must have "Proof" section with pointers |
-| Receipts | Must summarize tool outputs, not opinions |
-| Merge decisions | Must reference executed verification |
+| Context         | Requirement                               |
+| --------------- | ----------------------------------------- |
+| Gate decisions  | Must cite evidence for PASS/BOUNCE        |
+| PR Brief        | Must have "Proof" section with pointers   |
+| Receipts        | Must summarize tool outputs, not opinions |
+| Merge decisions | Must reference executed verification      |
 
 ### What Enforcement Looks Like
 
 **Pack-check can warn on:**
+
 - Claims without pointers in receipts
 - Gate decisions without evidence_sha
 - PR briefs missing "Not measured" section
 - Narrative-only artifacts (no tool outputs referenced)
 
 **Human reviewers should ask:**
+
 - "Where's the evidence for this claim?"
 - "What was actually measured?"
 - "Is this inference or execution?"
@@ -264,13 +278,13 @@ This isn't bureaucracy. It's discipline that enables trust.
 
 Understanding how claims degrade helps catch confabulation:
 
-| Level | Example | Trust Level |
-|-------|---------|-------------|
-| **Executed evidence** | `npm test` exit 0, output captured | High |
-| **Artifact pointer** | "See test_execution.md" (exists, recent) | Medium-high |
-| **Stale artifact** | "See test_execution.md" (wrong SHA) | Low |
-| **Narrative claim** | "Tests passed" (no pointer) | Very low |
-| **Implicit claim** | No mention of tests at all | None |
+| Level                 | Example                                  | Trust Level |
+| --------------------- | ---------------------------------------- | ----------- |
+| **Executed evidence** | `npm test` exit 0, output captured       | High        |
+| **Artifact pointer**  | "See test_execution.md" (exists, recent) | Medium-high |
+| **Stale artifact**    | "See test_execution.md" (wrong SHA)      | Low         |
+| **Narrative claim**   | "Tests passed" (no pointer)              | Very low    |
+| **Implicit claim**    | No mention of tests at all               | None        |
 
 The pack is designed to keep everything at level 1-2. Levels 3-5 are failure modes.
 

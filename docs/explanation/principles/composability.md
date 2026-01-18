@@ -11,12 +11,14 @@ Each agent does one thing well. The orchestrator combines them into sophisticate
 ### Simple Parts, Complex Whole
 
 A complex agent is:
+
 - Hard to understand
 - Hard to debug
 - Hard to modify
 - Brittle
 
 Simple agents composed:
+
 - Each part is clear
 - Issues are isolated
 - Changes are local
@@ -25,6 +27,7 @@ Simple agents composed:
 ### Reusability
 
 A focused agent can be reused:
+
 - code-critic works in Build AND Review
 - test-executor works in Build AND Gate
 - clarifier works in Signal AND Build
@@ -34,6 +37,7 @@ A kitchen-sink agent is one-off.
 ### Parallel Execution
 
 Independent agents can run in parallel:
+
 - code-critic AND test-critic (different domains)
 - security-scanner AND coverage-enforcer (different checks)
 
@@ -42,6 +46,7 @@ Composed workflows naturally parallelize.
 ### Substitutability
 
 Don't like how an agent works? Replace just that agent:
+
 - Swap test-critic for a stricter version
 - Use a different security-scanner
 - Add a new critic to the chain
@@ -68,30 +73,38 @@ Each agent does one job. The orchestrator creates the workflow.
 ### Composition Patterns
 
 **Sequential:**
+
 ```
 A → B → C
 ```
+
 Each depends on the previous.
 
 **Parallel:**
+
 ```
     ┌→ B ─┐
 A ──┤     ├→ D
     └→ C ─┘
 ```
+
 B and C run simultaneously after A.
 
 **Iterative:**
+
 ```
 A → B → (feedback) → A → B → ... → C
 ```
+
 Loop until condition met.
 
 **Conditional:**
+
 ```
 A → (if X) → B
     (else) → C
 ```
+
 Branch based on outcome.
 
 ### Example: Build Workflow
@@ -116,6 +129,7 @@ build-cleanup (summarize)
 ### Agent Interfaces
 
 Agents compose because they share a common interface:
+
 - **Input:** Context + task description
 - **Output:** Artifacts + handoff with recommendation
 - **Contract:** Single responsibility, clear handoff
@@ -125,6 +139,7 @@ Any agent can be replaced with another that follows this interface.
 ## Composition Examples
 
 ### Quality Chain
+
 ```
 code-implementer
     ↓
@@ -138,6 +153,7 @@ standards-enforcer (style)
 Each adds a quality dimension. Together: comprehensive review.
 
 ### Verification Chain
+
 ```
 test-executor (unit tests)
     ↓
@@ -149,6 +165,7 @@ coverage-enforcer (coverage thresholds)
 Each verifies a different property.
 
 ### Decision Chain
+
 ```
 receipt-checker (artifacts valid)
     ↓
@@ -162,43 +179,54 @@ Each contributes to the final decision.
 ## Building New Workflows
 
 ### Step 1: Identify Responsibilities
+
 What distinct jobs need doing?
+
 - "Review code" — code-critic
 - "Check security" — security-scanner
 - "Run tests" — test-executor
 
 ### Step 2: Define Sequence
+
 What order? What depends on what?
+
 - Tests first (need passing tests to review)
 - Security after code exists
 - Critic after implementation
 
 ### Step 3: Identify Iteration
+
 Where might we loop?
+
 - Writer/critic loops
 - Test/fix loops
 
 ### Step 4: Compose
+
 Write the orchestration that sequences agents.
 
 ## Anti-Patterns
 
 ### The God Agent
+
 One agent that does everything.
 
 **Fix:** Split into focused agents. Compose them.
 
 ### Tight Coupling
+
 Agent A directly calls Agent B.
 
 **Fix:** Orchestrator manages all agent calls. Agents are independent.
 
 ### Hidden Dependencies
+
 Agent assumes another agent ran without checking.
 
 **Fix:** Check artifacts. Evidence over trust.
 
 ### Non-Standard Interface
+
 Agent returns data in a unique format.
 
 **Fix:** All agents use handoff pattern. Standard interface.
@@ -206,12 +234,15 @@ Agent returns data in a unique format.
 ## The Power of Composition
 
 ### Small Agents
+
 - code-implementer: ~200 lines of prompt
 - code-critic: ~200 lines of prompt
 - test-author: ~150 lines of prompt
 
 ### Large Workflows
+
 Build flow composes 10+ agents into a sophisticated process that:
+
 - Implements features
 - Reviews quality
 - Runs tests

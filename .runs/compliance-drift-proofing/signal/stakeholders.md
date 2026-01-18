@@ -1,6 +1,7 @@
 # Stakeholders
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null
@@ -11,8 +12,9 @@ blockers: []
 missing_required: []
 
 concerns:
-  - Clarifier agent role in OpenQ generation is now explicit (REQ-003 consumer)
-  - 4 agents missing Skills sections are gaps requiring remediation (per ASM-004)
+
+- Clarifier agent role in OpenQ generation is now explicit (REQ-003 consumer)
+- 4 agents missing Skills sections are gaps requiring remediation (per ASM-004)
 
 ## Primary
 

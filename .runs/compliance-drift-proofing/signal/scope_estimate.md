@@ -13,15 +13,15 @@ blockers: []
 missing_required: []
 
 counts:
-  functional_requirements: 6
-  non_functional_requirements: 6
-  bdd_scenarios: 40
-  open_questions: 10
-  integration_points: 3
+functional_requirements: 6
+non_functional_requirements: 6
+bdd_scenarios: 40
+open_questions: 10
+integration_points: 3
 
 scope:
-  tshirt_size: M
-  confidence: High
+tshirt_size: M
+confidence: High
 
 ## Rationale (why this size)
 

@@ -1,6 +1,7 @@
 # Normalized Issue
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: problem-framer
@@ -8,14 +9,17 @@ route_to_flow: 2
 blockers: []
 missing_required: []
 notes:
-  - raw input was a comprehensive alignment analysis comparing documentation against codebase
-  - analysis cross-referenced CLAUDE.md, test_output.log, REPO_MAP.md, agent frontmatter, and secrets.rs
-  - all key claims were validated against code artifacts; evidence is bounded to specific findings
+
+- raw input was a comprehensive alignment analysis comparing documentation against codebase
+- analysis cross-referenced CLAUDE.md, test_output.log, REPO_MAP.md, agent frontmatter, and secrets.rs
+- all key claims were validated against code artifacts; evidence is bounded to specific findings
 
 ## Summary
+
 Analysis audit comparing DemoSwarm documentation (CLAUDE.md, REPO_MAP.md, etc.) against actual codebase reveals three classes of findings: (1) architectural correctness (Seven-Flow model confirmed; previous "Six-Flow" claim outdated), (2) test count discrepancy (actual 102 passing tests vs claimed 374), and (3) security posture validity (ReDoS claim invalid; path traversal concern valid).
 
 ## Signal Type
+
 - request_type: audit
 - source_type: manual alignment analysis
 - links:
@@ -25,6 +29,7 @@ Analysis audit comparing DemoSwarm documentation (CLAUDE.md, REPO_MAP.md, etc.) 
   - REPO_MAP.md (repo structure documentation)
 
 ## Observed vs Expected
+
 - observed:
   - Documentation states "Six-Flow" model in some places; code implements Seven-Flow (Signal → Plan → Build → Review → Gate → Deploy → Wisdom)
   - CLAUDE.md claims exist; agent color frontmatter also exists in agent YAML headers
@@ -39,12 +44,14 @@ Analysis audit comparing DemoSwarm documentation (CLAUDE.md, REPO_MAP.md, etc.) 
   - Security guidance aligned with implementation posture
 
 ## Impact
+
 - affected_users: all users of DemoSwarm (especially integrators relying on flow count / test coverage claims)
 - severity: medium (documentation drift creates confusion; security claims must be accurate)
 - frequency: persistent (affects ongoing documentation review and user expectations)
 - environment: documentation + pack contracts
 
 ## Components Mentioned
+
 - systems/services:
   - DemoSwarm pack (control plane, flows, agents)
   - test suite (102 passing unit tests)
@@ -60,6 +67,7 @@ Analysis audit comparing DemoSwarm documentation (CLAUDE.md, REPO_MAP.md, etc.) 
   - agent frontmatter (color coding)
 
 ## Constraints / Non-negotiables
+
 - Flow architecture is immutable (Seven-Flow is canonical)
 - Test counts must reflect actual pass count, not aspirational targets
 - Security claims require supporting evidence from code
@@ -70,9 +78,11 @@ Analysis audit comparing DemoSwarm documentation (CLAUDE.md, REPO_MAP.md, etc.) 
   - scope of integration test filtering impact on overall coverage story
 
 ## Evidence (bounded)
+
 Test output (line 109): "test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 277 filtered out"
 
 Agent frontmatter example (.claude/agents/test-critic.md, lines 1–6):
+
 ```yaml
 ---
 name: test-critic
@@ -83,6 +93,7 @@ color: red
 ```
 
 Secrets scanner (tools/demoswarm-runs-tools/src/commands/secrets.rs, lines 76–124):
+
 - Accepts `args.path: String` directly (no canonicalization)
 - Uses `Path::new()` and `fs::read_dir()` without normalization
 - No calls to `canonicalize()` or `realpath()`

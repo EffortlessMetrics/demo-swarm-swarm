@@ -13,14 +13,14 @@ This is a documentation-focused run normalizing language and ownership boundarie
 
 ## Gate Checks
 
-| Check | Status | Notes |
-|-------|--------|-------|
-| Merge Decision | VERIFIED | BOUNCE verdict due to MECH-001 |
-| Contract Compliance | VERIFIED | No contract violations |
-| Security Scan | VERIFIED | No security findings |
-| Coverage Audit | VERIFIED | N/A for documentation run |
-| Receipt Audit | UNVERIFIED | Non-blocking for documentation run |
-| Policy Analysis | VERIFIED | See policy_analysis.md |
+| Check               | Status     | Notes                              |
+| ------------------- | ---------- | ---------------------------------- |
+| Merge Decision      | VERIFIED   | BOUNCE verdict due to MECH-001     |
+| Contract Compliance | VERIFIED   | No contract violations             |
+| Security Scan       | VERIFIED   | No security findings               |
+| Coverage Audit      | VERIFIED   | N/A for documentation run          |
+| Receipt Audit       | UNVERIFIED | Non-blocking for documentation run |
+| Policy Analysis     | VERIFIED   | See policy_analysis.md             |
 
 ## Blockers
 
@@ -49,4 +49,5 @@ This is a documentation-focused run normalizing language and ownership boundarie
 - `.runs/align-doc-ownership/gate/gate_receipt.json`
 
 ---
-*Generated: 2025-12-13*
+
+_Generated: 2025-12-13_

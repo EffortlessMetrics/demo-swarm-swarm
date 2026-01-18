@@ -6,7 +6,7 @@
 
 ## Core Principle
 
-**Trust hierarchy: state → evidence → inference → narrative**
+### Trust hierarchy: state → evidence → inference → narrative
 
 The repo's current state (HEAD + working tree + executed evidence) is the asset you're building and shipping. Receipts and summaries help you investigate what happened, why, and where to look next—but they are not the primary mechanism for determining outcomes once the repo has moved forward.
 
@@ -19,7 +19,7 @@ The repo's current state (HEAD + working tree + executed evidence) is the asset 
 This is the ground truth:
 
 - `git rev-parse HEAD`, `git diff`, `git status`
-- Test/lint/mutation outputs generated *now* (not cached)
+- Test/lint/mutation outputs generated _now_ (not cached)
 - CI check runs for the current SHA
 - Actual tool execution results (pytest output, lint reports, mutation scores)
 
@@ -127,10 +127,10 @@ Mechanical execution is required for:
 
 When a critic returns `status: UNVERIFIED` with `recommended_action: PROCEED`, use `can_further_iteration_help` as the routing signal:
 
-| Value | Meaning | Routing |
-|-------|---------|---------|
-| `yes` | Another iteration could improve the work | RERUN the station |
-| `no` | Iteration won't help; gaps are acceptable or need human judgment | PROCEED despite UNVERIFIED |
+| Value | Meaning                                                          | Routing                    |
+| ----- | ---------------------------------------------------------------- | -------------------------- |
+| `yes` | Another iteration could improve the work                         | RERUN the station          |
+| `no`  | Iteration won't help; gaps are acceptable or need human judgment | PROCEED despite UNVERIFIED |
 
 **Example scenarios:**
 
@@ -156,13 +156,13 @@ blockers: ["Integration test requires external service"]
 
 **Trust LLM reasoning for:**
 
-| Task | Why |
-|------|-----|
-| Assessing test adequacy | Understands risk surface, edge cases, error paths |
-| Identifying missing scenarios | Pattern recognition over semantic context |
-| Evaluating design quality | Coherence, consistency, separation of concerns |
-| Drafting requirements | Semantic understanding of user intent |
-| Critiquing implementation | Code smells, maintainability, clarity |
+| Task                          | Why                                               |
+| ----------------------------- | ------------------------------------------------- |
+| Assessing test adequacy       | Understands risk surface, edge cases, error paths |
+| Identifying missing scenarios | Pattern recognition over semantic context         |
+| Evaluating design quality     | Coherence, consistency, separation of concerns    |
+| Drafting requirements         | Semantic understanding of user intent             |
+| Critiquing implementation     | Code smells, maintainability, clarity             |
 
 **Example:**
 
@@ -183,13 +183,13 @@ The critic reasons: "This has a zero-division edge case. The tests should verify
 
 **Enforce mechanical checks for:**
 
-| Task | Why |
-|------|-----|
-| Test execution | Only running tests proves they pass |
-| Lint/format conformance | Tooling has the final say on style |
-| Secrets scanning | Pattern matching is deterministic |
-| Git state inspection | Only git knows what's staged/committed |
-| CI status polling | Only CI knows the check run state |
+| Task                    | Why                                    |
+| ----------------------- | -------------------------------------- |
+| Test execution          | Only running tests proves they pass    |
+| Lint/format conformance | Tooling has the final say on style     |
+| Secrets scanning        | Pattern matching is deterministic      |
+| Git state inspection    | Only git knows what's staged/committed |
+| CI status polling       | Only CI knows the check run state      |
 
 **Example:**
 
@@ -217,7 +217,7 @@ Natural language summary of findings and recommendations. This is what orchestra
 **Recommendation:** Route to fixer for the timeout (mechanical fix), then test-author for coverage.
 ```
 
-2. **Machine Summary** (audit plane):
+1. **Machine Summary** (audit plane):
 
 Structured fields that cleanup agents derive from the prose for receipts:
 
@@ -234,7 +234,7 @@ severity_summary:
   minor: 0
 ```
 
-3. **Artifact body** (human audit plane):
+1. **Artifact body** (human audit plane):
 
 Human-readable narrative explaining findings, reasoning, and recommendations.
 
@@ -289,6 +289,7 @@ When a station doesn't produce expected output, cleanup agents create SKIPPED st
 
 ```markdown
 # <Artifact Name>
+
 status: SKIPPED
 reason: <why it wasn't produced>
 evidence_sha: <current HEAD>

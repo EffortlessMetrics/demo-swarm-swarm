@@ -8,27 +8,29 @@
 
 ### Quality Gates
 
-| Gate | Status |
-|------|--------|
-| test-critic | VERIFIED |
-| code-critic | VERIFIED |
+| Gate          | Status                                        |
+| ------------- | --------------------------------------------- |
+| test-critic   | VERIFIED                                      |
+| code-critic   | VERIFIED                                      |
 | self-reviewer | UNVERIFIED (permission issue, not code issue) |
 
 ### Counts
 
-| Metric | Value |
-|--------|-------|
-| Tests Written | 27 |
-| Files Changed | 22 |
-| Open Questions | 5 |
+| Metric         | Value |
+| -------------- | ----- |
+| Tests Written  | 27    |
+| Files Changed  | 22    |
+| Open Questions | 5     |
 
 ### Changes Summary
 
 **Part 1: Flow Command Cleanup (5 files)**
+
 - Removed skill plumbing references from flow command documentation
 - Affected: `flow-1-signal.md`, `flow-2-plan.md`, `flow-3-build.md`, `flow-4-gate.md`, `flow-6-wisdom.md`
 
 **Part 2: Pack-Check Boundary Rules (3 new checks)**
+
 - Check 45: Flow skill plumbing boundary (FAIL on match)
 - Check 46: Missing Skills section in agents (WARN)
 - Check 47: Flow output paths advisory (WARN)

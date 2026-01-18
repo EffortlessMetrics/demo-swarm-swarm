@@ -57,7 +57,7 @@ coverage_summary:
 
 ## Minor Issues
 
-- [MINOR] DC-MIN-001: Observability runbook paths are TBD - ALERT-STRICT-001, ALERT-PERF-001, ALERT-BASELINE-001 reference "docs/troubleshooting/*.md (TBD)". Acceptable at Plan phase; should be created during Build/Gate. Evidence: observability_spec.md lines 169, 176, 183.
+- [MINOR] DC-MIN-001: Observability runbook paths are TBD - ALERT-STRICT-001, ALERT-PERF-001, ALERT-BASELINE-001 reference "docs/troubleshooting/\*.md (TBD)". Acceptable at Plan phase; should be created during Build/Gate. Evidence: observability_spec.md lines 169, 176, 183.
 
 - [MINOR] DC-MIN-002: OQ-PLAN-004 prefix resolution deferred - stable-markers.md and contracts.md use PLAN/BUILD while openq-tools uses PLN/BLD. ADR assumes PLN/BLD is canonical (ASM-002). ST-006 in work_plan.md addresses this, but resolution should be explicit before implementation. Evidence: ADR line 119, impact_map.json IMP-009/IMP-010.
 
@@ -75,20 +75,20 @@ coverage_summary:
 
 Verified coverage for all REQ/NFR identifiers:
 
-| Identifier | ADR | Contracts | Test Plan | Work Plan | Observability |
-|------------|-----|-----------|-----------|-----------|---------------|
-| REQ-001 | DR-001, lines 61, 43 | x-checks.new.50 | 6 scenarios | ST-002 | CHECK-050, SLO-PERF-001 |
-| REQ-002 | DR-005, lines 62, 90 | x-checks.existing.49 | 6 scenarios | ST-003, ST-004 | CHECK-049 |
-| REQ-003 | lines 63, 45 | x-checks.new.51, OpenQId schema | 8 scenarios | ST-005 | CHECK-051 |
-| REQ-004 | DR-003, lines 64, 46 | BuildReceipt schema | 5 scenarios | ST-008, ST-009, ST-010 | Handshake contract |
-| REQ-005 | DR-002, lines 65, 47 | x-cli-interface.strict_warnings | 8 scenarios | ST-007 | Exit code behavior |
-| REQ-006 | lines 66, 49 | Baseline validation | 7 scenarios | ST-011 | ALERT-BASELINE-001 |
-| NFR-PERF-001 | DR-004, line 67 | Exit code timing | P2 non-behavioral | ST constraints | SLO-PERF-001, SLO-PERF-002 |
-| NFR-REL-001 | DR-003, line 68 | Deterministic output | NFR-REL-001 verification | All STs | SLO-REL-001, SLO-REL-002 |
-| NFR-OPS-001 | DR-004, line 69 | CheckDiagnostic schema | NFR-OPS-001 verification | ST-012 | Diagnostic format |
-| NFR-COMP-001 | DR-002, line 70-71 | Exit code preservation | NFR-COMP-001 verification | Rollout strategy | Backward compat |
-| NFR-SEC-001 | line 71 | No secrets in output | NFR-SEC-001 code review | Test fixture constraints | PII/secrets guidance |
-| NFR-MAINT-001 | line 72 | x-constants (contracts.rs) | NFR-MAINT-001 code review | ST-001 | Constants location |
+| Identifier    | ADR                  | Contracts                       | Test Plan                 | Work Plan                | Observability              |
+| ------------- | -------------------- | ------------------------------- | ------------------------- | ------------------------ | -------------------------- |
+| REQ-001       | DR-001, lines 61, 43 | x-checks.new.50                 | 6 scenarios               | ST-002                   | CHECK-050, SLO-PERF-001    |
+| REQ-002       | DR-005, lines 62, 90 | x-checks.existing.49            | 6 scenarios               | ST-003, ST-004           | CHECK-049                  |
+| REQ-003       | lines 63, 45         | x-checks.new.51, OpenQId schema | 8 scenarios               | ST-005                   | CHECK-051                  |
+| REQ-004       | DR-003, lines 64, 46 | BuildReceipt schema             | 5 scenarios               | ST-008, ST-009, ST-010   | Handshake contract         |
+| REQ-005       | DR-002, lines 65, 47 | x-cli-interface.strict_warnings | 8 scenarios               | ST-007                   | Exit code behavior         |
+| REQ-006       | lines 66, 49         | Baseline validation             | 7 scenarios               | ST-011                   | ALERT-BASELINE-001         |
+| NFR-PERF-001  | DR-004, line 67      | Exit code timing                | P2 non-behavioral         | ST constraints           | SLO-PERF-001, SLO-PERF-002 |
+| NFR-REL-001   | DR-003, line 68      | Deterministic output            | NFR-REL-001 verification  | All STs                  | SLO-REL-001, SLO-REL-002   |
+| NFR-OPS-001   | DR-004, line 69      | CheckDiagnostic schema          | NFR-OPS-001 verification  | ST-012                   | Diagnostic format          |
+| NFR-COMP-001  | DR-002, line 70-71   | Exit code preservation          | NFR-COMP-001 verification | Rollout strategy         | Backward compat            |
+| NFR-SEC-001   | line 71              | No secrets in output            | NFR-SEC-001 code review   | Test fixture constraints | PII/secrets guidance       |
+| NFR-MAINT-001 | line 72              | x-constants (contracts.rs)      | NFR-MAINT-001 code review | ST-001                   | Constants location         |
 
 ## Questions for Humans
 
@@ -132,11 +132,13 @@ Verified coverage for all REQ/NFR identifiers:
 ### 1) Handshake Validation (Sentinel Checks)
 
 **design_options.md**
+
 - Contains `## Machine Summary` block: PASS (lines 308-321)
 - Contains at least one `## OPT-###:` option heading: PASS (OPT-001 line 25, OPT-002 line 92, OPT-003 line 179)
 - No template placeholders in machine fields: PASS
 
 **adr.md**
+
 - Contains `## Machine Summary Block` section: PASS (lines 184-200)
 - Contains `ADR_CHOSEN_OPTION:` marker: PASS (line 159 "ADR_CHOSEN_OPTION: OPT-001")
 - Contains at least one `DRIVER:` line: PASS (lines 24, 27, 30, 33, 36)
@@ -145,9 +147,11 @@ Verified coverage for all REQ/NFR identifiers:
 ### 2) Requirements to Plan Coverage
 
 All 6 REQ identifiers appear with explicit markers:
+
 - REQ-001 through REQ-006 referenced in ADR Decision section (lines 61-66), api_contracts.yaml x-traceability, test_plan.md scenario inventory, work_plan.md subtask linkage
 
 All 6 NFR identifiers appear with explicit markers:
+
 - NFR-PERF-001, NFR-REL-001, NFR-OPS-001, NFR-COMP-001, NFR-SEC-001, NFR-MAINT-001 referenced in ADR (lines 67-72), schema.md traceability table, test_plan.md non-behavioral verification
 
 Requirements are not vague or missing identifiers - they bind to specific plan artifacts.
@@ -155,10 +159,12 @@ Requirements are not vague or missing identifiers - they bind to specific plan a
 ### 3) Options to ADR Binding
 
 ADR clearly chooses OPT-001 by stable ID:
+
 - Line 40: "We choose **OPT-001: Inline Extension of Existing Modules**."
 - Line 159: "ADR_CHOSEN_OPTION: OPT-001"
 
 Rejected alternatives documented with rationale:
+
 - OPT-002: Lines 78, 165-166 "ADR_ALT: OPT-002"
 - OPT-003: Lines 80-81, 167 "ADR_ALT: OPT-003"
 
@@ -167,6 +173,7 @@ Trade-offs captured from design_options.md comparison matrix carried into ADR Co
 ### 4) ADR to Contracts Binding
 
 Externally-visible behavior implied by REQs has contract surface:
+
 - REQ-001: Check 50 defined in api_contracts.yaml x-checks.new.50 with patterns and scan_targets
 - REQ-002: Check 49 defined in api_contracts.yaml x-checks.existing.49
 - REQ-003: Check 51 defined in api_contracts.yaml x-checks.new.51 with OpenQId schema
@@ -174,6 +181,7 @@ Externally-visible behavior implied by REQs has contract surface:
 - REQ-005: --strict_warnings flag in api_contracts.yaml x-cli-interface.arguments
 
 Error model coherent across endpoints:
+
 - Level enum (pass/warn/fail) applies uniformly to CheckDiagnostic
 - Exit codes defined consistently (0=SUCCESS, 1=FAILURE, 2=RUNTIME_ERROR)
 - Text and JSON output formats documented with consistent diagnostic structure
@@ -181,6 +189,7 @@ Error model coherent across endpoints:
 ### 5) Contracts to Test Plan Binding
 
 Test plan covers contract surfaces:
+
 - 40 scenarios across 6 feature files covering all REQ identifiers
 - Contract Test Plan section (test_plan.md lines 236-249) references:
   - Receipt schema assertions (BuildReceipt)
@@ -188,6 +197,7 @@ Test plan covers contract surfaces:
   - Diagnostic output contract (rule ID, file path)
 
 BDD scenarios map to requirements:
+
 - flow_boundary_enforcement.feature (6 scenarios) -> REQ-001
 - skills_section_enforcement.feature (6 scenarios) -> REQ-002
 - openq_prefix_validation.feature (8 scenarios) -> REQ-003
@@ -198,12 +208,14 @@ BDD scenarios map to requirements:
 ### 6) Design to Observability Binding
 
 Observability spec defines measurable signals for critical journeys:
+
 - SLO-PERF-001: < 30 seconds (NFR-PERF-001), measured via stats.duration_ms
 - SLO-PERF-002: < 5 seconds per rule, measured via baseline delta
 - SLO-REL-001: 100% byte-identical output, measured via hash comparison
 - SLO-REL-002: Sorted by file path + rule ID
 
 Alerts are actionable with CI integration:
+
 - ALERT-STRICT-001: Exit code != 0 when --strict enabled (BLOCKING)
 - ALERT-PERF-001: duration_ms > 30000 (WARNING)
 - ALERT-BASELINE-001: Violation count > baseline (BLOCKING after migration)
@@ -213,6 +225,7 @@ Not just "log something" - explicit fields, metrics, SLIs defined.
 ### 7) Design to Work Plan Binding
 
 Work plan includes tasks for:
+
 - Migrations: ST-006 (PLN/BLD documentation normalization)
 - Instrumentation: ST-001 (constants in contracts.rs)
 - Testing: ST-008, ST-009, ST-010 (fixtures and test cases)
@@ -220,6 +233,7 @@ Work plan includes tasks for:
 - Rollback: Lever documented (remove checks from drift.rs)
 
 All subtasks have REQ/NFR linkage:
+
 - ST-001 -> REQ-001, REQ-003, NFR-MAINT-001
 - ST-002 -> REQ-001, NFR-PERF-001, NFR-REL-001, NFR-OPS-001
 - ST-003, ST-004 -> REQ-002, REQ-006
@@ -233,6 +247,7 @@ All subtasks have REQ/NFR linkage:
 ### 8) Cross-Artifact Consistency
 
 All artifacts use consistent identifiers:
+
 - Requirements: REQ-001 through REQ-006, NFR-PERF-001 through NFR-MAINT-001
 - Options: OPT-001, OPT-002, OPT-003
 - Risks: RSK-001 through RSK-006

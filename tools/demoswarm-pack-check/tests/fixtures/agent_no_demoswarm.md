@@ -14,5 +14,6 @@ It does not invoke any skill-layer tools.
 ## Notes
 
 This agent is compliant because:
+
 1. It does NOT use the skill shim script
 2. Therefore no skill documentation heading is required

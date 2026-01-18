@@ -15,6 +15,7 @@ This pack works differently than you might expect.
 **The orchestrator is Claude.** Not a Python script. Not a state machine. Claude itself reads agent reports, understands them, and decides what to do next.
 
 This changes everything:
+
 - Agents communicate in prose, not structured data
 - Routing is based on understanding, not parsing
 - Artifacts exist for humans, not machines
@@ -24,9 +25,11 @@ If something seems counterintuitive, ask: "Does this make sense if Claude is the
 ## Reading Order
 
 ### 1. Start with Claude-Native Design
+
 **[Claude-Native Design](explanation/claude-native-design.md)**
 
 The comprehensive philosophy document. Covers:
+
 - The PM/Junior model (orchestrators coordinate, agents work)
 - Why prose communication beats YAML parsing
 - What artifacts should contain
@@ -35,24 +38,29 @@ The comprehensive philosophy document. Covers:
 This is the foundational document. Everything else builds on these ideas.
 
 ### 2. Learn the Agent Philosophy
+
 **[Agent Philosophy](explanation/agent-philosophy.md)**
 
 How agents are designed and why. Covers:
+
 - Why agents exist (work or context compression)
 - Single responsibility principle
 - Positive prompting (define what to do, not what to avoid)
 - Graceful outcomes (honest partial results beat silent failure)
 
 ### 3. Understand the Architecture
+
 **[Architecture](explanation/architecture.md)**
 
 The seven laws that prevent execution drift:
+
 - PM/IC boundary (orchestrators route, agents work)
 - Implicit resume (check disk state, not mode flags)
 - Workers maintain the ledger
 - Research-first autonomy
 
 ### 4. Key Mental Model Shifts
+
 **[Reviewing as Audit](explanation/reviewing-as-audit.md)** - How code review changes from diff-reading to evidence evaluation
 
 **[Codebase as Mold](explanation/codebase-as-mold.md)** - Why the existing codebase shapes all future generation
@@ -60,6 +68,7 @@ The seven laws that prevent execution drift:
 These documents explain the fundamental shifts in how work gets done when using the swarm.
 
 ### 5. Deep Dive on Principles (Optional)
+
 Individual principle docs for deeper understanding:
 
 - [PM/Junior Model](explanation/principles/pm-junior-model.md)
@@ -71,6 +80,7 @@ Individual principle docs for deeper understanding:
 - [Real Cognitive Work](explanation/principles/real-cognitive-work.md)
 
 ### 6. Practical Guides
+
 When you're ready to do work:
 
 - [How to Design Agents](how-to/design-agents.md) - Creating/modifying agent prompts
@@ -79,17 +89,17 @@ When you're ready to do work:
 
 ## Quick Reference
 
-| I want to... | Read this |
-|--------------|-----------|
-| Understand the core design | [Claude-Native Design](explanation/claude-native-design.md) |
-| Learn how agents should behave | [Agent Philosophy](explanation/agent-philosophy.md) |
-| Understand the architecture laws | [Architecture](explanation/architecture.md) |
-| Learn how to review swarm PRs | [Reviewing as Audit](explanation/reviewing-as-audit.md) |
-| Understand why codebase quality matters | [Codebase as Mold](explanation/codebase-as-mold.md) |
-| Create or modify an agent | [How to Design Agents](how-to/design-agents.md) |
-| Check if my code follows patterns | [Agent Patterns](reference/agent-patterns.md) |
-| Deep dive on a specific principle | [Principles](explanation/principles/) |
-| Understand the flow structure | [CLAUDE.md](../CLAUDE.md) |
+| I want to...                            | Read this                                                   |
+| --------------------------------------- | ----------------------------------------------------------- |
+| Understand the core design              | [Claude-Native Design](explanation/claude-native-design.md) |
+| Learn how agents should behave          | [Agent Philosophy](explanation/agent-philosophy.md)         |
+| Understand the architecture laws        | [Architecture](explanation/architecture.md)                 |
+| Learn how to review swarm PRs           | [Reviewing as Audit](explanation/reviewing-as-audit.md)     |
+| Understand why codebase quality matters | [Codebase as Mold](explanation/codebase-as-mold.md)         |
+| Create or modify an agent               | [How to Design Agents](how-to/design-agents.md)             |
+| Check if my code follows patterns       | [Agent Patterns](reference/agent-patterns.md)               |
+| Deep dive on a specific principle       | [Principles](explanation/principles/)                       |
+| Understand the flow structure           | [CLAUDE.md](../CLAUDE.md)                                   |
 
 ## For LLMs
 
@@ -126,12 +136,12 @@ If you're a human working with this pack:
 
 ### Key Files to Know
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Repo-level policy, attached to every agent |
-| `.claude/agents/*.md` | Agent prompts (the agent's instructions) |
-| `.claude/commands/flow-*.md` | Flow orchestrator commands |
-| `.runs/<run-id>/` | Run state and artifacts |
+| File                         | Purpose                                    |
+| ---------------------------- | ------------------------------------------ |
+| `CLAUDE.md`                  | Repo-level policy, attached to every agent |
+| `.claude/agents/*.md`        | Agent prompts (the agent's instructions)   |
+| `.claude/commands/flow-*.md` | Flow orchestrator commands                 |
+| `.runs/<run-id>/`            | Run state and artifacts                    |
 
 ## The 30-Second Version
 

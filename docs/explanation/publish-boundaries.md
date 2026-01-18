@@ -10,11 +10,11 @@ A publish boundary is where work becomes visible or permanent. Inside the bounda
 
 **The three publish boundaries:**
 
-| Boundary | What Crosses | Risk If Unchecked |
-|----------|--------------|-------------------|
-| **Commit** | Changes enter git history | Secrets become permanent; rotation is expensive |
-| **Push** | Changes leave local machine | Visible to collaborators, CI, and potentially the world |
-| **GitHub post** | Content reaches external system | Public visibility, notifications sent, no take-backs |
+| Boundary        | What Crosses                    | Risk If Unchecked                                       |
+| --------------- | ------------------------------- | ------------------------------------------------------- |
+| **Commit**      | Changes enter git history       | Secrets become permanent; rotation is expensive         |
+| **Push**        | Changes leave local machine     | Visible to collaborators, CI, and potentially the world |
+| **GitHub post** | Content reaches external system | Public visibility, notifications sent, no take-backs    |
 
 Everything else is local iteration. Reading files, writing code, running tests, exploring options---none of these are publish boundaries. They have no side effects outside the session.
 
@@ -29,6 +29,7 @@ This design implements Law 6 from the [Laws of the Swarm](laws-of-the-swarm.md):
 > Default-allow engineering inside the workspace. Gates engage at publish boundaries only.
 
 **Inside the workspace:**
+
 - Read any file
 - Write any code
 - Run any test
@@ -36,6 +37,7 @@ This design implements Law 6 from the [Laws of the Swarm](laws-of-the-swarm.md):
 - No permission checks
 
 **At boundaries:**
+
 - Require evidence
 - Run deterministic checks
 - Do not trust claims
@@ -76,6 +78,7 @@ Content crosses boundary
 Before you can verify what will be published, you must know what will be published.
 
 **What happens:**
+
 - Identify which files would be committed
 - Capture the exact diff that would leave the sandbox
 - Determine what content would be posted
@@ -87,6 +90,7 @@ Before you can verify what will be published, you must know what will be publish
 Scan exactly what would be published. Not the repo. Not the working tree. The staged surface.
 
 **What happens:**
+
 - Secrets detection on staged files
 - Anomaly detection (unexpected changes)
 - Surface verification (is this what we meant to publish?)
@@ -98,6 +102,7 @@ Scan exactly what would be published. Not the repo. Not the working tree. The st
 Only proceed if sanitization passed. Otherwise, pause publishing (not work).
 
 **What happens:**
+
 - If `safe_to_publish: true` --- execute the publish operation
 - If `safe_to_publish: false` --- block publishing, route to remediation
 
@@ -125,6 +130,7 @@ Scanning an unstaged or stale surface creates phantom confidence. You think you 
 The `secrets-sanitizer` agent guards the commit boundary.
 
 **Scans for:**
+
 - GitHub tokens: `gh[pousr]_[A-Za-z0-9_]{36,}`
 - AWS access keys: `AKIA[0-9A-Z]{16}`
 - Private keys: `-----BEGIN .*PRIVATE KEY-----`
@@ -133,6 +139,7 @@ The `secrets-sanitizer` agent guards the commit boundary.
 - Database URLs with embedded passwords
 
 **Returns:**
+
 - `safe_to_publish: true` --- staged surface passed all checks
 - `safe_to_publish: false` --- staged surface has issues
 
@@ -143,16 +150,19 @@ The `secrets-sanitizer` agent guards the commit boundary.
 The `repo-operator` agent guards the push boundary.
 
 **Checks for:**
+
 - Only expected paths in commit (files match intent)
 - No anomalous files outside allowlist
 - Staging and commit operations succeeded
 - No unexpected deletions (especially tests---anti-reward-hacking)
 
 **Returns:**
+
 - `proceed_to_github_ops: true` --- repo state is correct, safe to push
 - `proceed_to_github_ops: false` --- anomalies detected, push blocked
 
 **Anomaly classification:**
+
 - Staged/unstaged anomalies (HIGH risk): Block push
 - Untracked anomalies (LOW risk): Warning only
 
@@ -161,6 +171,7 @@ The `repo-operator` agent guards the push boundary.
 ### GitHub Post Boundary: Content Mode
 
 Before posting to GitHub (issues, comments, PR descriptions):
+
 - Content restrictions apply
 - No secrets in posted content
 - Safe to quote/link
@@ -178,12 +189,12 @@ GitHub operations require BOTH gates to pass:
 
 This is defense in depth. Secrets and hygiene are independent concerns. Both must be clean before crossing the boundary.
 
-| Scenario | Secrets Gate | Hygiene Gate | Result |
-|----------|--------------|--------------|--------|
-| Both pass | true | true | Proceed with GitHub ops |
-| Secrets bad | false | true | Skip GitHub ops |
-| Hygiene bad | true | false | Skip GitHub ops |
-| Both bad | false | false | Skip GitHub ops |
+| Scenario    | Secrets Gate | Hygiene Gate | Result                  |
+| ----------- | ------------ | ------------ | ----------------------- |
+| Both pass   | true         | true         | Proceed with GitHub ops |
+| Secrets bad | false        | true         | Skip GitHub ops         |
+| Hygiene bad | true         | false        | Skip GitHub ops         |
+| Both bad    | false        | false        | Skip GitHub ops         |
 
 See [why-two-gates.md](why-two-gates.md) for the full rationale.
 
@@ -234,6 +245,7 @@ Both are required. Neither alone is sufficient.
 ## What Blocking Means (and Does Not Mean)
 
 When `safe_to_publish: false`:
+
 - **Publishing is blocked** --- the commit/push/post does not happen
 - **Work continues locally** --- the agent is not stuck
 - **Route to remediation** --- fix secrets, explain anomalies
@@ -248,12 +260,14 @@ This distinction matters: blocking work is expensive and creates pressure to byp
 ## The Metaphor
 
 Consider a secure facility:
+
 - Inside: employees move freely, work on anything, access any room
 - At the exit: security checks bags, scans badges, verifies nothing leaves that shouldn't
 
 The security comes from the exit check, not from following employees around. Surveillance inside is expensive and counterproductive. A good exit check is cheap and effective.
 
 Same with agents:
+
 - Inside the sandbox: read any file, write any code, run any command
 - At the boundary: scan what would be published, block if unsafe
 
@@ -263,14 +277,15 @@ The security comes from the boundary check, not from approving each action.
 
 ## What This Prevents
 
-| Risk | How It Is Caught |
-|------|------------------|
-| Secret exposure | secrets-sanitizer scans staged changes before commit |
-| Reward hacking (test deletion) | repo-operator detects unexpected deletions |
-| Accidental publication | Anomaly detection blocks push of unexpected files |
-| Credential leakage | Secrets patterns caught before they enter history |
+| Risk                           | How It Is Caught                                     |
+| ------------------------------ | ---------------------------------------------------- |
+| Secret exposure                | secrets-sanitizer scans staged changes before commit |
+| Reward hacking (test deletion) | repo-operator detects unexpected deletions           |
+| Accidental publication         | Anomaly detection blocks push of unexpected files    |
+| Credential leakage             | Secrets patterns caught before they enter history    |
 
 What it does NOT prevent:
+
 - Agents reading any file in the repo (that is allowed)
 - Agents writing bad code locally (that is caught by tests and critics, not gates)
 - Local experiments (they never cross the boundary)

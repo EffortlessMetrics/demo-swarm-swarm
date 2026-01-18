@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,18 +13,20 @@ blockers: []
 missing_required: []
 
 concerns:
-  - RSK-001 (HIGH) documents prior Gate bounce on #49; warning-first mode (REQ-005) provides mitigation
-  - 10 open questions remain unresolved; suggested defaults are adopted but may need revision in Flow 2
-  - PLN vs PLAN prefix discrepancy (OQ-SIG-002) should be resolved before REQ-003 implementation
-  - RSK-008 (LOW) added: hardcoded skill list may drift as pack evolves
+
+- RSK-001 (HIGH) documents prior Gate bounce on #49; warning-first mode (REQ-005) provides mitigation
+- 10 open questions remain unresolved; suggested defaults are adopted but may need revision in Flow 2
+- PLN vs PLAN prefix discrepancy (OQ-SIG-002) should be resolved before REQ-003 implementation
+- RSK-008 (LOW) added: hardcoded skill list may drift as pack evolves
 
 severity_summary:
-  critical: 0
-  high: 1
-  medium: 4
-  low: 3
+critical: 0
+high: 1
+medium: 4
+low: 3
 
 ## Context
+
 - flow: signal
 - run_id: compliance-drift-proofing
 - iteration: 2
@@ -40,20 +43,21 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | OPS | HIGH | OPEN | Prior #49 bounce - incomplete foundation may indicate hidden complexity | pack-maintainers |
-| RSK-002 | DATA | MEDIUM | OPEN | PLN/PLAN prefix inconsistency may cause validation confusion | pack-maintainers |
-| RSK-003 | OPS | MEDIUM | OPEN | 4 agents missing Skills sections require remediation alongside validation | agent-authors |
-| RSK-004 | COMPLIANCE | MEDIUM | MITIGATED | Warning-first delays enforcement; timeline documented | pack-maintainers |
-| RSK-005 | PERFORMANCE | LOW | MITIGATED | CI runtime impact bounded by NFR-PERF-001 metrics | pack-maintainers |
-| RSK-006 | SECURITY | LOW | MITIGATED | Test fixture secrets addressed by NFR-SEC-001 MET-2 | pack-maintainers |
-| RSK-007 | OPS | MEDIUM | OPEN | Scope overlap with #49 may cause merge conflicts | pack-maintainers |
-| RSK-008 | DATA | LOW | OPEN | Hardcoded skill CLI subcommand list may drift as new skills are added | pack-maintainers |
+| ID      | Category    | Severity | Status    | Summary                                                                   | Owner            |
+| ------- | ----------- | -------- | --------- | ------------------------------------------------------------------------- | ---------------- |
+| RSK-001 | OPS         | HIGH     | OPEN      | Prior #49 bounce - incomplete foundation may indicate hidden complexity   | pack-maintainers |
+| RSK-002 | DATA        | MEDIUM   | OPEN      | PLN/PLAN prefix inconsistency may cause validation confusion              | pack-maintainers |
+| RSK-003 | OPS         | MEDIUM   | OPEN      | 4 agents missing Skills sections require remediation alongside validation | agent-authors    |
+| RSK-004 | COMPLIANCE  | MEDIUM   | MITIGATED | Warning-first delays enforcement; timeline documented                     | pack-maintainers |
+| RSK-005 | PERFORMANCE | LOW      | MITIGATED | CI runtime impact bounded by NFR-PERF-001 metrics                         | pack-maintainers |
+| RSK-006 | SECURITY    | LOW      | MITIGATED | Test fixture secrets addressed by NFR-SEC-001 MET-2                       | pack-maintainers |
+| RSK-007 | OPS         | MEDIUM   | OPEN      | Scope overlap with #49 may cause merge conflicts                          | pack-maintainers |
+| RSK-008 | DATA        | LOW      | OPEN      | Hardcoded skill CLI subcommand list may drift as new skills are added     | pack-maintainers |
 
 ## Risk Details
 
 ### RSK-001: Prior #49 Gate Bounce Indicates Implementation Complexity
+
 - Category: OPS
 - Severity: HIGH
 - Status: OPEN
@@ -89,6 +93,7 @@ severity_summary:
   - Consider incremental PRs per subtask rather than monolithic implementation
 
 ### RSK-002: PLN vs PLAN Prefix Inconsistency
+
 - Category: DATA
 - Severity: MEDIUM
 - Status: OPEN
@@ -120,6 +125,7 @@ severity_summary:
   - Document decision in ADR if prefix normalization requires migration
 
 ### RSK-003: Agents Missing Skills Sections Require Concurrent Remediation
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -153,6 +159,7 @@ severity_summary:
   - Document any intentional exemptions rather than assuming none exist
 
 ### RSK-004: Warning-First Mode May Delay Compliance Enforcement
+
 - Category: COMPLIANCE
 - Severity: MEDIUM
 - Status: MITIGATED
@@ -187,6 +194,7 @@ severity_summary:
   - Consider pack version milestone where --strict becomes default
 
 ### RSK-005: CI Runtime Impact from New Validation Rules
+
 - Category: PERFORMANCE
 - Severity: LOW
 - Status: MITIGATED
@@ -221,6 +229,7 @@ severity_summary:
   - Optimize regex patterns if approaching bounds
 
 ### RSK-006: Test Fixtures May Contain Sensitive Data Patterns
+
 - Category: SECURITY
 - Severity: LOW
 - Status: MITIGATED
@@ -255,6 +264,7 @@ severity_summary:
   - Document synthetic value convention in test fixture headers
 
 ### RSK-007: Scope Overlap with Bounced #49 May Cause Conflicts
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -289,6 +299,7 @@ severity_summary:
   - If #49 resumes, escalate for coordination rather than proceeding blindly
 
 ### RSK-008: Hardcoded Skill CLI Subcommand List May Drift
+
 - Category: DATA
 - Severity: LOW
 - Status: OPEN
@@ -324,21 +335,25 @@ severity_summary:
 ## Cross-Risk Interactions
 
 ### RSK-001 + RSK-007 (Compounding Complexity)
+
 The prior bounce of #49 (RSK-001) combined with potential scope overlap (RSK-007) creates a compounding risk. If #49 bounced due to issues that this work inherits (e.g., same validation approach), AND #49 resumes with conflicting changes, the combined complexity could push the estimate from M to L or cause this work to also bounce at Gate.
 
 Mitigation: The narrower scope of this work (validation rules only, not documentation restructuring) reduces the overlap surface. Warning-first mode (REQ-005) provides a graceful degradation path if blockers emerge. Problem statement explicitly limits scope to syntactic checks (non-goal: semantic validation).
 
 ### RSK-002 + RSK-003 (Documentation vs Implementation Gap)
+
 The PLN/PLAN discrepancy (RSK-002) and missing Skills sections (RSK-003) both represent gaps between documentation and implementation. Addressing them in parallel creates coordination overhead - the validation rules (REQ-002, REQ-003) must be implemented after the documentation is corrected, not before.
 
 Mitigation: Resolve OQ-SIG-002 (prefix canonicalization) in Flow 2 before implementation. Enumerate missing agents in Flow 2 work plan. Use warning-first mode to allow validation development to proceed while remediation occurs in parallel.
 
 ### RSK-004 + RSK-005 (Enforcement vs Performance Tradeoff)
+
 Warning-first mode (RSK-004) delays enforcement, but adding strict mode later may reveal performance issues (RSK-005) that were hidden when rules only produced warnings. The performance bounds in NFR-PERF-001 should be validated with --strict enabled, not just in warning mode.
 
 Mitigation: NFR-PERF-001 metrics apply regardless of warning/error mode. CI validation should measure timing with --strict flag to ensure bounds hold when enforcement is enabled.
 
 ### RSK-008 + RSK-002 (Pattern Drift Compounds)
+
 Both RSK-008 (skill list drift) and RSK-002 (prefix inconsistency) represent data pattern maintenance challenges. The same organizational discipline required to keep prefix patterns synchronized must also maintain the skill subcommand list. If one drifts, the other likely will too.
 
 Mitigation: NFR-MAINT-001 centralizes pattern definitions in contracts.rs. A single "pattern contract audit" during skill/flow additions can verify both are current. Future enhancement could automate this check.
@@ -346,6 +361,7 @@ Mitigation: NFR-MAINT-001 centralizes pattern definitions in contracts.rs. A sin
 ## Risk Category Analysis
 
 ### Security (NFR-SEC-001)
+
 - RSK-006 (test fixtures) is the only security risk identified
 - Status: MITIGATED through explicit NFR requirements
 - Validation tools print paths not contents, limiting exposure surface
@@ -353,6 +369,7 @@ Mitigation: NFR-MAINT-001 centralizes pattern definitions in contracts.rs. A sin
 - No elevated security risks identified for this feature
 
 ### Compliance
+
 - RSK-004 addresses compliance enforcement delay
 - Status: MITIGATED through --strict flag infrastructure
 - Enforcement policy is separate from enforcement infrastructure
@@ -360,6 +377,7 @@ Mitigation: NFR-MAINT-001 centralizes pattern definitions in contracts.rs. A sin
 - Feature designed to prevent future contract violations
 
 ### Performance (NFR-PERF-001)
+
 - RSK-005 addresses CI runtime impact
 - Status: MITIGATED through explicit bounds (30s total, 5s incremental)
 - Rust implementation provides good baseline performance
@@ -367,23 +385,27 @@ Mitigation: NFR-MAINT-001 centralizes pattern definitions in contracts.rs. A sin
 - Current baseline is well under bounds
 
 ### Data
+
 - RSK-002 (prefix inconsistency) and RSK-008 (skill list drift) are data pattern risks
 - Both require ongoing maintenance discipline
 - NFR-MAINT-001 centralizes pattern definitions
 - Resolution path documented for both
 
 ### Operational
+
 - RSK-001 (prior bounce), RSK-003 (missing Skills), RSK-007 (scope overlap) are operational
 - RSK-001 is the highest severity risk (HIGH)
 - All have documented mitigations and verification strategies
 - Deployment considerations: warning-first mode enables gradual rollout
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-008]
 - CHANGED: [RSK-001, RSK-002, RSK-003, RSK-004, RSK-005, RSK-006, RSK-007]
 - CLOSED: []
 
 Changes in iteration 2:
+
 - RSK-008 added from early_risks.md (skill CLI subcommand list drift)
 - All existing risks enhanced with:
   - Root cause analysis

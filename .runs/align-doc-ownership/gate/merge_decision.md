@@ -1,9 +1,11 @@
 # Merge Decision
 
 ## Verdict
+
 BOUNCE
 
 ## Evidence Summary
+
 - Receipt audit: FAIL — (receipt_audit.md Machine Summary: status UNVERIFIED, blockers: self_reviewer UNVERIFIED, mutation_score null)
 - Contract compliance: PASS — (contract_compliance.md Machine Summary: status VERIFIED, blockers empty, all validation rules OK)
 - Security scan: PASS — (security_scan.md Machine Summary: status VERIFIED, no HIGH/CRITICAL findings, no secrets detected)
@@ -12,13 +14,14 @@ BOUNCE
 - Risk assessment: WARN — (risk_assessment.md Machine Summary: status VERIFIED but recommended_action BOUNCE due to RSK-008)
 
 ## Requirements Readiness
-| Item | Outcome | Notes |
-|------|---------|------|
-| Priority classification | UNKNOWN | requirements.md does not use explicit MUST/SHOULD priority markers |
-| Verification signal | MISSING | build_receipt.json could not be read (permission denied per gate_fix_summary.md) |
-| MUST requirements | UNKNOWN | Cannot determine MUST vs SHOULD classification from requirements.md format |
-| SHOULD requirements | UNKNOWN | Same; priority markers not present |
-| Metrics / binding | UNKNOWN | build_receipt.json inaccessible; cannot verify binding status |
+
+| Item                    | Outcome | Notes                                                                            |
+| ----------------------- | ------- | -------------------------------------------------------------------------------- |
+| Priority classification | UNKNOWN | requirements.md does not use explicit MUST/SHOULD priority markers               |
+| Verification signal     | MISSING | build_receipt.json could not be read (permission denied per gate_fix_summary.md) |
+| MUST requirements       | UNKNOWN | Cannot determine MUST vs SHOULD classification from requirements.md format       |
+| SHOULD requirements     | UNKNOWN | Same; priority markers not present                                               |
+| Metrics / binding       | UNKNOWN | build_receipt.json inaccessible; cannot verify binding status                    |
 
 ## Decision Rationale
 
@@ -35,6 +38,7 @@ The non-mechanical concerns do not block this decision:
 - **build_receipt.json inaccessible**: While this prevents full verification, the gate artifacts themselves (contracts, security, coverage, policy) are all VERIFIED. The REQ readiness is UNKNOWN but the actual implementation evidence from contract_compliance.md shows all validation rules (FLOW_VIO_001/002, AGENT_VIO_001/002/003) verified OK.
 
 The substantive work is complete and verified:
+
 - 5 flow command documentation files updated (skill plumbing removed)
 - 3 pack-check Rust files modified (checks 45, 46, 47 added)
 - All 49 pack-check rules pass
@@ -45,6 +49,7 @@ The substantive work is complete and verified:
 The only remaining issue is mechanical formatting - a trivial fix that does not require judgment.
 
 ## If BOUNCE
+
 - **Target flow**: 3 (Build)
 - **Issues to address**:
   1. Run `cd tools/demoswarm-pack-check && cargo fmt` to fix formatting in 9 Rust source files:
@@ -61,20 +66,23 @@ The only remaining issue is mechanical formatting - a trivial fix that does not 
   3. Return to Gate (Flow 4) for verification
 
 ## Next Steps
+
 - Route to Flow 3 fixer agent to apply `cargo fmt`
 - Re-run gate after mechanical fix is applied
 - Expected outcome: MERGE on next gate pass (all substantive checks already VERIFIED)
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: BOUNCE
 route_to_flow: 3
 route_to_agent: fixer
 blockers:
-  - MECH-001: Rust formatting violations (9 files need cargo fmt)
-missing_required: []
-concerns:
-  - receipt_audit status UNVERIFIED (self_reviewer) - non-blocking for documentation run
-  - mutation_score null - explicitly N/A per test plan
-  - build_receipt.json inaccessible - cannot verify binding; gate artifacts are VERIFIED
-  - REQ readiness UNKNOWN due to missing priority markers and inaccessible receipt
+
+- MECH-001: Rust formatting violations (9 files need cargo fmt)
+  missing_required: []
+  concerns:
+- receipt_audit status UNVERIFIED (self_reviewer) - non-blocking for documentation run
+- mutation_score null - explicitly N/A per test plan
+- build_receipt.json inaccessible - cannot verify binding; gate artifacts are VERIFIED
+- REQ readiness UNKNOWN due to missing priority markers and inaccessible receipt

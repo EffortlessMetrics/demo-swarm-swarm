@@ -8,21 +8,21 @@
 
 ### Counts
 
-| Metric | Count |
-|--------|-------|
-| Functional Requirements | 7 |
-| Non-Functional Requirements | 3 |
-| BDD Scenarios | 31 |
-| Open Questions | 6 |
+| Metric                      | Count |
+| --------------------------- | ----- |
+| Functional Requirements     | 7     |
+| Non-Functional Requirements | 3     |
+| BDD Scenarios               | 31    |
+| Open Questions              | 6     |
 
 ### Risks
 
 | Severity | Count |
-|----------|-------|
-| Critical | 0 |
-| High | 1 |
-| Medium | 3 |
-| Low | 2 |
+| -------- | ----- |
+| Critical | 0     |
+| High     | 1     |
+| Medium   | 3     |
+| Low      | 2     |
 
 ### Quality Gates
 

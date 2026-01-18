@@ -1,6 +1,7 @@
 # Documentation Updates for compliance-drift-proofing
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -12,17 +13,19 @@ concerns: []
 ```
 
 ## Inputs Used
+
 - `.runs/compliance-drift-proofing/plan/adr.md`
 - `.runs/compliance-drift-proofing/plan/work_plan.md`
 - `tools/demoswarm-pack-check/src/checks/drift.rs` (implementation reference)
 - `tools/demoswarm-pack-check/src/contracts.rs` (constants reference)
 
 ## Files Updated
-| File | Change Type | Summary |
-|------|-------------|---------|
-| `docs/reference/pack-check.md` | updated | Added documentation for checks 52 and 53, plus remediation guidance |
-| `docs/reference/stable-markers.md` | updated | Normalized OpenQ flow codes to PLN/BLD (was PLAN/BUILD) |
-| `docs/reference/contracts.md` | updated | Normalized OpenQ flow codes to PLN/BLD (was PLAN/BUILD) |
+
+| File                               | Change Type | Summary                                                             |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------- |
+| `docs/reference/pack-check.md`     | updated     | Added documentation for checks 52 and 53, plus remediation guidance |
+| `docs/reference/stable-markers.md` | updated     | Normalized OpenQ flow codes to PLN/BLD (was PLAN/BUILD)             |
+| `docs/reference/contracts.md`      | updated     | Normalized OpenQ flow codes to PLN/BLD (was PLAN/BUILD)             |
 
 ## What Changed
 
@@ -47,6 +50,7 @@ concerns: []
 ## Mismatches Found (if any)
 
 None. Documentation now aligns with implemented behavior:
+
 - Check 52 validates flow boundary enforcement (as implemented in drift.rs lines 693-773)
 - Check 53 validates OpenQ prefix patterns (as implemented in drift.rs lines 775-931)
 - PLN/BLD abbreviations now consistent across all reference docs and contracts.rs

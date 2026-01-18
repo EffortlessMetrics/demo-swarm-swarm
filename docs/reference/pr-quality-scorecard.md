@@ -20,11 +20,11 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 **What it answers:** Does the code do what it's supposed to do?
 
-| Inspection Point | What to Check |
-|------------------|---------------|
-| BDD scenarios | Do acceptance criteria pass? |
-| Test results | What do tests cover? What passed/failed? |
-| Regression risk | Are there known risky areas? Edge cases? |
+| Inspection Point | What to Check                            |
+| ---------------- | ---------------------------------------- |
+| BDD scenarios    | Do acceptance criteria pass?             |
+| Test results     | What do tests cover? What passed/failed? |
+| Regression risk  | Are there known risky areas? Edge cases? |
 
 **Evidence pointers:** `test_execution.md`, BDD scenario results, gate receipt.
 
@@ -32,11 +32,11 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 **What it answers:** How hard is it for the tests to lie?
 
-| Inspection Point | What to Check |
-|------------------|---------------|
+| Inspection Point          | What to Check                        |
+| ------------------------- | ------------------------------------ |
 | Test delta vs logic delta | Did verification grow with behavior? |
-| Mutation testing | If run: survivors, score, hotspots |
-| Fuzz/property tests | If used: coverage, findings |
+| Mutation testing          | If run: survivors, score, hotspots   |
+| Fuzz/property tests       | If used: coverage, findings          |
 
 **Key insight:** Coverage tells you what ran. Mutation tells you if running mattered.
 
@@ -48,11 +48,11 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 **What it answers:** Did contracts and dependencies stay stable (or change intentionally)?
 
-| Inspection Point | What to Check |
-|------------------|---------------|
-| API/schema drift | None, additive, or breaking? |
-| Dependency changes | New deps? Version bumps? Feature flags? |
-| Layering violations | If enforced: any cross-layer calls? |
+| Inspection Point    | What to Check                           |
+| ------------------- | --------------------------------------- |
+| API/schema drift    | None, additive, or breaking?            |
+| Dependency changes  | New deps? Version bumps? Feature flags? |
+| Layering violations | If enforced: any cross-layer calls?     |
 
 **Evidence pointers:** `api_contracts.yaml` diff, dependency lockfile diff, layer check output.
 
@@ -62,12 +62,12 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 **What it answers:** Will the next reader (human or agent) understand this code?
 
-| Inspection Point | What to Check |
-|------------------|---------------|
-| Hotspots | Which files deserve reviewer attention? |
+| Inspection Point    | What to Check                             |
+| ------------------- | ----------------------------------------- |
+| Hotspots            | Which files deserve reviewer attention?   |
 | Complexity/coupling | Did it get worse, better, or stay stable? |
-| Module boundaries | Splits, refactors, de-risking moves |
-| Future reader notes | Comments, ADR references, context |
+| Module boundaries   | Splits, refactors, de-risking moves       |
+| Future reader notes | Comments, ADR references, context         |
 
 **Evidence pointers:** Hotspot list in PR Brief, complexity metrics, ADR.
 
@@ -77,11 +77,11 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 **What it answers:** Can a reviewer reach a trust decision quickly?
 
-| Inspection Point | What to Check |
-|------------------|---------------|
+| Inspection Point       | What to Check                            |
+| ---------------------- | ---------------------------------------- |
 | PR cockpit readability | Is the PR Brief scannable in 30 seconds? |
-| Evidence pointers | Does every claim have a pointer? |
-| Explicit unknowns | Are "not measured" items documented? |
+| Evidence pointers      | Does every claim have a pointer?         |
+| Explicit unknowns      | Are "not measured" items documented?     |
 
 **Evidence pointers:** The PR description itself.
 
@@ -93,13 +93,13 @@ The goal is not exhaustive measurement. The goal is honest communication about w
 
 Any single metric can be gamed:
 
-| If You Optimize For... | You Risk... |
-|------------------------|-------------|
-| Coverage | Hollow tests that touch lines without asserting |
-| Mutation score | Over-specific assertions that kill mutants but miss edge cases |
-| Green CI | Untested surfaces, flaky test hiding |
-| Clean lint | Compliant but complex code |
-| Fast review | Rubber-stamping without reading |
+| If You Optimize For... | You Risk...                                                    |
+| ---------------------- | -------------------------------------------------------------- |
+| Coverage               | Hollow tests that touch lines without asserting                |
+| Mutation score         | Over-specific assertions that kill mutants but miss edge cases |
+| Green CI               | Untested surfaces, flaky test hiding                           |
+| Clean lint             | Compliant but complex code                                     |
+| Fast review            | Rubber-stamping without reading                                |
 
 The quality panel uses multiple sensors that fail in different ways. If you game one, another goes red.
 
@@ -108,6 +108,7 @@ This is deliberate. The panel collectively approximates "good engineering" in a 
 ### Trust Decay Prevention
 
 Over time, reliable systems become less scrutinized. Prevent trust decay with:
+
 - Periodic calibration (inject known defects, verify gates catch them)
 - Explicit "not measured" (force attention to gaps)
 - Red flags (patterns that force slowdown)
@@ -124,6 +125,7 @@ See [calibration.md](calibration.md) for the full calibration protocol.
 The ratio we optimize: **maximum quality confidence per minute of human attention**.
 
 Machine time is a lever. Spend it to compress DevLT:
+
 - More verification loops reduce review burden
 - Better evidence summaries reduce reading time
 - Clearer hotspot pointers reduce search time
@@ -141,25 +143,25 @@ Use this in PR descriptions to communicate quality state:
 ```markdown
 ## Quality Scorecard
 
-| Surface | Status | Notes |
-|---------|--------|-------|
-| Correctness | measured | 12 BDD scenarios pass |
-| Verification | partial | mutation not run |
-| Boundaries | clean | no API/schema changes |
-| Maintainability | noted | 3 hotspots identified |
-| Explanation | complete | evidence pointers present |
+| Surface         | Status   | Notes                     |
+| --------------- | -------- | ------------------------- |
+| Correctness     | measured | 12 BDD scenarios pass     |
+| Verification    | partial  | mutation not run          |
+| Boundaries      | clean    | no API/schema changes     |
+| Maintainability | noted    | 3 hotspots identified     |
+| Explanation     | complete | evidence pointers present |
 ```
 
 ### Status Values
 
-| Status | Meaning |
-|--------|---------|
-| `measured` | Automated verification ran and reported |
-| `partial` | Some aspects measured, others not |
-| `estimated` | Derived from patterns/precedent, not run |
-| `noted` | Human observation recorded, not automated |
-| `clean` | No changes in this surface |
-| `unknown` | Not measured, no estimate available |
+| Status      | Meaning                                   |
+| ----------- | ----------------------------------------- |
+| `measured`  | Automated verification ran and reported   |
+| `partial`   | Some aspects measured, others not         |
+| `estimated` | Derived from patterns/precedent, not run  |
+| `noted`     | Human observation recorded, not automated |
+| `clean`     | No changes in this surface                |
+| `unknown`   | Not measured, no estimate available       |
 
 **`unknown` is acceptable when explained.** The point is honest communication, not green checkmarks.
 
@@ -182,6 +184,7 @@ Example: "Estimated regression risk: low (similar pattern to feat-login, which h
 ### Unknown / Not Measured
 
 Explicitly stated gap. Acceptable when:
+
 - The verification is expensive and the change is low-risk
 - The tooling doesn't exist yet
 - Time constraints apply
@@ -197,6 +200,7 @@ Example: "Mutation testing: not run (tooling not configured for this language)"
 ### Not "CI green = quality"
 
 CI passing is necessary but not sufficient. CI tells you the build worked. It doesn't tell you:
+
 - Whether tests are meaningful (mutation score)
 - Whether boundaries are respected (API drift)
 - Whether the change is reviewable (hotspots)
@@ -222,6 +226,7 @@ The scorecard helps reviewers focus. It doesn't replace their judgment about whe
 The scorecard is a **component** of the PR Brief, not a replacement for it.
 
 PR Brief structure (see [pr-review-interface.md](pr-review-interface.md)):
+
 1. What changed
 2. Why
 3. Review map (hotspots)

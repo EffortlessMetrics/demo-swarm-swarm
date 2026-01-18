@@ -19,6 +19,7 @@ This is a test fixture with invalid numeric suffix padding.
 ## Notes
 
 Numeric suffixes must be:
+
 - Exactly 3 digits
 - Zero-padded (001, not 1)
 - Range: 001-999

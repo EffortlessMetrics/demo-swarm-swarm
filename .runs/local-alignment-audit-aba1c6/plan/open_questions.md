@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -72,6 +73,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
 - A: Agent color coding remains advisory. No routing logic consumes color fields; they are for human/tooling visualization. No schema enforcement needed. (resolves OQ-SIG-005) [RESOLVED]
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: 3
@@ -82,6 +84,7 @@ assumptions_added: 3
 missing_required: []
 blockers: []
 concerns:
-  - Resolved 4 Signal questions based on CLAUDE.md authority
-  - 3 new Plan questions identified for Build-phase decisions
-  - OQ-SIG-004 and OQ-SIG-006 remain open (deferred to Build and before-merge respectively)
+
+- Resolved 4 Signal questions based on CLAUDE.md authority
+- 3 new Plan questions identified for Build-phase decisions
+- OQ-SIG-004 and OQ-SIG-006 remain open (deferred to Build and before-merge respectively)

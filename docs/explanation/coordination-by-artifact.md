@@ -7,12 +7,14 @@
 ## The Coordination Problem
 
 Multiple agents working on related tasks could:
+
 - Overwrite each other's work
 - Duplicate effort
 - Make conflicting decisions
 - Lose track of state
 
 Traditional distributed systems solve this with:
+
 - **Locks** — Acquire before acting, release after
 - **Queues** — Serialize operations through a broker
 - **Message passing** — Agents coordinate via protocols
@@ -29,12 +31,14 @@ Agents coordinate through disk state. No messages between agents. No shared memo
 ## The Pattern
 
 Agents coordinate through disk state:
+
 - Read what exists before starting
 - Write results to known locations
 - Let artifacts define boundaries
 - Trust the filesystem as arbiter
 
 The filesystem provides everything coordination needs:
+
 - **Atomicity** — A write completes or doesn't
 - **Visibility** — Everyone can read
 - **Durability** — State survives restarts
@@ -50,6 +54,7 @@ It's simple, reliable, and universal.
 ### 1. Implicit Resume
 
 Every agent starts by reading disk state:
+
 - What artifacts exist?
 - What work is complete?
 - What's pending?
@@ -61,6 +66,7 @@ Agent starts → Reads .runs/ → Sees AC-001 done, AC-002 pending → Works on 
 No one tells the agent what to do. The state tells the agent what to do.
 
 The agent doesn't ask "what's my assignment?" It checks:
+
 - Does `ac_status.json` exist? What does it say?
 - Does `build_receipt.json` exist? (Flow complete or not?)
 - What artifacts are present in the run directory?
@@ -71,20 +77,21 @@ State IS the disk contents. There's no separate "mode" or "assignment" — just 
 
 Each agent owns specific artifacts:
 
-| Agent | Owns |
-|-------|------|
+| Agent            | Owns                                    |
+| ---------------- | --------------------------------------- |
 | code-implementer | Source files, `impl_changes_summary.md` |
-| test-author | Test files, `test_strategy.md` |
-| code-critic | `code_critique.md` |
-| test-critic | `test_critique.md` |
-| *-cleanup | `*_receipt.json` |
-| repo-operator | Git operations, staging |
+| test-author      | Test files, `test_strategy.md`          |
+| code-critic      | `code_critique.md`                      |
+| test-critic      | `test_critique.md`                      |
+| \*-cleanup       | `*_receipt.json`                        |
+| repo-operator    | Git operations, staging                 |
 
 Agents don't touch each other's artifacts. A critic never modifies source code. An implementer never writes receipts. This creates natural separation — no collisions possible.
 
 ### 3. Handoff via Completion
 
 When an agent finishes:
+
 1. Writes its artifacts to known locations
 2. Reports what was done (natural language)
 3. Recommends what should happen next
@@ -107,6 +114,7 @@ Each agent picks up where the last left off.
 ### 4. The Orchestrator Routes
 
 The orchestrator (Claude) reads handoffs and decides:
+
 - Which agent runs next?
 - Is work complete?
 - Are there blockers?
@@ -125,7 +133,8 @@ Sequential work flows through artifact handoffs:
 Agent A writes artifact → Agent B reads artifact → Agent B writes → Agent C reads
 ```
 
-**Example: Build flow**
+### Example: Build flow
+
 ```
 requirements-author → requirements.md
     ↓
@@ -183,6 +192,7 @@ Agents run sequentially (one at a time in most flows). No concurrent writes to t
 State is on disk. Session resets don't lose work. Context exhaustion doesn't lose progress. Artifacts survive any interruption.
 
 Compare to message-based coordination:
+
 - Message in flight when agent crashes? Lost.
 - Shared memory when process dies? Lost.
 - Disk file when session resets? Still there.
@@ -190,6 +200,7 @@ Compare to message-based coordination:
 ### No Coordination Overhead
 
 No need to:
+
 - Establish connections between agents
 - Negotiate protocols or versions
 - Handle message delivery failures
@@ -201,6 +212,7 @@ Just read and write files. The filesystem handles the rest.
 ### Natural Boundaries
 
 File ownership creates natural separation:
+
 - **Clear responsibility** — Each agent knows exactly what it writes
 - **No stepping on toes** — Agents can't accidentally overwrite each other
 - **Easy debugging** — Check who owns the file, check what they wrote
@@ -212,12 +224,14 @@ File ownership creates natural separation:
 ### Message Passing Between Agents
 
 **Wrong:** Agents send messages to each other
+
 ```
 code-implementer → message → code-critic: "Please review auth.rs"
 code-critic → message → code-implementer: "Found 3 issues"
 ```
 
 **Right:** Agents write artifacts, orchestrator routes
+
 ```
 code-implementer writes src/auth.rs
 orchestrator calls code-critic
@@ -228,12 +242,14 @@ orchestrator calls code-implementer with critique context
 ### Shared Memory Access
 
 **Wrong:** Agents access shared data structure
+
 ```
 shared_state["ac_001"] = "in_progress"
 other_agent reads shared_state["ac_001"]
 ```
 
 **Right:** Agents access files with clear ownership
+
 ```
 code-implementer updates ac_status.json (its section)
 cleanup reads ac_status.json (everyone's sections)
@@ -242,12 +258,14 @@ cleanup reads ac_status.json (everyone's sections)
 ### Implicit Dependencies
 
 **Wrong:** Agent B assumes Agent A ran
+
 ```
 # code-implementer assumes requirements.md exists
 requirements = read("requirements.md")  # crashes if missing
 ```
 
 **Right:** Agent B checks if A's artifacts exist
+
 ```
 # code-implementer checks for required input
 if not exists("requirements.md"):
@@ -259,11 +277,13 @@ requirements = read("requirements.md")
 ### Direct Agent-to-Agent Calls
 
 **Wrong:** One agent spawns another
+
 ```
 code-implementer spawns test-author
 ```
 
 **Right:** Orchestrator routes to next agent
+
 ```
 code-implementer reports: "Implementation complete. Recommend test-author."
 orchestrator calls test-author
@@ -275,14 +295,14 @@ orchestrator calls test-author
 
 The filesystem provides everything distributed coordination needs:
 
-| Need | Filesystem Provides |
-|------|---------------------|
-| Atomicity | Write completes or doesn't |
-| Visibility | Any process can read any file |
-| Durability | Files survive process death |
-| Ordering | Modification times, creation order |
-| Identity | Paths as unique identifiers |
-| Isolation | Directory structure as namespacing |
+| Need       | Filesystem Provides                |
+| ---------- | ---------------------------------- |
+| Atomicity  | Write completes or doesn't         |
+| Visibility | Any process can read any file      |
+| Durability | Files survive process death        |
+| Ordering   | Modification times, creation order |
+| Identity   | Paths as unique identifiers        |
+| Isolation  | Directory structure as namespacing |
 
 No message broker. No consensus protocol. No distributed lock manager. Just files.
 
@@ -321,6 +341,7 @@ This pattern scales because:
 ### Horizontal Extension
 
 Adding a new flow or agent:
+
 1. Define what artifacts it reads (inputs)
 2. Define what artifacts it writes (outputs)
 3. Document artifact ownership
@@ -348,6 +369,7 @@ Agent prompts include instructions to check disk state first:
 
 ```markdown
 ## On Start
+
 Check if your tracking artifacts exist.
 If partially complete, resume from there.
 ```
@@ -373,14 +395,14 @@ This contract is documented in agent prompts and understood by orchestrators. No
 
 ## Comparison: Traditional vs Artifact Coordination
 
-| Aspect | Traditional (Messages) | Artifact Coordination |
-|--------|------------------------|----------------------|
-| State location | In flight, in memory | On disk |
-| Failure recovery | Complex (replay, acks) | Trivial (read files) |
-| Debugging | Trace logs, message dumps | Read files directly |
-| Adding agents | Protocol updates | Document file paths |
-| Scaling | Broker capacity | Filesystem capacity |
-| Complexity | High (protocols, failures) | Low (files) |
+| Aspect           | Traditional (Messages)     | Artifact Coordination |
+| ---------------- | -------------------------- | --------------------- |
+| State location   | In flight, in memory       | On disk               |
+| Failure recovery | Complex (replay, acks)     | Trivial (read files)  |
+| Debugging        | Trace logs, message dumps  | Read files directly   |
+| Adding agents    | Protocol updates           | Document file paths   |
+| Scaling          | Broker capacity            | Filesystem capacity   |
+| Complexity       | High (protocols, failures) | Low (files)           |
 
 The tradeoff: Artifact coordination is simpler but requires sequential execution within a flow. For swarm workflows, this is the right tradeoff — we want simplicity and recoverability over parallelism.
 
@@ -393,6 +415,7 @@ The tradeoff: Artifact coordination is simpler but requires sequential execution
 **The solution:** Coordinate through disk state, not messages.
 
 **The mechanism:**
+
 1. Read disk to understand current state
 2. Write to owned artifacts
 3. Report completion to orchestrator

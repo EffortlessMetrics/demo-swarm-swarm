@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,18 +13,20 @@ blockers: []
 missing_required: []
 
 concerns:
-  - ST-004 carries heavier scope (Gate + cross-cutting enforcement + CLAUDE.md cleanup); may require proportionally more effort
-  - 55 agent files to audit increases merge conflict risk if subtasks overlap in touches
-  - Open questions (OQ-SIG-001 through OQ-SIG-006) have defaults but remain open; Plan phase should confirm
-  - pack-check boundary enforcement rules may produce false positives on legitimate skill references
+
+- ST-004 carries heavier scope (Gate + cross-cutting enforcement + CLAUDE.md cleanup); may require proportionally more effort
+- 55 agent files to audit increases merge conflict risk if subtasks overlap in touches
+- Open questions (OQ-SIG-001 through OQ-SIG-006) have defaults but remain open; Plan phase should confirm
+- pack-check boundary enforcement rules may produce false positives on legitimate skill references
 
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 3
-  low: 4
+critical: 0
+high: 0
+medium: 3
+low: 4
 
 ## Context
+
 - flow: signal
 - run_id: align-doc-ownership
 - inputs_used:
@@ -37,19 +40,20 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | OPS | MEDIUM | OPEN | Merge conflicts across parallel subtasks due to overlapping file touches | pack-maintainers |
-| RSK-002 | OPS | MEDIUM | OPEN | ST-004 scope concentration may cause timeline imbalance | pack-maintainers |
-| RSK-003 | OPS | MEDIUM | OPEN | pack-check rule additions may produce false positives | pack-maintainers |
-| RSK-004 | OPS | LOW | OPEN | Validation run dependency blocks completion until flows 1-4 pass | pack-maintainers |
-| RSK-005 | PERFORMANCE | LOW | OPEN | pack-check runtime may increase with new boundary checks | pack-maintainers |
-| RSK-006 | SECURITY | LOW | MITIGATED | No code execution changes; secrets-sanitizer gate preserved | pack-maintainers |
-| RSK-007 | COMPLIANCE | LOW | MITIGATED | No regulatory impact; internal tooling only | pack-maintainers |
+| ID      | Category    | Severity | Status    | Summary                                                                  | Owner            |
+| ------- | ----------- | -------- | --------- | ------------------------------------------------------------------------ | ---------------- |
+| RSK-001 | OPS         | MEDIUM   | OPEN      | Merge conflicts across parallel subtasks due to overlapping file touches | pack-maintainers |
+| RSK-002 | OPS         | MEDIUM   | OPEN      | ST-004 scope concentration may cause timeline imbalance                  | pack-maintainers |
+| RSK-003 | OPS         | MEDIUM   | OPEN      | pack-check rule additions may produce false positives                    | pack-maintainers |
+| RSK-004 | OPS         | LOW      | OPEN      | Validation run dependency blocks completion until flows 1-4 pass         | pack-maintainers |
+| RSK-005 | PERFORMANCE | LOW      | OPEN      | pack-check runtime may increase with new boundary checks                 | pack-maintainers |
+| RSK-006 | SECURITY    | LOW      | MITIGATED | No code execution changes; secrets-sanitizer gate preserved              | pack-maintainers |
+| RSK-007 | COMPLIANCE  | LOW      | MITIGATED | No regulatory impact; internal tooling only                              | pack-maintainers |
 
 ## Risk Details
 
 ### RSK-001: Merge conflicts across parallel subtasks
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -74,6 +78,7 @@ severity_summary:
   - Proceed with distinct touches enforcement; document file ownership matrix in work_plan.md
 
 ### RSK-002: ST-004 scope concentration
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -98,6 +103,7 @@ severity_summary:
   - Proceed; Plan phase should account for ST-004 scope in work_plan.md estimates
 
 ### RSK-003: pack-check rule false positives
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -122,6 +128,7 @@ severity_summary:
   - Proceed; Plan phase should specify precise regex patterns for violation detection
 
 ### RSK-004: Validation run blocks completion
+
 - Category: OPS
 - Severity: LOW
 - Status: OPEN
@@ -145,6 +152,7 @@ severity_summary:
   - Proceed; this is a designed quality gate, not a risk to mitigate away
 
 ### RSK-005: pack-check runtime increase
+
 - Category: PERFORMANCE
 - Severity: LOW
 - Status: OPEN
@@ -166,6 +174,7 @@ severity_summary:
   - Proceed; monitor runtime during development but do not block on this
 
 ### RSK-006: No security regression
+
 - Category: SECURITY
 - Severity: LOW
 - Status: MITIGATED
@@ -187,6 +196,7 @@ severity_summary:
   - No additional mitigation required; proceed
 
 ### RSK-007: No compliance impact
+
 - Category: COMPLIANCE
 - Severity: LOW
 - Status: MITIGATED
@@ -206,11 +216,13 @@ severity_summary:
   - No action required; proceed
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-001, RSK-002, RSK-003, RSK-004, RSK-005, RSK-006, RSK-007]
 - CHANGED: []
 - CLOSED: []
 
 ## Recommended Next
+
 - Proceed to Flow 2 (Plan) to develop work_plan.md with explicit time estimates, especially for ST-004
 - Plan phase should define precise regex patterns for pack-check boundary violations to avoid false positives (RSK-003)
 - Plan phase should confirm the file ownership matrix to minimize merge conflicts (RSK-001)

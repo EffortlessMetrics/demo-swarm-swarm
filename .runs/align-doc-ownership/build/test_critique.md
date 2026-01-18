@@ -1,6 +1,7 @@
 # Test Critique for align-doc-ownership
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -16,6 +17,7 @@ severity_summary:
 ```
 
 ## Test Critic Result
+
 ```yaml
 status: VERIFIED
 can_further_iteration_help: no
@@ -53,5 +55,6 @@ The test changes summary adequately covers the boundary enforcement requirements
 The test specification is VERIFIED. Proceed to code implementation (ST-004 pack-check Rust development).
 
 ## Inventory
+
 - CRITIQUE_FINDING: minor - Check 47 advisory only
 - CRITIQUE_STATUS: VERIFIED

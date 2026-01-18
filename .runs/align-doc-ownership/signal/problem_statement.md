@@ -1,6 +1,7 @@
 # Problem Statement
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,9 +13,10 @@ blockers: []
 missing_required: []
 
 concerns:
-  - ST-004 carries heavier scope (Gate + cross-cutting enforcement + CLAUDE.md cleanup); may require more effort than other subtasks
-  - 55 agent files need consistency auditing; risk of inadvertent merge conflicts if subtasks overlap
-  - pack-check boundary enforcement rules do not exist yet; Rust development may be required
+
+- ST-004 carries heavier scope (Gate + cross-cutting enforcement + CLAUDE.md cleanup); may require more effort than other subtasks
+- 55 agent files need consistency auditing; risk of inadvertent merge conflicts if subtasks overlap
+- pack-check boundary enforcement rules do not exist yet; Rust development may be required
 
 confidence: High
 
@@ -73,22 +75,22 @@ The desired state is a clear separation of concerns: flow commands own orchestra
 ## Assumptions Made to Proceed
 
 - **ASM-1**: The three-tier ownership model (flow commands -> agents -> skills) is the intended architecture.
-  - *If wrong*: Entire framing changes; would need to define a different ownership model.
+  - _If wrong_: Entire framing changes; would need to define a different ownership model.
 
 - **ASM-2**: Cleanup agents legitimately need operational detail inline (they execute the work), but should reference skills for CLI truth rather than duplicating examples.
-  - *If wrong*: Agent docs may need to embed full CLI examples, increasing duplication tolerance.
+  - _If wrong_: Agent docs may need to embed full CLI examples, increasing duplication tolerance.
 
 - **ASM-3**: CLAUDE.md is meant to be entry-point level and should not duplicate CLI flag details from skill docs.
-  - *If wrong*: CLAUDE.md scope expands, skill docs become secondary.
+  - _If wrong_: CLAUDE.md scope expands, skill docs become secondary.
 
 - **ASM-4**: pack-check can be extended with boundary-enforcement drift checks without major refactoring.
-  - *If wrong*: Enforcement may need to be deferred or implemented via shell scripts instead.
+  - _If wrong_: Enforcement may need to be deferred or implemented via shell scripts instead.
 
 - **ASM-5**: The subtask partitioning (ST-001 through ST-006 by flow) is the intended decomposition.
-  - *If wrong*: Work plan may need restructuring.
+  - _If wrong_: Work plan may need restructuring.
 
 - **ASM-6**: No external dependencies or blockers prevent this alignment work.
-  - *If wrong*: Scope may need to shrink or defer certain areas.
+  - _If wrong_: Scope may need to shrink or defer certain areas.
 
 ## Questions / Clarifications Needed
 

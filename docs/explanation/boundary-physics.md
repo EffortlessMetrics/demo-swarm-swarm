@@ -22,17 +22,17 @@ This isn't a philosophy. It's an engineering trade-off. We accept that agents ca
 
 Publish boundaries are where work becomes visible or permanent:
 
-| Boundary | Risk | Why It Matters |
-|----------|------|----------------|
-| Git commit | Secrets enter history | History is forever; rotation is expensive |
-| Git push | Changes leave local machine | Visible to collaborators and CI |
-| PR creation/update | Content becomes public | Appears in GitHub, notifications sent |
-| GitHub issue/comment | Content reaches external system | Visible to the world |
-| Release/deploy | Code reaches users | Production impact |
+| Boundary             | Risk                            | Why It Matters                            |
+| -------------------- | ------------------------------- | ----------------------------------------- |
+| Git commit           | Secrets enter history           | History is forever; rotation is expensive |
+| Git push             | Changes leave local machine     | Visible to collaborators and CI           |
+| PR creation/update   | Content becomes public          | Appears in GitHub, notifications sent     |
+| GitHub issue/comment | Content reaches external system | Visible to the world                      |
+| Release/deploy       | Code reaches users              | Production impact                         |
 
 These are the **only** places where "not safe yet" is a valid outcome. Everything else is local iteration.
 
-**The key insight:** Reading a file isn't a risk. Writing code locally isn't a risk. Running tests isn't a risk. Only *publishing* creates risk. Gate accordingly.
+**The key insight:** Reading a file isn't a risk. Writing code locally isn't a risk. Running tests isn't a risk. Only _publishing_ creates risk. Gate accordingly.
 
 ---
 
@@ -45,6 +45,7 @@ This order is physics, not preference. Violating it creates real vulnerabilities
 Before you can verify what will be published, you must know what will be published.
 
 **What happens:**
+
 - Identify which files would be committed
 - Determine what content would be posted
 - Capture the exact diff that would leave the sandbox
@@ -56,6 +57,7 @@ Before you can verify what will be published, you must know what will be publish
 Scan exactly what would be published. Not the repo. Not the working tree. The staged surface.
 
 **What happens:**
+
 - Secrets detection on staged files
 - Anomaly detection (unexpected changes)
 - Surface verification (is this what we meant to publish?)
@@ -67,6 +69,7 @@ Scan exactly what would be published. Not the repo. Not the working tree. The st
 Only proceed if sanitization passed. Otherwise, pause publishing (not work).
 
 **What happens:**
+
 - If `safe_to_publish: true` — execute the publish operation
 - If `safe_to_publish: false` — block publishing, route to remediation
 
@@ -93,14 +96,15 @@ Scanning an unstaged or stale surface creates phantom confidence. You think you'
 
 The gate returns one of two values:
 
-| Value | Meaning | Response |
-|-------|---------|----------|
-| `safe_to_publish: true` | Staged surface passed all checks | Proceed with publish operation |
-| `safe_to_publish: false` | Staged surface has issues | Block publishing, route to remediation |
+| Value                    | Meaning                          | Response                               |
+| ------------------------ | -------------------------------- | -------------------------------------- |
+| `safe_to_publish: true`  | Staged surface passed all checks | Proceed with publish operation         |
+| `safe_to_publish: false` | Staged surface has issues        | Block publishing, route to remediation |
 
 ### This Is Not "Blocked"
 
 When `safe_to_publish: false`:
+
 - Publishing is blocked
 - **Work continues locally**
 - Route to remediation (fix secrets, explain anomalies)
@@ -164,6 +168,7 @@ The safety isn't in prompts or permissions. It's in architecture.
 ### 1. Containment (Sandbox Workspace)
 
 The sandbox is a real boundary:
+
 - No production credentials
 - No production network access
 - No ability to affect users
@@ -174,6 +179,7 @@ Claude can do anything inside the sandbox because the sandbox itself is the cont
 ### 2. Boundary Gates (Deterministic Checks at Exits)
 
 Gates are boring and mechanical:
+
 - Regex-based secrets detection
 - Diff-based anomaly detection
 - Boolean pass/fail outcomes
@@ -183,6 +189,7 @@ No judgment, no prompting, no "trust me." The gate passes or it doesn't. This is
 ### 3. Observable Evidence (Audit Trail)
 
 Everything is logged:
+
 - What was staged
 - What was scanned
 - What the gate decided
@@ -197,12 +204,14 @@ If something goes wrong, you can reconstruct exactly what happened. The audit tr
 > **We don't restrict what agents can think. We gate what crosses the boundary.**
 
 Consider a secure facility:
+
 - Inside: employees move freely, work on anything, access any room
 - At the exit: security checks bags, scans badges, verifies nothing leaves that shouldn't
 
 The security comes from the exit check, not from following employees around. Surveillance inside is expensive and counterproductive. A good exit check is cheap and effective.
 
 Same with agents:
+
 - Inside the sandbox: read any file, write any code, run any command
 - At the boundary: scan what would be published, block if unsafe
 
@@ -215,6 +224,7 @@ The security comes from the boundary check, not from approving each action. Perm
 ### Secrets Scanning
 
 The `secrets-sanitizer` implements the secrets gate:
+
 - Scans only the staged surface (not the whole repo)
 - Runs regex patterns for known secret formats
 - Returns `safe_to_publish: true | false`
@@ -223,6 +233,7 @@ The `secrets-sanitizer` implements the secrets gate:
 ### Repo Hygiene
 
 The `repo-operator` implements the hygiene gate:
+
 - Detects anomalies (files outside expected scope)
 - Guards against test deletion (anti-reward-hacking)
 - Returns `proceed_to_github_ops: true | false`
@@ -230,6 +241,7 @@ The `repo-operator` implements the hygiene gate:
 ### Two-Gate Rule
 
 GitHub operations require BOTH gates to pass:
+
 1. `secrets-sanitizer` returns `safe_to_publish: true`
 2. `repo-operator` returns `proceed_to_github_ops: true`
 

@@ -1,6 +1,7 @@
 # Problem Statement
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null
@@ -11,10 +12,11 @@ blockers: []
 missing_required: []
 
 concerns:
-  - Upstream issue #49 (align-doc-ownership) bounced at Gate; indicates prior implementation challenges
-  - OpenQ prefix inconsistency (PLN vs PLAN) remains open (OQ-SIG-002); affects REQ-003 implementation
-  - Skills section audit reveals 4 of 14 demoswarm.sh-using agents may be missing required sections
-  - Semantic compliance validation (cross-agent logic) is harder to validate mechanically than syntactic rules
+
+- Upstream issue #49 (align-doc-ownership) bounced at Gate; indicates prior implementation challenges
+- OpenQ prefix inconsistency (PLN vs PLAN) remains open (OQ-SIG-002); affects REQ-003 implementation
+- Skills section audit reveals 4 of 14 demoswarm.sh-using agents may be missing required sections
+- Semantic compliance validation (cross-agent logic) is harder to validate mechanically than syntactic rules
 
 confidence: High
 
@@ -102,36 +104,36 @@ The problem is compounded by the incomplete state of prior alignment work (issue
 
 ### Infrastructure Baseline
 
-| Component | Current State | Target REQ |
-|-----------|--------------|------------|
-| Status enum validation | check 28 | REQ-006 (no false positives) |
-| Action enum validation | check 29 | REQ-006 (no false positives) |
-| Drift guards (Bash) | 6 guards | Foundation |
-| Receipt validation | receipt-checker agent | REQ-004 (test fixtures) |
-| OpenQ prefixes | clarifier + openq-tools | REQ-003 (normalization) |
-| Skills sections | 10 of 14 users have them | REQ-002 (enforcement) |
-| Flow boundaries | NOT enforced | REQ-001 (new check) |
-| Warning-first mode | NOT implemented | REQ-005 (--strict flag) |
+| Component              | Current State            | Target REQ                   |
+| ---------------------- | ------------------------ | ---------------------------- |
+| Status enum validation | check 28                 | REQ-006 (no false positives) |
+| Action enum validation | check 29                 | REQ-006 (no false positives) |
+| Drift guards (Bash)    | 6 guards                 | Foundation                   |
+| Receipt validation     | receipt-checker agent    | REQ-004 (test fixtures)      |
+| OpenQ prefixes         | clarifier + openq-tools  | REQ-003 (normalization)      |
+| Skills sections        | 10 of 14 users have them | REQ-002 (enforcement)        |
+| Flow boundaries        | NOT enforced             | REQ-001 (new check)          |
+| Warning-first mode     | NOT implemented          | REQ-005 (--strict flag)      |
 
 ## Assumptions Made to Proceed
 
 - **ASM-1**: The upstream issue #49 design direction (three-tier ownership) is authoritative and will not be reversed.
-  - *If wrong*: Ownership boundary enforcement would need redesign.
+  - _If wrong_: Ownership boundary enforcement would need redesign.
 
 - **ASM-2**: pack-check (Rust) is the preferred venue for new structural validation rules.
-  - *If wrong*: More checks would go into check-doc-drift.sh instead, affecting implementation approach.
+  - _If wrong_: More checks would go into check-doc-drift.sh instead, affecting implementation approach.
 
 - **ASM-3**: OpenQ prefix normalization should use the abbreviated form (PLN, BLD, GAT, etc.) consistent with stable-markers.md.
-  - *If wrong*: Would need to update stable-markers.md and openq-tools/SKILL.md to use long-form (PLAN, BUILD, GATE).
+  - _If wrong_: Would need to update stable-markers.md and openq-tools/SKILL.md to use long-form (PLAN, BUILD, GATE).
 
 - **ASM-4**: Warning-before-failure is acceptable for new rules to enable incremental adoption.
-  - *If wrong*: All new checks would need immediate enforcement, requiring more careful rollout.
+  - _If wrong_: All new checks would need immediate enforcement, requiring more careful rollout.
 
 - **ASM-5**: The 4 agents using demoswarm.sh without Skills sections are gaps to fix, not intentional exceptions.
-  - *If wrong*: Need to document which agents are intentionally exempt.
+  - _If wrong_: Need to document which agents are intentionally exempt.
 
 - **ASM-6**: Prior Flow 1 research and requirements are correct and do not need major revision.
-  - *If wrong*: Iteration 2 would surface new requirements or constraints not captured in iteration 1.
+  - _If wrong_: Iteration 2 would surface new requirements or constraints not captured in iteration 1.
 
 ## Questions / Clarifications Needed
 

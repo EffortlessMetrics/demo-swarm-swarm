@@ -16,10 +16,10 @@ Many things feel hard or uncertain but can still be resolved by agents. The ques
 
 Ask: Does the decision require someone's **authority** or just someone's **knowledge**?
 
-| If it requires... | Then... | Status |
-|-------------------|---------|--------|
-| **Knowledge** | Research, derive, default safely, document reasoning, proceed | DEFAULTED |
-| **Authority** | Surface options, explain trade-offs, wait for boundary | NEEDS_HUMAN |
+| If it requires... | Then...                                                       | Status      |
+| ----------------- | ------------------------------------------------------------- | ----------- |
+| **Knowledge**     | Research, derive, default safely, document reasoning, proceed | DEFAULTED   |
+| **Authority**     | Surface options, explain trade-offs, wait for boundary        | NEEDS_HUMAN |
 
 This single distinction keeps flows moving. Most "blocked" situations are knowledge problems disguised as authority problems.
 
@@ -29,16 +29,16 @@ This single distinction keeps flows moving. Most "blocked" situations are knowle
 
 Things that seem hard but are actually researchable or derivable:
 
-| Question | Why DEFAULTED | The Move |
-|----------|---------------|----------|
-| "What's the GDPR retention limit?" | Legal requirements are documented | Research it, cite the source |
-| "Should we encrypt session data?" | Data sensitivity + codebase patterns tell you | Derive from context |
-| "What error handling pattern here?" | Codebase convention exists | Follow the pattern |
-| "Which HTTP status code for this?" | Standards exist (RFC 7231, etc.) | Apply the standard |
-| "How should we structure this module?" | Existing patterns in the repo | Mirror what's there |
-| "What timeout value?" | Check existing timeouts | Use the existing pattern |
-| "Should we add logging here?" | Check existing logging patterns | Match conventions |
-| "What's the right abstraction level?" | Judgment call within your domain | Make a choice, critic will push back if wrong |
+| Question                               | Why DEFAULTED                                 | The Move                                      |
+| -------------------------------------- | --------------------------------------------- | --------------------------------------------- |
+| "What's the GDPR retention limit?"     | Legal requirements are documented             | Research it, cite the source                  |
+| "Should we encrypt session data?"      | Data sensitivity + codebase patterns tell you | Derive from context                           |
+| "What error handling pattern here?"    | Codebase convention exists                    | Follow the pattern                            |
+| "Which HTTP status code for this?"     | Standards exist (RFC 7231, etc.)              | Apply the standard                            |
+| "How should we structure this module?" | Existing patterns in the repo                 | Mirror what's there                           |
+| "What timeout value?"                  | Check existing timeouts                       | Use the existing pattern                      |
+| "Should we add logging here?"          | Check existing logging patterns               | Match conventions                             |
+| "What's the right abstraction level?"  | Judgment call within your domain              | Make a choice, critic will push back if wrong |
 
 ### The DEFAULTED Protocol
 
@@ -65,6 +65,7 @@ From [open-questions.md example](../examples/open-questions.md):
 ```
 
 This looks hard. It affects architecture. But it's DEFAULTED because:
+
 - The agent can research options
 - A safe default exists (in-memory with abstraction)
 - The choice is reversible
@@ -76,15 +77,15 @@ This looks hard. It affects architecture. But it's DEFAULTED because:
 
 Things that genuinely require human authority:
 
-| Question | Why NEEDS_HUMAN | The Authority Gap |
-|----------|-----------------|-------------------|
-| "Break compatibility with 3 paying customers?" | Business relationship decision | Agent has no authority over customer relationships |
-| "Ship with known race condition or delay release?" | Risk tolerance decision | Agent cannot decide acceptable risk levels for the org |
-| "Which team owns this service long-term?" | Organizational authority | Agent cannot assign ownership |
-| "Should we take on this tech debt?" | Business trade-off | Involves timeline and resource allocation |
-| "Do we support this legacy format?" | Product decision | Involves customer commitments |
-| "Can we drop support for IE11?" | Customer impact | Affects paying users |
-| "Should we proceed despite failing security scan?" | Compliance authority | Cannot override security policy |
+| Question                                           | Why NEEDS_HUMAN                | The Authority Gap                                      |
+| -------------------------------------------------- | ------------------------------ | ------------------------------------------------------ |
+| "Break compatibility with 3 paying customers?"     | Business relationship decision | Agent has no authority over customer relationships     |
+| "Ship with known race condition or delay release?" | Risk tolerance decision        | Agent cannot decide acceptable risk levels for the org |
+| "Which team owns this service long-term?"          | Organizational authority       | Agent cannot assign ownership                          |
+| "Should we take on this tech debt?"                | Business trade-off             | Involves timeline and resource allocation              |
+| "Do we support this legacy format?"                | Product decision               | Involves customer commitments                          |
+| "Can we drop support for IE11?"                    | Customer impact                | Affects paying users                                   |
+| "Should we proceed despite failing security scan?" | Compliance authority           | Cannot override security policy                        |
 
 ### The NEEDS_HUMAN Protocol
 
@@ -114,6 +115,7 @@ From [open-questions.md example](../examples/open-questions.md):
 ```
 
 This is NEEDS_HUMAN because:
+
 - The decision affects external parties
 - Revenue and relationships are at stake
 - No amount of research resolves the trade-off
@@ -127,12 +129,13 @@ Most "blocked" situations are not actually blocked. They are DEFAULTED situation
 
 ### The Throughput Cost
 
-| Pattern | What Happens |
-|---------|-------------|
-| Agent defaults safely | Flow continues, question documented, human reviews at boundary |
+| Pattern                       | What Happens                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------- |
+| Agent defaults safely         | Flow continues, question documented, human reviews at boundary                                 |
 | Agent escalates unnecessarily | Flow stops, human context-switches, 30-60 min delay, human does research agent could have done |
 
 Every unnecessary escalation costs:
+
 - $50-100 in context-switch overhead
 - Minutes to hours of latency
 - Interruption to human focus
@@ -142,13 +145,13 @@ Every unnecessary escalation costs:
 
 Many questions feel like they need authority but actually need knowledge:
 
-| Feels Like Authority | Actually Knowledge |
-|---------------------|-------------------|
-| "What should the API return?" | Check REST conventions and existing endpoints |
-| "Is this the right abstraction?" | Make a judgment call; critic will push back |
-| "What's the performance requirement?" | Check NFRs or default conservatively |
-| "Should we add validation here?" | Check existing validation patterns |
-| "What error message?" | Check existing error messages |
+| Feels Like Authority                  | Actually Knowledge                            |
+| ------------------------------------- | --------------------------------------------- |
+| "What should the API return?"         | Check REST conventions and existing endpoints |
+| "Is this the right abstraction?"      | Make a judgment call; critic will push back   |
+| "What's the performance requirement?" | Check NFRs or default conservatively          |
+| "Should we add validation here?"      | Check existing validation patterns            |
+| "What error message?"                 | Check existing error messages                 |
 
 The test: **Can I research this? Can I derive it from patterns? Is there a safe default?** If yes to any, it's DEFAULTED.
 
@@ -197,27 +200,27 @@ Most questions resolve at step 3 or 4. Step 5 is rare.
 
 ### Bad NEEDS_HUMAN (Should Be DEFAULTED)
 
-| Question | Why It's Actually DEFAULTED |
-|----------|----------------------------|
-| "Should I use camelCase or snake_case?" | Check codebase, follow convention |
-| "Is this the right abstraction?" | Make a choice, critic will push back if wrong |
-| "What's the performance requirement?" | Check NFRs or default conservatively |
-| "Which test framework?" | Use what's already in the repo |
-| "Where should this file go?" | Follow existing directory structure |
-| "Should I add comments here?" | Follow existing comment patterns |
+| Question                                | Why It's Actually DEFAULTED                   |
+| --------------------------------------- | --------------------------------------------- |
+| "Should I use camelCase or snake_case?" | Check codebase, follow convention             |
+| "Is this the right abstraction?"        | Make a choice, critic will push back if wrong |
+| "What's the performance requirement?"   | Check NFRs or default conservatively          |
+| "Which test framework?"                 | Use what's already in the repo                |
+| "Where should this file go?"            | Follow existing directory structure           |
+| "Should I add comments here?"           | Follow existing comment patterns              |
 
 These all have safe defaults or can be derived from the codebase.
 
 ### Bad DEFAULTED (Should Be NEEDS_HUMAN)
 
-| Decision | Why It Requires Authority |
-|----------|--------------------------|
-| "I decided we should break the API" | Customer impact requires business authority |
-| "I chose to skip security review" | Risk tolerance requires organizational authority |
-| "I assigned ownership to Team X" | Organizational authority required |
-| "I committed to a delivery date" | Business commitment |
-| "I deprecated this feature" | Affects users, requires product authority |
-| "I accepted the security vulnerability" | Compliance authority required |
+| Decision                                | Why It Requires Authority                        |
+| --------------------------------------- | ------------------------------------------------ |
+| "I decided we should break the API"     | Customer impact requires business authority      |
+| "I chose to skip security review"       | Risk tolerance requires organizational authority |
+| "I assigned ownership to Team X"        | Organizational authority required                |
+| "I committed to a delivery date"        | Business commitment                              |
+| "I deprecated this feature"             | Affects users, requires product authority        |
+| "I accepted the security vulnerability" | Compliance authority required                    |
 
 These involve external commitments, business relationships, or organizational authority that agents do not have.
 
@@ -227,25 +230,25 @@ These involve external commitments, business relationships, or organizational au
 
 ### Types of Authority Agents Lack
 
-| Authority Type | Examples | Who Has It |
-|---------------|----------|------------|
-| **Business relationships** | Customer commitments, partner agreements | Account managers, sales |
-| **Risk tolerance** | Ship despite known issues, accept tech debt timeline | Engineering lead, product |
-| **Organizational** | Team ownership, headcount, resource allocation | Managers, leads |
-| **Compliance** | Security exceptions, legal requirements | Security, legal, compliance |
-| **Product direction** | Feature scope, user experience trade-offs | Product managers |
-| **External commitments** | Deadlines, SLAs, contract terms | Leadership |
+| Authority Type             | Examples                                             | Who Has It                  |
+| -------------------------- | ---------------------------------------------------- | --------------------------- |
+| **Business relationships** | Customer commitments, partner agreements             | Account managers, sales     |
+| **Risk tolerance**         | Ship despite known issues, accept tech debt timeline | Engineering lead, product   |
+| **Organizational**         | Team ownership, headcount, resource allocation       | Managers, leads             |
+| **Compliance**             | Security exceptions, legal requirements              | Security, legal, compliance |
+| **Product direction**      | Feature scope, user experience trade-offs            | Product managers            |
+| **External commitments**   | Deadlines, SLAs, contract terms                      | Leadership                  |
 
 ### Types of Decisions Agents CAN Make
 
-| Decision Type | Examples |
-|--------------|----------|
+| Decision Type                | Examples                                            |
+| ---------------------------- | --------------------------------------------------- |
 | **Technical implementation** | Algorithm choice, data structure, code organization |
-| **Convention following** | Naming, formatting, file structure |
-| **Standard application** | HTTP status codes, error formats, REST conventions |
-| **Pattern matching** | Following existing code patterns |
-| **Safe defaults** | Timeouts, limits, thresholds (when reversible) |
-| **Abstraction design** | Interface structure, module boundaries |
+| **Convention following**     | Naming, formatting, file structure                  |
+| **Standard application**     | HTTP status codes, error formats, REST conventions  |
+| **Pattern matching**         | Following existing code patterns                    |
+| **Safe defaults**            | Timeouts, limits, thresholds (when reversible)      |
+| **Abstraction design**       | Interface structure, module boundaries              |
 
 ---
 
@@ -281,6 +284,7 @@ Continue      Queue for boundary review
 ### The Flow Boundary
 
 Humans are asked at flow boundaries, not mid-flow. The ask includes:
+
 - What was done
 - What was assumed (with reasoning)
 - What decisions are requested (with options)
@@ -299,6 +303,7 @@ This gives humans context to make good decisions quickly.
 **Wrong approach:** "NEEDS_HUMAN: What timeout should I use?"
 
 **Right approach:**
+
 1. Search for existing timeouts in codebase: found `30s` in 5 places
 2. Check industry standards: REST APIs typically use 30-60s
 3. Default to 30s (matches codebase, reversible, safe)
@@ -313,6 +318,7 @@ This gives humans context to make good decisions quickly.
 **Wrong approach:** "DEFAULTED: I'll add a compatibility shim."
 
 **Right approach:**
+
 1. Research: Cannot determine business value of speed vs compatibility
 2. Options: (1) break + notify, (2) shim, (3) delay
 3. Each has trade-offs only business can weigh
@@ -328,6 +334,7 @@ This gives humans context to make good decisions quickly.
 **Wrong approach:** "NEEDS_HUMAN: Should I use sync or async?"
 
 **Right approach:**
+
 1. Check ADR: mentions "responsive UI" (suggests async)
 2. Check codebase: existing similar features use async
 3. Check NFRs: no specific latency requirements
@@ -342,13 +349,14 @@ This gives humans context to make good decisions quickly.
 
 Human attention is expensive. Machine iteration is cheap.
 
-| Action | Cost |
-|--------|------|
-| Agent researches and defaults | ~0 DevLT (machine time) |
-| Agent escalates unnecessarily | ~30 min DevLT (human context-switch, research, respond) |
+| Action                        | Cost                                                                |
+| ----------------------------- | ------------------------------------------------------------------- |
+| Agent researches and defaults | ~0 DevLT (machine time)                                             |
+| Agent escalates unnecessarily | ~30 min DevLT (human context-switch, research, respond)             |
 | Agent escalates appropriately | ~5 min DevLT (human makes informed decision with options presented) |
 
 Good escalation is:
+
 - Rare (most questions are DEFAULTED)
 - Well-researched (human sees what was tried)
 - Option-rich (human picks from choices, doesn't generate them)
@@ -358,7 +366,7 @@ Good escalation is:
 
 ## Summary
 
-**The question is not "Is this hard?" but "Does this require authority?"**
+> The question is not "Is this hard?" but "Does this require authority?"
 
 - **Knowledge problems:** Research, derive, default, proceed (DEFAULTED)
 - **Authority problems:** Present options, wait for boundary, let humans decide (NEEDS_HUMAN)

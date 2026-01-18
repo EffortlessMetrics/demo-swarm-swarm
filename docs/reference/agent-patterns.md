@@ -138,18 +138,20 @@ Report what you tried and what blocked you.
 Partial progress with clear next steps is valuable.
 
 **Blocked but made progress:**
+
 > Reviewed 3 of 5 REQs before hitting missing schema. Found 2 issues
 > in what I could review. Blocked on REQ-004 pending schema migration.
 > Recommend continuing after schema work completes.
 
 **Mechanical failure:**
+
 > Cannot read impl_changes_summary.md — file doesn't exist. Need
 > code-implementer to run first.
 ```
 
 ### Silent Failure
 
-*(No failure handling section = agent stops and orchestrator doesn't know why)*
+> (No failure handling section = agent stops and orchestrator doesn't know why)
 
 **Why graceful wins:** The orchestrator routes on your signals. Silent failure = no signal = stuck workflow.
 
@@ -185,16 +187,19 @@ reason_code: IMPL_FIX_NEEDED
 ## Signal Receipt
 
 **What was produced:**
+
 - 5 functional requirements (REQ-001 through REQ-005)
 - 2 non-functional requirements (NFR-PERF-001, NFR-SEC-001)
 - 3 BDD scenarios covering the happy path and two error cases
 - 1 open question about auth token expiry (defaulted to 15m)
 
 **Quality notes:**
+
 - REQ-002 may be underspecified (no error handling defined)
 - All requirements have acceptance criteria
 
 **Counts:**
+
 - Functional: 5, Non-functional: 2, Scenarios: 3, Questions: 1
 ```
 
@@ -217,15 +222,15 @@ reason_code: IMPL_FIX_NEEDED
 
 ## Quick Reference Table
 
-| Do This | Not This | Why |
-|---------|----------|-----|
-| Prose handoff | YAML status blocks | Orchestrators read prose |
-| Positive tips | Constraint lists | "Do X" > "don't do Y" |
-| One job | Multiple responsibilities | Focus produces quality |
-| "Run X next" | `route_to_agent: X` | Natural language routing |
-| Substantive artifacts | Stubby JSON gates | Decisions need reasoning |
-| Graceful failure | Silent failure | No signal = stuck workflow |
-| Audit narrative | Routing fields | Receipts explain, not route |
+| Do This               | Not This                  | Why                         |
+| --------------------- | ------------------------- | --------------------------- |
+| Prose handoff         | YAML status blocks        | Orchestrators read prose    |
+| Positive tips         | Constraint lists          | "Do X" > "don't do Y"       |
+| One job               | Multiple responsibilities | Focus produces quality      |
+| "Run X next"          | `route_to_agent: X`       | Natural language routing    |
+| Substantive artifacts | Stubby JSON gates         | Decisions need reasoning    |
+| Graceful failure      | Silent failure            | No signal = stuck workflow  |
+| Audit narrative       | Routing fields            | Receipts explain, not route |
 
 ---
 

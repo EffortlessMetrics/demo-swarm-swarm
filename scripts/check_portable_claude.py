@@ -18,22 +18,22 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 # Simple substring patterns that indicate harness/Flow Studio coupling
 FORBIDDEN_SUBSTRINGS = [
-    "Flow Studio",      # Flow Studio UI
-    "flow-studio",      # Flow Studio references
-    "flow_studio",      # Flow Studio snake_case
-    "localhost:5000",   # Flow Studio default port
-    "UIID",             # Flow Studio UI identifiers
-    "validate_swarm",   # Harness validation script
-    "FR-OP-",           # Harness operationalization FRs (FR-OP-001..005)
-    "selftest",         # Harness selftest system
-    "swarm-ops",        # Harness ops agent
+    "Flow Studio",  # Flow Studio UI
+    "flow-studio",  # Flow Studio references
+    "flow_studio",  # Flow Studio snake_case
+    "localhost:5000",  # Flow Studio default port
+    "UIID",  # Flow Studio UI identifiers
+    "validate_swarm",  # Harness validation script
+    "FR-OP-",  # Harness operationalization FRs (FR-OP-001..005)
+    "selftest",  # Harness selftest system
+    "swarm-ops",  # Harness ops agent
 ]
 
 # Regex patterns for path-segment matching (avoids false positives like .demoswarm/)
 # Match "swarm/" only when it's a directory segment, not part of "demoswarm/"
 FORBIDDEN_PATTERNS_REGEX = [
     # Matches /swarm/, \swarm\, or start-of-string swarm/ — but NOT demoswarm/
-    (re.compile(r'(?<![A-Za-z0-9])swarm[/\\]', re.IGNORECASE), "swarm/"),
+    (re.compile(r"(?<![A-Za-z0-9])swarm[/\\]", re.IGNORECASE), "swarm/"),
 ]
 
 # Patterns that are OK (functional requirement examples, not harness-specific)

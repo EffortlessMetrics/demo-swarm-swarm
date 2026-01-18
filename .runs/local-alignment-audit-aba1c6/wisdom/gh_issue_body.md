@@ -19,6 +19,7 @@ Comprehensive analysis of documentation-code alignment gaps in the DemoSwarm pac
 ## Key Findings
 
 ### Seven-Flow Model vs Six-Flow Claims
+
 - **Documented in**: CLAUDE.md (L13) lists "7 flows: Signal → Plan → Build → Review → Gate → Deploy → Wisdom"
 - **Command files**: 10 command files implement flow variants:
   - Flow 1–3: Single commands (Signal, Plan, Build)
@@ -30,16 +31,19 @@ Comprehensive analysis of documentation-code alignment gaps in the DemoSwarm pac
 - **Upstream impact**: align-doc-ownership (gh-49) established documentation ownership boundaries; this audit identifies specific drift items
 
 ### Test Coverage (Actual vs Claimed)
+
 - **Actual result**: 102 passing unit tests (per test_output.log)
 - **Filtered out**: 277 integration tests (require manual environment setup)
 - **Documentation gap**: Public docs do not reference actual test counts; no mention of filtered tests
 
 ### Security Posture
+
 - **Invalid claim**: ReDoS vulnerability in Rust regex crate (Rust regex uses finite automata, is immune to ReDoS by design)
 - **Valid concern**: Path traversal in `secrets.rs` due to missing path canonicalization (local execution context, pending threat assessment)
 - **Status**: Both claims need code-evidenced documentation
 
 ### Agent Color Coding
+
 - **Functional metadata**: Agent frontmatter contains `color:` field consistently across agent files
 - **Documentation**: Currently not explained in public-facing documentation; unclear if schema-validated or advisory
 
@@ -49,15 +53,15 @@ Comprehensive analysis of documentation-code alignment gaps in the DemoSwarm pac
 
 Suggested decomposition (7 functional requirements, 3 NFRs):
 
-| REQ | Title | Priority | Scope |
-|-----|-------|----------|-------|
-| REQ-001 | Update flow count references in public documentation | HIGH | README.md, DEMO_RUN.md, docs/explanation/architecture.md, CHANGELOG.md |
-| REQ-002 | Document flow overlap semantics (4 variant pairs) | HIGH | Explain flow-4-review vs flow-4-gate, etc. |
-| REQ-003 | Document Flow 7 purpose and usage | HIGH | Add /flow-7-wisdom to public documentation |
-| REQ-004 | Update CLAUDE.md flow table | HIGH | Reflect seven-flow + variant model |
-| REQ-005 | Correct test count documentation | MEDIUM | Align to 102 passing tests + explain filtering |
-| REQ-006 | Update security posture documentation | MEDIUM | Correct ReDoS claim; document path traversal limitation |
-| REQ-007 | Clarify agent color coding purpose | LOW | Acknowledge functional metadata in documentation |
+| REQ     | Title                                                | Priority | Scope                                                                  |
+| ------- | ---------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
+| REQ-001 | Update flow count references in public documentation | HIGH     | README.md, DEMO_RUN.md, docs/explanation/architecture.md, CHANGELOG.md |
+| REQ-002 | Document flow overlap semantics (4 variant pairs)    | HIGH     | Explain flow-4-review vs flow-4-gate, etc.                             |
+| REQ-003 | Document Flow 7 purpose and usage                    | HIGH     | Add /flow-7-wisdom to public documentation                             |
+| REQ-004 | Update CLAUDE.md flow table                          | HIGH     | Reflect seven-flow + variant model                                     |
+| REQ-005 | Correct test count documentation                     | MEDIUM   | Align to 102 passing tests + explain filtering                         |
+| REQ-006 | Update security posture documentation                | MEDIUM   | Correct ReDoS claim; document path traversal limitation                |
+| REQ-007 | Clarify agent color coding purpose                   | LOW      | Acknowledge functional metadata in documentation                       |
 
 ---
 
@@ -66,6 +70,7 @@ Suggested decomposition (7 functional requirements, 3 NFRs):
 **Decision**: OPT-003 (Layered Approach - Authoritative First, Generate/Validate Downstream)
 
 **Approach**: Four-phase phased update strategy
+
 - **Phase 1**: Update CLAUDE.md (flow table) and docs/explanation/architecture.md (flow semantics, Flow 7, security, test counts)
 - **Phase 2**: Update README.md, DEMO_RUN.md, CHANGELOG.md for "seven flows" consistency
 - **Phase 3** (optional): Secondary docs (glossary.md, CONTRIBUTING.md, walkthrough.md)
@@ -77,11 +82,11 @@ Suggested decomposition (7 functional requirements, 3 NFRs):
 
 ## Open Questions (Decisions Needed)
 
-| ID | Question | Suggested Default | Needs Answer By |
-|----|----------|-------------------|-----------------|
-| OQ-PLAN-001 | Single atomic PR or partitioned commits per file/topic? | Single atomic PR with logical commits | Flow 3 (Build) |
-| OQ-PLAN-002 | Should Flow 7 docs reference "second-cycle" or remain generic? | Explicitly describe as "second-cycle wisdom extraction" | Flow 3 (Build) |
-| OQ-PLAN-003 | Update compliance schema to ST-007 for Flow 7, or keep under ST-006? | Add ST-007 for completeness | Flow 3 (Build) |
+| ID          | Question                                                             | Suggested Default                                       | Needs Answer By |
+| ----------- | -------------------------------------------------------------------- | ------------------------------------------------------- | --------------- |
+| OQ-PLAN-001 | Single atomic PR or partitioned commits per file/topic?              | Single atomic PR with logical commits                   | Flow 3 (Build)  |
+| OQ-PLAN-002 | Should Flow 7 docs reference "second-cycle" or remain generic?       | Explicitly describe as "second-cycle wisdom extraction" | Flow 3 (Build)  |
+| OQ-PLAN-003 | Update compliance schema to ST-007 for Flow 7, or keep under ST-006? | Add ST-007 for completeness                             | Flow 3 (Build)  |
 
 **To answer:** Reply to this issue or update the artifact directly.
 
@@ -105,15 +110,17 @@ _3 questions total; all shown above (all human-actionable)._
 ## Flow Progress
 
 <!-- STATUS_BOARD_START -->
-| Flow | Status | Receipt | Updated |
-|------|--------|---------|---------|
-| Signal | ✅ VERIFIED | signal_receipt.json | 2025-12-20T03:52:42Z |
-| Plan | ✅ VERIFIED | plan_receipt.json | 2025-12-20T04:56:31Z |
-| Build | 🚫 CANNOT_PROCEED | build_receipt.json | 2025-12-20T12:30:00Z |
-| Review | ✅ VERIFIED | review_receipt.json | 2025-12-20T13:25:00Z |
-| Gate | ✅ VERIFIED | gate_receipt.json | 2025-12-20T15:13:38Z |
-| Deploy | ✅ VERIFIED | deploy_receipt.json | 2025-12-20T17:16:49Z |
-| Wisdom | ✅ VERIFIED | wisdom_receipt.json | 2025-12-21T22:22:11Z |
+
+| Flow   | Status            | Receipt             | Updated              |
+| ------ | ----------------- | ------------------- | -------------------- |
+| Signal | ✅ VERIFIED       | signal_receipt.json | 2025-12-20T03:52:42Z |
+| Plan   | ✅ VERIFIED       | plan_receipt.json   | 2025-12-20T04:56:31Z |
+| Build  | 🚫 CANNOT_PROCEED | build_receipt.json  | 2025-12-20T12:30:00Z |
+| Review | ✅ VERIFIED       | review_receipt.json | 2025-12-20T13:25:00Z |
+| Gate   | ✅ VERIFIED       | gate_receipt.json   | 2025-12-20T15:13:38Z |
+| Deploy | ✅ VERIFIED       | deploy_receipt.json | 2025-12-20T17:16:49Z |
+| Wisdom | ✅ VERIFIED       | wisdom_receipt.json | 2025-12-21T22:22:11Z |
+
 <!-- STATUS_BOARD_END -->
 
 **Overall Run Status**: ✅ VERIFIED (Flow 7 complete)
@@ -123,6 +130,7 @@ _3 questions total; all shown above (all human-actionable)._
 ## Deployment Summary
 
 **PR #2 Merge & Release:**
+
 - **Merge Commit**: `ed9b9c98b7a353a29671d489148fef3ba08d933e`
 - **Merged At**: 2025-12-20T17:06:14Z
 - **Merged By**: EffortlessSteven
@@ -131,6 +139,7 @@ _3 questions total; all shown above (all human-actionable)._
 - **Deploy Verdict**: NOT_DEPLOYED (governance constraint: branch protection not configured)
 
 **Deployment Verification:**
+
 - Merge operation: COMPLETED
 - Release tag: Created and pushed
 - All run artifacts: VERIFIED
@@ -170,6 +179,7 @@ The NOT_DEPLOYED verdict reflects a governance posture constraint, not a code de
 ---
 
 <!-- NEXT_STEPS_START -->
+
 ## Next Steps
 
 **Run Complete**: All seven flows verified. Observability pane updated.
@@ -181,15 +191,19 @@ The NOT_DEPLOYED verdict reflects a governance posture constraint, not a code de
 5. Recommended follow-up: Enable branch protection on main branch with required status checks (see `deployment_decision.md`)
 
 **Additional context**: Build flow marked CANNOT_PROCEED (mechanical failure); wisdom flow proceeded best-effort via alternative inputs. All quality gates passed. Run status: VERIFIED overall.
+
 <!-- NEXT_STEPS_END -->
 
 <!-- OPEN_QUESTIONS_START -->
+
 ## Decisions Needed (automation-owned)
 
 See "Open Questions" section above for detailed questions requiring human input. (Content withheld until publish gate unblocked; 3 questions pending.)
+
 <!-- OPEN_QUESTIONS_END -->
 
 <!-- CONCERNS_START -->
+
 ## Concerns for Review
 
 - **23 minor markdown formatting items pending** (non-blocking; suitable for post-merge cleanup)
@@ -198,8 +212,9 @@ See "Open Questions" section above for detailed questions requiring human input.
 - **Publish surface anomaly**: Flow 7 completed under RESTRICTED mode (publish_surface: NOT_PUSHED; branch protection constraint). Wisdom artifacts confirmed valid but not pushed to upstream.
 
 All critical and major issues resolved. Run complete, final status: VERIFIED.
+
 <!-- CONCERNS_END -->
 
 ---
 
-*This issue is the observability pane for the SDLC swarm. The status board above is updated after each flow. Flow summaries are posted as comments by gh-reporter.*
+_This issue is the observability pane for the SDLC swarm. The status board above is updated after each flow. Flow summaries are posted as comments by gh-reporter._

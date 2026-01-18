@@ -24,19 +24,19 @@ notes: string (1-3 lines)
 
 ### Field Definitions
 
-| Field | Values | Meaning |
-|-------|--------|---------|
-| `surface` | See list | One of the five quality surfaces |
-| `status` | `measured` | Automated verification ran and reported |
-| | `partial` | Some aspects measured, others not |
-| | `estimated` | Derived from patterns/precedent, not run |
-| | `clean` | No changes in this surface |
-| | `unknown` | Not measured, no estimate available |
-| `method` | `automated` | Tool output (test runner, linter, scanner) |
-| | `derived` | Calculated from other evidence |
-| | `attested` | Agent observation (lower confidence) |
-| `evidence` | array | File paths, commands, or artifact links |
-| `notes` | string | Brief context (1-3 lines max) |
+| Field      | Values      | Meaning                                    |
+| ---------- | ----------- | ------------------------------------------ |
+| `surface`  | See list    | One of the five quality surfaces           |
+| `status`   | `measured`  | Automated verification ran and reported    |
+|            | `partial`   | Some aspects measured, others not          |
+|            | `estimated` | Derived from patterns/precedent, not run   |
+|            | `clean`     | No changes in this surface                 |
+|            | `unknown`   | Not measured, no estimate available        |
+| `method`   | `automated` | Tool output (test runner, linter, scanner) |
+|            | `derived`   | Calculated from other evidence             |
+|            | `attested`  | Agent observation (lower confidence)       |
+| `evidence` | array       | File paths, commands, or artifact links    |
+| `notes`    | string      | Brief context (1-3 lines max)              |
 
 ### Example
 
@@ -66,11 +66,11 @@ notes: string (1-3 lines)
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| PR cockpit | PR description, Quality Scorecard section |
-| Receipts | `quality_gates` field in `*_receipt.json` |
-| Gate decisions | `merge_decision.md` evidence section |
+| Context        | Location                                  |
+| -------------- | ----------------------------------------- |
+| PR cockpit     | PR description, Quality Scorecard section |
+| Receipts       | `quality_gates` field in `*_receipt.json` |
+| Gate decisions | `merge_decision.md` evidence section      |
 
 See: [pr-quality-scorecard.md](pr-quality-scorecard.md) for the full quality surface philosophy.
 
@@ -107,6 +107,7 @@ needs: who has authority (role, not person)
 **NEEDS_HUMAN is about authority, not difficulty.**
 
 If an agent can research it, derive it, or choose a reversible default, it's DEFAULTED. NEEDS_HUMAN is reserved for decisions requiring human authority:
+
 - Business relationship trade-offs
 - Risk tolerance choices
 - Release timing decisions
@@ -144,11 +145,11 @@ needs: Product owner or account manager
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| Run artifacts | `.runs/<run-id>/*/open_questions.md` |
-| Receipt counts | `open_questions` field in receipts |
-| PR Brief | Open questions summary section |
+| Context        | Location                             |
+| -------------- | ------------------------------------ |
+| Run artifacts  | `.runs/<run-id>/*/open_questions.md` |
+| Receipt counts | `open_questions` field in receipts   |
+| PR Brief       | Open questions summary section       |
 
 See: [docs/examples/open-questions.md](../examples/open-questions.md) for full examples.
 
@@ -168,12 +169,12 @@ divergence_note: string (if stale, what might have changed)
 
 ### Status Values
 
-| Status | Meaning | Action |
-|--------|---------|--------|
-| `FRESH` | SHA matches HEAD | Trust as current |
-| `ACCEPTABLE_STALE` | SHA differs but changes are irrelevant (e.g., formatting only) | Accept with note |
-| `STALE` | SHA differs and changes may affect validity | Re-verify or note staleness |
-| `UNKNOWN` | Missing timestamp or SHA | Treat as unverified |
+| Status             | Meaning                                                        | Action                      |
+| ------------------ | -------------------------------------------------------------- | --------------------------- |
+| `FRESH`            | SHA matches HEAD                                               | Trust as current            |
+| `ACCEPTABLE_STALE` | SHA differs but changes are irrelevant (e.g., formatting only) | Accept with note            |
+| `STALE`            | SHA differs and changes may affect validity                    | Re-verify or note staleness |
+| `UNKNOWN`          | Missing timestamp or SHA                                       | Treat as unverified         |
 
 ### Example
 
@@ -187,11 +188,11 @@ divergence_note: 2 commits since evidence (formatting and comments only)
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| Receipts | `evidence_sha` and `generated_at` fields |
-| Gate decisions | Freshness check before merge |
-| PR Brief | Quality Scorecard staleness notes |
+| Context        | Location                                 |
+| -------------- | ---------------------------------------- |
+| Receipts       | `evidence_sha` and `generated_at` fields |
+| Gate decisions | Freshness check before merge             |
+| PR Brief       | Quality Scorecard staleness notes        |
 
 See: [evidence-freshness.md](evidence-freshness.md) for staleness detection patterns.
 
@@ -210,6 +211,7 @@ recommendation: string (specific next step + reasoning, naming agents)
 ### The Pattern
 
 Every agent ends with a handoff that answers three questions:
+
 1. What was done?
 2. What still needs to be done?
 3. What do I recommend?
@@ -239,11 +241,11 @@ final check before proceeding to review.
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| Agent responses | End of every agent output |
-| Cleanup summaries | Derived from agent handoffs |
-| Receipts | `recommended_action` field (derived) |
+| Context           | Location                             |
+| ----------------- | ------------------------------------ |
+| Agent responses   | End of every agent output            |
+| Cleanup summaries | Derived from agent handoffs          |
+| Receipts          | `recommended_action` field (derived) |
 
 See: [contracts.md](contracts.md) for the full handoff contract.
 
@@ -271,11 +273,11 @@ why: Failures appear to be test setup issues, not code bugs. Fixer can address m
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| Agent handoffs | Recommendation section (prose form) |
-| Routing table | Reference patterns |
-| Orchestrator decisions | Input for routing logic |
+| Context                | Location                            |
+| ---------------------- | ----------------------------------- |
+| Agent handoffs         | Recommendation section (prose form) |
+| Routing table          | Reference patterns                  |
+| Orchestrator decisions | Input for routing logic             |
 
 See: [routing-table.md](routing-table.md) for common routing patterns.
 
@@ -304,32 +306,32 @@ red_flags:
 
 ### Green Signals (Trust Builders)
 
-| Signal | What It Means |
-|--------|---------------|
-| Clean receipts | All flows completed with VERIFIED status |
-| Green mutation | Mutation score > 90%, survivors are documented |
-| Hotspots called out | Reviewer knows where to focus |
-| Critiques addressed | No unresolved CRITICAL or MAJOR issues |
-| ADR alignment | Implementation matches design decisions |
-| BDD scenarios pass | Acceptance criteria are verified |
+| Signal              | What It Means                                  |
+| ------------------- | ---------------------------------------------- |
+| Clean receipts      | All flows completed with VERIFIED status       |
+| Green mutation      | Mutation score > 90%, survivors are documented |
+| Hotspots called out | Reviewer knows where to focus                  |
+| Critiques addressed | No unresolved CRITICAL or MAJOR issues         |
+| ADR alignment       | Implementation matches design decisions        |
+| BDD scenarios pass  | Acceptance criteria are verified               |
 
 ### Red Flags (Trust Breakers)
 
-| Flag | Why It Matters |
-|------|----------------|
-| Missing security verification | High-risk surface unverified |
-| "Not measured" on risky areas | Unknown state in critical path |
-| UNVERIFIED without explanation | Gap not acknowledged |
-| Contract violations | API/schema drift without version bump |
-| Unaddressed CRITICAL critiques | Known serious issues remain |
+| Flag                           | Why It Matters                        |
+| ------------------------------ | ------------------------------------- |
+| Missing security verification  | High-risk surface unverified          |
+| "Not measured" on risky areas  | Unknown state in critical path        |
+| UNVERIFIED without explanation | Gap not acknowledged                  |
+| Contract violations            | API/schema drift without version bump |
+| Unaddressed CRITICAL critiques | Known serious issues remain           |
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
-| Gate decisions | `merge_decision.md` evidence evaluation |
-| PR Brief | Quality events section |
-| Reviewer guidance | Trust/risk assessment |
+| Context           | Location                                |
+| ----------------- | --------------------------------------- |
+| Gate decisions    | `merge_decision.md` evidence evaluation |
+| PR Brief          | Quality events section                  |
+| Reviewer guidance | Trust/risk assessment                   |
 
 See: [trust-model.md](trust-model.md) for the full evidence hierarchy.
 
@@ -370,11 +372,11 @@ recommendation: Proceed to Review. The deferred MAJOR issue does not block revie
 
 ### Usage
 
-| Context | Location |
-|---------|----------|
+| Context      | Location                      |
+| ------------ | ----------------------------- |
 | Flow cleanup | Written by `*-cleanup` agents |
-| Receipts | Populates `*_receipt.json` |
-| Orchestrator | Input for next-flow decision |
+| Receipts     | Populates `*_receipt.json`    |
+| Orchestrator | Input for next-flow decision  |
 
 ---
 
@@ -382,15 +384,15 @@ recommendation: Proceed to Review. The deferred MAJOR issue does not block revie
 
 Quick reference for where each schema appears in the codebase.
 
-| Schema | Primary Producer | Primary Consumer | Artifact Location |
-|--------|------------------|------------------|-------------------|
-| Quality Panel | cleanup agents | reviewers, gate agents | PR description, receipts |
-| Open Question | any agent | cleanup, reviewers | `open_questions.md` |
-| Evidence Freshness | cleanup agents | gate agents | receipts |
-| Handoff | all agents | orchestrators | agent output |
-| Routing Decision | agents | orchestrators | agent handoffs |
-| Trust Signals | gate agents | merge-decider | `merge_decision.md` |
-| Flow Boundary | cleanup agents | orchestrators | receipts |
+| Schema             | Primary Producer | Primary Consumer       | Artifact Location        |
+| ------------------ | ---------------- | ---------------------- | ------------------------ |
+| Quality Panel      | cleanup agents   | reviewers, gate agents | PR description, receipts |
+| Open Question      | any agent        | cleanup, reviewers     | `open_questions.md`      |
+| Evidence Freshness | cleanup agents   | gate agents            | receipts                 |
+| Handoff            | all agents       | orchestrators          | agent output             |
+| Routing Decision   | agents           | orchestrators          | agent handoffs           |
+| Trust Signals      | gate agents      | merge-decider          | `merge_decision.md`      |
+| Flow Boundary      | cleanup agents   | orchestrators          | receipts                 |
 
 ---
 

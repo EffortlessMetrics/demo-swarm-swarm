@@ -65,6 +65,7 @@ Every agent prompt should include graceful failure handling:
 ## If You're Stuck
 
 If you can't complete the work, that's okay. Report:
+
 - What you tried
 - What blocked you
 - What you recommend
@@ -88,20 +89,25 @@ The orchestrator needs to know what happened to route appropriately.
 ## Anti-Patterns
 
 ### ❌ Binary Success/Failure
+
 Treating anything less than 100% as failure discourages honest reporting.
 
 ### ❌ Silent Failure
+
 Agent hits a problem and returns nothing, or returns incomplete output without explanation.
 
 ### ❌ Overstating Progress
+
 Agent says "done" when blocked, hoping the problem resolves itself.
 
 ### ❌ Punishing Partial Results
+
 Prompts that imply partial completion is unacceptable.
 
 ## Examples
 
 ### Good: Honest Partial Report
+
 ```markdown
 ## Handoff
 
@@ -115,6 +121,7 @@ Prompts that imply partial completion is unacceptable.
 ```
 
 ### Good: Blocked but Informative
+
 ```markdown
 ## Handoff
 
@@ -126,9 +133,11 @@ Prompts that imply partial completion is unacceptable.
 ```
 
 ### Bad: Silent Incomplete
+
 Agent returns test results for 3 of 10 test files with no explanation of why 7 are missing.
 
 ### Bad: Overstatement
+
 Agent says "tests pass" when actually several tests were skipped due to missing dependencies.
 
 ## See Also

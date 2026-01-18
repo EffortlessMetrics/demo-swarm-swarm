@@ -19,14 +19,14 @@ The question isn't "is it fresh?" but **"is it fresh enough for this decision?"*
 
 ## Evidence Types and Their Lifespans
 
-| Evidence Type | Tied To | Stale When |
-|---------------|---------|------------|
-| Test results | SHA | Code changed since run |
-| Critiques | SHA + file content | Files critiqued were modified |
-| Receipts | Flow completion | Upstream artifacts changed |
-| Coverage reports | SHA | New code added |
-| Mutation results | SHA + test content | Tests or code changed |
-| API contracts | Schema version | Schema files modified |
+| Evidence Type    | Tied To            | Stale When                    |
+| ---------------- | ------------------ | ----------------------------- |
+| Test results     | SHA                | Code changed since run        |
+| Critiques        | SHA + file content | Files critiqued were modified |
+| Receipts         | Flow completion    | Upstream artifacts changed    |
+| Coverage reports | SHA                | New code added                |
+| Mutation results | SHA + test content | Tests or code changed         |
+| API contracts    | Schema version     | Schema files modified         |
 
 **Key insight:** Evidence freshness is determined by what it depends on, not by wall-clock time.
 
@@ -48,21 +48,21 @@ A stale receipt tells you "this was true then; verify if needed now."
 
 ## When to Re-verify vs Accept
 
-### Accept existing evidence when:
+### Accept existing evidence when
 
 - SHA matches current HEAD
 - Files in scope haven't changed
 - Upstream artifacts (requirements, contracts) unchanged
 - Risk level is low
 
-### Re-verify when:
+### Re-verify when
 
 - Code changed since evidence was generated
 - Upstream requirements or contracts changed
 - Evidence is for a high-risk surface (auth, crypto, schema)
 - Evidence was marked "estimated" or "partial"
 
-### Never blindly trust:
+### Never blindly trust
 
 - Evidence from a different branch
 - Evidence older than the last merge to main
@@ -87,13 +87,13 @@ When populating the PR Quality Scorecard (see [pr-quality-scorecard.md](pr-quali
 ```markdown
 ## Quality Scorecard
 
-| Surface | Status | Notes |
-|---------|--------|-------|
-| Correctness | measured | 12 BDD scenarios pass (SHA: abc123) |
-| Verification | measured (stale) | mutation run at abc123, HEAD is def456 |
-| Boundaries | clean | no API/schema changes |
-| Maintainability | noted | 3 hotspots identified |
-| Explanation | complete | evidence pointers present |
+| Surface         | Status           | Notes                                  |
+| --------------- | ---------------- | -------------------------------------- |
+| Correctness     | measured         | 12 BDD scenarios pass (SHA: abc123)    |
+| Verification    | measured (stale) | mutation run at abc123, HEAD is def456 |
+| Boundaries      | clean            | no API/schema changes                  |
+| Maintainability | noted            | 3 hotspots identified                  |
+| Explanation     | complete         | evidence pointers present              |
 ```
 
 ---
@@ -102,7 +102,7 @@ When populating the PR Quality Scorecard (see [pr-quality-scorecard.md](pr-quali
 
 The failure mode: "SHA changed -> re-run everything -> SHA changed again -> infinite loop"
 
-### Prevention:
+### Prevention
 
 1. **Re-verify only the affected scope** — If 3 files changed, re-run verification for those files, not the entire codebase.
 
@@ -118,7 +118,7 @@ The failure mode: "SHA changed -> re-run everything -> SHA changed again -> infi
 
 Agents should include freshness context when reporting evidence.
 
-### Fresh evidence:
+### Fresh evidence
 
 ```
 Evidence SHA: abc123
@@ -126,7 +126,7 @@ Current HEAD: abc123
 Status: FRESH
 ```
 
-### Stale evidence:
+### Stale evidence
 
 ```
 Evidence SHA: abc123
@@ -136,7 +136,7 @@ Changed files: src/auth/login.py, src/auth/session.py, tests/test_auth.py
 Recommendation: Re-run test suite for auth module
 ```
 
-### Unknown freshness:
+### Unknown freshness
 
 ```
 Evidence SHA: unknown (artifact missing timestamp)
@@ -149,10 +149,10 @@ Recommendation: Re-run verification or treat as unverified
 
 ## Historical vs Active Evidence
 
-| Category | Definition | Behavior |
-|----------|------------|----------|
+| Category       | Definition                    | Behavior                                                 |
+| -------------- | ----------------------------- | -------------------------------------------------------- |
 | **Historical** | Receipts from completed flows | Document what happened. Never update them retroactively. |
-| **Active** | Current verification state | Updated by re-running checks against HEAD. |
+| **Active**     | Current verification state    | Updated by re-running checks against HEAD.               |
 
 **Example:** A receipt saying "tests passed at SHA abc123" remains true forever. It documents a historical fact. Whether tests pass NOW is a different question answered by running tests against current HEAD.
 
@@ -166,7 +166,7 @@ Recommendation: Re-run verification or treat as unverified
 
 ## Staleness Detection in Practice
 
-### For cleanup agents writing receipts:
+### For cleanup agents writing receipts
 
 Always include `evidence_sha` and `generated_at`:
 
@@ -177,14 +177,14 @@ Always include `evidence_sha` and `generated_at`:
 }
 ```
 
-### For gate agents making decisions:
+### For gate agents making decisions
 
 1. Read the receipt's `evidence_sha`
 2. Compare to current `git rev-parse HEAD`
 3. If different, check what changed: `git diff <evidence_sha>..HEAD --name-only`
 4. Decide: re-verify, accept with note, or proceed
 
-### For reviewers reading PR Briefs:
+### For reviewers reading PR Briefs
 
 - Look for evidence SHAs in the Quality Scorecard
 - Compare to the PR's HEAD SHA

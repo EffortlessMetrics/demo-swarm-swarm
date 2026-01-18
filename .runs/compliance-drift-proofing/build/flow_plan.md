@@ -36,6 +36,7 @@
 ## Scope Summary
 
 **ADR Decision**: OPT-001 - Inline Extension of Existing Modules
+
 - Add check 50 to drift.rs (flow boundary enforcement - REQ-001)
 - Verify check 49 adequacy (Skills section - REQ-002)
 - Add check 51 to drift.rs (OpenQ prefix validation - REQ-003)
@@ -44,6 +45,7 @@
 - Establish validation baseline (REQ-006)
 
 **Subtasks**: 12 (from work_plan.md)
+
 - ST-001: Add constants to contracts.rs
 - ST-002: Add check 50 (flow boundary)
 - ST-003: Verify check 49 adequacy
@@ -69,7 +71,8 @@
 ## Human Review Checklist
 
 Before proceeding to Flow 4, humans should review:
+
 - [x] `test_critique.md` - Test concerns addressed
-- [x] `code_critique.md` - Code concerns addressed  
+- [x] `code_critique.md` - Code concerns addressed
 - [x] `self_review.md` - Implementation complete
 - [ ] Git diff - Are the changes what you expected?

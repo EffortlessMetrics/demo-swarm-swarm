@@ -20,6 +20,7 @@ The PR cockpit is the primary human interface. Most reviewers will only read thi
 ## Inputs
 
 Read from `.runs/<run-id>/`:
+
 - `build/build_receipt.json`
 - `build/self_review.md`
 - `gate/merge_decision.md` (if exists)
@@ -29,12 +30,14 @@ Read from `.runs/<run-id>/`:
 - Any critique files
 
 Also read:
+
 - `run_meta.json` for PR number and context
 - Git diff summary for change scope
 
 ## Output
 
 Write exactly one file:
+
 - `.runs/<run-id>/review/pr_cockpit.md`
 
 This file will be used as the PR description body.
@@ -51,12 +54,13 @@ This file will be used as the PR description body.
 **Risk**: LOW | MEDIUM | HIGH
 
 ### Quick Stats
-| Metric | Value |
-|--------|-------|
-| Files changed | X |
-| Lines +/- | +Y / -Z |
-| Tests | A passed, B failed |
-| Coverage | X% |
+
+| Metric        | Value              |
+| ------------- | ------------------ |
+| Files changed | X                  |
+| Lines +/-     | +Y / -Z            |
+| Tests         | A passed, B failed |
+| Coverage      | X%                 |
 ```
 
 ### Evidence Panel (1 minute to scan)
@@ -64,13 +68,13 @@ This file will be used as the PR description body.
 ```markdown
 ## Evidence Panel
 
-| Surface | Status | Evidence |
-|---------|--------|----------|
-| Tests | PASS | [test_execution.md](link) |
-| Critic | 0 MAJOR | [code_critique.md](link) |
-| Coverage | 78% | [coverage_audit.md](link) |
-| Mutation | N/A | Not run (low-risk) |
-| Security | PASS | [security_scan.md](link) |
+| Surface  | Status  | Evidence                  |
+| -------- | ------- | ------------------------- |
+| Tests    | PASS    | [test_execution.md](link) |
+| Critic   | 0 MAJOR | [code_critique.md](link)  |
+| Coverage | 78%     | [coverage_audit.md](link) |
+| Mutation | N/A     | Not run (low-risk)        |
+| Security | PASS    | [security_scan.md](link)  |
 
 **Freshness**: Evidence SHA matches HEAD (FRESH)
 ```
@@ -87,6 +91,7 @@ Review these 3-5 files for spot-checking:
 3. **tests/auth.test.ts** - New test coverage
 
 ### Why these files?
+
 - Highest complexity delta
 - Security-sensitive paths
 - Most lines changed
@@ -110,16 +115,18 @@ Review these 3-5 files for spot-checking:
 **Merge**: YES | NO | CONDITIONAL
 
 **Conditions** (if any):
+
 - [ ] Reviewer approves auth logic in login.ts
 - [ ] CI passes on final commit
 
 **Open Questions**:
+
 - None blocking merge
 ```
 
 ### Architecture Diagram (when helpful)
 
-```markdown
+````markdown
 ## Architecture
 
 ```mermaid
@@ -128,8 +135,10 @@ graph LR
     B --> C[Auth Service]
     C --> D[(Database)]
 ```
+````
 
-*New auth flow added in this PR*
+_New auth flow added in this PR_
+
 ```
 
 ## Design Principles
@@ -192,3 +201,4 @@ After designing the cockpit, tell the orchestrator what you created.
 ## Philosophy
 
 The cockpit is a UI. Design it like one. Reviewers are busy; respect their time. The goal is: can someone approve or request changes in 5 minutes without reading every line of the diff?
+```

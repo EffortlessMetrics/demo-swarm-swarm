@@ -21,11 +21,11 @@ Compress the Signal flow into a meaningful summary. You're not extracting fields
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/signal/` | The signal flow artifact directory |
-| Write access | `.runs/<run-id>/signal/signal_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                        | What It Contains                    |
+| ------------- | ------------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/signal/`                    | The signal flow artifact directory  |
+| Write access  | `.runs/<run-id>/signal/signal_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                          | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -34,31 +34,36 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `requirements.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `requirements.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Requirements (`requirements.md`)**
+
 - What problem is being solved?
 - How many requirements were defined? How many are functional vs non-functional?
 - Are they clear and testable?
 
 **BDD Scenarios (`features/*.feature`)**
+
 - Were scenarios written? How many?
 - Do they cover the requirements?
 
 **Critiques (`requirements_critique.md`, `bdd_critique.md`)**
+
 - Did critics run? What did they find?
 - Were there critical issues that need attention?
 - Or did things pass cleanly?
 
 **Open Questions (`open_questions.md`)**
+
 - Were questions raised? Are they blocking or informational?
 - Were assumptions documented?
 
 **Risks (`early_risks.md`, `risk_assessment.md`)**
+
 - Were risks identified? How severe?
 
 ## Writing the Receipt
@@ -66,6 +71,7 @@ Read these artifacts and understand what they tell you:
 Write `.runs/<run-id>/signal/signal_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - Did Signal produce what it needed to? (requirements, scenarios)
 - Were the outputs reviewed? What did reviewers find?
 - Is this ready for planning, or does it need more work?
@@ -73,6 +79,7 @@ The receipt should answer:
 Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but the purpose is understanding, not field extraction.
 
 **Status determination:**
+
 - `VERIFIED`: Requirements exist AND critics ran AND passed
 - `UNVERIFIED`: Missing required artifacts OR critics found critical issues OR critics didn't run
 - `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
@@ -88,7 +95,11 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
   "summary": "<1-2 sentence description of what Signal produced>",
 
   "artifacts": {
-    "requirements": { "exists": true, "count": 8, "notes": "clear and testable" },
+    "requirements": {
+      "exists": true,
+      "count": 8,
+      "notes": "clear and testable"
+    },
     "nfrs": { "exists": true, "count": 2 },
     "scenarios": { "exists": true, "count": 12 },
     "requirements_critique": { "exists": true, "passed": true },
@@ -111,6 +122,7 @@ Include counts where meaningful (REQs, NFRs, scenarios, risks by severity), but 
 Update `.runs/index.json` with status, last_flow, and updated_at for this run.
 
 Use the runs-index skill:
+
 ```bash
 bash .claude/scripts/demoswarm.sh index upsert-status \
   --index ".runs/index.json" \
@@ -125,6 +137,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/signal/cleanup_report.md`):**
 
 Write a human-readable summary of what Signal produced. Include:
+
 - What requirements were defined and why they matter
 - What the critics found (or that they passed)
 - Any open questions or risks worth noting
@@ -133,6 +146,7 @@ Write a human-readable summary of what Signal produced. Include:
 **GitHub Report (`.runs/<run-id>/signal/github_report.md`):**
 
 Pre-compose what will be posted to GitHub. Include the idempotency marker:
+
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:signal -->
 ```
@@ -152,6 +166,7 @@ If optional artifacts (risks, open questions) are missing, note it as a concern 
 After writing the receipt and reports, report back with what you found and your recommendation for next steps.
 
 Your handoff should explain:
+
 - What artifacts you found and summarized
 - Key counts (requirements, NFRs, scenarios, risks)
 - Whether critics passed or found issues
@@ -163,6 +178,7 @@ Your handoff should explain:
 Your default recommendation is **secrets-sanitizer**. After cleanup, artifacts need secrets scan before they can be committed.
 
 Other targets when conditions apply:
+
 - **spec-auditor**: Use when cleanup finds missing or incomplete artifacts that need validation.
 - **requirements-author**: Use when cleanup finds requirements are missing or incomplete.
 - **bdd-author**: Use when cleanup finds scenarios are missing or incomplete.

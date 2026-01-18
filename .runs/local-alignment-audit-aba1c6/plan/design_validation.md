@@ -74,18 +74,18 @@ coverage_summary:
 
 None identified. All REQ and NFR identifiers have design coverage:
 
-| Identifier | ADR Driver | Subtask Coverage | Test Coverage |
-|------------|-----------|------------------|---------------|
-| REQ-001 | DR-001 | ST-005, ST-006, ST-007, ST-010 | 5 scenarios |
-| REQ-002 | DR-001 | ST-002 | 5 scenarios |
-| REQ-003 | DR-001 | ST-002 | 4 scenarios |
-| REQ-004 | DR-001 | ST-001 | 3 scenarios |
-| REQ-005 | DR-002 | ST-003 | 5 scenarios |
-| REQ-006 | DR-002 | ST-003 | 5 scenarios |
-| REQ-007 | DR-003 | ST-004 | 5 scenarios |
-| NFR-DOC-001 | DR-001, DR-005 | ST-001, ST-002, ST-005, ST-006, ST-008, ST-010 | VS-001, SLO-001 |
-| NFR-SEC-001 | DR-002 | ST-003 | VS-004, SLO-003 |
-| NFR-TRACE-001 | DR-004 | ST-009, ST-010 | VS-002, SLO-002 |
+| Identifier    | ADR Driver     | Subtask Coverage                               | Test Coverage   |
+| ------------- | -------------- | ---------------------------------------------- | --------------- |
+| REQ-001       | DR-001         | ST-005, ST-006, ST-007, ST-010                 | 5 scenarios     |
+| REQ-002       | DR-001         | ST-002                                         | 5 scenarios     |
+| REQ-003       | DR-001         | ST-002                                         | 4 scenarios     |
+| REQ-004       | DR-001         | ST-001                                         | 3 scenarios     |
+| REQ-005       | DR-002         | ST-003                                         | 5 scenarios     |
+| REQ-006       | DR-002         | ST-003                                         | 5 scenarios     |
+| REQ-007       | DR-003         | ST-004                                         | 5 scenarios     |
+| NFR-DOC-001   | DR-001, DR-005 | ST-001, ST-002, ST-005, ST-006, ST-008, ST-010 | VS-001, SLO-001 |
+| NFR-SEC-001   | DR-002         | ST-003                                         | VS-004, SLO-003 |
+| NFR-TRACE-001 | DR-004         | ST-009, ST-010                                 | VS-002, SLO-002 |
 
 All 5 risks (RSK-001 through RSK-005) from early_risks.md have corresponding mitigations in ADR and work_plan.md.
 
@@ -114,42 +114,42 @@ All 5 risks (RSK-001 through RSK-005) from early_risks.md have corresponding mit
 
 ## Handshake Validation
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| design_options.md contains `## Machine Summary` | PASS | L286-299 |
-| design_options.md contains at least one `## OPT-###:` heading | PASS | L29 (OPT-001), L100 (OPT-002), L168 (OPT-003) |
-| adr.md contains `## Machine Summary` | PASS | L166-182 (inside code fence as `## Machine Summary Block`) |
-| adr.md contains `ADR_CHOSEN_OPTION:` marker | PASS | L143: `- ADR_CHOSEN_OPTION: OPT-003` |
-| adr.md contains at least one `DRIVER:` line | PASS | L23, L26, L29, L32, L35 (5 drivers) |
-| No template placeholders in machine fields | PASS | All values are concrete, no `|` or `<` artifacts |
+| Check                                                         | Result | Evidence                                                   |
+| ------------------------------------------------------------- | ------ | ---------------------------------------------------------- | ---------------- |
+| design_options.md contains `## Machine Summary`               | PASS   | L286-299                                                   |
+| design_options.md contains at least one `## OPT-###:` heading | PASS   | L29 (OPT-001), L100 (OPT-002), L168 (OPT-003)              |
+| adr.md contains `## Machine Summary`                          | PASS   | L166-182 (inside code fence as `## Machine Summary Block`) |
+| adr.md contains `ADR_CHOSEN_OPTION:` marker                   | PASS   | L143: `- ADR_CHOSEN_OPTION: OPT-003`                       |
+| adr.md contains at least one `DRIVER:` line                   | PASS   | L23, L26, L29, L32, L35 (5 drivers)                        |
+| No template placeholders in machine fields                    | PASS   | All values are concrete, no `                              | `or`<` artifacts |
 
 ## Artifact Validation
 
-| Artifact | Present | Machine Summary | Status |
-|----------|---------|-----------------|--------|
-| adr.md | Yes | Yes | VERIFIED |
-| design_options.md | Yes | Yes | VERIFIED |
-| api_contracts.yaml | Yes | N/A (OpenAPI) | VERIFIED (via CONTRACT_INVENTORY_V1) |
-| schema.md | Yes | Yes | VERIFIED |
-| observability_spec.md | Yes | Yes | VERIFIED |
-| test_plan.md | Yes | Yes | VERIFIED |
-| work_plan.md | Yes | Yes | VERIFIED |
-| subtasks.yaml | Yes | N/A | schema_version: subtasks_v1 |
-| ac_matrix.md | Yes | Yes | VERIFIED |
-| impact_map.json | Yes | Yes | VERIFIED |
-| open_questions.md | Yes | Yes | VERIFIED |
-| option_critique.md | Yes | Yes | VERIFIED |
-| contract_critique.md | Yes | Yes | VERIFIED |
-| observability_critique.md | Yes | Yes | VERIFIED |
+| Artifact                  | Present | Machine Summary | Status                               |
+| ------------------------- | ------- | --------------- | ------------------------------------ |
+| adr.md                    | Yes     | Yes             | VERIFIED                             |
+| design_options.md         | Yes     | Yes             | VERIFIED                             |
+| api_contracts.yaml        | Yes     | N/A (OpenAPI)   | VERIFIED (via CONTRACT_INVENTORY_V1) |
+| schema.md                 | Yes     | Yes             | VERIFIED                             |
+| observability_spec.md     | Yes     | Yes             | VERIFIED                             |
+| test_plan.md              | Yes     | Yes             | VERIFIED                             |
+| work_plan.md              | Yes     | Yes             | VERIFIED                             |
+| subtasks.yaml             | Yes     | N/A             | schema_version: subtasks_v1          |
+| ac_matrix.md              | Yes     | Yes             | VERIFIED                             |
+| impact_map.json           | Yes     | Yes             | VERIFIED                             |
+| open_questions.md         | Yes     | Yes             | VERIFIED                             |
+| option_critique.md        | Yes     | Yes             | VERIFIED                             |
+| contract_critique.md      | Yes     | Yes             | VERIFIED                             |
+| observability_critique.md | Yes     | Yes             | VERIFIED                             |
 
 ## Signal Artifact Validation
 
-| Artifact | Present | Status |
-|----------|---------|--------|
-| requirements.md | Yes | VERIFIED |
-| verification_notes.md | Yes | VERIFIED |
-| early_risks.md | Yes | VERIFIED |
-| features/*.feature | Yes (5 files) | 32 scenarios |
+| Artifact              | Present       | Status       |
+| --------------------- | ------------- | ------------ |
+| requirements.md       | Yes           | VERIFIED     |
+| verification_notes.md | Yes           | VERIFIED     |
+| early_risks.md        | Yes           | VERIFIED     |
+| features/\*.feature   | Yes (5 files) | 32 scenarios |
 
 ## Inventory (machine countable)
 

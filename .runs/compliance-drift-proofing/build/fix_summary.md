@@ -6,11 +6,13 @@
 **Fixer invoked:** Gate bounced with blocker MECH-001 (Clippy warning collapsible_if at drift.rs:666)
 
 **Source artifacts analyzed:**
+
 - `.runs/compliance-drift-proofing/gate/gate_fix_summary.md` - MECH-001 documented
 - `.runs/compliance-drift-proofing/gate/merge_decision.md` - BOUNCE verdict
 - `.runs/compliance-drift-proofing/gate/receipt_audit.md` - Receipt claims vs artifact state
 
 **Allowlist (best-effort from gate evidence):**
+
 - `tools/demoswarm-pack-check/src/checks/drift.rs`
 
 **Note:** `subtask_context_manifest.json` not accessible (permission denied). Proceeding with evidence from gate artifacts.
@@ -33,15 +35,18 @@
 4. Ran `cargo clippy --all-targets -- -D warnings` - passes clean
 
 **Conclusion:** The gate artifacts reference a stale issue. The Clippy warning cited in MECH-001 either:
+
 - Was fixed in a prior iteration and the gate artifacts were not updated
 - Was misreported (line 666 shows correct compound condition, not nested `if`)
 
 The code at line 666 is:
+
 ```rust
 if (content.contains("gh api") || content.contains("gh issue"))
     && !cx.re.gh_heredoc_pattern.is_match(&content)
 {
 ```
+
 This is already the correct collapsed form of a compound condition.
 
 ## Verification
@@ -49,15 +54,18 @@ This is already the correct collapsed form of a compound condition.
 **Verification ran:** Yes
 
 **Test results:**
+
 ```
 test result: ok. 36 passed; 0 failed; 5 ignored; 0 measured; 0 filtered out
 ```
 
 **Clippy results:**
+
 ```
 cargo clippy --all-targets -- -D warnings
 Finished `dev` profile [unoptimized + debuginfo] target(s)
 ```
+
 (No warnings or errors)
 
 **Verification status:** PASSED - Clippy is clean, all tests pass

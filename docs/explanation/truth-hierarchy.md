@@ -18,17 +18,18 @@ This is the epistemology of the pack. Every agent, flow, and gate operates under
 
 **What it is:** The actual results returned by tools—exit codes, stdout, structured output.
 
-| Source | Examples |
-|--------|----------|
-| Test runner | Exit code, pass/fail counts, output |
-| Linter | Warnings, errors, exit status |
-| Git commands | `git status`, `git diff` output |
-| Build tools | Compilation results, error messages |
-| CI checks | GitHub Actions status |
+| Source       | Examples                            |
+| ------------ | ----------------------------------- |
+| Test runner  | Exit code, pass/fail counts, output |
+| Linter       | Warnings, errors, exit status       |
+| Git commands | `git status`, `git diff` output     |
+| Build tools  | Compilation results, error messages |
+| CI checks    | GitHub Actions status               |
 
 **This layer is what actually happened.** When an agent claims tests passed but the test runner returned failures, the test runner's output wins.
 
 **Example:**
+
 ```
 # Agent claims: "All tests pass"
 # Tool output:
@@ -43,18 +44,20 @@ pytest tests/ --tb=short
 
 **What it is:** Counts and metrics extracted from tool outputs through deterministic operations.
 
-| Source | Examples |
-|--------|----------|
-| Counts | Number of failures, number of warnings |
-| Parses | JSON fields extracted from output |
+| Source   | Examples                                      |
+| -------- | --------------------------------------------- |
+| Counts   | Number of failures, number of warnings        |
+| Parses   | JSON fields extracted from output             |
 | Receipts | `build_receipt.json` summarizing tool outputs |
-| Markers | `REQ-001` counts extracted by regex |
+| Markers  | `REQ-001` counts extracted by regex           |
 
 **Why derived, not direct?** These depend on:
+
 1. The tool having run correctly (layer 1)
 2. The extraction being correct (potential error)
 
 **Example:**
+
 ```
 # Receipt shows:
 { "test_count": 15, "failures": 0, "exit_code": 0 }
@@ -67,16 +70,17 @@ pytest tests/ --tb=short
 
 **What it is:** The specifications that define success—BDD scenarios, ADRs, contracts.
 
-| Source | Examples |
-|--------|----------|
-| BDD scenarios | `features/*.feature` |
-| ADRs | `plan/adr.md` |
+| Source        | Examples                  |
+| ------------- | ------------------------- |
+| BDD scenarios | `features/*.feature`      |
+| ADRs          | `plan/adr.md`             |
 | API contracts | `plan/api_contracts.yaml` |
-| Requirements | `signal/requirements.md` |
+| Requirements  | `signal/requirements.md`  |
 
 **This layer is authoritative for design.** When implementation diverges from intent, we ask: was the intent wrong, or is the implementation wrong?
 
 **Example:**
+
 ```gherkin
 # Intent (BDD scenario):
 Scenario: User logs in with valid credentials
@@ -91,23 +95,23 @@ Scenario: User logs in with valid credentials
 
 **What it is:** The code itself.
 
-| Source | Examples |
-|--------|----------|
-| Source code | `src/**/*.ts` |
-| Test code | `tests/**/*.test.ts` |
-| Config | `package.json` |
+| Source      | Examples             |
+| ----------- | -------------------- |
+| Source code | `src/**/*.ts`        |
+| Test code   | `tests/**/*.test.ts` |
+| Config      | `package.json`       |
 
-**Treated like compiled output.** We inspect when needed, but we don't pretend line-by-line review scales. Implementation is checked *against* higher layers, not trusted in isolation.
+**Treated like compiled output.** We inspect when needed, but we don't pretend line-by-line review scales. Implementation is checked _against_ higher layers, not trusted in isolation.
 
 ### Layer 5: Narrative (Interpretation)
 
 **What it is:** Agent descriptions, status updates, prose summaries.
 
-| Source | Examples |
-|--------|----------|
+| Source          | Examples                       |
+| --------------- | ------------------------------ |
 | Agent responses | "I implemented the login flow" |
-| Status updates | "Tests are passing" |
-| Working notes | Prose in summaries |
+| Status updates  | "Tests are passing"            |
+| Working notes   | Prose in summaries             |
 
 **Useful for understanding, not for truth.** Narrative helps humans understand what happened, but it's never the source of truth for pass/fail decisions.
 
@@ -118,6 +122,7 @@ Scenario: User logs in with valid credentials
 Tool outputs outrank narratives **when they exist and are attributable**.
 
 If an agent claims "I ran X" but there is:
+
 - no captured output,
 - no report artifact,
 - no CI check link,
@@ -125,12 +130,12 @@ If an agent claims "I ran X" but there is:
 
 …then the correct state is **UNKNOWN / UNVERIFIED**, not PASS.
 
-| Situation | Correct Interpretation |
-|-----------|----------------------|
-| Tool ran, output captured, exit code 0 | PASS |
-| Tool ran, output captured, exit code 1 | FAIL |
-| Agent claims tool ran, no output exists | UNKNOWN |
-| Receipt cites artifact that doesn't exist | UNKNOWN |
+| Situation                                 | Correct Interpretation |
+| ----------------------------------------- | ---------------------- |
+| Tool ran, output captured, exit code 0    | PASS                   |
+| Tool ran, output captured, exit code 1    | FAIL                   |
+| Agent claims tool ran, no output exists   | UNKNOWN                |
+| Receipt cites artifact that doesn't exist | UNKNOWN                |
 
 **Unknown is fine. Unknown is honest. Unknown is routable.**
 
@@ -140,15 +145,16 @@ Route to run the tool now and capture output. Update the receipt to cite the act
 
 ## The Review Posture
 
-| Layer | Human Posture |
-|-------|---------------|
-| **Tool outputs** | Enforced mechanically. Tools verify. |
-| **Derived** | Review receipts. Spot-check counts. |
-| **Intent** | Primary review target. Do requirements make sense? |
-| **Implementation** | Spot-check guided by evidence. |
-| **Narrative** | Context, not evidence. |
+| Layer              | Human Posture                                      |
+| ------------------ | -------------------------------------------------- |
+| **Tool outputs**   | Enforced mechanically. Tools verify.               |
+| **Derived**        | Review receipts. Spot-check counts.                |
+| **Intent**         | Primary review target. Do requirements make sense? |
+| **Implementation** | Spot-check guided by evidence.                     |
+| **Narrative**      | Context, not evidence.                             |
 
 **The formula:**
+
 - Layers 1-2 are verified mechanically
 - Layer 3 is where humans focus
 - Layer 4 is spot-checked based on evidence

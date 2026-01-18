@@ -14,13 +14,13 @@ Work through this in order:
 
 Check the codebase, docs, conventions, and external standards.
 
-| Source | Example |
-|--------|---------|
-| Codebase | Check existing timeout values in config files |
-| ADRs | Review architectural decisions for this domain |
-| NFRs | Look for non-functional requirements |
-| Standards | Check RFC specs, REST conventions, etc. |
-| Library docs | Read the documentation for dependencies |
+| Source       | Example                                        |
+| ------------ | ---------------------------------------------- |
+| Codebase     | Check existing timeout values in config files  |
+| ADRs         | Review architectural decisions for this domain |
+| NFRs         | Look for non-functional requirements           |
+| Standards    | Check RFC specs, REST conventions, etc.        |
+| Library docs | Read the documentation for dependencies        |
 
 **If yes:** Research it, make the call, proceed.
 
@@ -28,12 +28,12 @@ Check the codebase, docs, conventions, and external standards.
 
 Use patterns, similar code, and surrounding context.
 
-| Pattern Source | What to Look For |
-|----------------|------------------|
-| Similar features | How did we solve this elsewhere? |
+| Pattern Source     | What to Look For                       |
+| ------------------ | -------------------------------------- |
+| Similar features   | How did we solve this elsewhere?       |
 | Naming conventions | What pattern does the codebase follow? |
-| Error handling | How do existing endpoints handle this? |
-| Test fixtures | What assumptions do tests make? |
+| Error handling     | How do existing endpoints handle this? |
+| Test fixtures      | What assumptions do tests make?        |
 
 **If yes:** Derive it, document your reasoning, proceed.
 
@@ -41,12 +41,12 @@ Use patterns, similar code, and surrounding context.
 
 Look for options that are reversible, low-risk, and conventional.
 
-| Safe Default Criteria | Example |
-|----------------------|---------|
-| Reversible | Config value that can be changed later |
-| Low-risk | Conservative timeout (30s vs 5s) |
-| Conventional | Matches existing patterns in codebase |
-| Documented | Can explain the choice to a reviewer |
+| Safe Default Criteria | Example                                |
+| --------------------- | -------------------------------------- |
+| Reversible            | Config value that can be changed later |
+| Low-risk              | Conservative timeout (30s vs 5s)       |
+| Conventional          | Matches existing patterns in codebase  |
+| Documented            | Can explain the choice to a reviewer   |
 
 **If yes:** Take the default, mark DEFAULTED, proceed.
 
@@ -54,13 +54,13 @@ Look for options that are reversible, low-risk, and conventional.
 
 If you're still stuck, ask: Does this require someone's **authority** to decide?
 
-| Authority Required | Example |
-|-------------------|---------|
-| Business relationships | Customer migration timelines |
-| Risk tolerance | Ship with known issue or delay |
-| Organizational | Team ownership, resource allocation |
-| Compliance | Security exceptions |
-| External commitments | Deadlines, SLAs |
+| Authority Required     | Example                             |
+| ---------------------- | ----------------------------------- |
+| Business relationships | Customer migration timelines        |
+| Risk tolerance         | Ship with known issue or delay      |
+| Organizational         | Team ownership, resource allocation |
+| Compliance             | Security exceptions                 |
+| External commitments   | Deadlines, SLAs                     |
 
 **If yes:** Mark NEEDS_HUMAN, document options, proceed with other work.
 
@@ -94,12 +94,12 @@ When you choose a default, document it fully:
 
 ### What Makes a Good Default
 
-| Good Default | Bad Default |
-|--------------|-------------|
-| Matches existing patterns | Invents new patterns |
-| Conservative/safe choice | Optimistic/aggressive choice |
-| Easy to change later | Hard to reverse |
-| Documented reasoning | Undocumented |
+| Good Default              | Bad Default                  |
+| ------------------------- | ---------------------------- |
+| Matches existing patterns | Invents new patterns         |
+| Conservative/safe choice  | Optimistic/aggressive choice |
+| Easy to change later      | Hard to reverse              |
+| Documented reasoning      | Undocumented                 |
 
 ---
 
@@ -132,13 +132,13 @@ When you genuinely need human authority:
 
 ### What Requires Authority
 
-| Category | Examples |
-|----------|----------|
-| Business | Customer commitments, partner agreements, pricing |
-| Risk | Ship despite known issues, accept security exceptions |
-| Organizational | Team ownership, headcount, resource allocation |
-| Compliance | Security policy exceptions, legal requirements |
-| External | Deadlines, SLAs, contract terms |
+| Category       | Examples                                              |
+| -------------- | ----------------------------------------------------- |
+| Business       | Customer commitments, partner agreements, pricing     |
+| Risk           | Ship despite known issues, accept security exceptions |
+| Organizational | Team ownership, headcount, resource allocation        |
+| Compliance     | Security policy exceptions, legal requirements        |
+| External       | Deadlines, SLAs, contract terms                       |
 
 ---
 
@@ -170,6 +170,7 @@ Continue the flow
 ### At Flow Boundary
 
 Provide humans with:
+
 - **Summary of DEFAULTED items** - What was assumed and why
 - **Summary of NEEDS_HUMAN items** - What decisions are needed
 - **Impact of each** - What depends on these decisions
@@ -182,15 +183,17 @@ This gives humans grouped context, not mid-flow interrupts.
 ## Open Questions Summary
 
 ### Defaults Taken (3)
-| QID | Question | Default | Risk |
-|-----|----------|---------|------|
-| OQ-BUILD-001 | Token format | JWT | Low - reversible |
-| OQ-BUILD-002 | Cache backend | In-memory | Low - abstracted |
-| OQ-BUILD-003 | Timeout value | 30s | Low - matches patterns |
+
+| QID          | Question      | Default   | Risk                   |
+| ------------ | ------------- | --------- | ---------------------- |
+| OQ-BUILD-001 | Token format  | JWT       | Low - reversible       |
+| OQ-BUILD-002 | Cache backend | In-memory | Low - abstracted       |
+| OQ-BUILD-003 | Timeout value | 30s       | Low - matches patterns |
 
 ### Needs Human Decision (1)
-| QID | Question | Options | Who Decides |
-|-----|----------|---------|-------------|
+
+| QID         | Question            | Options                | Who Decides   |
+| ----------- | ------------------- | ---------------------- | ------------- |
 | OQ-PLAN-002 | Break API for Acme? | Proceed / Shim / Delay | Product owner |
 ```
 
@@ -200,13 +203,14 @@ This gives humans grouped context, not mid-flow interrupts.
 
 Why this matters:
 
-| Pattern | Cost |
-|---------|------|
-| Agent researches and defaults | ~0 DevLT (machine time only) |
+| Pattern                       | Cost                                                    |
+| ----------------------------- | ------------------------------------------------------- |
+| Agent researches and defaults | ~0 DevLT (machine time only)                            |
 | Agent escalates unnecessarily | ~30 min DevLT (human context-switch, research, respond) |
-| Agent escalates appropriately | ~5 min DevLT (human picks from researched options) |
+| Agent escalates appropriately | ~5 min DevLT (human picks from researched options)      |
 
 Good escalation is:
+
 - **Rare** - Most questions resolve via research or defaults
 - **Well-researched** - Human sees what was tried
 - **Option-rich** - Human picks from choices, doesn't generate them
@@ -218,22 +222,22 @@ Good escalation is:
 
 ### Bad DEFAULTED (Should Be NEEDS_HUMAN)
 
-| Decision | Why It Requires Authority |
-|----------|--------------------------|
-| "I decided we should break the API" | Customer impact requires business authority |
-| "I chose to skip security review" | Risk tolerance requires organizational authority |
-| "I assigned ownership to Team X" | Organizational authority required |
-| "I committed to a delivery date" | Business commitment |
+| Decision                            | Why It Requires Authority                        |
+| ----------------------------------- | ------------------------------------------------ |
+| "I decided we should break the API" | Customer impact requires business authority      |
+| "I chose to skip security review"   | Risk tolerance requires organizational authority |
+| "I assigned ownership to Team X"    | Organizational authority required                |
+| "I committed to a delivery date"    | Business commitment                              |
 
 ### Bad NEEDS_HUMAN (Should Be DEFAULTED)
 
-| Question | Why It's Actually DEFAULTED |
-|----------|----------------------------|
-| "Should I use camelCase or snake_case?" | Check codebase, follow convention |
-| "Is this the right abstraction?" | Make a choice, critic will push back if wrong |
-| "What's the performance requirement?" | Check NFRs or default conservatively |
-| "Which test framework?" | Use what's already in the repo |
-| "Where should this file go?" | Follow existing directory structure |
+| Question                                | Why It's Actually DEFAULTED                   |
+| --------------------------------------- | --------------------------------------------- |
+| "Should I use camelCase or snake_case?" | Check codebase, follow convention             |
+| "Is this the right abstraction?"        | Make a choice, critic will push back if wrong |
+| "What's the performance requirement?"   | Check NFRs or default conservatively          |
+| "Which test framework?"                 | Use what's already in the repo                |
+| "Where should this file go?"            | Follow existing directory structure           |
 
 ---
 

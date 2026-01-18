@@ -16,6 +16,7 @@ This flow discusses validation concepts without invoking skill tools.
 
 The words "count", "index", and "receipt" appear here in natural prose.
 They should NOT be flagged as violations because:
+
 - They are not CLI command invocations
 - They are not preceded by any shim script
 - They describe concepts, not tool calls

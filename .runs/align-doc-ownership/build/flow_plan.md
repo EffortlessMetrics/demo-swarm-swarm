@@ -22,12 +22,14 @@
 ## Progress Notes
 
 **2025-12-13T07:47**: Run infrastructure established. run-prep completed successfully.
+
 - Run ID: align-doc-ownership
 - Build directory: `.runs/align-doc-ownership/build/`
 - Prior flows: signal, plan (both complete)
 - Iteration: 3
 
 **2025-12-13T07:48**: Context loaded and clarifier completed.
+
 - Subtask ST-001 (Flow 1 Signal) selected for implementation
 - Open questions resolved with defaults from user guidance
 - Test specification complete
@@ -35,6 +37,7 @@
 ## Task Context
 
 **ADR Decision**: OPT-002 (Pragmatic Enforcement)
+
 - Add pack-check rules for major boundary violations
 - Allow minimal inline examples in agent docs when skill docs have coverage gaps
 - Normalize CLAUDE.md to summary-level entry point
@@ -61,6 +64,7 @@ The user has provided detailed guidance on two boundary violations that need enf
 2. **Agent output filenames in flow step lists** - Lines like "work-planner → `subtasks.yaml`" are drift magnets. Flow step lists should be "agent + purpose" only; file-path specifics belong in agent docs.
 
 **Enforcement approach**:
+
 - Flows: **no skill names** anywhere; use invariant wording ("computed mechanically; never estimates")
 - Flows: **no agent output file paths** in step lists; step lists are agent + purpose only
 - Agent docs: own output filenames/paths; if multiple artifacts, declare which is canonical vs derived

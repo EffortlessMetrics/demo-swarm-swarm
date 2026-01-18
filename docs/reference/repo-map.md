@@ -122,31 +122,31 @@ docs/
 
 ## Agent Categories
 
-| Category | Color | Role |
-|----------|-------|------|
-| Shaping | Yellow | Early signal processing |
-| Spec | Purple | Requirements and design |
-| Implementation | Green | Writing code/tests/docs |
-| Critic | Red | Harsh review (never fixes) |
-| Verification | Blue | Checking work / audits |
-| Analytics | Orange | Analysis and learning |
-| Infra | Cyan | Infrastructure + repo ops |
-| Reporter | Pink | GitHub posting |
-| Cleanup | Various | Flow finalization / receipts |
+| Category       | Color   | Role                         |
+| -------------- | ------- | ---------------------------- |
+| Shaping        | Yellow  | Early signal processing      |
+| Spec           | Purple  | Requirements and design      |
+| Implementation | Green   | Writing code/tests/docs      |
+| Critic         | Red     | Harsh review (never fixes)   |
+| Verification   | Blue    | Checking work / audits       |
+| Analytics      | Orange  | Analysis and learning        |
+| Infra          | Cyan    | Infrastructure + repo ops    |
+| Reporter       | Pink    | GitHub posting               |
+| Cleanup        | Various | Flow finalization / receipts |
 
 ---
 
 ## Where to change what
 
-| To change... | Edit... |
-|--------------|---------|
-| Test command | `.claude/skills/test-runner/SKILL.md` |
-| Lint command | `.claude/skills/auto-linter/SKILL.md` |
-| Flow behavior | `.claude/commands/flow-*.md` |
-| Agent behavior | `.claude/agents/<agent>.md` |
-| Pack invariants | `CLAUDE.md` |
-| Drift validation | `.claude/scripts/pack-check.sh` |
-| Human docs | `docs/*` |
+| To change...     | Edit...                               |
+| ---------------- | ------------------------------------- |
+| Test command     | `.claude/skills/test-runner/SKILL.md` |
+| Lint command     | `.claude/skills/auto-linter/SKILL.md` |
+| Flow behavior    | `.claude/commands/flow-*.md`          |
+| Agent behavior   | `.claude/agents/<agent>.md`           |
+| Pack invariants  | `CLAUDE.md`                           |
+| Drift validation | `.claude/scripts/pack-check.sh`       |
+| Human docs       | `docs/*`                              |
 
 ---
 

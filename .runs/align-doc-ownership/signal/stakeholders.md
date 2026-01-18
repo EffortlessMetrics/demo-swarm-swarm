@@ -1,6 +1,7 @@
 # Stakeholders
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null

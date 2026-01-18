@@ -19,6 +19,7 @@ This distinction is fundamental. Skipping it is how failures happen.
 ## What Is a Candidate?
 
 A candidate is:
+
 - Raw LLM output
 - Probabilistically generated
 - Possibly wrong
@@ -26,6 +27,7 @@ A candidate is:
 - Unverified
 
 Candidates include:
+
 - Generated code
 - Proposed tests
 - Draft documentation
@@ -44,6 +46,7 @@ Until verification, you can't tell.
 ## What Is an Artifact?
 
 An artifact is:
+
 - Verified output
 - Evidence-backed
 - Worth preserving
@@ -51,6 +54,7 @@ An artifact is:
 - Part of the record
 
 Artifacts include:
+
 - Tested code (tests pass)
 - Verified claims (evidence exists)
 - Reviewed decisions (critics approved)
@@ -76,6 +80,7 @@ Between candidate and artifact is the **verification gap**.
 ```
 
 What happens in the gap:
+
 - Tests run and pass
 - Critics review and approve
 - Evidence is collected
@@ -84,6 +89,7 @@ What happens in the gap:
 ### The Gap Is Not Optional
 
 There is no shortcut across the verification gap. You cannot:
+
 - Infer the result from the candidate's quality
 - Trust the output because the prompt was good
 - Assume correctness because it looks right
@@ -101,6 +107,7 @@ An LLM saying "I implemented the feature" is a candidate claim.
 The feature being implemented (with tests, evidence) is an artifact.
 
 Treating candidates as artifacts is how you get:
+
 - "Tests pass" that didn't run
 - "Complete" that isn't
 - "Secure" that wasn't checked
@@ -130,25 +137,25 @@ Verification distinguishes correct from incorrect. Tone distinguishes nothing.
 
 Every candidate must cross the verification gap:
 
-| Candidate | Verification | Artifact |
-|-----------|--------------|----------|
-| Generated code | Tests pass | Tested code |
-| Proposed fix | Issue resolved | Verified fix |
-| Claimed complete | Checklist verified | Confirmed complete |
-| Security assertion | Scan run | Security evidence |
-| Performance claim | Benchmark executed | Performance data |
-| Coverage claim | Coverage measured | Coverage report |
+| Candidate          | Verification       | Artifact           |
+| ------------------ | ------------------ | ------------------ |
+| Generated code     | Tests pass         | Tested code        |
+| Proposed fix       | Issue resolved     | Verified fix       |
+| Claimed complete   | Checklist verified | Confirmed complete |
+| Security assertion | Scan run           | Security evidence  |
+| Performance claim  | Benchmark executed | Performance data   |
+| Coverage claim     | Coverage measured  | Coverage report    |
 
 ### Verification Is Cheap
 
 This is the key insight. The economics favor verification:
 
-| Step | Cost | What It Is |
-|------|------|------------|
-| Generate | Cheap | LLM produces candidate |
-| Execute | Cheap | Tests run, scanners scan |
-| Collect | Cheap | Evidence captured |
-| Verify | Cheap | Artifacts created |
+| Step     | Cost  | What It Is               |
+| -------- | ----- | ------------------------ |
+| Generate | Cheap | LLM produces candidate   |
+| Execute  | Cheap | Tests run, scanners scan |
+| Collect  | Cheap | Evidence captured        |
+| Verify   | Cheap | Artifacts created        |
 
 Human time is expensive. Machine time is cheap. Run the verification.
 
@@ -159,6 +166,7 @@ Human time is expensive. Machine time is cheap. Run the verification.
 ### Step 1: Generate (Cheap)
 
 LLM produces candidate:
+
 - Code, tests, analysis, recommendations
 - Fast, cheap, possibly wrong
 - No trust yet
@@ -168,6 +176,7 @@ This is speculation. Educated speculation, but speculation.
 ### Step 2: Execute (Cheap)
 
 Run verification:
+
 - Tests execute
 - Linters run
 - Scanners check
@@ -178,6 +187,7 @@ Still machine time. Still cheap. Now we're gathering data.
 ### Step 3: Evidence (Cheap)
 
 Collect proof:
+
 - Test output captured
 - Critic report generated
 - Evidence pointers created
@@ -188,12 +198,14 @@ The evidence exists independent of claims. It can be audited.
 ### Step 4: Artifact (Trusted)
 
 If verification passes:
+
 - Candidate becomes artifact
 - Evidence backs the claim
 - Human can trust the result
 - Downstream can depend on it
 
 If verification fails:
+
 - Candidate remains candidate
 - Fix and try again
 - No pretending it passed
@@ -247,12 +259,14 @@ If verification fails:
 ## The Artifact Record
 
 Artifacts persist because:
+
 - **They're verified** — worth keeping
 - **They're evidence** — needed for audit
 - **They're resumable** — enable continuation
 - **They're trusted** — downstream depends on them
 
 Candidates don't persist:
+
 - They might be wrong
 - They're superseded by artifacts
 - They're debugging context, not truth
@@ -289,13 +303,13 @@ The candidate-to-artifact transformation is implemented through:
 
 Each flow transforms candidates to artifacts:
 
-| Flow | Candidates In | Artifacts Out |
-|------|---------------|---------------|
+| Flow   | Candidates In          | Artifacts Out            |
+| ------ | ---------------------- | ------------------------ |
 | Signal | Raw requirements ideas | Reviewed requirements.md |
-| Plan | Design proposals | Approved ADR, contracts |
-| Build | Generated code/tests | Tested, reviewed code |
-| Review | Fix attempts | Verified fixes |
-| Gate | Merge recommendation | Evidence-backed decision |
+| Plan   | Design proposals       | Approved ADR, contracts  |
+| Build  | Generated code/tests   | Tested, reviewed code    |
+| Review | Fix attempts           | Verified fixes           |
+| Gate   | Merge recommendation   | Evidence-backed decision |
 
 ### Evidence Requirements
 
@@ -310,7 +324,7 @@ test_execution:
   artifact: ".runs/feat-auth/build/test_execution.md"
 
 # Candidate claim (insufficient)
-tests: "all passing"  # No command, no output, no artifact
+tests: "all passing" # No command, no output, no artifact
 ```
 
 ### Artifact Schemas
@@ -320,6 +334,7 @@ Receipts, summaries, and decisions have defined structures. These structures req
 ### Clear Naming
 
 The location tells you the status:
+
 - Draft files are candidates
 - Committed artifacts have passed verification
 - Receipt files summarize verified outcomes
@@ -331,6 +346,7 @@ The location tells you the status:
 ### Example: Code Implementation
 
 **Candidate stage:**
+
 ```
 code-implementer produces src/auth/login.ts
 Claims: "Implements REQ-001 per ADR-005"
@@ -338,6 +354,7 @@ Status: CANDIDATE (unverified)
 ```
 
 **Verification:**
+
 ```
 test-runner executes test suite
 code-critic reviews implementation
@@ -346,6 +363,7 @@ Evidence collected in build/code_critique.md
 ```
 
 **Artifact stage:**
+
 ```
 Tests: 12 passed, 0 failed
 Critic: No CRITICAL/MAJOR issues
@@ -356,12 +374,14 @@ Record: impl_changes_summary.md points to evidence
 ### Example: Security Claim
 
 **Candidate stage:**
+
 ```
 Agent claims: "No security vulnerabilities"
 Status: CANDIDATE (unverified)
 ```
 
 **Verification:**
+
 ```
 secrets-tools scans staged changes
 Scope: 15 files, all content reviewed
@@ -369,6 +389,7 @@ Findings: None detected
 ```
 
 **Artifact stage:**
+
 ```
 secrets_scan:
   tool: "secrets-tools"

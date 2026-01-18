@@ -41,7 +41,15 @@
     "created_at": "2025-12-20T03:32:56Z",
     "updated_at": "2025-12-21T22:07:21Z",
     "iterations": 8,
-    "flows_started": ["signal", "plan", "build", "review", "gate", "deploy", "wisdom"]
+    "flows_started": [
+      "signal",
+      "plan",
+      "build",
+      "review",
+      "gate",
+      "deploy",
+      "wisdom"
+    ]
   },
   "flows": {
     "signal": {
@@ -286,9 +294,7 @@
       "flow": "wisdom",
       "status": "IN_PROGRESS",
       "note": "Wisdom receipt not yet created; flow_plan.md present",
-      "key_artifacts": [
-        "flow_plan.md"
-      ],
+      "key_artifacts": ["flow_plan.md"],
       "receipt_file": ".runs/local-alignment-audit-aba1c6/wisdom/wisdom_receipt.json (pending)"
     }
   },
@@ -350,7 +356,9 @@
       "t_source": "content_timestamp",
       "flow": "signal",
       "type": "receipt_written",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/signal/signal_receipt.json"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/signal/signal_receipt.json"
+      ],
       "commit_sha": null,
       "details": {
         "status": "VERIFIED",
@@ -359,7 +367,7 @@
         "non_functional_requirements": 3,
         "bdd_scenarios": 32,
         "open_questions": 6,
-        "risks": {"critical": 0, "high": 0, "medium": 2, "low": 3}
+        "risks": { "critical": 0, "high": 0, "medium": 2, "low": 3 }
       },
       "evidence": {
         "artifact": "signal_receipt.json",
@@ -410,7 +418,9 @@
       "t_source": "content_timestamp",
       "flow": "plan",
       "type": "receipt_written",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/plan/plan_receipt.json"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/plan/plan_receipt.json"
+      ],
       "commit_sha": null,
       "details": {
         "status": "VERIFIED",
@@ -499,7 +509,9 @@
       "t_source": "content_timestamp",
       "flow": "review",
       "type": "receipt_written",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/review/review_receipt.json"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/review/review_receipt.json"
+      ],
       "commit_sha": null,
       "details": {
         "status": "VERIFIED",
@@ -556,7 +568,9 @@
       "t_source": "git_commit_timestamp",
       "flow": "gate",
       "type": "decision_recorded",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/merge_decision.md"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/gate/merge_decision.md"
+      ],
       "commit_sha": "820b04bfc756165618ce1c2f07c29a506d9b5d27",
       "details": {
         "decision_type": "Merge Decision",
@@ -581,7 +595,9 @@
       "t_source": "content_timestamp",
       "flow": "gate",
       "type": "receipt_written",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/gate/gate_receipt.json"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/gate/gate_receipt.json"
+      ],
       "commit_sha": null,
       "details": {
         "status": "VERIFIED",
@@ -673,7 +689,9 @@
       "t_source": "content_timestamp",
       "flow": "deploy",
       "type": "receipt_written",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json"
+      ],
       "commit_sha": null,
       "details": {
         "status": "VERIFIED",
@@ -697,7 +715,9 @@
       "t_source": "git_commit_timestamp",
       "flow": "deploy",
       "type": "decision_recorded",
-      "artifacts": [".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md"],
+      "artifacts": [
+        ".runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md"
+      ],
       "commit_sha": "1a58bdb9294c975a46c4ced31557089d0545d9d9",
       "details": {
         "decision_type": "Deployment Decision",

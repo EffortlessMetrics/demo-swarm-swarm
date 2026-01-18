@@ -5,6 +5,7 @@
 This run (`align-doc-ownership`) is a **documentation-only refactoring** implementing OPT-002 (Pragmatic Enforcement) from the ADR. There is no runtime component; therefore, traditional observability (metrics, logs, traces, SLOs) does not apply.
 
 Instead, this spec defines:
+
 1. **Build-time observability** -- counts of artifacts changed
 2. **Verification observability** -- pass/fail criteria for gates
 3. **Drift detection observability** -- CI gates for ongoing enforcement
@@ -37,14 +38,14 @@ Since this is not runtime code, metrics are **artifact counts** captured in the 
 
 ### Count Categories
 
-| Metric Name | Description | Expected Range |
-|-------------|-------------|----------------|
-| `agent_docs_changed` | Number of agent docs modified for consistency | 10-55 |
-| `flow_commands_changed` | Number of flow commands cleaned of skill plumbing | 0-6 |
-| `skill_docs_changed` | Number of skill docs updated with CLI truth | 0-7 |
-| `claude_md_changed` | Whether CLAUDE.md was normalized (0 or 1) | 0-1 |
-| `pack_check_rules_added` | Number of new boundary enforcement rules | 2-5 |
-| `validation_runs_completed` | Number of Toy Run A/B cycles completed | 1 |
+| Metric Name                 | Description                                       | Expected Range |
+| --------------------------- | ------------------------------------------------- | -------------- |
+| `agent_docs_changed`        | Number of agent docs modified for consistency     | 10-55          |
+| `flow_commands_changed`     | Number of flow commands cleaned of skill plumbing | 0-6            |
+| `skill_docs_changed`        | Number of skill docs updated with CLI truth       | 0-7            |
+| `claude_md_changed`         | Whether CLAUDE.md was normalized (0 or 1)         | 0-1            |
+| `pack_check_rules_added`    | Number of new boundary enforcement rules          | 2-5            |
+| `validation_runs_completed` | Number of Toy Run A/B cycles completed            | 1              |
 
 ### Naming Convention
 
@@ -60,16 +61,17 @@ Not applicable (no labels; these are scalar counts).
 
 No runtime logs. Build events are recorded in:
 
-| Event | Location | Purpose |
-|-------|----------|---------|
-| Subtask start/complete | `flow_plan.md` (TodoWrite) | Session navigation |
-| pack-check results | Terminal output + receipt | Validation gate |
-| doc-drift results | Terminal output + receipt | Validation gate |
-| Validation run outcome | `docs/maintainers/validation-log.md` | Audit trail |
+| Event                  | Location                             | Purpose            |
+| ---------------------- | ------------------------------------ | ------------------ |
+| Subtask start/complete | `flow_plan.md` (TodoWrite)           | Session navigation |
+| pack-check results     | Terminal output + receipt            | Validation gate    |
+| doc-drift results      | Terminal output + receipt            | Validation gate    |
+| Validation run outcome | `docs/maintainers/validation-log.md` | Audit trail        |
 
 ### Required Fields for Validation Log
 
 Per REQ-006 AC-2, validation log entries must include:
+
 - `date`: ISO8601 timestamp
 - `run_ids`: Toy Run A and B identifiers
 - `flows_executed`: 1, 2, 3, 4
@@ -164,32 +166,32 @@ No runtime dashboards. Progress visibility is via:
 
 ### Requirements to Verification Mapping
 
-| Requirement | Verification Criteria | Alert |
-|-------------|----------------------|-------|
-| REQ-001 (Flow Command Boundary) | SLO-001 + SLO-003 | ALERT-001 |
-| REQ-002 (Agent Doc Consistency) | SLO-001 | ALERT-001 |
-| REQ-003 (Skill Doc Ownership) | SLO-002 | ALERT-002 |
-| REQ-004 (CLAUDE.md Scope) | SLO-002 | ALERT-002 |
-| REQ-005 (Subtask Partitioning) | Receipt counts | N/A |
-| REQ-006 (Validation Run) | SLO-004 | ALERT-003 |
-| REQ-007 (Archive-Over-Delete) | PR review (manual) | N/A |
+| Requirement                     | Verification Criteria | Alert     |
+| ------------------------------- | --------------------- | --------- |
+| REQ-001 (Flow Command Boundary) | SLO-001 + SLO-003     | ALERT-001 |
+| REQ-002 (Agent Doc Consistency) | SLO-001               | ALERT-001 |
+| REQ-003 (Skill Doc Ownership)   | SLO-002               | ALERT-002 |
+| REQ-004 (CLAUDE.md Scope)       | SLO-002               | ALERT-002 |
+| REQ-005 (Subtask Partitioning)  | Receipt counts        | N/A       |
+| REQ-006 (Validation Run)        | SLO-004               | ALERT-003 |
+| REQ-007 (Archive-Over-Delete)   | PR review (manual)    | N/A       |
 
 ### NFR to Verification Mapping
 
-| NFR | Verification Criteria | Alert |
-|-----|----------------------|-------|
-| NFR-MAINT-001 (Maintainability) | SLO-002 + PR review | ALERT-002 |
-| NFR-TEST-001 (Validation Tooling) | SLO-001 + SLO-003 | ALERT-001 |
-| NFR-REGR-001 (No Regression) | SLO-004 + secrets gate | ALERT-003 |
+| NFR                               | Verification Criteria  | Alert     |
+| --------------------------------- | ---------------------- | --------- |
+| NFR-MAINT-001 (Maintainability)   | SLO-002 + PR review    | ALERT-002 |
+| NFR-TEST-001 (Validation Tooling) | SLO-001 + SLO-003      | ALERT-001 |
+| NFR-REGR-001 (No Regression)      | SLO-004 + secrets gate | ALERT-003 |
 
 ### Key Risks to Verification Mapping
 
-| Risk | Verification Criteria | Notes |
-|------|----------------------|-------|
-| RSK-001 (Merge Conflicts) | PR review | Mitigated by distinct touches patterns |
-| RSK-002 (ST-004 Scope) | Receipt counts by subtask | Monitor if ST-004 dominates |
-| RSK-003 (False Positives) | SLO-003 (negative test) | Rules must not over-match |
-| RSK-004 (Validation Delay) | SLO-004 | Expected gate, not true risk |
+| Risk                       | Verification Criteria     | Notes                                  |
+| -------------------------- | ------------------------- | -------------------------------------- |
+| RSK-001 (Merge Conflicts)  | PR review                 | Mitigated by distinct touches patterns |
+| RSK-002 (ST-004 Scope)     | Receipt counts by subtask | Monitor if ST-004 dominates            |
+| RSK-003 (False Positives)  | SLO-003 (negative test)   | Rules must not over-match              |
+| RSK-004 (Validation Delay) | SLO-004                   | Expected gate, not true risk           |
 
 ---
 

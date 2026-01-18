@@ -31,13 +31,24 @@
     ],
     "depends_on": [],
     "touches": ["CLAUDE.md"],
-    "planned_tests": ["grep 'seven flows' CLAUDE.md returns match", "pack-check passes"],
+    "planned_tests": [
+      "grep 'seven flows' CLAUDE.md returns match",
+      "pack-check passes"
+    ],
     "planned_observability": [],
     "estimate": "S"
   },
 
   "requirements": {
-    "req_ids": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+    "req_ids": [
+      "REQ-001",
+      "REQ-002",
+      "REQ-003",
+      "REQ-004",
+      "REQ-005",
+      "REQ-006",
+      "REQ-007"
+    ],
     "nfr_ids": ["NFR-DOC-001", "NFR-SEC-001", "NFR-TRACE-001"]
   },
 
@@ -114,7 +125,15 @@
       "type": "spec",
       "reason": "32 acceptance criteria mapped to test types and impl hints; defines verification methods",
       "signals": ["AC-001-001", "AC-007-005", "grep", "pack-check", "manual"],
-      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+      "req_refs": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007"
+      ],
       "source": "subtask_index"
     },
     {
@@ -129,7 +148,12 @@
       "path": ".runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml",
       "type": "spec",
       "reason": "Defines canonical 7-flow model schema, command registry (10 commands), and documentation consistency spec",
-      "signals": ["FlowModel", "flow_count: 7", "command_count: 10", "prohibited_patterns"],
+      "signals": [
+        "FlowModel",
+        "flow_count: 7",
+        "command_count: 10",
+        "prohibited_patterns"
+      ],
       "req_refs": ["REQ-001", "REQ-002", "REQ-004"],
       "source": "subtask_index"
     },
@@ -137,8 +161,20 @@
       "path": ".runs/local-alignment-audit-aba1c6/signal/requirements.md",
       "type": "spec",
       "reason": "7 functional requirements (REQ-001 to REQ-007) and 3 NFRs with acceptance criteria",
-      "signals": ["REQ-001 flow count", "REQ-002 overlap semantics", "REQ-006 security posture"],
-      "req_refs": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "REQ-006", "REQ-007"],
+      "signals": [
+        "REQ-001 flow count",
+        "REQ-002 overlap semantics",
+        "REQ-006 security posture"
+      ],
+      "req_refs": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007"
+      ],
       "source": "subtask_index"
     },
     {
@@ -217,7 +253,14 @@
       "path": "docs/explanation/architecture.md",
       "type": "doc",
       "reason": "Authoritative source (Tier 1, Phase 1). Must document flow overlap semantics, Flow 7 purpose, security posture, and test counts.",
-      "signals": ["flow overlap", "Flow 7", "ReDoS immunity", "102 tests", "L11", "L62"],
+      "signals": [
+        "flow overlap",
+        "Flow 7",
+        "ReDoS immunity",
+        "102 tests",
+        "L11",
+        "L62"
+      ],
       "req_refs": ["REQ-002", "REQ-003", "REQ-005", "REQ-006"],
       "source": "subtask_index"
     },

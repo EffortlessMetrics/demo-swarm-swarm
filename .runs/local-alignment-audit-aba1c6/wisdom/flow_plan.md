@@ -1,6 +1,7 @@
 # Flow 7: Wisdom for local-alignment-audit-aba1c6
 
 ## Planned Steps
+
 - [x] run-prep (establish run directory)
 - [x] repo-operator (ensure run branch)
 - [x] artifact-auditor (verify all flow artifacts)
