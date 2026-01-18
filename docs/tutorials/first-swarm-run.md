@@ -7,6 +7,7 @@ This tutorial walks you through running your first flow in DemoSwarm. By the end
 **Time required:** 10-15 minutes
 
 **What you will learn:**
+
 - How to start a flow
 - What agents do the work
 - Where artifacts are stored
@@ -45,6 +46,7 @@ If `gh` is not authenticated, that is fine. The flow works fully offline; GitHub
 ## Step 1: Open Your Repo in Claude Code
 
 Open your repo in your IDE with Claude Code enabled. Claude Code discovers the pack automatically:
+
 - `.claude/commands/` - Slash commands like `/flow-1-signal`
 - `.claude/agents/` - Specialist agents that do the work
 - `.claude/skills/` - Tools for testing, linting, etc.
@@ -73,55 +75,55 @@ After you run the command, you will see Claude Code spawn multiple agents. Here 
 
 ### Infrastructure Agents (Setting Up)
 
-| Agent | What It Does |
-|-------|-------------|
+| Agent               | What It Does                                 |
+| ------------------- | -------------------------------------------- |
 | `gh-issue-resolver` | Creates or finds a GitHub issue for tracking |
-| `repo-operator` | Creates a branch for this run |
-| `signal-run-prep` | Sets up the `.runs/<run-id>/` directory |
+| `repo-operator`     | Creates a branch for this run                |
+| `signal-run-prep`   | Sets up the `.runs/<run-id>/` directory      |
 
 ### Research and Analysis Agents
 
-| Agent | What It Does |
-|-------|-------------|
-| `gh-researcher` | Searches for related issues and prior work |
-| `signal-normalizer` | Parses your input into structured form |
-| `problem-framer` | Defines the problem clearly (goals, non-goals) |
-| `clarifier` | Documents ambiguities and assumptions |
+| Agent               | What It Does                                   |
+| ------------------- | ---------------------------------------------- |
+| `gh-researcher`     | Searches for related issues and prior work     |
+| `signal-normalizer` | Parses your input into structured form         |
+| `problem-framer`    | Defines the problem clearly (goals, non-goals) |
+| `clarifier`         | Documents ambiguities and assumptions          |
 
 ### Requirements Agents (Microloop)
 
-| Agent | What It Does |
-|-------|-------------|
+| Agent                 | What It Does                                 |
+| --------------------- | -------------------------------------------- |
 | `requirements-author` | Writes testable requirements (REQ-001, etc.) |
-| `requirements-critic` | Reviews and improves the requirements |
+| `requirements-critic` | Reviews and improves the requirements        |
 
 These two agents work in a loop, refining until the critic is satisfied.
 
 ### BDD Agents (Microloop)
 
-| Agent | What It Does |
-|-------|-------------|
-| `bdd-author` | Creates Gherkin scenarios (Given/When/Then) |
+| Agent        | What It Does                                   |
+| ------------ | ---------------------------------------------- |
+| `bdd-author` | Creates Gherkin scenarios (Given/When/Then)    |
 | `bdd-critic` | Reviews scenarios for coverage and testability |
 
 Again, these loop until the critic says the scenarios are ready.
 
 ### Assessment and Cleanup Agents
 
-| Agent | What It Does |
-|-------|-------------|
-| `scope-assessor` | Estimates scope (S/M/L/XL) and identifies risks |
-| `risk-analyst` | Performs deeper risk analysis |
-| `spec-auditor` | Final quality check across all artifacts |
+| Agent            | What It Does                                         |
+| ---------------- | ---------------------------------------------------- |
+| `scope-assessor` | Estimates scope (S/M/L/XL) and identifies risks      |
+| `risk-analyst`   | Performs deeper risk analysis                        |
+| `spec-auditor`   | Final quality check across all artifacts             |
 | `signal-cleanup` | Generates the receipt (summary of what was produced) |
 
 ### Publishing Agents
 
-| Agent | What It Does |
-|-------|-------------|
+| Agent               | What It Does                             |
+| ------------------- | ---------------------------------------- |
 | `secrets-sanitizer` | Scans for accidentally committed secrets |
-| `repo-operator` | Commits the artifacts |
-| `gh-reporter` | Posts a summary to the GitHub issue |
+| `repo-operator`     | Commits the artifacts                    |
+| `gh-reporter`       | Posts a summary to the GitHub issue      |
 
 ---
 
@@ -159,6 +161,7 @@ You will see a folder with your run ID. Inside:
 Users can log into the system with email and password.
 
 **Acceptance Criteria:**
+
 - AC-1: User can enter email and password
 - AC-2: System validates credentials
 - AC-3: Successful login redirects to dashboard
@@ -232,11 +235,11 @@ You will see something like:
 
 ### What the Status Means
 
-| Status | Meaning |
-|--------|---------|
-| `VERIFIED` | Flow completed successfully. All quality checks passed. |
-| `UNVERIFIED` | Flow completed but with issues. Check `blockers` field. |
-| `CANNOT_PROCEED` | Mechanical failure (permissions, missing tools). |
+| Status           | Meaning                                                 |
+| ---------------- | ------------------------------------------------------- |
+| `VERIFIED`       | Flow completed successfully. All quality checks passed. |
+| `UNVERIFIED`     | Flow completed but with issues. Check `blockers` field. |
+| `CANNOT_PROCEED` | Mechanical failure (permissions, missing tools).        |
 
 **UNVERIFIED is not failure.** It means the flow completed but the critic found issues worth noting. You can still proceed to Flow 2; the issues are documented.
 
@@ -246,14 +249,14 @@ You will see something like:
 
 You will see markers like `REQ-001`, `NFR-SECURITY-001`, and `@REQ-001` in the artifacts. These are stable identifiers for mechanical counting.
 
-| Marker | Meaning | Example |
-|--------|---------|---------|
-| `REQ-###` | Functional requirement | `REQ-001` (User Login) |
+| Marker           | Meaning                    | Example                               |
+| ---------------- | -------------------------- | ------------------------------------- |
+| `REQ-###`        | Functional requirement     | `REQ-001` (User Login)                |
 | `NFR-DOMAIN-###` | Non-functional requirement | `NFR-SECURITY-001` (Password hashing) |
-| `AC-#` | Acceptance criterion | `AC-1: User can enter email` |
-| `@REQ-###` | BDD scenario tags | Links scenario to requirement |
-| `RSK-###` | Risk identifier | `RSK-001 HIGH SECURITY` |
-| `OQ-SIG-###` | Open question | `OQ-SIG-001` (unclear scope) |
+| `AC-#`           | Acceptance criterion       | `AC-1: User can enter email`          |
+| `@REQ-###`       | BDD scenario tags          | Links scenario to requirement         |
+| `RSK-###`        | Risk identifier            | `RSK-001 HIGH SECURITY`               |
+| `OQ-SIG-###`     | Open question              | `OQ-SIG-001` (unclear scope)          |
 
 These markers let cleanup agents count artifacts without parsing prose. They also create traceability: every BDD scenario should trace back to a requirement.
 
@@ -264,6 +267,7 @@ These markers let cleanup agents count artifacts without parsing prose. They als
 ### Why did it create all these files?
 
 Each file serves a purpose:
+
 - **`requirements.md`** - What to build (testable)
 - **`features/*.feature`** - How to verify it (executable specs)
 - **`open_questions.md`** - What is unclear (for humans to answer)
@@ -288,6 +292,7 @@ cat .runs/*/signal/signal_receipt.json | jq .blockers
 ```
 
 Common issues:
+
 - **Missing artifacts** - An agent failed to write. Check `missing_required` field.
 - **Critic rejected** - Requirements or BDD did not meet quality bar. This is normal; iterate.
 - **GitHub unavailable** - `gh` not authenticated. Local artifacts still work.
@@ -295,6 +300,7 @@ Common issues:
 ### Can I run it again?
 
 Yes. Flow 1 is designed to be re-run. Running `/flow-1-signal` on an existing run-id:
+
 - Preserves the existing directory
 - Agents read and refine existing artifacts
 - Each run improves the output
@@ -302,6 +308,7 @@ Yes. Flow 1 is designed to be re-run. Running `/flow-1-signal` on an existing ru
 ### What do I do with open questions?
 
 Review `.runs/<run-id>/signal/open_questions.md`. You can:
+
 1. Answer the questions directly (edit the file)
 2. Note them for later (address in Flow 2)
 3. Provide more signal (re-run with more details)
@@ -331,6 +338,7 @@ If you want to refine the requirements:
 ### Option C: Review First
 
 Before proceeding, humans should check:
+
 - Are these the right requirements?
 - Do the BDD scenarios cover expected behavior?
 - Are the identified risks acceptable?
@@ -345,6 +353,7 @@ The swarm produced the artifacts. You decide if they are correct.
 ### "Command not found" when typing /flow-1-signal
 
 Make sure:
+
 1. You are in Claude Code (not regular terminal)
 2. `.claude/` directory exists at repo root
 3. Claude Code has discovered the pack (check available commands)
@@ -352,6 +361,7 @@ Make sure:
 ### Flow hangs or takes a long time
 
 This is normal for the first run. The flow:
+
 - Creates directories
 - Runs multiple agent loops (requirements, BDD)
 - May make GitHub API calls
@@ -369,6 +379,7 @@ gh auth login
 ### Receipt shows CANNOT_PROCEED
 
 This is a mechanical failure (I/O, permissions, tooling broken). Check:
+
 - Can you write to `.runs/`?
 - Do you have `bash` and `git` available?
 - Check `missing_required` field in receipt for specifics.
@@ -376,6 +387,7 @@ This is a mechanical failure (I/O, permissions, tooling broken). Check:
 ### Receipt shows UNVERIFIED
 
 This is not an error. It means the flow completed but the critic found issues. Check:
+
 - `blockers` field for what was flagged
 - `quality_gates` to see which checks did not pass
 
@@ -385,12 +397,12 @@ You can still proceed; the issues are documented for human review.
 
 ## Next Steps
 
-| Goal | Command/Doc |
-|------|-------------|
-| Continue to design | `/flow-2-plan` |
-| See all 7 flows | [Walkthrough](walkthrough.md) |
-| Customize for your stack | [customize-pack.md](../how-to/customize-pack.md) |
-| Understand the full system | [CLAUDE.md](../../CLAUDE.md) |
+| Goal                       | Command/Doc                                      |
+| -------------------------- | ------------------------------------------------ |
+| Continue to design         | `/flow-2-plan`                                   |
+| See all 7 flows            | [Walkthrough](walkthrough.md)                    |
+| Customize for your stack   | [customize-pack.md](../how-to/customize-pack.md) |
+| Understand the full system | [CLAUDE.md](../../CLAUDE.md)                     |
 
 ---
 

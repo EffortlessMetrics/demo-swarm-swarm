@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -125,6 +126,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
 (none yet)
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -135,5 +137,6 @@ assumptions_added: 5
 missing_required: []
 blockers: []
 concerns:
-  - stable-markers.md and contracts.md say PLAN/BUILD but openq-tools uses PLN/BLD (OQ-PLAN-004 captures this)
-  - 4 agents missing Skills sections not yet enumerated (deferred to implementation per OQ-PLAN-009)
+
+- stable-markers.md and contracts.md say PLAN/BUILD but openq-tools uses PLN/BLD (OQ-PLAN-004 captures this)
+- 4 agents missing Skills sections not yet enumerated (deferred to implementation per OQ-PLAN-009)

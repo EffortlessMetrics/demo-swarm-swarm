@@ -10,7 +10,7 @@ The job is moving up the stack. Again.
 
 Punchcards → Assembly → High-level languages → **Now**.
 
-Models now emit and revise nearly-working implementation at machine speed—10x to 500x faster than humans can review. The bottleneck isn't "can it write code." It's *trust*: can a human decide **ship / don't ship** quickly, without reading every line?
+Models now emit and revise nearly-working implementation at machine speed—10x to 500x faster than humans can review. The bottleneck isn't "can it write code." It's _trust_: can a human decide **ship / don't ship** quickly, without reading every line?
 
 Most AI coding tools optimize the wrong thing. They make generation faster, which produces more code for humans to review. The backlog grows. The bottleneck tightens.
 
@@ -66,14 +66,14 @@ Hotspots are **not** "where humans line-read." Hotspots are where you escalate v
 
 Where the real answers live:
 
-| Surface | Location | What It Proves |
-|---------|----------|----------------|
-| **PR cockpit** | PR description | Primary review UI: scope, proof pointers, explicit unknowns |
-| **Gate verdict** | `.runs/<run-id>/gate/merge_decision.md` | Ship or bounce (with rationale) |
-| **Test proof** | `.runs/<run-id>/build/test_execution.md` | Tests actually ran (exit codes, not claims) |
-| **Critiques** | `.runs/<run-id>/build/*_critique.md` | What critics found and prioritized |
-| **Receipts** | `.runs/<run-id>/*/*_receipt.json` | Mechanical summaries + evidence pointers |
-| **Diff** | GitHub PR diff | Final audit surface when evidence raises doubt |
+| Surface          | Location                                 | What It Proves                                              |
+| ---------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| **PR cockpit**   | PR description                           | Primary review UI: scope, proof pointers, explicit unknowns |
+| **Gate verdict** | `.runs/<run-id>/gate/merge_decision.md`  | Ship or bounce (with rationale)                             |
+| **Test proof**   | `.runs/<run-id>/build/test_execution.md` | Tests actually ran (exit codes, not claims)                 |
+| **Critiques**    | `.runs/<run-id>/build/*_critique.md`     | What critics found and prioritized                          |
+| **Receipts**     | `.runs/<run-id>/*/*_receipt.json`        | Mechanical summaries + evidence pointers                    |
+| **Diff**         | GitHub PR diff                           | Final audit surface when evidence raises doubt              |
 
 The PR cockpit is the default. `.runs/` is drill-down evidence and resumability.
 
@@ -83,15 +83,15 @@ The PR cockpit is the default. `.runs/` is drill-down evidence and resumability.
 
 ## The Seven Flows
 
-| Flow | Purpose | Output |
-|------|---------|--------|
-| **1. Signal** | Shape intent into contract | requirements, BDD scenarios |
-| **2. Plan** | Design before code | ADR, contracts, work plan |
-| **3. Build** | Implement with critics in the loop | code, tests, Draft PR |
-| **4. Review** | Harvest PR feedback, fix | Ready PR |
-| **5. Gate** | Final checks | MERGE or BOUNCE |
-| **6. Deploy** | Merge to main | CI verification |
-| **7. Wisdom** | Extract learnings | feedback for next run |
+| Flow          | Purpose                            | Output                      |
+| ------------- | ---------------------------------- | --------------------------- |
+| **1. Signal** | Shape intent into contract         | requirements, BDD scenarios |
+| **2. Plan**   | Design before code                 | ADR, contracts, work plan   |
+| **3. Build**  | Implement with critics in the loop | code, tests, Draft PR       |
+| **4. Review** | Harvest PR feedback, fix           | Ready PR                    |
+| **5. Gate**   | Final checks                       | MERGE or BOUNCE             |
+| **6. Deploy** | Merge to main                      | CI verification             |
+| **7. Wisdom** | Extract learnings                  | feedback for next run       |
 
 Each flow breaks work into focused tasks. Agents handle one thing—`code-implementer` writes code, `test-author` writes tests, `code-critic` reviews—then hand off with a clear recommendation.
 
@@ -104,6 +104,7 @@ Most AI tools optimize for **generation speed**. DemoSwarm optimizes for **verif
 The machine iterates. Critics apply pressure. Tools produce executed evidence. Humans arbitrate based on what's proven—and escalate verification where doubt exists.
 
 **Completion states:**
+
 - **VERIFIED** — Evidence is green and fresh. Blockers empty. Done.
 - **UNVERIFIED** — Checkpointed state. Artifacts written, next steps documented, resumable.
 - **CANNOT_PROCEED** — Mechanical failure (tooling broken, permissions missing).
@@ -116,15 +117,15 @@ UNVERIFIED means "checkpointed"—the next step is routing, not blame.
 
 Agents are specialists. Each does one thing well:
 
-| Agent | What It Does |
-|-------|--------------|
-| `code-implementer` | Writes implementation code |
-| `test-author` | Writes tests from BDD scenarios |
-| `code-critic` | Reviews code, finds issues |
-| `test-critic` | Reviews tests for coverage gaps |
-| `repo-operator` | Handles git operations |
+| Agent              | What It Does                    |
+| ------------------ | ------------------------------- |
+| `code-implementer` | Writes implementation code      |
+| `test-author`      | Writes tests from BDD scenarios |
+| `code-critic`      | Reviews code, finds issues      |
+| `test-critic`      | Reviews tests for coverage gaps |
+| `repo-operator`    | Handles git operations          |
 
-They work autonomously—research, decide, implement, fix what they encounter—then hand off: *"Did X, found Y, recommend routing to Z next."*
+They work autonomously—research, decide, implement, fix what they encounter—then hand off: _"Did X, found Y, recommend routing to Z next."_
 
 If a flow can't finish (missing info, failing tests), it checkpoints. Rerun the same flow to resume.
 
@@ -144,31 +145,32 @@ Gates constrain what leaves the workspace, not what the model can analyze.
 Agents recommend next steps in plain language. Orchestrators route by reading handoffs and choosing what makes sense. No brittle routing blocks to parse.
 
 Example handoff:
+
 > "Implemented 3 of 5 endpoints. Remaining 2 need the User schema. Route to code-implementer with User schema first."
 
 ---
 
 ## Repo Layout
 
-| Location | What's There |
-|----------|--------------|
-| `.claude/commands/` | Flow orchestrators |
-| `.claude/agents/` | Workers, critics, auditors, operators |
-| `.claude/skills/` | Deterministic helpers (test-runner, linter) |
-| `.runs/` | Run artifacts (in your repo) |
+| Location            | What's There                                |
+| ------------------- | ------------------------------------------- |
+| `.claude/commands/` | Flow orchestrators                          |
+| `.claude/agents/`   | Workers, critics, auditors, operators       |
+| `.claude/skills/`   | Deterministic helpers (test-runner, linter) |
+| `.runs/`            | Run artifacts (in your repo)                |
 
 ---
 
 ## Docs
 
-| If you want to... | Go here |
-|-------------------|---------|
-| Get running in 5 minutes | [Quickstart](docs/tutorials/quickstart.md) |
-| Customize for your stack | [Customize Pack](docs/how-to/customize-pack.md) |
-| Recover from failures | [Failure Recovery](docs/how-to/failure-recovery.md) |
-| Look up contracts/schemas | [Contracts](docs/reference/contracts.md) |
-| Understand the design | [Architecture](docs/explanation/architecture.md) |
-| Browse all docs | [Docs Index](docs/README.md) |
+| If you want to...         | Go here                                             |
+| ------------------------- | --------------------------------------------------- |
+| Get running in 5 minutes  | [Quickstart](docs/tutorials/quickstart.md)          |
+| Customize for your stack  | [Customize Pack](docs/how-to/customize-pack.md)     |
+| Recover from failures     | [Failure Recovery](docs/how-to/failure-recovery.md) |
+| Look up contracts/schemas | [Contracts](docs/reference/contracts.md)            |
+| Understand the design     | [Architecture](docs/explanation/architecture.md)    |
+| Browse all docs           | [Docs Index](docs/README.md)                        |
 
 ---
 

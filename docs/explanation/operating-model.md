@@ -54,6 +54,7 @@ The system exists to compress "work that needs doing" into "evidence that needs 
 ### What Agents Do (Not Just Coding)
 
 Agents handle the full pipeline:
+
 - **Planning:** Requirements, ADRs, work breakdown
 - **Implementation:** Code that satisfies ACs
 - **Testing:** Tests that prove behavior
@@ -70,13 +71,13 @@ We build code that can be **verified without reading every line**.
 
 ### How verification works
 
-| Layer | What It Proves | Who Checks |
-|-------|---------------|------------|
-| **BDD scenarios** | Intent is captured and testable | Human reviews during Signal |
-| **Tests** | Code matches intent | Machine runs, human reviews summary |
-| **Mutation testing** | Tests actually exercise the code | Machine runs (when configured) |
-| **Critics** | Issues found before humans see them | Agents review each other's work |
-| **Receipts** | What happened, with evidence | Human audits when needed |
+| Layer                | What It Proves                      | Who Checks                          |
+| -------------------- | ----------------------------------- | ----------------------------------- |
+| **BDD scenarios**    | Intent is captured and testable     | Human reviews during Signal         |
+| **Tests**            | Code matches intent                 | Machine runs, human reviews summary |
+| **Mutation testing** | Tests actually exercise the code    | Machine runs (when configured)      |
+| **Critics**          | Issues found before humans see them | Agents review each other's work     |
+| **Receipts**         | What happened, with evidence        | Human audits when needed            |
 
 ### What the human reviews
 
@@ -101,13 +102,13 @@ The default outcome is **route to fix**, not **block and wait**.
 
 ### The routing hierarchy
 
-| Issue Type | Response |
-|-----------|----------|
-| Lint failures | Route to linter (auto-fix) |
-| Test failures | Route to fixer with repro |
-| Missing info | Derive from context or ask a crisp question |
-| Scope issues | Try local resolution first |
-| Design conflicts | Call reasoning agent, fix locally |
+| Issue Type       | Response                                    |
+| ---------------- | ------------------------------------------- |
+| Lint failures    | Route to linter (auto-fix)                  |
+| Test failures    | Route to fixer with repro                   |
+| Missing info     | Derive from context or ask a crisp question |
+| Scope issues     | Try local resolution first                  |
+| Design conflicts | Call reasoning agent, fix locally           |
 
 ### "Blocked" is rare and literal
 
@@ -204,12 +205,12 @@ High trust comes from architecture, not faith.
 
 ### Four pillars of trust
 
-| Pillar | How It Works |
-|--------|-------------|
-| **Containment** | Sandbox limits blast radius. Mistakes happen locally. Git is the safety net. |
-| **Verification** | Critics review work. Tests prove behavior. Evidence accumulates. |
-| **Boundaries** | Publish gates can say no. Secrets scanning. Merge review. Deploy verification. |
-| **Observability** | Everything is auditable. Receipts exist. Diffs are visible. Nothing hides. |
+| Pillar            | How It Works                                                                   |
+| ----------------- | ------------------------------------------------------------------------------ |
+| **Containment**   | Sandbox limits blast radius. Mistakes happen locally. Git is the safety net.   |
+| **Verification**  | Critics review work. Tests prove behavior. Evidence accumulates.               |
+| **Boundaries**    | Publish gates can say no. Secrets scanning. Merge review. Deploy verification. |
+| **Observability** | Everything is auditable. Receipts exist. Diffs are visible. Nothing hides.     |
 
 ### Trust is earned, not assumed
 
@@ -236,14 +237,15 @@ A mistake in the sandbox is cheap. A mistake in production is expensive. Gate ac
 
 ## The Work/Publish Split
 
-| Plane | Posture | Purpose |
-|-------|---------|---------|
-| **Work Plane** | Default-allow | Explore, implement, iterate freely |
-| **Publish Plane** | Gated | Control what leaves the workspace |
+| Plane             | Posture       | Purpose                            |
+| ----------------- | ------------- | ---------------------------------- |
+| **Work Plane**    | Default-allow | Explore, implement, iterate freely |
+| **Publish Plane** | Gated         | Control what leaves the workspace  |
 
 ### Work Plane (freedom)
 
 Everything up to staging runs without friction:
+
 - Read any file
 - Run any command
 - Try any approach
@@ -252,6 +254,7 @@ Everything up to staging runs without friction:
 ### Publish Plane (gates)
 
 Gates engage only at boundaries:
+
 - **Commit:** Secrets scanning
 - **Push:** Repo hygiene check
 - **Merge:** Human review
@@ -268,12 +271,14 @@ This separation prevents security theater. Agents don't spend tokens proving the
 ### What this means
 
 The developer's expertise is in:
+
 - Knowing what to build
 - Evaluating whether it's right
 - Making ship decisions
 - Handling genuine ambiguity
 
 The developer's time shouldn't go to:
+
 - Writing boilerplate
 - Running obvious tests
 - Reading routine code

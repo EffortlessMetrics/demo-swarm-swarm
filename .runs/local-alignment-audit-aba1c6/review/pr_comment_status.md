@@ -28,4 +28,3 @@ concerns: []
 - idempotent marker included for future updates
 - content mode: RESTRICTED (gate results not yet available, publish gate status unknown)
 - includes: run identity, worklist summary, items resolved, files modified, pending items note
-

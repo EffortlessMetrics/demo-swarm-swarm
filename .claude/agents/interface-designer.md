@@ -98,30 +98,25 @@ These prefixes must not be renamed.
 ## Behavior
 
 1. **Extract interface boundaries**
-
    - From ADR: components, trust boundaries, dependencies, rollout constraints.
    - From requirements: REQ/NFR targets that imply contracts (latency budgets, authn/authz, data retention, compliance).
    - From risks: surfaces requiring defensive design (idempotency, replay, rate limits).
 
 2. **Choose contract style and compatibility rules**
-
    - Prefer additive changes; avoid breaking response shapes.
    - If breaking changes are unavoidable: version the endpoint or event (`/v2/...`, `event.name.v2`) and document migration/deprecation.
    - Define a single canonical error shape and error code taxonomy.
 
 3. **Design APIs**
-
    - Define endpoints, methods, status codes, and error cases.
    - Define request/response schemas with validation rules.
    - Document idempotency keys, pagination, and rate-limit semantics where relevant.
 
 4. **Design data model**
-
    - Define entities, keys, uniqueness, foreign keys, and invariants.
    - Call out sensitive fields and storage constraints (PII, secrets, retention) if relevant.
 
 5. **Plan migrations (optional)**
-
    - If DB changes are required, write planned migrations under `.runs/<run-id>/plan/migrations/`.
    - If DB dialect/tooling is unknown, keep SQL conservative and mark assumptions.
 
@@ -135,7 +130,6 @@ These prefixes must not be renamed.
    - **Search index / cache schema** changes
 
    When writing state transitions, scan the repo to identify how Flow 3 should apply them:
-
    - **Target Directory**: Search for existing migrations (`.sql` files, `migrations/` dirs, `prisma/migrations/`, `db/migrate/`, `alembic/versions/`, etc.) or config schemas.
    - **Apply Command**: Identify the tooling (e.g., `cargo sqlx migrate run`, `npx prisma migrate dev`, `alembic upgrade head`, `rails db:migrate`).
    - **Dialect/Format**: Infer the SQL dialect or config format from existing files.
@@ -146,15 +140,18 @@ These prefixes must not be renamed.
    ## State Transition Infrastructure
 
    ### Location Split
+
    - **Plan Drafts**: `.runs/<run-id>/plan/migrations/` (reviewed in Flow 2)
    - **Build Target**: `<repo path where Build moves real migrations>`
 
    ### Apply Details
+
    - **Apply Command**: `<command to apply state transitions>`
    - **Dialect/Format**: `<sql dialect or config format>`
    - **Naming Convention**: `<e.g., YYYYMMDDHHMMSS_name.sql, 001_name.sql>`
 
    ### Phasing (if applicable)
+
    - **Phase 1 (Expand)**: Add new columns/fields as nullable/optional
    - **Phase 2 (Migrate)**: Backfill data, deploy tolerant code
    - **Phase 3 (Contract)**: Remove old columns/fields, enforce new schema
@@ -163,7 +160,6 @@ These prefixes must not be renamed.
    If no existing infrastructure is found, document that explicitly so Flow 3 knows to scaffold it or use raw SQL/config.
 
 7. **Emit machine-countable inventory**
-
    - Populate the inventory header in `api_contracts.yaml`.
    - Populate the `## Inventory (machine countable)` section in `schema.md`.
 
@@ -194,6 +190,7 @@ At the end of `.runs/<run-id>/plan/schema.md`, include:
 ```
 
 Guidance:
+
 - If contracts are complete → "Contracts ready for Build; [N] endpoints, [M] schemas, [K] migrations defined"
 - If breaking changes required → "Breaking changes documented; review versioning strategy before Build"
 - If missing ADR/requirements → "Design gaps exist; recommend [specific agent] review in Flow 1/2"
@@ -210,6 +207,7 @@ After writing outputs, provide a natural language handoff:
 **Recommendation:** Provide specific guidance for next steps based on contract completeness.
 
 Outputs written:
+
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/schema.md`
 - `.runs/<run-id>/plan/migrations/<files...>` (only if migrations were needed)

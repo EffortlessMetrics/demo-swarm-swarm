@@ -21,10 +21,12 @@ This helps improve how we weight and triage signals in future runs.
 ## Inputs
 
 Required:
+
 - `.runs/<run-id>/review/pr_feedback.md` (raw feedback with sources)
 - `.runs/<run-id>/review/review_worklist.md` (worklist with statuses and skip_reasons)
 
 Supporting:
+
 - `.runs/<run-id>/review/review_worklist.json` (machine-readable worklist)
 - `.runs/<run-id>/build/pr_feedback.md` (if Build harvested feedback)
 - `.runs/<run-id>/build/test_execution.md` (test results)
@@ -35,6 +37,7 @@ Supporting:
 ### 1. Signal Accuracy by Source
 
 For each feedback source (CI, CodeRabbit, Human Review, Linter, Dependabot):
+
 - How many items were RESOLVED? (valid signal)
 - How many were SKIPPED? (noise or outdated)
 - What were the skip reasons?
@@ -42,6 +45,7 @@ For each feedback source (CI, CodeRabbit, Human Review, Linter, Dependabot):
 ### 2. False Positive Rate
 
 Track items marked as:
+
 - `SKIPPED: INCORRECT_SUGGESTION` — bot was wrong
 - `SKIPPED: STALE_COMMENT` — feedback was outdated
 - `SKIPPED: OUTDATED_CONTEXT` — context changed
@@ -57,6 +61,7 @@ High false positive rate = that source needs better triage.
 ### 4. Severity Calibration
 
 Did severity assignments match reality?
+
 - CRITICAL items that were actually minor?
 - MINOR items that caused real problems?
 
@@ -85,6 +90,7 @@ for item in worklist['items']:
 ### Step 2: Classify by Source
 
 Group items by their source prefix:
+
 - `FB-CI-*` → CI/GitHub Actions
 - `FB-RC-*` → Review comments (often CodeRabbit)
 - `FB-RV-*` → Full reviews (often human)
@@ -93,12 +99,14 @@ Group items by their source prefix:
 ### Step 3: Calculate Accuracy Metrics
 
 For each source:
+
 ```
 accuracy = RESOLVED / (RESOLVED + SKIPPED_AS_INCORRECT)
 noise_rate = SKIPPED / (RESOLVED + SKIPPED)
 ```
 
 Skip reasons matter:
+
 - `INCORRECT_SUGGESTION` = false positive (bad signal)
 - `STALE_COMMENT` = timing issue (not source's fault)
 - `ALREADY_FIXED` = redundant but not wrong
@@ -107,6 +115,7 @@ Skip reasons matter:
 ### Step 4: Identify Patterns
 
 Look for:
+
 - Sources with high false positive rates
 - Categories where bots struggle (e.g., architecture suggestions)
 - Categories where bots excel (e.g., lint, formatting)
@@ -120,6 +129,7 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 # Signal Quality Report for <run-id>
 
 ## Signal Summary
+
 - Total items: <int>
 - Resolved: <int>
 - Skipped: <int>
@@ -130,31 +140,33 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 
 ## Signal Accuracy by Source
 
-| Source | Total | Resolved | Skipped | Accuracy | Noise Rate |
-|--------|-------|----------|---------|----------|------------|
-| CI | 5 | 4 | 1 | 80% | 20% |
-| CodeRabbit | 12 | 8 | 4 | 67% | 33% |
-| Human Review | 3 | 3 | 0 | 100% | 0% |
-| Linter | 8 | 8 | 0 | 100% | 0% |
+| Source       | Total | Resolved | Skipped | Accuracy | Noise Rate |
+| ------------ | ----- | -------- | ------- | -------- | ---------- |
+| CI           | 5     | 4        | 1       | 80%      | 20%        |
+| CodeRabbit   | 12    | 8        | 4       | 67%      | 33%        |
+| Human Review | 3     | 3        | 0       | 100%     | 0%         |
+| Linter       | 8     | 8        | 0       | 100%     | 0%         |
 
 ## Skip Reason Breakdown
 
-| Reason | Count | % of Skipped |
-|--------|-------|--------------|
-| INCORRECT_SUGGESTION | 2 | 40% |
-| STALE_COMMENT | 1 | 20% |
-| ALREADY_FIXED | 1 | 20% |
-| OUT_OF_SCOPE | 1 | 20% |
+| Reason               | Count | % of Skipped |
+| -------------------- | ----- | ------------ |
+| INCORRECT_SUGGESTION | 2     | 40%          |
+| STALE_COMMENT        | 1     | 20%          |
+| ALREADY_FIXED        | 1     | 20%          |
+| OUT_OF_SCOPE         | 1     | 20%          |
 
 ## False Positives (Items Marked Incorrect)
 
 ### SQ-FP-001: FB-RC-123456789
+
 - **Source**: CodeRabbit
 - **Suggestion**: "Use bcrypt instead of argon2"
 - **Why incorrect**: Argon2 is the recommended choice; bot has outdated guidance
 - **Category**: SECURITY
 
 ### SQ-FP-002: FB-RC-234567890
+
 - **Source**: CodeRabbit
 - **Suggestion**: "This import is unused"
 - **Why incorrect**: Import is used in test file, bot didn't check tests
@@ -163,23 +175,28 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 ## Human vs Bot Comparison
 
 ### What Humans Caught That Bots Missed
+
 - "Race condition in concurrent handler" — requires understanding of control flow
 - "Error message is confusing for users" — UX judgment
 
 ### What Bots Caught That Humans Didn't Mention
+
 - 8 lint/style issues (mechanical, expected)
 - 2 potential null pointer issues (static analysis)
 
 ### Accuracy Comparison
+
 - **Bots**: 75% accuracy (good at mechanical, weak at architecture)
 - **Humans**: 100% accuracy (but caught fewer items)
 
 ## Severity Calibration
 
 ### Over-Severity (marked higher than actual impact)
+
 - FB-RC-345678901: Marked CRITICAL, was actually MINOR (style issue)
 
 ### Under-Severity (marked lower than actual impact)
+
 - FB-IC-456789012: Marked MINOR, caused actual bug (should have been MAJOR)
 
 ## CI Signal Analysis
@@ -191,19 +208,23 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 ## Recommendations
 
 ### Triage Improvements
+
 1. **Downweight CodeRabbit on architecture**: 40% false positive rate on ARCHITECTURE category
 2. **Trust linter output**: 100% accuracy, can auto-apply
 3. **Flag staff engineer comments**: 100% accuracy, high signal
 
 ### Automation Opportunities
+
 1. Human caught "race condition" — could add concurrency linter
 2. Human caught "confusing error message" — not automatable (UX judgment)
 
 ### Bot Tuning Suggestions
+
 1. CodeRabbit: Disable "unused import" checks (often wrong with test files)
 2. CodeRabbit: Update security guidance (argon2 > bcrypt is current best practice)
 
 ## Inventory (machine countable)
+
 - SIGNAL_ITEMS_TOTAL: <count>
 - SIGNAL_RESOLVED: <count>
 - SIGNAL_SKIPPED: <count>
@@ -220,6 +241,7 @@ Write `.runs/<run-id>/wisdom/signal_quality_report.md`:
 ## Stable Markers
 
 Use `### SQ-FP-NNN:` for false positive entries:
+
 ```
 ### SQ-FP-001: FB-RC-123456789
 ### SQ-FP-002: FB-RC-234567890
@@ -230,6 +252,7 @@ Use `### SQ-FP-NNN:` for false positive entries:
 After writing the signal quality report, report back with what you found and your recommendation for next steps.
 
 Your handoff should explain:
+
 - How many feedback items you analyzed and from which sources
 - Overall accuracy findings
 - Key patterns discovered (which sources are trustworthy, which are noisy)

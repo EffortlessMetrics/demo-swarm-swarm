@@ -11,6 +11,7 @@ This document explains Physics #3: how the `.runs/` directory creates a containe
 LLMs are non-deterministic. Given the same prompt twice, you may get different code. Sometimes that code is excellent. Sometimes it breaks things. Sometimes it rewrites files that should not have been touched.
 
 If agents operated directly on the main branch, every generation would be a gamble:
+
 - A bad generation could break production
 - A hallucinated refactor could touch 50 files
 - A completion-pressure artifact could claim success while leaving chaos
@@ -48,12 +49,12 @@ Each run gets its own isolated directory. Artifacts accumulate there through all
 
 The Shadow Fork exists to **contain blast radius** while enabling **default-allow engineering**.
 
-| Without Shadow Fork | With Shadow Fork |
-|---------------------|------------------|
-| Every file write is risky | Writes are contained to `.runs/` |
-| Permission checks everywhere | Autonomy inside, gates at boundary |
-| Bad generations affect main | Bad generations are local to the run |
-| Recovery requires git archeology | Recovery is `rm -rf .runs/<run-id>` |
+| Without Shadow Fork              | With Shadow Fork                     |
+| -------------------------------- | ------------------------------------ |
+| Every file write is risky        | Writes are contained to `.runs/`     |
+| Permission checks everywhere     | Autonomy inside, gates at boundary   |
+| Bad generations affect main      | Bad generations are local to the run |
+| Recovery requires git archeology | Recovery is `rm -rf .runs/<run-id>`  |
 
 The key insight: the danger of stochastic generation is not in the generation itself, but in the generation escaping to where it can cause harm. Contain the escape path, and generation becomes safe.
 
@@ -63,14 +64,14 @@ The key insight: the danger of stochastic generation is not in the generation it
 
 Inside the Shadow Fork, agents have god-mode:
 
-| Capability | Why It's Safe |
-|------------|---------------|
-| Read any file in the repo | Information doesn't leak; reading is not risk |
-| Write any code | It's in the sandbox; gate checks before escape |
-| Run any test | Results stay local; evidence gets recorded |
-| Iterate any number of times | Cheap compute; only final artifact matters |
-| Delete, refactor, experiment | Shadow Fork is disposable; main is untouched |
-| Make mistakes | Mistakes are cheap when contained |
+| Capability                   | Why It's Safe                                  |
+| ---------------------------- | ---------------------------------------------- |
+| Read any file in the repo    | Information doesn't leak; reading is not risk  |
+| Write any code               | It's in the sandbox; gate checks before escape |
+| Run any test                 | Results stay local; evidence gets recorded     |
+| Iterate any number of times  | Cheap compute; only final artifact matters     |
+| Delete, refactor, experiment | Shadow Fork is disposable; main is untouched   |
+| Make mistakes                | Mistakes are cheap when contained              |
 
 This is not "trust the agent." This is "trust the containment." The agent can do anything because the sandbox contains everything.
 
@@ -80,12 +81,12 @@ This is not "trust the agent." This is "trust the containment." The agent can do
 
 The Shadow Fork has hard boundaries:
 
-| Blocked Action | Why |
-|----------------|-----|
-| Commit secrets | `secrets-sanitizer` gates the boundary |
-| Push without approval | `repo-operator` gates GitHub operations |
-| Affect main branch directly | All changes go through staging/gating |
-| Skip the gate | Gate is the only path from `.runs/` to main |
+| Blocked Action              | Why                                         |
+| --------------------------- | ------------------------------------------- |
+| Commit secrets              | `secrets-sanitizer` gates the boundary      |
+| Push without approval       | `repo-operator` gates GitHub operations     |
+| Affect main branch directly | All changes go through staging/gating       |
+| Skip the gate               | Gate is the only path from `.runs/` to main |
 
 The boundaries are not prompts or permissions. They are architectural: there is no path from the Shadow Fork to production that doesn't go through the gate.
 
@@ -116,6 +117,7 @@ Until the gate approves and repo-operator executes, main is untouched. A hundred
 ## Recovery When Things Go Wrong
 
 Sometimes the Shadow Fork gets corrupted:
+
 - A run goes sideways
 - Artifacts become inconsistent
 - Experiments leave debris
@@ -143,6 +145,7 @@ Nuclear option. All swarm state is gone. Main remains untouched because nothing 
 **Recovery is cheap because containment is real.** You cannot corrupt what you cannot reach. The Shadow Fork is designed to be disposable.
 
 Compare to operating directly on main:
+
 - Recovery requires `git reflog` archaeology
 - Some changes might be pushed
 - Collaborators might have pulled
@@ -156,12 +159,12 @@ The Shadow Fork makes these scenarios impossible. Bad generations die in the san
 
 The Shadow Fork is what makes default-allow engineering viable.
 
-| Principle | How Shadow Fork Enables It |
-|-----------|---------------------------|
-| **No permission checks inside** | Containment is the permission. |
-| **Agents work freely** | Sandbox absorbs all experiments. |
-| **Gates only at boundaries** | Boundary is `.runs/` to main. |
-| **Velocity over ceremony** | Iteration is cheap when contained. |
+| Principle                       | How Shadow Fork Enables It         |
+| ------------------------------- | ---------------------------------- |
+| **No permission checks inside** | Containment is the permission.     |
+| **Agents work freely**          | Sandbox absorbs all experiments.   |
+| **Gates only at boundaries**    | Boundary is `.runs/` to main.      |
+| **Velocity over ceremony**      | Iteration is cheap when contained. |
 
 Without the Shadow Fork, default-allow would be reckless. With it, default-allow is smart engineering.
 

@@ -19,11 +19,13 @@ Your job is to read the code and tell the truth about its health. You do not fix
 ## Inputs (best-effort)
 
 Primary:
+
 - Changed files from `git diff` or `.runs/<run-id>/build/impl_changes_summary.md`
 - `.runs/<run-id>/build/build_receipt.json` (test counts, coverage data)
 - `.runs/<run-id>/build/code_critique.md` (if present)
 
 Supporting:
+
 - `.runs/<run-id>/plan/adr.md` (architectural context)
 - Project source files (for direct analysis)
 
@@ -58,12 +60,14 @@ Supporting:
 Focus on **changed files** from this run. Don't audit the entire codebase — analyze what was touched.
 
 Use:
+
 - `git diff --name-only` against the base branch
 - Files listed in `impl_changes_summary.md`
 
 ### Step 2: Read and Assess
 
 For each file in scope:
+
 - Read the file
 - Assess against the analysis targets
 - Note specific issues with line numbers when possible
@@ -71,6 +75,7 @@ For each file in scope:
 ### Step 3: Synthesize Findings
 
 Group findings by severity:
+
 - **High:** Architectural issues, security gaps, complex code that will cause bugs
 - **Medium:** Maintainability issues, inconsistent patterns
 - **Low:** Style issues, minor improvements
@@ -84,13 +89,13 @@ Write `.runs/<run-id>/wisdom/quality_report.md`:
 
 ## Quality Metrics
 
-| Metric | Value |
-|--------|-------|
-| Maintainability score | HIGH / MEDIUM / LOW |
-| Files analyzed | <int> |
-| High severity issues | <int> |
-| Medium severity issues | <int> |
-| Low severity issues | <int> |
+| Metric                 | Value               |
+| ---------------------- | ------------------- |
+| Maintainability score  | HIGH / MEDIUM / LOW |
+| Files analyzed         | <int>               |
+| High severity issues   | <int>               |
+| Medium severity issues | <int>               |
+| Low severity issues    | <int>               |
 
 ## Maintainability Score: <HIGH|MEDIUM|LOW>
 
@@ -99,26 +104,32 @@ Write `.runs/<run-id>/wisdom/quality_report.md`:
 ## Top 3 Areas Needing Attention
 
 ### 1. <Area Name>
+
 - **Location:** <path:line>
 - **Issue:** <what's wrong>
 - **Impact:** <why it matters>
 - **Suggested Refactor:** <concrete action>
 
 ### 2. <Area Name>
+
 ...
 
 ### 3. <Area Name>
+
 ...
 
 ## Detailed Findings
 
 ### High Severity
+
 - <finding with location and evidence>
 
 ### Medium Severity
+
 - <finding with location and evidence>
 
 ### Low Severity
+
 - <finding with location and evidence>
 
 ## Recommendations for Backlog
@@ -127,6 +138,7 @@ Write `.runs/<run-id>/wisdom/quality_report.md`:
 - <specific refactoring task>
 
 ## Inventory (machine countable)
+
 - QUALITY_ISSUE_HIGH: <count>
 - QUALITY_ISSUE_MEDIUM: <count>
 - QUALITY_ISSUE_LOW: <count>

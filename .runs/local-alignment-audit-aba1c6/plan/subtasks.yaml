@@ -42,7 +42,11 @@ subtasks:
       doc_paths: ["docs/explanation/architecture.md"]
       allow_new_files_under: []
     touches: ["docs/explanation/architecture.md"]
-    tests: ["grep 'six flows' docs/explanation/architecture.md returns zero matches", "grep 'seven flows' docs/explanation/architecture.md returns match"]
+    tests:
+      [
+        "grep 'six flows' docs/explanation/architecture.md returns zero matches",
+        "grep 'seven flows' docs/explanation/architecture.md returns match",
+      ]
     observability: []
     estimate: M
 
@@ -66,7 +70,11 @@ subtasks:
       doc_paths: ["docs/explanation/architecture.md"]
       allow_new_files_under: []
     touches: ["docs/explanation/architecture.md"]
-    tests: ["grep 'ReDoS' docs/explanation/architecture.md shows immunity claim", "grep '102' docs/explanation/architecture.md returns match"]
+    tests:
+      [
+        "grep 'ReDoS' docs/explanation/architecture.md shows immunity claim",
+        "grep '102' docs/explanation/architecture.md returns match",
+      ]
     observability: []
     estimate: S
 
@@ -106,7 +114,11 @@ subtasks:
       doc_paths: ["README.md"]
       allow_new_files_under: []
     touches: ["README.md"]
-    tests: ["grep 'six flows' README.md returns zero matches", "grep 'seven flows' README.md returns match"]
+    tests:
+      [
+        "grep 'six flows' README.md returns zero matches",
+        "grep 'seven flows' README.md returns match",
+      ]
     observability: []
     estimate: S
 
@@ -145,7 +157,10 @@ subtasks:
       doc_paths: ["CHANGELOG.md"]
       allow_new_files_under: []
     touches: ["CHANGELOG.md"]
-    tests: ["grep 'seven flows' CHANGELOG.md returns match or annotation explains evolution"]
+    tests:
+      [
+        "grep 'seven flows' CHANGELOG.md returns match or annotation explains evolution",
+      ]
     observability: []
     estimate: S
 
@@ -163,10 +178,24 @@ subtasks:
     scope_hints:
       code_roots: []
       test_roots: []
-      doc_paths: ["docs/reference/glossary.md", "CONTRIBUTING.md", "docs/how-to/work-without-github.md"]
+      doc_paths:
+        [
+          "docs/reference/glossary.md",
+          "CONTRIBUTING.md",
+          "docs/how-to/work-without-github.md",
+        ]
       allow_new_files_under: []
-    touches: ["docs/reference/glossary.md", "CONTRIBUTING.md", "docs/how-to/work-without-github.md"]
-    tests: ["grep '6 flows' docs/reference/glossary.md returns zero matches", "grep '6 flows' CONTRIBUTING.md returns zero matches"]
+    touches:
+      [
+        "docs/reference/glossary.md",
+        "CONTRIBUTING.md",
+        "docs/how-to/work-without-github.md",
+      ]
+    tests:
+      [
+        "grep '6 flows' docs/reference/glossary.md returns zero matches",
+        "grep '6 flows' CONTRIBUTING.md returns zero matches",
+      ]
     observability: []
     estimate: S
 
@@ -206,6 +235,10 @@ subtasks:
       doc_paths: []
       allow_new_files_under: []
     touches: []
-    tests: ["grep -r 'six flows' README.md DEMO_RUN.md docs/explanation/architecture.md returns zero matches", "pack-check exits 0"]
+    tests:
+      [
+        "grep -r 'six flows' README.md DEMO_RUN.md docs/explanation/architecture.md returns zero matches",
+        "pack-check exits 0",
+      ]
     observability: []
     estimate: S

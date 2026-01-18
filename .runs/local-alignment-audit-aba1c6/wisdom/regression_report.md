@@ -1,6 +1,7 @@
 # Regression Report
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -10,23 +11,26 @@ route_to_agent: null
 blockers: []
 
 missing_required:
-  - ".runs/local-alignment-audit-aba1c6/build/test_critique.md (not present; documentation-only run)"
-  - ".runs/local-alignment-audit-aba1c6/build/build_receipt.json (permission denied during read)"
+
+- ".runs/local-alignment-audit-aba1c6/build/test_critique.md (not present; documentation-only run)"
+- ".runs/local-alignment-audit-aba1c6/build/build_receipt.json (permission denied during read)"
 
 concerns:
-  - "Build receipt CANNOT_PROCEED status is a permissions artifact, not a content defect"
-  - "cargo audit could not run due to CVSS 4.0 parser limitation (external tooling issue)"
-  - "RSK-001 (path traversal in secrets.rs) deferred to future security hardening run"
+
+- "Build receipt CANNOT_PROCEED status is a permissions artifact, not a content defect"
+- "cargo audit could not run due to CVSS 4.0 parser limitation (external tooling issue)"
+- "RSK-001 (path traversal in secrets.rs) deferred to future security hardening run"
 
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+critical: 0
+major: 0
+minor: 0
 
 regressions_found: 0
 baseline_available: no
 
 ## Context
+
 - flow: wisdom
 - run_id: local-alignment-audit-aba1c6
 - issue_number: 1
@@ -46,27 +50,28 @@ baseline_available: no
   - ".runs/local-alignment-audit-aba1c6/deploy/deploy_receipt.json"
 
 ## Canonical Test Summary
+
 - pytest_summary: "Pack contents: Agents: 73, Commands: 8, Skills: 7. Passed with 2 warning(s)." (pack-check validation)
 - source: ".runs/local-alignment-audit-aba1c6/gate/receipt_audit.md (lines 68-69)"
 
 ## Test Analysis
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Total Tests | 53 | receipt_audit.md (line 48) |
-| Passed | 53 | receipt_audit.md (line 48) |
-| Failed | 0 | receipt_audit.md (line 49) |
-| XFailed | 0 | receipt_audit.md (line 51) |
-| Skipped | 0 | receipt_audit.md (line 50) |
-| Flaky | 0 | No flakiness indicators in artifacts |
+| Metric      | Value | Source                               |
+| ----------- | ----- | ------------------------------------ |
+| Total Tests | 53    | receipt_audit.md (line 48)           |
+| Passed      | 53    | receipt_audit.md (line 48)           |
+| Failed      | 0     | receipt_audit.md (line 49)           |
+| XFailed     | 0     | receipt_audit.md (line 51)           |
+| Skipped     | 0     | receipt_audit.md (line 50)           |
+| Flaky       | 0     | No flakiness indicators in artifacts |
 
 **Note:** This run was a documentation alignment audit. The "tests" are pack-check validations (structural assertions) rather than pytest unit tests. All 53 assertions passed with 2 advisory warnings (QID patterns, non-blocking).
 
 ## Regression Register
 
-| ID | Severity | Test/Area | Summary | Blamed Commit | Related Issue |
-|----|----------|-----------|---------|---------------|---------------|
-| (none) | - | - | No regressions detected | - | - |
+| ID     | Severity | Test/Area | Summary                 | Blamed Commit | Related Issue |
+| ------ | -------- | --------- | ----------------------- | ------------- | ------------- |
+| (none) | -        | -         | No regressions detected | -             | -             |
 
 **No regressions detected.** This run focused on documentation alignment, not code changes. All quality gates passed:
 
@@ -95,33 +100,34 @@ All changes were documentation/configuration only. No code execution surface was
 
 ## Coverage Signals
 
-| Source | Finding | Notes |
-|--------|---------|------|
-| gate/coverage_audit.md | N/A (docs-only) | Thresholds explicitly null; documentation-only work |
-| Scenario Coverage | PASS | 32 BDD scenarios covering 10 requirements (7 REQ + 3 NFR) |
-| Requirement Coverage | PASS | All 7 functional requirements mapped with acceptance criteria |
-| AC Completion | PASS | 35/35 acceptance criteria satisfied |
+| Source                 | Finding         | Notes                                                         |
+| ---------------------- | --------------- | ------------------------------------------------------------- |
+| gate/coverage_audit.md | N/A (docs-only) | Thresholds explicitly null; documentation-only work           |
+| Scenario Coverage      | PASS            | 32 BDD scenarios covering 10 requirements (7 REQ + 3 NFR)     |
+| Requirement Coverage   | PASS            | All 7 functional requirements mapped with acceptance criteria |
+| AC Completion          | PASS            | 35/35 acceptance criteria satisfied                           |
 
 **Coverage Thresholds:** Not applicable for documentation-only work. Coverage audit correctly marked thresholds as null per test_plan.md.
 
 ## Issue Correlation
 
-| Issue | Related Regression | Confidence | Notes |
-|-------|-------------------|------------|-------|
-| #1 (DemoSwarm Documentation-Code Alignment Audit) | none | HIGH | Primary work item; all objectives achieved |
+| Issue                                             | Related Regression | Confidence | Notes                                      |
+| ------------------------------------------------- | ------------------ | ---------- | ------------------------------------------ |
+| #1 (DemoSwarm Documentation-Code Alignment Audit) | none               | HIGH       | Primary work item; all objectives achieved |
 
 **Issue #1 Status:** OPEN (awaiting Wisdom flow completion)
+
 - PR #2: merged to main
 - Release tag: v1.0.0-local-alignment-audit-aba1c6
 - All documented objectives completed successfully
 
 ## Blame Summary
 
-| Commit | Author | Date | Files | Related Regressions |
-|--------|--------|------|-------|---------------------|
-| ed9b9c9 | EffortlessSteven | 2025-12-20 | merge | none (merge commit for PR #2) |
-| dcdf511 | Steven Zimmerman | 2025-12-20 | review docs | none (review documentation refactor) |
-| fc924d2 | Steven Zimmerman | 2025-12-20 | 13 files | none (seven-flow documentation alignment) |
+| Commit  | Author           | Date       | Files       | Related Regressions                       |
+| ------- | ---------------- | ---------- | ----------- | ----------------------------------------- |
+| ed9b9c9 | EffortlessSteven | 2025-12-20 | merge       | none (merge commit for PR #2)             |
+| dcdf511 | Steven Zimmerman | 2025-12-20 | review docs | none (review documentation refactor)      |
+| fc924d2 | Steven Zimmerman | 2025-12-20 | 13 files    | none (seven-flow documentation alignment) |
 
 **Blame Analysis:** All commits in this run are documentation changes by Steven Zimmerman. No code changes were introduced, so no regression-causing commits exist.
 
@@ -136,16 +142,18 @@ All changes were documentation/configuration only. No code execution surface was
 ---
 
 ## Regression Analyst Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
 route_to_agent: null
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+critical: 0
+major: 0
+minor: 0
 regressions_found: 0
 blockers: []
 missing_required:
-  - ".runs/local-alignment-audit-aba1c6/build/test_critique.md"
-  - ".runs/local-alignment-audit-aba1c6/build/build_receipt.json"
+
+- ".runs/local-alignment-audit-aba1c6/build/test_critique.md"
+- ".runs/local-alignment-audit-aba1c6/build/build_receipt.json"

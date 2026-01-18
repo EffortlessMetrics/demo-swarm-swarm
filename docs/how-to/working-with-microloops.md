@@ -26,24 +26,27 @@ The orchestrator routes on the critic's **prose handoff**, not by parsing struct
 ## Microloop Pairs by Flow
 
 ### Flow 1: Signal
-| Writer | Critic | Artifact |
-|--------|--------|----------|
+
+| Writer                | Critic                | Artifact                                       |
+| --------------------- | --------------------- | ---------------------------------------------- |
 | `requirements-author` | `requirements-critic` | `requirements.md` → `requirements_critique.md` |
-| `bdd-author` | `bdd-critic` | `features/*.feature` → `bdd_critique.md` |
+| `bdd-author`          | `bdd-critic`          | `features/*.feature` → `bdd_critique.md`       |
 
 ### Flow 2: Plan
-| Writer | Critic | Artifact |
-|--------|--------|----------|
-| `design-optioneer` | `option-critic` | `design_options.md` → `option_critique.md` |
-| `interface-designer` | `contract-critic` | `api_contracts.yaml` → `contract_critique.md` |
+
+| Writer                   | Critic                 | Artifact                                              |
+| ------------------------ | ---------------------- | ----------------------------------------------------- |
+| `design-optioneer`       | `option-critic`        | `design_options.md` → `option_critique.md`            |
+| `interface-designer`     | `contract-critic`      | `api_contracts.yaml` → `contract_critique.md`         |
 | `observability-designer` | `observability-critic` | `observability_spec.md` → `observability_critique.md` |
 
 ### Flow 3: Build
-| Writer | Critic | Artifact |
-|--------|--------|----------|
-| `test-author` | `test-critic` | Tests → `test_critique.md` |
-| `code-implementer` | `code-critic` | Code → `code_critique.md` |
-| `doc-writer` | `doc-critic` | Docs → `doc_critique.md` |
+
+| Writer             | Critic        | Artifact                   |
+| ------------------ | ------------- | -------------------------- |
+| `test-author`      | `test-critic` | Tests → `test_critique.md` |
+| `code-implementer` | `code-critic` | Code → `code_critique.md`  |
+| `doc-writer`       | `doc-critic`  | Docs → `doc_critique.md`   |
 
 ---
 
@@ -59,6 +62,7 @@ The default microloop runs 2 passes:
 ```
 
 **Continue beyond 2 passes only when:**
+
 - The critic's handoff recommends another iteration
 - The critic indicates further iteration would help
 
@@ -80,14 +84,14 @@ After each critic pass, read the **prose handoff** and route based on understand
 
 ### Routing Rules
 
-| What the critic says | Action |
-|---------------------|--------|
-| "Work is complete, no issues" | **Exit loop** — proceed to next station |
-| "Mechanical failure" (IO/permissions/tooling) | **Stop** — fix environment first |
-| "This needs to go back to [flow/agent]" | **Bounce** — route as recommended |
+| What the critic says                               | Action                                         |
+| -------------------------------------------------- | ---------------------------------------------- |
+| "Work is complete, no issues"                      | **Exit loop** — proceed to next station        |
+| "Mechanical failure" (IO/permissions/tooling)      | **Stop** — fix environment first               |
+| "This needs to go back to [flow/agent]"            | **Bounce** — route as recommended              |
 | "Recommend another iteration" + "this should help" | **Rerun** — call writer with critique worklist |
-| "Another iteration won't help" | **Exit loop** — proceed with blockers recorded |
-| "Ready to proceed despite issues" | **Exit loop** — proceed even if unverified |
+| "Another iteration won't help"                     | **Exit loop** — proceed with blockers recorded |
+| "Ready to proceed despite issues"                  | **Exit loop** — proceed even if unverified     |
 
 The orchestrator reads and understands the prose. There is no parsing of `recommended_action` or `can_further_iteration_help` fields.
 
@@ -124,12 +128,13 @@ Orchestrator exits loop, proceeds to code-implementer
 
 Microloops are **bounded** to prevent infinite iteration:
 
-| Pass Type | Default Limit | When to Extend |
-|-----------|---------------|----------------|
-| Writer → Critic | 2 full passes | Only when critic says another iteration would help |
-| Maximum iterations | 3-4 | Rarely; indicates upstream issue |
+| Pass Type          | Default Limit | When to Extend                                     |
+| ------------------ | ------------- | -------------------------------------------------- |
+| Writer → Critic    | 2 full passes | Only when critic says another iteration would help |
+| Maximum iterations | 3-4           | Rarely; indicates upstream issue                   |
 
 **If a loop won't converge:**
+
 1. The critic should say "another iteration won't help" in its handoff
 2. Blockers remain documented in the critique
 3. Flow proceeds with issues recorded
@@ -154,11 +159,11 @@ The writer addresses **blockers** (blocking issues). **Concerns** are advisory.
 
 ### Worklist Resolution States
 
-| State | Meaning |
-|-------|---------|
-| Addressed | Writer fixed the issue |
-| Deferred | Explicitly logged in Decision Log with rationale |
-| Out of scope | Issue requires upstream changes (BOUNCE) |
+| State        | Meaning                                          |
+| ------------ | ------------------------------------------------ |
+| Addressed    | Writer fixed the issue                           |
+| Deferred     | Explicitly logged in Decision Log with rationale |
+| Out of scope | Issue requires upstream changes (BOUNCE)         |
 
 ---
 
@@ -172,12 +177,14 @@ When you cannot or choose not to resolve a critic worklist, log it:
 ### 2025-12-22: Deferred contract-critic worklist
 
 **Worklist items deferred:**
+
 - Schema migration for user_roles table
 
 **Rationale:**
 Migration requires coordination with existing deployments. Will address in follow-up run.
 
 **Tracking:**
+
 - Issue draft added to feedback_actions.md
 ```
 
@@ -188,6 +195,7 @@ Migration requires coordination with existing deployments. Will address in follo
 ### 1. Re-reading Files for Routing
 
 **Wrong:**
+
 ```
 Call critic
 Read critique file
@@ -196,6 +204,7 @@ Decide to rerun
 ```
 
 **Right:**
+
 ```
 Call critic
 Route based on the prose handoff it returns
@@ -204,6 +213,7 @@ Route based on the prose handoff it returns
 ### 2. Infinite Loops
 
 **Wrong:**
+
 ```
 while critic says issues exist:
     call writer
@@ -211,6 +221,7 @@ while critic says issues exist:
 ```
 
 **Right:**
+
 ```
 for pass in [1, 2]:
     call writer
@@ -222,12 +233,14 @@ for pass in [1, 2]:
 ### 3. Parsing Structured Fields for Routing
 
 **Wrong:**
+
 ```
 if critic.recommended_action == "RERUN":
     call writer again
 ```
 
 **Right:**
+
 ```
 Read critic's handoff prose
 Understand the recommendation
@@ -253,6 +266,7 @@ Microloops are tracked as **one todo**:
 ```
 
 Not:
+
 ```
 - [ ] test-author (pass 1)
 - [ ] test-critic (pass 1)
@@ -274,6 +288,7 @@ Use this template for any writer ↔ critic pair:
 **Entry:** <preconditions>
 
 **Loop:**
+
 1. Call `<writer>` with context
 2. Call `<critic>`, read its prose handoff
 3. Route on handoff:

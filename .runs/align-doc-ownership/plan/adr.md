@@ -1,9 +1,11 @@
 # ADR: Documentation Ownership Boundaries
 
 ## Status
+
 Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
 
 ## Context
+
 - Problem: The DemoSwarm pack documentation suffers from blurred ownership boundaries between its three documentation tiers (flow commands, agent docs, skill docs). Flow commands contain skill plumbing that should live in agent or skill docs, agent docs inconsistently apply status/action enums, and CLAUDE.md duplicates deep reference material that belongs in skill docs. This structural coupling makes the pack harder to maintain and obscures where authoritative information lives.
 - Constraints:
   - `pack-check` must pass after changes, including new boundary-enforcement drift checks
@@ -19,6 +21,7 @@ Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
   - Upstream repo export or synchronization
 
 ## Decision Drivers (bound, machine-countable)
+
 Each driver MUST include a stable marker line, then a short explanation.
 
 - DRIVER: DR-001 req=[REQ-001] nfr=[NFR-MAINT-001] option_ref="OPT-002"
@@ -40,9 +43,11 @@ Each driver MUST include a stable marker line, then a short explanation.
   - Why it matters: Easy reversibility minimizes blast radius if the enforcement rules prove too strict or too lenient.
 
 ## Decision
+
 We choose **OPT-002: Pragmatic Enforcement**.
 
 ### What we are doing
+
 - Adding pack-check rules for major boundary violations:
   - Flow commands containing `demoswarm.sh`, skill-name invocations, or CLI flag syntax
   - Agent docs using skills without a `## Skills` section
@@ -56,6 +61,7 @@ We choose **OPT-002: Pragmatic Enforcement**.
 - Recording validation run (Toy Run A/B) in `docs/maintainers/validation-log.md`
 
 ### What we are NOT doing
+
 - Removing all inline examples from agent docs (strict enforcement would require this)
 - Relying solely on manual PR review without automated enforcement (minimal enforcement)
 - Changing the three-tier ownership model itself
@@ -63,6 +69,7 @@ We choose **OPT-002: Pragmatic Enforcement**.
 - Expanding CLAUDE.md to serve as deep CLI reference
 
 ### Requirements & NFR Traceability
+
 - **Satisfied by this decision**
   - REQ-001: Flow commands strictly scanned; any skill plumbing fails pack-check
   - REQ-002: All agents using skills get Skills sections; enums normalized; minimal inline examples allowed where needed
@@ -77,12 +84,14 @@ We choose **OPT-002: Pragmatic Enforcement**.
   - NFR-MAINT-001: PARTIAL - Clear ownership for major boundaries (flows, CLAUDE.md); agent-level examples have judgment calls on "when needed"
 
 ## Alternatives Considered
+
 - ALT: OPT-001 (Strict Enforcement) -- Rejected because: Maximum separation creates operator confusion through excessive indirection; requires skill docs to be comprehensively complete before agents can remove examples; higher implementation cost with limited additional benefit; operator productivity reduced by constant cross-referencing.
 - ALT: OPT-003 (Minimal Enforcement / Manual Fix) -- Rejected because: No automated regression prevention; boundary violations would reintroduce silently; relies on PR review discipline which does not scale; does not satisfy NFR-TEST-001 MET-3 (negative tests for pack-check).
 
 ## Consequences
 
 ### Positive
+
 - Clear ownership boundaries enforced by tooling for major violations (flow commands, skill usage declaration)
 - Reduced cognitive load for pack maintainers: authoritative location for each concern is well-defined
 - Balanced approach: operators can understand agent behavior from agent doc alone for most cases
@@ -90,12 +99,14 @@ We choose **OPT-002: Pragmatic Enforcement**.
 - Validation run provides confidence that alignment changes cause no regressions
 
 ### Negative
+
 - Judgment calls required on "when are inline examples needed" in agent docs
 - Potential for drift between agent examples and skill docs (mitigated by doc-drift script)
 - Skill docs may have coverage gaps initially; requires backfilling over time
 - Pack-check rules require Rust development (acceptable per ASM-004)
 
 ## Risks and Mitigations
+
 Use stable markers:
 
 - RISK: RSK-001 Drift between agent examples and skill docs over time. -> Mitigation: doc-drift script catches duplicates; manual review for consistency; clear guideline that examples allowed only if not in skill doc.
@@ -104,6 +115,7 @@ Use stable markers:
 - RISK: RSK-004 pack-check false positives on boundary detection (regex too aggressive). -> Mitigation: Careful regex patterns; test with known-good files before deployment; pragmatic rules less prone to false positives than strict rules.
 
 ## Assumptions Made to Proceed
+
 Use stable markers:
 
 - ASM: ASM-001 The three-tier ownership model (flow commands -> agents -> skills) is the intended architecture. (impact if wrong: Entire boundary definition and REQ-001 through REQ-004 would need rethinking)
@@ -113,6 +125,7 @@ Use stable markers:
 - ASM: ASM-005 Pack maintainers can exercise judgment on "minimal examples" consistently. (impact if wrong: Inconsistent application of rules; may need to tighten to strict enforcement)
 
 ## Questions / Clarifications Needed
+
 Use stable markers and include suggested defaults:
 
 - Q: Are skill docs complete enough to serve as sole CLI reference today? Suggested default: No, retain minimal examples in agents where skill coverage has gaps. Impact: If yes, could tighten to OPT-001 strict enforcement.
@@ -120,12 +133,14 @@ Use stable markers and include suggested defaults:
 - Q: Should the validation run (Toy Run A/B) block Flow 3 or be part of ST-006? Suggested default: Include as final step in ST-006. Impact: If separate, adds coordination overhead.
 
 ## Next Steps (Flow 2 binding)
+
 - Interface/contracts -> `.runs/align-doc-ownership/plan/api_contracts.yaml` + `.runs/align-doc-ownership/plan/schema.md`
 - Observability -> `.runs/align-doc-ownership/plan/observability_spec.md`
 - Tests -> `.runs/align-doc-ownership/plan/test_plan.md` (map to BDD + verification_notes if present)
 - Work breakdown -> `.runs/align-doc-ownership/plan/work_plan.md`
 
 ## Pointers
+
 - Options: `.runs/align-doc-ownership/plan/design_options.md`
 - Requirements: `.runs/align-doc-ownership/signal/requirements.md`
 - Problem statement: `.runs/align-doc-ownership/signal/problem_statement.md`
@@ -133,6 +148,7 @@ Use stable markers and include suggested defaults:
 - Open questions: `.runs/align-doc-ownership/signal/open_questions.md`
 
 ## Inventory (machine countable)
+
 (Only the following prefixed lines; do not rename prefixes)
 
 - ADR_CHOSEN_OPTION: OPT-002

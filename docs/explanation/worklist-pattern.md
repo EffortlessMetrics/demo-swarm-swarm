@@ -28,6 +28,7 @@ There might be a race condition. Also check the error handling.
 ```
 
 This is hard to:
+
 - **Track** — What's fixed vs pending?
 - **Prioritize** — What's critical vs nice-to-have?
 - **Verify** — How do we know it's addressed?
@@ -41,14 +42,15 @@ Structured worklist:
 ```markdown
 ## Worklist
 
-| ID | Issue | Severity | File:Line | Status |
-|----|-------|----------|-----------|--------|
-| W-001 | Missing null check | HIGH | auth.rs:45 | pending |
-| W-002 | Race condition in session | HIGH | session.rs:112 | pending |
-| W-003 | Generic error message | LOW | api.rs:89 | pending |
+| ID    | Issue                     | Severity | File:Line      | Status  |
+| ----- | ------------------------- | -------- | -------------- | ------- |
+| W-001 | Missing null check        | HIGH     | auth.rs:45     | pending |
+| W-002 | Race condition in session | HIGH     | session.rs:112 | pending |
+| W-003 | Generic error message     | LOW      | api.rs:89      | pending |
 ```
 
 This is:
+
 - **Trackable** — Clear status per item
 - **Prioritizable** — Severity guides order
 - **Verifiable** — Check the exact location
@@ -62,6 +64,7 @@ Each item has an identity. Progress is visible. Completion is unambiguous.
 ### 1. Generation (Critic Phase)
 
 Critics produce worklist items with:
+
 - Specific issue description
 - Severity/priority
 - Location (file:line)
@@ -72,6 +75,7 @@ The critic's job is to **find and document**, not to fix.
 ### 2. Triage (Routing Phase)
 
 The orchestrator/PM:
+
 - Routes items to appropriate fixers
 - Groups related items
 - Identifies blockers vs nice-to-haves
@@ -80,6 +84,7 @@ The orchestrator/PM:
 ### 3. Drain (Fix Phase)
 
 Fixer agents:
+
 - Take items from the queue
 - Apply fixes
 - Mark items addressed
@@ -89,6 +94,7 @@ Each fix reduces the queue. Progress is mechanical and visible.
 ### 4. Verification (Re-check Phase)
 
 Critics re-verify:
+
 - Is the issue actually fixed?
 - Did the fix introduce new issues?
 - Is the worklist drained?
@@ -98,6 +104,7 @@ This catches regressions and incomplete fixes.
 ### 5. Closure (Completion)
 
 When the worklist is empty (or remaining items are accepted):
+
 - Produce a summary
 - Move to next phase
 - Document what was addressed and what was deferred
@@ -124,20 +131,20 @@ A good worklist item has everything needed to find, understand, fix, and verify 
 
 ### Required Fields
 
-| Field | Purpose |
-|-------|---------|
-| **ID** | Unique identifier for tracking (W-001, W-002, etc.) |
-| **Severity** | HIGH/MEDIUM/LOW — guides priority |
-| **Location** | Exact file and line — enables direct navigation |
-| **Issue** | What's wrong — the actual problem |
-| **Status** | pending/in_progress/fixed/wontfix — current state |
+| Field        | Purpose                                             |
+| ------------ | --------------------------------------------------- |
+| **ID**       | Unique identifier for tracking (W-001, W-002, etc.) |
+| **Severity** | HIGH/MEDIUM/LOW — guides priority                   |
+| **Location** | Exact file and line — enables direct navigation     |
+| **Issue**    | What's wrong — the actual problem                   |
+| **Status**   | pending/in_progress/fixed/wontfix — current state   |
 
 ### Optional Fields
 
-| Field | Purpose |
-|-------|---------|
-| **Impact** | Why this matters — helps with prioritization |
-| **Fix guidance** | How to address — accelerates the fixer |
+| Field            | Purpose                                           |
+| ---------------- | ------------------------------------------------- |
+| **Impact**       | Why this matters — helps with prioritization      |
+| **Fix guidance** | How to address — accelerates the fixer            |
 | **Verification** | How to confirm closure — enables automated checks |
 
 ---
@@ -148,17 +155,18 @@ A good worklist item has everything needed to find, understand, fix, and verify 
 
 When an issue is found, route based on type:
 
-| Issue Type | Route To | Example |
-|------------|----------|---------|
-| Logic/semantic error | code-implementer | Wrong algorithm |
-| Missing test coverage | test-author | Untested edge case |
-| Formatting/lint | auto-linter (skill) | Style violations |
-| Documentation gap | doc-writer | Missing docstring |
-| Security issue | code-implementer + critic | Injection vulnerability |
+| Issue Type            | Route To                  | Example                 |
+| --------------------- | ------------------------- | ----------------------- |
+| Logic/semantic error  | code-implementer          | Wrong algorithm         |
+| Missing test coverage | test-author               | Untested edge case      |
+| Formatting/lint       | auto-linter (skill)       | Style violations        |
+| Documentation gap     | doc-writer                | Missing docstring       |
+| Security issue        | code-implementer + critic | Injection vulnerability |
 
 ### Mechanical vs Semantic
 
 **Mechanical issues** (deterministic fix):
+
 - Formatting
 - Import ordering
 - Trailing whitespace
@@ -167,6 +175,7 @@ When an issue is found, route based on type:
 Route to deterministic fixer (skill). Don't waste smart tokens.
 
 **Semantic issues** (judgment required):
+
 - Wrong logic
 - Missing edge cases
 - Architectural problems
@@ -186,6 +195,7 @@ Issue found → Severity HIGH? → Route to fixer → Continue
 ```
 
 Only block for:
+
 - Mechanical failure (tooling broken)
 - Non-derivable decision (need human input)
 - Unsafe publish boundary (secrets detected)
@@ -216,6 +226,7 @@ while worklist.has_pending_items():
 ### Termination Conditions
 
 Stop draining when:
+
 - All HIGH/MEDIUM items fixed
 - Remaining items accepted as known issues
 - Iteration budget exhausted (checkpoint, continue later)
@@ -223,6 +234,7 @@ Stop draining when:
 ### New Items During Drain
 
 Fixes may reveal new issues. Handle by:
+
 - Adding to worklist (same structure)
 - Continuing the drain loop
 - Tracking "waves" if needed
@@ -315,12 +327,12 @@ Gate fixer produces mechanical fixes. Quick drain. Gate decision.
 
 Worklists provide an audit trail:
 
-| What's Recorded | Purpose |
-|-----------------|---------|
-| What was found | Original issues |
-| What was fixed | Work completed |
-| What was accepted | Known issues / tech debt |
-| What verification was done | Proof of closure |
+| What's Recorded            | Purpose                  |
+| -------------------------- | ------------------------ |
+| What was found             | Original issues          |
+| What was fixed             | Work completed           |
+| What was accepted          | Known issues / tech debt |
+| What verification was done | Proof of closure         |
 
 This becomes part of the receipt for later review. If someone asks "why wasn't X caught?", the worklist shows exactly what was found, what was fixed, and what was left.
 

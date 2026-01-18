@@ -13,6 +13,7 @@ This document explains the relationship between flows, humans, and the swarm. Th
 ## Two Different Disciplines
 
 **Humans can bypass flows whenever they want.**
+
 - Flows don't lock you in
 - You can do work between flows (manually or with other LLMs)
 - You can skip flows entirely
@@ -20,6 +21,7 @@ This document explains the relationship between flows, humans, and the swarm. Th
 - The system is designed to accept work that was done outside the swarm
 
 **The swarm doesn't bypass.**
+
 - When the swarm runs, it follows its routing
 - It calls agents, gets corrected by critics and verification, and keeps moving
 - Internal discipline is what makes the swarm reliable
@@ -34,6 +36,7 @@ This isn't a contradiction. It's **external flexibility + internal discipline**.
 The swarm is a tool that works really well. You use it because it's effective, not because you're forced to.
 
 If you:
+
 - Want to write code yourself: do it, then run Flow 5 (Gate) to verify
 - Have another LLM do design work: feed it into Flow 3 (Build)
 - Need a hotfix NOW: commit manually, run Wisdom later
@@ -45,21 +48,24 @@ The flows accept work from anywhere. They don't demand provenance.
 
 ## How Mixed Work Flows
 
-**Scenario: Human writes code, swarm verifies**
+### Scenario: Human writes code, swarm verifies
+
 ```
 Human: writes implementation manually
   Flow 3 (Build): swarm runs tests, critics review, receipt generated
   Flow 5 (Gate): swarm verifies, decides merge
 ```
 
-**Scenario: External LLM does design, swarm implements**
+### Scenario: External LLM does design, swarm implements
+
 ```
 External LLM: produces ADR and contracts
   Human: drops artifacts into .runs/<id>/plan/
   Flow 3 (Build): swarm implements from those artifacts
 ```
 
-**Scenario: Swarm does Signal, human does Plan, swarm does Build**
+### Scenario: Swarm does Signal, human does Plan, swarm does Build
+
 ```
 Flow 1 (Signal): swarm produces requirements, BDD
   Human: writes own ADR, ignoring swarm's design-optioneer
@@ -73,6 +79,7 @@ All of these work. The system checks what exists and proceeds.
 ## Resume-Ready Design
 
 Every flow starts by checking what already exists:
+
 - If artifacts are present, use them
 - If artifacts are missing, note it and proceed best-effort
 - If artifacts conflict, flag it for resolution
@@ -88,6 +95,7 @@ See [architecture.md](architecture.md) for the "Every Call Is an Implicit Resume
 From CLAUDE.md: "Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVERIFIED outcomes when upstream artifacts are missing."
 
 This means:
+
 - You CAN run Flow 5 without running Flows 1-4
 - The system will note what's missing
 - Results will be marked appropriately (UNVERIFIED, assumptions documented)
@@ -100,6 +108,7 @@ The swarm treats UNVERIFIED as a legitimate outcome. It means "we did what we co
 ## The Swarm's Internal Discipline
 
 When the swarm IS running:
+
 - It doesn't skip steps to save time
 - It doesn't bypass critics because "the code looks fine"
 - It routes to agents, gets corrected, routes again
@@ -114,11 +123,13 @@ The swarm follows its routing because **that's what makes it useful**. Recipes y
 ## Why Both Are Needed
 
 **External flexibility** means the system serves you, not the other way around.
+
 - You're not a prisoner of the workflow
 - Emergency hotfixes don't require ceremony
 - You can integrate work from any source
 
 **Internal discipline** means the swarm's output is reliable.
+
 - When it says "verified," it actually verified
 - When it says "tests pass," tests actually ran
 - When it routes to a critic, the critic actually critiques
@@ -131,13 +142,13 @@ You get flexibility for humans AND reliability from automation.
 
 Different situations call for different starting points:
 
-| Situation | Start From | Why |
-|-----------|------------|-----|
-| New feature from scratch | Flow 1 (Signal) | Shape requirements before design |
-| Design already exists | Flow 3 (Build) | Skip to implementation |
-| Code already written | Flow 5 (Gate) | Just verify what exists |
-| Quick fix, already tested | Commit manually | Flow 7 (Wisdom) later |
-| Hotfix emergency | Whatever's fastest | Document gaps afterward |
+| Situation                 | Start From         | Why                              |
+| ------------------------- | ------------------ | -------------------------------- |
+| New feature from scratch  | Flow 1 (Signal)    | Shape requirements before design |
+| Design already exists     | Flow 3 (Build)     | Skip to implementation           |
+| Code already written      | Flow 5 (Gate)      | Just verify what exists          |
+| Quick fix, already tested | Commit manually    | Flow 7 (Wisdom) later            |
+| Hotfix emergency          | Whatever's fastest | Document gaps afterward          |
 
 The seven flows are a complete pipeline, but they're not a mandatory sequence.
 
@@ -146,12 +157,14 @@ The seven flows are a complete pipeline, but they're not a mandatory sequence.
 ## Anti-Patterns
 
 **Don't:**
+
 - Feel obligated to run all 7 flows for a typo fix
 - Reject human-written code because "it didn't go through Signal"
 - Force-fit work into flows where it doesn't belong
 - Skip flows and then expect VERIFIED markers
 
 **Do:**
+
 - Use flows when they add value
 - Accept work from any source
 - Run verification (Gate) on anything you want confidence in

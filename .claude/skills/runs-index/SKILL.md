@@ -23,11 +23,14 @@ bash .claude/scripts/demoswarm.sh index upsert-status [options]
 ## Operating Invariants
 
 ### Repo root only
+
 - Assume working directory is repo root.
 - All paths are repo-root-relative.
 
 ### Minimal ownership
+
 This skill only updates:
+
 - `status`
 - `last_flow`
 - `updated_at`
@@ -35,6 +38,7 @@ This skill only updates:
 Other fields (`canonical_key`, `issue_number`, `pr_number`, etc.) are owned by `run-prep`, `signal-run-prep`, and `gh-issue-manager`.
 
 ### Stable diffs
+
 - Upsert by `run_id` (update in place, not append)
 - Preserve existing ordering
 - Output is sorted for stable git diffs
@@ -44,6 +48,7 @@ Other fields (`canonical_key`, `issue_number`, `pr_number`, etc.) are owned by `
 ## Allowed Users
 
 Only these agents may use this skill:
+
 - `run-prep`
 - `signal-run-prep`
 - `signal-cleanup`
@@ -57,8 +62,8 @@ Only these agents may use this skill:
 
 ## Command Reference
 
-| Command | Purpose |
-|---------|---------|
+| Command               | Purpose                         |
+| --------------------- | ------------------------------- |
 | `index upsert-status` | Update run status in index.json |
 
 ---
@@ -146,6 +151,7 @@ cargo install --path tools/demoswarm-runs-tools --root .demoswarm
 ```
 
 The shim will automatically resolve in order:
+
 1. `.demoswarm/bin/demoswarm` (repo-local install, preferred)
 2. `demoswarm` on PATH (global install)
 3. `cargo run` fallback (dev environments)

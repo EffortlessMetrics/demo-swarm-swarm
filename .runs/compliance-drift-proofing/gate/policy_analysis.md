@@ -1,6 +1,7 @@
 # Policy Analysis
 
 ## Machine Summary
+
 status: UNVERIFIED
 
 recommended_action: BOUNCE
@@ -9,31 +10,35 @@ route_to_station: build-cleanup
 route_to_agent: null
 
 blockers:
-  - "POL-004 CRITICAL: Receipt integrity failure - build_receipt.json claims status=VERIFIED, 420 tests, 89.29% coverage; test_execution.md canonical artifact shows status=UNVERIFIED, 294 tests, 75.12% coverage (126-test inflation, 14.17% coverage gap)"
-  - "POL-003 NON-COMPLIANT: Receipt test counts (420) are not mechanical - canonical artifact shows 294 tests (253 unit + 41 integration); counts appear fabricated or stale"
-  - "POL-015 NON-COMPLIANT: Receipt quality_gates.coverage claims VERIFIED but underlying test_execution.md has blocker (coverage below 80% threshold)"
+
+- "POL-004 CRITICAL: Receipt integrity failure - build_receipt.json claims status=VERIFIED, 420 tests, 89.29% coverage; test_execution.md canonical artifact shows status=UNVERIFIED, 294 tests, 75.12% coverage (126-test inflation, 14.17% coverage gap)"
+- "POL-003 NON-COMPLIANT: Receipt test counts (420) are not mechanical - canonical artifact shows 294 tests (253 unit + 41 integration); counts appear fabricated or stale"
+- "POL-015 NON-COMPLIANT: Receipt quality_gates.coverage claims VERIFIED but underlying test_execution.md has blocker (coverage below 80% threshold)"
 
 missing_required:
-  - "Reconciled test_execution.md with authoritative test counts matching receipt claims (or corrected receipt)"
-  - "Coverage evidence reconciliation (89.29% vs 75.12%)"
-  - "Branch coverage metrics (required 70% threshold in test_plan.md but null in all artifacts)"
+
+- "Reconciled test_execution.md with authoritative test counts matching receipt claims (or corrected receipt)"
+- "Coverage evidence reconciliation (89.29% vs 75.12%)"
+- "Branch coverage metrics (required 70% threshold in test_plan.md but null in all artifacts)"
 
 concerns:
-  - "Dependency audit could not run (cargo-audit CVSS 4.0 incompatibility); manual review substituted"
-  - "Index.json metadata lags gate receipt (status=VERIFIED in index vs UNVERIFIED artifacts)"
-  - "Iterations count drift (run_meta=7, index=6)"
-  - "Prior gate iteration artifacts contain stale contract mismatch finding (corrected in iteration 6)"
+
+- "Dependency audit could not run (cargo-audit CVSS 4.0 incompatibility); manual review substituted"
+- "Index.json metadata lags gate receipt (status=VERIFIED in index vs UNVERIFIED artifacts)"
+- "Iterations count drift (run_meta=7, index=6)"
+- "Prior gate iteration artifacts contain stale contract mismatch finding (corrected in iteration 6)"
 
 compliance_summary:
-  policies_found: 1
-  policies_checked: 1
-  compliant: 11
-  non_compliant: 3
-  not_applicable: 1
-  unknown: 1
-  waivers_needed: 0
+policies_found: 1
+policies_checked: 1
+compliant: 11
+non_compliant: 3
+not_applicable: 1
+unknown: 1
+waivers_needed: 0
 
 ## Context
+
 - flow: gate
 - run_id: compliance-drift-proofing
 - policy_roots_searched:
@@ -57,34 +62,36 @@ compliance_summary:
   - CLAUDE.md
 
 ## Policies Reviewed
+
 - CLAUDE.md (pack-level policy) -- version: current HEAD (bacacfe)
 
 ## Compliance Register
 
 Use stable `POL-NNN` markers for mechanical counting.
 
-| ID | Policy | Section | Requirement | Status | Severity | Evidence |
-|----|--------|---------|-------------|--------|----------|----------|
-| POL-001 | CLAUDE.md | Machine Summary Contract | Status enum is VERIFIED/UNVERIFIED/CANNOT_PROCEED only | COMPLIANT | HIGH | All artifacts use valid status enum values |
-| POL-002 | CLAUDE.md | Machine Summary Contract | recommended_action enum is PROCEED/RERUN/BOUNCE/FIX_ENV only | COMPLIANT | HIGH | gate_receipt.json:L6-7 uses valid enum |
-| POL-003 | CLAUDE.md | Receipts | counts are mechanical (grep/wc/parse), never estimated | NON-COMPLIANT | CRITICAL | build_receipt.json claims 420 tests; test_execution.md L25 shows 294 |
-| POL-004 | CLAUDE.md | Receipts | quality_gates sourced from agent Machine Summaries | NON-COMPLIANT | CRITICAL | build_receipt.json status=VERIFIED but test_execution.md status=UNVERIFIED |
-| POL-005 | CLAUDE.md | CLI Tooling Surface | Agents invoke tools via shims only | COMPLIANT | MEDIUM | security_scan.md confirms shim usage |
-| POL-006 | CLAUDE.md | Non-Negotiables #5 | run_id folders never rename | NOT_APPLICABLE | LOW | Gate flow does not modify run identity |
-| POL-007 | CLAUDE.md | Canonical Status + Verdict Domains | Do not conflate status domains across contexts | COMPLIANT | HIGH | Artifacts use correct domain vocabulary |
-| POL-008 | CLAUDE.md | Secrets Sanitizer | Secrets gate required for publish | COMPLIANT | CRITICAL | security_scan.md:L34 findings_total=0 |
-| POL-009 | CLAUDE.md | Non-Negotiables #4 | Two gates required for GitHub operations | COMPLIANT | HIGH | traceability_audit.md:L93-96 confirms both gates satisfied |
-| POL-010 | CLAUDE.md | Non-Negotiables #1 | All paths repo-root-relative | COMPLIANT | HIGH | All artifact paths use consistent repo-root format |
-| POL-011 | CLAUDE.md | Non-Negotiables #3 | Control plane vs audit plane separation | COMPLIANT | HIGH | contract_compliance.md:L118-127 confirms alignment |
-| POL-012 | CLAUDE.md | Receipts | Reporters summarize from receipts, not raw artifacts | COMPLIANT | MEDIUM | gate_receipt.json:L46-57 lists key_artifacts |
-| POL-013 | CLAUDE.md | Machine Summary Contract | observations field optional but stable | COMPLIANT | LOW | gate_fix_summary.md:L193-196 observations section present |
-| POL-014 | CLAUDE.md | CLI Tooling Surface | Dependency audit for vulnerable components | UNKNOWN | MEDIUM | security_scan.md:L120-133 cargo-audit not run |
-| POL-015 | CLAUDE.md | Receipts | quality_gates reflect actual artifact state | NON-COMPLIANT | CRITICAL | build_receipt quality_gates.coverage=VERIFIED contradicts test_execution.md blocker |
-| POL-016 | CLAUDE.md | Machine Summary Contract | blockers must explain what prevents VERIFIED | COMPLIANT | HIGH | All UNVERIFIED artifacts include blockers array |
+| ID      | Policy    | Section                            | Requirement                                                  | Status         | Severity | Evidence                                                                            |
+| ------- | --------- | ---------------------------------- | ------------------------------------------------------------ | -------------- | -------- | ----------------------------------------------------------------------------------- |
+| POL-001 | CLAUDE.md | Machine Summary Contract           | Status enum is VERIFIED/UNVERIFIED/CANNOT_PROCEED only       | COMPLIANT      | HIGH     | All artifacts use valid status enum values                                          |
+| POL-002 | CLAUDE.md | Machine Summary Contract           | recommended_action enum is PROCEED/RERUN/BOUNCE/FIX_ENV only | COMPLIANT      | HIGH     | gate_receipt.json:L6-7 uses valid enum                                              |
+| POL-003 | CLAUDE.md | Receipts                           | counts are mechanical (grep/wc/parse), never estimated       | NON-COMPLIANT  | CRITICAL | build_receipt.json claims 420 tests; test_execution.md L25 shows 294                |
+| POL-004 | CLAUDE.md | Receipts                           | quality_gates sourced from agent Machine Summaries           | NON-COMPLIANT  | CRITICAL | build_receipt.json status=VERIFIED but test_execution.md status=UNVERIFIED          |
+| POL-005 | CLAUDE.md | CLI Tooling Surface                | Agents invoke tools via shims only                           | COMPLIANT      | MEDIUM   | security_scan.md confirms shim usage                                                |
+| POL-006 | CLAUDE.md | Non-Negotiables #5                 | run_id folders never rename                                  | NOT_APPLICABLE | LOW      | Gate flow does not modify run identity                                              |
+| POL-007 | CLAUDE.md | Canonical Status + Verdict Domains | Do not conflate status domains across contexts               | COMPLIANT      | HIGH     | Artifacts use correct domain vocabulary                                             |
+| POL-008 | CLAUDE.md | Secrets Sanitizer                  | Secrets gate required for publish                            | COMPLIANT      | CRITICAL | security_scan.md:L34 findings_total=0                                               |
+| POL-009 | CLAUDE.md | Non-Negotiables #4                 | Two gates required for GitHub operations                     | COMPLIANT      | HIGH     | traceability_audit.md:L93-96 confirms both gates satisfied                          |
+| POL-010 | CLAUDE.md | Non-Negotiables #1                 | All paths repo-root-relative                                 | COMPLIANT      | HIGH     | All artifact paths use consistent repo-root format                                  |
+| POL-011 | CLAUDE.md | Non-Negotiables #3                 | Control plane vs audit plane separation                      | COMPLIANT      | HIGH     | contract_compliance.md:L118-127 confirms alignment                                  |
+| POL-012 | CLAUDE.md | Receipts                           | Reporters summarize from receipts, not raw artifacts         | COMPLIANT      | MEDIUM   | gate_receipt.json:L46-57 lists key_artifacts                                        |
+| POL-013 | CLAUDE.md | Machine Summary Contract           | observations field optional but stable                       | COMPLIANT      | LOW      | gate_fix_summary.md:L193-196 observations section present                           |
+| POL-014 | CLAUDE.md | CLI Tooling Surface                | Dependency audit for vulnerable components                   | UNKNOWN        | MEDIUM   | security_scan.md:L120-133 cargo-audit not run                                       |
+| POL-015 | CLAUDE.md | Receipts                           | quality_gates reflect actual artifact state                  | NON-COMPLIANT  | CRITICAL | build_receipt quality_gates.coverage=VERIFIED contradicts test_execution.md blocker |
+| POL-016 | CLAUDE.md | Machine Summary Contract           | blockers must explain what prevents VERIFIED                 | COMPLIANT      | HIGH     | All UNVERIFIED artifacts include blockers array                                     |
 
 ## Compliance Details
 
 ### POL-001: Status enum frozen
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -94,6 +101,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Status values consistently within pack-standard enum
 
 ### POL-002: recommended_action enum frozen
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract"
 - Status: COMPLIANT
 - Severity: HIGH
@@ -103,6 +111,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Action enum compliance verified
 
 ### POL-003: Mechanical counts only
+
 - Policy: CLAUDE.md, Section "Receipts", Line 218: "counts are mechanical (grep/wc/parse), never estimated"
 - Status: NON-COMPLIANT
 - Severity: CRITICAL
@@ -114,6 +123,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Receipt counts are not mechanical - they do not match the canonical test artifact. The receipt appears to have been updated aspirationally or from a stale/different source. This violates the core receipt guarantee.
 
 ### POL-004: Quality gates sourced from Machine Summaries
+
 - Policy: CLAUDE.md, Section "Receipts", Line 219: "quality_gates are sourced from agent Machine Summaries (no recomputation)"
 - Status: NON-COMPLIANT
 - Severity: CRITICAL
@@ -126,6 +136,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: The build_receipt.json quality_gates were not sourced from the test_execution.md Machine Summary. The artifact has status=UNVERIFIED with an explicit coverage blocker, but the receipt claims VERIFIED. This is a policy violation.
 
 ### POL-005: Invoke tools via shims
+
 - Policy: CLAUDE.md, Section "CLI Tooling Surface", Line 477-478
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -135,6 +146,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Shim invocation consistently followed
 
 ### POL-006: run_id folders never rename
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #5", Line 81-82
 - Status: NOT_APPLICABLE
 - Severity: LOW
@@ -144,6 +156,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Not applicable to Gate flow operations; identity stable
 
 ### POL-007: Status domain separation
+
 - Policy: CLAUDE.md, Section "Canonical Status + Verdict Domains", Lines 314-336
 - Status: COMPLIANT
 - Severity: HIGH
@@ -155,6 +168,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Status domains not conflated; each artifact uses appropriate vocabulary
 
 ### POL-008: Secrets gate required for publish
+
 - Policy: CLAUDE.md, Section "Secrets Sanitizer (Publish Gate)", Lines 411-423
 - Status: COMPLIANT
 - Severity: CRITICAL
@@ -165,6 +179,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Secrets scan completed successfully with no findings
 
 ### POL-009: Two gates for GitHub operations
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #4", Lines 76-79
 - Status: COMPLIANT
 - Severity: HIGH
@@ -176,6 +191,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Two-gate requirement satisfied
 
 ### POL-010: Repo-root-relative paths
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #1", Line 65-66
 - Status: COMPLIANT
 - Severity: HIGH
@@ -185,6 +201,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Path conventions consistently followed
 
 ### POL-011: Control plane vs audit plane separation
+
 - Policy: CLAUDE.md, Section "Non-Negotiables #3", Lines 72-74
 - Status: COMPLIANT
 - Severity: HIGH
@@ -195,6 +212,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Control plane (api_contracts.yaml) and implementation (drift.rs) are correctly separated and aligned
 
 ### POL-012: Reporters summarize from receipts
+
 - Policy: CLAUDE.md, Section "Receipts", Line 220
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -204,6 +222,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Receipt-based summarization followed
 
 ### POL-013: observations field structure
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract", Line 240
 - Status: COMPLIANT
 - Severity: LOW
@@ -213,6 +232,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Observations field used appropriately
 
 ### POL-014: Dependency vulnerability audit
+
 - Policy: CLAUDE.md, Section "CLI Tooling Surface" (implied via security posture)
 - Status: UNKNOWN
 - Severity: MEDIUM
@@ -222,6 +242,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Automated audit could not run; manual review substituted but is not equivalent to tooled verification
 
 ### POL-015: Quality gates reflect actual artifact state
+
 - Policy: CLAUDE.md, Section "Receipts", Lines 218-220 (implied by "sourced from agent Machine Summaries")
 - Status: NON-COMPLIANT
 - Severity: CRITICAL
@@ -233,6 +254,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: The quality_gates in build_receipt.json do not reflect the actual state of the underlying artifacts. test_execution.md is UNVERIFIED with a coverage blocker, but the receipt claims coverage=VERIFIED.
 
 ### POL-016: blockers must explain UNVERIFIED
+
 - Policy: CLAUDE.md, Section "Machine Summary Contract", Lines 252-253
 - Status: COMPLIANT
 - Severity: HIGH
@@ -244,44 +266,45 @@ Use stable `POL-NNN` markers for mechanical counting.
 
 ## Violations Summary
 
-| ID | Policy | Section | Severity | Remediation | Owner |
-|----|--------|---------|----------|------------|-------|
-| POL-003 | CLAUDE.md | Receipts | CRITICAL | Regenerate build_receipt.json with mechanical counts from test_execution.md (294, not 420) | build-cleanup |
-| POL-004 | CLAUDE.md | Receipts | CRITICAL | Source quality_gates from actual artifact Machine Summaries; receipt status must reflect test_execution.md UNVERIFIED state | build-cleanup |
+| ID      | Policy    | Section  | Severity | Remediation                                                                                                                              | Owner         |
+| ------- | --------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| POL-003 | CLAUDE.md | Receipts | CRITICAL | Regenerate build_receipt.json with mechanical counts from test_execution.md (294, not 420)                                               | build-cleanup |
+| POL-004 | CLAUDE.md | Receipts | CRITICAL | Source quality_gates from actual artifact Machine Summaries; receipt status must reflect test_execution.md UNVERIFIED state              | build-cleanup |
 | POL-015 | CLAUDE.md | Receipts | CRITICAL | Reconcile coverage metrics: either run tests to achieve 89.29% and update test_execution.md, or correct receipt to reflect 75.12% actual | build-cleanup |
 
 ## Waivers Needed
+
 - None
 
 ## Evidence Cross-Reference
 
 ### Test Count Evidence Chain
 
-| Source | Claimed | Evidence Location |
-|--------|---------|-------------------|
-| build_receipt.json | 420 passed (379 unit + 41 integration) | build_receipt.json:L23-24 via git show |
+| Source                        | Claimed                                | Evidence Location                          |
+| ----------------------------- | -------------------------------------- | ------------------------------------------ |
+| build_receipt.json            | 420 passed (379 unit + 41 integration) | build_receipt.json:L23-24 via git show     |
 | test_execution.md (canonical) | 294 passed (253 unit + 41 integration) | test_execution.md:L25, L22-23 via git show |
-| receipt_audit.md | Identifies 126-test discrepancy | receipt_audit.md:L50-54 |
+| receipt_audit.md              | Identifies 126-test discrepancy        | receipt_audit.md:L50-54                    |
 
 **Conclusion**: Receipt contains fabricated test counts. Canonical test artifact shows 294 tests, not 420.
 
 ### Coverage Evidence Chain
 
-| Source | Claimed Line Coverage | Evidence Location |
-|--------|----------------------|-------------------|
-| build_receipt.json | 89.29% | build_receipt.json:L32 via git show |
-| test_execution.md (canonical) | 75.12% (1386/1845 lines) | test_execution.md:L22 via git show |
-| coverage_audit.md | Identifies 14.17% gap | coverage_audit.md:L81-84 |
+| Source                        | Claimed Line Coverage    | Evidence Location                   |
+| ----------------------------- | ------------------------ | ----------------------------------- |
+| build_receipt.json            | 89.29%                   | build_receipt.json:L32 via git show |
+| test_execution.md (canonical) | 75.12% (1386/1845 lines) | test_execution.md:L22 via git show  |
+| coverage_audit.md             | Identifies 14.17% gap    | coverage_audit.md:L81-84            |
 
 **Conclusion**: Receipt contains inflated coverage metrics. Canonical artifact shows 75.12%, which is below the 80% threshold.
 
 ### Status Evidence Chain
 
-| Source | Claimed Status | Evidence Location |
-|--------|----------------|-------------------|
-| build_receipt.json | VERIFIED | build_receipt.json:L4 via git show |
+| Source                        | Claimed Status          | Evidence Location                   |
+| ----------------------------- | ----------------------- | ----------------------------------- |
+| build_receipt.json            | VERIFIED                | build_receipt.json:L4 via git show  |
 | test_execution.md (canonical) | UNVERIFIED with blocker | test_execution.md:L2-6 via git show |
-| gate_receipt.json | UNVERIFIED | gate_receipt.json:L6 |
+| gate_receipt.json             | UNVERIFIED              | gate_receipt.json:L6                |
 
 **Conclusion**: Receipt status does not match canonical artifact. Build receipt claims VERIFIED but the underlying test execution artifact is UNVERIFIED with coverage blocker.
 

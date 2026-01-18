@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -116,6 +117,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
 (none yet)
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: 1
@@ -126,8 +128,9 @@ assumptions_added: 5
 missing_required: []
 blockers: []
 concerns:
-  - stable-markers.md line 60 uses PLAN/BUILD but openq-tools uses PLN/BLD (documentation inconsistency detected)
-  - output_path inferred from invocation context (signal flow)
+
+- stable-markers.md line 60 uses PLAN/BUILD but openq-tools uses PLN/BLD (documentation inconsistency detected)
+- output_path inferred from invocation context (signal flow)
 
 ## Update: run compliance-drift-proofing (iteration 2)
 
@@ -159,6 +162,7 @@ concerns:
 (none in iteration 2)
 
 ### Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: 1
@@ -169,4 +173,5 @@ assumptions_added: 2
 missing_required: []
 blockers: []
 concerns:
-  - All 10 questions (OQ-SIG-001 through OQ-SIG-010) remain OPEN; none resolved in iteration 2
+
+- All 10 questions (OQ-SIG-001 through OQ-SIG-010) remain OPEN; none resolved in iteration 2

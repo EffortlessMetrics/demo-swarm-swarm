@@ -1,6 +1,7 @@
 # Fix Summary for align-doc-ownership
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -20,4 +21,5 @@ No fixes required from the hardening phase.
 - **Pack-check**: All 49 checks pass
 
 ## Inventory
+
 - FIX_COUNT: 0

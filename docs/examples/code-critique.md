@@ -4,7 +4,7 @@ This is an example of a code critique artifact produced by the code-critic agent
 
 ---
 
-# Code Critique: feat-session-timeout
+## Code Critique: feat-session-timeout
 
 ## Summary
 
@@ -32,6 +32,7 @@ def get_session(self, sid: str) -> Session:
 **Impact:** Attacker can inject arbitrary SQL via session ID cookie.
 
 **Required fix:** Use parameterized query:
+
 ```python
 query = "SELECT * FROM sessions WHERE id = ?"
 return self.db.execute(query, (sid,)).fetchone()
@@ -57,6 +58,7 @@ def cleanup_expired(self):
 **Impact:** Under concurrent load, a valid session could be incorrectly deleted.
 
 **Suggested fix:** Use atomic DELETE with timestamp condition:
+
 ```python
 def cleanup_expired(self):
     self.db.execute(
@@ -102,6 +104,7 @@ SESSION_CONFIG = {
 **Issue:** `timeout_seconds` has no maximum, could be set to years.
 
 **Suggestion:** Add reasonable max (e.g., 86400 for 24h):
+
 ```python
 "timeout_seconds": {"type": "int", "min": 60, "max": 86400}
 ```
@@ -132,13 +135,13 @@ MAJOR race condition should ideally be fixed in this PR but could be deferred wi
 
 ## Evidence Pointers
 
-| Finding | File:Line | Severity |
-|---------|-----------|----------|
-| SQL injection | `src/auth/session_manager.py:52-54` | CRITICAL |
-| Race condition | `src/auth/session_manager.py:78-85` | MAJOR |
-| Missing session ID in log | `src/auth/session_manager.py:67` | MINOR |
-| Config validation gap | `src/config/defaults.py:23-27` | MINOR |
-| Cleanup strategy | `src/auth/session_manager.py:82` | SUGGESTION |
+| Finding                   | File:Line                           | Severity   |
+| ------------------------- | ----------------------------------- | ---------- |
+| SQL injection             | `src/auth/session_manager.py:52-54` | CRITICAL   |
+| Race condition            | `src/auth/session_manager.py:78-85` | MAJOR      |
+| Missing session ID in log | `src/auth/session_manager.py:67`    | MINOR      |
+| Config validation gap     | `src/config/defaults.py:23-27`      | MINOR      |
+| Cleanup strategy          | `src/auth/session_manager.py:82`    | SUGGESTION |
 
 ---
 

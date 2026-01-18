@@ -1,6 +1,7 @@
 # Context Brief (Iteration 2 Updated)
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_agent: null
@@ -8,13 +9,15 @@ route_to_flow: null
 blockers: []
 missing_required: []
 notes:
-  - Iteration 2 rerun context (2025-12-18): GitHub issue #8 now bound
-  - Prior artifacts from iteration 1 (2025-12-17) remain VERIFIED
-  - Keywords searched: pack-check, check-doc-drift, enum, receipt-checker, openq, Skills
-  - Exclusions: .runs/, .git/
-  - Substantial existing infrastructure found; upstream work at #49
+
+- Iteration 2 rerun context (2025-12-18): GitHub issue #8 now bound
+- Prior artifacts from iteration 1 (2025-12-17) remain VERIFIED
+- Keywords searched: pack-check, check-doc-drift, enum, receipt-checker, openq, Skills
+- Exclusions: .runs/, .git/
+- Substantial existing infrastructure found; upstream work at #49
 
 ## Run Identity Context
+
 - run_id_kind: GH_ISSUE
 - issue_binding: IMMEDIATE (updated from DEFERRED in iteration 1)
 - canonical_key: gh-8
@@ -23,6 +26,7 @@ notes:
 - repo_actual_at_creation: EffortlessMetrics/demo-swarm-staging
 
 ## Related Runs
+
 - align-doc-ownership: Addresses ownership boundaries, enum consistency, flow boundaries
   - Status: last_flow=gate, verdict=BOUNCE (complexity indicator)
   - Path: .runs/align-doc-ownership/signal/issue_normalized.md
@@ -30,28 +34,34 @@ notes:
 ## Likely Code Touch Points
 
 ### Pack-Check Validation (Rust)
+
 - tools/demoswarm-pack-check/src/checks/drift.rs (14 checks, foundation for REQ-001-003)
 - tools/demoswarm-pack-check/src/checks/control_plane.rs (enum checks 28-29, baseline)
 - tools/demoswarm-pack-check/src/checks/structure.rs (file checks, REQ-002 extension)
 - tools/demoswarm-pack-check/src/contracts.rs (constants, REQ-003 OpenQ codes)
 
 ### Drift Detection (Bash)
+
 - scripts/check-doc-drift.sh (6 guards: stale skills, old flags, marker drift)
 
 ### OpenQ Infrastructure
+
 - .claude/agents/clarifier.md (ID generation with flow prefixes)
 - .claude/skills/openq-tools/SKILL.md (openq next-id, append)
 - tools/demoswarm-runs-tools/src/commands/openq.rs (Rust impl)
 
 ### Receipt Validation
+
 - .claude/agents/receipt-checker.md (Build receipt validation, REQ-004 source)
 
 ### Skills Enforcement Targets
+
 - 10 agents have Skills sections (confirmed)
 - 14 agents use demoswarm.sh (4 potentially missing Skills)
 
 ### Flow Commands
-- .claude/commands/flow-*.md (6 files, REQ-001 enforcement target)
+
+- .claude/commands/flow-\*.md (6 files, REQ-001 enforcement target)
 
 ## Prior Art / Docs
 
@@ -62,16 +72,16 @@ notes:
 
 ## Infrastructure Baseline
 
-| Component | Current | REQ Target |
-|-----------|---------|-----------|
-| Status enum | check 28 | REQ-006 |
-| Action enum | check 29 | REQ-006 |
-| Drift (Bash) | 6 guards | Foundation |
-| Receipt validation | receipt-checker | REQ-004 |
-| OpenQ prefixes | clarifier + tools | REQ-003 |
-| Skills sections | 10/14 users | REQ-002 |
-| Flow boundaries | NOT enforced | REQ-001 |
-| Warning-first | NOT implemented | REQ-005 |
+| Component          | Current           | REQ Target |
+| ------------------ | ----------------- | ---------- |
+| Status enum        | check 28          | REQ-006    |
+| Action enum        | check 29          | REQ-006    |
+| Drift (Bash)       | 6 guards          | Foundation |
+| Receipt validation | receipt-checker   | REQ-004    |
+| OpenQ prefixes     | clarifier + tools | REQ-003    |
+| Skills sections    | 10/14 users       | REQ-002    |
+| Flow boundaries    | NOT enforced      | REQ-001    |
+| Warning-first      | NOT implemented   | REQ-005    |
 
 ## Key Risks
 

@@ -18,9 +18,9 @@ Diagrams should clarify, not decorate. Every diagram must:
 
 ### Flow Direction
 
-| Direction | Use For |
-|-----------|---------|
-| Top-to-bottom (`TB`) | Sequential flows, agent chains, decision trees |
+| Direction            | Use For                                            |
+| -------------------- | -------------------------------------------------- |
+| Top-to-bottom (`TB`) | Sequential flows, agent chains, decision trees     |
 | Left-to-right (`LR`) | Data transformation pipelines, compressor patterns |
 
 ```mermaid
@@ -49,13 +49,13 @@ flowchart LR
     E{{Hexagon: External System}}
 ```
 
-| Shape | Meaning | Example |
-|-------|---------|---------|
-| Rectangle `[text]` | Process or action | `[code-implementer]` |
-| Stadium `([text])` | Start or end point | `([Request])` |
-| Diamond `{text}` | Decision point | `{Tests pass?}` |
-| Cylinder `[(text)]` | Storage or data | `[(requirements.md)]` |
-| Hexagon `{{text}}` | External system | `{{GitHub API}}` |
+| Shape               | Meaning            | Example               |
+| ------------------- | ------------------ | --------------------- |
+| Rectangle `[text]`  | Process or action  | `[code-implementer]`  |
+| Stadium `([text])`  | Start or end point | `([Request])`         |
+| Diamond `{text}`    | Decision point     | `{Tests pass?}`       |
+| Cylinder `[(text)]` | Storage or data    | `[(requirements.md)]` |
+| Hexagon `{{text}}`  | External system    | `{{GitHub API}}`      |
 
 ### Edge Labels
 
@@ -76,14 +76,14 @@ flowchart TB
 
 Use consistent colors for semantic meaning. Colors supplement labels; do not rely on color alone.
 
-| Color | Hex | Meaning | Use For |
-|-------|-----|---------|---------|
-| Blue | `#4A90D9` | Work plane | Internal operations, building, testing |
-| Green | `#7CB342` | Success | Verified, clean, passing |
-| Orange | `#F5A623` | Warning | Needs attention, partial success |
-| Red | `#D94A4A` | Blocked | Failed, critical, stopped |
-| Purple | `#9C27B0` | Publish plane | External boundaries, GitHub ops |
-| Gray | `#9E9E9E` | Inactive | Historical, optional, skipped |
+| Color  | Hex       | Meaning       | Use For                                |
+| ------ | --------- | ------------- | -------------------------------------- |
+| Blue   | `#4A90D9` | Work plane    | Internal operations, building, testing |
+| Green  | `#7CB342` | Success       | Verified, clean, passing               |
+| Orange | `#F5A623` | Warning       | Needs attention, partial success       |
+| Red    | `#D94A4A` | Blocked       | Failed, critical, stopped              |
+| Purple | `#9C27B0` | Publish plane | External boundaries, GitHub ops        |
+| Gray   | `#9E9E9E` | Inactive      | Historical, optional, skipped          |
 
 ### Applying Colors in Mermaid
 
@@ -190,7 +190,7 @@ Show structure.
 
 **Use for:** System overview, component relationships
 
-**Use subgraphs for grouping**
+### Use subgraphs for grouping
 
 ```mermaid
 flowchart TB
@@ -212,12 +212,12 @@ flowchart TB
 
 ## Size Budgets
 
-| Diagram Type | Max Nodes | Max Edges | If Larger... |
-|--------------|-----------|-----------|--------------|
-| Flow | 10 | 15 | Split into sub-diagrams |
-| Sequence | 5 participants | 12 messages | Split into phases |
-| State | 7 | 12 | Hierarchical states |
-| Architecture | 12 | 20 | Use subgraphs |
+| Diagram Type | Max Nodes      | Max Edges   | If Larger...            |
+| ------------ | -------------- | ----------- | ----------------------- |
+| Flow         | 10             | 15          | Split into sub-diagrams |
+| Sequence     | 5 participants | 12 messages | Split into phases       |
+| State        | 7              | 12          | Hierarchical states     |
+| Architecture | 12             | 20          | Use subgraphs           |
 
 **No hairballs.** If you cannot parse it in 30 seconds, it is too complex. Split it or remove detail.
 
@@ -302,13 +302,13 @@ flowchart TB
 
 Colors communicate meaning. Use sparingly and consistently.
 
-| Semantic | Color | Hex | When to Use |
-|----------|-------|-----|-------------|
-| Intent | Blue | `#4A90D9` | User requests, goals, inputs that drive work |
-| Work plane | Gray | `#9E9E9E` | Internal operations, building, iteration (default-allow) |
-| Evidence | Green | `#7CB342` | Verified artifacts, passing tests, proof |
-| Boundaries | Orange | `#F5A623` | Gates, attention points, transitions between planes |
-| Halting | Red | `#D94A4A` | Blocked, failed, stopped, human-required decisions |
+| Semantic   | Color  | Hex       | When to Use                                              |
+| ---------- | ------ | --------- | -------------------------------------------------------- |
+| Intent     | Blue   | `#4A90D9` | User requests, goals, inputs that drive work             |
+| Work plane | Gray   | `#9E9E9E` | Internal operations, building, iteration (default-allow) |
+| Evidence   | Green  | `#7CB342` | Verified artifacts, passing tests, proof                 |
+| Boundaries | Orange | `#F5A623` | Gates, attention points, transitions between planes      |
+| Halting    | Red    | `#D94A4A` | Blocked, failed, stopped, human-required decisions       |
 
 ### Usage Guidelines
 
@@ -339,6 +339,7 @@ Beyond node/edge limits, apply these constraints:
 ### One Diagram Per Section
 
 Each documentation section should contain at most one diagram. If you need multiple diagrams:
+
 - Split into subsections
 - Question whether all diagrams are necessary
 - Consider if prose would suffice
@@ -346,6 +347,7 @@ Each documentation section should contain at most one diagram. If you need multi
 ### Avoid Universe Diagrams
 
 Do not create diagrams that show "everything." Signs of a universe diagram:
+
 - More than 3 subgraphs
 - Nodes that require scrolling to see
 - Legend longer than the diagram
@@ -355,11 +357,11 @@ Do not create diagrams that show "everything." Signs of a universe diagram:
 
 ### Complexity Budget
 
-| If you have... | Then limit to... |
-|----------------|------------------|
-| 1 subgraph | 8 nodes |
-| 2 subgraphs | 6 nodes per subgraph |
-| 3 subgraphs | 4 nodes per subgraph |
+| If you have... | Then limit to...             |
+| -------------- | ---------------------------- |
+| 1 subgraph     | 8 nodes                      |
+| 2 subgraphs    | 6 nodes per subgraph         |
+| 3 subgraphs    | 4 nodes per subgraph         |
 | More subgraphs | Split into multiple diagrams |
 
 ---
@@ -411,9 +413,9 @@ See [agent-data-flows.md](agent-data-flows.md) for examples of ASCII art diagram
 
 ## Tools
 
-| Tool | When to Use |
-|------|-------------|
-| Mermaid | Primary choice; renders in GitHub, docs sites |
+| Tool      | When to Use                                                      |
+| --------- | ---------------------------------------------------------------- |
+| Mermaid   | Primary choice; renders in GitHub, docs sites                    |
 | ASCII art | Simple flows in code comments, fallback when Mermaid unavailable |
 
 **Avoid:** External image files (cannot version, cannot search, break on path changes)
@@ -424,11 +426,11 @@ See [agent-data-flows.md](agent-data-flows.md) for examples of ASCII art diagram
 
 Diagrams in use that follow these conventions:
 
-| Document | Diagram Type | Purpose |
-|----------|--------------|---------|
-| [pr-as-review-surface.md](../explanation/pr-as-review-surface.md) | Flow | Shows flow progression |
-| [agent-data-flows.md](agent-data-flows.md) | ASCII art | Producer-consumer relationships |
-| [architecture.md](../explanation/architecture.md) | ASCII art | Compressor pattern illustration |
+| Document                                                          | Diagram Type | Purpose                         |
+| ----------------------------------------------------------------- | ------------ | ------------------------------- |
+| [pr-as-review-surface.md](../explanation/pr-as-review-surface.md) | Flow         | Shows flow progression          |
+| [agent-data-flows.md](agent-data-flows.md)                        | ASCII art    | Producer-consumer relationships |
+| [architecture.md](../explanation/architecture.md)                 | ASCII art    | Compressor pattern illustration |
 
 ---
 

@@ -3,6 +3,7 @@
 > Get the pack working in 5 minutes.
 
 **Prereqs:**
+
 - Git-initialized repo (swarm clone recommended)
 - Claude Code installed
 - Shell with `bash`, `git`
@@ -55,6 +56,7 @@ Optional: run `/customize-pack` to adapt test/lint commands to your stack.
 ```
 
 Flow 1 transforms free-text into:
+
 - `requirements.md` — testable requirements
 - `features/*.feature` — BDD scenarios
 - `signal_receipt.json` — flow summary
@@ -105,12 +107,12 @@ bash .claude/scripts/demoswarm.sh receipt get \
 
 ## Next Steps
 
-| Goal | Command/Doc |
-|------|-------------|
-| Continue to Plan | `/flow-2-plan` |
-| Run all 7 flows | [Walkthrough](walkthrough.md) |
+| Goal                     | Command/Doc                                      |
+| ------------------------ | ------------------------------------------------ |
+| Continue to Plan         | `/flow-2-plan`                                   |
+| Run all 7 flows          | [Walkthrough](walkthrough.md)                    |
 | Customize for your stack | [customize-pack.md](../how-to/customize-pack.md) |
-| Validate pack contracts | [validation-run.md](validation-run.md) |
+| Validate pack contracts  | [validation-run.md](validation-run.md)           |
 
 ---
 

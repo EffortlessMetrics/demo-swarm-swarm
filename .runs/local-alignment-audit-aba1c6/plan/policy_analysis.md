@@ -1,6 +1,7 @@
 # Policy Analysis
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,20 +13,22 @@ blockers: []
 missing_required: []
 
 concerns:
-  - No formal policy documents found in standard policy roots (policies/, docs/policies/, .policies/)
-  - Policies extracted from CLAUDE.md pack contracts (authoritative for this pack)
-  - Security claims require code evidence verification during Build/Gate (NFR-SEC-001)
+
+- No formal policy documents found in standard policy roots (policies/, docs/policies/, .policies/)
+- Policies extracted from CLAUDE.md pack contracts (authoritative for this pack)
+- Security claims require code evidence verification during Build/Gate (NFR-SEC-001)
 
 compliance_summary:
-  policies_found: 1
-  policies_checked: 1
-  compliant: 8
-  non_compliant: 0
-  not_applicable: 3
-  unknown: 0
-  waivers_needed: 0
+policies_found: 1
+policies_checked: 1
+compliant: 8
+non_compliant: 0
+not_applicable: 3
+unknown: 0
+waivers_needed: 0
 
 ## Context
+
 - flow: plan
 - run_id: local-alignment-audit-aba1c6
 - policy_roots_searched:
@@ -47,27 +50,29 @@ compliance_summary:
   - CLAUDE.md
 
 ## Policies Reviewed
+
 - CLAUDE.md - unknown (pack policy document, checked into repo)
 
 ## Compliance Register
 
-| ID | Policy | Section | Requirement | Status | Severity | Evidence |
-|----|--------|---------|-------------|--------|----------|----------|
-| POL-001 | CLAUDE.md | Non-Negotiables L65-66 | Repo root only: all paths repo-root-relative | COMPLIANT | HIGH | work_plan.md:L14-28, subtasks.yaml - all paths use repo-root-relative format |
-| POL-002 | CLAUDE.md | Non-Negotiables L68-70 | No raw git in flow commands or agent prompts | NOT-APPLICABLE | HIGH | Documentation-only change; no flow command modifications planned |
-| POL-003 | CLAUDE.md | Non-Negotiables L72-74 | Control plane vs audit plane: route on result blocks | COMPLIANT | MEDIUM | work_plan.md Machine Summary uses correct block format |
-| POL-004 | CLAUDE.md | Non-Negotiables L76-79 | Two gates for GitHub ops: safe_to_publish AND proceed_to_github_ops | NOT-APPLICABLE | HIGH | Documentation-only change; GitHub ops gating not in scope |
-| POL-005 | CLAUDE.md | Non-Negotiables L81-82 | run_id folders never rename | COMPLIANT | HIGH | run_meta.json shows stable run_id; canonical_key/aliases pattern used |
-| POL-006 | CLAUDE.md | L5, L13 | CLAUDE.md is authoritative for flow architecture | COMPLIANT | HIGH | adr.md:L9 explicitly references CLAUDE.md L13 as canonical source |
-| POL-007 | CLAUDE.md | Receipts L218-222 | Receipts are mechanical (grep/wc), not estimated | COMPLIANT | MEDIUM | test_plan.md:L45-50 explicitly sets coverage thresholds to null for documentation work |
-| POL-008 | CLAUDE.md | NFR-SEC-001 | Security claims require code evidence | COMPLIANT | HIGH | work_plan.md:ST-003 acceptance criteria include code reference requirement |
-| POL-009 | CLAUDE.md | NFR-TRACE-001 | pack-check must pass | COMPLIANT | HIGH | work_plan.md:ST-009 explicitly verifies pack-check execution |
-| POL-010 | CLAUDE.md | Secrets L427-439 | No secrets in artifacts | NOT-APPLICABLE | CRITICAL | Documentation-only change; no secrets patterns in scope |
-| POL-011 | CLAUDE.md | L13-15 | Pack claims: 7 flows, 50+ agents, 7 skills | COMPLIANT | HIGH | adr.md addresses "seven flows" alignment; no agent/skill count changes planned |
+| ID      | Policy    | Section                | Requirement                                                         | Status         | Severity | Evidence                                                                               |
+| ------- | --------- | ---------------------- | ------------------------------------------------------------------- | -------------- | -------- | -------------------------------------------------------------------------------------- |
+| POL-001 | CLAUDE.md | Non-Negotiables L65-66 | Repo root only: all paths repo-root-relative                        | COMPLIANT      | HIGH     | work_plan.md:L14-28, subtasks.yaml - all paths use repo-root-relative format           |
+| POL-002 | CLAUDE.md | Non-Negotiables L68-70 | No raw git in flow commands or agent prompts                        | NOT-APPLICABLE | HIGH     | Documentation-only change; no flow command modifications planned                       |
+| POL-003 | CLAUDE.md | Non-Negotiables L72-74 | Control plane vs audit plane: route on result blocks                | COMPLIANT      | MEDIUM   | work_plan.md Machine Summary uses correct block format                                 |
+| POL-004 | CLAUDE.md | Non-Negotiables L76-79 | Two gates for GitHub ops: safe_to_publish AND proceed_to_github_ops | NOT-APPLICABLE | HIGH     | Documentation-only change; GitHub ops gating not in scope                              |
+| POL-005 | CLAUDE.md | Non-Negotiables L81-82 | run_id folders never rename                                         | COMPLIANT      | HIGH     | run_meta.json shows stable run_id; canonical_key/aliases pattern used                  |
+| POL-006 | CLAUDE.md | L5, L13                | CLAUDE.md is authoritative for flow architecture                    | COMPLIANT      | HIGH     | adr.md:L9 explicitly references CLAUDE.md L13 as canonical source                      |
+| POL-007 | CLAUDE.md | Receipts L218-222      | Receipts are mechanical (grep/wc), not estimated                    | COMPLIANT      | MEDIUM   | test_plan.md:L45-50 explicitly sets coverage thresholds to null for documentation work |
+| POL-008 | CLAUDE.md | NFR-SEC-001            | Security claims require code evidence                               | COMPLIANT      | HIGH     | work_plan.md:ST-003 acceptance criteria include code reference requirement             |
+| POL-009 | CLAUDE.md | NFR-TRACE-001          | pack-check must pass                                                | COMPLIANT      | HIGH     | work_plan.md:ST-009 explicitly verifies pack-check execution                           |
+| POL-010 | CLAUDE.md | Secrets L427-439       | No secrets in artifacts                                             | NOT-APPLICABLE | CRITICAL | Documentation-only change; no secrets patterns in scope                                |
+| POL-011 | CLAUDE.md | L13-15                 | Pack claims: 7 flows, 50+ agents, 7 skills                          | COMPLIANT      | HIGH     | adr.md addresses "seven flows" alignment; no agent/skill count changes planned         |
 
 ## Compliance Details
 
 ### POL-001: Repo root only
+
 - Policy: CLAUDE.md, Section Non-Negotiables L65-66
 - Status: COMPLIANT
 - Severity: HIGH
@@ -78,25 +83,28 @@ compliance_summary:
 - Notes: Plan artifacts consistently use repo-root-relative paths without absolute paths or cd reliance
 
 ### POL-002: No raw git in flows
+
 - Policy: CLAUDE.md, Section Non-Negotiables L68-70
 - Status: NOT-APPLICABLE
 - Severity: HIGH
 - Evidence:
-  - This is a documentation-only audit; no flow command files (.claude/commands/flow-*.md) are being modified
+  - This is a documentation-only audit; no flow command files (.claude/commands/flow-\*.md) are being modified
   - work_plan.md:L559-577 describes rollback via git revert for human reference, not as agent instructions
 - Notes: Rollback documentation describes human-executed git commands for disaster recovery, which is appropriate
 
 ### POL-003: Control plane vs audit plane
+
 - Policy: CLAUDE.md, Section Non-Negotiables L72-74
 - Status: COMPLIANT
 - Severity: MEDIUM
 - Evidence:
-  - work_plan.md:L3-7 - Machine Summary block uses correct format (status, recommended_action, route_to_*)
+  - work*plan.md:L3-7 - Machine Summary block uses correct format (status, recommended_action, route_to*\*)
   - adr.md:L166-182 - Machine Summary block follows pack contract
   - test_plan.md:L3-13 - Machine Summary block correct
 - Notes: All Plan artifacts emit Machine Summary in control-plane-compatible format
 
 ### POL-004: Two gates for GitHub ops
+
 - Policy: CLAUDE.md, Section Non-Negotiables L76-79
 - Status: NOT-APPLICABLE
 - Severity: HIGH
@@ -106,6 +114,7 @@ compliance_summary:
 - Notes: This policy will apply when Build/Gate flows execute if GitHub posting occurs
 
 ### POL-005: run_id folders never rename
+
 - Policy: CLAUDE.md, Section Non-Negotiables L81-82
 - Status: COMPLIANT
 - Severity: HIGH
@@ -116,6 +125,7 @@ compliance_summary:
 - Notes: Identity follows canonical_key + aliases pattern; folder name unchanged
 
 ### POL-006: CLAUDE.md is authoritative
+
 - Policy: CLAUDE.md, Section L5, L13
 - Status: COMPLIANT
 - Severity: HIGH
@@ -126,6 +136,7 @@ compliance_summary:
 - Notes: ADR decision explicitly treats CLAUDE.md as authoritative source; derivation lineage is correct
 
 ### POL-007: Receipts are mechanical
+
 - Policy: CLAUDE.md, Section Receipts L218-222
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -136,6 +147,7 @@ compliance_summary:
 - Notes: Plan acknowledges documentation-only nature; no estimated counts; all counts traceable to feature files
 
 ### POL-008: Security claims require code evidence
+
 - Policy: CLAUDE.md (via NFR-SEC-001)
 - Status: COMPLIANT
 - Severity: HIGH
@@ -146,6 +158,7 @@ compliance_summary:
 - Notes: Plan explicitly requires code file:line references for security claims; compliance verified at Gate
 
 ### POL-009: pack-check must pass
+
 - Policy: CLAUDE.md (via NFR-TRACE-001)
 - Status: COMPLIANT
 - Severity: HIGH
@@ -156,6 +169,7 @@ compliance_summary:
 - Notes: Phase 4 is explicitly reactive to pack-check failures; structure.rs fixtures updated only if needed
 
 ### POL-010: No secrets in artifacts
+
 - Policy: CLAUDE.md, Section Secrets Sanitizer L427-439
 - Status: NOT-APPLICABLE
 - Severity: CRITICAL
@@ -166,6 +180,7 @@ compliance_summary:
 - Notes: secrets-sanitizer will run at Gate; no secret patterns expected in documentation updates
 
 ### POL-011: Pack claims accuracy
+
 - Policy: CLAUDE.md, Section L13-15
 - Status: COMPLIANT
 - Severity: HIGH
@@ -176,14 +191,17 @@ compliance_summary:
 - Notes: Plan aligns public documentation to pack claims; no changes to agent count (50+) or skill count (7)
 
 ## Violations Summary
-| ID | Policy | Section | Severity | Remediation | Owner |
-|----|--------|---------|----------|------------|-------|
-| (none) | - | - | - | - | - |
+
+| ID     | Policy | Section | Severity | Remediation | Owner |
+| ------ | ------ | ------- | -------- | ----------- | ----- |
+| (none) | -      | -       | -        | -           | -     |
 
 ## Waivers Needed
+
 - None
 
 ## Recommended Next
+
 - PROCEED to Flow 3 (Build) with current Plan artifacts
 - During Build: Implement ST-001 through ST-010 per work_plan.md phases
 - During Gate: Verify NFR-SEC-001 (security claims have code evidence), NFR-TRACE-001 (pack-check passes), NFR-DOC-001 (no "six flows" in public docs)
@@ -192,14 +210,15 @@ compliance_summary:
 ---
 
 ## Policy Analyst Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
 route_to_agent: null
 compliance_summary:
-  policies_checked: 11
-  compliant: 8
-  non_compliant: 0
-  waivers_needed: 0
+policies_checked: 11
+compliant: 8
+non_compliant: 0
+waivers_needed: 0
 blockers: []
 missing_required: []

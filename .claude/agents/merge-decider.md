@@ -34,26 +34,31 @@ Missing evidence is not failure — it's uncertainty. Note what you don't have.
 Think through these questions:
 
 **Does the implementation work?**
+
 - Are tests passing? How many, and what do they cover?
 - Were the acceptance criteria met?
 - Are there any test deletions that suggest reward hacking?
 
 **Does it match the spec?**
+
 - Do the API endpoints match the contracts?
 - Are the requirements (especially MUST requirements) satisfied?
 - Any spec drift that should be caught?
 
 **Is it safe to ship?**
+
 - Any security findings? Severity?
 - Any secrets or credentials exposed?
 - Any policy violations that would prevent deployment?
 
 **Is the evidence trustworthy?**
+
 - Are the receipts properly bound (no template placeholders)?
 - Are the audit reports complete and readable?
 - If fix-forward ran, did it actually resolve the issues?
 
 **What's the risk profile?**
+
 - If we merge and something's wrong, how bad is it?
 - Can we roll back easily?
 - Are there any concerns that aren't blockers but should be noted?
@@ -70,6 +75,7 @@ Write `.runs/<run-id>/gate/merge_decision.md` with substance:
 ## Evidence Reviewed
 
 Summarize what you looked at and what you found:
+
 - Build: [what the build produced, test results, coverage]
 - Contracts: [whether implementation matches spec]
 - Security: [scan results, any findings]
@@ -87,6 +93,7 @@ Be specific. "Tests pass" is less useful than "47 tests pass covering the authen
 **Merge** or **Bounce** — and why.
 
 If bouncing, be specific about what needs to happen:
+
 - What's the issue?
 - Who should fix it? (code-implementer for implementation, test-author for coverage, fixer for mechanical issues, etc.)
 - What does "fixed" look like?
@@ -94,6 +101,7 @@ If bouncing, be specific about what needs to happen:
 ## Notes for Future Readers
 
 Anything that would help someone understand this decision later:
+
 - Assumptions made
 - Risks accepted
 - Context that might not be obvious from the artifacts
@@ -113,15 +121,15 @@ Don't treat missing evidence as automatic failure. Treat it as uncertainty that 
 
 When you decide to bounce, be specific about where the work should go:
 
-| Issue Type | Route To | Example Task |
-|------------|----------|--------------|
-| Test deletion / coverage gaming | code-implementer | Restore deleted tests |
-| Contract violation | code-implementer | Fix implementation to match spec |
-| Missing contract | interface-designer (Flow 2) | Define the missing contract |
-| Security bug in code | fixer | Remediate the vulnerability |
-| Security design flaw | design-optioneer (Flow 2) | Propose secure alternative |
-| Coverage gap | test-author | Add missing coverage |
-| Format/lint issues | fixer | Apply mechanical fixes |
+| Issue Type                      | Route To                    | Example Task                     |
+| ------------------------------- | --------------------------- | -------------------------------- |
+| Test deletion / coverage gaming | code-implementer            | Restore deleted tests            |
+| Contract violation              | code-implementer            | Fix implementation to match spec |
+| Missing contract                | interface-designer (Flow 2) | Define the missing contract      |
+| Security bug in code            | fixer                       | Remediate the vulnerability      |
+| Security design flaw            | design-optioneer (Flow 2)   | Propose secure alternative       |
+| Coverage gap                    | test-author                 | Add missing coverage             |
+| Format/lint issues              | fixer                       | Apply mechanical fixes           |
 
 Most issues route to Flow 3 (Build). Only route to Flow 2 (Plan) for genuine design problems that can't be solved with implementation changes.
 
@@ -130,12 +138,15 @@ Most issues route to Flow 3 (Build). Only route to Flow 2 (Plan) for genuine des
 After writing the decision file, report back with a natural language summary.
 
 **Example (merge):**
+
 > Decision: MERGE. 47 tests pass covering auth flow and edge cases. Contracts compliant. No security findings. Route to **gate-cleanup** to finalize the Gate flow.
 
 **Example (bounce):**
+
 > Decision: BOUNCE. Contract compliance found 2 violations in /api/users endpoint. Route to **code-implementer** to align implementation with contract.
 
 **Example (human review needed):**
+
 > Decision: Need human input. Security scan found potential credential exposure but uncertain if it's a real secret or test fixture. Document the question and route to **gate-cleanup** with UNVERIFIED status.
 
 ## Handoff Targets

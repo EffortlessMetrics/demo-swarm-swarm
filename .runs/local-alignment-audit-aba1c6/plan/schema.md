@@ -16,13 +16,13 @@ This is a **documentation alignment task**, not an API or code change. The "inte
 
 ### Interface List
 
-| Interface | Type | Purpose |
-|-----------|------|---------|
-| FlowModel | Data Schema | Canonical 7-flow structure |
-| FlowCommandRegistry | Data Schema | 7 command files enumeration |
-| FlowVariant | Data Schema | Reserved variant semantics (none defined) |
-| DocumentationConsistencySpec | Validation Contract | Prohibited/required patterns |
-| FlowArtifactPath | Data Schema | Standard artifact locations |
+| Interface                    | Type                | Purpose                                   |
+| ---------------------------- | ------------------- | ----------------------------------------- |
+| FlowModel                    | Data Schema         | Canonical 7-flow structure                |
+| FlowCommandRegistry          | Data Schema         | 7 command files enumeration               |
+| FlowVariant                  | Data Schema         | Reserved variant semantics (none defined) |
+| DocumentationConsistencySpec | Validation Contract | Prohibited/required patterns              |
+| FlowArtifactPath             | Data Schema         | Standard artifact locations               |
 
 ---
 
@@ -32,16 +32,17 @@ This is a **documentation alignment task**, not an API or code change. The "inte
 
 The core unit of the SDLC model. Seven flows exist with the following structure:
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| number | integer | 1-7, unique | Flow sequence number |
-| name | string | enum: Signal, Plan, Build, Review, Gate, Deploy, Wisdom | Canonical flow name |
-| primary_command | string | pattern: `/flow-[1-7]-[a-z]+` | Primary slash command |
-| variant_commands | string[] | optional | Alternate entry points (none currently) |
-| artifact_dir | string | lowercase flow name | Directory under `.runs/<run-id>/` |
-| key_outputs | string[] | required | Primary artifacts produced |
+| Field            | Type     | Constraints                                             | Description                             |
+| ---------------- | -------- | ------------------------------------------------------- | --------------------------------------- |
+| number           | integer  | 1-7, unique                                             | Flow sequence number                    |
+| name             | string   | enum: Signal, Plan, Build, Review, Gate, Deploy, Wisdom | Canonical flow name                     |
+| primary_command  | string   | pattern: `/flow-[1-7]-[a-z]+`                           | Primary slash command                   |
+| variant_commands | string[] | optional                                                | Alternate entry points (none currently) |
+| artifact_dir     | string   | lowercase flow name                                     | Directory under `.runs/<run-id>/`       |
+| key_outputs      | string[] | required                                                | Primary artifacts produced              |
 
 **Invariants:**
+
 - All flows currently have no variants (one command per flow)
 - artifact_dir matches lowercase flow name
 
@@ -49,15 +50,16 @@ The core unit of the SDLC model. Seven flows exist with the following structure:
 
 A slash command file under `.claude/commands/`.
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| filename | string | pattern: `flow-[1-7]-[a-z]+.md` | Command file name |
-| flow_number | integer | 1-7 | Which flow this implements |
-| flow_name | string | required | Human-readable flow name |
-| is_variant | boolean | required | True if alternate entry point |
-| variant_purpose | string | required if is_variant | When to use this variant |
+| Field           | Type    | Constraints                     | Description                   |
+| --------------- | ------- | ------------------------------- | ----------------------------- |
+| filename        | string  | pattern: `flow-[1-7]-[a-z]+.md` | Command file name             |
+| flow_number     | integer | 1-7                             | Which flow this implements    |
+| flow_name       | string  | required                        | Human-readable flow name      |
+| is_variant      | boolean | required                        | True if alternate entry point |
+| variant_purpose | string  | required if is_variant          | When to use this variant      |
 
 **Invariants:**
+
 - Exactly 7 command files exist (verified by enumeration)
 - 7 primary commands, no variants
 
@@ -65,13 +67,14 @@ A slash command file under `.claude/commands/`.
 
 A documentation file subject to consistency validation.
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| path | string | repo-root-relative | File path |
-| tier | enum | authoritative, primary, secondary | Update priority |
-| flow_references | boolean | required | Contains flow count references |
+| Field           | Type    | Constraints                       | Description                    |
+| --------------- | ------- | --------------------------------- | ------------------------------ |
+| path            | string  | repo-root-relative                | File path                      |
+| tier            | enum    | authoritative, primary, secondary | Update priority                |
+| flow_references | boolean | required                          | Contains flow count references |
 
 **Tier semantics (per OPT-003):**
+
 - **authoritative**: CLAUDE.md, architecture.md - update in Phase 1
 - **primary**: README.md, DEMO_RUN.md, CHANGELOG.md - update in Phase 2
 - **secondary**: glossary, CONTRIBUTING, tutorials - update in Phase 3 (optional)
@@ -82,15 +85,15 @@ A documentation file subject to consistency validation.
 
 Per CLAUDE.md L13 and L186-197, the seven flows are:
 
-| # | Flow | Primary Command | Variant Commands | Artifact Dir |
-|---|------|-----------------|------------------|--------------|
-| 1 | Signal | /flow-1-signal | - | signal |
-| 2 | Plan | /flow-2-plan | - | plan |
-| 3 | Build | /flow-3-build | - | build |
-| 4 | Review | /flow-4-review | - | review |
-| 5 | Gate | /flow-5-gate | - | gate |
-| 6 | Deploy | /flow-6-deploy | - | deploy |
-| 7 | Wisdom | /flow-7-wisdom | - | wisdom |
+| #   | Flow   | Primary Command | Variant Commands | Artifact Dir |
+| --- | ------ | --------------- | ---------------- | ------------ |
+| 1   | Signal | /flow-1-signal  | -                | signal       |
+| 2   | Plan   | /flow-2-plan    | -                | plan         |
+| 3   | Build  | /flow-3-build   | -                | build        |
+| 4   | Review | /flow-4-review  | -                | review       |
+| 5   | Gate   | /flow-5-gate    | -                | gate         |
+| 6   | Deploy | /flow-6-deploy  | -                | deploy       |
+| 7   | Wisdom | /flow-7-wisdom  | -                | wisdom       |
 
 **Total: 7 flows, 7 command files**
 
@@ -114,12 +117,12 @@ Documentation changes are low-risk but should follow these rules:
 
 ### Migration Path (OPT-003 Phases)
 
-| Phase | Files | Dependency |
-|-------|-------|------------|
-| 1 | CLAUDE.md, architecture.md | None (authoritative) |
-| 2 | README.md, DEMO_RUN.md, CHANGELOG.md | Phase 1 complete |
-| 3 | glossary.md, CONTRIBUTING.md, work-without-github.md, walkthrough.md | Phase 2 complete (optional) |
-| 4 | structure.rs test fixtures | Only if pack-check fails |
+| Phase | Files                                                                | Dependency                  |
+| ----- | -------------------------------------------------------------------- | --------------------------- |
+| 1     | CLAUDE.md, architecture.md                                           | None (authoritative)        |
+| 2     | README.md, DEMO_RUN.md, CHANGELOG.md                                 | Phase 1 complete            |
+| 3     | glossary.md, CONTRIBUTING.md, work-without-github.md, walkthrough.md | Phase 2 complete (optional) |
+| 4     | structure.rs test fixtures                                           | Only if pack-check fails    |
 
 ---
 
@@ -127,23 +130,23 @@ Documentation changes are low-risk but should follow these rules:
 
 ### REQ -> Interface/Entity -> Constraints
 
-| REQ | Interface/Entity | Constraint/Validation |
-|-----|------------------|----------------------|
-| REQ-001 | DocumentationConsistencySpec | prohibited_patterns: "six flows" -> zero matches |
-| REQ-002 | Flow | Re-entry semantics documented; no variants in schema |
-| REQ-003 | Flow (flow 7) | Flow 7 must appear in enumeration with usage_note |
-| REQ-004 | FlowModel | CLAUDE.md flow table shows all 7 flows |
-| REQ-005 | (out of scope) | Test count is separate; no schema change |
-| REQ-006 | (out of scope) | Security posture is separate; no schema change |
-| REQ-007 | (out of scope) | Color coding is metadata; no schema change |
+| REQ     | Interface/Entity             | Constraint/Validation                                |
+| ------- | ---------------------------- | ---------------------------------------------------- |
+| REQ-001 | DocumentationConsistencySpec | prohibited_patterns: "six flows" -> zero matches     |
+| REQ-002 | Flow                         | Re-entry semantics documented; no variants in schema |
+| REQ-003 | Flow (flow 7)                | Flow 7 must appear in enumeration with usage_note    |
+| REQ-004 | FlowModel                    | CLAUDE.md flow table shows all 7 flows               |
+| REQ-005 | (out of scope)               | Test count is separate; no schema change             |
+| REQ-006 | (out of scope)               | Security posture is separate; no schema change       |
+| REQ-007 | (out of scope)               | Color coding is metadata; no schema change           |
 
 ### NFR -> Validation
 
-| NFR | Validation Method |
-|-----|------------------|
-| NFR-DOC-001 | `grep "six flows" <files>` returns zero matches |
-| NFR-SEC-001 | Security claims reference code files with line numbers |
-| NFR-TRACE-001 | `pack-check` passes after all phases complete |
+| NFR           | Validation Method                                      |
+| ------------- | ------------------------------------------------------ |
+| NFR-DOC-001   | `grep "six flows" <files>` returns zero matches        |
+| NFR-SEC-001   | Security claims reference code files with line numbers |
+| NFR-TRACE-001 | `pack-check` passes after all phases complete          |
 
 ---
 
@@ -151,11 +154,11 @@ Documentation changes are low-risk but should follow these rules:
 
 Not applicable - documentation changes have no runtime errors. Validation failures are:
 
-| Validation | Failure Condition | Resolution |
-|------------|-------------------|------------|
+| Validation               | Failure Condition                  | Resolution                              |
+| ------------------------ | ---------------------------------- | --------------------------------------- |
 | Prohibited pattern found | `grep "six flows"` returns matches | Edit file to replace with "seven flows" |
-| Required pattern missing | Flow enumeration incomplete | Add missing flow to documentation |
-| Pack-check failure | Test fixture expects "Six Flows" | Update fixture in Phase 4 |
+| Required pattern missing | Flow enumeration incomplete        | Add missing flow to documentation       |
+| Pack-check failure       | Test fixture expects "Six Flows"   | Update fixture in Phase 4               |
 
 ---
 
@@ -195,6 +198,7 @@ None. The current model has one command per flow with no variants.
 ---
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -202,5 +206,6 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns:
-  - This is a documentation-only task; api_contracts.yaml defines schemas for validation, not HTTP endpoints
-  - Pack-check test fixtures may need update in Phase 4 if "Six Flows" is a string assertion
+
+- This is a documentation-only task; api_contracts.yaml defines schemas for validation, not HTTP endpoints
+- Pack-check test fixtures may need update in Phase 4 if "Six Flows" is a string assertion

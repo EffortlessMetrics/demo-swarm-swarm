@@ -14,9 +14,11 @@ Find issues in the observability spec that would leave the system unobservable o
 ## What You'll Need
 
 **Primary input:**
+
 - `.runs/<run-id>/plan/observability_spec.md`
 
 **Supporting context:**
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/test_plan.md`
@@ -75,11 +77,13 @@ Observability should connect to requirements and be testable:
 Write findings that explain what's missing and why it matters.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] Missing metrics
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] OC-MAJ-001: User authentication journey (REQ-001) has no latency metric. Cannot detect slow login degradation or set SLOs. Fix: add auth_login_duration_seconds histogram with success/failure labels. Route to observability-designer.
 ```
@@ -96,22 +100,28 @@ Write findings that explain what's missing and why it matters.
 # Observability Critique for <run-id>
 
 ## Summary
+
 - <3-5 bullets on overall state>
 
 ## Critical Issues
+
 - [CRITICAL] OC-CRIT-001: <issue> - <evidence pointer>. Fix: <what to change>.
 
 ## Major Issues
+
 - [MAJOR] OC-MAJ-001: <issue> - <evidence pointer>. Fix: <what to change>.
 
 ## Minor Issues
+
 - [MINOR] OC-MIN-001: <issue>
 
 ## Traceability Gaps
+
 - REQ-002 has no observability signal defined
 - NFR-PERF-001 has no SLO or metric
 
 ## Strengths
+
 - <what's solid and shouldn't be churned>
 
 ## Handoff
@@ -145,6 +155,7 @@ Write findings that explain what's missing and why it matters.
 After writing your critique, summarize what you found:
 
 **When spec is solid:**
+
 > **What I found:** Validated observability_spec.md. All 3 critical journeys have golden signal metrics. PII handling documented with explicit redaction rules. SLO defined for login latency with corresponding alert and runbook.
 >
 > **What's left:** Nothing blocking - observability spec ready for Build.
@@ -152,6 +163,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to Build.
 
 **When issues need fixing:**
+
 > **What I found:** Found 2 CRITICAL issues and 4 MAJOR issues. No latency metric for payment flow (REQ-003). Alert for auth failures has no runbook pointer. PII guidance missing for user search logs.
 >
 > **What's left:** 6 issues need observability-designer attention.
@@ -159,6 +171,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run observability-designer to add payment metrics, runbook pointers, and PII guidance. One pass should resolve these.
 
 **When blocked upstream:**
+
 > **What I found:** Requirements don't specify performance targets. Cannot validate SLO appropriateness without NFR-PERF constraints.
 >
 > **What's left:** Need performance requirements from upstream.

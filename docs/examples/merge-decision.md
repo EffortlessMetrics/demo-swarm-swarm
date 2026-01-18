@@ -4,7 +4,7 @@ This is an example of a gate decision memo produced by the merge-decider agent i
 
 ---
 
-# Merge Decision: feat-session-timeout
+## Merge Decision: feat-session-timeout
 
 **Verdict:** MERGE
 
@@ -26,29 +26,29 @@ This is an example of a gate decision memo produced by the merge-decider agent i
 
 ## Gate Checklist
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| Signal receipt valid | PASS | `.runs/feat-session-timeout/signal/signal_receipt.json` |
-| Plan receipt valid | PASS | `.runs/feat-session-timeout/plan/plan_receipt.json` |
-| Build receipt valid | PASS | `.runs/feat-session-timeout/build/build_receipt.json` |
-| Tests passing | PASS | 142/142 passed (`.runs/feat-session-timeout/build/test_execution.md`) |
-| Code critique | PASS | 0 CRITICAL, 0 MAJOR, 2 MINOR (`.runs/feat-session-timeout/build/code_critique.md`) |
-| Test critique | PASS | No gaps identified (`.runs/feat-session-timeout/build/test_critique.md`) |
-| Contract compliance | PASS | Config schema additive only; no breaking changes |
-| Security scan | PASS | No secrets detected; no vulnerable dependencies |
-| Policy check | PASS | PR size within limits (247 lines changed) |
+| Check                | Result | Evidence                                                                           |
+| -------------------- | ------ | ---------------------------------------------------------------------------------- |
+| Signal receipt valid | PASS   | `.runs/feat-session-timeout/signal/signal_receipt.json`                            |
+| Plan receipt valid   | PASS   | `.runs/feat-session-timeout/plan/plan_receipt.json`                                |
+| Build receipt valid  | PASS   | `.runs/feat-session-timeout/build/build_receipt.json`                              |
+| Tests passing        | PASS   | 142/142 passed (`.runs/feat-session-timeout/build/test_execution.md`)              |
+| Code critique        | PASS   | 0 CRITICAL, 0 MAJOR, 2 MINOR (`.runs/feat-session-timeout/build/code_critique.md`) |
+| Test critique        | PASS   | No gaps identified (`.runs/feat-session-timeout/build/test_critique.md`)           |
+| Contract compliance  | PASS   | Config schema additive only; no breaking changes                                   |
+| Security scan        | PASS   | No secrets detected; no vulnerable dependencies                                    |
+| Policy check         | PASS   | PR size within limits (247 lines changed)                                          |
 
 ---
 
 ## Quality Scorecard Verification
 
-| Surface | Gate Status | Build Claim | Verified |
-|---------|-------------|-------------|----------|
-| Correctness | PASS | 8 BDD scenarios pass | Yes - test_execution.md confirms |
-| Verification | PASS | 94% mutation score | Yes - mutation_report.md confirms |
-| Boundaries | PASS | Config schema additive | Yes - schema diff shows no breaks |
-| Maintainability | PASS | 3 hotspots identified | Yes - PR Brief includes review map |
-| Explanation | PASS | ADR-007 documents strategy | Yes - ADR present and complete |
+| Surface         | Gate Status | Build Claim                | Verified                           |
+| --------------- | ----------- | -------------------------- | ---------------------------------- |
+| Correctness     | PASS        | 8 BDD scenarios pass       | Yes - test_execution.md confirms   |
+| Verification    | PASS        | 94% mutation score         | Yes - mutation_report.md confirms  |
+| Boundaries      | PASS        | Config schema additive     | Yes - schema diff shows no breaks  |
+| Maintainability | PASS        | 3 hotspots identified      | Yes - PR Brief includes review map |
+| Explanation     | PASS        | ADR-007 documents strategy | Yes - ADR present and complete     |
 
 ---
 
@@ -62,11 +62,11 @@ Signal (VERIFIED) -> Plan (VERIFIED) -> Build (VERIFIED) -> Gate (this flow)
 
 **Receipt integrity:** All receipts present and parseable. No missing required fields.
 
-| Flow | Status | Receipt Location |
-|------|--------|------------------|
+| Flow   | Status   | Receipt Location                                        |
+| ------ | -------- | ------------------------------------------------------- |
 | Signal | VERIFIED | `.runs/feat-session-timeout/signal/signal_receipt.json` |
-| Plan | VERIFIED | `.runs/feat-session-timeout/plan/plan_receipt.json` |
-| Build | VERIFIED | `.runs/feat-session-timeout/build/build_receipt.json` |
+| Plan   | VERIFIED | `.runs/feat-session-timeout/plan/plan_receipt.json`     |
+| Build  | VERIFIED | `.runs/feat-session-timeout/build/build_receipt.json`   |
 
 ---
 
@@ -74,14 +74,15 @@ Signal (VERIFIED) -> Plan (VERIFIED) -> Build (VERIFIED) -> Gate (this flow)
 
 ### Code Critique (`.runs/feat-session-timeout/build/code_critique.md`)
 
-| Severity | Count | Blocking |
-|----------|-------|----------|
-| CRITICAL | 0 | - |
-| MAJOR | 0 | - |
-| MINOR | 2 | No |
-| SUGGESTION | 1 | No |
+| Severity   | Count | Blocking |
+| ---------- | ----- | -------- |
+| CRITICAL   | 0     | -        |
+| MAJOR      | 0     | -        |
+| MINOR      | 2     | No       |
+| SUGGESTION | 1     | No       |
 
 **MINOR findings:**
+
 1. Logging could include session ID (`src/auth/session_manager.py:67`)
 2. Config validation missing upper bound (`src/config/defaults.py:23`)
 
@@ -96,17 +97,20 @@ No coverage gaps identified. All acceptance criteria have corresponding tests.
 ## Risk Assessment
 
 **Residual risks:**
+
 - MINOR code issues documented but not fixed (acceptable per policy)
 - Mutation testing showed 2 surviving mutants in edge case paths (acceptable at 94% score)
 - Load testing deferred (documented in open questions)
 
 **Mitigations in place:**
+
 - Feature is behind config flag (operator must enable `session.timeout_enabled`)
 - Default timeout (3600s) is conservative
 - Rollback path is config change only (`session.timeout_enabled: false`)
 - Interface is abstracted for future backend swap
 
 **Open questions requiring attention:**
+
 - OQ-SIGNAL-001: GDPR retention requirements (pre-deploy)
 - OQ-BUILD-004: Encryption at rest decision (pre-deploy)
 
@@ -131,25 +135,25 @@ These items are documented but not blocking merge:
 
 ## Evidence Pointers
 
-| Artifact | Location |
-|----------|----------|
-| Signal receipt | `.runs/feat-session-timeout/signal/signal_receipt.json` |
-| Plan receipt | `.runs/feat-session-timeout/plan/plan_receipt.json` |
-| Build receipt | `.runs/feat-session-timeout/build/build_receipt.json` |
-| ADR | `.runs/feat-session-timeout/plan/adr.md` |
-| Requirements | `.runs/feat-session-timeout/signal/requirements.md` |
-| Test results | `.runs/feat-session-timeout/build/test_execution.md` |
-| Mutation report | `.runs/feat-session-timeout/build/mutation_report.md` |
-| Code critique | `.runs/feat-session-timeout/build/code_critique.md` |
-| Test critique | `.runs/feat-session-timeout/build/test_critique.md` |
-| Open questions | `.runs/feat-session-timeout/build/open_questions.md` |
-| Security scan | `.runs/feat-session-timeout/gate/security_scan.md` |
+| Artifact        | Location                                                |
+| --------------- | ------------------------------------------------------- |
+| Signal receipt  | `.runs/feat-session-timeout/signal/signal_receipt.json` |
+| Plan receipt    | `.runs/feat-session-timeout/plan/plan_receipt.json`     |
+| Build receipt   | `.runs/feat-session-timeout/build/build_receipt.json`   |
+| ADR             | `.runs/feat-session-timeout/plan/adr.md`                |
+| Requirements    | `.runs/feat-session-timeout/signal/requirements.md`     |
+| Test results    | `.runs/feat-session-timeout/build/test_execution.md`    |
+| Mutation report | `.runs/feat-session-timeout/build/mutation_report.md`   |
+| Code critique   | `.runs/feat-session-timeout/build/code_critique.md`     |
+| Test critique   | `.runs/feat-session-timeout/build/test_critique.md`     |
+| Open questions  | `.runs/feat-session-timeout/build/open_questions.md`    |
+| Security scan   | `.runs/feat-session-timeout/gate/security_scan.md`      |
 
 ---
 
 ## Final Verdict
 
-**MERGE**
+### MERGE
 
 All gate checks passed. Residual risks are documented and acceptable. The change is ready for production deployment after product owner reviews the two NEEDS_HUMAN open questions.
 

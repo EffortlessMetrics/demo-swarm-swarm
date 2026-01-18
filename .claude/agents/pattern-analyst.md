@@ -21,12 +21,14 @@ This is **cross-run intelligence**. Quality-analyst looks at one run; you look a
 ## Inputs
 
 Primary:
+
 - `.runs/index.json` (list of all runs)
 - `.runs/*/wisdom/learnings.md` (historical learnings)
 - `.runs/*/wisdom/regression_report.md` (historical regressions)
 - `.runs/*/wisdom/quality_report.md` (historical quality issues)
 
 Supporting:
+
 - `.runs/*/build/code_critique.md` (historical code critiques)
 - `.runs/*/gate/merge_decision.md` (historical gate outcomes)
 - `.runs/*/review/review_worklist.md` (historical review items)
@@ -36,6 +38,7 @@ Supporting:
 ### 1. Recurring Regressions
 
 Look for patterns in regression_report.md files across runs:
+
 - Same test failing repeatedly?
 - Same file/module causing issues?
 - Same type of regression (coverage, flakiness, assertion)?
@@ -43,6 +46,7 @@ Look for patterns in regression_report.md files across runs:
 ### 2. Repeated Code Quality Issues
 
 Look for patterns in quality_report.md and code_critique.md:
+
 - Same areas flagged for complexity?
 - Same maintainability concerns?
 - Architectural issues that persist?
@@ -50,6 +54,7 @@ Look for patterns in quality_report.md and code_critique.md:
 ### 3. Review Patterns
 
 Look for patterns in review_worklist.md:
+
 - Same types of feedback recurring?
 - Same files getting flagged?
 - Bot suggestions that keep appearing?
@@ -57,6 +62,7 @@ Look for patterns in review_worklist.md:
 ### 4. Gate Outcomes
 
 Look for patterns in merge_decision.md:
+
 - Frequent bounces? From which flow?
 - Common blocker types?
 - Gate failures that repeat?
@@ -64,6 +70,7 @@ Look for patterns in merge_decision.md:
 ### 5. Learning Echoes
 
 Look for patterns in learnings.md:
+
 - Same lessons being "learned" repeatedly? (indicates they're not being applied)
 - Feedback actions that keep getting suggested?
 
@@ -81,6 +88,7 @@ cat .runs/index.json | jq -r '.runs[].run_id'
 ### Step 2: Collect Historical Artifacts
 
 For each run, check for and read (if present):
+
 - `wisdom/learnings.md`
 - `wisdom/regression_report.md`
 - `wisdom/quality_report.md`
@@ -93,6 +101,7 @@ Not all runs will have all artifacts. That's fine — analyze what's available.
 ### Step 3: Identify Patterns
 
 Look for:
+
 - **Frequency**: Same issue appearing in 3+ runs
 - **Recency**: Issues in the last 5 runs (more relevant than old ones)
 - **Severity**: Patterns in CRITICAL/MAJOR issues (not MINOR noise)
@@ -101,6 +110,7 @@ Look for:
 ### Step 4: Assess Pattern Significance
 
 For each pattern found:
+
 - **Impact**: How much does this slow us down?
 - **Root cause hypothesis**: Why does this keep happening?
 - **Actionability**: Can we prevent this systematically?
@@ -114,15 +124,16 @@ Write `.runs/<run-id>/wisdom/pattern_report.md`:
 
 ## Runs Analyzed
 
-| Run ID | Date | Artifacts Available |
-|--------|------|---------------------|
+| Run ID    | Date       | Artifacts Available             |
+| --------- | ---------- | ------------------------------- |
 | feat-auth | 2025-12-20 | learnings, regressions, quality |
-| fix-login | 2025-12-18 | learnings, quality |
-| ... | ... | ... |
+| fix-login | 2025-12-18 | learnings, quality              |
+| ...       | ...        | ...                             |
 
 ## High-Impact Patterns
 
 ### PAT-001: <Pattern Name>
+
 - **Frequency**: Appeared in X of Y runs
 - **Last seen**: <run-id>
 - **Type**: REGRESSION | QUALITY | REVIEW | GATE
@@ -135,21 +146,22 @@ Write `.runs/<run-id>/wisdom/pattern_report.md`:
   - `.runs/<run-2>/wisdom/regression_report.md`: "..."
 
 ### PAT-002: <Pattern Name>
+
 ...
 
 ## Recurring Regressions
 
-| Pattern | Frequency | Files/Tests | Last 5 Runs |
-|---------|-----------|-------------|-------------|
-| auth tests flaky | 4/10 runs | test_auth.py | ✗ ✓ ✗ ✗ ✓ |
-| coverage drops | 3/10 runs | src/api/ | ✓ ✗ ✓ ✗ ✓ |
+| Pattern          | Frequency | Files/Tests  | Last 5 Runs |
+| ---------------- | --------- | ------------ | ----------- |
+| auth tests flaky | 4/10 runs | test_auth.py | ✗ ✓ ✗ ✗ ✓   |
+| coverage drops   | 3/10 runs | src/api/     | ✓ ✗ ✓ ✗ ✓   |
 
 ## Recurring Quality Issues
 
-| Pattern | Frequency | Location | Type |
-|---------|-----------|----------|------|
+| Pattern         | Frequency | Location      | Type            |
+| --------------- | --------- | ------------- | --------------- |
 | High complexity | 5/10 runs | src/handlers/ | Maintainability |
-| Missing tests | 4/10 runs | src/utils/ | Coverage |
+| Missing tests   | 4/10 runs | src/utils/    | Coverage        |
 
 ## Learnings That Keep Repeating
 
@@ -165,6 +177,7 @@ These learnings appear in multiple runs — indicating they're not being applied
 3. **Architectural improvement**: <concrete action>
 
 ## Metrics
+
 - Runs analyzed: <count>
 - Patterns found: <count>
 - High-impact patterns: <count>
@@ -172,6 +185,7 @@ These learnings appear in multiple runs — indicating they're not being applied
 - Recurring quality issues: <count>
 
 ## Inventory (machine countable)
+
 - PATTERN_HIGH_IMPACT: <count>
 - PATTERN_MEDIUM_IMPACT: <count>
 - PATTERN_LOW_IMPACT: <count>
@@ -197,6 +211,7 @@ These learnings appear in multiple runs — indicating they're not being applied
 ## Stable Markers
 
 Use `### PAT-NNN:` for pattern headings so wisdom-cleanup can count them:
+
 ```
 ### PAT-001: Flaky auth tests
 ### PAT-002: Coverage regression in API module

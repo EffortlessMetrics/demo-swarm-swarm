@@ -1,6 +1,7 @@
 # Deploy Cleanup Report
 
 ## Run: local-alignment-audit-aba1c6
+
 ## Completed: 2025-12-20T17:16:49Z
 
 ## Machine Summary
@@ -14,20 +15,21 @@ gate_verdict: MERGE
 missing_required: []
 missing_optional: []
 blockers:
-  - "ORG_CONSTRAINT: Branch protection not enabled on main branch; required status checks not configured"
-concerns:
-  - "Merge operation completed successfully but governance enforcement is not verifiable"
-  - "CI workflows exist and would run on push/PR, but are not required to pass before merge"
-  - "Post-merge CI signal is UNKNOWN (workflow has not yet triggered)"
+
+- "ORG_CONSTRAINT: Branch protection not enabled on main branch; required status checks not configured"
+  concerns:
+- "Merge operation completed successfully but governance enforcement is not verifiable"
+- "CI workflows exist and would run on push/PR, but are not required to pass before merge"
+- "Post-merge CI signal is UNKNOWN (workflow has not yet triggered)"
 
 ## Artifact Verification
 
-| Artifact | Status |
-|----------|--------|
+| Artifact               | Status  |
+| ---------------------- | ------- |
 | deployment_decision.md | ✓ Found |
-| deployment_log.md | ✓ Found |
+| deployment_log.md      | ✓ Found |
 | verification_report.md | ✓ Found |
-| flow_plan.md | ✓ Found |
+| flow_plan.md           | ✓ Found |
 
 ## Extracted (anchored)
 
@@ -39,20 +41,20 @@ concerns:
 
 ## Counts Derived (stable markers)
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| failed_checks | 1 | deployment_decision.md YAML (`- check: branch_protection` item) |
-| ci_checks_total | 1 | verification_report.md (DEP_CI_RUN marker count) |
-| deploy_events_total | 1 | verification_report.md (DEP_DEPLOY_EVENT marker count) |
-| verification_checks_total | 2 | ci_checks_total + deploy_events_total |
+| Metric                    | Value | Source                                                          |
+| ------------------------- | ----- | --------------------------------------------------------------- |
+| failed_checks             | 1     | deployment_decision.md YAML (`- check: branch_protection` item) |
+| ci_checks_total           | 1     | verification_report.md (DEP_CI_RUN marker count)                |
+| deploy_events_total       | 1     | verification_report.md (DEP_DEPLOY_EVENT marker count)          |
+| verification_checks_total | 2     | ci_checks_total + deploy_events_total                           |
 
 ## Signals Extracted (from verification_report.md)
 
-| Signal | Value | Source |
-|--------|-------|--------|
-| ci_signal | UNKNOWN | DEP_CI_SIGNAL marker (workflow not yet triggered post-merge) |
-| deploy_signal | STABLE | DEP_DEPLOY_SIGNAL marker (merge operation succeeded) |
-| not_deployed | no | DEP_NOT_DEPLOYED marker |
+| Signal        | Value   | Source                                                       |
+| ------------- | ------- | ------------------------------------------------------------ |
+| ci_signal     | UNKNOWN | DEP_CI_SIGNAL marker (workflow not yet triggered post-merge) |
+| deploy_signal | STABLE  | DEP_DEPLOY_SIGNAL marker (merge operation succeeded)         |
+| not_deployed  | no      | DEP_NOT_DEPLOYED marker                                      |
 
 ## Index Updated
 

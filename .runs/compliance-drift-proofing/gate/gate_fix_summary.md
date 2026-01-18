@@ -13,6 +13,7 @@
 ### Evidence Summary
 
 The gate has surfaced:
+
 1. **Mechanical formatting drift** (deterministic, automated fix via `cargo fmt`)
 2. **Non-mechanical integrity failures** (coverage/test count discrepancies requiring data reconciliation)
 3. **Non-mechanical policy violations** (receipt aspirational claims vs actual artifact state)
@@ -24,11 +25,13 @@ This report focuses exclusively on **mechanical fix-forward eligibility**. The t
 ### MECH-001: Rust formatting drift (cargo fmt)
 
 **Evidence:**
+
 - `cargo fmt --check` exit code 1 indicates formatting violations across 8 source files
 - Drift pattern: Line wrapping and assertion formatting (deterministic, formatter-applied)
 - Files affected: `control_plane.rs`, `flow.rs`, `structure.rs`, `wisdom.rs`, `ctx.rs`, `reporter.rs`, `util.rs`, `check_integration_test.rs`
 
 **Files/Paths:**
+
 - `tools/demoswarm-pack-check/src/checks/control_plane.rs`
 - `tools/demoswarm-pack-check/src/checks/flow.rs`
 - `tools/demoswarm-pack-check/src/checks/structure.rs`
@@ -41,6 +44,7 @@ This report focuses exclusively on **mechanical fix-forward eligibility**. The t
 **Category:** `format`
 
 **Suggested Command:**
+
 ```bash
 cd tools/demoswarm-pack-check && cargo fmt
 ```
@@ -55,6 +59,7 @@ Formatting is deterministic and does not change program behavior; cargo fmt appl
 ### NONMECH-001: Test count fabrication in receipt
 
 **Evidence:**
+
 - `receipt_audit.md` (CRITICAL): Build receipt claims "420 passed (379 unit + 41 integration)" but `test_execution.md` canonical artifact documents only "253 unit + 41 integration = 294 total"
 - Discrepancy: 126 tests (42.8% inflation)
 - Root cause: Receipt updated aspirationally during reseal without canonical test artifact refresh
@@ -69,6 +74,7 @@ Reconciling test counts requires re-running test suite and regenerating test_exe
 ### NONMECH-002: Coverage metric mismatch and evidence inconsistency
 
 **Evidence:**
+
 - `coverage_audit.md` (CRITICAL): 14.17 percentage-point gap between build_receipt.json (89.29%) and test_execution.md (75.12%)
 - test_execution.md status UNVERIFIED due to coverage shortfall (below 80% threshold); build_receipt.json claims VERIFIED
 - Module-level coverage in drift.rs: 80.2% (test_execution.md) vs 87.1% (cleanup_report.md) — no merged report explains the delta
@@ -84,6 +90,7 @@ Coverage reconciliation requires test re-execution, coverage instrumentation ref
 ### NONMECH-003: Receipt policy violation (aspirational claims vs actual state)
 
 **Evidence:**
+
 - `policy_analysis.md` (NON-COMPLIANT): "POL-004: Quality gates sourced from Machine Summaries"
 - Receipt claims `lint.clippy_status: CLEAN` but lint_report.md artifact status is UNVERIFIED with active Clippy warning
 - Receipt claims coverage metrics as VERIFIED without reconciling to test_execution.md canonical source
@@ -99,6 +106,7 @@ This requires understanding the root cause of the mismatch (stale receipt, incom
 ## Fix-forward Plan (machine readable)
 
 <!-- PACK-CONTRACT: FIX_FORWARD_PLAN_V1 START -->
+
 ```yaml
 version: 1
 fix_forward_eligible: false
@@ -131,6 +139,7 @@ on_failure:
   route_to_station: build-cleanup
   route_to_agent: null
 ```
+
 <!-- PACK-CONTRACT: FIX_FORWARD_PLAN_V1 END -->
 
 ### Plan Rationale
@@ -149,6 +158,7 @@ Although formatting (MECH-001) is deterministic and fixable:
 3. **Proper routing**: Per CLAUDE.md non-negotiables, blockers that prevent VERIFIED status route to the upstream agent responsible for fixing them. Here, that is Flow 3 Build (build-cleanup / test-author).
 
 **Recommendation to merge-decider:** Route back to Flow 3 Build with focus on:
+
 - Re-running full test suite (unit + integration) with coverage instrumentation
 - Refreshing test_execution.md artifact with authoritative counts and coverage metrics
 - Resealing build_receipt.json with data derived from updated artifacts (not aspirational)
@@ -249,6 +259,6 @@ This violates **CLAUDE.md policy POL-004**: "quality_gates sourced from agent Ma
 
 ---
 
-*Gate Fixer Report: compliance-drift-proofing*
-*Generated: 2025-12-19T03:30:00Z*
-*Status: VERIFIED (analysis complete; findings mechanically derived from gate artifacts)*
+_Gate Fixer Report: compliance-drift-proofing_
+_Generated: 2025-12-19T03:30:00Z_
+_Status: VERIFIED (analysis complete; findings mechanically derived from gate artifacts)_

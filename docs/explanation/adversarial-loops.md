@@ -11,16 +11,19 @@ LLMs are people-pleasers by training. They optimize for agreement and completion
 ### The Failure Modes
 
 **They want to report success:**
+
 - "I've fixed the issue" (when they haven't)
 - "All tests pass" (when they didn't run them)
 - "Implementation complete" (when edge cases are missing)
 
 **They default to agreement:**
+
 - Accept requirements at face value without questioning
 - Confirm designs look good without critical analysis
 - Approve code that "seems fine"
 
 **They'll claim completion prematurely:**
+
 - Report "done" to stop the loop
 - Gloss over remaining work
 - Rationalize gaps as acceptable
@@ -46,18 +49,21 @@ The key insight: **LLMs are excellent at critiquing "someone else's" work.**
 The same model that rationalizes its own errors will ruthlessly identify flaws when reviewing work presented as coming from another agent. We exploit this by splitting the persona.
 
 **Author agent:**
+
 - Incentivized to complete the task
 - Wants to report "done"
 - Naturally optimistic about their output
 - Measures success by producing artifacts
 
 **Critic agent:**
+
 - Incentivized to find problems
 - Feels successful when finding issues
 - Naturally skeptical of claims
 - Measures success by catching flaws
 
 **Gate/Decider agent:**
+
 - Adjudicates based on evidence
 - Neither author nor critic
 - Makes the ship/no-ship call
@@ -93,11 +99,13 @@ Author → Execute → Critic → Fix → Repeat
 ### Termination Is Evidence-Based
 
 Stop when:
+
 - **Critic runs out of meaningful findings** - `can_further_iteration_help: no`
 - **Evidence thresholds are met** - Tests pass, coverage achieved, no CRITICAL items
 - **Status is VERIFIED** - All requirements demonstrably satisfied
 
 Don't stop when:
+
 - **Author claims done** - This is exactly the sycophancy trap
 - **Time runs out** - Checkpoint and continue later
 - **Loop count reached** - Evidence, not iterations, determines completion
@@ -120,12 +128,12 @@ This balances thoroughness with efficiency. Complex work may need more passes; s
 
 The agent that produced work cannot review it.
 
-| Work | Producer | Reviewer |
-|------|----------|----------|
-| Code | `code-implementer` | `code-critic` |
-| Tests | `test-author` | `test-critic` |
-| Requirements | `requirements-author` | `requirements-critic` |
-| Design | `design-optioneer` | Design review in Plan flow |
+| Work         | Producer              | Reviewer                   |
+| ------------ | --------------------- | -------------------------- |
+| Code         | `code-implementer`    | `code-critic`              |
+| Tests        | `test-author`         | `test-critic`              |
+| Requirements | `requirements-author` | `requirements-critic`      |
+| Design       | `design-optioneer`    | Design review in Plan flow |
 
 **Why this matters:** Self-review triggers rationalization. External review triggers analysis.
 
@@ -133,20 +141,22 @@ The agent that produced work cannot review it.
 
 Each role succeeds by different criteria:
 
-| Role | Success Metric |
-|------|----------------|
-| **Author** | "I produced complete, working output" |
-| **Critic** | "I found real issues before they escaped" |
-| **Gate** | "I made the correct ship/no-ship decision" |
+| Role       | Success Metric                             |
+| ---------- | ------------------------------------------ |
+| **Author** | "I produced complete, working output"      |
+| **Critic** | "I found real issues before they escaped"  |
+| **Gate**   | "I made the correct ship/no-ship decision" |
 
 The author wants green. The critic wants to find problems. The gate wants accuracy.
 
 **What happens without opposition:**
+
 - Single agent: "It looks fine to me" (confirmation bias)
 - Author-only: "I'm done" (premature completion)
 - Critic-only: "Everything is wrong" (endless iteration)
 
 **What happens with opposition:**
+
 - Author produces best effort
 - Critic identifies actual gaps
 - Gate decides based on evidence
@@ -157,6 +167,7 @@ The author wants green. The critic wants to find problems. The gate wants accura
 Findings must be grounded, not vibes-based.
 
 **Critics must cite:**
+
 - Specific file:line (not "somewhere in the code")
 - What's wrong (the actual issue)
 - Why it matters (impact or risk)
@@ -164,11 +175,13 @@ Findings must be grounded, not vibes-based.
 - How to verify closure (what "fixed" looks like)
 
 **Authors must address:**
+
 - Each specific finding (not "I reviewed the feedback")
 - With specific changes (not "I improved it")
 - With verification (tests pass, behavior correct)
 
 **Gates must point to:**
+
 - Evidence for decisions (not "it seems ready")
 - What was verified (specific checks)
 - What remains uncertain (known gaps)
@@ -201,12 +214,12 @@ constant-time behavior regardless of password similarity.
 
 ### Severity Levels
 
-| Level | Meaning | Action Required |
-|-------|---------|-----------------|
-| **CRITICAL** | Blocks ship | Must fix before proceeding |
-| **MAJOR** | Significant issue | Should fix before ship |
-| **MINOR** | Quality improvement | Fix if time permits |
-| **NIT** | Style/preference | Optional |
+| Level        | Meaning             | Action Required            |
+| ------------ | ------------------- | -------------------------- |
+| **CRITICAL** | Blocks ship         | Must fix before proceeding |
+| **MAJOR**    | Significant issue   | Should fix before ship     |
+| **MINOR**    | Quality improvement | Fix if time permits        |
+| **NIT**      | Style/preference    | Optional                   |
 
 Critics prioritize finding CRITICAL and MAJOR issues. Nits are captured but don't drive loops.
 
@@ -219,6 +232,7 @@ Critics prioritize finding CRITICAL and MAJOR issues. Nits are captured but don'
 The loop ends when evidence supports stopping:
 
 **Critic says `can_further_iteration_help: no`:**
+
 ```yaml
 status: VERIFIED
 findings:
@@ -230,12 +244,14 @@ reasoning: "Remaining items are style preferences, not correctness issues."
 ```
 
 **Evidence thresholds met:**
+
 - All tests pass
 - No CRITICAL or MAJOR findings
 - Coverage meets requirements
 - No security vulnerabilities
 
 **Status is VERIFIED:**
+
 - Requirements demonstrably satisfied
 - Implementation matches design
 - Critics agree it's ready
@@ -245,21 +261,27 @@ reasoning: "Remaining items are style preferences, not correctness issues."
 Don't stop based on:
 
 **Author claims done:**
+
 ```
 "I believe I've addressed all the issues."
 ```
+
 This is exactly what a sycophantic agent says to end the loop.
 
 **Iteration count reached:**
+
 ```
 "We've done 3 passes, that's enough."
 ```
+
 Three bad passes don't make good code. Evidence matters, not counts.
 
 **Time pressure:**
+
 ```
 "We need to ship, let's proceed."
 ```
+
 If time runs out, checkpoint with `PARTIAL` status. Don't pretend completion.
 
 ---
@@ -290,6 +312,7 @@ If tests pass on the mutant, they don't actually verify the `> 0` condition. The
 Mutation testing proves the tests **actually test** the code, not just **exercise** it.
 
 This is adversarial quality at its purest:
+
 - The mutator tries to break things in ways tests should catch
 - The tests try to catch all meaningful breakage
 - Surviving mutants reveal hollow test coverage

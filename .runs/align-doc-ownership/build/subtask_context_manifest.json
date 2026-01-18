@@ -212,7 +212,12 @@
       "path": ".claude/agents/signal-cleanup.md",
       "type": "doc",
       "reason": "Flow 1 cleanup agent; needs Skills section for runs-derive, runs-index per acceptance criteria",
-      "signals": ["signal-cleanup", "Skills section", "runs-derive", "runs-index"],
+      "signals": [
+        "signal-cleanup",
+        "Skills section",
+        "runs-derive",
+        "runs-index"
+      ],
       "req_refs": ["REQ-002"],
       "source": "subtask_index"
     },

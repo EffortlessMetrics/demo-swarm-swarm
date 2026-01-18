@@ -7,6 +7,7 @@
 ## The Core Insight
 
 When you use a stochastic compiler (LLM) to generate code, it doesn't start from nothing. It starts from:
+
 - The codebase you show it
 - The patterns it observes
 - The conventions it infers
@@ -20,12 +21,14 @@ This means **the codebase is a mold**. Whatever shape it has, that's the shape o
 The flow structure and existing patterns exert gravitational pull on new output.
 
 **Good codebase:**
+
 - Clear conventions → consistent new code
 - Well-defined interfaces → appropriate integrations
 - Tested patterns → testable additions
 - Clean structure → organized additions
 
 **Messy codebase:**
+
 - Inconsistent patterns → random style choices
 - Unclear interfaces → awkward integrations
 - Untested code → more untested code
@@ -41,17 +44,18 @@ The generator will match what it sees. Schema gravity is real.
 
 In traditional development, technical debt slows you down. In agentic development, technical debt **gets copied**.
 
-| Traditional | Agentic |
-|-------------|---------|
-| Debt makes coding slower | Debt gets replicated |
-| You can work around bad patterns | Generator learns bad patterns |
-| One messy file affects one file | One messy file affects all similar files |
+| Traditional                      | Agentic                                  |
+| -------------------------------- | ---------------------------------------- |
+| Debt makes coding slower         | Debt gets replicated                     |
+| You can work around bad patterns | Generator learns bad patterns            |
+| One messy file affects one file  | One messy file affects all similar files |
 
 This makes debt remediation even more important.
 
 ### 2. Refactoring Is Investment
 
 Improving the mold improves all future output:
+
 - Better interfaces → better generated integrations
 - Cleaner conventions → cleaner generated code
 - Better test patterns → better generated tests
@@ -62,12 +66,12 @@ Refactoring pays compound interest.
 
 Maintainability work is not a luxury. It's infrastructure.
 
-| Work Type | Traditional Value | Agentic Value |
-|-----------|------------------|---------------|
-| Style consistency | Nice to have | Shapes all generation |
-| Interface clarity | Helps humans | Helps generation too |
-| Test patterns | Safety net | Template for new tests |
-| Documentation | Onboarding | Context for generation |
+| Work Type         | Traditional Value | Agentic Value          |
+| ----------------- | ----------------- | ---------------------- |
+| Style consistency | Nice to have      | Shapes all generation  |
+| Interface clarity | Helps humans      | Helps generation too   |
+| Test patterns     | Safety net        | Template for new tests |
+| Documentation     | Onboarding        | Context for generation |
 
 The codebase teaches the generator what "good" looks like.
 
@@ -78,6 +82,7 @@ The codebase teaches the generator what "good" looks like.
 ### Invest in the Mold
 
 Before starting a major feature:
+
 - Is the relevant area well-structured?
 - Are the interfaces clear?
 - Are there good patterns to follow?
@@ -87,6 +92,7 @@ If not, consider improving the mold first.
 ### Watch for Pattern Drift
 
 Generated code will match existing patterns. If you see bad patterns spreading:
+
 - The generator is doing its job (matching context)
 - The fix is to improve the source patterns
 - Then regenerate or refactor
@@ -94,6 +100,7 @@ Generated code will match existing patterns. If you see bad patterns spreading:
 ### Document Conventions
 
 Explicit conventions help:
+
 - Humans understand the codebase
 - Generators follow the patterns
 - Critics check for violations
@@ -132,6 +139,7 @@ In agentic development, refactoring is infrastructure investment, not housekeepi
 ## The Mental Model
 
 Think of the codebase as a **template factory**:
+
 - Each pattern is a template
 - Each convention is a constraint
 - Each interface is a slot

@@ -17,6 +17,7 @@ This isn't reckless. It's intentional organizational design.
 ### What We Do
 
 We run Claude Code with `bypassPermissions` enabled. Claude can:
+
 - Read and write files freely
 - Run commands without approval
 - Execute multi-step operations autonomously
@@ -26,17 +27,20 @@ We run Claude Code with `bypassPermissions` enabled. Claude can:
 **The sandbox is the boundary, not the prompt.**
 
 We don't constrain Claude's moment-to-moment actions. Instead:
+
 - The repository is the sandbox
 - Gates engage at publish boundaries (commit, push, GitHub post)
 - Claude has freedom to explore, implement, iterate within that sandbox
 
 This is exactly how you'd treat a trusted new hire:
+
 - "Here's your dev environment. Experiment freely."
 - "When you're ready to ship, we'll review."
 
 ### The Alternative (and why it fails)
 
 Approval-per-action systems:
+
 - Interrupt flow constantly
 - Reduce Claude to a suggestion engine
 - Make iteration expensive
@@ -51,6 +55,7 @@ We'd rather have Claude try 10 things and find what works than ask permission fo
 ### The Principle
 
 Inside the sandbox: **freedom**
+
 - Explore the codebase
 - Try implementations
 - Run tests
@@ -58,6 +63,7 @@ Inside the sandbox: **freedom**
 - Iterate rapidly
 
 At the boundary: **gates**
+
 - Secrets scanning before commit
 - Repo hygiene before push
 - Review before merge
@@ -68,11 +74,13 @@ At the boundary: **gates**
 **Machine time is cheap. Human attention is expensive.**
 
 Let Claude iterate rapidly on implementation. Only engage human judgment at decision points:
+
 - "Should we ship this?" (Gate)
 - "Is this approach right?" (Design review)
 - "Does this solve the problem?" (Acceptance)
 
 Don't spend human attention on:
+
 - "Can Claude read this file?" (Yes)
 - "Can Claude run this test?" (Yes)
 - "Can Claude try this fix?" (Yes)
@@ -84,6 +92,7 @@ Don't spend human attention on:
 ### Individuals Over Process
 
 We don't constrain Claude with rigid processes. We give it:
+
 - Clear goals
 - Helpful guidance
 - Freedom to achieve them
@@ -97,6 +106,7 @@ Agents focus on producing working code, not satisfying schemas. Artifacts exist 
 ### Responding to Change
 
 Agents adapt to what they find. If the implementation reveals a problem with the design, they can:
+
 - Fix it locally
 - Flag it for discussion
 - Recommend an alternative
@@ -114,6 +124,7 @@ Agent communication is natural language, not rigid contracts. The orchestrator a
 ### Self-Management
 
 Agents manage their own work. They don't wait for micromanagement:
+
 - Read the context
 - Understand the goal
 - Do the work
@@ -134,6 +145,7 @@ The system evolves. Agents can observe friction, suggest improvements, and contr
 ### Trust Is Efficient
 
 Constantly verifying is expensive. We trust by default:
+
 - Trust agents to do reasonable things
 - Trust that file reads are appropriate
 - Trust that commands are well-intentioned
@@ -141,6 +153,7 @@ Constantly verifying is expensive. We trust by default:
 ### Verify at Boundaries
 
 When trust meets the outside world, verify:
+
 - Before secrets could leak (publish gate)
 - Before changes become permanent (merge gate)
 - Before production is affected (deploy gate)
@@ -148,6 +161,7 @@ When trust meets the outside world, verify:
 ### Recovery Over Prevention
 
 We don't try to prevent all possible mistakes. Instead:
+
 - State is on disk (recoverable)
 - Git is the safety net (revertible)
 - Human review at boundaries (catchable)
@@ -161,12 +175,14 @@ A mistake in the sandbox is cheap. A mistake in production is expensive. Gate ac
 ### High Velocity
 
 Claude can:
+
 - Try multiple approaches rapidly
 - Run tests without asking
 - Fix issues immediately
 - Iterate to working code
 
 Without:
+
 - Permission dialogs
 - Approval workflows
 - Stop-and-wait cycles
@@ -174,11 +190,13 @@ Without:
 ### Deep Focus
 
 Claude can:
+
 - Maintain context across long operations
 - Follow a complex implementation through
 - Handle multi-file changes atomically
 
 Without:
+
 - Constant interruption
 - Context loss from approval cycles
 - Fragmented attention
@@ -186,6 +204,7 @@ Without:
 ### Quality Through Iteration
 
 More iterations = better code:
+
 - Try something, see if it works
 - Run tests, fix failures
 - Get critique, address issues

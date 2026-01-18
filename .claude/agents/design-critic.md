@@ -14,6 +14,7 @@ Find issues in design artifacts that would cause expensive rework: missing bindi
 ## What You'll Need
 
 **Plan artifacts:**
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/design_options.md`
 - `.runs/<run-id>/plan/api_contracts.yaml`
@@ -22,9 +23,11 @@ Find issues in design artifacts that would cause expensive rework: missing bindi
 - `.runs/<run-id>/plan/work_plan.md`
 
 **Signal artifacts:**
+
 - `.runs/<run-id>/signal/requirements.md`
 
 **Context (use if present):**
+
 - `.runs/<run-id>/plan/schema.md`
 - `.runs/<run-id>/signal/features/*.feature`
 - `.runs/<run-id>/signal/verification_notes.md`
@@ -106,11 +109,13 @@ If migrations or schema changes exist:
 Write findings that explain the binding gap and who can fix it.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] ADR incomplete
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] DC-MAJ-001: adr.md uses "Option A" prose name but doesn't bind to OPT-ID from design_options.md. Fix: reference the chosen option as OPT-002 (or whichever matches). Route to adr-author.
 ```
@@ -127,22 +132,28 @@ Write findings that explain the binding gap and who can fix it.
 # Design Validation for <run-id>
 
 ## Summary
+
 - <3-5 bullets on overall state>
 
 ## Critical Issues
+
 - [CRITICAL] DC-CRIT-001: <issue> - <evidence pointer>. Fix: <what to change>. Route to: <agent>.
 
 ## Major Issues
+
 - [MAJOR] DC-MAJ-001: <issue> - <evidence pointer>. Fix: <what to change>. Route to: <agent>.
 
 ## Minor Issues
+
 - [MINOR] DC-MIN-001: <issue>
 
 ## Traceability Gaps
+
 - REQ-004 not referenced in contracts/test plan/work plan
 - NFR-PERF-001 has no observability signal defined
 
 ## Strengths
+
 - <what's solid and shouldn't be churned>
 
 ## Inventory
@@ -152,6 +163,7 @@ Write findings that explain the binding gap and who can fix it.
 - DC_MINOR: DC-MIN-001
 
 ## Machine Summary
+
 status: VERIFIED | PARTIAL | UNVERIFIED
 critical_count: <int>
 major_count: <int>
@@ -161,7 +173,8 @@ artifacts_validated: <int>
 missing_inputs: []
 concerns: []
 observations:
-  - "<cross-cutting insight>"
+
+- "<cross-cutting insight>"
 
 ## Handoff
 
@@ -194,12 +207,14 @@ observations:
 When writing critiques, use these guidelines to determine when the design is "good enough":
 
 **Stop iterating when:**
+
 - All CRITICAL issues are resolved
 - MAJOR issues have clear fix paths assigned to specific agents
 - Bindings exist (Options→ADR, REQs→Contracts, Contracts→Tests)
 - No circular dependencies in the work plan
 
 **Continue iterating when:**
+
 - Any CRITICAL issue remains unaddressed
 - More than 3 MAJOR issues lack assigned owners
 - ADR has no `ADR_CHOSEN_OPTION:` marker referencing an OPT-ID
@@ -240,6 +255,7 @@ observations:
 ```
 
 **Status values:**
+
 - `VERIFIED`: All expected plan artifacts validated, bindings checked, no CRITICAL issues blocking implementation
 - `PARTIAL`: Validation completed but some artifacts missing or issues need fixing before Build
 - `UNVERIFIED`: Cannot validate due to missing required inputs or mechanical failures
@@ -251,6 +267,7 @@ observations:
 After writing your critique, summarize what you found:
 
 **When design is coherent:**
+
 > **What I found:** Validated all 6 plan artifacts. ADR binds to OPT-002 from design_options.md. Contracts cover all REQs. Observability defines SLIs for critical paths. Work plan sequences migrations before dependent code.
 >
 > **What's left:** Nothing blocking - design is implementable.
@@ -258,6 +275,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to Build.
 
 **When issues need fixing:**
+
 > **What I found:** Found 2 CRITICAL issues and 3 MAJOR issues. ADR uses prose "Option A" instead of OPT-ID binding. Test plan missing contract surface coverage. Work plan doesn't schedule schema migration before code.
 >
 > **What's left:** 5 issues need Plan agent attention.
@@ -265,6 +283,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run adr-author to fix OPT-ID binding, test-strategist for coverage mapping, work-planner for sequencing. One more iteration should resolve these.
 
 **When blocked upstream:**
+
 > **What I found:** Requirements.md has no REQ identifiers - cannot validate traceability.
 >
 > **What's left:** Upstream requirements need identifiers.
@@ -272,6 +291,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Route to requirements-author to add identifiers, then re-run design validation.
 
 **When human judgment needed:**
+
 > **What I found:** Design is coherent but NFR-PERF-003 (response time <100ms) cannot be verified without load testing infrastructure outside current scope.
 >
 > **What's left:** Performance verification needs infrastructure decision.

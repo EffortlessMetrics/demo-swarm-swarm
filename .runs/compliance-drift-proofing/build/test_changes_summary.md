@@ -1,6 +1,7 @@
 # Test Changes Summary
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -20,42 +21,48 @@ missing_required: []
 concerns: []
 
 changes:
-  files_changed: 1
-  files_added: 0
-  tests_added: 38
-  tests_modified: 0
+files_changed: 1
+files_added: 0
+tests_added: 38
+tests_modified: 0
 
 coverage:
-  reqs_covered: []
-  reqs_uncovered: []
-  scenarios_covered: []
-  scenarios_uncovered: []
+reqs_covered: []
+reqs_uncovered: []
+scenarios_covered: []
+scenarios_uncovered: []
 
 ## What Changed
+
 - tools/demoswarm-pack-check/src/checks/control_plane.rs: Added 38 new integration tests in a nested integration module that exercise the check functions with tempdir-based fixtures
 
 ## REQ -> Test Map
-| REQ | Test (path::test_name) | Status | Notes |
-|-----|-------------------------|--------|-------|
-| N/A - task-specific | control_plane::tests::integration::* | added | Integration tests for uncovered check function lines |
+
+| REQ                 | Test (path::test_name)                | Status | Notes                                                |
+| ------------------- | ------------------------------------- | ------ | ---------------------------------------------------- |
+| N/A - task-specific | control_plane::tests::integration::\* | added  | Integration tests for uncovered check function lines |
 
 ## BDD Scenario -> Test Map
-| Scenario | Test (path::test_name) | Status |
-|----------|-------------------------|--------|
-| N/A - task-specific | See integration test module | added |
 
-## NFR Verification Notes (if any NFR-* in requirements)
-| NFR | Strategy | Status | Notes |
-|-----|----------|--------|-------|
-| N/A | N/A | N/A | No NFRs for this coverage improvement task |
+| Scenario            | Test (path::test_name)      | Status |
+| ------------------- | --------------------------- | ------ |
+| N/A - task-specific | See integration test module | added  |
+
+## NFR Verification Notes (if any NFR-\* in requirements)
+
+| NFR | Strategy | Status | Notes                                      |
+| --- | -------- | ------ | ------------------------------------------ |
+| N/A | N/A      | N/A    | No NFRs for this coverage improvement task |
 
 ## Test Run Results
+
 - Test-runner invoked: yes
 - Summary line: 102 passed; 0 failed; 0 ignored; 0 measured; 277 filtered out; finished in 0.22s
 - Expected failures (pre-implementation): none
 - Unexpected failures: none
 
 ## Edge Cases and Error Paths
+
 - Missing agents (test_check_repo_operator_result_missing_agent)
 - Missing Machine Summary heading (test_check_critics_machine_summary_missing_heading)
 - Missing canonical status axis (test_check_critics_machine_summary_missing_status_axis)
@@ -88,19 +95,23 @@ coverage:
 - Multiple critics with mixed observations coverage (test_check_critics_observations_field_multiple_critics)
 
 ## Known Issues / TODO
+
 - None identified
 
 ## Assumptions Made
+
 - Tests use tempfile::TempDir for isolation (the tempfile crate is already a dev-dependency)
 - The TestFixture helper creates minimal .claude/ directory structures for each test
 - Test reporter output is not captured; tests rely on rep.errors and rep.warnings counts
 
 ## Inventory (machine countable)
+
 - TEST_FILE_CHANGED: tools/demoswarm-pack-check/src/checks/control_plane.rs
 
-*Tests added: 38 integration tests in checks::control_plane::tests::integration module*
+_Tests added: 38 integration tests in checks::control_plane::tests::integration module_
 
 ### Tests Added (full list)
+
 1. test_check_critics_machine_summary_pass
 2. test_check_critics_machine_summary_missing_heading
 3. test_check_critics_machine_summary_missing_status_axis

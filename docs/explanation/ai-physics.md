@@ -31,6 +31,7 @@ See [Stateless Execution](stateless-execution.md) for the full pattern and why i
 ### The Problem: Context Explosion
 
 Raw reality is heavy:
+
 - Test logs: 10K+ lines
 - GitHub API responses: 100KB+ of JSON
 - Git diffs: Hundreds of changed lines
@@ -56,13 +57,13 @@ Designate certain agents as **Compressors**:
 
 ### Compressor Agents
 
-| Agent | Heavy Input | Light Output |
-|-------|-------------|--------------|
-| `test-executor` | 10K lines of test logs | `test_execution.md` (status + top 5 failures) |
-| `pr-feedback-harvester` | 100KB GitHub API JSON | `pr_feedback.md` + `blockers[]` |
-| `build-cleanup` | All flow artifacts | `build_receipt.json` (counts + gates) |
-| `repo-operator` | `git status`, `git diff` | `Repo Operator Result` block |
-| `standards-enforcer` | Full codebase scan | `standards_report.md` + summary |
+| Agent                   | Heavy Input              | Light Output                                  |
+| ----------------------- | ------------------------ | --------------------------------------------- |
+| `test-executor`         | 10K lines of test logs   | `test_execution.md` (status + top 5 failures) |
+| `pr-feedback-harvester` | 100KB GitHub API JSON    | `pr_feedback.md` + `blockers[]`               |
+| `build-cleanup`         | All flow artifacts       | `build_receipt.json` (counts + gates)         |
+| `repo-operator`         | `git status`, `git diff` | `Repo Operator Result` block                  |
+| `standards-enforcer`    | Full codebase scan       | `standards_report.md` + summary               |
 
 ### The Rule
 
@@ -79,11 +80,13 @@ The orchestrator reads the compressed output, not the raw inputs. This keeps flo
 ### The Problem: Agent Proliferation
 
 It's tempting to create narrow agents for every task:
+
 - `DocstringWriter` for docstrings
 - `DebugRemover` for removing `console.log`
 - `ImportSorter` for sorting imports
 
 But each agent spawn has cost:
+
 - Context loading overhead
 - Round-trip latency
 - Loss of local understanding
@@ -92,12 +95,12 @@ But each agent spawn has cost:
 
 Group related work by **context loaded**:
 
-| Context Loaded | Owner | Combined Duties |
-|----------------|-------|-----------------|
-| `src/*.ts`, ADR, contracts | `code-implementer` | Logic, docstrings, local refactor, debug removal |
-| `tests/*.test.ts`, BDD scenarios | `test-author` | Test writing, fixture updates, spec feedback |
-| `git status`, `git diff` | `repo-operator` | Staging, extras detection, security guard, commit/push |
-| GitHub API responses | `pr-feedback-harvester` | Fetching, triage, summarizing |
+| Context Loaded                   | Owner                   | Combined Duties                                        |
+| -------------------------------- | ----------------------- | ------------------------------------------------------ |
+| `src/*.ts`, ADR, contracts       | `code-implementer`      | Logic, docstrings, local refactor, debug removal       |
+| `tests/*.test.ts`, BDD scenarios | `test-author`           | Test writing, fixture updates, spec feedback           |
+| `git status`, `git diff`         | `repo-operator`         | Staging, extras detection, security guard, commit/push |
+| GitHub API responses             | `pr-feedback-harvester` | Fetching, triage, summarizing                          |
 
 ### Efficiency Wins
 
@@ -122,6 +125,7 @@ LLMs are poor at self-correction in a single pass. They tend to justify their fi
 ### The Solution
 
 We artificially induce critical distance by splitting the persona:
+
 1. **Author:** Writes the draft (optimistic).
 2. **Critic:** Reviews the draft against a checklist (pessimistic).
 3. **Loop:** The Author fixes the issues found by the Critic.
@@ -138,7 +142,7 @@ We artificially induce critical distance by splitting the persona:
 
 ### The Problem: Success Pressure → Guessing
 
-Agents under pressure to complete a task will **guess** to finish. If a file is missing, they might try to infer what the count *should* be (e.g., "I see 0 tests, but maybe they are implied...").
+Agents under pressure to complete a task will **guess** to finish. If a file is missing, they might try to infer what the count _should_ be (e.g., "I see 0 tests, but maybe they are implied...").
 
 This creates phantom confidence. A guessed `0` looks authoritative but is actually misleading data.
 
@@ -160,10 +164,10 @@ A `null` in a receipt is a signal to the human (missing data). A guessed `0` is 
 
 **Rule:** Separate routing from audit.
 
-| Plane | Purpose |
-|-------|---------|
+| Plane             | Purpose                                                            |
+| ----------------- | ------------------------------------------------------------------ |
 | **Routing Plane** | Routing ("What happens next?") — prose handoffs returned by agents |
-| **Audit Plane** | Record ("What happened?") — durable files committed to git |
+| **Audit Plane**   | Record ("What happened?") — durable files committed to git         |
 
 Orchestrators route on prose handoffs (Claude reads and understands). Files and receipts exist for humans and future review.
 
@@ -185,6 +189,7 @@ See [Why Two Planes](why-two-planes.md) for the full explanation.
 ### The Solution
 
 We replaced ad-hoc bash pipelines with the `demoswarm` CLI:
+
 - **The Shim:** `.claude/scripts/demoswarm.sh` ensures we use the same binary logic on Linux, macOS, and Windows
 - **Explicit commands:** `demoswarm count pattern` vs `grep -c | wc -l | sed`
 

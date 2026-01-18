@@ -11,11 +11,13 @@ This document catalogs the failure modes that kill velocity, quality, or trust. 
 ### 1. Schema Religion
 
 **What it looks like:**
+
 - Every agent emits structured YAML/JSON blocks
 - Routing depends on parsing specific fields
 - "If it's not machine-readable, it's not real"
 
 **Why it fails:**
+
 - Claude routes by reading, not parsing
 - Forces agents to optimize for compliance, not quality
 - Creates brittle dependencies on exact formats
@@ -26,6 +28,7 @@ This document catalogs the failure modes that kill velocity, quality, or trust. 
 **Example:**
 
 Bad:
+
 ```yaml
 status: BLOCKED
 reason: "missing_dependency"
@@ -33,6 +36,7 @@ blocker_type: "upstream_artifact"
 ```
 
 Good:
+
 > I cannot proceed with the implementation. The database migration from AC-001 doesn't exist yet. Either create it as part of this work or document the dependency.
 
 ---
@@ -40,6 +44,7 @@ Good:
 ### 2. Blocked Inflation
 
 **What it looks like:**
+
 - Lint failures become "CANNOT_PROCEED"
 - Every issue triggers a stop-and-wait
 - "Blocked" used for anything that isn't perfect
@@ -47,20 +52,22 @@ Good:
 
 **The reality:** "Blocked" is almost always just routing to another agent. True halting is very rare.
 
-| What They Say | What Should Happen |
-|---------------|-------------------|
-| "Blocked on lint" | Route to auto-linter |
-| "Blocked on test failure" | Route to fixer |
+| What They Say                | What Should Happen        |
+| ---------------------------- | ------------------------- |
+| "Blocked on lint"            | Route to auto-linter      |
+| "Blocked on test failure"    | Route to fixer            |
 | "Blocked on design conflict" | Route to design-optioneer |
-| "Blocked on unclear spec" | Route to clarifier |
+| "Blocked on unclear spec"    | Route to clarifier        |
 
 **Why it fails:**
+
 - Kills momentum on work that could continue
 - Wastes expensive human attention on fixable issues
 - Creates a culture of learned helplessness
 - Agents stop trying when they could fix-forward
 
 **The fix:** Almost everything is "route to X," not "blocked." True halt is reserved for:
+
 - Mechanical failure (tooling broken, infra down)
 - Non-derivable decision (business choice requiring human input)
 - Unsafe publish boundary (secrets detected)
@@ -68,9 +75,11 @@ Good:
 **Example:**
 
 Bad:
+
 > BLOCKED: ESLint found 3 warnings in the new code.
 
 Good:
+
 > Implementation complete. 3 lint warnings remain (unused variable, prefer-const x2). Recommend routing to auto-linter before commit.
 
 ---
@@ -78,12 +87,14 @@ Good:
 ### 3. Completion Theater
 
 **What it looks like:**
+
 - Agent reports "COMPLETE" without evidence
 - Tests "pass" but mutation score is 40%
 - Receipts claim success but point to nothing
 - "All requirements satisfied" with no verification
 
 **Why it fails:**
+
 - Process confabulation - agents please instead of verify
 - False confidence leads to production issues
 - Trust erodes when claims don't match reality
@@ -94,12 +105,14 @@ Good:
 **Example:**
 
 Bad:
+
 ```
 status: COMPLETE
 all_tests: PASS
 ```
 
 Good:
+
 > Implementation complete. 12 unit tests pass. Integration tests not run (no database fixture). NFR-PERF-001 not measured - load testing requires infrastructure not available locally.
 
 ---
@@ -107,12 +120,14 @@ Good:
 ### 4. Super-Agent Prompts
 
 **What it looks like:**
+
 - One agent does implement + review + gate + publish
 - 2000-line prompts with 15 responsibilities
 - "Just add another section to handle X"
 - Mode switches embedded in a single agent
 
 **Why it fails:**
+
 - Everything becomes shallow
 - No clear success criteria
 - Impossible to debug which part failed
@@ -131,12 +146,14 @@ Good: `code-implementer` writes code. `test-executor` runs tests. `code-critic` 
 ### 5. Chat as State
 
 **What it looks like:**
+
 - Work product lives in conversation history
 - Resuming requires re-explaining everything
 - Session reset = lost work
 - "Let me remind you what we discussed..."
 
 **Why it fails:**
+
 - Conversations get cleared
 - Context windows fill
 - No audit trail for later review
@@ -155,12 +172,14 @@ Good: Agent reads `.runs/<run-id>/plan/adr.md` to understand architectural decis
 ### 6. Permission Theater
 
 **What it looks like:**
+
 - Constant "may I read this file?" prompts
 - Every action requires approval
 - Safety through interruption
 - Human must approve each step
 
 **Why it fails:**
+
 - Kills velocity without adding safety
 - Safety comes from boundaries, not prompts
 - Human attention wasted on approving obvious actions
@@ -171,9 +190,11 @@ Good: Agent reads `.runs/<run-id>/plan/adr.md` to understand architectural decis
 **Example:**
 
 Bad:
+
 > I found a utility file that might need changes. May I read src/utils/helpers.ts?
 
 Good:
+
 > I read src/utils/helpers.ts and found the validation function. Modified it to handle the new edge case per REQ-003.
 
 ---
@@ -181,12 +202,14 @@ Good:
 ### 7. Review Everything
 
 **What it looks like:**
+
 - Human reads every line of generated code
 - PRs reviewed like hand-written code
 - "I need to understand every change"
 - Treating AI output as untrusted by default
 
 **Why it fails:**
+
 - Doesn't scale (70k LOC PRs exist)
 - Wastes senior attention on mechanical details
 - Ignores the evidence that proves correctness
@@ -205,12 +228,14 @@ Good: Checking the PR Brief for hotspots, reviewing the 3 flagged areas, verifyi
 ### 8. Premature Abstraction
 
 **What it looks like:**
+
 - Creating "frameworks" for one-off tasks
 - Adding configuration for hypothetical futures
 - "Let's make this generic"
 - Building extensibility before the second use case
 
 **Why it fails:**
+
 - Complexity without value
 - Harder to understand and maintain
 - The future need never arrives
@@ -229,12 +254,14 @@ Good: Implementing email notifications directly. When SMS is needed, refactor th
 ### 9. Wisdom Without Implementation
 
 **What it looks like:**
+
 - "We learned X" but nothing changes
 - Lessons documented, never applied
 - Same mistakes repeated across runs
 - Retrospectives that produce only notes
 
 **Why it fails:**
+
 - Learning without action is just notes
 - No compound improvement over time
 - Organizational amnesia persists
@@ -245,9 +272,11 @@ Good: Implementing email notifications directly. When SMS is needed, refactor th
 **Example:**
 
 Bad:
+
 > Learned: We should check for null values more carefully.
 
 Good:
+
 > Learned: Null checks were missing in 3 handlers. Updated the code-critic checklist to flag functions without null guards. Added test template with null case.
 
 ---
@@ -255,18 +284,21 @@ Good:
 ### 10. Gate Everywhere
 
 **What it looks like:**
+
 - Approval required for every step
 - Multiple "checkpoints" during implementation
 - "Let's add a gate here too"
 - Human in the loop for internal iterations
 
 **Why it fails:**
+
 - Gates are expensive (human attention is scarce)
 - Most gates become rubber stamps
 - Real safety comes from publish boundaries
 - Slows everything without proportional benefit
 
 **The fix:** Gate at boundaries only. Work freely inside the sandbox. The meaningful gates are:
+
 - Before committing (secrets scan)
 - Before pushing (repo state)
 - Before merging (quality gate)
@@ -278,18 +310,18 @@ Internal iteration doesn't need gates.
 
 ## Quick Recognition Table
 
-| Symptom | Likely Anti-Pattern |
-|---------|---------------------|
-| Agents output mostly YAML/JSON | Schema Religion |
-| Everything stops for lint errors | Blocked Inflation |
-| "Complete" with no evidence | Completion Theater |
-| Prompts have 10+ responsibilities | Super-Agent |
-| Can't resume after session reset | Chat as State |
-| Constant permission prompts | Permission Theater |
-| Human reads every generated line | Review Everything |
-| Simple task becomes framework | Premature Abstraction |
-| Same failures keep recurring | Wisdom Without Implementation |
-| Can't ship without 5 approvals | Gate Everywhere |
+| Symptom                           | Likely Anti-Pattern           |
+| --------------------------------- | ----------------------------- |
+| Agents output mostly YAML/JSON    | Schema Religion               |
+| Everything stops for lint errors  | Blocked Inflation             |
+| "Complete" with no evidence       | Completion Theater            |
+| Prompts have 10+ responsibilities | Super-Agent                   |
+| Can't resume after session reset  | Chat as State                 |
+| Constant permission prompts       | Permission Theater            |
+| Human reads every generated line  | Review Everything             |
+| Simple task becomes framework     | Premature Abstraction         |
+| Same failures keep recurring      | Wisdom Without Implementation |
+| Can't ship without 5 approvals    | Gate Everywhere               |
 
 ---
 

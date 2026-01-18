@@ -7,15 +7,16 @@ recommended_action: BOUNCE
 route_to_flow: 2
 route_to_agent: pack-customizer
 blockers:
-  - No Markdown linting command configured or available in environment
-  - auto-linter SKILL.md is Rust-focused; no Rust code changes in this build
-  - .markdownlint.json exists but no compatible runner installed
-missing_required:
-  - demo-swarm.config.json with lint/format commands (not found)
-  - Markdown linter binary or npm package (not available)
-concerns:
-  - This is documentation-only build; need customizer to define appropriate Markdown linting strategy
-lint_summary:
+
+- No Markdown linting command configured or available in environment
+- auto-linter SKILL.md is Rust-focused; no Rust code changes in this build
+- .markdownlint.json exists but no compatible runner installed
+  missing_required:
+- demo-swarm.config.json with lint/format commands (not found)
+- Markdown linter binary or npm package (not available)
+  concerns:
+- This is documentation-only build; need customizer to define appropriate Markdown linting strategy
+  lint_summary:
   mode: check
   format_command: null
   format_exit_code: null

@@ -17,13 +17,13 @@ MERGE
 
 ## Requirements Readiness
 
-| Item | Outcome | Notes |
-|------|---------|-------|
-| Priority classification | KNOWN | requirements.md explicitly marks REQ-001 through REQ-007 as HIGH/MEDIUM/LOW priority |
-| Verification signal | PRESENT | receipt_audit.md cross-references ac_status.json (35/35 complete) and test_execution.md |
-| MUST requirements | PASS | All HIGH priority REQs (REQ-001, REQ-002, REQ-003, REQ-004) have verified ACs per ac_status.json |
-| SHOULD requirements | PASS | MEDIUM priority REQs (REQ-005, REQ-006) verified; LOW (REQ-007) verified |
-| Metrics / binding | BOUND | No template placeholders detected in receipts; all counts are mechanical (grep/wc/parse) |
+| Item                    | Outcome | Notes                                                                                            |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------------------ |
+| Priority classification | KNOWN   | requirements.md explicitly marks REQ-001 through REQ-007 as HIGH/MEDIUM/LOW priority             |
+| Verification signal     | PRESENT | receipt_audit.md cross-references ac_status.json (35/35 complete) and test_execution.md          |
+| MUST requirements       | PASS    | All HIGH priority REQs (REQ-001, REQ-002, REQ-003, REQ-004) have verified ACs per ac_status.json |
+| SHOULD requirements     | PASS    | MEDIUM priority REQs (REQ-005, REQ-006) verified; LOW (REQ-007) verified                         |
+| Metrics / binding       | BOUND   | No template placeholders detected in receipts; all counts are mechanical (grep/wc/parse)         |
 
 ## Decision Rationale
 

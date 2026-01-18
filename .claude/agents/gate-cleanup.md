@@ -23,11 +23,11 @@ Compress the Gate flow into a meaningful summary. Seal the envelope with the mer
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/gate/` | The gate flow artifact directory |
-| Write access | `.runs/<run-id>/gate/gate_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                    | What It Contains                    |
+| ------------- | --------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/gate/`                  | The gate flow artifact directory    |
+| Write access  | `.runs/<run-id>/gate/gate_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                      | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -36,7 +36,7 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `merge_decision.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `merge_decision.md`) are not CANNOT_PROCEED -- they result in UNVERIFIED status with documented gaps.
 
 ## Receipt Supremacy
 
@@ -47,26 +47,32 @@ These are mechanical failures. Missing *artifacts* (like `merge_decision.md`) ar
 Read these artifacts and understand what they tell you:
 
 **Merge Decision (`merge_decision.md`)**
+
 - What was the verdict? MERGE or BOUNCE?
 - Why? What drove the decision?
 
 **Receipt Audit (`receipt_audit.md`)**
+
 - Were prior flow receipts valid?
 - Any gaps in the evidence chain?
 
 **Contract Compliance (`contract_compliance.md`)**
+
 - Do the implementations match the API contracts?
 - Any violations?
 
 **Security Scan (`security_scan.md`)**
+
 - Were security checks run?
 - Any findings?
 
 **Coverage Audit (`coverage_audit.md`)**
+
 - What's the test coverage?
 - Does it meet thresholds?
 
 **Policy Analysis (`policy_analysis.md`)**
+
 - Are there policy violations?
 - Waivers needed?
 
@@ -75,6 +81,7 @@ Read these artifacts and understand what they tell you:
 Write `.runs/<run-id>/gate/gate_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What was the merge verdict?
 - Did all checks pass?
 - Is this safe to deploy?
@@ -103,6 +110,7 @@ The receipt should answer:
 ```
 
 **Status determination:**
+
 - `VERIFIED`: Merge verdict is MERGE AND all required checks passed
 - `UNVERIFIED`: Missing decision OR any check failed OR verdict is BOUNCE
 - `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
@@ -125,6 +133,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/gate/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - The merge verdict and why
 - What each check found
 - Whether this is safe to deploy
@@ -146,12 +155,15 @@ If verification artifacts are missing, note which checks didn't run. This affect
 After writing the receipt and reports, provide a natural language summary.
 
 **Example (MERGE):**
+
 > Summarized Gate flow. Merge verdict: MERGE. All checks passed: receipt audit clean, contracts compliant, no security findings, coverage at 85% line / 72% branch. Route to **secrets-sanitizer**, then Flow 6 (Deploy).
 
 **Example (BOUNCE):**
+
 > Summarized Gate flow. Merge verdict: BOUNCE. Contract compliance found 3 violations on /api/users endpoint. Route to **code-implementer** to fix contract violations, then rebuild.
 
 **Example (partial evidence):**
+
 > Summarized Gate flow with incomplete evidence. Merge decision was MERGE with documented gaps (security scan not run). Route to **secrets-sanitizer** with the documented gaps.
 
 ## Handoff Targets

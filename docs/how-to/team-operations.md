@@ -11,6 +11,7 @@
 ## The Multi-Operator Reality
 
 When multiple people use the swarm on the same repo:
+
 - Runs can overlap
 - Branches can conflict
 - State can diverge
@@ -26,6 +27,7 @@ This guide teaches coordination patterns that keep everyone productive.
 The person (or session) that starts a run owns it until completion.
 
 **Naming conventions that signal ownership:**
+
 - Person-based: `feat-auth-alice`, `fix-bug-bob`
 - Issue-based: `issue-142`, `gh-142` (naturally unique)
 - Ticket-based: `jira-PROJ-456`
@@ -41,6 +43,7 @@ If Alice is running Flow 3 on `feat-auth`, Bob should not also run Flow 3 on `fe
 ### Completed Runs Are Shared Artifacts
 
 Once a run completes (all flows finished, or explicitly handed off):
+
 - Anyone can read the artifacts
 - Anyone can continue from them (new run, same `canonical_key`)
 - Receipts become shared team history
@@ -52,6 +55,7 @@ Once a run completes (all flows finished, or explicitly handed off):
 ### Swarm Branches Track Runs
 
 Branch naming conventions:
+
 - `swarm/<run-id>` - standard swarm branch
 - `feat/<run-id>` - feature-style naming
 - `run/<run-id>` - alternative pattern
@@ -61,6 +65,7 @@ Branch naming conventions:
 ### Main Branch Is Sacred
 
 The swarm follows merge discipline:
+
 - Never pushes directly to main
 - All merges go through Gate (Flow 5)
 - Merge decisions are documented in `merge_decision.md`
@@ -120,23 +125,25 @@ Each flow starts by examining what actually exists on disk. Agents don't assume 
 
 ### When to Make Manual Edits
 
-| Timing | Impact |
-|--------|--------|
-| **Between flows** | Clean. Next flow sees your changes as the starting state. |
-| **During a flow** | Depends. If the flow hasn't touched that file yet, fine. If it has, you may create conflicts. |
-| **During agent execution** | Risky. Wait for the agent to finish. |
+| Timing                     | Impact                                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| **Between flows**          | Clean. Next flow sees your changes as the starting state.                                     |
+| **During a flow**          | Depends. If the flow hasn't touched that file yet, fine. If it has, you may create conflicts. |
+| **During agent execution** | Risky. Wait for the agent to finish.                                                          |
 
 **Safest pattern:** Let the current flow complete, make your edits, then start the next flow.
 
 ### What Gets Reconciled vs. What Gets Lost
 
 **Reconciled (preserved):**
+
 - File content changes (code, docs, config)
 - New files you added
 - Deleted files (they stay deleted)
 - Git state (commits, branch position)
 
 **May cause confusion:**
+
 - Editing artifact files (`.runs/`) that agents expect to control
 - Changing file paths that receipts reference
 - Modifying mid-flow while an agent is running
@@ -176,6 +183,7 @@ You can use other tools between flows:
 ### When Manual Edits Require Re-verification
 
 If your manual changes affect:
+
 - Test behavior - Re-run tests before Review
 - API contracts - Verify alignment with `api_contracts.yaml`
 - Security-sensitive code - Consider re-running relevant checks
@@ -191,6 +199,7 @@ The Gate (Flow 5) will catch many issues, but earlier verification saves time.
 Two runs touching the same files will likely conflict at merge time.
 
 **Before starting:** Check for overlap:
+
 ```bash
 # On your branch
 git diff main --name-only > my-files.txt
@@ -209,6 +218,7 @@ If overlap is significant, sequence the runs (one completes before the other sta
 Two runs with the same ID is a broken state.
 
 **Prevention:**
+
 - Always use unique run IDs
 - Check `.runs/index.json` before creating new runs
 - Use issue-based IDs when possible (they're unique by definition)
@@ -216,6 +226,7 @@ Two runs with the same ID is a broken state.
 ### Gate Collisions
 
 Two runs trying to merge at the same time:
+
 - First one wins
 - Second one needs to rebase and re-verify
 
@@ -243,15 +254,18 @@ Add to the run's artifacts (e.g., `.runs/<run-id>/handoff.md`):
 **State:** Flow 3 complete, ready for Review
 
 ### Context
+
 - Implemented OAuth2 login flow
 - All tests passing (see build_receipt.json)
 - Used Google as the first provider; other providers are stubbed
 
 ### Open Questions
+
 - OQ-BUILD-003: Token refresh interval (defaulted to 1 hour)
 - Should we support Remember Me? (not implemented)
 
 ### What Bob Needs to Know
+
 - The auth module is at src/auth/oauth.py
 - Integration tests require GOOGLE_CLIENT_ID env var (see .env.example)
 - ADR chose stateless tokens over sessions (see plan/adr.md)
@@ -264,6 +278,7 @@ Slack, email, standup - whatever your team uses. The handoff note is the record;
 ### 4. Bob Starts Fresh Session
 
 Bob opens a new Claude Code session on the same run:
+
 ```bash
 /flow-4-review  # Continue from where Alice left off
 ```
@@ -279,6 +294,7 @@ The swarm surfaces questions continuously but only requests human input at flow 
 ### How Questions Flow
 
 Questions arise during agent work:
+
 - Ambiguous requirements
 - Design trade-offs
 - Missing information
@@ -311,11 +327,11 @@ Next Flow
 
 ### Question Severity Levels
 
-| Level | Description | Handling |
-|-------|-------------|----------|
-| **Informational** | Curious, not blocking | Log and continue |
-| **Assumption-made** | Needed answer, chose default | Log assumption, continue, human can override |
-| **Blocking** | Cannot proceed without answer | Complete partial work, surface at boundary |
+| Level               | Description                   | Handling                                     |
+| ------------------- | ----------------------------- | -------------------------------------------- |
+| **Informational**   | Curious, not blocking         | Log and continue                             |
+| **Assumption-made** | Needed answer, chose default  | Log assumption, continue, human can override |
+| **Blocking**        | Cannot proceed without answer | Complete partial work, surface at boundary   |
 
 **Most questions should be assumption-made.** The swarm is biased toward progress. Make a reasonable choice, document it clearly, and let humans correct if needed.
 
@@ -363,12 +379,12 @@ Almost never. But these situations warrant interruption:
 
 ### Escalation Paths
 
-| Issue Type | Escalation Target | Method |
-|------------|-------------------|--------|
-| Technical question about code | Team tech lead | Update open_questions.md, tag in PR |
-| Requirements clarification | Product owner | Out-of-band communication |
-| Security concern | Security team | Stop flow, communicate immediately |
-| Infrastructure blocker | DevOps | Out-of-band, document in run artifacts |
+| Issue Type                    | Escalation Target | Method                                 |
+| ----------------------------- | ----------------- | -------------------------------------- |
+| Technical question about code | Team tech lead    | Update open_questions.md, tag in PR    |
+| Requirements clarification    | Product owner     | Out-of-band communication              |
+| Security concern              | Security team     | Stop flow, communicate immediately     |
+| Infrastructure blocker        | DevOps            | Out-of-band, document in run artifacts |
 
 **The swarm doesn't have escalation automation.** Humans route to humans. The swarm captures the questions and context; you decide who answers them.
 
@@ -378,32 +394,32 @@ Almost never. But these situations warrant interruption:
 
 ### Safe
 
-| Pattern | Example |
-|---------|---------|
-| Different features on different branches | Alice: auth, Bob: payments |
-| Same feature, sequential flows | Alice does Signal+Plan, Bob does Build+Gate |
-| Independent bug fixes | Alice: `fix-123`, Bob: `fix-456` |
-| Disjoint file sets | Alice: frontend, Bob: backend |
+| Pattern                                  | Example                                     |
+| ---------------------------------------- | ------------------------------------------- |
+| Different features on different branches | Alice: auth, Bob: payments                  |
+| Same feature, sequential flows           | Alice does Signal+Plan, Bob does Build+Gate |
+| Independent bug fixes                    | Alice: `fix-123`, Bob: `fix-456`            |
+| Disjoint file sets                       | Alice: frontend, Bob: backend               |
 
 ### Risky
 
-| Pattern | Problem |
-|---------|---------|
-| Same files, different runs | Merge conflicts at Gate |
-| Same run, different sessions simultaneously | Artifact corruption |
-| Rebasing while another flow is active | Branch state divergence |
-| Both editing shared infrastructure | Semantic conflicts even if files differ |
+| Pattern                                     | Problem                                 |
+| ------------------------------------------- | --------------------------------------- |
+| Same files, different runs                  | Merge conflicts at Gate                 |
+| Same run, different sessions simultaneously | Artifact corruption                     |
+| Rebasing while another flow is active       | Branch state divergence                 |
+| Both editing shared infrastructure          | Semantic conflicts even if files differ |
 
 ---
 
 ## Shared State Locations
 
-| State | Location | Who Writes | Collision Risk |
-|-------|----------|------------|----------------|
-| Run artifacts | `.runs/<run-id>/` | Owner of run | Low (unique IDs) |
-| Index | `.runs/index.json` | run-prep, cleanup agents | Medium (serialize updates) |
-| Git branches | `refs/heads/*` | repo-operator | Medium (coordinate pushes) |
-| GitHub issues/PRs | GitHub | gh-* agents | Low (API handles) |
+| State             | Location           | Who Writes               | Collision Risk             |
+| ----------------- | ------------------ | ------------------------ | -------------------------- |
+| Run artifacts     | `.runs/<run-id>/`  | Owner of run             | Low (unique IDs)           |
+| Index             | `.runs/index.json` | run-prep, cleanup agents | Medium (serialize updates) |
+| Git branches      | `refs/heads/*`     | repo-operator            | Medium (coordinate pushes) |
+| GitHub issues/PRs | GitHub             | gh-\* agents             | Low (API handles)          |
 
 **Serialize writes to index.json:** The cleanup agents write to index.json at flow boundaries. If two runs complete flows simultaneously, the writes should be serialized (git will reject the second push, requiring a pull and retry).
 
@@ -413,11 +429,11 @@ Almost never. But these situations warrant interruption:
 
 ### Run Got Into a Bad State
 
-| Option | When to Use | How |
-|--------|-------------|-----|
-| **A: Abandon and start fresh** | Artifacts are corrupted or confusing | New run with new ID |
-| **B: Manually fix artifacts** | Know exactly what's wrong | Edit, commit, resume flow |
-| **C: Revert to last known good** | Recent corruption | `git checkout <sha> -- .runs/<id>/` |
+| Option                           | When to Use                          | How                                 |
+| -------------------------------- | ------------------------------------ | ----------------------------------- |
+| **A: Abandon and start fresh**   | Artifacts are corrupted or confusing | New run with new ID                 |
+| **B: Manually fix artifacts**    | Know exactly what's wrong            | Edit, commit, resume flow           |
+| **C: Revert to last known good** | Recent corruption                    | `git checkout <sha> -- .runs/<id>/` |
 
 See [failure-recovery.md](failure-recovery.md) for detailed procedures.
 
@@ -456,17 +472,17 @@ This is the expected path. Gate provides the audit trail and verification.
 
 "Break glass" means bypassing normal controls. Use it when:
 
-| Scenario | Justification | Risk Level |
-|----------|---------------|------------|
-| **Production hotfix** | Outage requires immediate fix | High - verify manually |
-| **Gate false positive** | Check failing incorrectly, verified manually | Medium - document bypass |
-| **Blocked on infrastructure** | CI down, need to ship | Medium - run checks locally |
-| **Security patch** | Vulnerability disclosure timeline | High - minimal change, verify manually |
-| **Reverts** | Undoing a bad merge quickly | Low - revert is well-understood |
+| Scenario                      | Justification                                | Risk Level                             |
+| ----------------------------- | -------------------------------------------- | -------------------------------------- |
+| **Production hotfix**         | Outage requires immediate fix                | High - verify manually                 |
+| **Gate false positive**       | Check failing incorrectly, verified manually | Medium - document bypass               |
+| **Blocked on infrastructure** | CI down, need to ship                        | Medium - run checks locally            |
+| **Security patch**            | Vulnerability disclosure timeline            | High - minimal change, verify manually |
+| **Reverts**                   | Undoing a bad merge quickly                  | Low - revert is well-understood        |
 
 ### Break Glass Procedure
 
-**1. Announce your intent**
+#### 1. Announce your intent
 
 Tell your team you're bypassing Gate. This is not optional.
 
@@ -475,7 +491,7 @@ Tell your team you're bypassing Gate. This is not optional.
 manually verified tests pass. Merging directly.
 ```
 
-**2. Document the bypass**
+#### 2. Document the bypass
 
 Create a record in the run artifacts:
 
@@ -487,10 +503,12 @@ Create a record in the run artifacts:
 **Operator:** alice@example.com
 
 ## Reason for Bypass
+
 CI infrastructure (GitHub Actions) has been down for 2 hours.
 Feature is blocking release. Tests verified locally.
 
 ## Verification Performed Manually
+
 - [ ] Unit tests: `npm test` - all passing
 - [ ] Integration tests: `npm run test:integration` - all passing
 - [ ] Lint: `npm run lint` - clean
@@ -498,18 +516,20 @@ Feature is blocking release. Tests verified locally.
 - [ ] Security scan: `npm audit` - no high/critical
 
 ## Risks Accepted
+
 - CI may catch issues we missed
 - No automated policy checks ran
 - Merge decision not formally documented
 
 ## Planned Follow-up
+
 - Re-run Gate when CI recovers
 - Verify no regressions in next deploy
 ```
 
 Save as `.runs/<run-id>/gate/break_glass_record.md`
 
-**3. Execute the merge**
+#### 3. Execute the merge
 
 ```bash
 # Merge directly (no swarm involvement)
@@ -518,39 +538,43 @@ git merge feat-auth --no-ff -m "feat: user authentication (break glass - CI down
 git push origin main
 ```
 
-**4. Follow up**
+#### 4. Follow up
 
 When conditions normalize:
+
 - Run verification that was skipped
 - Address any issues found
 - Update the break glass record with outcomes
 
 ### Break Glass Anti-Patterns
 
-| Don't | Why |
-|-------|-----|
-| Break glass because Gate is "too slow" | Speed is not an emergency |
-| Skip documentation | You lose the audit trail |
-| Break glass alone in secret | Team needs visibility |
-| Use break glass for convenience | Erodes the discipline for everyone |
-| Break glass on others' runs | Only the run owner should decide |
+| Don't                                  | Why                                |
+| -------------------------------------- | ---------------------------------- |
+| Break glass because Gate is "too slow" | Speed is not an emergency          |
+| Skip documentation                     | You lose the audit trail           |
+| Break glass alone in secret            | Team needs visibility              |
+| Use break glass for convenience        | Erodes the discipline for everyone |
+| Break glass on others' runs            | Only the run owner should decide   |
 
 ### Merge Discipline Beyond Gate
 
 Even with Gate, teams should maintain discipline:
 
 **Protected branches:** Configure GitHub/GitLab to require:
+
 - PR before merge (no direct pushes)
 - At least one approval
 - CI checks passing
 - Up-to-date with base branch
 
 **Merge windows:** Consider limiting merges to:
+
 - Business hours (so humans are available if issues arise)
 - Not Friday afternoon (Monday debugging is painful)
 - Not during incidents
 
 **Merge order:** When multiple runs are ready:
+
 - Smaller changes first (less conflict potential)
 - Infrastructure before features
 - Communicate the queue
@@ -593,23 +617,23 @@ The swarm's Flow 6 (Deploy) and Flow 7 (Wisdom) handle this for normal paths. Br
 
 ### Don't
 
-| Anti-Pattern | Why |
-|--------------|-----|
-| Start runs with duplicate IDs | Corrupts index and artifacts |
+| Anti-Pattern                                                | Why                          |
+| ----------------------------------------------------------- | ---------------------------- |
+| Start runs with duplicate IDs                               | Corrupts index and artifacts |
 | Work on the same run from different sessions simultaneously | Race conditions on artifacts |
-| Force-push shared branches | Loses others' work |
-| Merge without re-verifying after upstream changes | Untested combinations |
-| Leave abandoned runs cluttering the repo | Confuses team, wastes disk |
+| Force-push shared branches                                  | Loses others' work           |
+| Merge without re-verifying after upstream changes           | Untested combinations        |
+| Leave abandoned runs cluttering the repo                    | Confuses team, wastes disk   |
 
 ### Do
 
-| Pattern | Why |
-|---------|-----|
-| Use unique, descriptive run IDs | Clear ownership, no collisions |
-| Complete flows before handing off | Clean boundaries |
-| Communicate about overlapping work | Prevents conflicts |
-| Clean up after yourself | Keeps repo manageable |
-| Check index.json before starting | Avoids duplicate IDs |
+| Pattern                            | Why                            |
+| ---------------------------------- | ------------------------------ |
+| Use unique, descriptive run IDs    | Clear ownership, no collisions |
+| Complete flows before handing off  | Clean boundaries               |
+| Communicate about overlapping work | Prevents conflicts             |
+| Clean up after yourself            | Keeps repo manageable          |
+| Check index.json before starting   | Avoids duplicate IDs           |
 
 ---
 

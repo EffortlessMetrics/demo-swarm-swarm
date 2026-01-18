@@ -9,6 +9,7 @@
 **Humans are expensive. Escalate only when necessary. But when necessary, escalate clearly.**
 
 Every escalation costs:
+
 - $50-100 in context-switch overhead
 - Minutes to hours of latency
 - Interruption to human focus
@@ -24,6 +25,7 @@ The bar is high: "Can I solve this without human input?" Try hard before escalat
 ### Why Flow Boundaries?
 
 Flows are natural checkpoint moments:
+
 - Work is complete (for that phase)
 - Artifacts exist (receipts, summaries)
 - Context is summarized (not sprawling)
@@ -39,6 +41,7 @@ Flows are natural checkpoint moments:
 ### Why NOT Mid-Flow?
 
 Mid-flow escalation breaks momentum:
+
 - Context is fragmented
 - Work is incomplete
 - State is messy
@@ -54,27 +57,33 @@ Mid-flow escalation breaks momentum:
 ## Flow 2 Complete: Plan
 
 ### What Was Done
+
 - ADR written for authentication approach
 - API contracts defined
 - Work breakdown complete (12 ACs)
 
 ### Findings
+
 - REQ-007 conflicts with GDPR (noted for human review)
 - No existing auth library in codebase (will use Passport.js)
 
 ### Decision Needed
+
 Should we proceed with OAuth-only or add SAML support?
 (See ADR section 3.2 for trade-offs)
 
 ### Next Flow
+
 Flow 3 (Build) will implement the 12 ACs.
 Estimated: 4-6 microloop iterations.
 
 ### To Proceed
+
 Reply "continue" to start Build, or provide guidance on the SAML question.
 ```
 
 This gives the dev:
+
 - Clear status
 - Digestible findings
 - Actionable decision points
@@ -118,6 +127,7 @@ Three categories require human involvement. Everything else should be handled by
 **What it is:** The decision requires information or judgment that cannot be derived from the codebase, artifacts, or context.
 
 **Examples:**
+
 - "Should we use OAuth or SAML for enterprise customers?"
 - "What's the acceptable latency threshold for this API?"
 - "Which third-party service should we integrate with?"
@@ -136,6 +146,7 @@ Three categories require human involvement. Everything else should be handled by
 SAML is often required by large enterprises.
 
 **Options:**
+
 1. OAuth only (simpler, covers 80% of cases)
 2. SAML only (enterprise-first)
 3. Both (complexity cost, full coverage)
@@ -152,6 +163,7 @@ SAML is often required by large enterprises.
 **What it is:** The requirements, spec, or intent is genuinely unclear and cannot be safely assumed.
 
 **Examples:**
+
 - Conflicting requirements in the spec
 - Acceptance criteria that could mean two different things
 - Missing information that affects architecture
@@ -183,6 +195,7 @@ SAML is often required by large enterprises.
 **What it is:** Something is preventing safe publication but work can continue locally.
 
 **Examples:**
+
 - Secrets detected in staged content
 - Unexpected files in the change surface
 - Failed security scan with unclear remediation
@@ -200,6 +213,7 @@ SAML is often required by large enterprises.
 **Status:** Work continues locally. Publishing is paused.
 
 **To unblock:**
+
 1. Remove the key from the file, OR
 2. Confirm this is an intentional example key (not real)
 
@@ -211,6 +225,7 @@ SAML is often required by large enterprises.
 ## The Escalation Format
 
 Good escalations are:
+
 - **Specific:** Exactly what's needed
 - **Bounded:** Clear options, not open-ended
 - **Actionable:** Human can respond with minimal effort
@@ -233,6 +248,7 @@ This forces the human to diagnose the problem, understand the context, generate 
 PostgreSQL but this feature has document-shaped data.
 
 **Options:**
+
 1. PostgreSQL with JSONB columns (consistent stack, good enough)
 2. MongoDB (better fit for data shape, new dependency)
 3. SQLite for MVP (simplest, migrate later)
@@ -276,6 +292,7 @@ Don't ask humans to fix lint errors, resolve import conflicts, or debug test fai
 ### Permission-Seeking
 
 **Wrong:**
+
 ```
 Should I read the config file?
 May I run the tests?
@@ -290,6 +307,7 @@ Agents are authorized to explore, read, and act within their role. They don't ne
 ### False Uncertainty
 
 **Wrong:**
+
 ```
 I'm not sure if I should add error handling to this function.
 What do you think?
@@ -301,6 +319,7 @@ Add the error handling. It's a technical decision within your scope. If there's 
 ### Escalating Routeable Problems
 
 **Wrong:**
+
 ```
 The tests are failing. What should I do?
 ```
@@ -311,11 +330,13 @@ Investigate why. If it's a code bug, fix it or route to `fixer`. If it's a test 
 ### Open-Ended Questions
 
 **Wrong:**
+
 ```
 How should we handle authentication?
 ```
 
 **Right:**
+
 ```
 ## Authentication Approach
 
@@ -365,13 +386,13 @@ This lets the human know the flow isn't stopped—just one piece is waiting.
 
 Before escalating, ask:
 
-| Question | If Yes | If No |
-|----------|--------|-------|
-| Can I derive this from codebase patterns? | Do that | Continue... |
-| Is there a safe, reversible default? | Use it, document it | Continue... |
-| Can another agent handle this? | Route to them | Continue... |
-| Will the human's answer significantly change the implementation? | Maybe escalate | Don't escalate |
-| Is this decision irreversible? | Maybe escalate | Default and move on |
+| Question                                                         | If Yes              | If No               |
+| ---------------------------------------------------------------- | ------------------- | ------------------- |
+| Can I derive this from codebase patterns?                        | Do that             | Continue...         |
+| Is there a safe, reversible default?                             | Use it, document it | Continue...         |
+| Can another agent handle this?                                   | Route to them       | Continue...         |
+| Will the human's answer significantly change the implementation? | Maybe escalate      | Don't escalate      |
+| Is this decision irreversible?                                   | Maybe escalate      | Default and move on |
 
 Only when you reach the end of this chain AND the answer matters AND it's not derivable should you escalate.
 
@@ -417,6 +438,7 @@ Only when you reach the end of this chain AND the answer matters AND it's not de
 **Risk:** PII exposure, potential GDPR violation.
 
 **Options:**
+
 1. Hash emails before exposing (preserves functionality, protects PII)
 2. Require authentication for this endpoint
 3. Remove the email field from the response

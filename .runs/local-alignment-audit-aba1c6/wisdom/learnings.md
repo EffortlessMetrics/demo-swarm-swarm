@@ -16,8 +16,8 @@
 ### What Worked
 
 - **Explicit priority classification**: REQ-001 through REQ-007 marked as HIGH/MEDIUM/LOW enabled clear triage during review. Critical work (flow count alignment) was prioritized correctly.
-- **Assumption tracking with impact analysis**: Each ASM-* included "impact if wrong" statements, enabling Gate flow to validate assumptions without re-litigating them.
-- **Open questions register (OQ-SIG-*)**: 6 open questions were tracked; the swarm proceeded with documented defaults rather than blocking on human input. This reduced cycle time significantly.
+- **Assumption tracking with impact analysis**: Each ASM-\* included "impact if wrong" statements, enabling Gate flow to validate assumptions without re-litigating them.
+- **Open questions register (OQ-SIG-\*)**: 6 open questions were tracked; the swarm proceeded with documented defaults rather than blocking on human input. This reduced cycle time significantly.
 - **Requirements linked to acceptance criteria**: Every REQ had explicit ACs (35 total), enabling mechanical verification in Build and Gate flows.
 
 ### What Didn't
@@ -95,14 +95,14 @@
 
 ## Assumptions
 
-| Assumption | Held? | Evidence |
-|-----------|-------|----------|
-| ASM-001: CLAUDE.md is authoritative for flow architecture | Yes | 7 flows model validated; no contradicting evidence found |
-| ASM-002: Flow variants are intentional re-entry points | Yes | OPT-003 succeeded; variants work as designed |
-| ASM-003: 102 passing unit tests is authoritative count | Unknown | Test count was not re-verified in this run (docs-only) |
-| ASM-004: Path traversal is awareness issue, not exploitable | Yes | RSK-001 deferred to future security hardening; no immediate exploit vector identified |
-| ASM-005: Agent color coding is advisory, not schema-enforced | Yes | No schema validation failures encountered |
-| ASM-006: Pack-check uses string literals, not semantic assertions | Yes | Pack-check passed without test fixture updates |
+| Assumption                                                        | Held?   | Evidence                                                                              |
+| ----------------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------- |
+| ASM-001: CLAUDE.md is authoritative for flow architecture         | Yes     | 7 flows model validated; no contradicting evidence found                              |
+| ASM-002: Flow variants are intentional re-entry points            | Yes     | OPT-003 succeeded; variants work as designed                                          |
+| ASM-003: 102 passing unit tests is authoritative count            | Unknown | Test count was not re-verified in this run (docs-only)                                |
+| ASM-004: Path traversal is awareness issue, not exploitable       | Yes     | RSK-001 deferred to future security hardening; no immediate exploit vector identified |
+| ASM-005: Agent color coding is advisory, not schema-enforced      | Yes     | No schema validation failures encountered                                             |
+| ASM-006: Pack-check uses string literals, not semantic assertions | Yes     | Pack-check passed without test fixture updates                                        |
 
 ---
 

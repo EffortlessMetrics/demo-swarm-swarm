@@ -151,13 +151,13 @@ When in doubt: **delete and restart**.
 
 ## Cost-Benefit Analysis
 
-| Scenario | Salvage Cost | Restart Cost | Recommended |
-|----------|--------------|--------------|-------------|
-| Simple typo | Trivial | Quick | Repair |
-| Single file conflict | Moderate | Quick | Delete |
-| Multiple conflicts | High | Moderate | Delete |
-| Corrupted artifacts | Unknown | Moderate | Delete |
-| Stale base | Very high | Moderate | Delete |
+| Scenario             | Salvage Cost | Restart Cost | Recommended |
+| -------------------- | ------------ | ------------ | ----------- |
+| Simple typo          | Trivial      | Quick        | Repair      |
+| Single file conflict | Moderate     | Quick        | Delete      |
+| Multiple conflicts   | High         | Moderate     | Delete      |
+| Corrupted artifacts  | Unknown      | Moderate     | Delete      |
+| Stale base           | Very high    | Moderate     | Delete      |
 
 **Rule of thumb:** If salvage takes more than 3x restart time, delete.
 
@@ -217,12 +217,12 @@ git commit -m "Fix corrupted receipt JSON"
 
 ## Quick Reference
 
-| Problem | Command |
-|---------|---------|
-| Crashed flow | `/flow-<N>-<name>` (resume) |
-| Merge conflict | `git checkout main && git branch -D run/<id>` + restart |
-| Corrupted artifacts | `rm -rf .runs/<id>` + restart |
-| Stale base | Delete branch + restart |
-| Multiple failures | Clean slate + restart |
+| Problem             | Command                                                 |
+| ------------------- | ------------------------------------------------------- |
+| Crashed flow        | `/flow-<N>-<name>` (resume)                             |
+| Merge conflict      | `git checkout main && git branch -D run/<id>` + restart |
+| Corrupted artifacts | `rm -rf .runs/<id>` + restart                           |
+| Stale base          | Delete branch + restart                                 |
+| Multiple failures   | Clean slate + restart                                   |
 
 **Default action:** Delete and restart.

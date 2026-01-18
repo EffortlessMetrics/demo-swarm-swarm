@@ -1,6 +1,7 @@
 # Lint Report
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: 3
@@ -9,19 +10,21 @@ blockers: []
 missing_required: []
 concerns: []
 lint_summary:
-  mode: check
-  format_command: cargo fmt --check
-  format_exit_code: 0
-  lint_command: cargo clippy --all-targets --all-features
-  lint_exit_code: 0
-  files_modified: false
-  touched_paths: []
+mode: check
+format_command: cargo fmt --check
+format_exit_code: 0
+lint_command: cargo clippy --all-targets --all-features
+lint_exit_code: 0
+files_modified: false
+touched_paths: []
 
 ## Inputs Used
+
 - tools/demoswarm-pack-check/
 - tools/demoswarm-runs-tools/
 
 ## Execution
+
 - tool: auto-linter (cargo-based)
 - mode: check
 - format: `cargo fmt --check` (demoswarm-pack-check) → exit_code: 0
@@ -30,15 +33,18 @@ lint_summary:
 - lint: `cargo clippy --all-targets --all-features` (demoswarm-runs-tools) → exit_code: 0
 
 ## Canonical Summary (tool-bound)
+
 - demoswarm-pack-check format check: PASSED
 - demoswarm-pack-check clippy lint: PASSED (Finished dev profile [unoptimized + debuginfo])
 - demoswarm-runs-tools format check: PASSED
 - demoswarm-runs-tools clippy lint: PASSED (Finished dev profile [unoptimized + debuginfo])
 
 ## Failures (if any)
+
 None. All checks passed successfully.
 
 ## Notes
+
 - Format checking via `cargo fmt --check` on both Rust tools completed with zero exit code.
 - Lint checking via `cargo clippy --all-targets --all-features` on both tools completed with zero exit code.
 - No formatting violations detected.

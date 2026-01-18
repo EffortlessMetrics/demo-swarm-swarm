@@ -20,10 +20,10 @@ Terms derived from `run_meta.json` and orchestrator signal:
 
 ## Related Issues
 
-| # | Title | State | Repo | Relevance |
-|---|-------|-------|------|-----------|
-| 8 | DemoSwarm Compliance Enforcement & Drift-Proofing Analysis | OPEN | demo-swarm-staging | **Critical (this run)** |
-| 49 | Align doc ownership boundaries across pack | OPEN | demo-swarm-dev | **High (parent work)** |
+| #   | Title                                                      | State | Repo               | Relevance               |
+| --- | ---------------------------------------------------------- | ----- | ------------------ | ----------------------- |
+| 8   | DemoSwarm Compliance Enforcement & Drift-Proofing Analysis | OPEN  | demo-swarm-staging | **Critical (this run)** |
+| 49  | Align doc ownership boundaries across pack                 | OPEN  | demo-swarm-dev     | **High (parent work)**  |
 
 ### Issue Details
 
@@ -53,12 +53,12 @@ Terms derived from `run_meta.json` and orchestrator signal:
 
 ## Related PRs
 
-| # | Title | State | Repo | Relevance |
-|---|-------|-------|------|-----------|
-| 7 | signal: checkpoint compliance-drift-proofing Flow 1 | MERGED | demo-swarm-staging | **Critical (this run)** |
-| 6 | docs: update contracts reference | MERGED | demo-swarm-staging | **High** |
-| 5 | Align docs with repo and Diátaxis | OPEN | demo-swarm-staging | **Medium** |
-| 1 | flow(signal): checkpoint align-doc-ownership artifacts | MERGED | demo-swarm-staging | **Medium** |
+| #   | Title                                                  | State  | Repo               | Relevance               |
+| --- | ------------------------------------------------------ | ------ | ------------------ | ----------------------- |
+| 7   | signal: checkpoint compliance-drift-proofing Flow 1    | MERGED | demo-swarm-staging | **Critical (this run)** |
+| 6   | docs: update contracts reference                       | MERGED | demo-swarm-staging | **High**                |
+| 5   | Align docs with repo and Diátaxis                      | OPEN   | demo-swarm-staging | **Medium**              |
+| 1   | flow(signal): checkpoint align-doc-ownership artifacts | MERGED | demo-swarm-staging | **Medium**              |
 
 ### PR Details
 
@@ -115,6 +115,7 @@ From the research and related artifacts, the following decisions and constraints
 ### 2. Canonical Enum Enforcement (from contracts.md, pack-check control_plane.rs)
 
 Already enforced by existing pack-check checks:
+
 - **Status axis**: `VERIFIED | UNVERIFIED | CANNOT_PROCEED` (check 28)
 - **Recommended action**: `PROCEED | RERUN | BOUNCE | FIX_ENV` (check 29)
 - **Route fields**: `route_to_flow: 1|2|3|4|5|6|null`, `route_to_agent: <name>|null` (checks 31-35)
@@ -124,6 +125,7 @@ Already enforced by existing pack-check checks:
 ### 3. OpenQ Prefix Contract (from openq-tools/SKILL.md, stable-markers.md)
 
 Current state has **documented inconsistency** (OQ-SIG-002 open):
+
 - **Canonical format**: `OQ-<FLOW>-<NNN>` (e.g., `OQ-SIG-001`, `OQ-BUILD-042`)
 - **Flow codes (abbreviated)**: `SIG`, `PLN`, `BLD`, `GAT`, `DEP`, `WIS` (per stable-markers.md)
 - **Flow codes (alternate)**: Some docs say `PLAN`, `BUILD`, `GATE` (full names)
@@ -134,6 +136,7 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 ### 4. Pack-Check Validation Scope (from drift.rs, control_plane.rs)
 
 **Existing checks** (14 drift checks + 15 control-plane checks):
+
 - Status/action enum validation (checks 3, 4, 16-35)
 - Banned pattern detection (checks 7, 8, 14, 23, 30, 38-49)
 - Shim enforcement (checks 45, 47, 48)
@@ -141,6 +144,7 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 - Flow boundary enforcement (check 40: `See CLAUDE.md` substitution check)
 
 **Gaps identified** (to be addressed by REQ-001 through REQ-006):
+
 - No explicit validation that flow commands don't contain demoswarm.sh
 - No validation that agents using demoswarm.sh have Skills sections
 - No validation of OpenQ prefix patterns in open_questions.md files
@@ -149,6 +153,7 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 ### 5. Check-Doc-Drift.sh Scope (from script inspection)
 
 **Existing Bash-based checks** (6 checks):
+
 1. Stale runs tooling reference (skills were split; update to current skill names)
 2. Legacy OpenQ CLI usage (update to the current OpenQ tool interface)
 3. Legacy secrets CLI usage (update to the current secrets tool interface)
@@ -175,20 +180,20 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 
 ## Prior Art Pointers (Local Codebase)
 
-| Path | Note | Key Insight |
-|------|------|------------|
-| `tools/demoswarm-pack-check/src/checks/drift.rs` | 14 existing drift checks (IDs 7,8,14,23,30,38-49) | Foundation for REQ-001 flow boundary check and REQ-002 skills validation |
-| `tools/demoswarm-pack-check/src/checks/control_plane.rs` | 15 control-plane checks (IDs 3,4,16-35) | Machine Summary and canonical enum validation (already working) |
-| `tools/demoswarm-pack-check/src/checks/structure.rs` | Structural checks for file presence, format | Can be extended for Skills section validation (REQ-002) |
-| `tools/demoswarm-pack-check/src/contracts.rs` | Canonical enums, required agents, skill ownership | Update required for OpenQ flow codes constant (REQ-003) |
-| `scripts/check-doc-drift.sh` | 6 Bash-based doc drift guards | Possible venue for REQ-003 if not handled in pack-check |
-| `.claude/agents/receipt-checker.md` | Build receipt validation agent | Source for understanding Build-to-Gate contract (REQ-004 documentation) |
-| `.claude/agents/clarifier.md` | OpenQ ID generation with flow prefixes | Consumers of OpenQ prefix contract; must align with REQ-003 |
-| `.claude/skills/openq-tools/SKILL.md` | openq next-id, append commands | Authority on OpenQ prefix format; must be canonical reference |
-| `docs/reference/contracts.md` | Receipt schemas, Machine Summary contract, stable markers | Authority on all contracts; REQ-004 test fixtures should reference this |
-| `docs/reference/stable-markers.md` | Marker patterns for counting (ISSUE, PR, DISCUSSION, CODE_REF) | Defines OpenQ flow code abbreviations (SIG, PLN, BLD, etc.) |
-| `docs/reference/pack-check.md` | pack-check rule documentation | Should be updated with new rules (REQ-001 through REQ-005) |
-| `.runs/gh-8/signal/` | Current run artifacts | Problem statement, requirements, risk assessment, open_questions.md |
+| Path                                                     | Note                                                           | Key Insight                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `tools/demoswarm-pack-check/src/checks/drift.rs`         | 14 existing drift checks (IDs 7,8,14,23,30,38-49)              | Foundation for REQ-001 flow boundary check and REQ-002 skills validation |
+| `tools/demoswarm-pack-check/src/checks/control_plane.rs` | 15 control-plane checks (IDs 3,4,16-35)                        | Machine Summary and canonical enum validation (already working)          |
+| `tools/demoswarm-pack-check/src/checks/structure.rs`     | Structural checks for file presence, format                    | Can be extended for Skills section validation (REQ-002)                  |
+| `tools/demoswarm-pack-check/src/contracts.rs`            | Canonical enums, required agents, skill ownership              | Update required for OpenQ flow codes constant (REQ-003)                  |
+| `scripts/check-doc-drift.sh`                             | 6 Bash-based doc drift guards                                  | Possible venue for REQ-003 if not handled in pack-check                  |
+| `.claude/agents/receipt-checker.md`                      | Build receipt validation agent                                 | Source for understanding Build-to-Gate contract (REQ-004 documentation)  |
+| `.claude/agents/clarifier.md`                            | OpenQ ID generation with flow prefixes                         | Consumers of OpenQ prefix contract; must align with REQ-003              |
+| `.claude/skills/openq-tools/SKILL.md`                    | openq next-id, append commands                                 | Authority on OpenQ prefix format; must be canonical reference            |
+| `docs/reference/contracts.md`                            | Receipt schemas, Machine Summary contract, stable markers      | Authority on all contracts; REQ-004 test fixtures should reference this  |
+| `docs/reference/stable-markers.md`                       | Marker patterns for counting (ISSUE, PR, DISCUSSION, CODE_REF) | Defines OpenQ flow code abbreviations (SIG, PLN, BLD, etc.)              |
+| `docs/reference/pack-check.md`                           | pack-check rule documentation                                  | Should be updated with new rules (REQ-001 through REQ-005)               |
+| `.runs/gh-8/signal/`                                     | Current run artifacts                                          | Problem statement, requirements, risk assessment, open_questions.md      |
 
 ## Implications for Flow 1 (Signal Phase Re-Run)
 
@@ -236,22 +241,22 @@ Current state has **documented inconsistency** (OQ-SIG-002 open):
 ## Assumptions Made to Proceed
 
 1. **ASM-1**: The upstream issue #49 design direction (three-tier ownership) is authoritative and will not be reversed
-   - *Consequence*: Ownership boundary enforcement is in-scope and foundational
+   - _Consequence_: Ownership boundary enforcement is in-scope and foundational
 
 2. **ASM-2**: pack-check (Rust) is the preferred venue for new structural validation rules
-   - *Consequence*: REQ-001, REQ-002, REQ-003 will be implemented in drift.rs and structure.rs, not check-doc-drift.sh (unless performance/maintainability analysis suggests otherwise)
+   - _Consequence_: REQ-001, REQ-002, REQ-003 will be implemented in drift.rs and structure.rs, not check-doc-drift.sh (unless performance/maintainability analysis suggests otherwise)
 
 3. **ASM-3**: OpenQ prefix normalization should use the abbreviated form (PLN, BLD, GAT, etc.) consistent with stable-markers.md
-   - *Consequence*: REQ-003 enforces PLN (not PLAN); open question OQ-SIG-002 assumes this resolution
+   - _Consequence_: REQ-003 enforces PLN (not PLAN); open question OQ-SIG-002 assumes this resolution
 
 4. **ASM-4**: Warning-before-failure is acceptable for new rules to enable incremental adoption
-   - *Consequence*: REQ-005 defines `--strict` flag for opt-in enforcement; CI can run without --strict during rollout period
+   - _Consequence_: REQ-005 defines `--strict` flag for opt-in enforcement; CI can run without --strict during rollout period
 
 5. **ASM-5**: The 4 agents potentially missing Skills sections are gaps to fix, not intentional exceptions
-   - *Consequence*: REQ-002 will surface them; remediation path is to add Skills sections to each
+   - _Consequence_: REQ-002 will surface them; remediation path is to add Skills sections to each
 
 6. **ASM-6**: Prior Flow 1 research and requirements are correct and will not need major revision
-   - *Consequence*: Flow 1 re-run per orchestrator signal will update artifacts but not fundamentally change scope
+   - _Consequence_: Flow 1 re-run per orchestrator signal will update artifacts but not fundamentally change scope
 
 ## Questions / Clarifications Needed
 

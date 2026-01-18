@@ -1,6 +1,7 @@
 # Contract Compliance Report for compliance-drift-proofing
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED
@@ -42,6 +43,7 @@ endpoints_checked: 8
 - endpoints_in_contract: 8 (2 CLI endpoints, 4 schemas, 4 checks declared)
 
 Contract inventory markers found:
+
 ```
 # CONTRACT_INVENTORY_V1
 # ENDPOINT: CLI pack-check --strict
@@ -53,6 +55,7 @@ Contract inventory markers found:
 ```
 
 Checks declared under x-checks:
+
 - existing.49: Skills section enforcement (REQ-002)
 - existing.50: GH body hygiene
 - new.52: Flow boundary enforcement (REQ-001)
@@ -68,16 +71,16 @@ Checks declared under x-checks:
 
 ## Endpoints Checked
 
-| Method | Path/Check | Result | Notes | Evidence (contract) | Evidence (impl) |
-| ------ | ---------- | ------ | ----- | ------------------- | --------------- |
-| CLI | pack-check --strict_warnings | OK | Flag exists at cli.rs:38, exit code logic at reporter.rs:147,192 | api_contracts.yaml:x-cli-interface.arguments.strict_warnings | cli.rs:37-38, reporter.rs:147,192 |
-| CLI | pack-check --format json | OK | JSON output matches RunReport schema | api_contracts.yaml:x-cli-interface.arguments.format | cli.rs:29-30, reporter.rs:176-196 |
-| CHECK | 49 (Skills section) | OK | drift.rs:80 id=49, function=check_skills_section_required | api_contracts.yaml:x-checks.existing.49 | drift.rs:79-82 |
-| CHECK | 50 (GH body hygiene) | OK | drift.rs:85 id=50, function=check_gh_body_hygiene | api_contracts.yaml:x-checks.existing.50 | drift.rs:84-87 |
-| CHECK | 52 (flow boundary) | OK | drift.rs:90 id=52, function=check_flow_boundary_enforcement | api_contracts.yaml:x-checks.new.52 | drift.rs:89-92 |
-| CHECK | 53 (OpenQ prefix) | OK | drift.rs:95 id=53, function=check_openq_prefix_validation | api_contracts.yaml:x-checks.new.53 | drift.rs:94-97 |
-| SCHEMA | BuildReceipt | OK | Test fixtures exist with core fields; simplified schema documented in README | api_contracts.yaml:components.schemas.BuildReceipt | tests/fixtures/build_receipt_*.json |
-| SCHEMA | OpenQId | OK | Pattern OQ-<FLOW>-<NNN> validated by check 53 | api_contracts.yaml:components.schemas.OpenQId | contracts.rs:540-547, drift.rs:775-918 |
+| Method | Path/Check                   | Result | Notes                                                                        | Evidence (contract)                                          | Evidence (impl)                        |
+| ------ | ---------------------------- | ------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- |
+| CLI    | pack-check --strict_warnings | OK     | Flag exists at cli.rs:38, exit code logic at reporter.rs:147,192             | api_contracts.yaml:x-cli-interface.arguments.strict_warnings | cli.rs:37-38, reporter.rs:147,192      |
+| CLI    | pack-check --format json     | OK     | JSON output matches RunReport schema                                         | api_contracts.yaml:x-cli-interface.arguments.format          | cli.rs:29-30, reporter.rs:176-196      |
+| CHECK  | 49 (Skills section)          | OK     | drift.rs:80 id=49, function=check_skills_section_required                    | api_contracts.yaml:x-checks.existing.49                      | drift.rs:79-82                         |
+| CHECK  | 50 (GH body hygiene)         | OK     | drift.rs:85 id=50, function=check_gh_body_hygiene                            | api_contracts.yaml:x-checks.existing.50                      | drift.rs:84-87                         |
+| CHECK  | 52 (flow boundary)           | OK     | drift.rs:90 id=52, function=check_flow_boundary_enforcement                  | api_contracts.yaml:x-checks.new.52                           | drift.rs:89-92                         |
+| CHECK  | 53 (OpenQ prefix)            | OK     | drift.rs:95 id=53, function=check_openq_prefix_validation                    | api_contracts.yaml:x-checks.new.53                           | drift.rs:94-97                         |
+| SCHEMA | BuildReceipt                 | OK     | Test fixtures exist with core fields; simplified schema documented in README | api_contracts.yaml:components.schemas.BuildReceipt           | tests/fixtures/build*receipt*\*.json   |
+| SCHEMA | OpenQId                      | OK     | Pattern OQ-<FLOW>-<NNN> validated by check 53                                | api_contracts.yaml:components.schemas.OpenQId                | contracts.rs:540-547, drift.rs:775-918 |
 
 ## Findings
 

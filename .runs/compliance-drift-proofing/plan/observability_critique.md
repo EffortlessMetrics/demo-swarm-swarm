@@ -60,6 +60,7 @@ severity_summary:
 (none - all REQ and NFR identifiers have observability coverage)
 
 The following requirements are covered by signals:
+
 - REQ-001: CHECK-050 violations + ALERT-STRICT-001
 - REQ-002: CHECK-049 violations + ALERT-STRICT-001
 - REQ-003: CHECK-051 violations + ALERT-STRICT-001
@@ -87,6 +88,7 @@ The following requirements are covered by signals:
 ### 1) Handshake Validity
 
 **PASS**: The observability spec includes a properly formatted `## Inventory (machine countable)` section (lines 358-373) with all required marker prefixes:
+
 - `METRIC`: 3 entries (pack_check_violations_total, pack_check_duration_ms, pack_check_files_scanned)
 - `LOG_EVENT`: 4 entries (SCAN_START, RULE_APPLIED, VIOLATION_FOUND, SCAN_COMPLETE)
 - `SLO`: 4 entries (SLO-PERF-001, SLO-PERF-002, SLO-REL-001, SLO-REL-002)
@@ -98,21 +100,23 @@ All alerts include runbook pointers (though marked TBD).
 
 **PASS**: The three critical paths identified (developer validation loop, CI pipeline validation, diagnostic triage) are all measurable:
 
-| Journey | Rate/Errors/Duration Signal | Debug Anchor |
-|---------|---------------------------|--------------|
-| Developer validation | stats.violations_total, exit code | VIOLATION_FOUND log event with check_id, file, line |
-| CI pipeline | exit code, stats.duration_ms | JSON output with full diagnostics array |
-| Diagnostic triage | CheckDiagnostic with message, suggestion | File path + line number in output format |
+| Journey              | Rate/Errors/Duration Signal              | Debug Anchor                                        |
+| -------------------- | ---------------------------------------- | --------------------------------------------------- |
+| Developer validation | stats.violations_total, exit code        | VIOLATION_FOUND log event with check_id, file, line |
+| CI pipeline          | exit code, stats.duration_ms             | JSON output with full diagnostics array             |
+| Diagnostic triage    | CheckDiagnostic with message, suggestion | File path + line number in output format            |
 
 ### 3) Safety: PII/Secrets + Cardinality
 
 **PASS**: Section "PII/Secrets Guidance (NFR-SEC-001)" at lines 90-95 explicitly addresses:
+
 - NEVER print file contents in diagnostic output
 - ONLY print file paths and rule violation descriptions
 - Test fixtures must use obviously synthetic values
 - Violations reference line numbers, not line contents
 
 Cardinality rules at lines 66-68:
+
 - Allowed labels: severity, check_id, file_path (relative), line_number
 - Prohibited labels: file_contents, user_id, full_absolute_path
 
@@ -120,23 +124,25 @@ Cardinality rules at lines 66-68:
 
 **PASS**: All four SLOs have explicit targets and measurement methods:
 
-| SLO | Target | Window | Measurement |
-|-----|--------|--------|-------------|
-| SLO-PERF-001 | < 30 seconds | per invocation | SCAN_COMPLETE.duration_ms |
-| SLO-PERF-002 | < 5 seconds per rule | per rule | baseline vs with-rule delta |
-| SLO-REL-001 | 100% byte-identical | consecutive runs | hash comparison |
-| SLO-REL-002 | sorted by file, rule ID | per run | output parser verification |
+| SLO          | Target                  | Window           | Measurement                 |
+| ------------ | ----------------------- | ---------------- | --------------------------- |
+| SLO-PERF-001 | < 30 seconds            | per invocation   | SCAN_COMPLETE.duration_ms   |
+| SLO-PERF-002 | < 5 seconds per rule    | per rule         | baseline vs with-rule delta |
+| SLO-REL-001  | 100% byte-identical     | consecutive runs | hash comparison             |
+| SLO-REL-002  | sorted by file, rule ID | per run          | output parser verification  |
 
 All three alerts specify severity (BLOCKING or WARNING) and runbook pointers.
 
 ### 5) Traceability + Verification Hooks
 
 **PASS**: The "Traceability" section (lines 315-338) maps:
+
 - REQ-001 through REQ-006 to specific CHECK-NNN IDs and alerts
 - NFR-PERF-001, NFR-REL-001, NFR-OPS-001 to measurement methods
 - RSK-001, RSK-004, RSK-005, RSK-008 to observable signals
 
 The test_plan.md "Non-Behavioral Verification" section (lines 251-259) includes verification strategies for:
+
 - NFR-PERF-001: CI timing wrapper
 - NFR-REL-001: Determinism test (run twice, diff output)
 - NFR-OPS-001: Manual review of diagnostic output format
@@ -158,6 +164,7 @@ The observability spec is **VERIFIED** because:
 6. Test plan includes verification hooks for observability assertions.
 
 The three MINOR issues identified are polish concerns:
+
 - TBD runbooks are normal at Plan phase
 - Vague measurement method for SLO-REL-002 is clarifiable during implementation
 - RSK-008 "false negative rate" is correctly positioned as manual audit (not automated metric)

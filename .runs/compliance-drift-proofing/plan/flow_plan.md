@@ -59,6 +59,7 @@ No critic worklists deferred. All critics returned PROCEED.
 ## Human Review Checklist
 
 Before proceeding to Flow 3, humans should review:
+
 - [ ] `adr.md` - Is OPT-001 the right architecture decision?
 - [ ] `api_contracts.yaml` - Are the check definitions correct?
 - [ ] `work_plan.md` - Is the 12-subtask breakdown reasonable?

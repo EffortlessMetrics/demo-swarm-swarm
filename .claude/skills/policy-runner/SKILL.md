@@ -15,12 +15,14 @@ Run policy-as-code checks against plan artifacts, code, and configurations. This
 Policy-as-code transforms governance rules from documentation into executable checks. Instead of "the security team reviews PRs," you get "the policy runner verifies authentication requirements are met."
 
 **What this skill does:**
+
 - Execute policy checks defined in `policy_plan.md`
 - Run OPA/Conftest against target files
 - Produce structured pass/fail evidence
 - Generate summaries for downstream agents (policy-analyst)
 
 **What this skill does not do:**
+
 - Grant waivers or exceptions
 - Modify policy files
 - Make compliance judgments (that's policy-analyst's job)
@@ -30,13 +32,14 @@ Policy-as-code transforms governance rules from documentation into executable ch
 
 ## When to Use
 
-| Flow | Purpose |
-|------|---------|
-| **Flow 2 (Plan)** | Validate contracts/ADR against architectural policies |
-| **Flow 4 (Review)** | Re-check policies after implementation changes |
-| **Flow 5 (Gate)** | Final policy verification before merge decision |
+| Flow                | Purpose                                               |
+| ------------------- | ----------------------------------------------------- |
+| **Flow 2 (Plan)**   | Validate contracts/ADR against architectural policies |
+| **Flow 4 (Review)** | Re-check policies after implementation changes        |
+| **Flow 5 (Gate)**   | Final policy verification before merge decision       |
 
 The skill is typically invoked by:
+
 - `policy-analyst` agent (for compliance mapping)
 - Flow orchestrators (as a verification step)
 
@@ -67,6 +70,7 @@ deny[msg] {
 ### Conftest
 
 Conftest is a tool for testing structured data (YAML, JSON, HCL) against OPA policies. It's commonly used for:
+
 - Kubernetes manifests
 - Terraform plans
 - CI/CD configurations
@@ -80,6 +84,7 @@ conftest test api_contracts.yaml -p policies/api/
 ### Rego
 
 The policy language for OPA. Key concepts:
+
 - **Rules** define what's allowed/denied
 - **Input** is the data being evaluated (e.g., your YAML files)
 - **Packages** organize rules by domain
@@ -107,18 +112,22 @@ opa eval --data <policy.rego> --input <target.json> "data.policy.deny"
 ## Operating Invariants
 
 ### Repo root only
+
 - Assume working directory is repo root.
 - All paths are repo-root-relative.
 
 ### Read-only execution
+
 - Do not modify policy files or targets.
 - Do not grant waivers.
 
 ### Evidence capture
+
 - Save raw output to `policy_runner_output.log`.
 - Write structured summary to `policy_runner_summary.md`.
 
 ### Null over guess
+
 - If policies aren't configured: report "no policies wired"
 - If tool errors: capture the error, don't fabricate results
 
@@ -129,6 +138,7 @@ opa eval --data <policy.rego> --input <target.json> "data.policy.deny"
 ### Policy Plan (`policy_plan.md`)
 
 The `policy_plan.md` file defines which policies to run. Located at:
+
 - `.runs/<run-id>/plan/policy_plan.md` (run-specific)
 - `policies/policy_plan.md` (repo default)
 
@@ -139,11 +149,11 @@ Format:
 
 ## Active Policies
 
-| Policy | Target | Command | Required |
-|--------|--------|---------|----------|
-| api-security | api_contracts.yaml | conftest test {target} -p policies/api/ | yes |
-| data-retention | schema.md | opa eval -d policies/data/retention.rego | no |
-| naming-conventions | *.yaml | conftest test {target} -p policies/naming/ | yes |
+| Policy             | Target             | Command                                    | Required |
+| ------------------ | ------------------ | ------------------------------------------ | -------- |
+| api-security       | api_contracts.yaml | conftest test {target} -p policies/api/    | yes      |
+| data-retention     | schema.md          | opa eval -d policies/data/retention.rego   | no       |
+| naming-conventions | \*.yaml            | conftest test {target} -p policies/naming/ | yes      |
 
 ## Policy Roots
 
@@ -312,29 +322,33 @@ Output:
 # Policy Runner Summary
 
 ## Execution Context
+
 - Run ID: feat-auth
 - Timestamp: 2025-12-12T10:30:00Z
 - Policy Plan: .runs/feat-auth/plan/policy_plan.md
 
 ## Results
 
-| Policy | Target | Status | Violations |
-|--------|--------|--------|------------|
-| api-security | api_contracts.yaml | PASS | 0 |
-| data-retention | schema.md | FAIL | 1 |
-| naming-conventions | *.yaml | PASS | 0 |
+| Policy             | Target             | Status | Violations |
+| ------------------ | ------------------ | ------ | ---------- |
+| api-security       | api_contracts.yaml | PASS   | 0          |
+| data-retention     | schema.md          | FAIL   | 1          |
+| naming-conventions | \*.yaml            | PASS   | 0          |
 
 ## Violations Detail
 
 ### data-retention (FAIL)
+
 - Target: schema.md
 - Violation: Field 'email' in User model must have retention period defined
 - Policy file: policies/data/retention.rego:L42
 
 ## Planned Only (Not Executed)
+
 - pii-classification: No auto-execute command configured
 
 ## Summary
+
 - Total policies: 4
 - Executed: 3
 - Passed: 2
@@ -351,6 +365,7 @@ Output:
 **Symptom:** "No policy checks wired for this change"
 
 **Resolution:**
+
 1. Create `policies/` directory with Rego files
 2. Create `policy_plan.md` with policy-to-target mappings
 3. Or: acknowledge no policy-as-code is configured (valid state)
@@ -360,6 +375,7 @@ Output:
 **Symptom:** `conftest: command not found` or `opa: command not found`
 
 **Resolution:**
+
 ```bash
 # Install conftest
 brew install conftest  # macOS
@@ -375,6 +391,7 @@ brew install opa  # macOS
 **Symptom:** Rego syntax errors in output
 
 **Resolution:**
+
 1. Check Rego syntax in the failing policy file
 2. Run `opa check policies/*.rego` to validate syntax
 3. Fix syntax errors before re-running
@@ -384,6 +401,7 @@ brew install opa  # macOS
 **Symptom:** `error: file not found: api_contracts.yaml`
 
 **Resolution:**
+
 1. Verify the target file exists at the specified path
 2. Check if `policy_plan.md` references the correct location
 3. Ensure upstream agents (interface-designer) have run
@@ -393,6 +411,7 @@ brew install opa  # macOS
 **Symptom:** Unexpected failures or passes
 
 **Resolution:**
+
 1. Test policy in isolation: `opa eval --data policy.rego --input test.json "data.policy.deny"`
 2. Add trace output: `opa eval ... --explain full`
 3. Review Rego logic for edge cases
@@ -402,12 +421,14 @@ brew install opa  # macOS
 ## Integration with policy-analyst
 
 The `policy-analyst` agent uses policy-runner output to:
+
 1. Map policy requirements to evidence
 2. Classify violations by severity
 3. Determine compliance status
 4. Recommend routing (fix vs waive vs proceed)
 
 **Flow:**
+
 ```
 policy-runner (execute)
     |

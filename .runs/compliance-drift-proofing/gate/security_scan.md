@@ -1,6 +1,7 @@
 # Security Scan Report
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -11,51 +12,56 @@ blockers: []
 missing_required: []
 
 concerns:
-  - Dependency audit could not run (cargo-audit CVSS 4.0 format incompatibility)
+
+- Dependency audit could not run (cargo-audit CVSS 4.0 format incompatibility)
 
 sources:
-  - git diff main...HEAD --name-only (115 changed files)
-  - tools/demoswarm-pack-check/src/checks/control_plane.rs
-  - tools/demoswarm-pack-check/src/checks/drift.rs
-  - tools/demoswarm-pack-check/src/checks/flow.rs
-  - tools/demoswarm-pack-check/src/checks/structure.rs
-  - tools/demoswarm-pack-check/src/checks/wisdom.rs
-  - tools/demoswarm-pack-check/src/checks/mod.rs
-  - tools/demoswarm-pack-check/src/contracts.rs
-  - tools/demoswarm-pack-check/tests/check_integration_test.rs
-  - .claude/hooks/contract_lint.py
-  - .claude/hooks/gh_outbound_guard.py
+
+- git diff main...HEAD --name-only (115 changed files)
+- tools/demoswarm-pack-check/src/checks/control_plane.rs
+- tools/demoswarm-pack-check/src/checks/drift.rs
+- tools/demoswarm-pack-check/src/checks/flow.rs
+- tools/demoswarm-pack-check/src/checks/structure.rs
+- tools/demoswarm-pack-check/src/checks/wisdom.rs
+- tools/demoswarm-pack-check/src/checks/mod.rs
+- tools/demoswarm-pack-check/src/contracts.rs
+- tools/demoswarm-pack-check/tests/check_integration_test.rs
+- .claude/hooks/contract_lint.py
+- .claude/hooks/gh_outbound_guard.py
 
 severity_summary:
-  critical: 0
-  major: 0
-  minor: 0
+critical: 0
+major: 0
+minor: 0
 
 findings_total: 0
 
 scan_scope:
-  changed_files_count: 115
-  changed_files_source: git_diff
+changed_files_count: 115
+changed_files_source: git_diff
 
 dependency_audit:
-  status: not_run
-  tool: cargo-audit
-  reason: Advisory database CVSS 4.0 format not supported by installed cargo-audit version
+status: not_run
+tool: cargo-audit
+reason: Advisory database CVSS 4.0 format not supported by installed cargo-audit version
 
 ## Findings
 
 ### Secrets Exposure
+
 No suspected secrets detected in scanned surface.
 
 The following files were scanned for secrets patterns:
+
 - All Rust source files in `tools/demoswarm-pack-check/src/`
 - Python hooks in `.claude/hooks/`
 - Test fixtures in `tools/demoswarm-pack-check/tests/fixtures/`
 - Agent and command markdown files in `.claude/`
 
 Patterns checked:
+
 - AWS access keys (AKIA...)
-- GitHub tokens (ghp_, ghs_, gho_, ghu_, ghr_)
+- GitHub tokens (ghp*, ghs*, gho*, ghu*, ghr\_)
 - Private key blocks (-----BEGIN PRIVATE KEY-----)
 - Slack tokens
 - JWT secrets
@@ -64,16 +70,18 @@ Patterns checked:
 - Generic patterns: password=, secret=, api_key=, token=
 
 All checked files contain only:
-- Regex patterns for secret *detection* (not actual secrets)
+
+- Regex patterns for secret _detection_ (not actual secrets)
 - Test fixtures with synthetic values (e.g., "test-run")
 - Documentation patterns
 
 ### SAST / Code Patterns
+
 No high-signal vulnerability patterns detected in scanned surface.
 
 **Files analyzed:**
 
-1. **tools/demoswarm-pack-check/src/lib.rs** and **src/checks/*.rs**
+1. **tools/demoswarm-pack-check/src/lib.rs** and **src/checks/\*.rs**
    - Purpose: Pack validation checks for compliance drift detection
    - Security posture: Read-only file operations using safe Rust APIs
    - **`#![forbid(unsafe_code)]` declared** - eliminates all memory safety vulnerabilities
@@ -103,12 +111,13 @@ No high-signal vulnerability patterns detected in scanned surface.
 
 5. **.claude/hooks/gh_outbound_guard.py**
    - Purpose: Pre-tool-use hook to block secret leakage to GitHub
-   - Security posture: This is a *security control* that prevents secrets from being posted
+   - Security posture: This is a _security control_ that prevents secrets from being posted
    - Blocks: private keys, GitHub tokens, AWS keys, bearer tokens, database URLs with passwords
    - Returns exit code 2 to block operations when secrets detected
    - Does NOT print/log detected secret content (only pattern names)
 
 **Observations:**
+
 - The codebase follows defense-in-depth with `gh_outbound_guard.py` as a guardrail
 - All file I/O uses safe Rust APIs (std::fs) or Python pathlib
 - No unsafe blocks in Rust code
@@ -123,6 +132,7 @@ No high-signal vulnerability patterns detected in scanned surface.
 **Reason:** The `cargo audit` tool encountered a compatibility issue with the CVSS 4.0 format in the RustSec advisory database. This is a known issue with cargo-audit versions prior to 0.22.0.
 
 **Mitigation:** The Rust dependencies are standard crates:
+
 - `regex` - well-maintained regex library
 - `walkdir` - directory traversal
 - `clap` - CLI argument parsing

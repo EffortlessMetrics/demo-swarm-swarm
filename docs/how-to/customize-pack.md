@@ -3,6 +3,7 @@
 This guide covers how to adapt the DemoSwarm **Claude Code pack** to your stack, repo layout, and tooling.
 
 The pack is designed to be **layout-neutral**:
+
 - durable artifacts always live under `.runs/<run-id>/...`
 - code/test/doc locations are **project-defined**
 - Flow 3 scope is constrained by `subtask_context_manifest.json`, not by assuming `src/` or `tests/`
@@ -11,15 +12,18 @@ The pack is designed to be **layout-neutral**:
 
 ## What you typically customize
 
-1) **Commands** (tests, lint, policy)
+1. **Commands** (tests, lint, policy)
+
 - `.claude/skills/test-runner/SKILL.md`
 - `.claude/skills/auto-linter/SKILL.md`
 - `.claude/skills/policy-runner/SKILL.md`
 
-2) **Repo layout + intended change surface** (Flow 3)
+1. **Repo layout + intended change surface** (Flow 3)
+
 - Use `/customize-pack` (recommended) and ensure `context-loader` produces a correct `.runs/<run-id>/build/subtask_context_manifest.json`.
 
-3) **GitHub integration** (optional)
+1. **GitHub integration** (optional)
+
 - If `gh` is missing/unauthenticated, the pack still produces local artifacts.
 - Reporting ops (`gh-issue-manager`, `gh-reporter`) are designed to **SKIP** when GH tooling/auth isn't available.
 - Release ops in Flow 6 (merge/tag/release) require working GitHub integration if you want automation.
@@ -30,37 +34,42 @@ The pack is designed to be **layout-neutral**:
 
 ### Required tools (for pack-check and mechanical agents)
 
-| Tool | Purpose | Required |
-|------|---------|----------|
-| `bash` | Pack scripts + shell-driven skills | Yes |
-| `git` | Local repo operations (repo-operator) | Yes |
+| Tool   | Purpose                               | Required |
+| ------ | ------------------------------------- | -------- |
+| `bash` | Pack scripts + shell-driven skills    | Yes      |
+| `git`  | Local repo operations (repo-operator) | Yes      |
 
 Notes:
+
 - Some scripts may rely on **bash 4+** features. If you hit issues on macOS default bash, install a newer bash and rerun.
 - Mechanical operations (counting, extraction) use the **`demoswarm` CLI** via shims, not raw shell utilities.
 
 ### Optional tools
 
-| Tool | Purpose | Fallback |
-|------|---------|----------|
-| `jq` | JSON pretty-printing | `python -m json.tool` |
-| `gh` | GitHub issues/comments + (Flow 6) GitHub-native release ops | Reporting ops SKIPPED; release ops require human handling |
-| `curl` | Smoke/health checks (Flow 6 smoke-verifier) | Smoke checks become artifact-only / N/A |
+| Tool   | Purpose                                                     | Fallback                                                  |
+| ------ | ----------------------------------------------------------- | --------------------------------------------------------- |
+| `jq`   | JSON pretty-printing                                        | `python -m json.tool`                                     |
+| `gh`   | GitHub issues/comments + (Flow 6) GitHub-native release ops | Reporting ops SKIPPED; release ops require human handling |
+| `curl` | Smoke/health checks (Flow 6 smoke-verifier)                 | Smoke checks become artifact-only / N/A                   |
 
 ---
 
 ## Platform support
 
 ### Linux / macOS
+
 Works out of the box with standard Unix utilities.
 
 macOS note:
+
 - Differences like BSD `sed` vs GNU `sed` can matter if you copy/paste shell snippets. Prefer portable patterns (no `sed -i` assumptions).
 
 ### Windows
+
 Recommended: **WSL2** for best compatibility.
 
 Alternatives (more brittle):
+
 - Git Bash (works for many cases; ensure `jq` is installed)
 - PowerShell + Unix tools (scoop/choco), but expect edge cases
 
@@ -72,24 +81,28 @@ Alternatives (more brittle):
 
 Edit `.claude/skills/test-runner/SKILL.md` to match your repo:
 
-**Rust**
+#### Rust
+
 ```bash
 cargo test --workspace --tests
 ```
 
-**Node.js**
+#### Node.js
+
 ```bash
 pnpm test
 # or npm test / yarn test
 ```
 
-**Python**
+#### Python
+
 ```bash
 python -m pytest -q
 # or pytest -q
 ```
 
-**Go**
+#### Go
+
 ```bash
 go test ./...
 ```
@@ -98,19 +111,22 @@ go test ./...
 
 Edit `.claude/skills/auto-linter/SKILL.md`:
 
-**Rust**
+#### Rust
+
 ```bash
 cargo fmt --all
 cargo clippy --all-targets --all-features -- -D warnings
 ```
 
-**Node.js**
+#### Node.js
+
 ```bash
 pnpm lint
 pnpm format
 ```
 
-**Python**
+#### Python
+
 ```bash
 ruff check --fix .
 ruff format .
@@ -118,7 +134,7 @@ ruff format .
 
 ### Policy checks
 
-Edit `.claude/skills/policy-runner/SKILL.md` to run *your* checks:
+Edit `.claude/skills/policy-runner/SKILL.md` to run _your_ checks:
 
 ```bash
 ./scripts/check-policies.sh
@@ -136,17 +152,17 @@ Avoid editing agent prompts to "teach" hardcoded paths.
 
 Instead:
 
-* Use the Flow 3 context mechanism:
-  * `context-loader` writes `.runs/<run-id>/build/subtask_context_manifest.json`
-  * implementers/fixer/doc-writer treat that manifest as the scope boundary
-* If a repo has multiple apps/packages:
-  * ensure the manifest points at the correct package(s) for the subtask
+- Use the Flow 3 context mechanism:
+  - `context-loader` writes `.runs/<run-id>/build/subtask_context_manifest.json`
+  - implementers/fixer/doc-writer treat that manifest as the scope boundary
+- If a repo has multiple apps/packages:
+  - ensure the manifest points at the correct package(s) for the subtask
 
 ### BDD features are run-local
 
 Flow 1 BDD artifacts always live under:
 
-* `.runs/<run-id>/signal/features/*.feature`
+- `.runs/<run-id>/signal/features/*.feature`
 
 (They are not stored in repo-root `features/` by default.)
 
@@ -158,18 +174,18 @@ The plan is to keep receipts **layout-neutral** and **mechanical**.
 
 Do:
 
-* Prefer counts derived from `.runs/` artifacts (summaries + inventory markers).
-* Keep stable marker prefixes intact in summary artifacts (e.g., inventory sections).
+- Prefer counts derived from `.runs/` artifacts (summaries + inventory markers).
+- Keep stable marker prefixes intact in summary artifacts (e.g., inventory sections).
 
 Do not:
 
-* "Fix" receipts by scanning repo folders like `tests/` or `src/` unless you're intentionally making the pack repo-specific.
+- "Fix" receipts by scanning repo folders like `tests/` or `src/` unless you're intentionally making the pack repo-specific.
 
 If you need different counts:
 
-* adjust the *producer artifacts* to emit stable markers the cleanup agents can count (preferred),
-* or adjust cleanup patterns to count from `.runs/<run-id>/...` artifacts (acceptable),
-* avoid repo scanning patterns as the default.
+- adjust the _producer artifacts_ to emit stable markers the cleanup agents can count (preferred),
+- or adjust cleanup patterns to count from `.runs/<run-id>/...` artifacts (acceptable),
+- avoid repo scanning patterns as the default.
 
 ---
 
@@ -181,15 +197,15 @@ If you're on GitLab/Azure/Bitbucket, you have two sane options:
 
 1. **Skip GH integration**
 
-* run flows locally
-* keep artifacts and receipts
-* handle issues/merge/release manually in your provider
+- run flows locally
+- keep artifacts and receipts
+- handle issues/merge/release manually in your provider
 
-2. **Fork integration agents + update flow commands**
+1. **Fork integration agents + update flow commands**
 
-* create equivalents (e.g., `glab-issue-manager`, `glab-reporter`, `glab-researcher`)
-* update `.claude/commands/flow-*.md` to reference them
-* keep the two-gate rule and safe-bail semantics unchanged
+- create equivalents (e.g., `glab-issue-manager`, `glab-reporter`, `glab-researcher`)
+- update `.claude/commands/flow-*.md` to reference them
+- keep the two-gate rule and safe-bail semantics unchanged
 
 Treat "swap commands in place" as insufficient unless you also update contracts, gating language, and pack-check.
 
@@ -199,12 +215,12 @@ Treat "swap commands in place" as insufficient unless you also update contracts,
 
 Default:
 
-* Flow 6 `deploy-monitor` is written for GitHub Actions (via `gh`).
+- Flow 6 `deploy-monitor` is written for GitHub Actions (via `gh`).
 
 If you use another CI system:
 
-* adapt `deploy-monitor` to query your CI for run status (read-only) and write the same `verification_report.md` contract.
-* keep it evidence-first: URLs + concise summaries.
+- adapt `deploy-monitor` to query your CI for run status (read-only) and write the same `verification_report.md` contract.
+- keep it evidence-first: URLs + concise summaries.
 
 ---
 
@@ -218,8 +234,8 @@ Run:
 
 Use it to:
 
-* set test/lint/policy commands in skill files
-* configure how Flow 3 discovers scope (manifest expectations)
+- set test/lint/policy commands in skill files
+- configure how Flow 3 discovers scope (manifest expectations)
 
 The command should also write a receipt of what it changed (path should be shown by the command output). Keep that receipt in the repo.
 
@@ -270,9 +286,9 @@ If receipts show `UNVERIFIED` or counts are `null`, check `cleanup_report.md` fo
 
 Install jq.
 
-* macOS: `brew install jq`
-* Ubuntu/Debian: `apt install jq`
-* Windows (scoop): `scoop install jq`
+- macOS: `brew install jq`
+- Ubuntu/Debian: `apt install jq`
+- Windows (scoop): `scoop install jq`
 
 ### `sed` portability problems
 
@@ -280,8 +296,8 @@ Avoid `sed -i` assumptions. Prefer portable patterns or handle macOS/Linux diffe
 
 ### `gh: command not found` / `gh: not authenticated`
 
-* Reporting ops will be SKIPPED and local artifacts still written.
-* Flow 6 release ops won't run automatically without working GitHub tooling/auth.
+- Reporting ops will be SKIPPED and local artifacts still written.
+- Flow 6 release ops won't run automatically without working GitHub tooling/auth.
 
 Install/auth (GitHub CLI docs):
 

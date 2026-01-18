@@ -31,13 +31,13 @@ User sessions currently persist indefinitely, creating a security risk. This cha
 
 ### Quality Scorecard
 
-| Surface | Status | Notes |
-|---------|--------|-------|
-| Correctness | measured | 8 BDD scenarios pass |
-| Verification | measured | 94% mutation score on new code |
-| Boundaries | clean | config schema additive only |
-| Maintainability | noted | 3 hotspots identified above |
-| Explanation | complete | ADR-007 documents timeout strategy |
+| Surface         | Status   | Notes                              |
+| --------------- | -------- | ---------------------------------- |
+| Correctness     | measured | 8 BDD scenarios pass               |
+| Verification    | measured | 94% mutation score on new code     |
+| Boundaries      | clean    | config schema additive only        |
+| Maintainability | noted    | 3 hotspots identified above        |
+| Explanation     | complete | ADR-007 documents timeout strategy |
 
 **Status values:** `measured` (automated), `partial` (some measured), `estimated` (inferred), `noted` (human observation), `clean` (no changes), `unknown` (gap documented)
 
@@ -58,13 +58,13 @@ User sessions currently persist indefinitely, creating a security risk. This cha
 
 ## Evidence Pointers
 
-| Artifact | Location |
-|----------|----------|
-| Test results | `.runs/feat-session-timeout/build/test_execution.md` |
-| Code critique | `.runs/feat-session-timeout/build/code_critique.md` |
+| Artifact        | Location                                              |
+| --------------- | ----------------------------------------------------- |
+| Test results    | `.runs/feat-session-timeout/build/test_execution.md`  |
+| Code critique   | `.runs/feat-session-timeout/build/code_critique.md`   |
 | Mutation report | `.runs/feat-session-timeout/build/mutation_report.md` |
-| ADR | `.runs/feat-session-timeout/plan/adr.md` |
-| Gate receipt | `.runs/feat-session-timeout/gate/gate_receipt.json` |
+| ADR             | `.runs/feat-session-timeout/plan/adr.md`              |
+| Gate receipt    | `.runs/feat-session-timeout/gate/gate_receipt.json`   |
 
 ---
 

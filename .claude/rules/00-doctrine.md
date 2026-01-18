@@ -26,11 +26,11 @@ Everything we learned about software engineering still applies—tests, reviews,
 
 ## The New Roles
 
-| Role | What They Do |
-|------|--------------|
-| **Architect** | Write intent (specs, ADRs, BDD). Define contracts. |
-| **PM** | Make judgment calls. Handle NEEDS_HUMAN. Decide scope. |
-| **Auditor** | Review evidence. Spot-check hotspots. Authorize merge. |
+| Role          | What They Do                                           |
+| ------------- | ------------------------------------------------------ |
+| **Architect** | Write intent (specs, ADRs, BDD). Define contracts.     |
+| **PM**        | Make judgment calls. Handle NEEDS_HUMAN. Decide scope. |
+| **Auditor**   | Review evidence. Spot-check hotspots. Authorize merge. |
 
 What humans don't do: write implementation code, debug syntax, review diffs line-by-line.
 
@@ -68,12 +68,12 @@ Compute is cheap. Architect attention is expensive. Trade accordingly.
 
 Code is a byproduct. The actual product is a PR where the review surface is self-evidently trustworthy. The verification panel answers every question the reviewer would have asked.
 
-| Traditional | Swarm |
-|-------------|-------|
-| Write code | Define intent |
-| Hope it's correct | Generate candidates |
+| Traditional             | Swarm               |
+| ----------------------- | ------------------- |
+| Write code              | Define intent       |
+| Hope it's correct       | Generate candidates |
 | Review catches problems | Verify exhaustively |
-| | Ship what passes |
+|                         | Ship what passes    |
 
 The verification IS the product.
 
@@ -98,6 +98,7 @@ When sources conflict, evidence arbitrates:
 **Tool outputs → Derived facts → Intent → Implementation → Narrative**
 
 These are two different orderings for two different purposes:
+
 - The first is **how work moves** (forward flow)
 - The second is **how disagreements resolve** (arbitration)
 
@@ -110,6 +111,7 @@ Intent artifacts (REQ/BDD/ADR) are the primary change surface. We still edit cod
 "Rerun" is a tool, not a virtue.
 
 Choose the cheapest path to trust:
+
 1. **Tool-output grounded debugging** — compiler errors, failing tests, diff-based blame
 2. **Intent edits** — if the bug is spec/contract-level
 3. **Surgical code edits** — if it's implementation-level
@@ -122,11 +124,11 @@ Agents can and should debug. The goal is trust, not purity.
 
 "Done" is a mechanical state, not a feeling.
 
-| Status | Meaning |
-|--------|---------|
-| `VERIFIED` | Converged. Evidence panel green, evidence fresh, blockers empty. |
-| `UNVERIFIED` | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
-| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down. |
+| Status           | Meaning                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `VERIFIED`       | Converged. Evidence panel green, evidence fresh, blockers empty.               |
+| `UNVERIFIED`     | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down.           |
 
 **UNVERIFIED is not failure. It's honest state.**
 
@@ -139,11 +141,11 @@ Flows never stop mid-execution. They run to the boundary and checkpoint.
 
 The only external constraints (all rare):
 
-| Constraint | What It Means | How Rare |
-|------------|---------------|----------|
-| **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
-| **Access** | Tooling broken, permissions missing, infra down | Rare |
-| **Authority** | Non-derivable decision with no safe default | Very rare (prefer DEFAULTED + log) |
+| Constraint    | What It Means                                   | How Rare                           |
+| ------------- | ----------------------------------------------- | ---------------------------------- |
+| **Budget**    | Tokens, time, or CI minutes exhausted           | Occasional                         |
+| **Access**    | Tooling broken, permissions missing, infra down | Rare                               |
+| **Authority** | Non-derivable decision with no safe default     | Very rare (prefer DEFAULTED + log) |
 
 **Everything else is routing.** Stagnation → route differently. Oscillation → break the cycle. Failure → route to fixer. "Blocked" is almost always just "route to the right agent."
 
@@ -170,9 +172,9 @@ See [the-physics.md](../../docs/explanation/the-physics.md) for full explanation
 
 In the work plane, **handcuffs are worse than errors**.
 
-| Mode | What Happens |
-|------|--------------|
-| **Errors** | Route to fixers, continue, learn |
+| Mode          | What Happens                                                  |
+| ------------- | ------------------------------------------------------------- |
+| **Errors**    | Route to fixers, continue, learn                              |
 | **Handcuffs** | Stop-and-ask mid-flow, rigid routing schemas, kill throughput |
 
 Errors are expected. The pipeline handles them. Handcuffs prevent the pipeline from running.
@@ -196,6 +198,7 @@ Velocity comes from smooth execution, not from being clever. Long, simple chains
 **Machine workflows are code. Human workflows are not.**
 
 Every hour of work moved from human to machine is an hour we can optimize:
+
 - Profile it
 - Parallelize it
 - Cache it
@@ -218,12 +221,12 @@ The more we push to machine, the faster everything gets. Human time doesn't comp
 
 When trust is manufactured (not hoped for), the shape of work changes:
 
-| Old Constraint | New Reality |
-|----------------|-------------|
-| PRs must be small to be reviewable | PR size is independent of review time |
-| Large changes require many review cycles | Evidence quality determines review time |
-| Refactors are risky and avoided | Refactors are verified like any other change |
-| "Too big to review" is a blocker | Review the cockpit, spot-check hotspots |
+| Old Constraint                           | New Reality                                  |
+| ---------------------------------------- | -------------------------------------------- |
+| PRs must be small to be reviewable       | PR size is independent of review time        |
+| Large changes require many review cycles | Evidence quality determines review time      |
+| Refactors are risky and avoided          | Refactors are verified like any other change |
+| "Too big to review" is a blocker         | Review the cockpit, spot-check hotspots      |
 
 This isn't about doing more. It's about the relationship between change size and review burden no longer being linear.
 
@@ -233,12 +236,12 @@ This isn't about doing more. It's about the relationship between change size and
 
 Implementation code is generated output. Your attention shifts:
 
-| Less | More |
-|------|------|
-| Reading implementation line-by-line | Reading evidence panels |
-| Debugging syntax | Refining intent |
-| Code ownership ("my code") | Intent ownership ("my spec") |
-| Reviewing diffs | Reviewing cockpits |
+| Less                                | More                         |
+| ----------------------------------- | ---------------------------- |
+| Reading implementation line-by-line | Reading evidence panels      |
+| Debugging syntax                    | Refining intent              |
+| Code ownership ("my code")          | Intent ownership ("my spec") |
+| Reviewing diffs                     | Reviewing cockpits           |
 
 **No one "wrote" the implementation.** Just like no one wrote the assembly under your C. The work you take pride in is the spec, the architecture, the decisions—not the syntax.
 
@@ -255,6 +258,7 @@ The LLM is not a chatbot. It is a **stochastic compiler**.
 - **Process:** Non-deterministic, iterative, refinable
 
 Like a traditional compiler, but:
+
 - Probabilistic (same input may vary)
 - Fallible (output needs verification)
 - Cheap to re-run (iteration is the normal path)
@@ -270,6 +274,7 @@ We always knew we should write comprehensive tests, document everything, run mut
 Now the cost is immaterial. **Do it right.**
 
 Spend compute on:
+
 - **Verification depth** (mutation testing, multiple critic passes)
 - **Documentation** (generated alongside code, always current)
 - **Evidence quality** (clear receipts, comprehensive coverage)
@@ -299,6 +304,7 @@ This approach draws from:
 The eleven laws in `docs/explanation/laws-of-the-swarm.md` are not preferences. They are the physics that makes the system work. Violating them breaks the system in predictable ways.
 
 When proposing a change, ask:
+
 - Does this violate any law?
 - Does this support any law?
 - Is the violation justified and documented?

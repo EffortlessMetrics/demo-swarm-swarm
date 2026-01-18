@@ -44,6 +44,7 @@ This is the **single source of truth** for pack portability and contract drift.
 Machine Summary is an **audit format**, not a routing mechanism. Orchestrators route on prose handoffs; cleanup agents derive Machine Summary fields for receipts.
 
 pack-check validates:
+
 - Presence in critics and verifiers (for audit completeness)
 - Correct heading casing (`## Machine Summary`)
 - Required fields present
@@ -146,20 +147,20 @@ When using `--format json`, pack-check outputs:
 
 **Fields:**
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `schema_version` | `number` | Always `1` (for future compatibility) |
-| `repo_root` | `string` | Absolute path to validated repo |
-| `errors` | `number` | Count of failures |
-| `warnings` | `number` | Count of warnings |
-| `counts.agents` | `number` | Number of agent files found |
-| `counts.commands` | `number` | Number of command files found |
-| `counts.skills` | `number` | Number of skill files found |
-| `diagnostics[]` | `array` | Non-pass diagnostics only |
-| `diagnostics[].level` | `"warn" \| "fail"` | Severity |
-| `diagnostics[].check_id` | `number` | Check number (matches text output) |
-| `diagnostics[].check_title` | `string` | Check section title |
-| `diagnostics[].message` | `string` | Specific diagnostic message |
+| Field                       | Type               | Description                           |
+| --------------------------- | ------------------ | ------------------------------------- |
+| `schema_version`            | `number`           | Always `1` (for future compatibility) |
+| `repo_root`                 | `string`           | Absolute path to validated repo       |
+| `errors`                    | `number`           | Count of failures                     |
+| `warnings`                  | `number`           | Count of warnings                     |
+| `counts.agents`             | `number`           | Number of agent files found           |
+| `counts.commands`           | `number`           | Number of command files found         |
+| `counts.skills`             | `number`           | Number of skill files found           |
+| `diagnostics[]`             | `array`            | Non-pass diagnostics only             |
+| `diagnostics[].level`       | `"warn" \| "fail"` | Severity                              |
+| `diagnostics[].check_id`    | `number`           | Check number (matches text output)    |
+| `diagnostics[].check_title` | `string`           | Check section title                   |
+| `diagnostics[].message`     | `string`           | Specific diagnostic message           |
 
 **Interpretation:**
 
@@ -180,11 +181,13 @@ When using `--format json`, pack-check outputs:
 ```
 
 CI validates:
+
 - Pack structure and contracts
 - Agent frontmatter
 - Optional: targeted scripts
 
 CI does **not** validate:
+
 - Your target repo's build/tests
 - Actual flow execution
 
@@ -237,6 +240,7 @@ These are supplements, not replacements for pack-check.
 **Symptom:** pack-check warns about non-canonical QID flow codes.
 
 **Fix:** Update QIDs to use canonical flow codes:
+
 - `SIGNAL` -> `SIG`
 - `PLN` -> `PLAN`
 - `BLD` -> `BUILD`

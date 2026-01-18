@@ -28,34 +28,34 @@ concerns:
 
 ### Run Identity Coherence
 
-| Check | Result | Notes |
-|-------|--------|-------|
-| run_meta.run_id matches dir | PASS | Both are `local-alignment-audit-aba1c6` |
-| run_id_kind sane | PASS | LOCAL_ONLY is valid; issue_binding=DEFERRED is correct |
-| issue_number/canonical_key alignment | PASS | issue_number=1, canonical_key=gh-1, aliases include both |
-| .runs/index.json entry present | PASS | Entry exists with correct run_id, issue_number=1, pr_number=2 |
-| Index issue_number matches run_meta | PASS | Both set to 1 |
-| Index canonical_key matches run_meta | PASS | Both set to gh-1 |
+| Check                                | Result | Notes                                                         |
+| ------------------------------------ | ------ | ------------------------------------------------------------- |
+| run_meta.run_id matches dir          | PASS   | Both are `local-alignment-audit-aba1c6`                       |
+| run_id_kind sane                     | PASS   | LOCAL_ONLY is valid; issue_binding=DEFERRED is correct        |
+| issue_number/canonical_key alignment | PASS   | issue_number=1, canonical_key=gh-1, aliases include both      |
+| .runs/index.json entry present       | PASS   | Entry exists with correct run_id, issue_number=1, pr_number=2 |
+| Index issue_number matches run_meta  | PASS   | Both set to 1                                                 |
+| Index canonical_key matches run_meta | PASS   | Both set to gh-1                                              |
 
 ## Receipt Matrix
 
-| Flow | Receipt Present | Status | Notes |
-|------|-----------------|--------|-------|
-| Signal | YES | VERIFIED | signal_receipt.json exists; status=VERIFIED, recommended_action=PROCEED |
-| Plan | YES | VERIFIED | plan_receipt.json exists; status=VERIFIED, recommended_action=PROCEED |
-| Build | UNREADABLE | UNKNOWN | build_receipt.json exists but permission denied; context indicates documentation-only run (no build artifacts created) |
-| Review | YES | VERIFIED | review_receipt.json exists; status=VERIFIED, recommended_action=PROCEED; pr_ready_for_gate=true |
-| Gate | NO | PENDING | gate_receipt.json does not exist (expected—auditor runs before gate receipt creation) |
-| Deploy | NO | N/A | Not yet executed |
-| Wisdom | NO | N/A | Not yet executed |
+| Flow   | Receipt Present | Status   | Notes                                                                                                                  |
+| ------ | --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Signal | YES             | VERIFIED | signal_receipt.json exists; status=VERIFIED, recommended_action=PROCEED                                                |
+| Plan   | YES             | VERIFIED | plan_receipt.json exists; status=VERIFIED, recommended_action=PROCEED                                                  |
+| Build  | UNREADABLE      | UNKNOWN  | build_receipt.json exists but permission denied; context indicates documentation-only run (no build artifacts created) |
+| Review | YES             | VERIFIED | review_receipt.json exists; status=VERIFIED, recommended_action=PROCEED; pr_ready_for_gate=true                        |
+| Gate   | NO              | PENDING  | gate_receipt.json does not exist (expected—auditor runs before gate receipt creation)                                  |
+| Deploy | NO              | N/A      | Not yet executed                                                                                                       |
+| Wisdom | NO              | N/A      | Not yet executed                                                                                                       |
 
 ### Receipt Coherence Checks
 
-| Receipt | run_id Match | flow Match | status ∈ {VERIFIED, UNVERIFIED, CANNOT_PROCEED} | recommended_action ∈ {PROCEED, RERUN, BOUNCE, FIX_ENV} | Notes |
-|---------|--------------|------------|------------------------------------------------|------------------------------------------------------|-------|
-| signal | PASS | PASS | VERIFIED ✓ | PROCEED ✓ | No issues |
-| plan | PASS | PASS | VERIFIED ✓ | PROCEED ✓ | No issues |
-| review | PASS | PASS | VERIFIED ✓ | PROCEED ✓ | No issues |
+| Receipt | run_id Match | flow Match | status ∈ {VERIFIED, UNVERIFIED, CANNOT_PROCEED} | recommended_action ∈ {PROCEED, RERUN, BOUNCE, FIX_ENV} | Notes     |
+| ------- | ------------ | ---------- | ----------------------------------------------- | ------------------------------------------------------ | --------- |
+| signal  | PASS         | PASS       | VERIFIED ✓                                      | PROCEED ✓                                              | No issues |
+| plan    | PASS         | PASS       | VERIFIED ✓                                      | PROCEED ✓                                              | No issues |
+| review  | PASS         | PASS       | VERIFIED ✓                                      | PROCEED ✓                                              | No issues |
 
 ### Index Coherence
 
@@ -83,13 +83,13 @@ concerns:
 
 Verified per local GitHub marker files:
 
-| Flow | Comment ID | Posted | Status | Notes |
-|------|-----------|--------|--------|-------|
-| Signal | (gh_comment_id.txt exists) | YES | POSTED | Flow 1 comment posted to issue #1 |
-| Plan | (gh_comment_id.txt exists) | YES | POSTED | Flow 2 comment posted to issue #1 |
-| Build | (gh_comment_id.txt exists) | YES | POSTED | Flow 3 comment posted to issue #1 |
-| Review | 3677836739 | YES | POSTED | Flow 4 comment visible on GitHub (ID verified) |
-| Gate | N/A | PENDING | Audit precedes gate report posting | Expected |
+| Flow   | Comment ID                 | Posted  | Status                             | Notes                                          |
+| ------ | -------------------------- | ------- | ---------------------------------- | ---------------------------------------------- |
+| Signal | (gh_comment_id.txt exists) | YES     | POSTED                             | Flow 1 comment posted to issue #1              |
+| Plan   | (gh_comment_id.txt exists) | YES     | POSTED                             | Flow 2 comment posted to issue #1              |
+| Build  | (gh_comment_id.txt exists) | YES     | POSTED                             | Flow 3 comment posted to issue #1              |
+| Review | 3677836739                 | YES     | POSTED                             | Flow 4 comment visible on GitHub (ID verified) |
+| Gate   | N/A                        | PENDING | Audit precedes gate report posting | Expected                                       |
 
 **GH Observability Summary:** OK (all prior flows have posted comments; review Flow 4 comment ID verified on GitHub issue #1)
 
@@ -106,25 +106,25 @@ Verified per local GitHub marker files:
 
 **Functional Requirements (REQ-###):**
 
-| REQ-ID | Title | AC Count | Notes |
-|--------|-------|----------|-------|
-| REQ-001 | Update Flow Count References in Public Documentation | 5 | HIGH priority; flow count alignment |
-| REQ-002 | Document Flow Overlap Semantics | 5 | HIGH priority; multi-path flow design |
-| REQ-003 | Document Flow 7 Purpose and Usage | 4 | HIGH priority; Flow 7 documentation |
-| REQ-004 | Update CLAUDE.md Flow Table | 3 | HIGH priority; authoritative source |
-| REQ-005 | Correct Test Count Documentation | 4 | MEDIUM priority; test coverage accuracy |
-| REQ-006 | Update Security Posture Documentation | 4 | MEDIUM priority; security claims evidence |
-| REQ-007 | Clarify Agent Color Coding Purpose | 4 | LOW priority; agent metadata documentation |
+| REQ-ID  | Title                                                | AC Count | Notes                                      |
+| ------- | ---------------------------------------------------- | -------- | ------------------------------------------ |
+| REQ-001 | Update Flow Count References in Public Documentation | 5        | HIGH priority; flow count alignment        |
+| REQ-002 | Document Flow Overlap Semantics                      | 5        | HIGH priority; multi-path flow design      |
+| REQ-003 | Document Flow 7 Purpose and Usage                    | 4        | HIGH priority; Flow 7 documentation        |
+| REQ-004 | Update CLAUDE.md Flow Table                          | 3        | HIGH priority; authoritative source        |
+| REQ-005 | Correct Test Count Documentation                     | 4        | MEDIUM priority; test coverage accuracy    |
+| REQ-006 | Update Security Posture Documentation                | 4        | MEDIUM priority; security claims evidence  |
+| REQ-007 | Clarify Agent Color Coding Purpose                   | 4        | LOW priority; agent metadata documentation |
 
 **Total REQ count:** 7 (no duplicates) ✓
 
 **Non-Functional Requirements (NFR-###):**
 
-| NFR-ID | Title | Verification Strategy | Notes |
-|--------|-------|----------------------|-------|
-| NFR-DOC-001 | Documentation Consistency | Automated grep search for "six flows" | Gate verification |
-| NFR-SEC-001 | Security Claims Evidence | Manual documentation review + code cross-reference | Gate verification |
-| NFR-TRACE-001 | Pack-Check Test Continuity | Execute pack-check validation | Gate verification |
+| NFR-ID        | Title                      | Verification Strategy                              | Notes             |
+| ------------- | -------------------------- | -------------------------------------------------- | ----------------- |
+| NFR-DOC-001   | Documentation Consistency  | Automated grep search for "six flows"              | Gate verification |
+| NFR-SEC-001   | Security Claims Evidence   | Manual documentation review + code cross-reference | Gate verification |
+| NFR-TRACE-001 | Pack-Check Test Continuity | Execute pack-check validation                      | Gate verification |
 
 **Total NFR count:** 3 (no duplicates) ✓
 
@@ -135,13 +135,13 @@ Verified per local GitHub marker files:
 
 **Scenario Inventory:**
 
-| Feature File | Scenario Count | REQ Tags Used | Notes |
-|--------------|-----------------|---------------|-------|
-| agent_color_coding.feature | 5 | @REQ-007 | 5 scenarios, all tagged with REQ-007 |
-| flow_count_alignment.feature | 8 | @REQ-001, @REQ-004 | 5 scenarios for REQ-001, 3 for REQ-004 |
-| flow_overlap_documentation.feature | 9 | @REQ-002, @REQ-003 | 5 scenarios for REQ-002, 4 for REQ-003 |
-| security_posture_documentation.feature | 5 | @REQ-006 | 5 scenarios, all tagged with REQ-006 |
-| test_count_documentation.feature | 5 | @REQ-005 | 5 scenarios, all tagged with REQ-005 |
+| Feature File                           | Scenario Count | REQ Tags Used      | Notes                                  |
+| -------------------------------------- | -------------- | ------------------ | -------------------------------------- |
+| agent_color_coding.feature             | 5              | @REQ-007           | 5 scenarios, all tagged with REQ-007   |
+| flow_count_alignment.feature           | 8              | @REQ-001, @REQ-004 | 5 scenarios for REQ-001, 3 for REQ-004 |
+| flow_overlap_documentation.feature     | 9              | @REQ-002, @REQ-003 | 5 scenarios for REQ-002, 4 for REQ-003 |
+| security_posture_documentation.feature | 5              | @REQ-006           | 5 scenarios, all tagged with REQ-006   |
+| test_count_documentation.feature       | 5              | @REQ-005           | 5 scenarios, all tagged with REQ-005   |
 
 **Total Scenario Count:** 32 ✓ (matches signal_receipt.json.counts.bdd_scenarios = 32)
 
@@ -149,15 +149,15 @@ Verified per local GitHub marker files:
 
 **Mapping:**
 
-| REQ-ID | Covered By | Scenario Count | Status |
-|--------|-----------|---|--------|
-| REQ-001 | flow_count_alignment.feature (@REQ-001 tags) | 5 | COVERED ✓ |
-| REQ-002 | flow_overlap_documentation.feature (@REQ-002 tags) | 5 | COVERED ✓ |
-| REQ-003 | flow_overlap_documentation.feature (@REQ-003 tags) | 4 | COVERED ✓ |
-| REQ-004 | flow_count_alignment.feature (@REQ-004 tags) | 3 | COVERED ✓ |
-| REQ-005 | test_count_documentation.feature (@REQ-005 tags) | 5 | COVERED ✓ |
-| REQ-006 | security_posture_documentation.feature (@REQ-006 tags) | 5 | COVERED ✓ |
-| REQ-007 | agent_color_coding.feature (@REQ-007 tags) | 5 | COVERED ✓ |
+| REQ-ID  | Covered By                                             | Scenario Count | Status    |
+| ------- | ------------------------------------------------------ | -------------- | --------- |
+| REQ-001 | flow_count_alignment.feature (@REQ-001 tags)           | 5              | COVERED ✓ |
+| REQ-002 | flow_overlap_documentation.feature (@REQ-002 tags)     | 5              | COVERED ✓ |
+| REQ-003 | flow_overlap_documentation.feature (@REQ-003 tags)     | 4              | COVERED ✓ |
+| REQ-004 | flow_count_alignment.feature (@REQ-004 tags)           | 3              | COVERED ✓ |
+| REQ-005 | test_count_documentation.feature (@REQ-005 tags)       | 5              | COVERED ✓ |
+| REQ-006 | security_posture_documentation.feature (@REQ-006 tags) | 5              | COVERED ✓ |
+| REQ-007 | agent_color_coding.feature (@REQ-007 tags)             | 5              | COVERED ✓ |
 
 **Coverage Summary:** All 7 functional requirements covered by ≥1 BDD scenario ✓
 
@@ -170,11 +170,11 @@ Verified per local GitHub marker files:
 
 **Non-Behavioral Coverage (NFR verification):**
 
-| NFR | Verification Strategy | When | Status |
-|-----|----------------------|------|--------|
-| NFR-DOC-001 | Automated grep search for "six flows" in public docs | Gate | Documented ✓ |
-| NFR-SEC-001 | Manual documentation review + code cross-reference | Gate | Documented ✓ |
-| NFR-TRACE-001 | Execute pack-check validation | Gate | Documented ✓ |
+| NFR           | Verification Strategy                                | When | Status       |
+| ------------- | ---------------------------------------------------- | ---- | ------------ |
+| NFR-DOC-001   | Automated grep search for "six flows" in public docs | Gate | Documented ✓ |
+| NFR-SEC-001   | Manual documentation review + code cross-reference   | Gate | Documented ✓ |
+| NFR-TRACE-001 | Execute pack-check validation                        | Gate | Documented ✓ |
 
 **Coverage Summary:** All 3 non-functional requirements have documented verification strategies ✓
 
@@ -207,22 +207,22 @@ All 7 REQs are referenced by ≥1 scenario in the feature files.
 
 **AC-001 through AC-007 (REQ-driven):** 32 ACs defined
 
-| AC Range | REQ Link | Source Column | Description |
-|----------|----------|----------------|-------------|
-| AC-001-001 to AC-001-005 | @REQ-001 | feature file:line | flow_count_alignment.feature refs (lines 11, 18, 24, 31, 38) |
-| AC-002-001 to AC-002-005 | @REQ-002 | feature file:line | flow_overlap_documentation.feature refs (lines 11, 17, 24, 31, 38) |
-| AC-003-001 to AC-003-004 | @REQ-003 | feature file:line | flow_overlap_documentation.feature refs (lines 45, 51, 57, 63) |
-| AC-004-001 to AC-004-003 | @REQ-004 | feature file:line | flow_count_alignment.feature refs (lines 43, 54, 62) |
-| AC-005-001 to AC-005-005 | @REQ-005 | feature file:line | test_count_documentation.feature refs (lines 11, 17, 24, 31, 37) |
+| AC Range                 | REQ Link | Source Column     | Description                                                            |
+| ------------------------ | -------- | ----------------- | ---------------------------------------------------------------------- |
+| AC-001-001 to AC-001-005 | @REQ-001 | feature file:line | flow_count_alignment.feature refs (lines 11, 18, 24, 31, 38)           |
+| AC-002-001 to AC-002-005 | @REQ-002 | feature file:line | flow_overlap_documentation.feature refs (lines 11, 17, 24, 31, 38)     |
+| AC-003-001 to AC-003-004 | @REQ-003 | feature file:line | flow_overlap_documentation.feature refs (lines 45, 51, 57, 63)         |
+| AC-004-001 to AC-004-003 | @REQ-004 | feature file:line | flow_count_alignment.feature refs (lines 43, 54, 62)                   |
+| AC-005-001 to AC-005-005 | @REQ-005 | feature file:line | test_count_documentation.feature refs (lines 11, 17, 24, 31, 37)       |
 | AC-006-001 to AC-006-005 | @REQ-006 | feature file:line | security_posture_documentation.feature refs (lines 11, 17, 24, 31, 38) |
-| AC-007-001 to AC-007-005 | @REQ-007 | feature file:line | agent_color_coding.feature refs (lines 11, 17, 23, 30, 36) |
+| AC-007-001 to AC-007-005 | @REQ-007 | feature file:line | agent_color_coding.feature refs (lines 11, 17, 23, 30, 36)             |
 
 **AC-NFR (NFR-driven):** 3 ACs defined
 
-| AC-ID | NFR Link | Source |
-|-------|----------|--------|
-| AC-NFR-DOC-001 | NFR-DOC-001 | verification_notes.md |
-| AC-NFR-SEC-001 | NFR-SEC-001 | verification_notes.md |
+| AC-ID            | NFR Link      | Source                |
+| ---------------- | ------------- | --------------------- |
+| AC-NFR-DOC-001   | NFR-DOC-001   | verification_notes.md |
+| AC-NFR-SEC-001   | NFR-SEC-001   | verification_notes.md |
 | AC-NFR-TRACE-001 | NFR-TRACE-001 | verification_notes.md |
 
 **Total AC Count:** 35 (32 REQ-driven + 3 NFR-driven)
@@ -230,6 +230,7 @@ All 7 REQs are referenced by ≥1 scenario in the feature files.
 ### AC <-> REQ Linking
 
 **Spot Check (REQ-001):**
+
 - AC-001-001: Source = "@REQ-001, flow_count_alignment.feature:11" ✓
 - AC-001-002: Source = "@REQ-001, flow_count_alignment.feature:18" ✓
 - AC-001-003: Source = "@REQ-001, flow_count_alignment.feature:24" ✓
@@ -241,6 +242,7 @@ All 7 REQs are referenced by ≥1 scenario in the feature files.
 ### AC <-> BDD Linking
 
 **Spot Check (AC-001-001):**
+
 - Feature file: flow_count_alignment.feature
 - Line 11: `@REQ-001 @smoke`
 - Scenario: "README references seven flows"
@@ -322,7 +324,7 @@ All REQ-driven ACs reference a feature file:line in Source column.
 
 ## Inventory (machine countable)
 
-### Traceability Checks (TRC_*)
+### Traceability Checks (TRC\_\*)
 
 - TRC_OK: run_meta.run_id matches directory name
 - TRC_OK: run_id_kind=LOCAL_ONLY is sane
@@ -339,7 +341,7 @@ All REQ-driven ACs reference a feature file:line in Source column.
 - TRC_OK: Flow comments posted for Signal, Plan, Build, Review (per gh_comment_id.txt files)
 - TRC_OK: Review Flow 4 comment ID verified (3677836739)
 
-### Spec Traceability Checks (TRS_*)
+### Spec Traceability Checks (TRS\_\*)
 
 - TRS_OK: requirements.md exists and has Machine Summary
 - TRS_OK: requirements_total=7 (REQ-001 through REQ-007)
@@ -353,7 +355,7 @@ All REQ-driven ACs reference a feature file:line in Source column.
 - TRS_OK: NFR-DOC-001, NFR-SEC-001, NFR-TRACE-001 documented with verification strategies
 - TRS_OK: no multi-REQ scenarios without justification
 
-### Acceptance Criteria Traceability Checks (TRS_AC_*)
+### Acceptance Criteria Traceability Checks (TRS*AC*\*)
 
 - TRS_AC_OK: ac_matrix.md exists
 - TRS_AC_OK: ac_total=35 (32 REQ-driven + 3 NFR-driven)

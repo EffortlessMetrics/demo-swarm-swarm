@@ -13,21 +13,24 @@
 
 ## Findings (redacted)
 
-| # | Type | File | Line | Action |
-|---|------|------|------|--------|
-| - | - | - | - | - |
+| #   | Type | File | Line | Action |
+| --- | ---- | ---- | ---- | ------ |
+| -   | -    | -    | -    | -      |
 
-*No secrets detected on publish surface.*
+_No secrets detected on publish surface._
 
 ## Actions Taken
 
 ### Redacted
+
 - None required
 
 ### Externalized
+
 - None required
 
 ### Unstaged
+
 - None required
 
 ## Safety Flags

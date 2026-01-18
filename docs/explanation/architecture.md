@@ -25,7 +25,7 @@ Model iteration is cheap relative to reviewer attention. So the goal is not "gen
 
 The pack treats generated code as draft until it's backed by evidence (tests, diffs, critiques). Receipts summarize what happened; the git log is the audit trail.
 
-We don't enforce hard coverage ratios or test-to-code formulas. Instead, critics reason about whether the test *strategy* matches the code's *risk surface*. See [trust-model.md](../reference/trust-model.md) for details.
+We don't enforce hard coverage ratios or test-to-code formulas. Instead, critics reason about whether the test _strategy_ matches the code's _risk surface_. See [trust-model.md](../reference/trust-model.md) for details.
 
 ### The Topology
 
@@ -45,7 +45,7 @@ This isolates high-churn iteration from human development and keeps `.runs/` art
 ## What DemoSwarm Is Not
 
 - Not an autonomous "ship to prod" agent
-- Not a replacement for code review—it produces the *input* to review
+- Not a replacement for code review—it produces the _input_ to review
 - Not a promise that code is "correct because AI said so"
 - Not a repo that merges into upstream automatically (by design)
 
@@ -61,8 +61,8 @@ Four patterns that separate DemoSwarm from standard LLM scripts.
 
 To optimize token usage and context windows:
 
-*   **Thin Flows:** The Orchestrator follows a simple checklist (`flow-3-build.md`). It spends tokens on *routing*, not *instruction*.
-*   **Thick Agents:** Complex logic lives inside the Agent prompts (`repo-operator.md`). They spin up fresh contexts, perform heavy analysis (diff checks, log parsing), and return small **Result Blocks**.
+- **Thin Flows:** The Orchestrator follows a simple checklist (`flow-3-build.md`). It spends tokens on _routing_, not _instruction_.
+- **Thick Agents:** Complex logic lives inside the Agent prompts (`repo-operator.md`). They spin up fresh contexts, perform heavy analysis (diff checks, log parsing), and return small **Result Blocks**.
 
 **Why this matters:** When logic lives in flows, the orchestrator must tokenize and reason about it every step. When logic lives in agents, a fresh sub-agent context handles the work cheaply. Put decisions in flows, put work in agents.
 
@@ -83,6 +83,7 @@ We use agents to "compress" reality into signal.
 ```
 
 Examples:
+
 - `test-executor`: 10K lines of console logs → `test_execution.md` (status + top failures)
 - `pr-feedback-harvester`: GitHub API firehose → `pr_feedback.md` + normalized `blockers[]`
 - `build-cleanup`: All flow artifacts → `build_receipt.json` (mechanical counts)
@@ -93,9 +94,9 @@ Examples:
 
 We don't use receipts as permission boundaries. We use them as **Logs**.
 
-*   The `*-cleanup` agents verify that the *logical outcome* (Test Report exists and is Green) is true.
-*   The `secrets-sanitizer` ensures the *package* is safe (Redacting logs).
-*   We accept divergence between the Receipt and the Commit to maintain velocity.
+- The `*-cleanup` agents verify that the _logical outcome_ (Test Report exists and is Green) is true.
+- The `secrets-sanitizer` ensures the _package_ is safe (Redacting logs).
+- We accept divergence between the Receipt and the Commit to maintain velocity.
 
 **State-First Verification:** The repo's current state (HEAD + working tree + staged diff) is the thing you're building and shipping. Receipts help investigate what happened—but they're not the primary verification mechanism once the repo has moved.
 
@@ -103,11 +104,11 @@ We don't use receipts as permission boundaries. We use them as **Logs**.
 
 We enforce safety via tools, not prompts.
 
-| Guardrail | Implementation |
-| :--- | :--- |
+| Guardrail               | Implementation                                                                                                                                                              |
+| :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Anti-Reward Hacking** | Critics + `standards-enforcer` detect test deletions/weakened assertions during microloops. If detected, route to rework immediately—don't let it reach Gate as a surprise. |
-| **Intent + Extras** | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict. |
-| **Fix-First Security** | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks publish when manual remediation is required—work never stops. |
+| **Intent + Extras**     | `repo-operator` detects ad-hoc human edits ("Extras") and stages them automatically. It assumes collaboration, not conflict.                                                |
+| **Fix-First Security**  | `secrets-sanitizer` runs as a pre-commit hook. It redacts in-place. It only blocks publish when manual remediation is required—work never stops.                            |
 
 ---
 
@@ -133,14 +134,15 @@ This constraint shapes every design decision. We maximize engineering output per
 
 The pack separates **where work happens** from **where gates engage**:
 
-| Plane | Posture | Purpose | Example |
-|-------|---------|---------|---------|
-| **Work Plane** | Default-allow | Explore, implement, iterate | Reading files, writing code, running tests |
-| **Publish Plane** | Gated | Control what leaves the workspace | Commit, push, GitHub post |
+| Plane             | Posture       | Purpose                           | Example                                    |
+| ----------------- | ------------- | --------------------------------- | ------------------------------------------ |
+| **Work Plane**    | Default-allow | Explore, implement, iterate       | Reading files, writing code, running tests |
+| **Publish Plane** | Gated         | Control what leaves the workspace | Commit, push, GitHub post                  |
 
 ### Work Plane (Default-Allow)
 
 Everything up to staging runs without friction:
+
 - Read any files, search code, run checks
 - Write tests early, iterate on code freely
 - Run tests locally, fix issues as discovered
@@ -150,6 +152,7 @@ Everything up to staging runs without friction:
 ### Publish Plane (Gated)
 
 Gates engage only when crossing the boundary:
+
 - **Commit**: secrets-sanitizer scans staged changes
 - **Push**: repo-operator checks for anomalies
 - **GitHub post**: content mode restricts what gets posted (not what's analyzed)
@@ -168,14 +171,15 @@ If a gate blocks, **keep working locally**. Gates constrain publishing, not thin
 
 Don't spin up a new agent (and pay the startup cost) just for bureaucratic purity.
 
-| Context Loaded | Owner | Combined Duties |
-|----------------|-------|-----------------|
-| `src/*.ts`, `ac_matrix.md` | `code-implementer` | Logic, docstrings, local refactor, debug removal |
-| `features/*.feature`, `tests/*.test.ts` | `test-author` | Test writing, fixture updates, spec feedback |
-| `git status`, `git diff` | `repo-operator` | Staging, extras detection, security guard, commit/push |
-| GitHub API JSON | `pr-feedback-harvester` | Harvesting, triage, summarizing |
+| Context Loaded                          | Owner                   | Combined Duties                                        |
+| --------------------------------------- | ----------------------- | ------------------------------------------------------ |
+| `src/*.ts`, `ac_matrix.md`              | `code-implementer`      | Logic, docstrings, local refactor, debug removal       |
+| `features/*.feature`, `tests/*.test.ts` | `test-author`           | Test writing, fixture updates, spec feedback           |
+| `git status`, `git diff`                | `repo-operator`         | Staging, extras detection, security guard, commit/push |
+| GitHub API JSON                         | `pr-feedback-harvester` | Harvesting, triage, summarizing                        |
 
 **Efficiency wins:**
+
 - We don't have a separate "Anomaly Detector" agent—repo-operator sees anomalies while staging
 - We don't fetch data in one agent and analyze in another—harvester ingests and emits signal in one pass
 
@@ -192,6 +196,7 @@ author → artifact → critic → critique → author → improved artifact →
 ### Microloops
 
 Writer ↔ Critic iteration until:
+
 - `status: VERIFIED`, OR
 - `can_further_iteration_help: no`
 
@@ -204,6 +209,7 @@ Default cadence: 2 passes (write → critique → write → critique → proceed
 The orchestrator tells agents **what to produce** (intent). Agents figure out **what paths to touch** (execution).
 
 When staging, expect "extras" (files changed outside the expected set):
+
 1. **Stage them** by default (assume the developer did them for a reason)
 2. **Record them** in `extra_changes.md`
 3. **Do not block** unless they trigger a hard guardrail (test deletion)
@@ -216,10 +222,10 @@ When staging, expect "extras" (files changed outside the expected set):
 
 Separate from Work/Publish planes, the pack has two **data planes**:
 
-| Plane | Artifacts | Purpose | Lifecycle |
-|-------|-----------|---------|-----------|
-| **Routing** | Prose handoffs, `Gate Result` (for boolean gates) | Routing decisions | Ephemeral (read once, route, discard) |
-| **Audit** | `*_receipt.json`, `*.md` artifacts, `index.json` | Record of what happened | Durable (committed to git) |
+| Plane       | Artifacts                                         | Purpose                 | Lifecycle                             |
+| ----------- | ------------------------------------------------- | ----------------------- | ------------------------------------- |
+| **Routing** | Prose handoffs, `Gate Result` (for boolean gates) | Routing decisions       | Ephemeral (read once, route, discard) |
+| **Audit**   | `*_receipt.json`, `*.md` artifacts, `index.json`  | Record of what happened | Durable (committed to git)            |
 
 **Crucial rule:** Orchestrators route on prose handoffs, not by parsing structured blocks or re-reading files.
 
@@ -237,21 +243,22 @@ Orchestrator
 
 ## The Seven Flows
 
-| Flow | Input | Output | Purpose |
-|------|-------|--------|---------|
-| 1. Signal | Raw request | Requirements, BDD, risks | Shape the work |
-| 2. Plan | Signal outputs | ADR, contracts, plans | Design the solution |
-| 3. Build | Plan outputs | Code, tests, reviews | Implement with tests |
-| 4. Review | Build outputs + Draft PR | PR feedback, worklist | Harvest PR feedback |
-| 5. Gate | Review outputs | Merge decision | Pre-merge verification |
-| 6. Deploy | Gate outputs | Verification, deployment | Release to mainline |
-| 7. Wisdom | All outputs | Learnings, regressions | Close feedback loops |
+| Flow      | Input                    | Output                   | Purpose                |
+| --------- | ------------------------ | ------------------------ | ---------------------- |
+| 1. Signal | Raw request              | Requirements, BDD, risks | Shape the work         |
+| 2. Plan   | Signal outputs           | ADR, contracts, plans    | Design the solution    |
+| 3. Build  | Plan outputs             | Code, tests, reviews     | Implement with tests   |
+| 4. Review | Build outputs + Draft PR | PR feedback, worklist    | Harvest PR feedback    |
+| 5. Gate   | Review outputs           | Merge decision           | Pre-merge verification |
+| 6. Deploy | Gate outputs             | Verification, deployment | Release to mainline    |
+| 7. Wisdom | All outputs              | Learnings, regressions   | Close feedback loops   |
 
 ### Flow 3: Build (The Construction Site)
 
 **Posture:** High velocity. Push early, fail fast.
 
 Key stations:
+
 1. **AC Microloops:** Test ↔ Critic ↔ Code ↔ Critic (per acceptance criterion)
 2. **Early PR Bootstrap:** After first vertical slice, push + create Draft PR to get bots spinning
 3. **Feedback Check:** Harvest PR feedback, route on blockers (CRITICAL only during Build)
@@ -263,6 +270,7 @@ Key stations:
 **Posture:** High rigor. Drain the worklist.
 
 Key stations:
+
 1. **Harvest:** Full PR feedback (all severities, including nits)
 2. **Worklist Loop:** Unbounded iteration until complete or context exhausted
 3. **Context Checkpoint:** If context > 80%, checkpoint and exit with `PARTIAL` status
@@ -271,6 +279,7 @@ Key stations:
 ### Flow 6: Deploy (Mainline Promotion)
 
 **Two-Axis Verdict:**
+
 - `deploy_action`: COMPLETED | SKIPPED | FAILED
 - `governance_enforcement`: VERIFIED | VERIFIED_RULESET | UNVERIFIED_PERMS | NOT_CONFIGURED | UNKNOWN
 
@@ -290,29 +299,29 @@ Flow 7 extracts learnings and proposes actions, but **does not auto-apply** them
 
 ## Agent Taxonomy
 
-| Family | Color | Behavior |
-|--------|-------|----------|
-| Shaping | Yellow | Early signal processing |
-| Spec | Purple | Write requirements/design |
-| Implementation | Green | Write code/tests/docs |
-| Critic | Red | Harsh review (never fixes) |
-| Verification | Blue | Audit and check |
-| Analytics | Orange | Analysis and learning |
-| Infra | Cyan | Git and run infrastructure |
-| Reporter | Pink | GitHub posting |
-| Cleanup | Various | Seal receipts, update index |
+| Family         | Color   | Behavior                    |
+| -------------- | ------- | --------------------------- |
+| Shaping        | Yellow  | Early signal processing     |
+| Spec           | Purple  | Write requirements/design   |
+| Implementation | Green   | Write code/tests/docs       |
+| Critic         | Red     | Harsh review (never fixes)  |
+| Verification   | Blue    | Audit and check             |
+| Analytics      | Orange  | Analysis and learning       |
+| Infra          | Cyan    | Git and run infrastructure  |
+| Reporter       | Pink    | GitHub posting              |
+| Cleanup        | Various | Seal receipts, update index |
 
 ### Key Agents and Their Contexts
 
-| Agent | Role | Context Strategy |
-|-------|------|------------------|
-| `repo-operator` | State Manager | Intent-based staging; embraces extras; guards test deletion |
-| `pr-feedback-harvester` | The Eyes | Compressor; ingests API JSON, outputs normalized blockers |
-| `secrets-sanitizer` | The Janitor | Fix-first pre-commit hook; redacts in-place; doesn't route |
-| `test-executor` | Verifier | Compressor; runs suite, outputs pass/fail summary |
-| `standards-enforcer` | Polisher | Runs formatters, strips debug artifacts |
-| `code-implementer` | Writer | Writes code + docstrings; focuses on correctness |
-| `*-cleanup` | Auditors | Verify logical outcomes; write SKIPPED stubs for missing steps |
+| Agent                   | Role          | Context Strategy                                               |
+| ----------------------- | ------------- | -------------------------------------------------------------- |
+| `repo-operator`         | State Manager | Intent-based staging; embraces extras; guards test deletion    |
+| `pr-feedback-harvester` | The Eyes      | Compressor; ingests API JSON, outputs normalized blockers      |
+| `secrets-sanitizer`     | The Janitor   | Fix-first pre-commit hook; redacts in-place; doesn't route     |
+| `test-executor`         | Verifier      | Compressor; runs suite, outputs pass/fail summary              |
+| `standards-enforcer`    | Polisher      | Runs formatters, strips debug artifacts                        |
+| `code-implementer`      | Writer        | Writes code + docstrings; focuses on correctness               |
+| `*-cleanup`             | Auditors      | Verify logical outcomes; write SKIPPED stubs for missing steps |
 
 ---
 
@@ -321,6 +330,7 @@ Flow 7 extracts learnings and proposes actions, but **does not auto-apply** them
 ### Two-Gate Rule
 
 GitHub operations require BOTH:
+
 1. `safe_to_publish: true` (secrets-sanitizer)
 2. `proceed_to_github_ops: true` (repo-operator)
 
@@ -329,6 +339,7 @@ GitHub operations require BOTH:
 ### Single-Pass Sanitization
 
 The sanitizer runs **once** before push:
+
 1. Scan staged files and allowlist artifacts
 2. Auto-fix: redact secrets in-place
 3. Do NOT trigger a reseal loop
@@ -338,6 +349,7 @@ The sanitizer runs **once** before push:
 ### Safe-Bail
 
 When publishing can't proceed safely:
+
 - `checkpoint_mode: local_only`
 - Never push
 - Flow completes UNVERIFIED with evidence
@@ -351,12 +363,14 @@ When publishing can't proceed safely:
 ### Why Rust over Bash
 
 We replaced ad-hoc bash pipelines with the `demoswarm` CLI because:
+
 - **The "Bash Tax":** `grep` behaves differently on GNU vs BSD. `sed` is a minefield.
 - **The Shim:** `.claude/scripts/demoswarm.sh` ensures consistent behavior across platforms.
 
 ### The Shim Pattern
 
 Agents **always** invoke via shims:
+
 ```bash
 # Never this:
 grep -c "pattern" file.md
@@ -369,14 +383,14 @@ bash .claude/scripts/demoswarm.sh count pattern --file "file.md" --regex "patter
 
 ## What Lives Where
 
-| Content | Location |
-|---------|----------|
-| Flow behavior | `.claude/commands/flow-*.md` |
-| Agent behavior | `.claude/agents/*.md` |
-| Shared invariants | `CLAUDE.md` |
-| Mechanical helpers | `.claude/skills/*/SKILL.md` |
-| Validation | `.claude/scripts/pack-check.sh` |
-| Run artifacts | `.runs/<run-id>/` (in target repo) |
+| Content            | Location                           |
+| ------------------ | ---------------------------------- |
+| Flow behavior      | `.claude/commands/flow-*.md`       |
+| Agent behavior     | `.claude/agents/*.md`              |
+| Shared invariants  | `CLAUDE.md`                        |
+| Mechanical helpers | `.claude/skills/*/SKILL.md`        |
+| Validation         | `.claude/scripts/pack-check.sh`    |
+| Run artifacts      | `.runs/<run-id>/` (in target repo) |
 
 ---
 
@@ -399,11 +413,11 @@ Seven invariants that prevent execution drift. Violating them creates subtle fai
 
 **Orchestrators route. Agents work. Cleanup agents audit.**
 
-| Role | Responsibility | Example |
-|------|----------------|---------|
-| **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite | "If gate_verdict is MERGE, proceed to merge ops" |
-| **Worker** (agent) | Do the work, update tracking artifacts, report honestly | `code-implementer`, `test-author`, `fixer` |
-| **Auditor** (cleanup agent) | Verify on-disk state matches evidence (tests/diffs), seal receipts | `build-cleanup`, `review-cleanup` |
+| Role                            | Responsibility                                                     | Example                                          |
+| ------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------ |
+| **Orchestrator** (flow session) | Call agents, route on Result blocks, manage TodoWrite              | "If gate_verdict is MERGE, proceed to merge ops" |
+| **Worker** (agent)              | Do the work, update tracking artifacts, report honestly            | `code-implementer`, `test-author`, `fixer`       |
+| **Auditor** (cleanup agent)     | Verify on-disk state matches evidence (tests/diffs), seal receipts | `build-cleanup`, `review-cleanup`                |
 
 Workers own their progress updates. Cleanup agents verify that claims match reality.
 
@@ -415,6 +429,7 @@ Workers own their progress updates. Cleanup agents verify that claims match real
 **Agents don't need "resume mode" flags.** They check disk state and determine what's left.
 
 When an agent starts:
+
 1. Check if its tracking artifact exists (e.g., `ac_status.json`, `review_worklist.json`)
 2. If yes: read it, determine what's PENDING, continue from there
 3. If no: initialize fresh
@@ -429,15 +444,16 @@ When an agent starts:
 **The worker who touches the code is the worker who updates the status.**
 
 Workers (`code-implementer`, `test-author`, `fixer`, `doc-writer`) update their tracking artifacts (`ac_status.json`, `review_worklist.json`) **before** reporting back to the orchestrator. This ensures:
+
 - The "save game" is atomic with the work
 - The orchestrator routes on Result blocks, not prose parsing
 - State survives context exhaustion
 
-| Artifact Type | Who Updates | Who Audits |
-|--------------|-------------|------------|
-| **Progress state** (`ac_status.json`, `review_worklist.json`) | Worker completing the work | Cleanup agent cross-checks against test results |
-| **Receipts** (`*_receipt.json`) | Cleanup agent (mechanical derivation) | Downstream flows |
-| **Index** (`.runs/index.json`) | Cleanup agents, `run-prep`, `gh-issue-manager` | — |
+| Artifact Type                                                 | Who Updates                                    | Who Audits                                      |
+| ------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| **Progress state** (`ac_status.json`, `review_worklist.json`) | Worker completing the work                     | Cleanup agent cross-checks against test results |
+| **Receipts** (`*_receipt.json`)                               | Cleanup agent (mechanical derivation)          | Downstream flows                                |
+| **Index** (`.runs/index.json`)                                | Cleanup agents, `run-prep`, `gh-issue-manager` | —                                               |
 
 **Key insight:** Cross-agent coordination happens through artifacts, not prose parsing. The cleanup agent reads `ac_status.json` and cross-references it with `test_execution.md`. If they disagree, it reports a **Forensic Mismatch** — status becomes UNVERIFIED.
 
@@ -446,6 +462,7 @@ Workers (`code-implementer`, `test-author`, `fixer`, `doc-writer`) update their 
 **"Green tests" is necessary but not sufficient for AC completion.**
 
 An AC is done when:
+
 1. `test-executor` returns Green for that AC's scope
 2. The orchestrator agrees there's nothing left worth fixing based on critic feedback
 
@@ -458,6 +475,7 @@ Even with green tests, if `code-critic` identifies a maintainability risk or cle
 **If an agent can't derive an answer, it investigates first, then defaults, then escalates.**
 
 The escalation ladder (in order):
+
 1. **Investigate locally:** Search code, tests, configs, prior runs, existing docs
 2. **Investigate remotely (if allowed):** GitHub issues/PRs, web search, library docs
 3. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
@@ -471,6 +489,7 @@ The escalation ladder (in order):
 **Infrastructure subtasks are the root of the dependency tree.**
 
 The `work-planner` designs dependency graphs where:
+
 - Infrastructure/migration subtasks (ST-000, etc.) have no dependencies
 - Logic subtasks that consume new state list infrastructure in `depends_on`
 - Critics validate that dependencies flow downward (foundations → walls → roof)
@@ -489,6 +508,7 @@ When an agent hits a logic gap, design contradiction, or implementation snag:
 4. **Resume.** Hand the micro-fix back to the implementer.
 
 **BOUNCE only when:**
+
 - The specialists agree the entire architecture is invalid
 - The fix requires upstream stakeholder decisions
 - Multiple flows worth of work needs revisiting
@@ -503,19 +523,22 @@ When an agent hits a logic gap, design contradiction, or implementation snag:
 
 This separation is about **token economics**: Orchestrator context is expensive, Agent execution is cheap.
 
-### Flows contain:
+### Flows contain
+
 - Station order (which agents to call, in what sequence)
 - Routing logic (which Result block to read, what to do on PROCEED/RERUN/BOUNCE)
 - Artifact expectations (what outputs to expect from each station)
 - Termination conditions (when the flow is complete)
 
-### Flows must NOT contain:
+### Flows must NOT contain
+
 - Shell snippets (beyond illustrative examples)
 - File path lists to stage/check (move to agents)
 - Parsing logic or computation
 - If/else chains for file existence checks
 
-### Agents contain:
+### Agents contain
+
 - All procedural work (read files, run commands, write outputs)
 - Intent-to-paths mapping (the agent figures out what to stage)
 - Validation logic (the agent checks if things are correct)

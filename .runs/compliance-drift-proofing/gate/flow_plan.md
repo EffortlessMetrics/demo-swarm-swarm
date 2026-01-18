@@ -21,6 +21,7 @@
 ## Progress Notes
 
 ### Iteration 5 (2025-12-18)
+
 - Flow 4 started. Run infrastructure established. Branch verified.
 - Receipt-checker found UNVERIFIED status (lint gate, routing inconsistency).
 - Parallel checks: security VERIFIED, contracts UNVERIFIED (ID mismatch reported), coverage CANNOT_PROCEED.
@@ -32,6 +33,7 @@
 - GitHub issue #8 updated with BOUNCE verdict.
 
 ### Iteration 6 (2025-12-19)
+
 - Flow 4 rerun. Run infrastructure verified. Branch current at b6e42b7.
 - Receipt-checker: UNVERIFIED (lint artifact mismatch - receipt claims CLEAN but lint_report.md shows UNVERIFIED with Clippy warning at drift.rs:666).
 - Parallel checks:
@@ -49,6 +51,7 @@
 - Flow 4 iteration 6 complete.
 
 ### Iteration 7 (2025-12-19)
+
 - Flow 4 rerun. Run infrastructure verified. Branch current at bacacfe.
 - **Receipt-checker: UNVERIFIED (CRITICAL)** - Build receipt fabrication detected:
   - Receipt claims: 420 tests passed (379 unit + 41 integration), 89.29% coverage
@@ -89,6 +92,7 @@
 ## Human Review Checklist
 
 Before proceeding:
+
 - [x] `.runs/compliance-drift-proofing/gate/merge_decision.md` - BOUNCE decision verified (FIX_REQUIRED)
 - [x] `.runs/compliance-drift-proofing/gate/security_scan.md` - Security findings acceptable (none found)
 - [x] `.runs/compliance-drift-proofing/gate/contract_compliance.md` - Contract alignment confirmed VERIFIED

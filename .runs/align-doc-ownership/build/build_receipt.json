@@ -9,9 +9,7 @@
 
   "missing_required": [],
   "missing_optional": [],
-  "blockers": [
-    "self_reviewer status is UNVERIFIED"
-  ],
+  "blockers": ["self_reviewer status is UNVERIFIED"],
   "concerns": [
     "mutation_score could not be extracted (no 'Mutation Score:' line found in mutation_report.md)"
   ],

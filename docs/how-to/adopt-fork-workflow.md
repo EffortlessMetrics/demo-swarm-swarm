@@ -124,6 +124,7 @@ git push origin main
 ```
 
 The flow will:
+
 - Create `.runs/<run-id>/signal/` artifacts
 - Commit to `run/<run-id>` branch
 - Push to fork (if gates pass)
@@ -230,9 +231,10 @@ Receipt: VERIFIED
 Issue: #456"
 ```
 
-2. Request review, merge when approved
+1. Request review, merge when approved
 
 **Benefits:**
+
 - Native GitHub PR review workflow
 - CI runs against origin
 - Code appears in origin with clean attribution
@@ -259,14 +261,14 @@ Find commit SHAs in `.runs/<run-id>/build/build_receipt.json` or Git log.
 
 ### What to export vs. what to keep
 
-| Content | Export? | Notes |
-|---------|---------|-------|
-| Code changes | Yes | The implementation |
-| Test changes | Yes | Tests validating the implementation |
-| `.runs/` artifacts | No | Keep in fork only |
-| `run_meta.json` | No | Swarm-internal metadata |
-| Receipts | No | Audit trail stays in fork |
-| `.claude/` pack | Maybe | If origin wants swarm capability too |
+| Content            | Export? | Notes                                |
+| ------------------ | ------- | ------------------------------------ |
+| Code changes       | Yes     | The implementation                   |
+| Test changes       | Yes     | Tests validating the implementation  |
+| `.runs/` artifacts | No      | Keep in fork only                    |
+| `run_meta.json`    | No      | Swarm-internal metadata              |
+| Receipts           | No      | Audit trail stays in fork            |
+| `.claude/` pack    | Maybe   | If origin wants swarm capability too |
 
 **Traceability:** Include swarm run reference in commit messages:
 
@@ -299,21 +301,23 @@ Gate verdict = MERGE?
 
 ## Fork vs. clone comparison
 
-| Aspect | Fork Workflow | Clone Workflow |
-|--------|---------------|----------------|
-| Setup | Fork on GitHub, clone locally | Clone origin, no fork |
-| GitHub integration | Native fork PRs to origin | Manual remote setup for PRs |
-| Visibility | Fork is a GitHub repo (team visible) | Clone is local-only unless pushed |
-| Export | GitHub PR (easy) | Cherry-pick or manual PR (harder) |
-| Isolation | Perfect (separate GitHub repo) | Good (separate clone) |
-| Recommended for | Team workflows, GitHub-heavy projects | Solo workflows, local-first development |
+| Aspect             | Fork Workflow                         | Clone Workflow                          |
+| ------------------ | ------------------------------------- | --------------------------------------- |
+| Setup              | Fork on GitHub, clone locally         | Clone origin, no fork                   |
+| GitHub integration | Native fork PRs to origin             | Manual remote setup for PRs             |
+| Visibility         | Fork is a GitHub repo (team visible)  | Clone is local-only unless pushed       |
+| Export             | GitHub PR (easy)                      | Cherry-pick or manual PR (harder)       |
+| Isolation          | Perfect (separate GitHub repo)        | Good (separate clone)                   |
+| Recommended for    | Team workflows, GitHub-heavy projects | Solo workflows, local-first development |
 
 Choose fork when:
+
 - You want GitHub PR integration
 - Team needs visibility into swarm runs
 - You're comfortable with GitHub fork mechanics
 
 Choose clone when:
+
 - You prefer local-only simplicity
 - No need for GitHub PR workflow
 - You're already managing multiple remotes
@@ -353,6 +357,7 @@ If using org-scoped fork, ensure you have write access to `your-org/my-project-s
 CI failures in fork-to-origin PRs are expected on first attempt. The swarm runs its tests in the fork environment. Origin CI may have different requirements.
 
 **Fix:**
+
 1. Review CI failures in origin PR
 2. Make fixes in fork's `run/<run-id>` branch
 3. Push updates to fork
@@ -390,15 +395,18 @@ my-project                    # Origin
 ```
 
 Benefits:
+
 - Personal experimentation doesn't affect team
 - Each developer controls their swarm runs
 - Can still PR from personal fork to origin
 
 Tradeoffs:
+
 - More repos to manage
 - Less visibility into each other's work
 
 Use this when:
+
 - Team is large (>3 people using swarm)
 - Developers work on separate features
 - You want personal swarm sandboxes

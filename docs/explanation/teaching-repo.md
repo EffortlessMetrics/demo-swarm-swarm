@@ -9,6 +9,7 @@
 This is not just a working system. It is a **teaching system**. The repo teaches the mental model while you use it.
 
 Every layer reinforces the concepts:
+
 - CLAUDE.md provides the contract
 - Agent prompts are executable job descriptions
 - Docs explain the why behind the what
@@ -23,6 +24,7 @@ The architecture is intentionally **self-documenting and self-teaching**. You le
 ### Layer 1: CLAUDE.md (The Contract)
 
 CLAUDE.md is attached to every agent thread. It contains:
+
 - Core philosophy (one paragraph)
 - Key principles (bulleted)
 - Flow overview (table)
@@ -35,6 +37,7 @@ When you run any flow, CLAUDE.md is already loaded. You never need to explain "w
 ### Layer 2: Agent Prompts (Executable Examples)
 
 Each prompt in `.claude/agents/` demonstrates:
+
 - Single responsibility in action
 - Handoff structure
 - Graceful outcome handling
@@ -46,13 +49,17 @@ The prompts are not abstract specifications. They are working code. When you rea
 
 ```markdown
 # From code-critic.md (example structure)
+
 ## Role
+
 You are code-critic. You find issues. You do not fix them.
 
 ## Output
+
 Write findings to critique file. Report summary in handoff.
 
 ## Handoff
+
 What I found: <issues by severity>
 Recommendation: Route to fixer if CRITICAL/MAJOR items exist
 ```
@@ -62,6 +69,7 @@ The prompt teaches by being exactly what it describes.
 ### Layer 3: Flow Commands (Orchestration Examples)
 
 Each flow in `.claude/commands/` demonstrates:
+
 - Station sequencing
 - Microloop iteration
 - Routing decisions
@@ -70,6 +78,7 @@ Each flow in `.claude/commands/` demonstrates:
 **Teaching function:** Shows how agents compose into workflows.
 
 When you read `flow-3-build.md`, you see:
+
 - Which agents get called and in what order
 - What artifacts each station produces
 - How the orchestrator routes on outcomes
@@ -80,6 +89,7 @@ The flow is both documentation and implementation. Running the flow teaches the 
 ### Layer 4: Explanation Docs (The Why)
 
 `docs/explanation/` provides:
+
 - Principles with rationale
 - Patterns with context
 - Physics with examples
@@ -92,6 +102,7 @@ When you encounter something unexpected (why do critics never fix? why are there
 ### Layer 5: How-To Docs (The Practice)
 
 `docs/how-to/` provides:
+
 - Step-by-step guides
 - Common tasks
 - Troubleshooting
@@ -104,6 +115,7 @@ When you need to do something specific (add a new agent, adapt for a different s
 ### Layer 6: Reference Docs (The Details)
 
 `docs/reference/` provides:
+
 - Schemas and contracts
 - CLI commands
 - Agent index
@@ -144,6 +156,7 @@ Each interaction reinforces the mental model. You learn by doing, and the system
 ### Consistency Across Layers
 
 The same concepts appear at every layer, reinforcing each other:
+
 - CLAUDE.md says X
 - Agent prompts do X
 - Docs explain X
@@ -161,14 +174,15 @@ Updates must propagate to all layers. If you change how handoffs work, you updat
 
 The distinction between "docs" and "code" is intentionally blurred:
 
-| Artifact | Documentation? | Executable? |
-|----------|----------------|-------------|
-| Agent prompts | Yes | Yes |
-| Flow commands | Yes | Yes |
-| CLAUDE.md | Yes | Yes (shapes all behavior) |
-| Skills | Yes | Yes |
+| Artifact      | Documentation? | Executable?               |
+| ------------- | -------------- | ------------------------- |
+| Agent prompts | Yes            | Yes                       |
+| Flow commands | Yes            | Yes                       |
+| CLAUDE.md     | Yes            | Yes (shapes all behavior) |
+| Skills        | Yes            | Yes                       |
 
 This means:
+
 - Outdated docs fail visibly (the flow breaks)
 - Examples are always runnable (they ARE the implementation)
 - You can't have working code with wrong documentation
@@ -177,11 +191,11 @@ This means:
 
 Information is layered by depth:
 
-| If you need... | Read... | Depth |
-|----------------|---------|-------|
-| The basics | CLAUDE.md | Summary |
-| The concepts | `docs/explanation/` | Intermediate |
-| The specifications | `docs/reference/` | Full detail |
+| If you need...     | Read...             | Depth        |
+| ------------------ | ------------------- | ------------ |
+| The basics         | CLAUDE.md           | Summary      |
+| The concepts       | `docs/explanation/` | Intermediate |
+| The specifications | `docs/reference/`   | Full detail  |
 
 You start simple and add depth when you need it. The system does not force you to understand everything before you can do anything.
 
@@ -189,11 +203,11 @@ You start simple and add depth when you need it. The system does not force you t
 
 The system teaches by execution, not just explanation:
 
-| Instead of... | The system... |
-|---------------|---------------|
-| Explain microloops | Runs them so you see iteration |
-| Describe handoffs | Produces them so you see the format |
-| Document receipts | Generates them so you see the structure |
+| Instead of...      | The system...                           |
+| ------------------ | --------------------------------------- |
+| Explain microloops | Runs them so you see iteration          |
+| Describe handoffs  | Produces them so you see the format     |
+| Document receipts  | Generates them so you see the structure |
 
 Reading about receipts is helpful. Seeing the receipts the system generates is more helpful. Generating receipts yourself (by running flows) is most helpful.
 
@@ -204,6 +218,7 @@ Reading about receipts is helpful. Seeing the receipts the system generates is m
 ### Faster Onboarding
 
 New users learn by using:
+
 1. Run a flow
 2. See the patterns
 3. Read the docs when curious
@@ -214,6 +229,7 @@ There is no "study the docs first, then try using it" phase. The system is desig
 ### Reduced Drift
 
 When docs are executable, they cannot drift silently:
+
 - Outdated docs fail visibly (the flow does not work)
 - Pack-check catches mismatches (agent references, flow names)
 - The system stays coherent (or it breaks obviously)
@@ -223,6 +239,7 @@ Traditional documentation drifts from implementation because they live in separa
 ### Knowledge Transfer
 
 When someone leaves the project:
+
 - The system documents itself
 - Patterns are explicit in the prompts
 - Mental model is encoded in CLAUDE.md
@@ -235,11 +252,13 @@ The knowledge lives in the repo, not in people's heads.
 ## The Meta-Insight
 
 Most repos have:
+
 - Code that works
 - Docs that explain
 - Disconnect between them
 
 This repo has:
+
 - Prompts that are docs
 - Flows that are examples
 - Docs that match behavior
@@ -272,6 +291,7 @@ Do → Observe → Understand → Do again with more context
 ### For Pack Maintainers
 
 Every change should teach correctly:
+
 - Update CLAUDE.md when contracts change
 - Update agent prompts when behavior changes
 - Update explanation docs when rationale changes
@@ -282,6 +302,7 @@ If a change only updates the implementation without updating the teaching layer,
 ### For Pack Designers
 
 If you create a new pack, consider:
+
 - Can someone learn by using it?
 - Do the prompts demonstrate the patterns?
 - Is there a graduated path from summary to detail?

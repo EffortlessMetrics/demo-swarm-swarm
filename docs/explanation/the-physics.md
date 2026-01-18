@@ -38,11 +38,11 @@ When sources conflict, trust flows downward:
 
 ### What It Implies
 
-| Constraint | Why |
-|------------|-----|
+| Constraint                    | Why                                            |
+| ----------------------------- | ---------------------------------------------- |
 | Cite tool outputs in receipts | "15 passed, 0 failed" from the actual test run |
-| Claims require evidence | Point to the artifact, not just assert |
-| "Not measured" is acceptable | Better than false certainty |
+| Claims require evidence       | Point to the artifact, not just assert         |
+| "Not measured" is acceptable  | Better than false certainty                    |
 
 ### Example
 
@@ -70,14 +70,14 @@ Schema Gravity isn't just compilers and linters. It's the swarm's design. Runnin
 
 ### The Gravity Sources
 
-| Source | Pull |
-|--------|------|
-| **Flow 1 requires BDD** | Code must satisfy scenarios or gate fails |
-| **Flow 2 requires ADR** | Implementation must align with recorded decisions |
-| **Flow 3 requires receipts** | Must produce evidence with specific fields |
-| **Critics require findings format** | Issues become trackable worklist items |
-| **Gates require evidence** | If it wasn't measured, it didn't happen |
-| **Compiler/linter** | Code must actually work in the existing codebase |
+| Source                              | Pull                                              |
+| ----------------------------------- | ------------------------------------------------- |
+| **Flow 1 requires BDD**             | Code must satisfy scenarios or gate fails         |
+| **Flow 2 requires ADR**             | Implementation must align with recorded decisions |
+| **Flow 3 requires receipts**        | Must produce evidence with specific fields        |
+| **Critics require findings format** | Issues become trackable worklist items            |
+| **Gates require evidence**          | If it wasn't measured, it didn't happen           |
+| **Compiler/linter**                 | Code must actually work in the existing codebase  |
 
 ### How It Works
 
@@ -112,10 +112,10 @@ Agents operate in a hermetic `.runs/<run-id>/` directory — the Shadow Fork. In
 
 ### The Separation
 
-| Zone | Posture | What Happens |
-|------|---------|--------------|
-| **Inside sandbox** | Default-allow | Read any file, write any code, run any test, iterate freely |
-| **At publish boundary** | Gated | Stage, sanitize, persist (only if clean) |
+| Zone                    | Posture       | What Happens                                                |
+| ----------------------- | ------------- | ----------------------------------------------------------- |
+| **Inside sandbox**      | Default-allow | Read any file, write any code, run any test, iterate freely |
+| **At publish boundary** | Gated         | Stage, sanitize, persist (only if clean)                    |
 
 ### The Boundary Order
 
@@ -129,11 +129,11 @@ This order is load-bearing. Scanning an unstaged surface creates a TOCTOU gap.
 
 ### What It Implies
 
-| Constraint | Why |
-|------------|-----|
-| No permission checks inside the sandbox | Permission theater kills throughput |
+| Constraint                                 | Why                                                 |
+| ------------------------------------------ | --------------------------------------------------- |
+| No permission checks inside the sandbox    | Permission theater kills throughput                 |
 | Publish boundaries are the only real gates | Commit, push, GitHub post — that's where risk lives |
-| Accept iteration messiness | The gate catches problems, not mid-flow checks |
+| Accept iteration messiness                 | The gate catches problems, not mid-flow checks      |
 
 ---
 
@@ -145,10 +145,10 @@ Don't make humans read more. Make the system prove more.
 
 ### The Economics
 
-| Resource | Reality |
-|----------|---------|
-| Tokens | Fractions of a cent. 60+ tokens/second. Effectively free. |
-| Attention | Senior dev hours. Most scarce resource. |
+| Resource  | Reality                                                   |
+| --------- | --------------------------------------------------------- |
+| Tokens    | Fractions of a cent. 60+ tokens/second. Effectively free. |
+| Attention | Senior dev hours. Most scarce resource.                   |
 
 **Verification Arbitrage:** Burn infinite cheap compute to buy back expensive human attention.
 
@@ -165,21 +165,21 @@ New: Generate many → Pick best → Review evidence summaries → Machine prove
 
 Reviewing 100,000 lines line-by-line is impossible. We review telemetry:
 
-| Sensor | Threshold |
-|--------|-----------|
-| Intent | 100% BDD scenario coverage |
-| Integrity | 95% mutation score |
-| Health | Complexity delta within budget |
+| Sensor    | Threshold                      |
+| --------- | ------------------------------ |
+| Intent    | 100% BDD scenario coverage     |
+| Integrity | 95% mutation score             |
+| Health    | Complexity delta within budget |
 
 If sensors are green and intent (ADR) is valid, we merge. The code is treated as compiled binary.
 
 ### What It Implies
 
-| Constraint | Why |
-|------------|-----|
-| Review cost is O(1), not O(n) | A 2000-line PR takes the same review time as 200 lines if evidence is good |
-| The PR cockpit is the product | Most reviewers read only the description |
-| Verification loops are investments | More critic passes, mutation testing — cheap machine time buys confidence |
+| Constraint                         | Why                                                                        |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| Review cost is O(1), not O(n)      | A 2000-line PR takes the same review time as 200 lines if evidence is good |
+| The PR cockpit is the product      | Most reviewers read only the description                                   |
+| Verification loops are investments | More critic passes, mutation testing — cheap machine time buys confidence  |
 
 ---
 
@@ -193,18 +193,18 @@ We don't train models to be "honest." We build systems where dishonesty is impos
 
 The **Author** (who wants to finish) is pitted against the **Critic** (who wants to find bugs). The system doesn't proceed until the Critic runs out of ammunition.
 
-| Role | Incentive | Success |
-|------|-----------|---------|
-| Author | Complete the task | "I produced working output" |
-| Critic | Find problems | "I caught real issues" |
-| Gate | Make correct decision | "I made the right call on evidence" |
+| Role   | Incentive             | Success                             |
+| ------ | --------------------- | ----------------------------------- |
+| Author | Complete the task     | "I produced working output"         |
+| Critic | Find problems         | "I caught real issues"              |
+| Gate   | Make correct decision | "I made the right call on evidence" |
 
 ### What It Implies
 
-| Constraint | Why |
-|------------|-----|
-| Critics never fix | Conflict of interest. If you fix your own findings, you stop finding. |
-| Worklists are drainable | Finite, specific items. Each has file:line and verification condition. |
+| Constraint               | Why                                                                      |
+| ------------------------ | ------------------------------------------------------------------------ |
+| Critics never fix        | Conflict of interest. If you fix your own findings, you stop finding.    |
+| Worklists are drainable  | Finite, specific items. Each has file:line and verification condition.   |
 | "Green CI" is one signal | CI passing means tests ran. Mutation testing proves tests actually test. |
 
 ### The Microloop
@@ -214,6 +214,7 @@ Author → Critic → Fix → Repeat until Critic satisfied
 ```
 
 Don't stop when:
+
 - Author claims done (sycophancy trap)
 - Iteration count reached (evidence matters, not counts)
 
@@ -239,15 +240,15 @@ The savings compound. Over a full run with dozens of agent calls, scoped context
 
 ### The Mechanism
 
-Every atomic task spins up a fresh context. The Curator generates a manifest that hydrates the worker with *only* the 3-5 files relevant to the task.
+Every atomic task spins up a fresh context. The Curator generates a manifest that hydrates the worker with _only_ the 3-5 files relevant to the task.
 
 ### What It Implies
 
-| Constraint | Why |
-|------------|-----|
-| Artifacts must be self-contained | So you can load just what you need |
-| Handoffs should be tight | Pass relevant files and summary, not "read the whole thread" |
-| Disk is source of truth | Files are cheaper to re-read than context is to carry |
+| Constraint                       | Why                                                          |
+| -------------------------------- | ------------------------------------------------------------ |
+| Artifacts must be self-contained | So you can load just what you need                           |
+| Handoffs should be tight         | Pass relevant files and summary, not "read the whole thread" |
+| Disk is source of truth          | Files are cheaper to re-read than context is to carry        |
 
 **Note:** The quality impact of irrelevant upthread context exists but isn't catastrophic. The cost impact is significant and compounds.
 
@@ -255,14 +256,14 @@ Every atomic task spins up a fresh context. The Curator generates a manifest tha
 
 ## When Physics Are Violated
 
-| Physics Violated | What Breaks |
-|------------------|-------------|
-| Mechanical Truth | Process confabulation, false completions, phantom confidence |
-| Schema Gravity | Drift, scope creep, code that "looks right" but doesn't compile |
-| Shadow Fork | Permission theater, velocity collapse, unsafe autonomy |
-| Throughput Inversion | Review bottleneck, O(n) human cost, unsustainable scaling |
-| Adversarial Pressure | Sycophantic completion, hollow tests, unverified claims |
-| Scoped Context | Cost explosion, paying for irrelevant tokens |
+| Physics Violated     | What Breaks                                                     |
+| -------------------- | --------------------------------------------------------------- |
+| Mechanical Truth     | Process confabulation, false completions, phantom confidence    |
+| Schema Gravity       | Drift, scope creep, code that "looks right" but doesn't compile |
+| Shadow Fork          | Permission theater, velocity collapse, unsafe autonomy          |
+| Throughput Inversion | Review bottleneck, O(n) human cost, unsustainable scaling       |
+| Adversarial Pressure | Sycophantic completion, hollow tests, unverified claims         |
+| Scoped Context       | Cost explosion, paying for irrelevant tokens                    |
 
 ---
 
@@ -273,6 +274,7 @@ These physics answer: **How do you make LLM-generated code trustworthy?**
 Not by hoping. Not by prompting harder. Not by asking "are you sure?"
 
 By architecture:
+
 1. Force mechanical verification (kernel returns integers)
 2. Pull output toward schemas (gravity constrains drift)
 3. Contain blast radius (safe autonomy inside, gates at boundaries)

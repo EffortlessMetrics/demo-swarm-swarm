@@ -6,9 +6,10 @@
 
 ## The Core Principle
 
-**"Blocked" almost never means "stop." It means "route to the agent that handles this."**
+"Blocked" almost never means "stop." It means "route to the agent that handles this."
 
 Agents do not escalate to humans mid-flow. They:
+
 1. Try to resolve locally
 2. If they cannot, route to another agent
 3. Document the situation
@@ -22,35 +23,35 @@ True halts are rare. Most "blocks" are just routing decisions.
 
 When an agent encounters something outside its scope:
 
-| Do | Do Not |
-|----|--------|
-| Finish what you can | Stop at the first obstacle |
-| Route to the right specialist | Guess outside your domain |
-| Queue questions, continue with assumptions | Escalate mid-flow |
-| Document what happened and what you assumed | Leave gaps unexplained |
+| Do                                          | Do Not                     |
+| ------------------------------------------- | -------------------------- |
+| Finish what you can                         | Stop at the first obstacle |
+| Route to the right specialist               | Guess outside your domain  |
+| Queue questions, continue with assumptions  | Escalate mid-flow          |
+| Document what happened and what you assumed | Leave gaps unexplained     |
 
 ---
 
 ## Common Routing Patterns
 
-| When This Happens | Route To | Why |
-|-------------------|----------|-----|
-| Lint/format failures | `auto-linter` (skill) | Mechanical fix |
-| Test failures | `test-author` or `fixer` | Test needs update or code needs fix |
-| Type errors | `fixer` | Mechanical fix |
-| Missing dependency | `code-implementer` | Implementation gap |
-| Unclear requirement | `clarifier` (queues question) | Needs human input eventually |
-| Design ambiguity | `design-optioneer` | Generate options |
-| Security concern | `risk-analyst` | Assess and document |
-| Git operation needed | `repo-operator` | Sole owner of git |
-| Merge conflict | `merge-reconciler` | Resolve conflicts, then back to repo-operator |
-| Critique finding | `fixer` | Address the issue |
-| Contract mismatch | `interface-designer` or `fixer` | Design or implementation gap |
-| Secrets detected | `secrets-sanitizer` | Must clean before publish |
-| Missing test coverage | `test-author` | Write the tests |
-| Documentation gap | `doc-writer` | Update docs |
-| BDD scenario issue | `bdd-author` | Revise scenarios |
-| Requirements unclear | `requirements-author` or `clarifier` | Revise or clarify |
+| When This Happens     | Route To                             | Why                                           |
+| --------------------- | ------------------------------------ | --------------------------------------------- |
+| Lint/format failures  | `auto-linter` (skill)                | Mechanical fix                                |
+| Test failures         | `test-author` or `fixer`             | Test needs update or code needs fix           |
+| Type errors           | `fixer`                              | Mechanical fix                                |
+| Missing dependency    | `code-implementer`                   | Implementation gap                            |
+| Unclear requirement   | `clarifier` (queues question)        | Needs human input eventually                  |
+| Design ambiguity      | `design-optioneer`                   | Generate options                              |
+| Security concern      | `risk-analyst`                       | Assess and document                           |
+| Git operation needed  | `repo-operator`                      | Sole owner of git                             |
+| Merge conflict        | `merge-reconciler`                   | Resolve conflicts, then back to repo-operator |
+| Critique finding      | `fixer`                              | Address the issue                             |
+| Contract mismatch     | `interface-designer` or `fixer`      | Design or implementation gap                  |
+| Secrets detected      | `secrets-sanitizer`                  | Must clean before publish                     |
+| Missing test coverage | `test-author`                        | Write the tests                               |
+| Documentation gap     | `doc-writer`                         | Update docs                                   |
+| BDD scenario issue    | `bdd-author`                         | Revise scenarios                              |
+| Requirements unclear  | `requirements-author` or `clarifier` | Revise or clarify                             |
 
 ---
 
@@ -60,72 +61,72 @@ When an agent encounters something outside its scope:
 
 Critics **never fix**. They find issues and report them.
 
-| Agent | Routes findings to | Routes structural issues to |
-|-------|-------------------|----------------------------|
-| `code-critic` | `fixer` | `code-implementer` (if redesign needed) |
-| `test-critic` | `test-author` | `test-strategist` (if test plan wrong) |
-| `requirements-critic` | `requirements-author` | `problem-framer` (if scope wrong) |
-| `bdd-critic` | `bdd-author` | `requirements-author` (if reqs wrong) |
-| `design-critic` | `design-optioneer` or `adr-author` | Back to Flow 2 start |
-| `contract-critic` | `interface-designer` | Back to Flow 2 |
-| `doc-critic` | `doc-writer` | `code-implementer` (if behavior wrong) |
+| Agent                 | Routes findings to                 | Routes structural issues to             |
+| --------------------- | ---------------------------------- | --------------------------------------- |
+| `code-critic`         | `fixer`                            | `code-implementer` (if redesign needed) |
+| `test-critic`         | `test-author`                      | `test-strategist` (if test plan wrong)  |
+| `requirements-critic` | `requirements-author`              | `problem-framer` (if scope wrong)       |
+| `bdd-critic`          | `bdd-author`                       | `requirements-author` (if reqs wrong)   |
+| `design-critic`       | `design-optioneer` or `adr-author` | Back to Flow 2 start                    |
+| `contract-critic`     | `interface-designer`               | Back to Flow 2                          |
+| `doc-critic`          | `doc-writer`                       | `code-implementer` (if behavior wrong)  |
 
 ### Authors (Purple/Green)
 
 Authors **create artifacts** in their domain.
 
-| Agent | Routes implementation needs to | Routes ambiguity to |
-|-------|-------------------------------|---------------------|
-| `requirements-author` | `bdd-author` (next step) | `clarifier` |
-| `bdd-author` | `test-author` (Flow 3) | `clarifier` |
-| `test-author` | `code-implementer` (if code needs changing) | `clarifier` |
-| `design-optioneer` | `adr-author` (next step) | `clarifier` |
-| `interface-designer` | `code-implementer` (Flow 3) | `design-optioneer` |
+| Agent                 | Routes implementation needs to              | Routes ambiguity to |
+| --------------------- | ------------------------------------------- | ------------------- |
+| `requirements-author` | `bdd-author` (next step)                    | `clarifier`         |
+| `bdd-author`          | `test-author` (Flow 3)                      | `clarifier`         |
+| `test-author`         | `code-implementer` (if code needs changing) | `clarifier`         |
+| `design-optioneer`    | `adr-author` (next step)                    | `clarifier`         |
+| `interface-designer`  | `code-implementer` (Flow 3)                 | `design-optioneer`  |
 
 ### Implementers (Green)
 
 Implementers **write and modify code**.
 
-| Agent | Routes test needs to | Routes git operations to | Routes critiques to |
-|-------|---------------------|-------------------------|---------------------|
-| `code-implementer` | `test-author` | `repo-operator` | Self (fix) or `fixer` |
-| `fixer` | `test-author` | `repo-operator` | Self |
-| `test-author` | Self | `repo-operator` | Self |
-| `doc-writer` | N/A | `repo-operator` | Self |
+| Agent              | Routes test needs to | Routes git operations to | Routes critiques to   |
+| ------------------ | -------------------- | ------------------------ | --------------------- |
+| `code-implementer` | `test-author`        | `repo-operator`          | Self (fix) or `fixer` |
+| `fixer`            | `test-author`        | `repo-operator`          | Self                  |
+| `test-author`      | Self                 | `repo-operator`          | Self                  |
+| `doc-writer`       | N/A                  | `repo-operator`          | Self                  |
 
 ### Operators (Cyan/Green)
 
 Operators **handle external system interactions**.
 
-| Agent | Routes content decisions to | Routes failures to |
-|-------|----------------------------|-------------------|
-| `repo-operator` | Requesting agent | `fixer` (code issues) or human (at boundary) |
-| `gh-issue-manager` | Requesting agent | `clarifier` (if issue unclear) |
-| `gh-reporter` | Requesting agent | N/A (report-only) |
+| Agent              | Routes content decisions to | Routes failures to                           |
+| ------------------ | --------------------------- | -------------------------------------------- |
+| `repo-operator`    | Requesting agent            | `fixer` (code issues) or human (at boundary) |
+| `gh-issue-manager` | Requesting agent            | `clarifier` (if issue unclear)               |
+| `gh-reporter`      | Requesting agent            | N/A (report-only)                            |
 
 ### Cleanup Agents (Blue)
 
 Cleanup agents **summarize and verify state**.
 
-| Agent | Routes incomplete work to | Routes to next flow if |
-|-------|--------------------------|------------------------|
-| `signal-cleanup` | Owning agent in Flow 1 | All artifacts exist |
-| `plan-cleanup` | Owning agent in Flow 2 | All artifacts exist |
-| `build-cleanup` | Owning agent in Flow 3 | Tests pass, artifacts exist |
-| `review-cleanup` | `fixer` | Worklist addressed |
-| `gate-cleanup` | Depends on verdict | MERGE or BOUNCE decided |
-| `deploy-cleanup` | `deploy-monitor` | Deployment verified |
-| `wisdom-cleanup` | N/A | Learnings extracted |
+| Agent            | Routes incomplete work to | Routes to next flow if      |
+| ---------------- | ------------------------- | --------------------------- |
+| `signal-cleanup` | Owning agent in Flow 1    | All artifacts exist         |
+| `plan-cleanup`   | Owning agent in Flow 2    | All artifacts exist         |
+| `build-cleanup`  | Owning agent in Flow 3    | Tests pass, artifacts exist |
+| `review-cleanup` | `fixer`                   | Worklist addressed          |
+| `gate-cleanup`   | Depends on verdict        | MERGE or BOUNCE decided     |
+| `deploy-cleanup` | `deploy-monitor`          | Deployment verified         |
+| `wisdom-cleanup` | N/A                       | Learnings extracted         |
 
 ### Gate Agents (Blue/Red)
 
 Gate agents **make decisions based on evidence**.
 
-| Agent | If pass | If fail |
-|-------|---------|---------|
-| `merge-decider` | Proceed to Gate cleanup | BOUNCE with reason |
-| `deploy-decider` | Proceed to deploy | Block deployment |
-| `secrets-sanitizer` | Allow publish | Block publish, attempt fix |
+| Agent               | If pass                 | If fail                    |
+| ------------------- | ----------------------- | -------------------------- |
+| `merge-decider`     | Proceed to Gate cleanup | BOUNCE with reason         |
+| `deploy-decider`    | Proceed to deploy       | Block deployment           |
+| `secrets-sanitizer` | Allow publish           | Block publish, attempt fix |
 
 ---
 
@@ -186,12 +187,12 @@ Questions do not stop flows. They get queued.
 
 A flow should only halt when:
 
-| Condition | Why it halts |
-|-----------|--------------|
+| Condition                              | Why it halts                            |
+| -------------------------------------- | --------------------------------------- |
 | Secrets detected and cannot be cleaned | Cannot publish with exposed credentials |
-| External system completely unavailable | Cannot proceed (e.g., GitHub down) |
-| Circular dependency between agents | Needs human arbitration |
-| Safety/compliance hard stop | Policy requires human sign-off |
+| External system completely unavailable | Cannot proceed (e.g., GitHub down)      |
+| Circular dependency between agents     | Needs human arbitration                 |
+| Safety/compliance hard stop            | Policy requires human sign-off          |
 
 Even these often resolve to "route to X" rather than "stop everything."
 
@@ -207,6 +208,7 @@ When an agent hands off with a routing recommendation:
 **What I did:** Implemented the session timeout feature.
 
 **What's left:**
+
 - Tests are failing on edge case (1 failure in test_session_edge_cases.py)
 - Unclear whether timeout should be hard or soft (defaulted to hard, queued question)
 
@@ -270,27 +272,27 @@ Do it   Is there an agent for this?
 
 Quick reference for common problems:
 
-| Problem Type | First Choice | Second Choice |
-|--------------|--------------|---------------|
-| **Code quality** | `fixer` | `code-implementer` |
-| **Test failures** | `fixer` | `test-author` |
-| **Missing tests** | `test-author` | - |
-| **Type errors** | `fixer` | - |
-| **Lint errors** | `auto-linter` | `fixer` |
-| **Format issues** | `auto-linter` | - |
-| **Import errors** | `fixer` | `code-implementer` |
-| **Missing docs** | `doc-writer` | - |
-| **Stale comments** | `fixer` | `doc-writer` |
-| **Git conflicts** | `repo-operator` | - |
-| **Branch issues** | `repo-operator` | - |
-| **Secrets exposed** | `secrets-sanitizer` | - |
-| **Design unclear** | `design-optioneer` | `clarifier` |
-| **Requirements unclear** | `clarifier` | `requirements-author` |
-| **Contract violation** | `interface-designer` | `code-implementer` |
-| **Coverage gap** | `test-author` | - |
-| **Security issue** | `risk-analyst` | `security-scanner` |
-| **Flaky test** | `flakiness-detector` | `test-author` |
-| **Mutation survivors** | `mutation-auditor` | `test-author` |
+| Problem Type             | First Choice         | Second Choice         |
+| ------------------------ | -------------------- | --------------------- |
+| **Code quality**         | `fixer`              | `code-implementer`    |
+| **Test failures**        | `fixer`              | `test-author`         |
+| **Missing tests**        | `test-author`        | -                     |
+| **Type errors**          | `fixer`              | -                     |
+| **Lint errors**          | `auto-linter`        | `fixer`               |
+| **Format issues**        | `auto-linter`        | -                     |
+| **Import errors**        | `fixer`              | `code-implementer`    |
+| **Missing docs**         | `doc-writer`         | -                     |
+| **Stale comments**       | `fixer`              | `doc-writer`          |
+| **Git conflicts**        | `repo-operator`      | -                     |
+| **Branch issues**        | `repo-operator`      | -                     |
+| **Secrets exposed**      | `secrets-sanitizer`  | -                     |
+| **Design unclear**       | `design-optioneer`   | `clarifier`           |
+| **Requirements unclear** | `clarifier`          | `requirements-author` |
+| **Contract violation**   | `interface-designer` | `code-implementer`    |
+| **Coverage gap**         | `test-author`        | -                     |
+| **Security issue**       | `risk-analyst`       | `security-scanner`    |
+| **Flaky test**           | `flakiness-detector` | `test-author`         |
+| **Mutation survivors**   | `mutation-auditor`   | `test-author`         |
 
 ---
 
@@ -324,6 +326,7 @@ At flow boundaries (signal-cleanup, plan-cleanup, etc.):
 4. **Report** to orchestrator with routing recommendation
 
 The orchestrator then decides:
+
 - Continue to next flow
 - Rerun current flow
 - Wait for human input (at boundary, not mid-flow)

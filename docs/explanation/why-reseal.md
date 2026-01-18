@@ -9,6 +9,7 @@
 Receipts must reflect the final committed state.
 
 Timeline without reseal:
+
 1. Cleanup writes receipt (counts artifacts)
 2. Secrets-sanitizer scans
 3. Sanitizer redacts/modifies artifacts
@@ -28,6 +29,7 @@ cleanup → sanitizer → modified_files: true?
 ```
 
 In words:
+
 1. Cleanup computes receipt
 2. Sanitizer scans publish surface
 3. If sanitizer modified files, receipt is stale
@@ -50,10 +52,12 @@ Reseal ensures receipts match the final tree.
 ### Commit consistency
 
 The commit should contain:
+
 - Artifacts in their final form
 - Receipt that accurately describes them
 
 Without reseal, you might commit:
+
 - Pre-redaction artifacts (bad)
 - Stale receipt (misleading)
 
@@ -82,6 +86,7 @@ sanitizer → modified_files: false
 ### Convergence
 
 Normally converges in 1-2 cycles:
+
 - First cleanup: original state
 - Sanitizer modifies
 - Second cleanup: post-modification state
@@ -98,16 +103,18 @@ cleanup → sanitizer → modified → cleanup → sanitizer → modified → ..
 ```
 
 Causes:
+
 - Sanitizer modifies something that cleanup re-generates
 - Pathological pattern in artifacts
 
-**Solution: safe-bail**
+### Solution: safe-bail
 
 ```yaml
 repo-operator checkpoint_mode: local_only
 ```
 
 This:
+
 - Commits locally
 - Never pushes
 - Forces `proceed_to_github_ops: false`
@@ -120,11 +127,13 @@ Better to complete locally than loop forever.
 ## Flow 3 special case
 
 Flow 3 has extra complexity:
+
 - Build produces code/tests
 - Sanitizer might modify code/tests
 - Must restage after modification
 
 Sequence:
+
 ```
 build-cleanup → sanitizer → modified_files: true?
   YES → restage → build-cleanup → sanitizer → ...
@@ -151,6 +160,7 @@ This field drives the reseal loop.
 ### Why not just recompute receipts later?
 
 Receipts should be sealed at flow completion. Lazy recomputation:
+
 - Adds complexity
 - Creates "which version?" ambiguity
 - Breaks receipts-first reporting

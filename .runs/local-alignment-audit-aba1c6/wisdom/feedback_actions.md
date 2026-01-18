@@ -1,6 +1,7 @@
 # Feedback Actions (Run local-alignment-audit-aba1c6)
 
 ## Outcome Snapshot
+
 - issue_drafts: 4
 - suggestions: 5
 - inputs_present:
@@ -154,6 +155,7 @@ None. (Drafts only; no GitHub side effects.)
 ---
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

@@ -22,7 +22,7 @@
 
 - RSK-004 [LOW] [OPS]
   - What: Flow variant documentation may become stale if new variants are added without updating overlap semantics section
-  - Trigger: When new flow command files are added (e.g., flow-8-* or additional variants)
+  - Trigger: When new flow command files are added (e.g., flow-8-\* or additional variants)
   - Mitigation hint: Add flow variant documentation to pack-check scope; consider automating variant enumeration from command files
   - Evidence: REQ-002; 10 command files currently implement 7 flows with variants
 
@@ -33,12 +33,14 @@
   - Evidence: REQ-007; OQ-SIG-005; agent frontmatter includes color: field
 
 ## Risk Summary (derived)
+
 - Critical: 0
 - High: 0
 - Medium: 2
 - Low: 3
 
 ## Notes
+
 - No HIGH or CRITICAL risks identified; this is documentation alignment work with no code changes
 - RSK-003 is intentionally rated LOW because path traversal is documented as a known limitation with deferred threat assessment, and the immediate work is documentation-only
 - ReDoS is NOT listed as a risk because Rust regex crate is immune by design (finite automata implementation); any prior ReDoS claims are invalid

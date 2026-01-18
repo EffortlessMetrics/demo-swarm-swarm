@@ -11,6 +11,7 @@
 The system doesn't produce "code that hopefully works." It produces "verified artifacts with evidence."
 
 Traditional development:
+
 ```
 Developer writes code -> Reviewer reads code -> Ship
 ```
@@ -18,6 +19,7 @@ Developer writes code -> Reviewer reads code -> Ship
 The product is "code someone wrote."
 
 AgOps development:
+
 ```
 Spec -> Generate -> Verify -> Verify -> Verify -> Evidence -> Ship
 ```
@@ -102,11 +104,11 @@ The author/critic separation defeats sycophancy. A model reviewing its own work 
 
 Evidence discipline prevents confabulation:
 
-| Claim | Without Evidence | With Evidence |
-|-------|------------------|---------------|
-| "Tests pass" | Maybe they ran, maybe not | `npm test` exit 0, 47 passed (artifact: test_execution.md) |
-| "Secure" | Someone thought about it | secrets-tools scan on 12 files, 0 findings (artifact: secrets_scan.md) |
-| "Complete" | Author says so | All ACs verified, critic says `can_further_iteration_help: no` |
+| Claim        | Without Evidence          | With Evidence                                                          |
+| ------------ | ------------------------- | ---------------------------------------------------------------------- |
+| "Tests pass" | Maybe they ran, maybe not | `npm test` exit 0, 47 passed (artifact: test_execution.md)             |
+| "Secure"     | Someone thought about it  | secrets-tools scan on 12 files, 0 findings (artifact: secrets_scan.md) |
+| "Complete"   | Author says so            | All ACs verified, critic says `can_further_iteration_help: no`         |
 
 "Not measured" is honest. "Passed" without evidence is dangerous.
 
@@ -130,14 +132,14 @@ Gates are cheap but critical. They're not where quality comes from—they're whe
 
 ## What Each Layer Proves
 
-| Layer | Proves | Doesn't Prove |
-|-------|--------|---------------|
-| Syntax | Valid code | Correct code |
-| Tests | Matches spec | Spec is right |
-| Mutation | Tests are real | Tests are complete |
-| Critics | No obvious issues | No subtle issues |
+| Layer    | Proves            | Doesn't Prove      |
+| -------- | ----------------- | ------------------ |
+| Syntax   | Valid code        | Correct code       |
+| Tests    | Matches spec      | Spec is right      |
+| Mutation | Tests are real    | Tests are complete |
+| Critics  | No obvious issues | No subtle issues   |
 | Evidence | Claims are backed | Claims are correct |
-| Gates | Safe to publish | Good to publish |
+| Gates    | Safe to publish   | Good to publish    |
 
 Each layer is necessary. None is sufficient alone.
 
@@ -195,12 +197,12 @@ The reviewer checks the evidence table, spots-checks hotspots, verifies the proc
 
 ### The Shift
 
-| Aspect | Old Model | New Model |
-|--------|-----------|-----------|
-| Review target | Lines of code | Evidence summary |
-| Quality source | Human attention | Verification layers |
-| Scaling limit | Reviewer capacity | Machine time |
-| Large changes | Terrifying | Manageable |
+| Aspect         | Old Model         | New Model           |
+| -------------- | ----------------- | ------------------- |
+| Review target  | Lines of code     | Evidence summary    |
+| Quality source | Human attention   | Verification layers |
+| Scaling limit  | Reviewer capacity | Machine time        |
+| Large changes  | Terrifying        | Manageable          |
 
 The code is the binary. The verification is the product.
 
@@ -208,14 +210,14 @@ The code is the binary. The verification is the product.
 
 ## Cost of Verification
 
-| Layer | Cost | Value |
-|-------|------|-------|
-| Syntax | Milliseconds | Low (necessary, not valuable) |
-| Tests | Seconds-minutes | Medium (proves behavior) |
-| Mutation | Minutes-hours | High (proves test quality) |
-| Critics | Minutes | High (finds issues early) |
-| Evidence | Minimal | High (enables trust) |
-| Gates | Seconds | Critical (prevents disasters) |
+| Layer    | Cost            | Value                         |
+| -------- | --------------- | ----------------------------- |
+| Syntax   | Milliseconds    | Low (necessary, not valuable) |
+| Tests    | Seconds-minutes | Medium (proves behavior)      |
+| Mutation | Minutes-hours   | High (proves test quality)    |
+| Critics  | Minutes         | High (finds issues early)     |
+| Evidence | Minimal         | High (enables trust)          |
+| Gates    | Seconds         | Critical (prevents disasters) |
 
 ### Investment Strategy
 
@@ -237,13 +239,13 @@ Machine iteration is cheap. Human attention is expensive. Verification converts 
 
 Skipping verification layers creates debt:
 
-| Skipped Layer | Debt Created |
-|---------------|--------------|
-| Tests | Behavioral uncertainty — does it actually work? |
-| Mutation | Test theater — tests pass but don't verify |
-| Critics | Missed issues — problems escape to production |
-| Evidence | Unverifiable claims — "trust me" culture |
-| Gates | Unsafe publishes — credentials in repo, broken deploys |
+| Skipped Layer | Debt Created                                           |
+| ------------- | ------------------------------------------------------ |
+| Tests         | Behavioral uncertainty — does it actually work?        |
+| Mutation      | Test theater — tests pass but don't verify             |
+| Critics       | Missed issues — problems escape to production          |
+| Evidence      | Unverifiable claims — "trust me" culture               |
+| Gates         | Unsafe publishes — credentials in repo, broken deploys |
 
 Each skip increases risk. Debt compounds.
 
@@ -324,14 +326,11 @@ The system either gets better at verification over time, or it collapses back to
 
 ### Complex Changes
 
-Add:
-4. **Critics**: Author/critic loop until verified (minutes)
-5. **Mutation**: Prove tests actually test (optional, targeted)
+Add: 4. **Critics**: Author/critic loop until verified (minutes) 5. **Mutation**: Prove tests actually test (optional, targeted)
 
 ### Publish Boundaries
 
-Always:
-6. **Gates**: Secrets scan, safety checks (seconds)
+Always: 6. **Gates**: Secrets scan, safety checks (seconds)
 
 ### The Stack in Receipts
 

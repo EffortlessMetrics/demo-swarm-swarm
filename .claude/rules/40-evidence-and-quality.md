@@ -14,11 +14,11 @@ Claims require pointers. Receipts summarize tool outputs. "Not measured" is acce
 
 ### The Standard
 
-| Good | Bad |
-|------|-----|
+| Good                                                                     | Bad                                 |
+| ------------------------------------------------------------------------ | ----------------------------------- |
 | "Tests pass (see `test_execution.md`: 15 passed, 0 failed, exit code 0)" | "I ran the tests and they all pass" |
-| "Coverage: 78% (see coverage_audit.md)" | "Coverage looks good" |
-| "Not measured: mutation testing skipped (no budget)" | "Tests are probably effective" |
+| "Coverage: 78% (see coverage_audit.md)"                                  | "Coverage looks good"               |
+| "Not measured: mutation testing skipped (no budget)"                     | "Tests are probably effective"      |
 
 Uncertainty is fine when labeled. Certainty without evidence is the failure mode.
 
@@ -28,21 +28,21 @@ Uncertainty is fine when labeled. Certainty without evidence is the failure mode
 
 "Done" is not a feeling. It is a mechanical state.
 
-| Status | Meaning |
-|--------|---------|
-| `VERIFIED` | Converged. Evidence panel green, evidence fresh, blockers empty. |
-| `UNVERIFIED` | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
-| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down. |
+| Status           | Meaning                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `VERIFIED`       | Converged. Evidence panel green, evidence fresh, blockers empty.               |
+| `UNVERIFIED`     | Not converged, but checkpointed. Artifacts written, state captured, resumable. |
+| `CANNOT_PROCEED` | Mechanical failure. Tooling broken, permissions missing, infra down.           |
 
 ### What Evidence Shows
 
-| Condition | Status |
-|-----------|--------|
-| Evidence exists AND passes | GREEN |
-| Evidence exists AND fails | RED |
-| Evidence does not exist | UNKNOWN |
+| Condition                        | Status  |
+| -------------------------------- | ------- |
+| Evidence exists AND passes       | GREEN   |
+| Evidence exists AND fails        | RED     |
+| Evidence does not exist          | UNKNOWN |
 | Evidence is stale (SHA mismatch) | UNKNOWN |
-| Agent claims done, no evidence | UNKNOWN |
+| Agent claims done, no evidence   | UNKNOWN |
 
 **UNKNOWN is not PASS.** Missing evidence is not passing evidence.
 
@@ -55,6 +55,7 @@ Uncertainty is fine when labeled. Certainty without evidence is the failure mode
 ### Why This Matters
 
 The default failure mode in stochastic systems is "absence feels like success." An agent that doesn't find a problem may have:
+
 1. Found no problems (correct)
 2. Failed to look (incorrect)
 3. Looked in the wrong place (incorrect)
@@ -64,6 +65,7 @@ Only captured evidence distinguishes case 1 from cases 2 and 3.
 ### Completion Checklist
 
 Before marking work complete:
+
 - [ ] Evidence artifact exists on disk
 - [ ] Evidence artifact is tied to current HEAD (fresh)
 - [ ] Evidence shows explicit pass/fail, not silence
@@ -77,14 +79,15 @@ If any checkbox is unchecked, the work is UNKNOWN, not DONE.
 
 Receipts are historical. Current state is NOW.
 
-| Status | Meaning |
-|--------|---------|
-| FRESH | Evidence SHA matches current HEAD |
-| ACCEPTABLE_STALE | Minor drift, still trustworthy |
-| STALE | Significant drift, re-verify before trusting |
-| UNKNOWN | Cannot determine freshness |
+| Status           | Meaning                                      |
+| ---------------- | -------------------------------------------- |
+| FRESH            | Evidence SHA matches current HEAD            |
+| ACCEPTABLE_STALE | Minor drift, still trustworthy               |
+| STALE            | Significant drift, re-verify before trusting |
+| UNKNOWN          | Cannot determine freshness                   |
 
 When evidence and current state diverge:
+
 - Note the divergence explicitly
 - Don't pretend the receipt is current
 - Re-verify if the change is significant
@@ -98,6 +101,7 @@ See [evidence-freshness.md](../../docs/reference/evidence-freshness.md) for stal
 ### Why a Panel (Not One Metric)
 
 Any single metric can be gamed (intentionally or accidentally):
+
 - "Passes tests" can hide complexity bloat
 - "High coverage" can hide hollow tests
 - "Mutation score" can be gamed with bad structure
@@ -108,14 +112,14 @@ We use a **panel** that collectively approximates "good engineering."
 
 Include (or link to) evidence for:
 
-| Surface | What It Shows |
-|---------|---------------|
-| **Intent fidelity** | REQ/BDD mapping; what changed and why |
-| **Verification depth** | Tests + mutation; are the tests meaningful? |
-| **Maintainability** | Complexity deltas, churn hotspots, idioms |
-| **Safety** | Secrets scan, boundary notes |
-| **Operability/NFRs** | Perf budgets, memory, binary size (where relevant) |
-| **Explainability** | Risks, assumptions, "not measured", next steps |
+| Surface                | What It Shows                                      |
+| ---------------------- | -------------------------------------------------- |
+| **Intent fidelity**    | REQ/BDD mapping; what changed and why              |
+| **Verification depth** | Tests + mutation; are the tests meaningful?        |
+| **Maintainability**    | Complexity deltas, churn hotspots, idioms          |
+| **Safety**             | Secrets scan, boundary notes                       |
+| **Operability/NFRs**   | Perf budgets, memory, binary size (where relevant) |
+| **Explainability**     | Risks, assumptions, "not measured", next steps     |
 
 ### Claims Policy
 
@@ -129,7 +133,7 @@ Include (or link to) evidence for:
 
 **PR Quality + Maintainability** with **minimal human review time**.
 
-This is not just speed. Not just quality. The *efficiency* of producing quality.
+This is not just speed. Not just quality. The _efficiency_ of producing quality.
 
 ### The Ratio
 
@@ -139,11 +143,11 @@ This is not just speed. Not just quality. The *efficiency* of producing quality.
 
 Machine time is cheap. Dev time is expensive.
 
-| Option A | Option B | Winner |
-|----------|----------|--------|
-| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably) |
+| Option A                  | Option B                  | Winner             |
+| ------------------------- | ------------------------- | ------------------ |
+| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably)   |
 | 2 hrs machine, 45 min dev | 6 hrs machine, 20 min dev | **B** (definitely) |
-| 1 hr machine, 60 min dev | 4 hrs machine, 15 min dev | **B** (absolutely) |
+| 1 hr machine, 60 min dev  | 4 hrs machine, 15 min dev | **B** (absolutely) |
 
 More verification loops, more critic passes, more evidence generation = more machine time but less dev review time. That's almost always the right trade.
 
@@ -162,6 +166,7 @@ All to reduce the human review burden (expensive).
 ### Front-Load Quality
 
 Shift-left with:
+
 - BDD scenarios (intent before code)
 - Critics (find issues before human sees them)
 - Mutation testing (prove tests work)
@@ -183,6 +188,7 @@ Every unnecessary line increases DevLT.
 The reviewer's job is **evidence sufficiency**, not diff archaeology.
 
 Questions a skilled reviewer asks:
+
 - Is the evidence fresh? (SHA matches HEAD?)
 - Is the panel complete for the risk profile?
 - What 3-8 hotspots should I spot-check?
@@ -200,6 +206,7 @@ The existing codebase shapes all future generation.
 **Schema gravity:** Existing patterns, conventions, and structure constrain what gets generated. A well-structured codebase produces well-structured output. A messy codebase produces consistent mess.
 
 **Implications:**
+
 - Improving the mold (refactoring, better interfaces, clearer conventions) improves all future output
 - Technical debt compounds: bad patterns get reinforced
 - Maintainability work is first-class because it increases future reliability
@@ -212,13 +219,13 @@ The codebase is not just what we ship. It's the jig that shapes everything we ma
 
 Most reviewers will only read the PR description. Treat it as the cockpit display.
 
-| They Need | They Don't Need |
-|-----------|-----------------|
-| What changed (summary) | Every line that changed |
-| Why it changed (intent link) | The full requirements doc |
-| What was verified (evidence table) | Raw test output |
-| Where to spot-check (hotspots) | Comprehensive file list |
-| What's not measured (explicit gaps) | Silent assumptions |
+| They Need                           | They Don't Need           |
+| ----------------------------------- | ------------------------- |
+| What changed (summary)              | Every line that changed   |
+| Why it changed (intent link)        | The full requirements doc |
+| What was verified (evidence table)  | Raw test output           |
+| Where to spot-check (hotspots)      | Comprehensive file list   |
+| What's not measured (explicit gaps) | Silent assumptions        |
 
 The diff is for spot-checks and audits. The cockpit is for decisions.
 

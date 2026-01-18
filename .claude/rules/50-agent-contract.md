@@ -12,6 +12,7 @@ globs:
 ## The Agent Promise
 
 Every agent is a **well-trained junior** who does real cognitive work:
+
 - Think through problems
 - Investigate the codebase
 - Make judgment calls
@@ -28,11 +29,12 @@ Agents are not clipboard-copiers. Agents are not template-fillers. Agents do wor
 
 Each agent has a single responsibility, done deeply. If it needs modes, split it.
 
-| Good | Bad |
-|------|-----|
+| Good                                 | Bad                                                            |
+| ------------------------------------ | -------------------------------------------------------------- |
 | `code-implementer` and `code-critic` | `code-agent --mode implement` and `code-agent --mode critique` |
 
 Separation ensures:
+
 - Focus (one thing, done well)
 - Clear handoffs (who does what is unambiguous)
 - No conflicts of interest (a critic doesn't review its own fixes)
@@ -44,21 +46,27 @@ Separation ensures:
 Every agent prompt must include:
 
 ### Your Job
+
 One sentence. What you do. What you don't do.
 
 ### Inputs
+
 What to read. Where truth lives. What exists when you start.
 
 ### Outputs
+
 Artifacts you will write. Where they go. What they contain.
 
 ### How to Do It
+
 Steps, tips, positive prompting. What good looks like.
 
 ### When Stuck
+
 Graceful outcomes. What to do when things don't go as expected. Partial is success if reported well.
 
 ### Handoff
+
 What I did. What I found. What I recommend next.
 
 ---
@@ -94,6 +102,7 @@ Recommendation: <specific next step with reasoning>
 ## Default Recommendation + Neighbors
 
 Each agent should:
+
 - Have a default "happy path" next-step recommendation
 - Know 3-4 likely handoff targets (neighbors)
 - Describe neighbors briefly in context
@@ -106,8 +115,8 @@ Agents do not need to know the entire swarm. They know their neighbors.
 
 An agent that completes 60% of the work and clearly documents what's done, what's blocked, and what to try next **has succeeded**.
 
-| Success | Failure |
-|---------|---------|
+| Success                                                                                                                                                                    | Failure                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | "Implemented 3 of 5 endpoints. The remaining 2 require the User schema which doesn't exist yet. Recommend routing to code-implementer with User schema as the first task." | "Done." (when work is incomplete) |
 
 **Failure to complete work is not failure as an agent.** Hiding uncertainty behind false completion is the actual failure mode.
@@ -117,6 +126,7 @@ An agent that completes 60% of the work and clearly documents what's done, what'
 ## "Blocked" Language
 
 Avoid "blocked" unless it's truly halting:
+
 - Unsafe boundary (e.g., secrets)
 - Non-derivable human decision
 - Mechanical environment failure
@@ -131,6 +141,7 @@ Otherwise: "Route to X because..."
 ## Open Questions
 
 If something is unclear:
+
 1. Make the best safe assumption
 2. Record it (OpenQ or inline assumption note)
 3. Proceed
@@ -143,11 +154,13 @@ Use DEFAULTED for safe assumptions, NEEDS_HUMAN for genuine blockers.
 ## When Stuck: Debug, Don't Freeze
 
 If something fails:
+
 1. **Ground yourself in tool outputs** — compiler errors, test output, exit codes
 2. **Fix forward** — route to the appropriate fixer or do the fix if it's in scope
 3. **If the failure indicates intent mismatch** — surface it as DEFAULTED or NEEDS_HUMAN (authority line)
 
 **Do not stop the flow.** Write down assumptions and proceed unless:
+
 - Unsafe boundary (secrets, publish risk)
 - Authority required (business decision, customer impact)
 - Mechanical failure (tools broken, permissions missing)
@@ -159,6 +172,7 @@ If something fails:
 ## Evidence in Agent Outputs
 
 When making claims:
+
 - Point to specific files, lines, or artifacts
 - Include counts and metrics from tool outputs
 - Mark uncertainty explicitly
@@ -174,12 +188,12 @@ NEEDS_HUMAN is about authority, not difficulty. **It's rare by design.**
 
 **Authority** = non-derivable decision with no safe default. Prefer DEFAULTED + log unless it's unsafe.
 
-| Agent Can Handle (DEFAULTED) | Requires Human (NEEDS_HUMAN) |
-|------------------------------|------------------------------|
-| Researchable questions | Business relationship decisions |
-| Derivable from codebase | Risk tolerance choices |
-| Safe defaults exist | Org ownership questions |
-| Reversible choices | Customer impact trade-offs |
+| Agent Can Handle (DEFAULTED) | Requires Human (NEEDS_HUMAN)    |
+| ---------------------------- | ------------------------------- |
+| Researchable questions       | Business relationship decisions |
+| Derivable from codebase      | Risk tolerance choices          |
+| Safe defaults exist          | Org ownership questions         |
+| Reversible choices           | Customer impact trade-offs      |
 
 The test: Does the decision require someone's **authority** or just someone's **knowledge**?
 
