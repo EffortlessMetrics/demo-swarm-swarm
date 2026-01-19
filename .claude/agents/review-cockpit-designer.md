@@ -55,7 +55,7 @@ This file will be used as the PR description body.
 |--------|-------|
 | Files changed | X |
 | Lines +/- | +Y / -Z |
-| Tests | A passed, B failed |
+| Tests | ✅ A passed, ❌ B failed |
 | Coverage | X% |
 ```
 
@@ -66,13 +66,13 @@ This file will be used as the PR description body.
 
 | Surface | Status | Evidence |
 |---------|--------|----------|
-| Tests | PASS | [test_execution.md](link) |
-| Critic | 0 MAJOR | [code_critique.md](link) |
-| Coverage | 78% | [coverage_audit.md](link) |
-| Mutation | N/A | Not run (low-risk) |
-| Security | PASS | [security_scan.md](link) |
+| Tests | ✅ PASS | [test_execution.md](link) |
+| Critic | ✅ 0 MAJOR | [code_critique.md](link) |
+| Coverage | ✅ 78% | [coverage_audit.md](link) |
+| Mutation | ⚪ N/A | Not run (low-risk) |
+| Security | ✅ PASS | [security_scan.md](link) |
 
-**Freshness**: Evidence SHA matches HEAD (FRESH)
+**Freshness**: ✅ Evidence SHA matches HEAD (FRESH)
 ```
 
 ### Hotspots (where to focus review)
@@ -164,7 +164,7 @@ Low-risk changes need minimal cockpit. High-risk changes need detailed evidence.
 - Use tables for scanning
 - Use bullet points, not paragraphs
 - Use Mermaid diagrams sparingly and meaningfully
-- Don't rely on color alone
+- Don't rely on color alone (use status icons: ✅, ❌, ⚠️, ⚪)
 
 ## Completion States
 
