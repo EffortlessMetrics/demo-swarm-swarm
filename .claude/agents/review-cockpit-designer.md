@@ -46,9 +46,9 @@ This file will be used as the PR description body.
 ```markdown
 ## Summary
 
-**What**: <one sentence describing the change>
-**Why**: <link to REQ or issue>
-**Risk**: LOW | MEDIUM | HIGH
+**📦 What**: <one sentence describing the change>
+**🎯 Why**: <link to REQ or issue>
+**⚠️ Risk**: 🟢 LOW | 🟡 MEDIUM | 🔴 HIGH
 
 ### Quick Stats
 | Metric | Value |
@@ -66,11 +66,11 @@ This file will be used as the PR description body.
 
 | Surface | Status | Evidence |
 |---------|--------|----------|
-| Tests | PASS | [test_execution.md](link) |
-| Critic | 0 MAJOR | [code_critique.md](link) |
-| Coverage | 78% | [coverage_audit.md](link) |
-| Mutation | N/A | Not run (low-risk) |
-| Security | PASS | [security_scan.md](link) |
+| Tests | ✅ PASS | [test_execution.md](link) |
+| Critic | 🟡 0 MAJOR | [code_critique.md](link) |
+| Coverage | ✅ 78% | [coverage_audit.md](link) |
+| Mutation | ⚪ N/A | Not run (low-risk) |
+| Security | ✅ PASS | [security_scan.md](link) |
 
 **Freshness**: Evidence SHA matches HEAD (FRESH)
 ```
@@ -107,7 +107,7 @@ Review these 3-5 files for spot-checking:
 ```markdown
 ## Recommendation
 
-**Merge**: YES | NO | CONDITIONAL
+**Merge**: 🟢 YES | 🔴 NO | 🟡 CONDITIONAL
 
 **Conditions** (if any):
 - [ ] Reviewer approves auth logic in login.ts
@@ -164,6 +164,7 @@ Low-risk changes need minimal cockpit. High-risk changes need detailed evidence.
 - Use tables for scanning
 - Use bullet points, not paragraphs
 - Use Mermaid diagrams sparingly and meaningfully
+- **Redundant Coding**: Pair status text with icons (e.g., "✅ PASS", not just "PASS")
 - Don't rely on color alone
 
 ## Completion States
