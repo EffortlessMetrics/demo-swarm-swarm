@@ -4,12 +4,15 @@ These are synthetic but realistic examples of swarm-generated artifacts. They de
 
 **Why these examples matter:** You learn this system by seeing the artifacts. The PR cockpit, the merge decision, the critiques—these are what review actually looks like. Read them to understand the posture.
 
-| Example                                | Shows                 | What to Notice                                                     |
-| -------------------------------------- | --------------------- | ------------------------------------------------------------------ |
-| [pr-cockpit.md](pr-cockpit.md)         | PR description format | The cockpit is your primary UI, not the diff                       |
-| [code-critique.md](code-critique.md)   | Critique severities   | CRITICAL/MAJOR/MINOR/SUGGESTION have clear semantics               |
-| [open-questions.md](open-questions.md) | Uncertainty tracking  | DEFAULTED = safe assumption made; NEEDS_HUMAN = requires authority |
-| [merge-decision.md](merge-decision.md) | Gate decision memo    | Receipt chain audit shows how verification flows through           |
+| Example                                  | Shows                 | What to Notice                                                     |
+| ---------------------------------------- | --------------------- | ------------------------------------------------------------------ |
+| [signal-receipt.json](signal-receipt.json) | Flow 1 receipt output | Counts, quality gates, and station status for Signal flow          |
+| [build-receipt.json](build-receipt.json) | Flow 3 receipt output | Test results, critic verdicts, and quality gates                   |
+| [work-plan.md](work-plan.md)             | Task decomposition    | IMPL/TEST/DOC markers enable mechanical counting                   |
+| [pr-cockpit.md](pr-cockpit.md)           | PR description format | The cockpit is your primary UI, not the diff                       |
+| [code-critique.md](code-critique.md)     | Critique severities   | CRITICAL/MAJOR/MINOR/SUGGESTION have clear semantics               |
+| [open-questions.md](open-questions.md)   | Uncertainty tracking  | DEFAULTED = safe assumption made; NEEDS_HUMAN = requires authority |
+| [merge-decision.md](merge-decision.md)   | Gate decision memo    | Receipt chain audit shows how verification flows through           |
 
 ---
 
@@ -32,8 +35,9 @@ All examples demonstrate these patterns:
 1. **Handoff structure** — "What I did / What's left / Recommendation" for routing
 2. **Evidence pointers** — File paths with line numbers (e.g., `src/auth/session.py:45-89`)
 3. **Quality scorecard** — Five surfaces: Correctness, Verification, Boundaries, Maintainability, Explanation
-4. **Stable markers** — Countable prefixes like `REQ-`, `OQ-`, `[CRITICAL]`, `[MAJOR]`, `[MINOR]`
+4. **Stable markers** — Countable prefixes like `REQ-`, `OQ-`, `[CRITICAL]`, `[MAJOR]`, `[MINOR]`, `IMPL_`, `TEST_`
 5. **"Not Measured" explicit** — Gaps are acknowledged, not hidden
+6. **Receipt schemas** — JSON receipts with counts, quality gates, and station status
 
 ---
 

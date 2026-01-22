@@ -80,19 +80,20 @@ Every flow that produces a PR (Build/Review/Gate) must generate a PR Brief that 
 
 ## Where This Gets Generated
 
-**Status:** Planned — not yet automated.
+**Status:** Implemented in cleanup agents.
 
-When implemented, the target is:
+| Flow | Agent | Output | Action |
+|------|-------|--------|--------|
+| Build | `build-cleanup` | `.runs/<run-id>/build/pr_brief.md` | Creates initial brief |
+| Review | `review-cleanup` | `.runs/<run-id>/review/pr_brief.md` | Updates with review feedback |
+| Gate | `gate-cleanup` | `.runs/<run-id>/gate/pr_brief.md` | Finalizes with gate verification |
 
-| Flow | Agent | Output |
-|------|-------|--------|
-| Build | `build-cleanup` | `.runs/<run-id>/build/pr_brief.md` |
-| Review | `review-cleanup` | `.runs/<run-id>/review/pr_brief.md` |
-| Gate | `gate-cleanup` | `.runs/<run-id>/gate/pr_brief.md` |
+**Brief evolution:**
+1. **Flow 3 (Build):** Initial brief with implementation summary, test results, hotspots
+2. **Flow 4 (Review):** Adds review feedback summary, updates proof table
+3. **Flow 5 (Gate):** Finalizes with gate verdict, security scan, coverage, contract compliance
 
-The `pr-creator` and `pr-commenter` agents would read the latest `pr_brief.md` and post it to the PR description.
-
-**Current state:** Manual composition. Use the template above when writing PR descriptions for swarm-produced PRs.
+The `pr-creator` and `pr-commenter` agents read the latest `pr_brief.md` (from gate if available, otherwise review, otherwise build) and post it to the PR description.
 
 ---
 

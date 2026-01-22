@@ -14,6 +14,75 @@ This document specifies the CLI helper surface for mechanical operations in `.ru
 
 **Strict mode (optional):** set `DEMOSWARM_STRICT=1` to return non-zero exit codes on parse/exec errors. Agents never set this; it is for human debugging only. Note: `.claude/scripts/demoswarm.sh` unsets `DEMOSWARM_STRICT` to keep agent behavior stable; use direct `demoswarm ...` invocation for strict debugging.
 
+## Exit Codes
+
+| Exit Code | Mode | Meaning |
+| --------- | ---- | ------- |
+| 0 | Normal | Success OR error (errors expressed via `null` output) |
+| 0 | Strict | Success only |
+| 2 | Strict | Parse error or execution error |
+
+**Key principle:** In normal mode, the CLI **always** exits 0. Errors are communicated via the `null` sentinel in stdout. This ensures agents using the shim never encounter unexpected process failures.
+
+**When to use strict mode:**
+- Human debugging of command syntax
+- CI/CD scripts that need exit code signaling
+- Never in agent automation (the shim unsets `DEMOSWARM_STRICT`)
+
+## Error Handling
+
+### Output Signals
+
+All commands communicate errors via stdout values, not exit codes:
+
+| Output | Meaning |
+| ------ | ------- |
+| `null` | Error occurred (file missing, parse error, invalid input) |
+| `0` | Valid result: zero matches/items found |
+| Integer | Valid result: count of matches/items |
+| String | Valid result: extracted value |
+| `CLEAN` | Secrets scan: no secrets found |
+| `SECRETS_FOUND` | Secrets scan: secrets detected |
+| `ok` | Write operation succeeded |
+| `SKIPPED_MISSING_INDEX` | Index file does not exist |
+| `SKIPPED_RUN_NOT_FOUND` | Run ID not found in index |
+| `FILE_NOT_FOUND` | File does not exist (redact command) |
+| `SCAN_PATH_MISSING` | Scan path does not exist |
+
+### Common Error Scenarios
+
+| Scenario | Command Output | How to Handle |
+| -------- | -------------- | ------------- |
+| File does not exist | `null` | Check if file path is correct; file may not be created yet |
+| Directory does not exist | `null` | Verify the run directory exists |
+| Invalid regex pattern | `null` | Check regex syntax (ERE format required) |
+| No YAML block in file | `null` | File may not contain fenced ` ```yaml ``` ` block |
+| Key not found | `null` | Verify key name matches exactly (case-sensitive) |
+| Template leak detected | `null` | Value contains `\|` or `<` characters (unfilled template) |
+| JSON parse error | `null` | Receipt file may be malformed JSON |
+| Run not in index | `SKIPPED_RUN_NOT_FOUND` | Add run to index first, or check run_id spelling |
+
+### Debugging Tips
+
+1. **Use strict mode for debugging:**
+   ```bash
+   DEMOSWARM_STRICT=1 demoswarm count pattern --file x --regex y
+   # Exit code 2 + error message if something is wrong
+   ```
+
+2. **Check file existence first:**
+   ```bash
+   test -f ".runs/feat-auth/signal/requirements.md" && \
+     bash .claude/scripts/demoswarm.sh count pattern \
+       --file ".runs/feat-auth/signal/requirements.md" \
+       --regex '^### REQ-'
+   ```
+
+3. **Validate regex separately:**
+   ```bash
+   echo "test line" | grep -E '^test' >/dev/null && echo "regex valid"
+   ```
+
 ## Architecture
 
 ### Shim Invocation (Required)

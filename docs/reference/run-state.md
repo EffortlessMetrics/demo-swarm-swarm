@@ -13,6 +13,7 @@ All paths are **repo-root-relative**. Run artifacts live under:
 ├── index.json                      # Global run index
 └── <run-id>/
     ├── run_meta.json               # Per-run metadata
+    ├── branch_protection_check.md  # Advisory branch protection status
     ├── signal/                     # Flow 1 artifacts
     │   ├── requirements.md
     │   ├── features/*.feature
@@ -108,7 +109,10 @@ Per-run metadata at `.runs/<run-id>/run_meta.json`.
   "pr_number": null,
   "supersedes": "<previous-run-id | null>",
   "related_runs": [],
-  "base_ref": "<branch-name | null>"
+  "base_ref": "<branch-name | null>",
+  "branch_protection_verified": "true | false | unknown",
+  "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE | null",
+  "branch_protection_checked_at": "<ISO8601 | null>"
 }
 ```
 
@@ -120,6 +124,16 @@ Per-run metadata at `.runs/<run-id>/run_meta.json`.
 ### Stacked Run Support
 
 - `base_ref` (optional): The branch this run is based on. Used for diff computation in agents that audit changes (standards-enforcer, coverage-enforcer, etc.). If present, diffs are computed relative to `base_ref`; otherwise agents default to `origin/main`.
+
+### Branch Protection Fields
+
+Advisory fields set during run-prep to surface branch protection status early:
+
+- `branch_protection_verified`: `true` (protected with checks), `false` (not protected), or `"unknown"` (could not verify)
+- `branch_protection_status`: `PROTECTED`, `UNPROTECTED`, `UNVERIFIABLE`, or `null` (not yet checked)
+- `branch_protection_checked_at`: ISO8601 timestamp when the check was performed
+
+These are non-blocking advisory fields. Gate and Deploy flows may use them to inform decisions, but missing or unknown values do not block the flow.
 
 ---
 

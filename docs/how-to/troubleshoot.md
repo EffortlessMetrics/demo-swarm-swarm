@@ -4,6 +4,16 @@
 
 ---
 
+## CI Failures
+
+If your PR has failing GitHub Actions or CodeRabbit feedback, see [Handling CI Failures](handling-ci-failures.md) for:
+- Interpreting each CI job's output
+- Common failure patterns and resolutions
+- Decision tree for fix vs bounce
+- Using fix-forward-runner for mechanical fixes
+
+---
+
 ## Quick Diagnosis Ladder
 
 | Symptom                  | First Check                           | Likely Cause                                                               |

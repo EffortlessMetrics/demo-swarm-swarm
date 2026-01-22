@@ -327,3 +327,6 @@ Use this for every swarm PR:
 - [pr-review-interface.md](../reference/pr-review-interface.md) — PR Brief template and philosophy
 - [working-with-receipts.md](working-with-receipts.md) — How to read receipts
 - [troubleshoot.md](troubleshoot.md) — When things look wrong
+- [pr-cockpit.md](../examples/pr-cockpit.md) — Example PR description
+- [code-critique.md](../examples/code-critique.md) — Example critique output
+- [merge-decision.md](../examples/merge-decision.md) — Example gate decision

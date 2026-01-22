@@ -1,0 +1,49 @@
+{
+  "schema_version": "signal_receipt_v1",
+  "run_id": "feat-session-timeout",
+  "flow": "signal",
+  "status": "VERIFIED",
+  "recommended_action": "PROCEED",
+  "route_to_flow": 2,
+  "route_to_agent": null,
+  "missing_required": [],
+  "blockers": [],
+  "completed_at": "2024-01-15T09:30:00Z",
+  "evidence_sha": "abc123def456",
+  "generated_at": "2024-01-15T09:30:00Z",
+
+  "counts": {
+    "functional_requirements": 5,
+    "non_functional_requirements": 3,
+    "bdd_scenarios": 12,
+    "open_questions": 2,
+    "risks": {
+      "critical": 0,
+      "high": 1,
+      "medium": 2,
+      "low": 1
+    }
+  },
+
+  "quality_gates": {
+    "requirements_critic": "VERIFIED",
+    "bdd_critic": "VERIFIED"
+  },
+
+  "key_artifacts": [
+    "requirements.md",
+    "features/session_timeout.feature",
+    "features/session_cleanup.feature",
+    "open_questions.md",
+    "early_risks.md"
+  ],
+
+  "stations": {
+    "requirements-author": { "executed": true, "result": "PASS" },
+    "requirements-critic": { "executed": true, "result": "PASS" },
+    "bdd-author": { "executed": true, "result": "PASS" },
+    "bdd-critic": { "executed": true, "result": "PASS" },
+    "scope-assessor": { "executed": true, "result": "PASS" },
+    "clarifier": { "executed": true, "result": "PASS" }
+  }
+}
