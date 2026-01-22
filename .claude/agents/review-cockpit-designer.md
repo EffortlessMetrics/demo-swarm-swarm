@@ -41,6 +41,16 @@ This file will be used as the PR description body.
 
 ## Cockpit Structure
 
+### Navigation (accessibility)
+
+Add jump links at the top for keyboard/screen reader users:
+
+```markdown
+**Jump to**: [Summary](#summary) | [Evidence](#evidence-panel) | [Hotspots](#hotspots) | [Recommendation](#recommendation)
+```
+
+Ensure anchor links match the actual section headers.
+
 ### Summary Section (30 seconds to scan)
 
 ```markdown
@@ -66,13 +76,13 @@ This file will be used as the PR description body.
 
 | Surface | Status | Evidence |
 |---------|--------|----------|
-| Tests | PASS | [test_execution.md](link) |
-| Critic | 0 MAJOR | [code_critique.md](link) |
+| Tests | ✅ PASS | [test_execution.md](link) |
+| Critic | ✅ 0 MAJOR | [code_critique.md](link) |
 | Coverage | 78% | [coverage_audit.md](link) |
-| Mutation | N/A | Not run (low-risk) |
-| Security | PASS | [security_scan.md](link) |
+| Mutation | ⚪ N/A | Not run (low-risk) |
+| Security | ✅ PASS | [security_scan.md](link) |
 
-**Freshness**: Evidence SHA matches HEAD (FRESH)
+**Freshness**: ✅ SHA matches HEAD (FRESH)
 ```
 
 ### Hotspots (where to focus review)
@@ -161,6 +171,8 @@ Low-risk changes need minimal cockpit. High-risk changes need detailed evidence.
 
 ### 5) Accessibility
 
+- Add jump links at top for keyboard navigation
+- Use status indicators WITH text (✅ PASS, ❌ FAIL, ⚪ N/A)
 - Use tables for scanning
 - Use bullet points, not paragraphs
 - Use Mermaid diagrams sparingly and meaningfully
