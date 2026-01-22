@@ -24,6 +24,9 @@ jobs:
       - name: Lint .claude frontmatter
         run: python scripts/lint_frontmatter.py
 
+      - name: Validate agent prompts
+        run: python scripts/validate_agent_prompts.py
+
   pack-check:
     runs-on: ubuntu-latest
     steps:

@@ -119,7 +119,7 @@ fn check_regression_markers(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result
 #[cfg(test)]
 mod tests {
     use super::headings;
-    use crate::contracts::Regexes;
+    use crate::contracts::test_utils::REGEXES;
 
     // -------------------------------------------------------------------------
     // Smoke signal regex tests (Check 36)
@@ -128,7 +128,7 @@ mod tests {
     /// Smoke signal enum line is detected correctly.
     #[test]
     fn test_smoke_signal_regex_valid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         let valid = "smoke_signal: STABLE | INVESTIGATE | ROLLBACK";
         assert!(
@@ -147,7 +147,7 @@ mod tests {
     /// Invalid smoke signal lines are rejected.
     #[test]
     fn test_smoke_signal_regex_invalid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Wrong order
         let wrong_order = "smoke_signal: INVESTIGATE | STABLE | ROLLBACK";
@@ -174,7 +174,7 @@ mod tests {
     /// Smoke signal with whitespace variations.
     #[test]
     fn test_smoke_signal_whitespace() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Extra spaces
         let extra_spaces = "smoke_signal:  STABLE  |  INVESTIGATE  |  ROLLBACK";
@@ -250,7 +250,7 @@ status: VERIFIED
     /// REG marker grep regex matches expected patterns.
     #[test]
     fn test_grep_reg_marker_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // The grep pattern for heading-based REG markers
         // The regex pattern `grep.*\^### REG-\[0-9\]\{3\}:` expects:
@@ -480,7 +480,7 @@ smoke_signal: STABLE
     /// smoke-verifier should have canonical recommended_action.
     #[test]
     fn test_smoke_verifier_canon_action() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         let with_canon_action = "recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
         assert!(re.canon_action.is_match(with_canon_action));
@@ -493,7 +493,7 @@ smoke_signal: STABLE
     /// Domain actions belong in smoke_signal, not recommended_action.
     #[test]
     fn test_domain_actions_in_smoke_signal() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // ROLLBACK and INVESTIGATE are domain-specific
         let smoke_signal_line = "smoke_signal: STABLE | INVESTIGATE | ROLLBACK";

@@ -328,9 +328,9 @@ name: test-agent
             "flow-1-signal.md",
             "flow-2-plan.md",
             "flow-3-build.md",
-            "flow-4-gate.md",
-            "flow-5-deploy.md",
-            "flow-7-wisdom.md",
+            "flow-4-review.md",
+            "flow-5-gate.md",
+            "flow-6-deploy.md",
         ];
 
         for (i, name) in valid_names.iter().enumerate() {
@@ -580,7 +580,8 @@ name: different-name
     /// Helper: run structure checks and collect diagnostics.
     fn run_structure_checks(repo_root: &std::path::Path) -> (usize, usize, Vec<String>) {
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -588,13 +589,12 @@ name: different-name
         let ctx = Ctx::discover(Some(repo_root.to_path_buf())).unwrap();
         let inv = Inventory::from_ctx(&ctx).unwrap();
         let contracts = Contracts::default();
-        let re = Regexes::compile().unwrap();
 
         let mut rep = Reporter::new(OutputFormat::Json, false, false);
         let check_ctx = super::CheckCtx {
             ctx: &ctx,
             inv: &inv,
-            re: &re,
+            re: &REGEXES,
             c: &contracts,
         };
 
