@@ -227,7 +227,7 @@ All custom patterns are validated at load time. If any pattern has invalid regex
 1. **stdout scan**: Status string (`CLEAN` | `SECRETS_FOUND` | `SCAN_PATH_MISSING` | `PATTERN_ERROR`)
 2. **stdout redact**: Status string (`ok` | `FILE_NOT_FOUND` | `null`)
 3. **JSON output**: Written to `--output` file path, not stdout
-4. **exit code**: `0` always (errors expressed in output, not exit code)
+4. **exit code**: `0` always (errors expressed in output, not exit code). In CI or human scripts, fail-fast via exit code is appropriate; agents should record `PATTERN_ERROR` in the JSON and hand off to the orchestrator rather than exiting abruptly.
 5. **No secrets in output**: Any output containing secret values is a bug
 
 ---

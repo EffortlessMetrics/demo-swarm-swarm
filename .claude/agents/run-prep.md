@@ -75,8 +75,8 @@ gh api repos/{owner}/{repo}/branches/{branch}/protection
 
 - **200 with `required_status_checks`:** Branch is protected with CI gates. Extract check names.
 - **200 without `required_status_checks`:** Branch is "protected" but merges aren't gated on checks.
-- **404 with "Branch not protected":** No branch protection configured.
-- **401/403:** Permission denied (user lacks admin access to view protection). Log as "unverifiable."
+- **404:** Ambiguous. Could mean "branch not protected" OR "permission denied" (user lacks admin access). Treat as **UNVERIFIABLE** unless you have a separate positive signal confirming the branch exists and is accessible.
+- **401/403:** Permission denied. Log as "unverifiable."
 - **Network/API error:** Log as "unverifiable" with error details.
 
 4. **Write summary** to `.runs/<run-id>/branch_protection_check.md`:
@@ -106,25 +106,25 @@ gh api repos/{owner}/{repo}/branches/{branch}/protection
 
 ```json
 {
-  "branch_protection_verified": true | false | "unknown",
+  "branch_protection_verified": true | false,
   "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE",
   "branch_protection_checked_at": "<ISO8601>"
 }
 ```
 
 Where:
-- `true` = Branch is protected with required status checks
-- `false` = Branch exists but is not protected (or protected without checks)
-- `"unknown"` = Could not verify (permissions, network, `github_ops_allowed: false`)
+- `branch_protection_verified: true` = Successfully queried and confirmed protection status
+- `branch_protection_verified: false` = Could not verify (permissions, network, `github_ops_allowed: false`, ambiguous 404)
+- `branch_protection_status` = The actual status when verified ("PROTECTED" or "UNPROTECTED"), or "UNVERIFIABLE" when not
 
 ### Graceful Fallback
 
 If the check cannot complete:
 
-- **`github_ops_allowed: false`:** Skip check, set `branch_protection_verified: "unknown"`, note "GitHub operations disabled."
-- **No `github_repo` in run_meta:** Skip check, set `branch_protection_verified: "unknown"`, note "No GitHub repo configured."
-- **401/403 from API:** Set `branch_protection_verified: "unknown"`, note "Permission denied - admin access required to view branch protection."
-- **Network/other error:** Set `branch_protection_verified: "unknown"`, include error details.
+- **`github_ops_allowed: false`:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "GitHub operations disabled."
+- **No `github_repo` in run_meta:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "No GitHub repo configured."
+- **401/403/404 from API:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "Permission denied - admin access required to view branch protection."
+- **Network/other error:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, include error details.
 
 **Never block the flow.** This is advisory information for later flows (especially Gate and Deploy).
 
@@ -207,7 +207,7 @@ Create or update `.runs/<run-id>/run_meta.json`:
   "related_runs": [],
   "base_ref": "<branch-name | null>",
 
-  "branch_protection_verified": "true | false | unknown",
+  "branch_protection_verified": true | false,
   "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE | null",
   "branch_protection_checked_at": "<ISO8601 | null>"
 }

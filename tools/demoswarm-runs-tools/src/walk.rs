@@ -139,20 +139,34 @@ impl WalkDir {
                             Ok(entry) => {
                                 let path = entry.path();
 
-                                // Use metadata to avoid following symlinks
+                                // Use symlink_metadata to check the entry type without following
                                 match path.symlink_metadata() {
                                     Ok(meta) => {
                                         if meta.is_file() {
+                                            // Regular file: include it
                                             self.pending_files.push_back(path);
                                         } else if meta.is_dir() {
-                                            // Check exclusion list
+                                            // Regular directory: traverse it (unless excluded)
                                             if let Some(name) = path.file_name() {
                                                 if !self.is_excluded(name) {
                                                     self.stack.push_back(path);
                                                 }
                                             }
+                                        } else if meta.file_type().is_symlink() {
+                                            // Symlink: follow to check what it points to
+                                            // Include if it resolves to a file, skip if directory
+                                            // (avoids directory traversal loops while including
+                                            // common patterns like symlinked .env files)
+                                            match fs::metadata(&path) {
+                                                Ok(target_meta) if target_meta.is_file() => {
+                                                    self.pending_files.push_back(path);
+                                                }
+                                                // Symlink to directory: skip (avoid loops)
+                                                // Broken symlink: skip
+                                                _ => {}
+                                            }
                                         }
-                                        // Skip symlinks and other file types
+                                        // Skip other special file types (devices, pipes, etc.)
                                     }
                                     Err(e) => {
                                         self.record_skipped(

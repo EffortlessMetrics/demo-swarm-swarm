@@ -16,7 +16,7 @@ This is an example of a work plan artifact produced by the work-planner agent in
 
 Implement configurable session timeout functionality with automatic cleanup of expired sessions.
 
-**Total subtasks:** 8
+**Total subtasks:** 9
 **Estimated effort:** 2-3 days
 
 ---

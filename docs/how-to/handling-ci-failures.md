@@ -17,7 +17,7 @@ When CI fails, start here:
 | `lint` job failed | GitHub Actions > lint | Run auto-linter skill |
 | `pack-check` job failed | GitHub Actions > pack-check | Fix pack structure issues |
 | `demoswarm-smoke` job failed | GitHub Actions > demoswarm-smoke | Fix CLI or Rust tooling |
-| `runs-tools-tests` job failed | GitHub Actions > runs-tools-tests | Fix Rust tests |
+| `tooling-tests` job failed | GitHub Actions > tooling-tests | Fix Rust tests |
 | `doc-drift` job failed | GitHub Actions > doc-drift | Update stale doc references |
 | CodeRabbit comment | PR comments | Address feedback per type |
 
@@ -103,10 +103,10 @@ bash .claude/scripts/demoswarm.sh time now
 bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 ```
 
-### 4. `runs-tools-tests` Job
+### 4. `tooling-tests` Job
 
 **What it checks:**
-- Rust unit tests for the runs-tools crate
+- Rust unit tests for the CLI tooling crate
 
 **Common failures:**
 
@@ -124,7 +124,7 @@ cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
 ### 5. `doc-drift` Job
 
 **What it checks:**
-- Stale skill name references (`runs-tools` was split into multiple skills)
+- Stale skill name references (legacy monolith skill was split into `runs-derive`, `runs-index`, `openq-tools`, `secrets-tools`)
 - Old CLI interface patterns (deprecated flags)
 - Required docs exist (quickstart, releasing guide, CLI reference, etc.)
 - Legacy Python fallback not promoted over Rust CLI
@@ -133,10 +133,10 @@ cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| "stale 'runs-tools' references" | Old skill name in docs | Update to `runs-derive`, `runs-index`, `openq-tools`, or `secrets-tools` |
-| "old openq interface (--flow, --qid)" | Deprecated flag usage | Update to current CLI interface |
-| "yaml count-items --key" | Wrong flag name | Use `--item-regex` instead |
-| "inv get --key" | Wrong flag name | Use `--marker` instead |
+| "stale skill-name references" | Old monolith skill name in docs | Update to `runs-derive`, `runs-index`, `openq-tools`, or `secrets-tools` |
+| "legacy Open Questions flags" | Deprecated flag usage | Update to current CLI interface |
+| "yaml count-items flag mismatch" | Wrong flag name | Use `--item-regex` instead |
+| "inv get flag mismatch" | Wrong flag name | Use `--marker` instead |
 | "Missing required doc" | Required file doesn't exist | Create the required documentation |
 
 **How to fix locally:**
@@ -203,7 +203,7 @@ python scripts/lint_frontmatter.py
 
 ### Pattern 2: Test Failures
 
-**Symptom:** `runs-tools-tests` job fails.
+**Symptom:** `tooling-tests` job fails.
 
 **Resolution:**
 
@@ -249,7 +249,7 @@ bash .claude/scripts/pack-check.sh
 bash scripts/check-doc-drift.sh
 
 # Common updates:
-# - "runs-tools" -> appropriate new skill name
+# - legacy monolith skill name -> appropriate new skill name
 # - Old CLI flags -> current flag names
 # - Missing docs -> create required files
 ```
@@ -368,7 +368,7 @@ change_scope:
 | lint | Fix frontmatter, remove harness refs | `python scripts/lint_frontmatter.py` |
 | pack-check | Fix pack structure | `bash .claude/scripts/pack-check.sh` |
 | demoswarm-smoke | Fix CLI/Rust code | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
-| runs-tools-tests | Fix Rust tests | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
+| tooling-tests | Fix Rust tests | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
 | doc-drift | Update stale references | `bash scripts/check-doc-drift.sh` |
 
 ---

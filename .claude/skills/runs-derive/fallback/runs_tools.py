@@ -364,6 +364,8 @@ def try_git_show(path: str) -> Optional[str]:
         if result.returncode == 0:
             return result.stdout
     except Exception:
+        # Best-effort git fallback: if git is unavailable or errors, behave as if
+        # the file is missing and let the caller handle None.
         pass
     return None
 

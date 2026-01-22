@@ -250,16 +250,13 @@ fn scan(args: &SecretsScan) -> Result<()> {
     // Use shared walker with exclusions and verbose mode for security scanning
     let mut walker = walk_dir_excluding_verbose(root, EXCLUDED_DIRS, verbose);
 
-    // Collect files from walker
-    let files: Vec<_> = walker.by_ref().collect();
+    // Stream files directly instead of collecting (reduces memory usage)
+    for f in walker.by_ref() {
+        scan_one_file(&f, &compiled, &mut findings, &mut skipped, verbose);
+    }
 
     // Get skipped items from directory walking
     skipped.extend(walker.take_skipped_items());
-
-    // Scan each file
-    for f in files {
-        scan_one_file(&f, &compiled, &mut findings, &mut skipped, verbose);
-    }
 
     let skipped_count = skipped.len();
 

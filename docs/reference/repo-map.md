@@ -20,7 +20,7 @@ This is a **pack-only repo**; no runtime, UI, harness, or application code lives
 |-- .github/               # CI workflow + PR template
 |-- docs/                  # Documentation (Diataxis layout)
 |-- scripts/               # Bootstrap and validation scripts
-|-- tools/                 # Rust CLI tools (pack-check, runs-tools)
+|-- tools/                 # Rust CLI tools (pack-check, CLI tooling)
 |
 |-- ARCHITECTURE.md        # Architecture overview (explanation)
 |-- CHANGELOG.md           # Pack release history

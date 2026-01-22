@@ -203,7 +203,6 @@ def main() -> int:
     all_skills = get_all_skill_names()
 
     for agent_path in sorted(AGENTS_DIR.glob("*.md")):
-        agent_name = agent_path.stem
         rel_path = agent_path.relative_to(ROOT)
 
         try:
