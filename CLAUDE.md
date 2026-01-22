@@ -11,7 +11,7 @@ This repository contains an SDLC swarm pack under `.claude/`.
 This pack provides:
 
 - **7 flows**: Signal → Plan → Build → Review → Gate → Deploy → Wisdom
-- **Narrow specialist agents**: requirements-author, code-critic, test-author, \*-cleanup, etc. (see `.claude/agents/`)
+- **Narrow specialist agents**: requirements-author, code-critic, test-author, *-cleanup, etc. (see `.claude/agents/`)
 - **7 skills**: test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools
 
 Start here:
@@ -25,7 +25,6 @@ Then proceed in order (unless you are intentionally running out-of-order):
 `/flow-2-plan` → `/flow-3-build` → `/flow-4-review` → `/flow-5-gate` → `/flow-6-deploy` → `/flow-7-wisdom`
 
 **Quick links for reviewers:**
-
 - [What is quality here?](docs/reference/pr-quality-scorecard.md) — the multi-sensor trust panel
 - [How do I review a swarm PR?](docs/how-to/review-a-swarm-pr.md) — the decision procedure
 - [Show me examples](docs/examples/) — sample artifacts
@@ -50,18 +49,18 @@ See: [docs/explanation/why-ops-first.md](docs/explanation/why-ops-first.md)
 
 Claude Code rules live in `.claude/rules/`. They encode the physics and vibe that shape all behavior.
 
-| Rule                            | What It Governs                                      |
-| ------------------------------- | ---------------------------------------------------- |
-| `00-doctrine.md`                | Core thesis, the triangle, anti-austerity            |
-| `10-operating-model.md`         | PM + IC swarm, when to spawn agents                  |
-| `20-intent-to-narrative.md`     | The pipeline from intent to PR                       |
-| `30-autonomy-and-boundaries.md` | Default-allow + strict gates                         |
-| `40-evidence-and-quality.md`    | Claims require pointers, the quality panel           |
-| `50-agent-contract.md`          | Agent prompts (scoped to `.claude/agents/`)          |
-| `60-flow-orchestrators.md`      | Flow commands (scoped to `.claude/commands/flow-*`)  |
-| `70-docs-and-teaching.md`       | Documentation (scoped to `docs/`)                    |
-| `80-developer-experience.md`    | UX, accessibility, investing in quality              |
-| `90-voice-and-tone.md`          | How we communicate: industrial clarity, human warmth |
+| Rule | What It Governs |
+|------|-----------------|
+| `00-doctrine.md` | Core thesis, the triangle, anti-austerity |
+| `10-operating-model.md` | PM + IC swarm, when to spawn agents |
+| `20-intent-to-narrative.md` | The pipeline from intent to PR |
+| `30-autonomy-and-boundaries.md` | Default-allow + strict gates |
+| `40-evidence-and-quality.md` | Claims require pointers, the quality panel |
+| `50-agent-contract.md` | Agent prompts (scoped to `.claude/agents/`) |
+| `60-flow-orchestrators.md` | Flow commands (scoped to `.claude/commands/flow-*`) |
+| `70-docs-and-teaching.md` | Documentation (scoped to `docs/`) |
+| `80-developer-experience.md` | UX, accessibility, investing in quality |
+| `90-voice-and-tone.md` | How we communicate: industrial clarity, human warmth |
 
 Rules are the constitution Claude loads reliably. CLAUDE.md is the contract. Docs are the textbook.
 
@@ -74,12 +73,10 @@ Rules are the constitution Claude loads reliably. CLAUDE.md is the contract. Doc
 Orchestrators scope work, route tasks, and make sequencing decisions. Agents do real cognitive work: they think, investigate, make judgment calls, and produce artifacts with substance. Agents are not clipboard-copiers or template-fillers.
 
 **Why spawn an agent?** Two reasons only:
-
 1. **Do work** — The task requires focused expertise (code-implementer writes code, test-author writes tests)
 2. **Compress context** — A specialist can summarize, filter, or derive information more efficiently than carrying full context forward
 
 **Every agent returns two things:**
-
 1. **An answer** — What they found, built, or concluded
 2. **A routing suggestion** — What should happen next and why
 
@@ -134,15 +131,15 @@ See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audi
 
 ## The Seven Flows
 
-| Flow      | Slash Command    | Key Outputs                                                         |
-| --------- | ---------------- | ------------------------------------------------------------------- |
-| 1. Signal | `/flow-1-signal` | `requirements.md`, `features/*.feature`, `signal_receipt.json`      |
-| 2. Plan   | `/flow-2-plan`   | `adr.md`, `api_contracts.yaml`, `work_plan.md`, `plan_receipt.json` |
-| 3. Build  | `/flow-3-build`  | code/tests, critiques, `build_receipt.json`, Draft PR               |
-| 4. Review | `/flow-4-review` | `review_worklist.md`, `review_receipt.json`                         |
-| 5. Gate   | `/flow-5-gate`   | `merge_decision.md`, `gate_receipt.json`                            |
-| 6. Deploy | `/flow-6-deploy` | `verification_report.md`, `deploy_receipt.json`                     |
-| 7. Wisdom | `/flow-7-wisdom` | `learnings.md`, `wisdom_receipt.json`                               |
+| Flow | Slash Command | Key Outputs |
+|------|---------------|-------------|
+| 1. Signal | `/flow-1-signal` | `requirements.md`, `features/*.feature`, `signal_receipt.json` |
+| 2. Plan | `/flow-2-plan` | `adr.md`, `api_contracts.yaml`, `work_plan.md`, `plan_receipt.json` |
+| 3. Build | `/flow-3-build` | code/tests, critiques, `build_receipt.json`, Draft PR |
+| 4. Review | `/flow-4-review` | `review_worklist.md`, `review_receipt.json` |
+| 5. Gate | `/flow-5-gate` | `merge_decision.md`, `gate_receipt.json` |
+| 6. Deploy | `/flow-6-deploy` | `verification_report.md`, `deploy_receipt.json` |
+| 7. Wisdom | `/flow-7-wisdom` | `learnings.md`, `wisdom_receipt.json` |
 
 Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVERIFIED outcomes when upstream artifacts are missing.
 
@@ -150,15 +147,15 @@ Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVER
 
 ## Skills
 
-| Skill           | Purpose                                          |
-| --------------- | ------------------------------------------------ |
-| `test-runner`   | Run tests, capture output to run artifacts       |
-| `auto-linter`   | Format + lint code                               |
-| `policy-runner` | Run policy-as-code checks                        |
-| `runs-derive`   | Read-only .runs derivations (counts, extraction) |
-| `runs-index`    | Write .runs/index.json updates                   |
-| `openq-tools`   | Open questions register (QID generation)         |
-| `secrets-tools` | Secrets scanning/redaction for publish gates     |
+| Skill | Purpose |
+|-------|---------|
+| `test-runner` | Run tests, capture output to run artifacts |
+| `auto-linter` | Format + lint code |
+| `policy-runner` | Run policy-as-code checks |
+| `runs-derive` | Read-only .runs derivations (counts, extraction) |
+| `runs-index` | Write .runs/index.json updates |
+| `openq-tools` | Open questions register (QID generation) |
+| `secrets-tools` | Secrets scanning/redaction for publish gates |
 
 ---
 
@@ -215,7 +212,6 @@ See: [docs/explanation/architecture.md](docs/explanation/architecture.md) for de
 ## Customization
 
 See [docs/how-to/customize-pack.md](docs/how-to/customize-pack.md) for:
-
 - Prerequisites (bash/jq/grep, Windows/WSL2/Git Bash)
 - Test/lint command adaptation
 - Source layout changes
@@ -226,7 +222,6 @@ See [docs/how-to/customize-pack.md](docs/how-to/customize-pack.md) for:
 ## Troubleshooting
 
 See [docs/how-to/troubleshoot.md](docs/how-to/troubleshoot.md) for common situations:
-
 - **Mechanical failures** — Environment or tooling issues blocking execution
 - **GitHub operations not happening** — Check that secrets scan passed and repo is in pushable state
 - **Loops not terminating** — Follow the agent's recommended action
@@ -249,24 +244,32 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 
 ## Reference Index
 
-| Topic                         | Location                                       |
-| ----------------------------- | ---------------------------------------------- |
-| **Rules (constitution)**      | `.claude/rules/*.md`                           |
-| The Thesis                    | `docs/explanation/the-thesis.md`               |
-| Architecture & Philosophy     | `docs/explanation/`                            |
-| The Physics                   | `docs/explanation/the-physics.md`              |
-| Emergent Phenomena            | `docs/explanation/emergent-phenomena.md`       |
-| Authority vs Difficulty       | `docs/explanation/authority-not-difficulty.md` |
-| Org Design as Code            | `docs/explanation/org-design-as-code.md`       |
-| Reviewing as Audit            | `docs/explanation/reviewing-as-audit.md`       |
-| Codebase as Mold              | `docs/explanation/codebase-as-mold.md`         |
-| Control-plane blocks, schemas | `docs/reference/contracts.md`                  |
-| Schemas                       | `docs/reference/schemas.md`                    |
-| Run state schemas             | `docs/reference/run-state.md`                  |
-| Stable markers                | `docs/reference/stable-markers.md`             |
-| Trust model                   | `docs/reference/trust-model.md`                |
-| Calibration                   | `docs/reference/calibration.md`                |
-| CLI commands                  | `docs/reference/demoswarm-cli.md`              |
-| How-to guides                 | `docs/how-to/`                                 |
-| Flow commands                 | `.claude/commands/flow-*.md`                   |
-| Agent prompts                 | `.claude/agents/*.md`                          |
+| Topic | Location |
+|-------|----------|
+| **Rules (constitution)** | `.claude/rules/*.md` |
+| **Explanation docs** | `docs/explanation/` |
+| The Thesis | `docs/explanation/the-thesis.md` |
+| The Physics | `docs/explanation/the-physics.md` |
+| Laws of the Swarm | `docs/explanation/laws-of-the-swarm.md` |
+| Economics | `docs/explanation/economics.md` |
+| Agent Philosophy | `docs/explanation/agent-philosophy.md` |
+| Architecture | `docs/explanation/architecture.md` |
+| Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
+| Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
+| Org Design as Code | `docs/explanation/org-design-as-code.md` |
+| Reviewing as Audit | `docs/explanation/reviewing-as-audit.md` |
+| Codebase as Mold | `docs/explanation/codebase-as-mold.md` |
+| **Reference docs** | `docs/reference/` |
+| Communication patterns | `docs/reference/contracts.md` |
+| Schemas | `docs/reference/schemas.md` |
+| Run state schemas | `docs/reference/run-state.md` |
+| Stable markers | `docs/reference/stable-markers.md` |
+| Trust model | `docs/reference/trust-model.md` |
+| Calibration | `docs/reference/calibration.md` |
+| CLI commands | `docs/reference/demoswarm-cli.md` |
+| Glossary | `docs/reference/glossary.md` |
+| Agents index | `docs/reference/agents-index.md` |
+| **How-to guides** | `docs/how-to/` |
+| Example artifacts | `docs/examples/` |
+| **Flow commands** | `.claude/commands/flow-*.md` |
+| **Agent prompts** | `.claude/agents/*.md` |

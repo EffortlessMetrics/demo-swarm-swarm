@@ -20,7 +20,6 @@ The PR cockpit is the primary human interface. Most reviewers will only read thi
 ## Inputs
 
 Read from `.runs/<run-id>/`:
-
 - `build/build_receipt.json`
 - `build/self_review.md`
 - `gate/merge_decision.md` (if exists)
@@ -30,19 +29,27 @@ Read from `.runs/<run-id>/`:
 - Any critique files
 
 Also read:
-
 - `run_meta.json` for PR number and context
 - Git diff summary for change scope
 
 ## Output
 
 Write exactly one file:
-
 - `.runs/<run-id>/review/pr_cockpit.md`
 
 This file will be used as the PR description body.
 
 ## Cockpit Structure
+
+### Navigation (accessibility)
+
+Add jump links at the top for keyboard/screen reader users:
+
+```markdown
+**Jump to**: [Summary](#summary) | [Evidence](#evidence-panel) | [Hotspots](#hotspots) | [Recommendation](#recommendation)
+```
+
+Ensure anchor links match the actual section headers.
 
 ### Summary Section (30 seconds to scan)
 
@@ -54,13 +61,12 @@ This file will be used as the PR description body.
 **Risk**: LOW | MEDIUM | HIGH
 
 ### Quick Stats
-
-| Metric        | Value              |
-| ------------- | ------------------ |
-| Files changed | X                  |
-| Lines +/-     | +Y / -Z            |
-| Tests         | A passed, B failed |
-| Coverage      | X%                 |
+| Metric | Value |
+|--------|-------|
+| Files changed | X |
+| Lines +/- | +Y / -Z |
+| Tests | A passed, B failed |
+| Coverage | X% |
 ```
 
 ### Evidence Panel (1 minute to scan)
@@ -68,15 +74,15 @@ This file will be used as the PR description body.
 ```markdown
 ## Evidence Panel
 
-| Surface  | Status  | Evidence                  |
-| -------- | ------- | ------------------------- |
-| Tests    | PASS    | [test_execution.md](link) |
-| Critic   | 0 MAJOR | [code_critique.md](link)  |
-| Coverage | 78%     | [coverage_audit.md](link) |
-| Mutation | N/A     | Not run (low-risk)        |
-| Security | PASS    | [security_scan.md](link)  |
+| Surface | Status | Evidence |
+|---------|--------|----------|
+| Tests | ✅ PASS | [test_execution.md](link) |
+| Critic | ✅ 0 MAJOR | [code_critique.md](link) |
+| Coverage | 78% | [coverage_audit.md](link) |
+| Mutation | ⚪ N/A | Not run (low-risk) |
+| Security | ✅ PASS | [security_scan.md](link) |
 
-**Freshness**: Evidence SHA matches HEAD (FRESH)
+**Freshness**: ✅ SHA matches HEAD (FRESH)
 ```
 
 ### Hotspots (where to focus review)
@@ -91,7 +97,6 @@ Review these 3-5 files for spot-checking:
 3. **tests/auth.test.ts** - New test coverage
 
 ### Why these files?
-
 - Highest complexity delta
 - Security-sensitive paths
 - Most lines changed
@@ -115,18 +120,16 @@ Review these 3-5 files for spot-checking:
 **Merge**: YES | NO | CONDITIONAL
 
 **Conditions** (if any):
-
 - [ ] Reviewer approves auth logic in login.ts
 - [ ] CI passes on final commit
 
 **Open Questions**:
-
 - None blocking merge
 ```
 
 ### Architecture Diagram (when helpful)
 
-````markdown
+```markdown
 ## Architecture
 
 ```mermaid
@@ -136,7 +139,8 @@ graph LR
     C --> D[(Database)]
 ```
 
-_New auth flow added in this PR_
+*New auth flow added in this PR*
+```
 
 ## Design Principles
 
@@ -167,6 +171,8 @@ Low-risk changes need minimal cockpit. High-risk changes need detailed evidence.
 
 ### 5) Accessibility
 
+- Add jump links at top for keyboard navigation
+- Use status indicators WITH text (✅ PASS, ❌ FAIL, ⚪ N/A)
 - Use tables for scanning
 - Use bullet points, not paragraphs
 - Use Mermaid diagrams sparingly and meaningfully

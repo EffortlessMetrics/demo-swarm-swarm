@@ -1,6 +1,6 @@
 [package]
 name = "demoswarm-pack-check"
-version = "1.0.1"
+version = "2.2.0"
 edition = "2024"
 rust-version = "1.89"
 description = "Validator for DemoSwarm .claude packs (structural + contract consistency)."
