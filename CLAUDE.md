@@ -247,21 +247,29 @@ See: [docs/reference/demoswarm-cli.md](docs/reference/demoswarm-cli.md) for comm
 | Topic | Location |
 |-------|----------|
 | **Rules (constitution)** | `.claude/rules/*.md` |
+| **Explanation docs** | `docs/explanation/` |
 | The Thesis | `docs/explanation/the-thesis.md` |
-| Architecture & Philosophy | `docs/explanation/` |
 | The Physics | `docs/explanation/the-physics.md` |
+| Laws of the Swarm | `docs/explanation/laws-of-the-swarm.md` |
+| Economics | `docs/explanation/economics.md` |
+| Agent Philosophy | `docs/explanation/agent-philosophy.md` |
+| Architecture | `docs/explanation/architecture.md` |
 | Emergent Phenomena | `docs/explanation/emergent-phenomena.md` |
 | Authority vs Difficulty | `docs/explanation/authority-not-difficulty.md` |
 | Org Design as Code | `docs/explanation/org-design-as-code.md` |
 | Reviewing as Audit | `docs/explanation/reviewing-as-audit.md` |
 | Codebase as Mold | `docs/explanation/codebase-as-mold.md` |
-| Control-plane blocks, schemas | `docs/reference/contracts.md` |
+| **Reference docs** | `docs/reference/` |
+| Communication patterns | `docs/reference/contracts.md` |
 | Schemas | `docs/reference/schemas.md` |
 | Run state schemas | `docs/reference/run-state.md` |
 | Stable markers | `docs/reference/stable-markers.md` |
 | Trust model | `docs/reference/trust-model.md` |
 | Calibration | `docs/reference/calibration.md` |
 | CLI commands | `docs/reference/demoswarm-cli.md` |
-| How-to guides | `docs/how-to/` |
-| Flow commands | `.claude/commands/flow-*.md` |
-| Agent prompts | `.claude/agents/*.md` |
+| Glossary | `docs/reference/glossary.md` |
+| Agents index | `docs/reference/agents-index.md` |
+| **How-to guides** | `docs/how-to/` |
+| Example artifacts | `docs/examples/` |
+| **Flow commands** | `.claude/commands/flow-*.md` |
+| **Agent prompts** | `.claude/agents/*.md` |

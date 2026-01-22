@@ -8,6 +8,7 @@ Pick docs by intent: **learn**, **do**, **look up**, **understand**, or **mainta
 
 | Goal | Doc |
 |------|-----|
+| Understand the key insight first | [START-HERE](START-HERE.md) |
 | Run Flow 1 in 5 minutes | [Quickstart](tutorials/quickstart.md) |
 | Customize for your stack | [Customize Pack](how-to/customize-pack.md) |
 | Understand the design | [Architecture](explanation/architecture.md) |
@@ -23,6 +24,7 @@ Pick docs by intent: **learn**, **do**, **look up**, **understand**, or **mainta
 | Accomplish a specific task | [How-to](how-to/README.md) |
 | Look up schemas or enums | [Reference](reference/README.md) |
 | Understand why things work this way | [Explanation](explanation/README.md) |
+| See example artifacts | [Examples](examples/README.md) |
 | Maintain or release the pack | [Maintainers](maintainers/README.md) |
 
 ---

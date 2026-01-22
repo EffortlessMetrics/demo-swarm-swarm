@@ -8,27 +8,27 @@
 
 | Flow | Name | Primary Input | Primary Output | Key Agents | Typical Duration |
 |------|------|---------------|----------------|------------|------------------|
-| 1 | Signal | Feature request / issue | `signal_receipt.json`, requirements, BDD | gh-issue-resolver, requirements-author, bdd-author, spec-auditor | 15-30 min |
-| 2 | Plan | Requirements + BDD scenarios | `plan_receipt.json`, ADR, contracts, work plan | impact-analyzer, design-optioneer, adr-author, interface-designer | 20-40 min |
-| 3 | Build | ADR + contracts + work plan | `build_receipt.json`, code, tests, Draft PR | test-author, code-implementer, test-executor, pr-creator | 30-90 min |
-| 4 | Review | Draft PR + feedback | `review_receipt.json`, resolved worklist | pr-feedback-harvester, review-worklist-writer, fixer | 15-45 min |
-| 5 | Gate | Build + Review receipts | `gate_receipt.json`, merge decision | receipt-checker, security-scanner, merge-decider | 10-25 min |
-| 6 | Deploy | Gate MERGE decision | `deploy_receipt.json`, deployment verdict | deploy-decider, repo-operator, deploy-monitor | 5-15 min |
-| 7 | Wisdom | All prior receipts | `wisdom_receipt.json`, learnings | solution-analyst, quality-analyst, learning-synthesizer | 20-40 min |
+| 1 | Signal | Feature request / issue | `signal_receipt.json`, requirements, BDD | gh-issue-resolver, requirements-author, bdd-author, scope-assessor, spec-auditor | 15-30 min |
+| 2 | Plan | Requirements + BDD scenarios | `plan_receipt.json`, ADR, contracts, work plan | impact-analyzer, design-optioneer, adr-author, interface-designer, test-strategist, work-planner | 20-40 min |
+| 3 | Build | ADR + contracts + work plan | `build_receipt.json`, code, tests, Draft PR | test-author, code-implementer, test-executor, standards-enforcer, pr-creator | 30-90 min |
+| 4 | Review | Draft PR + feedback | `review_receipt.json`, resolved worklist | pr-feedback-harvester, review-worklist-writer, pr-commenter, pr-status-manager | 15-45 min |
+| 5 | Gate | Build + Review receipts | `gate_receipt.json`, merge decision | receipt-checker, contract-enforcer, security-scanner, coverage-enforcer, merge-decider | 10-25 min |
+| 6 | Deploy | Gate MERGE decision | `deploy_receipt.json`, deployment verdict | deploy-decider, repo-operator, deploy-monitor, smoke-verifier | 5-15 min |
+| 7 | Wisdom | All prior receipts | `wisdom_receipt.json`, learnings | solution-analyst, quality-analyst, maintainability-analyst, learning-synthesizer, feedback-applier | 20-40 min |
 
 ---
 
-## Agent Count per Flow
+## Agent Categories
 
-| Flow | Domain Agents | Cross-Cutting Agents | Infrastructure Agents | Total |
-|------|---------------|----------------------|-----------------------|-------|
-| 1 - Signal | 8 | 3 | 6 | 17 |
-| 2 - Plan | 10 | 4 | 5 | 19 |
-| 3 - Build | 13 | 3 | 6 | 22 |
-| 4 - Review | 6 | 2 | 6 | 14 |
-| 5 - Gate | 7 | 3 | 5 | 15 |
-| 6 - Deploy | 4 | 0 | 5 | 9 |
-| 7 - Wisdom | 12 | 2 | 5 | 19 |
+Agents are organized into three categories across all flows:
+
+| Category | Examples | Purpose |
+|----------|----------|---------|
+| **Domain Agents** | requirements-author, code-implementer, merge-decider | Do the primary work of each flow |
+| **Cross-Cutting Agents** | clarifier, risk-analyst, policy-analyst | Provide expertise used across multiple flows |
+| **Infrastructure Agents** | run-prep, repo-operator, secrets-sanitizer, *-cleanup | Handle setup, git operations, and finalization |
+
+For authoritative agent lists per flow, see the individual flow command files in `.claude/commands/flow-*.md`.
 
 ---
 
@@ -40,21 +40,36 @@
 |----------|----------|---------|
 | `signal_receipt.json` | signal-cleanup | Machine-readable summary for downstream |
 | `requirements.md` | requirements-author | Functional + non-functional requirements |
+| `requirements_critique.md` | requirements-critic | Critique and iteration guidance |
 | `features/*.feature` | bdd-author | BDD scenarios in Gherkin format |
+| `verification_notes.md` | bdd-author | NFR verification criteria (non-BDD) |
+| `bdd_critique.md` | bdd-critic | Critique of BDD scenarios |
 | `problem_statement.md` | problem-framer | Goals, non-goals, constraints |
-| `early_risks.md` | scope-assessor | Initial risk identification |
+| `stakeholders.md` | scope-assessor | Teams, systems, users affected |
+| `early_risks.md` | scope-assessor | Initial risk identification by category |
+| `risk_assessment.md` | risk-analyst | Deep risk analysis with severity ratings |
 | `scope_estimate.md` | scope-assessor | S/M/L/XL estimate with rationale |
+| `spec_audit.md` | spec-auditor | Integrative audit verdict |
 
 ### Flow 2: Plan
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
 | `plan_receipt.json` | plan-cleanup | Receipt for downstream flows |
+| `impact_map.json` | impact-analyzer | Affected services, modules, data |
+| `design_options.md` | design-optioneer | 2-3 architecture options with trade-offs |
+| `option_critique.md` | option-critic | Options critique + worklist |
 | `adr.md` | adr-author | Architecture decision record |
 | `api_contracts.yaml` | interface-designer | Endpoints, schemas, error shapes |
-| `work_plan.md` | work-planner | Subtasks, ordering, dependencies |
-| `ac_matrix.md` | test-strategist | AC-driven build contract |
+| `schema.md` | interface-designer | Data models, relationships, invariants |
+| `contract_critique.md` | contract-critic | Contract validation critique |
 | `observability_spec.md` | observability-designer | Metrics, logs, traces, SLOs |
+| `observability_critique.md` | observability-critic | Observability validation critique |
+| `test_plan.md` | test-strategist | BDD to test types mapping |
+| `ac_matrix.md` | test-strategist | AC-driven build contract |
+| `work_plan.md` | work-planner | Subtasks, ordering, dependencies |
+| `design_validation.md` | design-critic | Feasibility assessment |
+| `policy_analysis.md` | policy-analyst | Policy compliance check |
 
 ### Flow 3: Build
 
@@ -62,48 +77,87 @@
 |----------|----------|---------|
 | `build_receipt.json` | build-cleanup | AC completion tracker, test results |
 | `ac_status.json` | build-cleanup | Per-AC pass/fail status |
-| `impl_changes_summary.md` | code-implementer | What code changed and why |
 | `test_changes_summary.md` | test-author | What tests were added/modified |
+| `test_critique.md` | test-critic | Test quality assessment |
+| `impl_changes_summary.md` | code-implementer | What code changed and why |
 | `code_critique.md` | code-critic | Implementation quality assessment |
+| `test_execution.md` | test-executor | Test run results |
+| `standards_report.md` | standards-enforcer | Format/lint verification |
+| `mutation_report.md` | mutation-auditor | Mutation testing results (if run) |
+| `flakiness_report.md` | flakiness-detector | Test flakiness analysis (if run) |
+| `doc_updates.md` | doc-writer | Documentation changes |
+| `doc_critique.md` | doc-critic | Documentation review |
+| `self_review.md` | self-reviewer | Final consistency check |
 | `pr_creation_status.md` | pr-creator | Draft PR details |
+| `pr_feedback.md` | pr-feedback-harvester | Bot/human feedback from PR |
 
 ### Flow 4: Review
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
 | `review_receipt.json` | review-cleanup | Worklist resolution summary |
-| `review_worklist.json` | review-worklist-writer | Machine-readable item tracker |
 | `pr_feedback.md` | pr-feedback-harvester | Summarized bot + human feedback |
-| `review_actions.md` | orchestrator | Cumulative log of changes made |
+| `review_worklist.md` | review-worklist-writer | Actionable items with stable markers |
+| `review_worklist.json` | review-worklist-writer | Machine-readable item tracker |
+| `review_actions.md` | review-worklist-writer | Cumulative log of changes made |
+| `style_sweep.md` | orchestrator | Style sweep result |
+| `cleanup_report.md` | review-cleanup | Cleanup summary |
 
 ### Flow 5: Gate
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
 | `gate_receipt.json` | gate-cleanup | Final verification summary |
-| `merge_decision.md` | merge-decider | MERGE / BOUNCE with reasoning |
 | `receipt_audit.md` | receipt-checker | Build receipt verification |
+| `contract_compliance.md` | contract-enforcer | API contract check results |
 | `security_scan.md` | security-scanner | Security scan findings |
-| `traceability_audit.md` | traceability-auditor | REQ-BDD-Code coherence |
+| `coverage_audit.md` | coverage-enforcer | Coverage threshold check |
+| `gate_fix_summary.md` | gate-fixer | Mechanical issues report + fix-forward plan |
+| `fix_forward_report.md` | fix-forward-runner | Runner execution log (if eligible) |
+| `traceability_audit.md` | traceability-auditor | Run-level coherence + spec traceability |
+| `risk_assessment.md` | risk-analyst | Risk analysis |
+| `policy_analysis.md` | policy-analyst | Policy compliance check |
+| `merge_decision.md` | merge-decider | MERGE / BOUNCE with reasoning |
+| `cleanup_report.md` | gate-cleanup | Cleanup summary |
 
 ### Flow 6: Deploy
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
 | `deploy_receipt.json` | deploy-cleanup | Deployment outcome record |
+| `deployment_log.md` | repo-operator | Merge, tag, release actions (or why skipped) |
+| `verification_report.md` | deploy-monitor, smoke-verifier | CI status + smoke check results |
 | `deployment_decision.md` | deploy-decider | STABLE / NOT_DEPLOYED / BLOCKED_BY_GATE |
-| `deployment_log.md` | repo-operator | Merge, tag, release actions |
-| `verification_report.md` | deploy-monitor | CI status + smoke check results |
+| `cleanup_report.md` | deploy-cleanup | Cleanup status and evidence |
 
 ### Flow 7: Wisdom
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
+| `flow_plan.md` | orchestrator | Execution state and phase tracking |
 | `wisdom_receipt.json` | wisdom-cleanup | Final run receipt |
-| `learnings.md` | learning-synthesizer | Narrative lessons extracted |
+| `artifact_audit.md` | artifact-auditor | Structural sanity check of all flows |
+| `solution_analysis.md` | solution-analyst | Requirement/implementation alignment |
+| `quality_report.md` | quality-analyst | Code health, complexity |
+| `maintainability_analysis.md` | maintainability-analyst | Naming, modularity, DRY, coupling |
+| `process_analysis.md` | process-analyst | Flow efficiency, iterations, bounces |
 | `friction_log.md` | process-analyst | Where the swarm hit walls |
-| `pack_improvements.md` | feedback-applier | Suggested diffs to agent prompts |
-| `quality_report.md` | quality-analyst | Code health assessment |
+| `regression_report.md` | regression-analyst | What got worse and where |
+| `pattern_report.md` | pattern-analyst | Cross-run recurring issues and trends |
+| `signal_quality_report.md` | signal-quality-analyst | Feedback source accuracy analysis |
+| `flow_history.json` | flow-historian | Timeline + DevLT metrics |
+| `learnings.md` | learning-synthesizer | Narrative lessons extracted |
+| `feedback_actions.md` | feedback-applier | Concrete follow-ups (issues, doc updates) |
+| `pack_improvements.md` | feedback-applier | Suggested diffs to pack/agent prompts |
+| `codebase_wisdom.md` | feedback-applier | Structural insights for humans |
+| `risk_assessment.md` | risk-analyst | Risk perspective (predicted vs actual) |
+| `cleanup_report.md` | wisdom-cleanup | Cleanup status and evidence |
+| `secrets_scan.md` | secrets-sanitizer | Secrets scan results |
+| `secrets_status.json` | secrets-sanitizer | Safe-to-publish status |
+| `git_status.md` | repo-operator | Git state documentation |
+| `gh_issue_status.md` | gh-issue-manager | Issue sync status |
+| `gh_report_status.md` | gh-reporter | GitHub report posting status |
+| `github_report.md` | gh-reporter | Issue comment content |
 
 ---
 
@@ -279,9 +333,9 @@ When a flow produces PARTIAL or UNVERIFIED:
 
 **Purpose:** Transform messy input into testable requirements.
 
-**Key agents:** gh-issue-resolver, signal-normalizer, problem-framer, requirements-author, requirements-critic, bdd-author, bdd-critic, spec-auditor
+**Key agents:** gh-issue-resolver, signal-normalizer, problem-framer, requirements-author, requirements-critic, bdd-author, bdd-critic, scope-assessor, risk-analyst, spec-auditor
 
-**Main outputs:** `signal_receipt.json`, `requirements.md`, `features/*.feature`
+**Main outputs:** `signal_receipt.json`, `requirements.md`, `features/*.feature`, `scope_estimate.md`
 
 **Common issues:** Ambiguous input, missing sad paths, GitHub unavailable
 
@@ -295,9 +349,9 @@ When a flow produces PARTIAL or UNVERIFIED:
 
 **Purpose:** Turn requirements into architecture and execution plan.
 
-**Key agents:** impact-analyzer, design-optioneer, option-critic, adr-author, interface-designer, contract-critic, test-strategist, work-planner, design-critic
+**Key agents:** impact-analyzer, design-optioneer, option-critic, adr-author, interface-designer, contract-critic, observability-designer, observability-critic, test-strategist, work-planner, design-critic, policy-analyst
 
-**Main outputs:** `plan_receipt.json`, `adr.md`, `api_contracts.yaml`, `work_plan.md`
+**Main outputs:** `plan_receipt.json`, `adr.md`, `api_contracts.yaml`, `ac_matrix.md`, `work_plan.md`
 
 **Common issues:** Missing upstream, design conflicts, policy violations
 
@@ -343,7 +397,7 @@ When a flow produces PARTIAL or UNVERIFIED:
 
 **Purpose:** Decide merge or bounce with evidence.
 
-**Key agents:** receipt-checker, contract-enforcer, security-scanner, coverage-enforcer, gate-fixer, traceability-auditor, merge-decider
+**Key agents:** receipt-checker, contract-enforcer, security-scanner, coverage-enforcer, gate-fixer, fix-forward-runner, traceability-auditor, risk-analyst, policy-analyst, merge-decider
 
 **Main outputs:** `gate_receipt.json`, `merge_decision.md`
 
@@ -375,7 +429,7 @@ When a flow produces PARTIAL or UNVERIFIED:
 
 **Purpose:** Extract learnings and close feedback loops.
 
-**Key agents:** artifact-auditor, solution-analyst, quality-analyst, maintainability-analyst, process-analyst, regression-analyst, pattern-analyst, learning-synthesizer, feedback-applier
+**Key agents:** artifact-auditor, solution-analyst, quality-analyst, maintainability-analyst, process-analyst, regression-analyst, pattern-analyst, signal-quality-analyst, flow-historian, learning-synthesizer, feedback-applier, traceability-auditor, risk-analyst
 
 **Main outputs:** `wisdom_receipt.json`, `learnings.md`, `pack_improvements.md`
 

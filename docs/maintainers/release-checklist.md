@@ -10,10 +10,10 @@ Pack version, repo tags, and Rust tool versions are aligned:
 
 | Component | Location | Example |
 |-----------|----------|---------|
-| Pack release | Git tag | `v1.0.0` |
-| pack-check | `tools/demoswarm-pack-check/Cargo.toml` | `version = "1.0.0"` |
-| demoswarm CLI | `tools/demoswarm-runs-tools/Cargo.toml` | `version = "1.0.0"` |
-| CHANGELOG | `CHANGELOG.md` | `## [1.0.0]` |
+| Pack release | Git tag | `v2.2.0` |
+| pack-check | `tools/demoswarm-pack-check/Cargo.toml` | `version = "2.2.0"` |
+| demoswarm CLI | `tools/demoswarm-runs-tools/Cargo.toml` | `version = "2.2.0"` |
+| CHANGELOG | `CHANGELOG.md` | `## [2.2.0]` |
 
 All four must match for a release. The `[Unreleased]` section in CHANGELOG.md tracks changes between releases.
 
