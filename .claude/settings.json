@@ -16,12 +16,7 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": true,
-    "excludedCommands": [
-      "docker",
-      "docker-compose",
-      "podman",
-      "watchman"
-    ]
+    "excludedCommands": ["docker", "docker-compose", "podman", "watchman"]
   },
   "permissions": {
     "defaultMode": "bypassPermissions",

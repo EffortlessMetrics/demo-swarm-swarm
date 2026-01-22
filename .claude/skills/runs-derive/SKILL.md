@@ -17,6 +17,7 @@ bash .claude/scripts/demoswarm.sh <command> [options]
 ```
 
 The shim resolves implementation in order:
+
 1. `.demoswarm/bin/demoswarm` (Rust binary, preferred)
 2. `demoswarm` on PATH (global install)
 3. `cargo run` fallback (dev environments)
@@ -47,19 +48,19 @@ This skill only reads. Index updates use `runs-index`. Secrets use `secrets-tool
 
 ## Command Reference
 
-| Command | Purpose |
-|---------|---------|
-| `count pattern` | Count lines matching regex in a file |
-| `count bdd` | Count BDD scenarios in feature files |
-| `ms get` | Extract field from Machine Summary block |
-| `yaml get` | Extract field from fenced YAML block |
-| `yaml count-items` | Count items in YAML block |
-| `inv get` | Extract inventory marker value |
-| `line get` | Extract value from line with prefix |
-| `receipts count` | Count prior flow receipts in run dir |
-| `receipt get` | Read field from receipt JSON |
-| `openapi count-paths` | Count paths in OpenAPI YAML |
-| `time now` | Get current UTC timestamp |
+| Command               | Purpose                                  |
+| --------------------- | ---------------------------------------- |
+| `count pattern`       | Count lines matching regex in a file     |
+| `count bdd`           | Count BDD scenarios in feature files     |
+| `ms get`              | Extract field from Machine Summary block |
+| `yaml get`            | Extract field from fenced YAML block     |
+| `yaml count-items`    | Count items in YAML block                |
+| `inv get`             | Extract inventory marker value           |
+| `line get`            | Extract value from line with prefix      |
+| `receipts count`      | Count prior flow receipts in run dir     |
+| `receipt get`         | Read field from receipt JSON             |
+| `openapi count-paths` | Count paths in OpenAPI YAML              |
+| `time now`            | Get current UTC timestamp                |
 
 ---
 
@@ -214,6 +215,7 @@ cargo install --path tools/demoswarm-runs-tools --root .demoswarm
 ```
 
 The shim will automatically resolve in order:
+
 1. `.demoswarm/bin/demoswarm` (repo-local install, preferred)
 2. `demoswarm` on PATH (global install)
 3. `cargo run` fallback (dev environments)

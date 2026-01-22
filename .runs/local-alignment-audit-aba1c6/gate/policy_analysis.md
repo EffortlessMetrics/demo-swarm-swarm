@@ -13,19 +13,21 @@ blockers: []
 missing_required: []
 
 concerns:
-  - No formal policy documents found in standard policy roots (policies/, docs/policies/, .policies/)
-  - Policies extracted from CLAUDE.md pack contracts (authoritative for this pack)
+
+- No formal policy documents found in standard policy roots (policies/, docs/policies/, .policies/)
+- Policies extracted from CLAUDE.md pack contracts (authoritative for this pack)
 
 compliance_summary:
-  policies_found: 1
-  policies_checked: 1
-  compliant: 10
-  non_compliant: 0
-  not_applicable: 2
-  unknown: 0
-  waivers_needed: 0
+policies_found: 1
+policies_checked: 1
+compliant: 10
+non_compliant: 0
+not_applicable: 2
+unknown: 0
+waivers_needed: 0
 
 ## Context
+
 - flow: gate
 - run_id: local-alignment-audit-aba1c6
 - policy_roots_searched:
@@ -47,30 +49,32 @@ compliance_summary:
   - CLAUDE.md
 
 ## Policies Reviewed
+
 - CLAUDE.md - unknown (pack policy document, checked into repo)
 
 ## Compliance Register
 
 Use stable `POL-NNN` markers for mechanical counting.
 
-| ID | Policy | Section | Requirement | Status | Severity | Evidence |
-|----|--------|---------|-------------|--------|----------|----------|
-| POL-001 | CLAUDE.md | Non-Negotiables L65-66 | Repo root only: all paths repo-root-relative | COMPLIANT | HIGH | All Gate artifacts use repo-root-relative paths |
-| POL-002 | CLAUDE.md | Non-Negotiables L68-70 | No raw git in flow commands or agent prompts | NOT-APPLICABLE | HIGH | Gate phase; no flow command modifications |
-| POL-003 | CLAUDE.md | Non-Negotiables L72-74 | Control plane vs audit plane: route on result blocks | COMPLIANT | MEDIUM | All Gate artifacts use Machine Summary blocks for routing |
-| POL-004 | CLAUDE.md | Non-Negotiables L76-79 | Two gates for GitHub ops: safe_to_publish AND proceed_to_github_ops | COMPLIANT | HIGH | Review receipt shows github_reporting: PENDING; proper gating observed |
-| POL-005 | CLAUDE.md | Non-Negotiables L81-82 | run_id folders never rename | COMPLIANT | HIGH | run_meta.json shows stable run_id with canonical_key + aliases pattern |
-| POL-006 | CLAUDE.md | Receipts L218-222 | Receipts are mechanical (grep/wc), not estimated | COMPLIANT | MEDIUM | receipt_audit.md confirms mechanical counts from receipts |
-| POL-007 | CLAUDE.md | Machine Summary L226-251 | Machine Summary contract followed | COMPLIANT | HIGH | All Gate artifacts emit compliant Machine Summary blocks |
-| POL-008 | CLAUDE.md | Gate Merge Verdict L342-343 | Gate verdict is MERGE or BOUNCE | NOT-APPLICABLE | MEDIUM | merge_decision.md not yet written; this is policy_analysis phase |
-| POL-009 | CLAUDE.md | Secrets Sanitizer L427-439 | No secrets in artifacts | COMPLIANT | CRITICAL | security_scan.md: 0 secrets detected in changed files |
-| POL-010 | CLAUDE.md | L13 | Pack claims: 7 flows | COMPLIANT | HIGH | contract_compliance.md verifies 7 flow commands match contract |
-| POL-011 | CLAUDE.md | L355-369 | Publish surface per flow | COMPLIANT | HIGH | Gate publish surface correctly scoped to .runs/<run-id>/gate/ |
-| POL-012 | CLAUDE.md | L232-234 | Status enum values valid | COMPLIANT | MEDIUM | All Machine Summaries use VERIFIED/UNVERIFIED/CANNOT_PROCEED correctly |
+| ID      | Policy    | Section                     | Requirement                                                         | Status         | Severity | Evidence                                                               |
+| ------- | --------- | --------------------------- | ------------------------------------------------------------------- | -------------- | -------- | ---------------------------------------------------------------------- |
+| POL-001 | CLAUDE.md | Non-Negotiables L65-66      | Repo root only: all paths repo-root-relative                        | COMPLIANT      | HIGH     | All Gate artifacts use repo-root-relative paths                        |
+| POL-002 | CLAUDE.md | Non-Negotiables L68-70      | No raw git in flow commands or agent prompts                        | NOT-APPLICABLE | HIGH     | Gate phase; no flow command modifications                              |
+| POL-003 | CLAUDE.md | Non-Negotiables L72-74      | Control plane vs audit plane: route on result blocks                | COMPLIANT      | MEDIUM   | All Gate artifacts use Machine Summary blocks for routing              |
+| POL-004 | CLAUDE.md | Non-Negotiables L76-79      | Two gates for GitHub ops: safe_to_publish AND proceed_to_github_ops | COMPLIANT      | HIGH     | Review receipt shows github_reporting: PENDING; proper gating observed |
+| POL-005 | CLAUDE.md | Non-Negotiables L81-82      | run_id folders never rename                                         | COMPLIANT      | HIGH     | run_meta.json shows stable run_id with canonical_key + aliases pattern |
+| POL-006 | CLAUDE.md | Receipts L218-222           | Receipts are mechanical (grep/wc), not estimated                    | COMPLIANT      | MEDIUM   | receipt_audit.md confirms mechanical counts from receipts              |
+| POL-007 | CLAUDE.md | Machine Summary L226-251    | Machine Summary contract followed                                   | COMPLIANT      | HIGH     | All Gate artifacts emit compliant Machine Summary blocks               |
+| POL-008 | CLAUDE.md | Gate Merge Verdict L342-343 | Gate verdict is MERGE or BOUNCE                                     | NOT-APPLICABLE | MEDIUM   | merge_decision.md not yet written; this is policy_analysis phase       |
+| POL-009 | CLAUDE.md | Secrets Sanitizer L427-439  | No secrets in artifacts                                             | COMPLIANT      | CRITICAL | security_scan.md: 0 secrets detected in changed files                  |
+| POL-010 | CLAUDE.md | L13                         | Pack claims: 7 flows                                                | COMPLIANT      | HIGH     | contract_compliance.md verifies 7 flow commands match contract         |
+| POL-011 | CLAUDE.md | L355-369                    | Publish surface per flow                                            | COMPLIANT      | HIGH     | Gate publish surface correctly scoped to .runs/<run-id>/gate/          |
+| POL-012 | CLAUDE.md | L232-234                    | Status enum values valid                                            | COMPLIANT      | MEDIUM   | All Machine Summaries use VERIFIED/UNVERIFIED/CANNOT_PROCEED correctly |
 
 ## Compliance Details
 
 ### POL-001: Repo root only
+
 - Policy: CLAUDE.md, Section Non-Negotiables L65-66
 - Status: COMPLIANT
 - Severity: HIGH
@@ -81,6 +85,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Gate phase artifacts consistently use repo-root-relative paths
 
 ### POL-002: No raw git in flows
+
 - Policy: CLAUDE.md, Section Non-Negotiables L68-70
 - Status: NOT-APPLICABLE
 - Severity: HIGH
@@ -90,11 +95,12 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Gate is a verification phase; no flow command modifications in scope
 
 ### POL-003: Control plane vs audit plane
+
 - Policy: CLAUDE.md, Section Non-Negotiables L72-74
 - Status: COMPLIANT
 - Severity: MEDIUM
 - Evidence:
-  - receipt_audit.md:L3-23 - Machine Summary block with status, recommended_action, route_to_*
+  - receipt*audit.md:L3-23 - Machine Summary block with status, recommended_action, route_to*\*
   - coverage_audit.md:L5-16 - Machine Summary block
   - contract_compliance.md:L4-20 - Machine Summary block
   - security_scan.md:L4-36 - Machine Summary block
@@ -102,6 +108,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: All Gate artifacts properly separate control plane (Machine Summary) from audit body
 
 ### POL-004: Two gates for GitHub ops
+
 - Policy: CLAUDE.md, Section Non-Negotiables L76-79
 - Status: COMPLIANT
 - Severity: HIGH
@@ -112,6 +119,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: GitHub operations properly deferred pending two-gate validation
 
 ### POL-005: run_id folders never rename
+
 - Policy: CLAUDE.md, Section Non-Negotiables L81-82
 - Status: COMPLIANT
 - Severity: HIGH
@@ -122,6 +130,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Identity follows canonical_key + aliases pattern; folder name unchanged through all flows
 
 ### POL-006: Receipts are mechanical
+
 - Policy: CLAUDE.md, Section Receipts L218-222
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -132,6 +141,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: All counts in Gate phase are traced to mechanical sources (grep/parse), not estimated
 
 ### POL-007: Machine Summary contract
+
 - Policy: CLAUDE.md, Section Machine Summary L226-251
 - Status: COMPLIANT
 - Severity: HIGH
@@ -144,6 +154,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Machine Summary contract uniformly followed across Gate artifacts
 
 ### POL-008: Gate merge verdict
+
 - Policy: CLAUDE.md, Section Gate Merge Verdict L342-343
 - Status: NOT-APPLICABLE
 - Severity: MEDIUM
@@ -153,6 +164,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Verdict domain MERGE|BOUNCE will be enforced when merge_decision.md is created
 
 ### POL-009: No secrets in artifacts
+
 - Policy: CLAUDE.md, Section Secrets Sanitizer L427-439
 - Status: COMPLIANT
 - Severity: CRITICAL
@@ -163,6 +175,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Documentation alignment audit has no secret exposure risk; all changed files are Markdown/YAML
 
 ### POL-010: Pack claims 7 flows
+
 - Policy: CLAUDE.md, Section L13
 - Status: COMPLIANT
 - Severity: HIGH
@@ -173,6 +186,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Documentation alignment audit ensures pack claims match implementation
 
 ### POL-011: Publish surface per flow
+
 - Policy: CLAUDE.md, Section Publish Surface L355-369
 - Status: COMPLIANT
 - Severity: HIGH
@@ -183,6 +197,7 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: Gate phase respects publish surface boundaries
 
 ### POL-012: Status enum values
+
 - Policy: CLAUDE.md, Section Machine Summary L232-234
 - Status: COMPLIANT
 - Severity: MEDIUM
@@ -195,14 +210,17 @@ Use stable `POL-NNN` markers for mechanical counting.
 - Notes: All status values from valid enum {VERIFIED, UNVERIFIED, CANNOT_PROCEED}
 
 ## Violations Summary
-| ID | Policy | Section | Severity | Remediation | Owner |
-|----|--------|---------|----------|------------|-------|
-| (none) | - | - | - | - | - |
+
+| ID     | Policy | Section | Severity | Remediation | Owner |
+| ------ | ------ | ------- | -------- | ----------- | ----- |
+| (none) | -      | -       | -        | -           | -     |
 
 ## Waivers Needed
+
 - None
 
 ## Recommended Next
+
 - Proceed to merge-decider for verdict (MERGE or BOUNCE)
 - All policy requirements are satisfied for Gate phase
 - 0 MINOR formatting items pending; style sweep complete (review_receipt.json:L147-153)
@@ -211,14 +229,15 @@ Use stable `POL-NNN` markers for mechanical counting.
 ---
 
 ## Policy Analyst Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
 route_to_agent: null
 compliance_summary:
-  policies_checked: 12
-  compliant: 10
-  non_compliant: 0
-  waivers_needed: 0
+policies_checked: 12
+compliant: 10
+non_compliant: 0
+waivers_needed: 0
 blockers: []
 missing_required: []

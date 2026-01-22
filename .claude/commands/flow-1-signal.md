@@ -19,6 +19,7 @@ You are the PM orchestrating Flow 1 of the SDLC swarm. Your team of specialist a
 - Do **not** rely on `cd` into any folder to make relative paths work.
 
 **Important**: Run identity now comes from `gh-issue-resolver` (Step 0). The `repo-operator` ensures the run branch (Step 0b) and `signal-run-prep` (Step 0c) establishes the run directory using that run-id. Do not skip these steps.
+
 - `run_id_kind: LOCAL_ONLY` means the run-id is a local slug (`local-...`) and the issue is not bound yet (`issue_number: null`).
   - If `github_ops_allowed: false` → repo mismatch / trust block (never bind/create issues in this repo).
   - If `github_ops_allowed: true` + `issue_number: null` → GitHub binding is deferred (bind later when GitHub works; handled by `gh-issue-manager`).
@@ -26,9 +27,9 @@ You are the PM orchestrating Flow 1 of the SDLC swarm. Your team of specialist a
 
 #### Artifact visibility rule
 
-* Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
-* Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
+- Do **not** attempt to “prove files exist” under `.runs/<run-id>/…` **before** `signal-run-prep` / `run-prep`.
+- If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on the flow’s verification agents (e.g., `receipt-checker` in Gate) to obtain evidence from committed state when necessary.
+- Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
 
 ## Your Goals
 
@@ -82,6 +83,7 @@ Flow 1 uses **two complementary state machines**:
 ### On Rerun
 
 If running `/flow-1-signal` on an existing run-id:
+
 - Read `.runs/<run-id>/signal/flow_plan.md`
 - Create TodoWrite from the checklist
 - Pre-mark items done if artifacts exist and look current
@@ -134,6 +136,7 @@ If running `/flow-1-signal` on an existing run-id:
 **Call `gh-issue-resolver` first.**
 
 This agent will:
+
 - Resolve an explicit issue reference **or** create a new GitHub issue from the signal text
 - Return `run_id` (gh-<issue_number> or local-<slug>-<hash6> when repo mismatch prevents GitHub ops) plus issue metadata in a control-plane block
 - Perform no filesystem writes (runs before `.runs/<run-id>/` exists)
@@ -151,6 +154,7 @@ The agent handles branch creation/switching safely. This keeps checkpoint commit
 **Call `signal-run-prep`** using the issue-derived `run_id` while on the run branch.
 
 This agent will:
+
 - Confirm the provided `run-id` (should already be `gh-<issue_number>`)
 - Create `.runs/<run-id>/signal/` directory structure
 - Write `.runs/<run-id>/run_meta.json` with run metadata (binding `issue_number` when the run-id matches `gh-<n>`)
@@ -193,6 +197,7 @@ Create or update `.runs/<run-id>/signal/flow_plan.md`:
 ### Step 2: Research Context
 
 **Call `gh-researcher`.** This agent handles both:
+
 - **GitHub reconnaissance:** Related issues/PRs, prior decisions, constraints
 - **Wisdom scent trail:** Reads `.runs/_wisdom/latest.md` (if present) and applies learnings
 
@@ -234,6 +239,7 @@ Alternate between `requirements-author` and `requirements-critic`:
    - If the critic reports a mechanical failure → stop and address the environment issue
 
 **Loop guidance:**
+
 - Your agents do the thinking. You read their recommendations and route accordingly.
 - Continue while the critic sees value in another iteration.
 - If context is exhausted before completion, checkpoint and exit with status PARTIAL. This is a valid outcome; the flow is resumable.
@@ -249,7 +255,7 @@ Alternate between `bdd-author` and `bdd-critic`:
    - Writes `verification_notes.md` for NFRs not expressible as BDD (always present; richer when NFRs exist)
 
 2. Call `bdd-critic` to critique scenarios.
-   - Reviews traceability (every REQ-* has scenarios)
+   - Reviews traceability (every REQ-\* has scenarios)
    - Checks testability (concrete, not vibes)
    - Assesses coverage (edge cases, errors)
    - Sets `Status: VERIFIED | UNVERIFIED`
@@ -263,6 +269,7 @@ Alternate between `bdd-author` and `bdd-critic`:
    - If the critic reports a mechanical failure → stop and address the environment issue
 
 **Loop guidance:**
+
 - Your agents do the thinking. You read their recommendations and route accordingly.
 - The critic will flag missing sad paths. Trust them to identify what needs improvement.
 - If context is exhausted before completion, checkpoint and exit with status PARTIAL. This is a valid outcome; the flow is resumable.
@@ -284,6 +291,7 @@ Add risk patterns (security, compliance, data, performance) and severity ratings
 **Call `spec-auditor`** to perform an integrative audit of all Flow 1 artifacts.
 
 This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews:
+
 - Problem → Requirements alignment
 - Requirements → BDD coverage
 - Risk coverage completeness
@@ -292,6 +300,7 @@ This is the "Staff Engineer" check before handoff to Flow 2. The auditor reviews
 
 **Route on the auditor's handoff:**
 Read the auditor's report. This is the "Staff Engineer" check. Trust their assessment:
+
 - If the auditor says "proceed" or "ready for cleanup" → move to cleanup
 - If the auditor recommends specific fixes → route to the agent they name, then check back with the auditor
 - If the auditor reports a mechanical failure → stop and address the environment issue
@@ -305,6 +314,7 @@ The auditor will tell you when progress has stalled or when remaining issues nee
 Use `signal-cleanup` to seal the receipt and update index.
 
 This agent:
+
 - Verifies all required artifacts exist
 - Computes counts mechanically (never estimates)
 - Reads quality gate status from critic outputs
@@ -318,11 +328,13 @@ This agent:
 Use `secrets-sanitizer` (publish gate).
 
 This agent is a **publish gate** that ensures no secrets are accidentally committed or posted:
+
 - Scans the commit surface (`.runs/<run-id>/`, staged changes)
 - **Fixes** what it can: redacts artifacts, externalizes code secrets
 - Writes `secrets_status.json` with `safe_to_commit` and `safe_to_publish` flags
 
-**Status semantics** (status describes what the sanitizer *did*; flags tell you what you're allowed to do):
+**Status semantics** (status describes what the sanitizer _did_; flags tell you what you're allowed to do):
+
 - `CLEAN`: No secrets found; flags typically true (but always read flags, not status)
 - `FIXED`: Secrets found and remediated; flags typically true **unless** `needs_upstream_fix` forced gating
 - `BLOCKED_PUBLISH`: Sanitizer couldn't complete (mechanical); `safe_to_publish: false`
@@ -332,6 +344,7 @@ This agent is a **publish gate** that ensures no secrets are accidentally commit
 > Secrets scan complete. Status: CLEAN. No findings. Safe to commit and publish.
 
 For audit purposes, it also writes `secrets_status.json` with fields:
+
 - `status`: CLEAN, FIXED, or BLOCKED
 - `safe_to_commit`: whether commit can proceed
 - `safe_to_publish`: whether GitHub posting can proceed
@@ -340,6 +353,7 @@ For audit purposes, it also writes `secrets_status.json` with fields:
 - `blocker_reason`: explanation if blocked
 
 **Gating logic (boolean gate — the sanitizer says yes/no, orchestrator decides next steps):**
+
 - The sanitizer is a fix-first pre-commit hook, not a router
 - If `safe_to_commit: true` → proceed to checkpoint commit (Step 11c)
 - If `safe_to_commit: false`:
@@ -354,6 +368,7 @@ For audit purposes, it also writes `secrets_status.json` with fields:
 Checkpoint the audit trail **before** any GitHub operations.
 
 **Call `repo-operator`** in checkpoint mode. The agent handles:
+
 1. Resets staging and stages allowlist only
 2. Enforces allowlist/anomaly interlock mechanically
 3. Writes `.runs/<run-id>/signal/git_status.md` if anomaly detected
@@ -361,6 +376,7 @@ Checkpoint the audit trail **before** any GitHub operations.
 5. Returns **Repo Operator Result** (control plane)
 
 **Allowlist for Flow 1:**
+
 - `.runs/<run-id>/signal/`
 - `.runs/<run-id>/run_meta.json`
 - `.runs/index.json`
@@ -369,6 +385,7 @@ Checkpoint the audit trail **before** any GitHub operations.
 
 ```md
 ## Repo Operator Result
+
 operation: checkpoint
 status: COMPLETED | COMPLETED_WITH_ANOMALY | FAILED | CANNOT_PROCEED
 proceed_to_github_ops: true | false
@@ -380,11 +397,13 @@ anomaly_paths: []
 **Note:** `commit_sha` is always populated (current HEAD on no-op), never null. `publish_surface` must always be present (PUSHED or NOT_PUSHED), even on no-op commits, anomalies, `safe_to_commit: false`, or push failures.
 
 **Routing logic (from Repo Operator Result):**
+
 - `status: COMPLETED` + `proceed_to_github_ops: true` → proceed to GitHub ops
 - `status: COMPLETED_WITH_ANOMALY` → allowlist committed, anomaly documented in `git_status.md`; `proceed_to_github_ops: false`
 - `status: FAILED` or `status: CANNOT_PROCEED` → mechanical failure; stop and require human intervention
 
 **Gating interaction with secrets-sanitizer:**
+
 - `repo-operator` reads `safe_to_commit` and `safe_to_publish` from the prior Gate Result
 - If `safe_to_commit: false`: skips commit entirely
 - If `safe_to_publish: false`: commits locally but skips push; sets `proceed_to_github_ops: false` and `publish_surface: NOT_PUSHED`
@@ -396,6 +415,7 @@ anomaly_paths: []
 **Call `gh-issue-manager`** (sync/update/bind issue) then **`gh-reporter`** (post summary).
 
 See `CLAUDE.md` → **GitHub Access + Content Mode** for gating rules. Quick reference:
+
 - Skip if `github_ops_allowed: false` or `gh` unauthenticated
 - Content mode is derived from secrets gate + push surface (not workspace hygiene)
 - Issue-first: flow summaries go to the issue, never the PR
@@ -407,6 +427,7 @@ If `issue_number` is missing and `gh` is available, `gh-issue-manager` may attem
 **Note:** Receipt derivation is handled by `signal-cleanup` (Step 10). See the `signal-cleanup` agent documentation for derivation rules.
 
 Update `flow_plan.md`:
+
 - Mark all steps as complete
 - Add final summary section:
 
@@ -421,6 +442,7 @@ Update `flow_plan.md`:
 ## Human Review Checklist
 
 Before proceeding to Flow 2, humans should review:
+
 - [ ] `.runs/<run-id>/signal/requirements.md` - Are these the right requirements?
 - [ ] `.runs/<run-id>/signal/features/*.feature` - Do these scenarios cover the expected behavior?
 - [ ] `.runs/<run-id>/signal/verification_notes.md` - Are NFR verification criteria adequate?
@@ -432,44 +454,46 @@ Before proceeding to Flow 2, humans should review:
 
 All written to `.runs/<run-id>/signal/`:
 
-| Artifact | Source Agent | Description |
-|----------|--------------|-------------|
-| `run_meta.json` | signal-run-prep, gh-issue-manager | Run metadata (in `.runs/<run-id>/`) |
-| `flow_plan.md` | orchestrator | Execution plan and progress |
-| `github_research.md` | gh-researcher | Related issues/PRs and constraints |
-| `issue_normalized.md` | signal-normalizer | Structured summary of raw signal |
-| `context_brief.md` | signal-normalizer | Related history and context |
-| `problem_statement.md` | problem-framer | Goals, non-goals, constraints |
-| `open_questions.md` | clarifier | Open questions and assumptions |
-| `requirements.md` | requirements-author | Functional + non-functional requirements |
-| `requirements_critique.md` | requirements-critic | Critique and iteration guidance |
-| `features/*.feature` | bdd-author | BDD scenarios (Gherkin) |
-| `example_matrix.md` | bdd-author | Example mapping for BDD |
-| `verification_notes.md` | bdd-author | NFR verification criteria (non-BDD) |
-| `bdd_critique.md` | bdd-critic | Critique of BDD scenarios |
-| `stakeholders.md` | scope-assessor | Teams, systems, users affected |
-| `early_risks.md` | scope-assessor | Initial risk identification by category |
-| `risk_assessment.md` | risk-analyst | Deep risk analysis with severity ratings |
-| `scope_estimate.md` | scope-assessor | S/M/L/XL estimate with rationale |
-| `spec_audit.md` | spec-auditor | Integrative audit verdict and cross-artifact consistency |
-| `signal_receipt.json` | signal-cleanup | Structured summary for downstream flows |
-| `cleanup_report.md` | signal-cleanup | Artifact verification and count derivation |
-| `secrets_scan.md` | secrets-sanitizer | Secrets scan findings and actions taken |
-| `secrets_status.json` | secrets-sanitizer | Machine-readable publish gate status |
-| `git_status.md` | repo-operator | Anomaly documentation (if detected) |
-| `gh_issue_status.md` | gh-issue-manager | GitHub issue sync status |
-| `gh_report_status.md` | gh-reporter | GitHub posting status |
-| `github_report.md` | gh-reporter | Record of GitHub post |
+| Artifact                   | Source Agent                      | Description                                              |
+| -------------------------- | --------------------------------- | -------------------------------------------------------- |
+| `run_meta.json`            | signal-run-prep, gh-issue-manager | Run metadata (in `.runs/<run-id>/`)                      |
+| `flow_plan.md`             | orchestrator                      | Execution plan and progress                              |
+| `github_research.md`       | gh-researcher                     | Related issues/PRs and constraints                       |
+| `issue_normalized.md`      | signal-normalizer                 | Structured summary of raw signal                         |
+| `context_brief.md`         | signal-normalizer                 | Related history and context                              |
+| `problem_statement.md`     | problem-framer                    | Goals, non-goals, constraints                            |
+| `open_questions.md`        | clarifier                         | Open questions and assumptions                           |
+| `requirements.md`          | requirements-author               | Functional + non-functional requirements                 |
+| `requirements_critique.md` | requirements-critic               | Critique and iteration guidance                          |
+| `features/*.feature`       | bdd-author                        | BDD scenarios (Gherkin)                                  |
+| `example_matrix.md`        | bdd-author                        | Example mapping for BDD                                  |
+| `verification_notes.md`    | bdd-author                        | NFR verification criteria (non-BDD)                      |
+| `bdd_critique.md`          | bdd-critic                        | Critique of BDD scenarios                                |
+| `stakeholders.md`          | scope-assessor                    | Teams, systems, users affected                           |
+| `early_risks.md`           | scope-assessor                    | Initial risk identification by category                  |
+| `risk_assessment.md`       | risk-analyst                      | Deep risk analysis with severity ratings                 |
+| `scope_estimate.md`        | scope-assessor                    | S/M/L/XL estimate with rationale                         |
+| `spec_audit.md`            | spec-auditor                      | Integrative audit verdict and cross-artifact consistency |
+| `signal_receipt.json`      | signal-cleanup                    | Structured summary for downstream flows                  |
+| `cleanup_report.md`        | signal-cleanup                    | Artifact verification and count derivation               |
+| `secrets_scan.md`          | secrets-sanitizer                 | Secrets scan findings and actions taken                  |
+| `secrets_status.json`      | secrets-sanitizer                 | Machine-readable publish gate status                     |
+| `git_status.md`            | repo-operator                     | Anomaly documentation (if detected)                      |
+| `gh_issue_status.md`       | gh-issue-manager                  | GitHub issue sync status                                 |
+| `gh_report_status.md`      | gh-reporter                       | GitHub posting status                                    |
+| `github_report.md`         | gh-reporter                       | Record of GitHub post                                    |
 
 ## Assumptions + Questions Contract
 
 All Flow 1 agents must emit:
+
 - **Assumptions Made to Proceed**: What was assumed, why, and impact if wrong
 - **Questions / Clarifications Needed**: Questions that would change the spec, with defaults
 
 These sections enable humans to review what was assumed at the flow boundary, and to re-run with better inputs if needed.
 
 **Flow 1 is designed to be re-run.** If you run `/flow-1-signal` on an existing run-id:
+
 - `signal-run-prep` will lock onto the existing directory
 - Agents will read and refine existing artifacts
 - Each run improves the output based on newly resolved ambiguity
@@ -503,6 +527,7 @@ Your agents report what they did and what they recommend. Read their prose and f
 ## Completion
 
 Flow 1 is complete when:
+
 1. All artifacts exist under `.runs/<run-id>/signal/` (even if imperfect)
 2. `flow_plan.md` is updated with final status
 3. GitHub summary is posted (or `github_report.md` written if gh unavailable)
@@ -557,9 +582,9 @@ If yes, proceed to `/flow-2-plan`.
 
 Run this template for: tests, code, docs, requirements, BDD, options, contracts, observability.
 
-1) **Writer pass:** call the writer agent
-2) **Critique pass:** call the critic agent, read their handoff
-3) **Route on the critic's recommendation:**
+1. **Writer pass:** call the writer agent
+2. **Critique pass:** call the critic agent, read their handoff
+3. **Route on the critic's recommendation:**
    - If the critic says "ready" or "proceed" → move forward
    - If the critic recommends improvements → run the writer with their feedback, then ask the critic again
    - If the critic says "no further improvement possible" → proceed with documented blockers

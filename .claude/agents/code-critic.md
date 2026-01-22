@@ -14,6 +14,7 @@ Find issues in the implementation: missing REQ coverage, ADR violations, contrac
 ## What You'll Need
 
 **Primary inputs:**
+
 - `.runs/<run-id>/build/impl_changes_summary.md`
 - `.runs/<run-id>/build/subtask_context_manifest.json`
 - `.runs/<run-id>/plan/adr.md`
@@ -77,16 +78,19 @@ Everything else is out of scope for this critique.
 Write findings that explain the violation and its impact.
 
 **Sparse (not helpful):**
+
 ```
 - [CRITICAL] src/auth/login.ts:45 violates ADR
 ```
 
 **Rich (actionable):**
+
 ```
 - [CRITICAL] src/auth/login.ts:45 uses sessions (stateful) but ADR-005 mandates JWT (stateless). This breaks the contract assumption that tokens are self-contained and prevents horizontal scaling. code-implementer should refactor to JWT. If session fallback is intentional, may need design-optioneer to clarify ADR interpretation.
 ```
 
 **Synthesize patterns:** If you find 3+ issues in the same component, note the pattern:
+
 ```
 - Auth design drift across 3 locations. Recommend design-optioneer review ADR-005 interpretation before piecemeal fixes.
 ```
@@ -105,34 +109,42 @@ Write findings that explain the violation and its impact.
 ## Scope
 
 ### In-scope Requirements
+
 - REQ-001, REQ-002, REQ-003
 
 ### Out-of-scope
+
 - REQ-004 - not in subtask manifest
 
 ## Coverage Table (REQ to impl to tests)
-| REQ | Implementation | Tests | Notes |
-|-----|----------------|-------|-------|
-| REQ-001 | `src/auth/login.ts:23` | `tests/auth.test.ts:45` | OK |
-| REQ-002 | [NO IMPL] | N/A | Missing |
+
+| REQ     | Implementation         | Tests                   | Notes   |
+| ------- | ---------------------- | ----------------------- | ------- |
+| REQ-001 | `src/auth/login.ts:23` | `tests/auth.test.ts:45` | OK      |
+| REQ-002 | [NO IMPL]              | N/A                     | Missing |
 
 ## ADR Alignment
+
 - [CRITICAL] <path:line> - <constraint violated> - <impact> - <who should fix>
 - (or "No violations found")
 
 ## Contract Compliance
+
 - [MAJOR] <path:line> - <contract mismatch> - <impact>
 - (or "No violations found")
 
 ## Security / Safety
+
 - [CRITICAL] <path:line> - <security issue> - <impact>
 - (or "No hazards found")
 
 ## Edge Cases
+
 - [MAJOR] Missing handling for <edge case>
 - (or "Key cases covered")
 
 ## Counts
+
 - Critical: N, Major: N, Minor: N
 - REQs in scope: N, with impl: N, with tests: N
 
@@ -167,6 +179,7 @@ Write findings that explain the violation and its impact.
 After writing your critique, summarize what you found:
 
 **When implementation is solid:**
+
 > **What I found:** Implementation covers all 5 in-scope REQs. No ADR violations. Contracts match. Auth properly enforced. Edge cases handled.
 >
 > **What's left:** Nothing blocking - ready for test-critic.
@@ -174,6 +187,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to test-critic.
 
 **When issues need fixing:**
+
 > **What I found:** REQ-003 has no implementation. Session timeout uses 30m but ADR specifies 15m. POST /users returns 200 but contract says 201.
 >
 > **What's left:** 3 issues need code-implementer attention.
@@ -181,6 +195,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run code-implementer to implement REQ-003, fix timeout value, and correct status code. Then re-run me to verify.
 
 **When design questions arise:**
+
 > **What I found:** Implementation uses sessions but ADR-005 says "stateless auth". Either code is wrong or ADR interpretation needs clarification.
 >
 > **What's left:** Need ADR clarification before code fix.

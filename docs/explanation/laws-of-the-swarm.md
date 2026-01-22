@@ -74,13 +74,13 @@ When an agent says "tests pass," there must be a receipt showing exit code 0. Wh
 
 ### The Reality of "Blocked"
 
-| What People Say | What Actually Happens |
-|-----------------|----------------------|
-| "Blocked on lint" | Route to auto-linter |
-| "Blocked on test failure" | Route to fixer |
-| "Blocked on missing import" | Route back to code-implementer |
-| "Blocked on design conflict" | Route to design-optioneer |
-| "Blocked on unclear spec" | Route to clarifier |
+| What People Say              | What Actually Happens          |
+| ---------------------------- | ------------------------------ |
+| "Blocked on lint"            | Route to auto-linter           |
+| "Blocked on test failure"    | Route to fixer                 |
+| "Blocked on missing import"  | Route back to code-implementer |
+| "Blocked on design conflict" | Route to design-optioneer      |
+| "Blocked on unclear spec"    | Route to clarifier             |
 
 **These are not blocks. They are routing decisions.**
 
@@ -98,6 +98,7 @@ Even then, work often continues in parallel while waiting for resolution.
 **Correct:** "Routing to auto-linter to fix style issues."
 
 **When true halt is appropriate:**
+
 - Mechanical failure (file system permissions, network unavailable)
 - Non-derivable decision (two valid designs, human must choose)
 - Unsafe boundary (would expose secrets, requires human approval)
@@ -113,6 +114,7 @@ Default-allow engineering inside the workspace. Gates engage at publish boundari
 Agents can read any file, write any code, run any test. No permission checks inside the workspace. Gates engage when crossing boundaries: commit, push, GitHub post. This separation prevents "security theater" where agents spend more time proving they are allowed to act than actually acting.
 
 **The boundaries:**
+
 - Commit: secrets-sanitizer scans staged changes
 - Push: repo-operator checks for anomalies
 - GitHub post: content restrictions apply
@@ -142,6 +144,7 @@ Tool outputs > derived facts > intent > implementation > narrative. When sources
 **Corollary:** An agent's claim does not override tool output.
 
 The hierarchy:
+
 1. **Tool outputs:** Exit codes, stdout, test results (what actually happened)
 2. **Derived facts:** Counts and metrics extracted from outputs
 3. **Intent:** BDD scenarios, ADRs, contracts (what we meant to build)
@@ -195,6 +198,7 @@ Flows run to completion. Counts are not exit criteria. Almost everything is rout
 **Definition:** no new signal (same failure signature, same evidence, no meaningful diff change).
 
 Response: reroute, don't stop:
+
 - **Same failure, no new signal** → route to a different agent, change approach
 - **Oscillation** (toggling between states) → break the cycle by routing differently
 
@@ -204,20 +208,20 @@ The orchestrator's job is to keep things moving. When progress stalls, route to 
 
 ### The Only External Constraints (All Rare)
 
-| Constraint | What It Means | How Rare |
-|------------|---------------|----------|
-| **Budget** | Tokens, time, or CI minutes exhausted | Occasional |
-| **Access** | Tooling broken, permissions missing, infra down | Rare |
-| **Authority** | Non-derivable decision with no safe default | Very rare (prefer DEFAULTED + log) |
+| Constraint    | What It Means                                   | How Rare                           |
+| ------------- | ----------------------------------------------- | ---------------------------------- |
+| **Budget**    | Tokens, time, or CI minutes exhausted           | Occasional                         |
+| **Access**    | Tooling broken, permissions missing, infra down | Rare                               |
+| **Authority** | Non-derivable decision with no safe default     | Very rare (prefer DEFAULTED + log) |
 
 When an external constraint hits, checkpoint UNVERIFIED and continue when the constraint clears. The flow still runs to completion—it just ends with honest state instead of green evidence.
 
-| Wrong | Right |
-|-------|-------|
-| "3 tries, moving on" | "3 tries, running again" |
-| "Stagnation detected, stopping" | "Stagnation detected, routing to different agent" |
-| "Max iterations, proceeding as done" | "Still not converged, change approach" |
-| "Timeout, assuming success" | "External constraint hit, checkpointing UNVERIFIED" |
+| Wrong                                | Right                                               |
+| ------------------------------------ | --------------------------------------------------- |
+| "3 tries, moving on"                 | "3 tries, running again"                            |
+| "Stagnation detected, stopping"      | "Stagnation detected, routing to different agent"   |
+| "Max iterations, proceeding as done" | "Still not converged, change approach"              |
+| "Timeout, assuming success"          | "External constraint hit, checkpointing UNVERIFIED" |
 
 **Violation:** "We tried 3 times, proceeding to Gate anyway."
 **Correct:** "3 tries with same failure. Routing to a different agent to unstick."
@@ -229,6 +233,7 @@ When an external constraint hits, checkpoint UNVERIFIED and continue when the co
 ### As Design Check
 
 When proposing a change, ask:
+
 - Does this violate any law?
 - Does this support any law?
 - Is the violation justified and documented?
@@ -238,6 +243,7 @@ When proposing a change, ask:
 ### As Debugging Tool
 
 When something fails, ask:
+
 - Which law was violated?
 - How can the system prevent this violation?
 
@@ -246,6 +252,7 @@ When something fails, ask:
 ### As Teaching Tool
 
 When explaining the system, reference:
+
 - Which laws govern this behavior?
 - Why does this law exist?
 
@@ -257,19 +264,19 @@ When explaining the system, reference:
 
 These are not preferences or style choices. They are the physics that makes the system work.
 
-| Law Violated | What Breaks |
-|--------------|-------------|
-| Law 1 (Disk Is Memory) | Work disappears on session reset |
-| Law 2 (Prose Routes Work) | Routing becomes fragile, requires harness maintenance |
-| Law 3 (One Agent, One Job) | Shallow work everywhere, unclear accountability |
-| Law 4 (Evidence Over Trust) | Process confabulation, false completions |
-| Law 5 (Fix Forward) | Everything blocks, nothing ships |
-| Law 6 (Gate at Boundaries) | Permission theater, agents paralyzed by access checks |
-| Law 7 (Local Resolution) | Expensive bounces for trivial issues |
-| Law 8 (Truth Flows Downward) | Agents override exit codes, hallucinated success |
-| Law 9 (Artifacts Reduce Work) | Artifact bloat, noise drowns signal |
-| Law 10 (System Improves) | Same failures repeat indefinitely |
-| Law 11 (Keep Going) | Early exit, count-based completion, treating routing as stopping |
+| Law Violated                  | What Breaks                                                      |
+| ----------------------------- | ---------------------------------------------------------------- |
+| Law 1 (Disk Is Memory)        | Work disappears on session reset                                 |
+| Law 2 (Prose Routes Work)     | Routing becomes fragile, requires harness maintenance            |
+| Law 3 (One Agent, One Job)    | Shallow work everywhere, unclear accountability                  |
+| Law 4 (Evidence Over Trust)   | Process confabulation, false completions                         |
+| Law 5 (Fix Forward)           | Everything blocks, nothing ships                                 |
+| Law 6 (Gate at Boundaries)    | Permission theater, agents paralyzed by access checks            |
+| Law 7 (Local Resolution)      | Expensive bounces for trivial issues                             |
+| Law 8 (Truth Flows Downward)  | Agents override exit codes, hallucinated success                 |
+| Law 9 (Artifacts Reduce Work) | Artifact bloat, noise drowns signal                              |
+| Law 10 (System Improves)      | Same failures repeat indefinitely                                |
+| Law 11 (Keep Going)           | Early exit, count-based completion, treating routing as stopping |
 
 The laws emerged from failure. They encode what breaks when ignored.
 
@@ -284,6 +291,7 @@ Laws can evolve, but the bar is high:
 3. **Must not break existing guarantees.** Laws protect invariants that other laws depend on.
 
 **Process:**
+
 - Propose in Flow 7 (Wisdom) based on evidence from completed runs
 - Document the failure mode the amendment addresses
 - Test in isolation before pack-wide adoption

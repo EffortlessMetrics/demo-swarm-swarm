@@ -16,6 +16,7 @@ Flow 3 built the house. Flow 4 does the punch list.
 **Mentality:** Feedback is noisy, time is linear, code rots instantly. Grab what's available, fix it, report it, move on. Don't wait for perfect signal.
 
 **Three Phases:**
+
 1. **Harvest & Cluster** — Pull all feedback, cluster into actionable Work Items
 2. **Execute** — Route Work Items to agents, fix what's current, skip what's stale
 3. **Close the Loop** — Update the PR, show humans what was addressed
@@ -34,9 +35,9 @@ Flow 3 built the house. Flow 4 does the punch list.
 
 #### Artifact visibility rule
 
-* Do **not** attempt to prove files exist under `.runs/<run-id>/` **before** `signal-run-prep` / `run-prep`.
-* If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on verification agents to obtain evidence from committed state when necessary.
-* Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
+- Do **not** attempt to prove files exist under `.runs/<run-id>/` **before** `signal-run-prep` / `run-prep`.
+- If `.runs/` is not directly readable in the current tool context, **do not conclude artifacts are missing**. Proceed with the flow and rely on verification agents to obtain evidence from committed state when necessary.
+- Preflight in flow docs is **policy**, not mechanics. Mechanics live in agents.
 
 ## Your Goals
 
@@ -86,6 +87,7 @@ Flow 4 uses **two complementary state machines**:
 ### On Rerun
 
 If running `/flow-4-review` on an existing run-id:
+
 - Read `.runs/<run-id>/review/flow_plan.md`
 - Read `.runs/<run-id>/review/review_worklist.json` for current item statuses
 - Create TodoWrite from the checklist
@@ -97,12 +99,15 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 ## Subagents to use
 
 **Infrastructure (Step 0)**:
+
 - **run-prep** -- establish the run directory and `.runs/<run-id>/review/`
 
 **Git operations (cross-cutting)**:
+
 - repo-operator -- branch at start, commit at end
 
 **PR lifecycle**:
+
 - pr-creator -- create Draft PR if none exists
 - pr-feedback-harvester -- read all PR feedback sources
 - review-worklist-writer -- convert feedback to actionable worklist
@@ -110,6 +115,7 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 - pr-status-manager -- flip Draft to Ready when review complete
 
 **Fix loop agents (reused from Build)**:
+
 - test-author -- fix test-related items
 - code-implementer -- fix code-related items
 - doc-writer -- fix documentation items
@@ -117,11 +123,13 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 - test-executor -- verify fixes
 
 **Polish and wrap-up**:
+
 - build-cleanup -- reseal build receipt after code changes
 - review-cockpit-designer -- design PR description for reviewer efficiency (optional, before pr-commenter)
 - review-cleanup -- write review_receipt.json, update index
 
 **Cleanup + Reporting (End of Flow)**:
+
 - secrets-sanitizer -- publish gate
 - repo-operator -- commit/push (gated on secrets)
 - gh-issue-manager -- update issue board
@@ -130,10 +138,12 @@ If you encounter missing PR or unclear state, **document it and continue**. Crea
 ## Upstream Inputs
 
 Read from `.runs/<run-id>/build/` (if available):
+
 - `build_receipt.json`
 - `pr_creation_status.md`
 
 Read from `.runs/<run-id>/run_meta.json`:
+
 - `pr_number` (from pr-creator in Flow 3)
 - `issue_number`
 - `github_repo`
@@ -144,23 +154,23 @@ Read from `.runs/<run-id>/run_meta.json`:
 
 ## Artifact Outputs
 
-| Artifact | Producer | Description |
-|----------|----------|-------------|
-| `flow_plan.md` | Orchestrator | Flow progress tracking |
-| `pr_feedback.md` | pr-feedback-harvester | Summarized bot + human feedback |
-| `pr_feedback_raw.json` | pr-feedback-harvester | Raw API responses (optional) |
-| `review_worklist.md` | review-worklist-writer | Actionable items with stable markers |
-| `review_worklist.json` | review-worklist-writer | Machine-readable worklist |
-| `review_actions.md` | Orchestrator | Cumulative log of changes made |
-| `style_sweep.md` | Orchestrator | Style sweep result (NOOP if no pending MINOR Markdown items) |
-| `cleanup_report.md` | review-cleanup | Cleanup summary |
-| `review_receipt.json` | review-cleanup | Machine-readable receipt |
-| `secrets_scan.md` | secrets-sanitizer | Secrets scan findings |
-| `secrets_status.json` | secrets-sanitizer | Gate status (audit record) |
-| `git_status.md` | repo-operator | Anomaly documentation (if detected) |
-| `gh_issue_status.md` | gh-issue-manager | Issue operation status |
-| `github_report.md` | gh-reporter | Local copy of GitHub post |
-| `gh_report_status.md` | gh-reporter | GitHub posting status |
+| Artifact               | Producer               | Description                                                  |
+| ---------------------- | ---------------------- | ------------------------------------------------------------ |
+| `flow_plan.md`         | Orchestrator           | Flow progress tracking                                       |
+| `pr_feedback.md`       | pr-feedback-harvester  | Summarized bot + human feedback                              |
+| `pr_feedback_raw.json` | pr-feedback-harvester  | Raw API responses (optional)                                 |
+| `review_worklist.md`   | review-worklist-writer | Actionable items with stable markers                         |
+| `review_worklist.json` | review-worklist-writer | Machine-readable worklist                                    |
+| `review_actions.md`    | Orchestrator           | Cumulative log of changes made                               |
+| `style_sweep.md`       | Orchestrator           | Style sweep result (NOOP if no pending MINOR Markdown items) |
+| `cleanup_report.md`    | review-cleanup         | Cleanup summary                                              |
+| `review_receipt.json`  | review-cleanup         | Machine-readable receipt                                     |
+| `secrets_scan.md`      | secrets-sanitizer      | Secrets scan findings                                        |
+| `secrets_status.json`  | secrets-sanitizer      | Gate status (audit record)                                   |
+| `git_status.md`        | repo-operator          | Anomaly documentation (if detected)                          |
+| `gh_issue_status.md`   | gh-issue-manager       | Issue operation status                                       |
+| `github_report.md`     | gh-reporter            | Local copy of GitHub post                                    |
+| `gh_report_status.md`  | gh-reporter            | GitHub posting status                                        |
 
 All artifacts live under `.runs/<run-id>/review/`.
 
@@ -191,12 +201,14 @@ After setup, you have a run directory and a PR to harvest feedback from.
 **pr-feedback-harvester** → **review-worklist-writer**
 
 **Call `pr-feedback-harvester`:**
+
 - Grabs all available feedback (bots, humans, CI)
 - Grabs partial CI failures if jobs are still running but already failing
 - Doesn't wait for pending checks
 - **Non-blocking:** Returns immediately with what's available. CI latency is handled by re-harvest during checkpoints, not by waiting.
 
 **Call `review-worklist-writer`:**
+
 - Clusters feedback into Work Items (by file/theme, not individual comments)
 - 50 comments → 5-10 Work Items
 - Items get stable `RW-NNN` IDs
@@ -252,6 +264,7 @@ while pending > 0 and not exhausted:
 **Handling Design Feedback (Law 7: Local Resolution):**
 
 If a reviewer flags a fundamental design issue (not just a code fix):
+
 1. **Call `design-optioneer`** to analyze the feedback against the current code and ADR
 2. **If the analysis suggests a scoped fix:** Call `code-implementer` to apply it
 3. **Verification:** Run `test-executor` to confirm no regressions
@@ -266,6 +279,7 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Always stage before scan. The re-harvest immediately captures bot feedback on the new push.
 
 **Exit conditions:**
+
 - The worklist-writer reports no pending items → complete
 - Context exhausted → PARTIAL (checkpoint, rerun to continue)
 - The worklist-writer reports a stuck signal → PARTIAL (human may need to intervene)
@@ -281,11 +295,13 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 **pr-commenter** → **pr-status-manager**
 
 **Call `pr-commenter`:**
+
 - Posts resolved items checklist (closure signal)
 - Shows what was fixed, skipped, or pending
 - Idempotent (updates existing comment)
 
 **Call `pr-status-manager`:**
+
 - If review complete: flip Draft → Ready for Review
 - If incomplete: keep Draft, document remaining items
 
@@ -301,6 +317,7 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 4. **`gh-issue-manager`** + **`gh-reporter`** — Update issue (if allowed)
 
 **Gate Result semantics:**
+
 - `safe_to_commit: false` → skip commit
 - `safe_to_publish: false` → commit locally, skip push
 - `proceed_to_github_ops: false` → skip GitHub updates
@@ -330,8 +347,8 @@ If a reviewer flags a fundamental design issue (not just a code fix):
 
 ## Worklist Progress
 
-| Item | Category | Severity | Status |
-|------|----------|----------|--------|
+| Item                         | Category | Severity | Status |
+| ---------------------------- | -------- | -------- | ------ |
 | (populated by worklist loop) |
 
 ## Summary
@@ -356,6 +373,7 @@ All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is bett
 ## Review Completion Criteria
 
 Flow 4 is VERIFIED when:
+
 - All CRITICAL worklist items are resolved
 - All MAJOR worklist items are resolved (or explicitly deferred with reason)
 - CI checks are passing
@@ -384,6 +402,7 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 **This is an explicit agent call chain. You route based on what agents tell you.**
 
 **Loop:**
+
 ```
 1) Call review-worklist-writer (mode: refresh)
    → The agent tells you: what's pending, whether it's stuck, what to work on next
@@ -425,6 +444,7 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 **Checkpoint Routine:** Sanitizer gates the **staged surface**. Stage first, then scan. Every push must be gated.
 
 **Exit conditions:**
+
 - Agent reports all items resolved → VERIFIED
 - Context exhausted → PARTIAL
 - Agent reports stuck → PARTIAL
@@ -453,4 +473,3 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 **Why explicit?** The orchestrator (you) executes what's in the list. Grouped phases get skipped. Explicit agents get called.
 
 Use explore agents to answer any immediate questions you have and then create the todo list and call the agents.
-

@@ -20,12 +20,14 @@
 ## Context
 
 This run is for aligning documentation ownership boundaries across the DemoSwarm pack:
+
 - **Canonical key**: gh-49
 - **Issue**: #49
 - **Run ID**: align-doc-ownership
 - **Prior flow**: Signal (VERIFIED)
 
 ## Upstream Inputs (from Signal)
+
 - `requirements.md` - 7 functional requirements (REQ-001 through REQ-007), 3 NFRs
 - `features/doc-ownership.feature` - BDD scenarios
 - `verification_notes.md` - NFR verification criteria
@@ -65,12 +67,14 @@ This run is for aligning documentation ownership boundaries across the DemoSwarm
 The checkpoint commit succeeded locally (e5bc8ef) but push was skipped because 5 Signal flow artifacts were found outside the Flow 2 allowlist. These were leftover from Flow 1 and need to be committed separately. This is a known artifact from the incremental Signal checkpoint.
 
 To resolve before Flow 3:
+
 1. Push the local commit manually: `git push origin run/align-doc-ownership`
 2. Or run Flow 3 which will include these in its checkpoint
 
 ## Human Review Checklist
 
 Before proceeding to Flow 3, humans should review:
+
 - [ ] `.runs/align-doc-ownership/plan/adr.md` - Is OPT-002 (Pragmatic Enforcement) the right choice?
 - [ ] `.runs/align-doc-ownership/plan/api_contracts.yaml` - Are the boundary enforcement patterns correct?
 - [ ] `.runs/align-doc-ownership/plan/work_plan.md` - Is the 6-subtask breakdown reasonable?
@@ -79,11 +83,11 @@ Before proceeding to Flow 3, humans should review:
 
 ## Key Artifacts
 
-| Artifact | Purpose |
-|----------|---------|
-| `adr.md` | Architecture decision: OPT-002 Pragmatic Enforcement |
-| `subtasks.yaml` | 6 subtasks partitioned by flow (ST-001 through ST-006) |
-| `work_plan.md` | Human-readable work plan with dependency graph |
-| `api_contracts.yaml` | Boundary enforcement patterns for pack-check |
-| `test_plan.md` | Test strategy: pack-check, doc-drift, negative tests, validation run |
-| `plan_receipt.json` | Flow 2 receipt for downstream consumers |
+| Artifact             | Purpose                                                              |
+| -------------------- | -------------------------------------------------------------------- |
+| `adr.md`             | Architecture decision: OPT-002 Pragmatic Enforcement                 |
+| `subtasks.yaml`      | 6 subtasks partitioned by flow (ST-001 through ST-006)               |
+| `work_plan.md`       | Human-readable work plan with dependency graph                       |
+| `api_contracts.yaml` | Boundary enforcement patterns for pack-check                         |
+| `test_plan.md`       | Test strategy: pack-check, doc-drift, negative tests, validation run |
+| `plan_receipt.json`  | Flow 2 receipt for downstream consumers                              |

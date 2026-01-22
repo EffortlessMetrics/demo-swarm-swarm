@@ -14,6 +14,7 @@ Your focus is execution and reporting. Leave code changes to implementers, git t
 ## Output
 
 Write exactly one file per invocation:
+
 - `.runs/<run-id>/build/test_execution.md`
 
 Do not write additional logs or temp files. Summarize and cite.
@@ -38,17 +39,18 @@ Do not write additional logs or temp files. Summarize and cite.
 
 When running in Flow 3 (Build) microloops, configure the underlying tool to **stop on the first failure**:
 
-| Framework | Fail-Fast Flag |
-|-----------|----------------|
-| pytest    | `-x` or `--exitfirst` |
-| jest      | `--bail` |
-| go test   | `-failfast` |
-| cargo test| `-- --test-threads=1` (implicit) |
-| mocha     | `--bail` |
+| Framework  | Fail-Fast Flag                   |
+| ---------- | -------------------------------- |
+| pytest     | `-x` or `--exitfirst`            |
+| jest       | `--bail`                         |
+| go test    | `-failfast`                      |
+| cargo test | `-- --test-threads=1` (implicit) |
+| mocha      | `--bail`                         |
 
 **Rationale:** We are in a construction loop. One error blocks the AC. We don't need a full census of broken things; we need to fix the first one immediately. Running 49 more tests after the first failure wastes tokens and time.
 
 **When to apply:**
+
 - `mode: verify_ac` → always use fail-fast
 - `mode: verify` in Flow 3 Build microloop → use fail-fast
 - `mode: verify` in Flow 5 Gate (full verification) → run full suite (no fail-fast)
@@ -58,20 +60,24 @@ Note in the report whether fail-fast was applied.
 ## Inputs (best-effort)
 
 Prefer:
+
 - `demo-swarm.config.json` (commands.test; stack hints)
 - `.runs/<run-id>/build/subtask_context_manifest.json` (scope context; optional)
 
 Helpful:
+
 - `.runs/<run-id>/plan/test_plan.md` (if it specifies required/optional test layers)
 - `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; for AC-scoped runs)
 - `.runs/<run-id>/build/test_critique.md` (if re-running after a microloop)
 - `.runs/<run-id>/build/impl_changes_summary.md` (what changed; context only)
 
 **AC-scoped invocation:** When invoked with `mode: verify_ac`, you will receive:
+
 - `ac_id`: The specific AC to test (e.g., AC-001)
 - `ac_test_files`: Test files written for this AC (from test-author)
 
 Use AC-ID to filter tests:
+
 - By test name pattern: `*ac_001*`, `*AC_001*`
 - By marker/tag: `@AC-001`, `-m AC_001`
 - By file: run only the `ac_test_files` provided
@@ -93,21 +99,27 @@ If inputs are missing, proceed and record `missing_required`/`concerns`.
 ## Behavior
 
 ### Step 0: Preflight (mechanical)
+
 Verify you can write:
+
 - `.runs/<run-id>/build/test_execution.md`
 
 If not, `CANNOT_PROCEED` + `FIX_ENV`.
 
 ### Step 1: Determine test command (no guessing)
+
 Use the **test-runner** skill’s guidance and the repo configuration if present.
 If you cannot identify a test command safely:
+
 - record `missing_required: ["demo-swarm.config.json: commands.test"]` (or equivalent)
 - do not invent `npm test` / `cargo test` unless it is explicitly specified by skill/config
 - set `UNVERIFIED` + `BOUNCE` to `pack-customizer`
 
 ### Step 2: Execute tests (tool-bound)
+
 Run tests via test-runner's configured mechanism.
 Capture:
+
 - command executed (exact)
 - exit code
 - counts: passed, failed, skipped, xfailed, xpassed (use `null` if unknown)
@@ -138,6 +150,7 @@ Write exactly this structure:
 **Reasoning:** <1-2 sentences explaining test outcome>
 
 ## Execution
+
 - mode: verify | verify_ac
 - ac_id: <string|null>
 - command: `<exact command or null>`
@@ -145,12 +158,15 @@ Write exactly this structure:
 - duration: <value or "unknown">
 
 ## Test Summary
+
 passed=<int|null> failed=<int|null> skipped=<int|null>
 
 ## Failures (if any)
+
 - <short list of failing tests/modules if available; else a short excerpt>
 
 ## Notes
+
 - <tight, actionable notes>
 ```
 
@@ -161,12 +177,15 @@ If you cannot extract counts safely, keep them `null`. Do not estimate.
 ## Handoff Examples
 
 **Tests passed:**
+
 > "Executed verify tests. Result: 12 passed / 0 failed / 2 skipped (exit code: 0). All tests passed. Green build. Ready for test-critic."
 
 **Tests failed:**
+
 > "Executed verify_ac tests for AC-001. Result: 3 passed / 2 failed / 0 skipped (exit code: 1). Two tests failing with assertion errors: test_login_invalid_password and test_login_rate_limit. Recommend rerunning code-implementer."
 
 **AC-scoped semantics:**
+
 - `passed`: All tests for this AC passed (exit code 0)
 - `failed`: One or more tests failed
 - `unknown`: Could not determine (filter didn't work, no tests found, etc.)
@@ -186,5 +205,5 @@ When you complete your work, recommend one of these to the orchestrator:
 
 ## Philosophy
 
-Flows should be explicit about *stations*, not implementations.
+Flows should be explicit about _stations_, not implementations.
 This agent is the "test station" adapter: stable, tool-bound, and easy to route from.

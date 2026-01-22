@@ -18,11 +18,11 @@ These enums define the **audit vocabulary** used in receipts and machine summari
 VERIFIED | UNVERIFIED | CANNOT_PROCEED
 ```
 
-| Value | Meaning |
-|-------|---------|
-| `VERIFIED` | Adequate for purpose; blockers empty |
-| `UNVERIFIED` | Gaps/concerns remain; artifacts still written |
-| `CANNOT_PROCEED` | Mechanical failure only (IO/perms/tooling) |
+| Value            | Meaning                                       |
+| ---------------- | --------------------------------------------- |
+| `VERIFIED`       | Adequate for purpose; blockers empty          |
+| `UNVERIFIED`     | Gaps/concerns remain; artifacts still written |
+| `CANNOT_PROCEED` | Mechanical failure only (IO/perms/tooling)    |
 
 **Rule:** `CANNOT_PROCEED` requires `missing_required` to be non-empty.
 
@@ -32,12 +32,12 @@ VERIFIED | UNVERIFIED | CANNOT_PROCEED
 PROCEED | RERUN | BOUNCE | FIX_ENV
 ```
 
-| Value | Meaning |
-|-------|---------|
+| Value     | Meaning                                                                         |
+| --------- | ------------------------------------------------------------------------------- |
 | `PROCEED` | Default: continue even when open questions exist (capture blockers/assumptions) |
-| `RERUN` | Same station again with a deterministic improvement expected |
-| `BOUNCE` | Route to a specific flow/agent for an actionable fix |
-| `FIX_ENV` | Environment/tooling issue (paired with `status: CANNOT_PROCEED`) |
+| `RERUN`   | Same station again with a deterministic improvement expected                    |
+| `BOUNCE`  | Route to a specific flow/agent for an actionable fix                            |
+| `FIX_ENV` | Environment/tooling issue (paired with `status: CANNOT_PROCEED`)                |
 
 **Note:** Agents don't emit these values directly. They write prose like "run code-implementer next" or "this needs to go back to Plan." Cleanup agents translate prose into enum values when writing receipts.
 
@@ -63,6 +63,7 @@ blocker_reason: <string | null>
 ```
 
 Notes:
+
 - The sanitizer is a **boolean gate**, not a router. It says yes/no.
 - If `safe_to_publish: false`, the flow doesn't push. The orchestrator decides next steps.
 - `blocker_kind` is the machine-readable category: `NONE` (not blocked), `MECHANICAL` (IO/tooling failure), `SECRET_IN_CODE` (staged code needs fix), `SECRET_IN_ARTIFACT` (artifact can't be redacted).
@@ -87,6 +88,7 @@ anomaly_paths: []
 ```
 
 Notes:
+
 - `commit_sha` is always populated (current HEAD on no-op).
 - `publish_surface` is always present: `PUSHED` only when push succeeds; `NOT_PUSHED` for local-only checkpoints.
 - `status` values:
@@ -105,10 +107,12 @@ Notes:
 Machine Summary is an **audit format** used by cleanup agents when writing receipts. It is not a communication format between agents.
 
 **Who uses Machine Summary:**
+
 - Cleanup agents (signal-cleanup, plan-cleanup, build-cleanup, etc.) write these when producing receipts
 - The format enables mechanical processing of receipt data
 
 **Who does NOT use Machine Summary:**
+
 - Critics communicate via prose critiques with severity markers
 - Workers communicate via prose handoffs
 - Orchestrators route on prose handoffs, not Machine Summary
@@ -125,9 +129,9 @@ blockers: []
 missing_required: []
 concerns: []
 
-can_further_iteration_help: yes | no   # critics only
+can_further_iteration_help: yes | no # critics only
 
-severity_summary:                      # critics/verifiers
+severity_summary: # critics/verifiers
   critical: 0
   major: 0
   minor: 0
@@ -139,14 +143,14 @@ severity_summary:                      # critics/verifiers
 
 ## Verdict Domains (don't conflate)
 
-| Domain | Values | Used by |
-|--------|--------|---------|
-| Flow/Agent Status | `VERIFIED \| UNVERIFIED \| PARTIAL \| CANNOT_PROCEED` | Machine Summary, receipts |
-| Repo Operator Status | `COMPLETED \| COMPLETED_WITH_WARNING \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED` | Repo Operator Result |
-| Secrets Sanitizer Status | `CLEAN \| FIXED \| BLOCKED` | Gate Result |
-| Gate Merge Verdict | `MERGE \| BOUNCE` (include reason when bouncing) | `merge_decision.md` |
-| Deploy Verdict (two-axis) | `deploy_action`: `COMPLETED \| SKIPPED \| FAILED`; `governance_enforcement`: `VERIFIED \| VERIFIED_RULESET \| UNVERIFIED_PERMS \| NOT_CONFIGURED \| UNKNOWN`; `deployment_verdict` (derived): `STABLE \| NOT_DEPLOYED \| GOVERNANCE_UNVERIFIABLE \| BLOCKED_BY_GATE` | `deployment_decision.md` |
-| Smoke Signal | `STABLE \| INVESTIGATE \| ROLLBACK` | `verification_report.md` |
+| Domain                    | Values                                                                                                                                                                                                                                                               | Used by                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Flow/Agent Status         | `VERIFIED \| UNVERIFIED \| PARTIAL \| CANNOT_PROCEED`                                                                                                                                                                                                                | Machine Summary, receipts |
+| Repo Operator Status      | `COMPLETED \| COMPLETED_WITH_WARNING \| COMPLETED_WITH_ANOMALY \| FAILED \| CANNOT_PROCEED`                                                                                                                                                                          | Repo Operator Result      |
+| Secrets Sanitizer Status  | `CLEAN \| FIXED \| BLOCKED`                                                                                                                                                                                                                                          | Gate Result               |
+| Gate Merge Verdict        | `MERGE \| BOUNCE` (include reason when bouncing)                                                                                                                                                                                                                     | `merge_decision.md`       |
+| Deploy Verdict (two-axis) | `deploy_action`: `COMPLETED \| SKIPPED \| FAILED`; `governance_enforcement`: `VERIFIED \| VERIFIED_RULESET \| UNVERIFIED_PERMS \| NOT_CONFIGURED \| UNKNOWN`; `deployment_verdict` (derived): `STABLE \| NOT_DEPLOYED \| GOVERNANCE_UNVERIFIABLE \| BLOCKED_BY_GATE` | `deployment_decision.md`  |
+| Smoke Signal              | `STABLE \| INVESTIGATE \| ROLLBACK`                                                                                                                                                                                                                                  | `verification_report.md`  |
 
 Note: `GOVERNANCE_UNVERIFIABLE` means deploy action succeeded but governance cannot be verified. This is distinct from `NOT_DEPLOYED` (deploy action failed).
 
@@ -257,19 +261,21 @@ The fixer can address these without needing design input.
 
 ### What This Replaces
 
-| Old Pattern | Problem | New Pattern |
-|-------------|---------|-------------|
-| Rigid routing rules | Brittle, requires updates across the system | Agent recommends, orchestrator routes |
-| Agents knowing all agents | Impossible to maintain, prompts bloat | Agents know 3-4 neighbors |
-| Orchestrator guessing | Orchestrator lacks context | Agent provides reasoning |
+| Old Pattern               | Problem                                     | New Pattern                           |
+| ------------------------- | ------------------------------------------- | ------------------------------------- |
+| Rigid routing rules       | Brittle, requires updates across the system | Agent recommends, orchestrator routes |
+| Agents knowing all agents | Impossible to maintain, prompts bloat       | Agents know 3-4 neighbors             |
+| Orchestrator guessing     | Orchestrator lacks context                  | Agent provides reasoning              |
 
 ### Guidelines for Neighbor Descriptions
 
 Keep descriptions to **one line** with two parts:
+
 1. **What the agent does** (verb phrase)
 2. **When to route there** (condition)
 
 **Good examples:**
+
 ```
 - **fixer**: Applies targeted fixes when issues are mechanical and well-defined
 - **test-author**: Writes or updates tests when test coverage gaps are identified
@@ -278,6 +284,7 @@ Keep descriptions to **one line** with two parts:
 ```
 
 **Anti-patterns to avoid:**
+
 ```
 # Too vague - doesn't say when to route
 - **fixer**: Fixes things
@@ -291,11 +298,13 @@ Keep descriptions to **one line** with two parts:
 ### Choosing Which Neighbors to Include
 
 Include agents that handle:
+
 1. **The happy path** - Where does work normally go next after you?
 2. **Common issues** - What problems do you often discover that someone else should fix?
 3. **Quality gates** - Who reviews your work before it moves forward?
 
 Do not include agents for:
+
 - Edge cases that rarely happen
 - Agents many hops away in the flow
 - Mechanical skills (use skill invocations instead)
@@ -317,6 +326,7 @@ When you complete your work, recommend one of these agents:
 Route to **test-author** - Implementation is complete and passes existing tests,
 but I identified two untested edge cases in the error handling path. The
 test-author should add coverage for:
+
 1. Network timeout during auth refresh
 2. Malformed token response from OAuth provider
 
@@ -332,6 +342,7 @@ See [agent-philosophy.md](../explanation/agent-philosophy.md) for the broader ph
 The orchestrator routes on your signals. Hiding uncertainty behind false completion causes downstream failures.
 
 **PARTIAL is a win.** If you:
+
 - Made real progress
 - Documented what's done and what's blocked
 - Left the codebase in a runnable state
@@ -366,12 +377,14 @@ Agents are **intelligent actors**, not mechanical extractors. They do real cogni
 ### Core Principles
 
 **Agents are like well-trained juniors reporting to a PM.** They:
+
 - Investigate autonomously before asking for help
 - Make reasonable assumptions and document them
 - Report what they found, what they did, and what they recommend
 - Communicate in natural language, not structured data formats
 
 **Single responsibility per agent.** Each agent has one job:
+
 - Critics critique (they never fix)
 - Workers implement (they maintain the ledger)
 - Cleanup agents audit (they write receipts)
@@ -383,6 +396,7 @@ Agents are **intelligent actors**, not mechanical extractors. They do real cogni
 ### Research-First Autonomy
 
 When agents encounter ambiguity, they follow this sequence:
+
 1. **Investigate** — Search the codebase, read existing implementations
 2. **Derive** — Use existing patterns to infer correct behavior
 3. **Default** — Choose reversible defaults and document them
@@ -396,14 +410,14 @@ Stable markers enable mechanical counting without parsing prose. Agents emit the
 
 **Key marker families:**
 
-| Family | Pattern | Used in |
-|--------|---------|---------|
-| Requirements | `^### REQ-`, `^### NFR-` | `requirements.md` |
-| Risks | `^- RSK-[0-9]+ \[SEVERITY\]` | `early_risks.md`, `risk_assessment.md` |
-| Questions | `^- QID: OQ-<FLOW>-[0-9]{3}` | `open_questions.md` |
-| Severity | `^- \[CRITICAL\]`, `^- \[MAJOR\]`, `^- \[MINOR\]` | Critiques |
-| Build | `^- IMPL_FILE_*:`, `^- TEST_FILE_*:` | `*_changes_summary.md` |
-| Wisdom | `^## Learning:`, `^### REG-[0-9]{3}:` | `learnings.md`, `regression_report.md` |
+| Family       | Pattern                                           | Used in                                |
+| ------------ | ------------------------------------------------- | -------------------------------------- |
+| Requirements | `^### REQ-`, `^### NFR-`                          | `requirements.md`                      |
+| Risks        | `^- RSK-[0-9]+ \[SEVERITY\]`                      | `early_risks.md`, `risk_assessment.md` |
+| Questions    | `^- QID: OQ-<FLOW>-[0-9]{3}`                      | `open_questions.md`                    |
+| Severity     | `^- \[CRITICAL\]`, `^- \[MAJOR\]`, `^- \[MINOR\]` | Critiques                              |
+| Build        | `^- IMPL_FILE_*:`, `^- TEST_FILE_*:`              | `*_changes_summary.md`                 |
+| Wisdom       | `^## Learning:`, `^### REG-[0-9]{3}:`             | `learnings.md`, `regression_report.md` |
 
 See [stable-markers.md](stable-markers.md) for complete patterns, examples, and counting commands.
 
@@ -442,7 +456,11 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
     "requirements_critic": null,
     "bdd_critic": null
   },
-  "key_artifacts": ["requirements.md", "features/*.feature", "open_questions.md"]
+  "key_artifacts": [
+    "requirements.md",
+    "features/*.feature",
+    "open_questions.md"
+  ]
 }
 ```
 
@@ -463,10 +481,20 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
   },
   "decision_spine": {
     "status": null,
-    "design_options": { "status": null, "recommendation": null, "confidence": null },
+    "design_options": {
+      "status": null,
+      "recommendation": null,
+      "confidence": null
+    },
     "adr": { "status": null, "chosen_option": null, "drivers_total": null }
   },
-  "key_artifacts": ["design_options.md", "adr.md", "design_validation.md", "work_plan.md", "test_plan.md"]
+  "key_artifacts": [
+    "design_options.md",
+    "adr.md",
+    "design_validation.md",
+    "work_plan.md",
+    "test_plan.md"
+  ]
 }
 ```
 
@@ -532,7 +560,13 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
     "security_scan": null,
     "coverage_audit": null
   },
-  "key_artifacts": ["merge_decision.md", "receipt_audit.md", "contract_compliance.md", "security_scan.md", "coverage_audit.md"]
+  "key_artifacts": [
+    "merge_decision.md",
+    "receipt_audit.md",
+    "contract_compliance.md",
+    "security_scan.md",
+    "coverage_audit.md"
+  ]
 }
 ```
 
@@ -557,7 +591,11 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
     "deploy_decider": null,
     "verification_report": null
   },
-  "key_artifacts": ["deployment_decision.md", "deployment_log.md", "verification_report.md"]
+  "key_artifacts": [
+    "deployment_decision.md",
+    "deployment_log.md",
+    "verification_report.md"
+  ]
 }
 ```
 
@@ -573,7 +611,11 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
     "followup_issue_drafts": null
   },
   "flow_summary": {
-    "signal": null, "plan": null, "build": null, "gate": null, "deploy": null
+    "signal": null,
+    "plan": null,
+    "build": null,
+    "gate": null,
+    "deploy": null
   },
   "final_outcomes": {
     "merge_decision": null,
@@ -648,12 +690,12 @@ Each flow produces a receipt with flow-specific fields. All receipts share a com
 
 ## Sources of Truth
 
-| What | Where |
-|------|-------|
-| Flow sequences, gating | `.claude/commands/flow-*.md` |
-| Agent behavior, outputs | `.claude/agents/*.md` |
-| Shared invariants, canonical blocks | `CLAUDE.md` |
-| Drift validation | `.claude/scripts/pack-check.sh` |
+| What                                | Where                           |
+| ----------------------------------- | ------------------------------- |
+| Flow sequences, gating              | `.claude/commands/flow-*.md`    |
+| Agent behavior, outputs             | `.claude/agents/*.md`           |
+| Shared invariants, canonical blocks | `CLAUDE.md`                     |
+| Drift validation                    | `.claude/scripts/pack-check.sh` |
 
 ---
 

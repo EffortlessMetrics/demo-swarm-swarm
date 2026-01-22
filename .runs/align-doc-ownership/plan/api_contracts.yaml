@@ -41,7 +41,7 @@ flow_command_boundary:
 
   applies_to:
     glob: ".claude/commands/flow-*.md"
-    count: 6  # flows 1-6
+    count: 6 # flows 1-6
 
   violation_patterns:
     # Pattern group 1: Direct demoswarm.sh invocation
@@ -58,7 +58,7 @@ flow_command_boundary:
       name: skill_name_invocation
       pattern: "(runs-derive|runs-index|openq-tools|secrets-tools|test-runner|auto-linter|policy-runner)"
       type: regex
-      context: code_block  # Only in code blocks, not prose references
+      context: code_block # Only in code blocks, not prose references
       severity: error
       message: "Flow command must not invoke skill by name in code blocks"
       rationale: "Skill invocation is agent responsibility, not flow orchestration"
@@ -68,7 +68,7 @@ flow_command_boundary:
       name: cli_flag_syntax
       pattern: "--(file|prefix|run-id|run-dir|output|regex|type|status|format)"
       type: regex
-      context: code_block  # Only in code blocks
+      context: code_block # Only in code blocks
       severity: error
       message: "Flow command must not contain CLI flag syntax"
       rationale: "CLI flags indicate implementation detail; flows route, not invoke"
@@ -96,7 +96,7 @@ agent_skill_declaration:
 
   applies_to:
     glob: ".claude/agents/*.md"
-    count: 55  # per problem statement
+    count: 55 # per problem statement
 
   detection_rule:
     trigger_patterns:
@@ -120,10 +120,19 @@ agent_skill_declaration:
       columns:
         - name: Skill
           required: true
-          values: [runs-derive, runs-index, openq-tools, secrets-tools, test-runner, auto-linter, policy-runner]
+          values:
+            [
+              runs-derive,
+              runs-index,
+              openq-tools,
+              secrets-tools,
+              test-runner,
+              auto-linter,
+              policy-runner,
+            ]
         - name: Purpose
           required: true
-          max_length: 100  # brief, not CLI reference
+          max_length: 100 # brief, not CLI reference
       example: |
         | Skill | Purpose |
         |-------|---------|
@@ -229,11 +238,11 @@ claudemd_skills_table:
         format: skill_name
       - name: Purpose
         required: true
-        max_length: 120  # very brief
+        max_length: 120 # very brief
         forbidden_patterns:
-          - "--"  # CLI flags
-          - "demoswarm.sh"  # invocation detail
-          - ".claude/scripts/"  # path detail
+          - "--" # CLI flags
+          - "demoswarm.sh" # invocation detail
+          - ".claude/scripts/" # path detail
 
     example_valid: |
       | Skill | Purpose |
@@ -249,7 +258,7 @@ claudemd_skills_table:
   reference_requirement:
     description: "CLAUDE.md should reference skill docs for detailed usage"
     pattern: "See \\.\\.\\./SKILL\\.md"
-    recommendation: true  # not strictly required
+    recommendation: true # not strictly required
 
   traceability:
     requirements:
@@ -323,7 +332,13 @@ error_model:
         description: "Line number of violation (0 if file-level)"
       rule:
         type: string
-        enum: [flow_command_boundary, agent_skill_declaration, agent_enum_consistency, claudemd_skills_table]
+        enum:
+          [
+            flow_command_boundary,
+            agent_skill_declaration,
+            agent_enum_consistency,
+            claudemd_skills_table,
+          ]
         description: "Rule that was violated"
       severity:
         type: string
@@ -386,7 +401,7 @@ pack_check_integration:
     new_flags:
       - flag: "--check-boundaries"
         description: "Run boundary enforcement checks"
-        default: true  # enabled by default after implementation
+        default: true # enabled by default after implementation
 
   exit_codes:
     0: "All checks pass"
@@ -403,16 +418,17 @@ traceability_matrix:
     violations: [FLOW_VIO_001, FLOW_VIO_002, FLOW_VIO_003]
 
   REQ-002:
-    contracts: [agent_skill_declaration, agent_enum_consistency, agent_skill_reference]
+    contracts:
+      [agent_skill_declaration, agent_enum_consistency, agent_skill_reference]
     violations: [AGENT_VIO_001, AGENT_VIO_002, AGENT_VIO_003]
 
   REQ-003:
     contracts: [agent_skill_reference]
-    violations: []  # advisory, not blocking
+    violations: [] # advisory, not blocking
 
   REQ-004:
     contracts: [claudemd_skills_table]
-    violations: []  # advisory initially, may become blocking
+    violations: [] # advisory initially, may become blocking
 
   NFR-TEST-001:
     mets:

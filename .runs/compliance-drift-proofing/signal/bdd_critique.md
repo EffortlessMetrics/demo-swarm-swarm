@@ -56,6 +56,7 @@ None. All scenarios use domain-level language (validation rules, warnings, error
 ## Coverage Gaps
 
 None. All 6 requirements have:
+
 - Happy path scenarios (6/6)
 - Edge case scenarios (6/6)
 - Error case scenarios (5/6 - REQ-006 N/A as documented)
@@ -83,25 +84,26 @@ None. All ambiguities were resolved in iteration 2 or are documented in requirem
 
 ## Coverage Matrix
 
-| REQ | Scenarios | Happy | Edge | Error | Feature File |
-|-----|-----------|-------|------|-------|--------------|
-| REQ-001 | 6 | 1 | 1 | 3 | flow_boundary_enforcement.feature |
-| REQ-002 | 6 | 1 | 1 | 3 | skills_section_enforcement.feature |
-| REQ-003 | 8 | 2 | 1 | 4 | openq_prefix_validation.feature |
-| REQ-004 | 5 | 1 | 1 | 1 | build_gate_handshake.feature |
-| REQ-005 | 8 | 1 | 1 | 1 | warning_first_mode.feature |
-| REQ-006 | 7 | 3 | 2 | 0 | no_false_positives.feature |
-| **Total** | **40** | **9** | **7** | **12** | |
+| REQ       | Scenarios | Happy | Edge  | Error  | Feature File                       |
+| --------- | --------- | ----- | ----- | ------ | ---------------------------------- |
+| REQ-001   | 6         | 1     | 1     | 3      | flow_boundary_enforcement.feature  |
+| REQ-002   | 6         | 1     | 1     | 3      | skills_section_enforcement.feature |
+| REQ-003   | 8         | 2     | 1     | 4      | openq_prefix_validation.feature    |
+| REQ-004   | 5         | 1     | 1     | 1      | build_gate_handshake.feature       |
+| REQ-005   | 8         | 1     | 1     | 1      | warning_first_mode.feature         |
+| REQ-006   | 7         | 3     | 2     | 0      | no_false_positives.feature         |
+| **Total** | **40**    | **9** | **7** | **12** |                                    |
 
 Notes:
+
 - REQ-003 scenario count includes Scenario Outlines which expand to multiple test cases
 - REQ-006 has no error scenarios by design (it validates absence of false positives)
 - Remaining 12 scenarios are general/validation scenarios without specific @smoke/@edge/@error tags
 
 ## Iteration 2 Resolution Summary
 
-| Prior Issue | Resolution |
-|-------------|------------|
-| BDD-MIN-001: Combined clean pack scenario | Split into two separate scenarios (lines 62-73 in warning_first_mode.feature) |
-| BDD-MIN-002: Abstract documentation assertions | Made concrete with README.md file existence and specific section titles (lines 71-75 in build_gate_handshake.feature) |
-| BDD-MIN-003: Abstract "validation result is PASS" | Replaced with concrete exit code assertions throughout all features |
+| Prior Issue                                       | Resolution                                                                                                            |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| BDD-MIN-001: Combined clean pack scenario         | Split into two separate scenarios (lines 62-73 in warning_first_mode.feature)                                         |
+| BDD-MIN-002: Abstract documentation assertions    | Made concrete with README.md file existence and specific section titles (lines 71-75 in build_gate_handshake.feature) |
+| BDD-MIN-003: Abstract "validation result is PASS" | Replaced with concrete exit code assertions throughout all features                                                   |

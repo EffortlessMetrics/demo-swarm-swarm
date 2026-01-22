@@ -13,11 +13,13 @@ Inside the development sandbox, Claude has freedom to explore, implement, and it
 Machine time is cheap. Human attention is expensive.
 
 Let Claude iterate 10 times to find what works. Only engage human judgment when it matters:
+
 - "Should we ship this?" (merge gate)
 - "Is this safe to publish?" (secrets gate)
 - "Does this solve the problem?" (review)
 
 Don't spend human attention on:
+
 - "Can Claude read this file?" (yes)
 - "Can Claude run this test?" (yes)
 - "Can Claude try this approach?" (yes)
@@ -27,6 +29,7 @@ The economics are asymmetric. A human reviewing "permission to read auth.rs" cos
 ### The Sandbox Is the Boundary
 
 We don't constrain each action. We constrain the blast radius:
+
 - The repo is the sandbox
 - Changes stay local until pushed
 - Secrets can't leak until publish
@@ -39,12 +42,14 @@ This is exactly how you'd onboard a trusted new team member: "Here's your dev en
 ### Velocity Through Freedom
 
 Approval-per-action kills velocity:
+
 - Constant interruption breaks flow
 - Context loss between approvals
 - Stop-and-wait cycles waste time
 - Claude becomes a suggestion engine instead of a builder
 
 Freedom enables velocity:
+
 - Try approaches rapidly without permission
 - Run tests immediately to get feedback
 - Fix issues in-flight as they're discovered
@@ -57,6 +62,7 @@ The difference is an order of magnitude. A feature that takes 10 approval cycles
 ### Inside the Sandbox (Default-Allow)
 
 Claude can freely:
+
 - Read any file in the repo
 - Write and edit code
 - Run commands and scripts
@@ -74,23 +80,25 @@ This isn't reckless — the sandbox itself is the security boundary. Claude oper
 
 Gates engage at publish points:
 
-| Boundary | Gate | What It Checks |
-|----------|------|----------------|
-| Commit | secrets-sanitizer | No secrets in staged changes |
-| Push | repo-operator | Repo hygiene, anomaly detection |
-| PR | merge-decider | Evidence synthesis, quality gates |
-| Merge | GitHub/CI | Tests pass, reviews complete |
-| Deploy | deploy-decider | Governance, verification |
+| Boundary | Gate              | What It Checks                    |
+| -------- | ----------------- | --------------------------------- |
+| Commit   | secrets-sanitizer | No secrets in staged changes      |
+| Push     | repo-operator     | Repo hygiene, anomaly detection   |
+| PR       | merge-decider     | Evidence synthesis, quality gates |
+| Merge    | GitHub/CI         | Tests pass, reviews complete      |
+| Deploy   | deploy-decider    | Governance, verification          |
 
 Each gate is a discrete checkpoint with a clear question and a boolean answer. Either the evidence supports proceeding, or it doesn't.
 
 ### The Gate Contract
 
 Gates are binary decisions backed by evidence:
+
 - **Pass**: Evidence supports proceeding
 - **Block**: Specific reason with actionable fix
 
 Gates don't micromanage. They don't second-guess implementation choices. They verify boundaries:
+
 - "Are there secrets in this diff?" (not "is this good code?")
 - "Do tests pass?" (not "are there enough tests?")
 - "Is the PR well-formed?" (not "is this the best approach?")
@@ -108,6 +116,7 @@ Quality judgments happen in upstream flows (critics, reviewers). Gates verify th
 **Why here:** Once pushed, secrets are in git history forever. This is the last chance to catch them. A secret that reaches GitHub requires rotating credentials, notifying users, and potentially reporting breaches.
 
 **What it checks:**
+
 - API keys and tokens
 - Passwords and credentials
 - Private keys
@@ -123,6 +132,7 @@ Quality judgments happen in upstream flows (critics, reviewers). Gates verify th
 **Why here:** Once merged to main, it's the team's shared reality. Other developers will build on it. Reverting becomes a coordination problem.
 
 **What it checks:**
+
 - Requirements were addressed (receipts exist)
 - Critics signed off (no blocking issues)
 - Tests pass (CI green)
@@ -137,6 +147,7 @@ Quality judgments happen in upstream flows (critics, reviewers). Gates verify th
 **Why here:** Once deployed, users are affected. Rollback is possible but disruptive. Production issues cost real money and trust.
 
 **What it checks:**
+
 - Deployment prerequisites met
 - Verification tests ready
 - Rollback path exists
@@ -275,6 +286,7 @@ Trust flows downward. Each gate is a checkpoint that verifies the work before it
 If gates are slow, people skip them. A secrets scan that takes 10 minutes trains developers to commit without scanning "just this once."
 
 Good gates:
+
 - Run in seconds
 - Provide clear pass/fail
 - Give actionable feedback on failure
@@ -285,6 +297,7 @@ Good gates:
 A gate that sometimes catches a problem and sometimes doesn't is worse than no gate. Developers learn to distrust it and route around it.
 
 Good gates:
+
 - Deterministic results for same input
 - No false positives (or very rare ones)
 - No false negatives (ever)
@@ -294,6 +307,7 @@ Good gates:
 Gates verify boundaries, not quality. A gate that asks "does this code follow best practices?" is doing the wrong job at the wrong time.
 
 Quality comes from:
+
 - Good requirements (Signal flow)
 - Good design (Plan flow)
 - Good implementation (Build flow)
@@ -306,6 +320,7 @@ Gates come last and verify that quality work happened.
 A sandbox that leaks is not a sandbox. If Claude can accidentally affect production from the "sandbox," you don't have a gate pattern — you have theater.
 
 Real sandbox:
+
 - No production credentials
 - No production network access
 - Git is the only path out
@@ -316,6 +331,7 @@ Real sandbox:
 Consider two approaches for a 50-operation feature:
 
 **Approval-per-action:**
+
 - 50 operations x 30 seconds human attention = 25 minutes of human time
 - Plus context-switch overhead: ~10 minutes
 - Plus approval latency: ~30 minutes of waiting
@@ -323,6 +339,7 @@ Consider two approaches for a 50-operation feature:
 - Result: Human attention spent on low-value decisions
 
 **Gate pattern:**
+
 - 50 operations x 0 seconds human attention = 0 minutes
 - 3 gates x 10 seconds each = 30 seconds of automated verification
 - 1 PR review x 5 minutes human attention = 5 minutes

@@ -9,6 +9,7 @@
 CLAUDE.md is the **repo-level policy file** that Claude Code automatically loads from the repository root. Every Claude Code session in this repository sees this file attached to its context.
 
 Think of it as the **constitution** for the swarm. It defines:
+
 - The operating philosophy (default-allow engineering, gated publishing)
 - The coordination contracts (how agents communicate, who owns git)
 - The flow overview (what exists, what each flow produces)
@@ -33,6 +34,7 @@ Claude Code loads CLAUDE.md automatically when you open a session in a repositor
 When an orchestrator spawns an agent using the Task tool, the agent inherits the CLAUDE.md context. This is why CLAUDE.md says "This file is attached to every agent thread."
 
 The propagation chain:
+
 1. **User session** - Claude Code loads CLAUDE.md
 2. **Orchestrator** - Sees CLAUDE.md in its context
 3. **Spawned agent** - Also sees CLAUDE.md (inherited via Task tool)
@@ -43,6 +45,7 @@ Agents don't need to re-read CLAUDE.md. They already have it. This is automatic,
 ### Why This Matters
 
 Every agent in the swarm operates under the same constitutional rules:
+
 - They all know the flows exist
 - They all understand the handoff pattern
 - They all know repo-operator owns git
@@ -56,17 +59,17 @@ This shared context is what makes multi-agent orchestration coherent.
 
 CLAUDE.md is loaded in **every** agent context. This has implications for what should live there versus elsewhere.
 
-| Content Type | Location | Why |
-|--------------|----------|-----|
-| Pack philosophy | CLAUDE.md | Every agent needs the operating model |
-| Flow overview | CLAUDE.md | Routing/navigation context |
-| Coordination patterns | CLAUDE.md | Shared contracts between agents |
-| Reference pointers | CLAUDE.md | "See X for details" links |
-| Agent-specific instructions | `.claude/agents/*.md` | Only that agent needs them |
-| Flow orchestration logic | `.claude/commands/flow-*.md` | Only that flow needs it |
-| Skill invocation details | `.claude/skills/*.md` | Only skill users need it |
-| Detailed how-to guides | `docs/how-to/*.md` | Reference when needed, not always |
-| Schema specifications | `docs/reference/*.md` | Reference when needed, not always |
+| Content Type                | Location                     | Why                                   |
+| --------------------------- | ---------------------------- | ------------------------------------- |
+| Pack philosophy             | CLAUDE.md                    | Every agent needs the operating model |
+| Flow overview               | CLAUDE.md                    | Routing/navigation context            |
+| Coordination patterns       | CLAUDE.md                    | Shared contracts between agents       |
+| Reference pointers          | CLAUDE.md                    | "See X for details" links             |
+| Agent-specific instructions | `.claude/agents/*.md`        | Only that agent needs them            |
+| Flow orchestration logic    | `.claude/commands/flow-*.md` | Only that flow needs it               |
+| Skill invocation details    | `.claude/skills/*.md`        | Only skill users need it              |
+| Detailed how-to guides      | `docs/how-to/*.md`           | Reference when needed, not always     |
+| Schema specifications       | `docs/reference/*.md`        | Reference when needed, not always     |
 
 **Rule of thumb:** If every agent needs it for coordination, it goes in CLAUDE.md. If only some agents need it, put it elsewhere and link to it.
 
@@ -81,6 +84,7 @@ Context builds up in layers:
 The repo-level policy. Everyone sees this.
 
 Contains:
+
 - Philosophy and operating model
 - Coordination patterns
 - Flow overview
@@ -92,6 +96,7 @@ Contains:
 The agent-specific instructions from `.claude/agents/<agent>.md`.
 
 Contains:
+
 - What this agent does (and doesn't do)
 - Input/output specifications
 - Success criteria
@@ -103,6 +108,7 @@ Contains:
 The specific invocation from the orchestrator.
 
 Contains:
+
 - The particular work to do now
 - Relevant context for this task
 - Run ID and file paths
@@ -126,11 +132,13 @@ The agent knows the coordination model (CLAUDE.md), knows its role (agent prompt
 Every word in CLAUDE.md costs tokens in every agent spawn. A 5000-token CLAUDE.md means 5000 extra tokens for every agent invocation.
 
 **Write tight:**
+
 - State the principle, link to the explanation
 - Tables over prose for reference material
 - "See X" pointers for depth
 
 **Don't write:**
+
 - Full tutorials (put in `docs/how-to/`)
 - Exhaustive explanations (put in `docs/explanation/`)
 - Implementation details (put in agent prompts or skill docs)
@@ -138,6 +146,7 @@ Every word in CLAUDE.md costs tokens in every agent spawn. A 5000-token CLAUDE.m
 ### Focus on Contracts
 
 CLAUDE.md is where agents learn to coordinate. Focus on:
+
 - Shared vocabulary ("handoff", "receipt", "run")
 - Ownership rules ("repo-operator owns git")
 - Communication patterns ("natural language routing")
@@ -146,6 +155,7 @@ CLAUDE.md is where agents learn to coordinate. Focus on:
 ### Reference, Don't Duplicate
 
 **Good:**
+
 ```markdown
 ## Handoffs
 
@@ -154,6 +164,7 @@ See: [docs/reference/contracts.md](docs/reference/contracts.md)
 ```
 
 **Bad:**
+
 ```markdown
 ## Handoffs
 
@@ -162,6 +173,7 @@ Agents communicate through natural language handoffs.
 ### The Three Questions
 
 Every handoff answers:
+
 1. What did you do?
 2. What's left?
 3. What do you recommend?
@@ -223,11 +235,13 @@ A typical flow might spawn 5-10 agents. A complex build might spawn 20+. Every t
 ### The Trade-off
 
 More content in CLAUDE.md means:
+
 - Higher token cost per flow
 - Richer shared context
 - More consistent agent behavior
 
 Less content means:
+
 - Lower token cost
 - Agents may miss important context
 - More reliance on agent prompts and task descriptions
@@ -252,6 +266,7 @@ This is powerful but requires care. A mistake in CLAUDE.md affects every agent u
 ### Testing Changes
 
 The best way to test CLAUDE.md changes:
+
 1. Run a flow that exercises the changed content
 2. Observe agent behavior in the task outputs
 3. Check that coordination patterns work as expected
@@ -259,6 +274,7 @@ The best way to test CLAUDE.md changes:
 ### Pack Consistency
 
 `pack-check.sh` validates that CLAUDE.md is consistent with the pack:
+
 - Flow names match flow commands
 - Agent references are valid
 - Skill names are correct

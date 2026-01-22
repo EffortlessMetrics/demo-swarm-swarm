@@ -108,7 +108,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Flow overlap semantics (REQ-002) and Flow 7 documentation (REQ-003) likely added here"]
+      "notes": [
+        "Flow overlap semantics (REQ-002) and Flow 7 documentation (REQ-003) likely added here"
+      ]
     },
     {
       "id": "IMP-004",
@@ -125,7 +127,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Historical record; annotation rather than correction preferred"]
+      "notes": [
+        "Historical record; annotation rather than correction preferred"
+      ]
     },
     {
       "id": "IMP-005",
@@ -143,7 +147,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-001", "IMP-002", "IMP-003"],
       "tests_referencing": ["IMP-012"],
-      "notes": ["Authoritative pack reference; ensure flow table stays aligned with the 7-command model"]
+      "notes": [
+        "Authoritative pack reference; ensure flow table stays aligned with the 7-command model"
+      ]
     },
     {
       "id": "IMP-006",
@@ -160,7 +166,9 @@
       "depends_on": ["IMP-005"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Secondary documentation; enumeration lists 6 flows (Signal through Wisdom)"]
+      "notes": [
+        "Secondary documentation; enumeration lists 6 flows (Signal through Wisdom)"
+      ]
     },
     {
       "id": "IMP-007",
@@ -226,7 +234,9 @@
       "depends_on": ["IMP-012"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Test fixtures use stale 'Six Flows' string; tests may fail if not updated"]
+      "notes": [
+        "Test fixtures use stale 'Six Flows' string; tests may fail if not updated"
+      ]
     },
     {
       "id": "IMP-011",
@@ -243,7 +253,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["The 6-element array lists 6 flow names; wisdom is present. Flow 7 uses same wisdom folder. Likely no change needed but requires verification."]
+      "notes": [
+        "The 6-element array lists 6 flow names; wisdom is present. Flow 7 uses same wisdom folder. Likely no change needed but requires verification."
+      ]
     },
     {
       "id": "IMP-012",
@@ -260,7 +272,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-010"],
       "tests_referencing": [],
-      "notes": ["Production constant is correct; structure.rs test fixtures need update to match"]
+      "notes": [
+        "Production constant is correct; structure.rs test fixtures need update to match"
+      ]
     },
     {
       "id": "IMP-013",
@@ -277,7 +291,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Check validates 6 flow commands mention checkpoint_mode. Flow 7 may not need it if it's read-only wisdom extraction."]
+      "notes": [
+        "Check validates 6 flow commands mention checkpoint_mode. Flow 7 may not need it if it's read-only wisdom extraction."
+      ]
     },
     {
       "id": "IMP-014",
@@ -295,7 +311,9 @@
       "depends_on": [],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Checks 24, 36, 41 validate wisdom/regression markers. No Flow 7 specific checks exist but this is documentation task."]
+      "notes": [
+        "Checks 24, 36, 41 validate wisdom/regression markers. No Flow 7 specific checks exist but this is documentation task."
+      ]
     }
   ],
 

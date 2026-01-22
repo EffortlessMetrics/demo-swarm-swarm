@@ -1,9 +1,11 @@
 # ADR: Inline Extension of Existing Modules for Compliance Drift-Proofing
 
 ## Status
+
 Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
 
 ## Context
+
 - Problem: The DemoSwarm pack lacks comprehensive, mechanical enforcement of compliance contracts. Flow commands can contain skill-layer CLI details, agents using demoswarm.sh may lack required Skills sections, OpenQ prefixes are inconsistent (PLN vs PLAN), and the Build-to-Gate handshake has no automated test fixtures. Prior work (issue #49) bounced at Gate, indicating implementation complexity.
 - Constraints:
   - Canonical status and action enums are frozen
@@ -19,6 +21,7 @@ Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
   - Changing existing OpenQ IDs (normalize future generation only)
 
 ## Decision Drivers (bound, machine-countable)
+
 Each driver MUST include a stable marker line, then a short explanation.
 
 - DRIVER: DR-001 req=[REQ-001,REQ-002,REQ-003] nfr=[NFR-MAINT-001] option_ref="OPT-001"
@@ -37,18 +40,21 @@ Each driver MUST include a stable marker line, then a short explanation.
   - Why it matters: Check 49 (check_skills_section_required) already exists for REQ-002; only verification and possible enhancement needed, not new implementation.
 
 ## Decision
+
 We choose **OPT-001: Inline Extension of Existing Modules**.
 
 ### What we are doing
-- Adding check 50 to drift.rs for REQ-001 (flow boundary enforcement): scan flow-*.md files for demoswarm.sh and skill CLI subcommands
+
+- Adding check 50 to drift.rs for REQ-001 (flow boundary enforcement): scan flow-\*.md files for demoswarm.sh and skill CLI subcommands
 - Verifying check 49 adequacy for REQ-002 (Skills section enforcement); enhance if gaps found
-- Adding check 51 to drift.rs for REQ-003 (OpenQ prefix validation): validate QID patterns in .runs/**/open_questions.md
+- Adding check 51 to drift.rs for REQ-003 (OpenQ prefix validation): validate QID patterns in .runs/\*\*/open_questions.md
 - Creating test fixtures at tools/demoswarm-pack-check/tests/fixtures/ for REQ-004 (Build-to-Gate handshake)
 - Verifying --strict_warnings flag behavior for REQ-005; adjust exit code handling if needed
 - Adding skill CLI subcommands list and OpenQ flow codes (SIG/PLN/BLD/GAT/DEP/WIS) to contracts.rs per NFR-MAINT-001
 - Establishing validation baseline by running pack-check before introducing new rules per REQ-006
 
 ### What we are NOT doing
+
 - Creating a new ComplianceRule trait or pluggable rules framework (OPT-002)
 - Implementing validation in check-doc-drift.sh (Bash) (OPT-003)
 - Migrating existing checks to a new architecture
@@ -57,8 +63,9 @@ We choose **OPT-001: Inline Extension of Existing Modules**.
 - Creating test fixtures for Signal-to-Plan or Plan-to-Build handshakes
 
 ### Requirements & NFR Traceability
+
 - **Satisfied by this decision**
-  - REQ-001: Add check 50 to drift.rs scanning flow-*.md for demoswarm.sh and skill subcommands
+  - REQ-001: Add check 50 to drift.rs scanning flow-\*.md for demoswarm.sh and skill subcommands
   - REQ-002: Check 49 already exists; verify coverage against AC-1 through AC-4, enhance if needed
   - REQ-003: Add check 51 to drift.rs with regex for OQ-<FLOW>-<NNN> pattern validation
   - REQ-004: Create valid and invalid build_receipt.json fixtures in tests/fixtures/
@@ -75,6 +82,7 @@ We choose **OPT-001: Inline Extension of Existing Modules**.
   - None identified; all REQ and NFR fully supported by OPT-001
 
 ## Alternatives Considered
+
 - ALT: OPT-002 (Modular Compliance Rules Framework) -- Rejected because: Higher initial investment (trait design + registry), introduces new abstraction layer with more moving parts, over-engineering risk for only 2-3 new rules, existing check 49 would need migration or coexistence, and team learning curve for new trait interface. OPT-002 is preferable if 10+ compliance rules are anticipated in the next 6 months, but current scope does not justify the architectural investment.
 
 - ALT: OPT-003 (Minimal + Deferred Architecture) -- Rejected because: Splits validation across two tools (Bash + Rust), creating maintenance divergence and inconsistent --strict behavior. Cross-platform issues on Windows (Git Bash dependency), diagnostic quality regression (bash guards lack structured rule IDs), and NFR-OPS-001 only partially satisfied. While fastest to write, the technical debt is not acceptable for production-quality enforcement.
@@ -82,6 +90,7 @@ We choose **OPT-001: Inline Extension of Existing Modules**.
 ## Consequences
 
 ### Positive
+
 - Fastest path to delivery: copy existing check patterns, minimal new code
 - No architectural disruption: follows proven drift.rs conventions (checks 38-49)
 - Reversibility is easy: checks can be extracted later if modularization becomes valuable
@@ -91,12 +100,14 @@ We choose **OPT-001: Inline Extension of Existing Modules**.
 - Constants in contracts.rs pattern already established; no new infrastructure
 
 ### Negative
+
 - drift.rs grows by 2 more checks (16 total); may become unwieldy long-term if compliance rules continue to grow significantly
 - Check ID allocation requires manual review of mod.rs to avoid collision (50, 51 must be reserved)
 - If --strict_warnings behavior does not match REQ-005, small CLI changes are needed
 - No per-rule severity configuration; all new rules elevated together with --strict flag
 
 ## Risks and Mitigations
+
 Use stable markers:
 
 - RISK: RSK-001 Prior related work (issue #49) bounced at Gate, indicating implementation complexity may be underestimated. -> Mitigation: Design for warning-first mode (REQ-005) to allow incremental rollout; limit scope to syntactic checks; review #49 Gate bounce reasons before implementation.
@@ -112,6 +123,7 @@ Use stable markers:
 - RISK: RSK-006 Hardcoded skill CLI subcommand list may drift as new skills are added. -> Mitigation: Define list as constant in contracts.rs per NFR-MAINT-001; document update process; MET-3 limits changes to 2 files.
 
 ## Assumptions Made to Proceed
+
 Use stable markers:
 
 - ASM: ASM-001 The three-tier ownership model (flow commands -> agent docs -> skill docs) from issue #49 is authoritative and stable. (impact if wrong: Ownership boundary enforcement rules would need redesign)
@@ -127,6 +139,7 @@ Use stable markers:
 - ASM: ASM-006 The 4 agents using demoswarm.sh without Skills sections are gaps to fix, not intentional exceptions. (impact if wrong: Would need exemption list in validation rule rather than adding sections)
 
 ## Questions / Clarifications Needed
+
 Use stable markers and include suggested defaults:
 
 - Q: OQ-PLAN-004 Should REQ-003 normalize to PLN/BLD (per openq-tools) or PLAN/BUILD (per stable-markers.md)? Suggested default: PLN/BLD (openq-tools is canonical implementation). Impact: If PLAN/BUILD chosen, requires openq-tools code changes.
@@ -138,12 +151,14 @@ Use stable markers and include suggested defaults:
 - Q: OQ-PLAN-001 Should checks 50-51 go in drift.rs specifically or a new validation.rs module? Suggested default: drift.rs (aligns with existing boundary enforcement checks 38-49). Impact: New module adds file overhead but provides separation.
 
 ## Next Steps (Flow 2 binding)
+
 - Interface/contracts -> `.runs/compliance-drift-proofing/plan/api_contracts.yaml` + `.runs/compliance-drift-proofing/plan/schema.md`
 - Observability -> `.runs/compliance-drift-proofing/plan/observability_spec.md`
 - Tests -> `.runs/compliance-drift-proofing/plan/test_plan.md` (map to BDD + verification_notes if present)
 - Work breakdown -> `.runs/compliance-drift-proofing/plan/work_plan.md`
 
 ## Pointers
+
 - Options: `.runs/compliance-drift-proofing/plan/design_options.md`
 - Requirements: `.runs/compliance-drift-proofing/signal/requirements.md`
 - Problem statement: `.runs/compliance-drift-proofing/signal/problem_statement.md`
@@ -154,6 +169,7 @@ Use stable markers and include suggested defaults:
 - Early risks: `.runs/compliance-drift-proofing/signal/early_risks.md`
 
 ## Inventory (machine countable)
+
 (Only the following prefixed lines; do not rename prefixes)
 
 - ADR_CHOSEN_OPTION: OPT-001

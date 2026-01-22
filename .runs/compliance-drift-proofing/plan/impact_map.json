@@ -70,7 +70,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-002", "IMP-003"],
       "tests_referencing": [],
-      "notes": ["Central contract file - changes affect all checks using these constants"]
+      "notes": [
+        "Central contract file - changes affect all checks using these constants"
+      ]
     },
     {
       "id": "IMP-002",
@@ -89,7 +91,9 @@
       "depends_on": ["IMP-001"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["New checks likely check 50 (flow boundary) and check 51 (OpenQ prefix)"]
+      "notes": [
+        "New checks likely check 50 (flow boundary) and check 51 (OpenQ prefix)"
+      ]
     },
     {
       "id": "IMP-003",
@@ -107,7 +111,9 @@
       "depends_on": ["IMP-001"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["--strict_warnings already exists; may need verification of behavior alignment"]
+      "notes": [
+        "--strict_warnings already exists; may need verification of behavior alignment"
+      ]
     },
     {
       "id": "IMP-004",
@@ -174,7 +180,9 @@
       "depends_on": ["IMP-005", "IMP-006"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Confidence MEDIUM - test location may vary based on Rust project structure"]
+      "notes": [
+        "Confidence MEDIUM - test location may vary based on Rust project structure"
+      ]
     },
     {
       "id": "IMP-008",
@@ -209,7 +217,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-001"],
       "tests_referencing": [],
-      "notes": ["Must align with openq-tools or update openq-tools - likely update docs to PLN/BLD"]
+      "notes": [
+        "Must align with openq-tools or update openq-tools - likely update docs to PLN/BLD"
+      ]
     },
     {
       "id": "IMP-010",
@@ -311,7 +321,9 @@
       "depends_on": [],
       "depended_on_by": ["IMP-005", "IMP-006"],
       "tests_referencing": [],
-      "notes": ["Contract reference for test fixtures - no changes expected to agent itself"]
+      "notes": [
+        "Contract reference for test fixtures - no changes expected to agent itself"
+      ]
     },
     {
       "id": "IMP-016",
@@ -328,7 +340,9 @@
       "depends_on": ["IMP-001"],
       "depended_on_by": [],
       "tests_referencing": [],
-      "notes": ["Confidence MEDIUM - scope intentionally limited per three-tier ownership"]
+      "notes": [
+        "Confidence MEDIUM - scope intentionally limited per three-tier ownership"
+      ]
     },
     {
       "id": "IMP-017",

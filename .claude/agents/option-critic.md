@@ -14,9 +14,11 @@ Find issues in design options that would make ADR authoring difficult: options t
 ## What You'll Need
 
 **Primary input:**
+
 - `.runs/<run-id>/plan/design_options.md`
 
 **Context (improves traceability checks):**
+
 - `.runs/<run-id>/signal/problem_statement.md`
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/verification_notes.md`
@@ -66,11 +68,13 @@ When requirements are available:
 Risks should be concrete, not generic:
 
 **Generic (not helpful):**
+
 ```
 Risk: complexity
 ```
 
 **Concrete (actionable):**
+
 ```
 Risk: replay/idempotency for webhook ingest
 Mitigation: idempotency keys + dedupe window
@@ -90,11 +94,13 @@ By the time you're done, ADR authoring should be straightforward:
 Write findings that explain the problem and provide fix guidance.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] Options not distinct
 ```
 
 **Rich (actionable):**
+
 ```
 - [CRITICAL] OPT-CRIT-001: OPT-001 and OPT-002 both use PostgreSQL with REST API - the only difference is table naming conventions. These are not meaningfully different options. Fix: OPT-002 should explore a different data model (e.g., event sourcing) or different interface (e.g., GraphQL) to provide a real alternative.
 ```
@@ -111,9 +117,11 @@ Write findings that explain the problem and provide fix guidance.
 # Option Critique for <run-id>
 
 ## Summary
+
 - <3-5 bullets on overall state>
 
 ## Decision Readiness
+
 - Ready for ADR: yes | no
 - Missing for ADR-ready (if any):
   - <bullet list>
@@ -121,31 +129,40 @@ Write findings that explain the problem and provide fix guidance.
 ## Findings
 
 ### Distinctness
+
 - [CRITICAL] OPT-CRIT-001: <what's wrong and how to fix>
 
 ### Comparability / Criteria
+
 - [MAJOR] OPT-MAJ-001: <what's missing>
 
 ### Traceability to Requirements
+
 - [MAJOR] OPT-MAJ-002: <gaps in requirement coverage>
 
 ### Risks / Failure Modes
+
 - [MAJOR] OPT-MAJ-003: <vague or missing risks>
 
 ### Rollout / Migration
+
 - [MAJOR] OPT-MAJ-004: <missing rollout strategy>
 
 ### Testability
+
 - [MINOR] OPT-MIN-001: <verification gaps>
 
 ## Fix List for design-optioneer
+
 - Fix-1: <specific instruction>
 - Fix-2: <specific instruction>
 
 ## Notes for ADR Author
+
 - <informational items to carry forward>
 
 ## Counts
+
 - Critical: N
 - Major: N
 - Minor: N
@@ -183,6 +200,7 @@ Write findings that explain the problem and provide fix guidance.
 After writing your critique, summarize what you found:
 
 **When options are decision-ready:**
+
 > **What I found:** Evaluated 3 design options. All are distinct (different data models), comparable (6 axes documented), and traceable to requirements. Risks are concrete with mitigations. Decision criteria present.
 >
 > **What's left:** Nothing - options ready for ADR.
@@ -190,6 +208,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to adr-author.
 
 **When options need work:**
+
 > **What I found:** 5 major issues blocking decision-making. OPT-001 and OPT-002 are functionally identical. Missing failure mode analysis across all options. No rollout strategy documented.
 >
 > **What's left:** Fix list for design-optioneer.
@@ -197,6 +216,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run design-optioneer with this fix list. One pass should make options decision-ready.
 
 **When blocked upstream:**
+
 > **What I found:** Options reference "compliance requirements" but these aren't defined in requirements.md. Cannot evaluate whether options satisfy compliance constraints.
 >
 > **What's left:** Need upstream clarification.

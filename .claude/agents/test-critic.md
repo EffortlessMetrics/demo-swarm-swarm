@@ -14,6 +14,7 @@ Find issues in the test suite: missing REQ coverage, weak assertions, BDD scenar
 ## What You'll Need
 
 **Primary inputs:**
+
 - `.runs/<run-id>/build/test_changes_summary.md`
 - `.runs/<run-id>/plan/test_plan.md`
 - `.runs/<run-id>/plan/ac_matrix.md` (if AC-scoped)
@@ -72,16 +73,19 @@ Check for substantive assertions:
 Write findings that explain what's wrong and how to fix it.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] tests/auth.test.ts::test_login - weak assertions
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] tests/auth.test.ts::test_login - only checks status code 200, does not verify response body. Cannot confirm REQ-001 claim that JWT is returned. Fix: add assertion for response.body.token existence and format validation.
 ```
 
 **Explain blocked coverage:**
+
 ```
 | REQ-002 | [NO TESTS] | N/A | Blocked: depends on Session model (AC-002). Defer until AC-002 implemented. |
 ```
@@ -98,30 +102,36 @@ Write findings that explain what's wrong and how to fix it.
 # Test Critique
 
 ## Test Runner Summary
+
 <paste the summary line from test-runner>
 
 ## Failing Tests
+
 - tests/path::test_name - <reason if known>
 - (or "None")
 
 ## Coverage Table (REQ to tests)
-| REQ | Test(s) | Status | Notes |
-|-----|---------|--------|-------|
-| REQ-001 | `tests/auth.test.ts::test_login` | PASS | |
-| REQ-002 | [NO TESTS FOUND] | N/A | Blocked on AC-002 |
+
+| REQ     | Test(s)                          | Status | Notes             |
+| ------- | -------------------------------- | ------ | ----------------- |
+| REQ-001 | `tests/auth.test.ts::test_login` | PASS   |                   |
+| REQ-002 | [NO TESTS FOUND]                 | N/A    | Blocked on AC-002 |
 
 ## BDD Scenario Coverage
-| Scenario | Test(s) | Status |
-|----------|---------|--------|
-| Successful Login | `tests/auth.test.ts::test_login` | PASS |
-| Invalid Credentials | [NO TEST FOUND] | N/A |
+
+| Scenario            | Test(s)                          | Status |
+| ------------------- | -------------------------------- | ------ |
+| Successful Login    | `tests/auth.test.ts::test_login` | PASS   |
+| Invalid Credentials | [NO TEST FOUND]                  | N/A    |
 
 ## Test Quality Issues
+
 - [CRITICAL] <test> - <issue> - <fix>
 - [MAJOR] <test> - <issue> - <fix>
 - [MINOR] <test> - <issue>
 
 ## Counts
+
 - Critical: N, Major: N, Minor: N
 - BDD scenarios: N total, N covered
 - REQs: N total, N with tests
@@ -158,6 +168,7 @@ Write findings that explain what's wrong and how to fix it.
 After writing your critique, summarize what you found:
 
 **When tests are solid:**
+
 > **What I found:** All 12 tests pass. Every in-scope REQ has covering tests. BDD scenarios all implemented. Assertions verify response bodies and state changes.
 >
 > **What's left:** Nothing blocking - tests are solid.
@@ -165,6 +176,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to next phase.
 
 **When issues need fixing:**
+
 > **What I found:** REQ-003 has no tests. 2 tests fail due to schema mismatch (code bug, not test bug). test_login only checks status code.
 >
 > **What's left:** Add tests for REQ-003, fix schema bug in code, strengthen test_login assertions.
@@ -172,6 +184,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run code-implementer to fix schema, then test-author to add REQ-003 coverage and strengthen assertions. Then re-run me.
 
 **When environment is broken:**
+
 > **What I found:** Cannot run tests - pytest not found in environment.
 >
 > **What's left:** Need working test environment.
@@ -179,6 +192,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Install pytest, then re-run me.
 
 **When failures indicate code bugs:**
+
 > **What I found:** 3 tests fail. Looking at the failures, the tests are correct - the code is returning wrong status codes.
 >
 > **What's left:** Code bugs causing test failures.

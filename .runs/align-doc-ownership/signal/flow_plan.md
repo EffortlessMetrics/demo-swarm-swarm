@@ -27,12 +27,14 @@
 ## Signal Summary
 
 **Objective:** Normalize language + ownership boundaries across the DemoSwarm pack:
+
 - Flow commands: orchestration + artifact contracts + routing gates only
 - Agent docs: own operational detail
 - Skill docs: own CLI flag/contract truth
 - CLAUDE.md: table of contents + quick start, not deep reference
 
 **Definition of Done:**
+
 - pack-check passes (new drift checks for boundaries)
 - doc-drift passes
 - agents consistent on enums, output rules, Skills section
@@ -54,6 +56,7 @@
 ## Human Review Checklist
 
 Before proceeding to Flow 2, humans should review:
+
 - [ ] `.runs/align-doc-ownership/signal/requirements.md` - Are these the right requirements?
 - [ ] `.runs/align-doc-ownership/signal/features/doc-ownership.feature` - Do these scenarios cover the expected behavior?
 - [ ] `.runs/align-doc-ownership/signal/verification_notes.md` - Are NFR verification criteria adequate?

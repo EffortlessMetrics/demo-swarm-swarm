@@ -11,6 +11,7 @@
 `.claude/commands/flow-*.md` are the **PM/orchestrators**.
 
 They:
+
 - Translate intent into a sequence of narrow agent tasks
 - Keep flows moving (fix-forward, not stop-and-wait)
 - Read handoffs and route based on understanding (no parsing)
@@ -24,6 +25,7 @@ Orchestrators do not do the work. They scope it, sequence it, and route it.
 `.claude/agents/*.md` are the **individual contributors**.
 
 They:
+
 - Have one job, done deeply
 - Do real cognitive work (think, investigate, make judgment calls)
 - Produce artifacts worth reading later
@@ -36,6 +38,7 @@ Agents are not clipboard-copiers or template-fillers. They are well-trained juni
 `.claude/skills/` and shell tools provide **mechanical truth**.
 
 They:
+
 - Execute deterministically
 - Return exit codes, counts, structured data
 - Have no judgment, no "decisions"
@@ -67,13 +70,13 @@ Hiding uncertainty behind false completion is the actual failure mode.
 
 ## "Blocked" Is Usually Just Routing
 
-| What People Say | What Actually Happens |
-|-----------------|----------------------|
-| "Blocked on lint" | Route to auto-linter |
-| "Blocked on test failure" | Route to fixer |
-| "Blocked on missing import" | Route back to code-implementer |
-| "Blocked on design conflict" | Route to design-optioneer |
-| "Blocked on unclear spec" | Route to clarifier |
+| What People Say              | What Actually Happens          |
+| ---------------------------- | ------------------------------ |
+| "Blocked on lint"            | Route to auto-linter           |
+| "Blocked on test failure"    | Route to fixer                 |
+| "Blocked on missing import"  | Route back to code-implementer |
+| "Blocked on design conflict" | Route to design-optioneer      |
+| "Blocked on unclear spec"    | Route to clarifier             |
 
 **These are not blocks. They are routing decisions.**
 
@@ -94,12 +97,14 @@ Even then, work often continues in parallel while waiting for resolution.
 Questions can be recorded anytime (OpenQ, docs, notes).
 
 But flows continue with best-effort assumptions:
+
 - Choose a safe default
 - Record the assumption
 - Proceed
 - Surface to humans at flow boundary, not mid-flow
 
 The flow boundary is where humans are asked for decisions, with:
+
 - What was done
 - What was found
 - What assumptions were made

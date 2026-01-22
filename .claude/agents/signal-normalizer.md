@@ -33,6 +33,7 @@ You do **not** decide the design. You do **not** write requirements. You do **no
 ## Status model (pack-wide)
 
 Use:
+
 - `VERIFIED` — wrote both outputs; extracted useful structure and at least attempted repo context scan
 - `UNVERIFIED` — outputs written but signal is sparse/ambiguous, or repo scan could not be performed meaningfully
 - `CANNOT_PROCEED` — mechanical failure only (cannot read/write required paths due to IO/permissions/tooling)
@@ -40,12 +41,14 @@ Use:
 ## Behavior
 
 ### Step 0: Preconditions
+
 - Ensure `.runs/<run-id>/signal/` exists.
   - If missing, still write outputs if you can create the directory.
   - If you cannot write under `.runs/<run-id>/signal/`, set status to CANNOT_PROCEED and explain the failure in your handoff.
 - Best-effort: read `.runs/<run-id>/run_meta.json` to capture run identity/trust flags (`run_id_kind`, `issue_binding`, `issue_binding_deferred_reason`, `github_ops_allowed`, `github_repo`, `github_repo_expected`, `github_repo_actual_at_creation`). If unreadable, proceed and note this in your handoff.
 
 ### Step 1: Normalize the raw signal into facts (no interpretation)
+
 Extract and structure:
 
 - **Request type**: feature | bug | incident | refactor | question
@@ -60,6 +63,7 @@ Extract and structure:
 If information is missing, do not invent. Record as "unknown" and keep moving.
 
 ### Step 2: Repo context scan (best-effort, bounded)
+
 Goal: find "prior art" and likely touch-points.
 
 - Search prior runs:
@@ -74,6 +78,7 @@ Goal: find "prior art" and likely touch-points.
 If nothing is found, say so plainly.
 
 ### Step 3: Quoting / redaction rules (tighten-only)
+
 - Do not paste large logs. Max **30 lines** of quoted material total.
 - If you see obvious secrets (API keys, private keys, bearer tokens), **redact inline** (e.g., `Bearer ***REDACTED***`) and note that you redacted.
 - If you're unsure whether something is sensitive, include only a short excerpt and note "possible sensitive content; minimized."
@@ -81,43 +86,52 @@ If nothing is found, say so plainly.
 ### Step 4: Write outputs
 
 #### A) `.runs/<run-id>/signal/issue_normalized.md`
+
 Use this structure:
 
 ```markdown
 # Normalized Issue
 
 ## Summary
+
 <1 short paragraph: what is being asked / what is failing, in plain terms>
 
 ## Signal Type
+
 - request_type: <feature|bug|incident|...>
 - source_type: <slack|email|ticket|url|other>
 - links:
   - <url or "none">
 
 ## Observed vs Expected
+
 - observed: <what happens>
 - expected: <what should happen>
 
 ## Impact
+
 - affected_users: <who>
 - severity: <low|medium|high|unknown>
 - frequency: <always|intermittent|unknown>
 - environment: <prod|staging|local|unknown>
 
 ## Components Mentioned
+
 - systems/services: [...]
 - endpoints/paths: [...]
 - files/modules: [...]
 
 ## Constraints / Non-negotiables
+
 - <bullet list>
 - unknowns: <bullet list of missing-but-important details>
 
 ## Evidence (bounded)
+
 > <short excerpt(s), max 30 lines total, redacted if needed>
 
 ## Notes
+
 - <e.g., "raw input was a URL; content not available, proceeded with title only">
 - <e.g., "quoted logs truncated to 30 lines; secrets redacted">
 ```
@@ -130,6 +144,7 @@ Use this structure:
 # Context Brief
 
 ## Run Identity Context
+
 - run_id_kind: <GH_ISSUE|LOCAL_ONLY|null>
 - issue_binding: <IMMEDIATE|DEFERRED|null>
 - issue_binding_deferred_reason: <gh_unauth|gh_unavailable|null>
@@ -138,22 +153,27 @@ Use this structure:
 - github_repo_actual_at_creation: <owner/repo|null>
 
 ## Related Runs (best-effort)
+
 - <run-id>: <why it seems related> (path: `.runs/<id>/signal/issue_normalized.md`)
 - If none: "No related runs found."
 
 ## Likely Code Touch Points (best-effort)
+
 - <path> — <why relevant>
 - <path> — <why relevant>
 - If none: "No clear code touch points found from the available signal."
 
 ## Docs / Prior Art
+
 - <path or doc name> — <why relevant>
 - If none: "No prior art found."
 
 ## Risks Spotted Early (non-binding)
+
 - <bullet list of risks implied by the signal, labeled as inference>
 
 ## Notes
+
 - <keywords searched: "...">
 - <exclusions applied: ".runs/, .git/">
 ```
@@ -163,6 +183,7 @@ Use this structure:
 After writing files, report back with what you found and your recommendation for next steps.
 
 Your handoff should explain:
+
 - What you normalized and wrote
 - Signal quality (clear, sparse, ambiguous)
 - Any redactions or truncations applied
@@ -173,6 +194,7 @@ Your handoff should explain:
 Your default recommendation is **problem-framer**. After normalization, the signal is ready for problem framing.
 
 Other targets when conditions apply:
+
 - **gh-researcher**: Use when GitHub context would inform problem framing (e.g., signal references issues, prior work, or external constraints).
 - **clarifier**: Use when signal is extremely sparse and you made significant assumptions that affect framing.
 

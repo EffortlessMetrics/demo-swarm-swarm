@@ -9,6 +9,7 @@
 ### North Star: PR Quality + Maintainability
 
 The ultimate goal is **high-quality, maintainable PRs** that meet modern standards:
+
 - Well-tested (mutation score, coverage, BDD alignment)
 - Well-documented (clear PR description, evidence, context for future readers)
 - Well-structured (reviewable, modular, follows codebase patterns)
@@ -19,18 +20,18 @@ The ultimate goal is **high-quality, maintainable PRs** that meet modern standar
 
 **Quality:DevLT** = PR quality achieved per minute of developer attention
 
-This ratio is what we optimize. Not just speed. Not just quality. The *efficiency* of producing quality.
+This ratio is what we optimize. Not just speed. Not just quality. The _efficiency_ of producing quality.
 
 ### The Full Picture
 
 It's not just one ratio—it's multiple angles that add up:
 
-| Dimension | What We Optimize |
-|-----------|------------------|
-| **Change Size** | Large, meaningful changes (not tiny PRs) |
-| **Trust Level** | Verified, tested, critiqued (not "hope it works") |
-| **Evidence Quality** | Clear proof of what was done (not just claims) |
-| **Human Time** | Minimal architect attention required |
+| Dimension               | What We Optimize                                   |
+| ----------------------- | -------------------------------------------------- |
+| **Change Size**         | Large, meaningful changes (not tiny PRs)           |
+| **Trust Level**         | Verified, tested, critiqued (not "hope it works")  |
+| **Evidence Quality**    | Clear proof of what was done (not just claims)     |
+| **Human Time**          | Minimal architect attention required               |
 | **Scope of Automation** | Planning + testing + verification, not just coding |
 
 **In practice:** Agents do the testing, verification, and planning—not just the coding. Humans review large trusted changes with minimal time investment because the work is already verified.
@@ -41,11 +42,11 @@ It's not just one ratio—it's multiple angles that add up:
 
 Machine time is cheap. Dev time is expensive. The arbitrage: spend infinite cheap tokens to save scarce human minutes.
 
-| Option A | Option B | Winner |
-|----------|----------|--------|
-| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably) |
+| Option A                  | Option B                  | Winner             |
+| ------------------------- | ------------------------- | ------------------ |
+| 4 hrs machine, 30 min dev | 8 hrs machine, 25 min dev | **B** (probably)   |
 | 2 hrs machine, 45 min dev | 6 hrs machine, 20 min dev | **B** (definitely) |
-| 1 hr machine, 60 min dev | 4 hrs machine, 15 min dev | **B** (absolutely) |
+| 1 hr machine, 60 min dev  | 4 hrs machine, 15 min dev | **B** (absolutely) |
 
 We don't care if the AI generates 500,000 lines of garbage to produce 100,000 lines of gold. The garbage costs nothing. The gold is verified.
 
@@ -84,12 +85,12 @@ Code is a byproduct. The actual product is a PR that is boring to approve becaus
 
 ### What We Actually Make
 
-| What People Think | What We Actually Produce |
-|-------------------|-------------------------|
-| Code | Evidence that code is correct |
-| Features | Verified changes with clear intent |
-| PRs | Review surfaces that compress decision time |
-| Automation | Trust on demand |
+| What People Think | What We Actually Produce                    |
+| ----------------- | ------------------------------------------- |
+| Code              | Evidence that code is correct               |
+| Features          | Verified changes with clear intent          |
+| PRs               | Review surfaces that compress decision time |
+| Automation        | Trust on demand                             |
 
 ### The Process Inversion
 
@@ -143,12 +144,14 @@ When evaluating any change to the system, ask: does this improve Quality:DevLT? 
 ### The Inversion
 
 Traditional development:
+
 - Human writes code: expensive
 - Human reviews code: expensive
 - Human runs tests: expensive
 - Everything depends on human throughput
 
 AgOps development:
+
 - Machine generates code: cheap (~$0.05/1k lines)
 - Machine verifies code: cheap (~$0.10/verification loop)
 - Machine produces evidence: cheap
@@ -158,6 +161,7 @@ AgOps development:
 ### The Math
 
 **Old model (hand-written PR):**
+
 ```
 Feature: 2000 lines
 Writing time: 8 hours ($400 @ $50/hr)
@@ -167,6 +171,7 @@ Total: $700, 14 hours
 ```
 
 **AgOps model (generated + verified PR):**
+
 ```
 Feature: 2000 lines
 Generation: 500k tokens (~$5)
@@ -180,13 +185,13 @@ The 10x cost savings matter. The 28x time savings matter more.
 
 ### Token Economics
 
-| Operation | Tokens | Cost (approx) |
-|-----------|--------|---------------|
-| Generate 500 LOC | ~50k | $0.50 |
-| Critic review | ~20k | $0.20 |
-| Test execution + report | ~10k | $0.10 |
-| Full microloop iteration | ~100k | $1.00 |
-| Complete flow (Signal to Gate) | ~2M | $20 |
+| Operation                      | Tokens | Cost (approx) |
+| ------------------------------ | ------ | ------------- |
+| Generate 500 LOC               | ~50k   | $0.50         |
+| Critic review                  | ~20k   | $0.20         |
+| Test execution + report        | ~10k   | $0.10         |
+| Full microloop iteration       | ~100k  | $1.00         |
+| Complete flow (Signal to Gate) | ~2M    | $20           |
 
 **Key insight:** A full flow costs less than 10 minutes of senior dev time.
 
@@ -219,6 +224,7 @@ Machine verification (tests, critics, scans) scales linearly with tokens spent. 
 ### Evidence Compresses
 
 A 70,000 line change becomes:
+
 - 5-bullet summary
 - 10-row evidence table
 - 3 hotspot pointers
@@ -241,6 +247,7 @@ All to reduce the human review burden (expensive).
 ### Front-Load Quality
 
 Shift-left with:
+
 - BDD scenarios (intent before code)
 - Critics (find issues before human sees them)
 - Mutation testing (prove tests work)
@@ -285,12 +292,14 @@ Plus: faster ship times, fewer production issues, better documentation.
 **We're not trying to replace developers. We're trying to replace toil.**
 
 The senior architect still:
+
 - Sets direction
 - Makes judgment calls
 - Handles true ambiguity
 - Decides what ships
 
 The system handles:
+
 - Mechanical implementation
 - Verification grinding
 - Evidence generation

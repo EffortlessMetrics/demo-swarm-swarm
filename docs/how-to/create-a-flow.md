@@ -7,11 +7,13 @@ This guide explains how to add a new flow to the DemoSwarm pack.
 ## When to Create a Flow
 
 Create a new flow when you have:
+
 - A **distinct phase** in the SDLC (e.g., "Migration Planning" between Plan and Build)
 - **Unique station ordering** that doesn't fit existing flows
 - **Different gating semantics** (what constitutes "done")
 
 Do NOT create a new flow for:
+
 - Adding an agent to an existing flow (see [add-an-agent.md](add-an-agent.md))
 - Customizing behavior (see [customize-pack.md](customize-pack.md))
 
@@ -37,13 +39,14 @@ dispatch → bounded work → compress → checkpoint → exit/resume
 
 Identify the "heavy read → light output" points in your flow. These are natural yield points:
 
-| Station Type | Input | Output | Example |
-|--------------|-------|--------|---------|
-| **Harvester** | API firehose, logs | `blockers[]`, counts | `pr-feedback-harvester` |
-| **Executor** | Test suite, lint rules | pass/fail summary | `test-executor` |
-| **Cleanup** | All flow artifacts | receipt JSON | `build-cleanup` |
+| Station Type  | Input                  | Output               | Example                 |
+| ------------- | ---------------------- | -------------------- | ----------------------- |
+| **Harvester** | API firehose, logs     | `blockers[]`, counts | `pr-feedback-harvester` |
+| **Executor**  | Test suite, lint rules | pass/fail summary    | `test-executor`         |
+| **Cleanup**   | All flow artifacts     | receipt JSON         | `build-cleanup`         |
 
 At each compressor station, it's natural to:
+
 - Change instructions
 - Cap work
 - Checkpoint/exit with `PARTIAL`
@@ -51,12 +54,12 @@ At each compressor station, it's natural to:
 
 ### Exit Semantics
 
-| Status | Meaning | Rerun Behavior |
-|--------|---------|----------------|
-| `VERIFIED` | Flow completed with executed evidence | No rerun needed |
-| `UNVERIFIED` | Gaps exist; verification incomplete | May rerun to resolve |
-| `PARTIAL` | Real progress made; context exhausted | Rerun continues from disk state |
-| `CANNOT_PROCEED` | Mechanical failure (IO/tooling) | Fix environment, then rerun |
+| Status           | Meaning                               | Rerun Behavior                  |
+| ---------------- | ------------------------------------- | ------------------------------- |
+| `VERIFIED`       | Flow completed with executed evidence | No rerun needed                 |
+| `UNVERIFIED`     | Gaps exist; verification incomplete   | May rerun to resolve            |
+| `PARTIAL`        | Real progress made; context exhausted | Rerun continues from disk state |
+| `CANNOT_PROCEED` | Mechanical failure (IO/tooling)       | Fix environment, then rerun     |
 
 **Key invariant:** `PARTIAL` is valid for unbounded loops (Flow 4 Review). It means "made progress, didn't finish, safe to resume."
 
@@ -129,6 +132,7 @@ You are orchestrating Flow <n> of the SDLC swarm.
 ## Orchestrator Kickoff
 
 ### Station order + templates
+
 ### TodoWrite (copy exactly)
 ```
 
@@ -220,12 +224,13 @@ For writer ↔ critic stations:
 ```markdown
 #### Microloop Template (writer ↔ critic)
 
-1) Writer pass: call `<writer>`
-2) Critique pass: call `<critic>` and read its prose handoff
-3) Apply pass: call `<writer>` once using the critic's findings
-4) Re-critique: call `<critic>` again
+1. Writer pass: call `<writer>`
+2. Critique pass: call `<critic>` and read its prose handoff
+3. Apply pass: call `<writer>` once using the critic's findings
+4. Re-critique: call `<critic>` again
 
 Continue looping beyond default two passes only when:
+
 - The critic's handoff recommends another iteration
 - The critic indicates further iteration would help
 - The issues are specific and actionable
@@ -292,6 +297,7 @@ Include routing guidance for each major decision point:
 
 ```markdown
 **Route on the agent's prose handoff:**
+
 - If the agent reports mechanical failure (IO/tooling) → **FIX_ENV**; stop and require human intervention
 - If the agent recommends going back to an earlier flow → follow the recommendation
 - If the agent recommends another iteration → rerun the specified agent
@@ -360,7 +366,10 @@ Every flow produces a receipt at `.runs/<run-id>/<flow>/<flow>_receipt.json`. Re
   },
 
   "stations": {
-    "<station>": { "executed": true, "result": "PASS | FAIL | SKIPPED | UNKNOWN" }
+    "<station>": {
+      "executed": true,
+      "result": "PASS | FAIL | SKIPPED | UNKNOWN"
+    }
   },
 
   "evidence_sha": "<current HEAD>",
@@ -402,6 +411,7 @@ argument-hint: "[run-id]"
 ```
 
 Station order:
+
 1. `run-prep` (establish `.runs/<run-id>/migration/`)
 2. `migration-analyzer` (analyze current schema + changes)
 3. `migration-planner` ↔ `migration-critic` (microloop)
@@ -412,6 +422,7 @@ Station order:
 8. `gh-issue-manager` / `gh-reporter` (if allowed)
 
 Outputs:
+
 - `migration_plan.md`
 - `rollback_strategy.md`
 - `migration_receipt.json`

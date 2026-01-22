@@ -31,6 +31,7 @@ minor_pending: 0
 ## Review Completion Summary
 
 All blocking-item criteria met:
+
 - CRITICAL items: 1 resolved (RW-001)
 - MAJOR items: 5 resolved (RW-002 skipped per contract, RW-003, RW-004, RW-005, RW-006)
 - MINOR items: 24 resolved (style sweep complete)
@@ -51,4 +52,3 @@ route_to_agent: null
 blockers: []
 missing_required: []
 concerns: []
-

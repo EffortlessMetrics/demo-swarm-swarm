@@ -11,6 +11,7 @@ When agents encounter problems, they should try to resolve them locally before b
 ### Flow Restarts Are Expensive
 
 Bouncing from Build back to Plan means:
+
 - Losing build progress
 - Re-running design work
 - Context reset
@@ -21,6 +22,7 @@ A local fix takes minutes. A bounce takes hours.
 ### Most Problems Are Local
 
 The implementation doesn't match the spec? Usually:
+
 - Misread the spec (re-read it)
 - Missed a detail (add it)
 - Made a mistake (fix it)
@@ -30,6 +32,7 @@ Rarely: "The entire architecture is wrong."
 ### The Stubborn PM
 
 A good PM doesn't give up at the first obstacle:
+
 - "The design doesn't say how to handle this edge case"
 - -> Make a reasonable choice, document it, continue
 - Not: -> Bounce to design, halt everything
@@ -37,11 +40,13 @@ A good PM doesn't give up at the first obstacle:
 ### Human Time Is Precious
 
 Every bounce that reaches a human should be worth their attention:
+
 - Genuine architectural issues
 - Business/product decisions
 - Trade-offs requiring judgment
 
 Not:
+
 - "I wasn't sure about a detail"
 - "The spec was slightly ambiguous"
 - "I need permission to make a choice"
@@ -85,6 +90,7 @@ When encountering a problem, try in order:
 ### Write-Through on Local Fixes
 
 When a specialist (design-optioneer, impact-analyzer) resolves a snag locally:
+
 - Update the relevant plan artifact immediately
 - Edit `adr.md`, `work_plan.md`, or `ac_matrix.md`
 - The fix survives context resets
@@ -98,6 +104,7 @@ Don't just "remember" the fix — write it down.
 **Problem:** Spec says "session timeout" but doesn't specify duration.
 
 **Local fix:**
+
 1. Check codebase for existing timeouts -> Found 15m used elsewhere
 2. Document assumption: "Using 15m consistent with existing patterns"
 3. Implement with 15m
@@ -110,6 +117,7 @@ Don't just "remember" the fix — write it down.
 **Problem:** Implementation reveals the API design can't meet latency requirements.
 
 **Local fix:**
+
 1. Route to design-optioneer: "Can we adjust the API to batch requests?"
 2. Optioneer proposes micro-redesign (batch endpoint)
 3. Optioneer updates api_contracts.yaml
@@ -138,21 +146,25 @@ Don't just "remember" the fix — write it down.
 ## Anti-Patterns
 
 ### X First-Obstacle Bounce
+
 Hit any ambiguity -> immediately bounce upstream.
 
 **Fix:** Try the resolution ladder first.
 
 ### X Guess and Pray
+
 Make arbitrary choices without documenting them.
 
 **Fix:** Document assumptions explicitly. Flag for review.
 
 ### X Silent Assumptions
+
 Make choices but don't tell anyone.
 
 **Fix:** Every assumption in the handoff. "I assumed X because Y."
 
 ### X Infinite Local Loops
+
 Keep trying locally when genuinely stuck.
 
 **Fix:** Recognize when escalation is needed. "Stubborn" has limits.
@@ -160,12 +172,14 @@ Keep trying locally when genuinely stuck.
 ## The Handoff on Local Resolution
 
 When you resolved locally:
+
 ```markdown
 ## Handoff
 
 **What I did:** Implemented the auth endpoint.
 
 **Assumptions made:**
+
 - Session timeout: 15m (consistent with existing code)
 - Error format: RFC 7807 problem details (matches other endpoints)
 - Rate limit: 100 req/min (common default, flagged for review)
@@ -174,10 +188,12 @@ When you resolved locally:
 ```
 
 When you need to bounce:
+
 ```markdown
 ## Handoff
 
 **What I tried:**
+
 - Checked spec: no guidance on sync model
 - Checked codebase: no existing pattern
 - Asked design-optioneer: confirmed this is architectural

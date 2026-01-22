@@ -29,13 +29,13 @@ This document defines the data schemas, validation contracts, and interface boun
 
 ### Interface List
 
-| Interface | Type | Direction | Contract Location |
-|-----------|------|-----------|-------------------|
-| CLI invocation | External | In | `api_contracts.yaml` x-cli-interface |
-| JSON report output | External | Out | `api_contracts.yaml` RunReport schema |
-| Text diagnostic output | External | Out | `api_contracts.yaml` x-error-model |
-| Build receipt validation | Internal | In | `api_contracts.yaml` BuildReceipt schema |
-| Constants (validation patterns) | Internal | N/A | `contracts.rs` |
+| Interface                       | Type     | Direction | Contract Location                        |
+| ------------------------------- | -------- | --------- | ---------------------------------------- |
+| CLI invocation                  | External | In        | `api_contracts.yaml` x-cli-interface     |
+| JSON report output              | External | Out       | `api_contracts.yaml` RunReport schema    |
+| Text diagnostic output          | External | Out       | `api_contracts.yaml` x-error-model       |
+| Build receipt validation        | Internal | In        | `api_contracts.yaml` BuildReceipt schema |
+| Constants (validation patterns) | Internal | N/A       | `contracts.rs`                           |
 
 ---
 
@@ -45,16 +45,17 @@ This document defines the data schemas, validation contracts, and interface boun
 
 Internal representation of a single validation check result.
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| check_id | u32 | 1-99 | Unique check identifier |
-| title | String | non-empty | Human-readable check description |
-| level | Level | {Pass, Warn, Fail} | Result severity |
-| message | String | non-empty | Diagnostic message |
-| file_path | Option<String> | repo-root-relative | Source file (if file-specific) |
-| line_no | Option<usize> | >= 1 | Line number (if line-specific) |
+| Field     | Type           | Constraints        | Description                      |
+| --------- | -------------- | ------------------ | -------------------------------- |
+| check_id  | u32            | 1-99               | Unique check identifier          |
+| title     | String         | non-empty          | Human-readable check description |
+| level     | Level          | {Pass, Warn, Fail} | Result severity                  |
+| message   | String         | non-empty          | Diagnostic message               |
+| file_path | Option<String> | repo-root-relative | Source file (if file-specific)   |
+| line_no   | Option<usize>  | >= 1               | Line number (if line-specific)   |
 
 **Invariants:**
+
 - If `level == Pass`, diagnostic is not included in JSON output
 - `file_path` and `line_no` are both present or both absent
 - Check IDs are stable across versions (no renumbering)
@@ -63,16 +64,17 @@ Internal representation of a single validation check result.
 
 Machine-readable validation report.
 
-| Field | Type | Constraints | Description |
-|-------|------|-------------|-------------|
-| schema_version | u32 | const 1 | Report format version |
-| repo_root | String | absolute path | Validated repository root |
-| errors | usize | >= 0 | Count of Fail-level diagnostics |
-| warnings | usize | >= 0 | Count of Warn-level diagnostics |
-| counts | PackCounts | non-null | Pack content counts |
-| diagnostics | Vec<Diagnostic> | Pass filtered | Non-pass diagnostics |
+| Field          | Type            | Constraints   | Description                     |
+| -------------- | --------------- | ------------- | ------------------------------- |
+| schema_version | u32             | const 1       | Report format version           |
+| repo_root      | String          | absolute path | Validated repository root       |
+| errors         | usize           | >= 0          | Count of Fail-level diagnostics |
+| warnings       | usize           | >= 0          | Count of Warn-level diagnostics |
+| counts         | PackCounts      | non-null      | Pack content counts             |
+| diagnostics    | Vec<Diagnostic> | Pass filtered | Non-pass diagnostics            |
 
 **Invariants:**
+
 - `errors == diagnostics.iter().filter(|d| d.level == Fail).count()`
 - `warnings == diagnostics.iter().filter(|d| d.level == Warn).count()`
 - `schema_version` increments only on breaking changes
@@ -81,39 +83,40 @@ Machine-readable validation report.
 
 JSON structure for Build flow receipts, validated by receipt-checker and pack-check test fixtures.
 
-| Field | Type | Required | Constraints |
-|-------|------|----------|-------------|
-| run_id | String | Yes | Non-empty |
-| flow | String | Yes | Must be "build" |
-| status | String | Yes | VERIFIED, UNVERIFIED, CANNOT_PROCEED |
-| recommended_action | String | Yes | PROCEED, RERUN, BOUNCE, FIX_ENV |
-| route_to_flow | int/null | Yes | 1-6 or null |
-| route_to_agent | String/null | Yes | Agent name or null |
-| missing_required | Array<String> | Yes | May be empty |
-| blockers | Array<String> | Yes | May be empty |
-| completed_at | String | Yes | ISO8601 format |
-| tests | Object | Yes | Test grounding (see below) |
-| critic_verdicts | Object | Yes | Critic results (see below) |
+| Field              | Type          | Required | Constraints                          |
+| ------------------ | ------------- | -------- | ------------------------------------ |
+| run_id             | String        | Yes      | Non-empty                            |
+| flow               | String        | Yes      | Must be "build"                      |
+| status             | String        | Yes      | VERIFIED, UNVERIFIED, CANNOT_PROCEED |
+| recommended_action | String        | Yes      | PROCEED, RERUN, BOUNCE, FIX_ENV      |
+| route_to_flow      | int/null      | Yes      | 1-6 or null                          |
+| route_to_agent     | String/null   | Yes      | Agent name or null                   |
+| missing_required   | Array<String> | Yes      | May be empty                         |
+| blockers           | Array<String> | Yes      | May be empty                         |
+| completed_at       | String        | Yes      | ISO8601 format                       |
+| tests              | Object        | Yes      | Test grounding (see below)           |
+| critic_verdicts    | Object        | Yes      | Critic results (see below)           |
 
 **tests sub-object:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| canonical_summary | String | Yes | Pytest summary line |
-| summary_source | String | Yes | Source file reference |
-| metrics_binding | String | Yes | Binding identifier |
-| passed | int | No | Test count |
-| failed | int | No | Test count |
-| skipped | int | No | Test count |
+| Field             | Type   | Required | Description           |
+| ----------------- | ------ | -------- | --------------------- |
+| canonical_summary | String | Yes      | Pytest summary line   |
+| summary_source    | String | Yes      | Source file reference |
+| metrics_binding   | String | Yes      | Binding identifier    |
+| passed            | int    | No       | Test count            |
+| failed            | int    | No       | Test count            |
+| skipped           | int    | No       | Test count            |
 
 **critic_verdicts sub-object:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| test_critic | String/null | No | VERIFIED/UNVERIFIED/CANNOT_PROCEED/null |
-| code_critic | String/null | No | VERIFIED/UNVERIFIED/CANNOT_PROCEED/null |
+| Field       | Type        | Required | Description                             |
+| ----------- | ----------- | -------- | --------------------------------------- |
+| test_critic | String/null | No       | VERIFIED/UNVERIFIED/CANNOT_PROCEED/null |
+| code_critic | String/null | No       | VERIFIED/UNVERIFIED/CANNOT_PROCEED/null |
 
 **Invariants:**
+
 - If `recommended_action != BOUNCE`, then `route_to_flow` and `route_to_agent` must be null
 - `metrics_binding` must not be a placeholder (no `<...>` tokens)
 - `completed_at` must be valid ISO8601
@@ -122,21 +125,23 @@ JSON structure for Build flow receipts, validated by receipt-checker and pack-ch
 
 Canonical Open Question identifier.
 
-| Component | Pattern | Description |
-|-----------|---------|-------------|
-| Prefix | `OQ-` | Fixed prefix |
-| FlowCode | `SIG\|PLN\|BLD\|GAT\|DEP\|WIS` | Canonical flow abbreviation |
-| Separator | `-` | Dash |
-| Sequence | `[0-9]{3}` | Zero-padded 001-999 |
+| Component | Pattern                        | Description                 |
+| --------- | ------------------------------ | --------------------------- |
+| Prefix    | `OQ-`                          | Fixed prefix                |
+| FlowCode  | `SIG\|PLN\|BLD\|GAT\|DEP\|WIS` | Canonical flow abbreviation |
+| Separator | `-`                            | Dash                        |
+| Sequence  | `[0-9]{3}`                     | Zero-padded 001-999         |
 
 **Full Pattern:** `^OQ-(SIG|PLN|BLD|GAT|DEP|WIS)-[0-9]{3}$`
 
 **Valid Examples:**
+
 - `OQ-SIG-001`
 - `OQ-PLAN-004`
 - `OQ-BUILD-012`
 
 **Invalid Examples:**
+
 - `OQ-PLAN-001` (wrong flow code)
 - `OQ-SIG-1` (not zero-padded)
 - `OQ-SIG-1234` (too many digits)
@@ -174,13 +179,13 @@ If breaking changes become necessary:
 
 ### Versioning Discipline
 
-| Change Type | Version Impact | Example |
-|-------------|----------------|---------|
-| New check added | Patch | Check 50 added |
-| New JSON field | Patch | New optional field |
-| Check behavior modified | Minor | Check 49 pattern expanded |
-| JSON field removed | Major | Requires schema_version bump |
-| Exit code semantics changed | Major | Would break CI |
+| Change Type                 | Version Impact | Example                      |
+| --------------------------- | -------------- | ---------------------------- |
+| New check added             | Patch          | Check 50 added               |
+| New JSON field              | Patch          | New optional field           |
+| Check behavior modified     | Minor          | Check 49 pattern expanded    |
+| JSON field removed          | Major          | Requires schema_version bump |
+| Exit code semantics changed | Major          | Would break CI               |
 
 ---
 
@@ -206,6 +211,7 @@ pub const OPENQ_FLOW_CODES: &[&str] = &[
 ```
 
 **Update Process:** When adding a new flow:
+
 1. Update `.claude/skills/openq-tools/SKILL.md`
 2. Update `contracts.rs` OPENQ_FLOW_CODES
 3. No other files require changes (per NFR-MAINT-001 MET-3)
@@ -236,6 +242,7 @@ pub const SKILL_CLI_SUBCOMMANDS: &[&str] = &[
 ```
 
 **Update Process:** When adding a new skill subcommand:
+
 1. Update `tools/demoswarm-runs-tools/` (implementation)
 2. Update `contracts.rs` SKILL_CLI_SUBCOMMANDS
 3. No other files require changes (per NFR-MAINT-001 MET-3)
@@ -246,30 +253,30 @@ pub const SKILL_CLI_SUBCOMMANDS: &[&str] = &[
 
 ### Requirements to Interfaces
 
-| REQ/NFR | Interface Element | Validation Point |
-|---------|-------------------|------------------|
-| REQ-001 | Check 50 | Flow commands scanned for demoswarm.sh and subcommands |
-| REQ-001 | SKILL_CLI_SUBCOMMANDS | Pattern list in contracts.rs |
-| REQ-002 | Check 49 (existing) | Agents with demoswarm.sh checked for ## Skills |
-| REQ-003 | Check 51 | open_questions.md files scanned for QID patterns |
-| REQ-003 | OPENQ_FLOW_CODES | Valid flow codes in contracts.rs |
-| REQ-004 | BuildReceipt schema | Test fixtures validate against schema |
-| REQ-005 | --strict_warnings flag | Exit code behavior verified |
-| REQ-006 | All checks | Baseline validation before rule introduction |
-| NFR-PERF-001 | All checks | Pattern matching is O(n) |
-| NFR-REL-001 | RunReport | Deterministic output, sorted diagnostics |
-| NFR-OPS-001 | CheckDiagnostic | check_id, file_path, line_no, message |
-| NFR-COMP-001 | Exit codes | 0/1/2 semantics preserved |
-| NFR-SEC-001 | Diagnostic format | Only paths and rule IDs, no file contents |
-| NFR-MAINT-001 | OPENQ_FLOW_CODES, SKILL_CLI_SUBCOMMANDS | Constants in contracts.rs |
+| REQ/NFR       | Interface Element                       | Validation Point                                       |
+| ------------- | --------------------------------------- | ------------------------------------------------------ |
+| REQ-001       | Check 50                                | Flow commands scanned for demoswarm.sh and subcommands |
+| REQ-001       | SKILL_CLI_SUBCOMMANDS                   | Pattern list in contracts.rs                           |
+| REQ-002       | Check 49 (existing)                     | Agents with demoswarm.sh checked for ## Skills         |
+| REQ-003       | Check 51                                | open_questions.md files scanned for QID patterns       |
+| REQ-003       | OPENQ_FLOW_CODES                        | Valid flow codes in contracts.rs                       |
+| REQ-004       | BuildReceipt schema                     | Test fixtures validate against schema                  |
+| REQ-005       | --strict_warnings flag                  | Exit code behavior verified                            |
+| REQ-006       | All checks                              | Baseline validation before rule introduction           |
+| NFR-PERF-001  | All checks                              | Pattern matching is O(n)                               |
+| NFR-REL-001   | RunReport                               | Deterministic output, sorted diagnostics               |
+| NFR-OPS-001   | CheckDiagnostic                         | check_id, file_path, line_no, message                  |
+| NFR-COMP-001  | Exit codes                              | 0/1/2 semantics preserved                              |
+| NFR-SEC-001   | Diagnostic format                       | Only paths and rule IDs, no file contents              |
+| NFR-MAINT-001 | OPENQ_FLOW_CODES, SKILL_CLI_SUBCOMMANDS | Constants in contracts.rs                              |
 
 ### Check to Error Code Mapping
 
-| Check ID | Error Code | Message Pattern |
-|----------|------------|-----------------|
-| 49 | E049 | "Agents using demoswarm.sh must have a ## Skills section" |
-| 50 | W050/E050 | "Flow command contains [demoswarm.sh\|skill CLI subcommand]" |
-| 51 | W051/E051 | "Non-canonical OpenQ ID: [pattern description]" |
+| Check ID | Error Code | Message Pattern                                              |
+| -------- | ---------- | ------------------------------------------------------------ |
+| 49       | E049       | "Agents using demoswarm.sh must have a ## Skills section"    |
+| 50       | W050/E050  | "Flow command contains [demoswarm.sh\|skill CLI subcommand]" |
+| 51       | W051/E051  | "Non-canonical OpenQ ID: [pattern description]"              |
 
 Note: W = warning (default), E = error (with --strict_warnings)
 
@@ -313,6 +320,7 @@ Note: W = warning (default), E = error (with --strict_warnings)
 ---
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

@@ -14,22 +14,23 @@ Create a new agent when you need:
 2. **A fresh context** - Token-heavy work that would exhaust an existing context
 
 Don't create an agent for:
+
 - Work that fits in an existing agent (extend that agent instead)
 - One-off customization (use pack config)
 - Bureaucratic separation (if context is shared, keep the work together)
 
 ### Agent Categories
 
-| Category | Color | Behavior | Example |
-|----------|-------|----------|---------|
-| **Spec** | Purple | Write artifacts (requirements, designs) | `requirements-author` |
-| **Critic** | Red | Review harshly (never fix) | `code-critic` |
-| **Implementation** | Green | Write code, tests, docs | `code-implementer` |
-| **Verification** | Blue | Check and audit | `artifact-auditor` |
-| **Analytics** | Orange | Analyze and learn | `regression-analyst` |
-| **Infrastructure** | Cyan | Git, run setup | `repo-operator` |
-| **Reporter** | Pink | GitHub posting | `pr-commenter` |
-| **Cleanup** | Various | Seal receipts, count artifacts | `build-cleanup` |
+| Category           | Color   | Behavior                                | Example               |
+| ------------------ | ------- | --------------------------------------- | --------------------- |
+| **Spec**           | Purple  | Write artifacts (requirements, designs) | `requirements-author` |
+| **Critic**         | Red     | Review harshly (never fix)              | `code-critic`         |
+| **Implementation** | Green   | Write code, tests, docs                 | `code-implementer`    |
+| **Verification**   | Blue    | Check and audit                         | `artifact-auditor`    |
+| **Analytics**      | Orange  | Analyze and learn                       | `regression-analyst`  |
+| **Infrastructure** | Cyan    | Git, run setup                          | `repo-operator`       |
+| **Reporter**       | Pink    | GitHub posting                          | `pr-commenter`        |
+| **Cleanup**        | Various | Seal receipts, count artifacts          | `build-cleanup`       |
 
 Know which category your agent falls into before writing it.
 
@@ -52,9 +53,11 @@ You are the **<Agent Name>**.
 ## What You'll Need
 
 Primary:
+
 - `.runs/<run-id>/<flow>/<input-file>.md`
 
 Feedback (if present):
+
 - `.runs/<run-id>/<flow>/<critique>.md`
 
 ## What You Produce
@@ -91,6 +94,7 @@ Feedback (if present):
 **Goal:** One clear sentence about what the agent does, one about what it doesn't.
 
 **Good:**
+
 ```markdown
 You are the **Requirements Author**.
 
@@ -98,6 +102,7 @@ You author requirements. You do not critique. You do not perform git ops.
 ```
 
 **Bad:**
+
 ```markdown
 You are a brilliant requirements expert who carefully crafts perfect specifications.
 
@@ -107,6 +112,7 @@ Your job is to take the user's vague ideas and transform them into crystal-clear
 **Why:** The first version is factual and constraint-first. The second is theatrical and vague about actual behavior.
 
 **Tips:**
+
 - Open with what the agent does (positive)
 - Follow with what it doesn't do (boundary)
 - Keep to 1-2 sentences total
@@ -117,18 +123,22 @@ Your job is to take the user's vague ideas and transform them into crystal-clear
 **Goal:** Tell the agent exactly what to read.
 
 **Good:**
+
 ```markdown
 ## What You'll Need
 
 Primary:
+
 - `.runs/<run-id>/signal/problem_statement.md`
 - `.runs/<run-id>/signal/requirements.md`
 
 Feedback (if present):
+
 - `.runs/<run-id>/signal/requirements_critique.md`
 ```
 
 **Bad:**
+
 ```markdown
 ## What You'll Need
 
@@ -138,6 +148,7 @@ Read the relevant inputs from the run folder. Check for any critique files that 
 **Why:** Agents should know exactly what paths to read, not guess based on vague descriptions.
 
 **Tips:**
+
 - List specific file paths
 - Mark optional inputs clearly
 - Distinguish primary inputs from feedback loops
@@ -148,6 +159,7 @@ Read the relevant inputs from the run folder. Check for any critique files that 
 **Goal:** Describe outcomes, not schemas.
 
 **Good:**
+
 ```markdown
 ## What Success Looks Like
 
@@ -155,10 +167,12 @@ Requirements that a stranger could turn into deterministic tests without asking 
 ```
 
 **Bad:**
+
 ```markdown
 ## What Success Looks Like
 
 The output file must contain:
+
 - A Summary section with Status field
 - A Functional Requirements section with REQ-### headers
 - An NFR section with NFR-DOMAIN-### headers
@@ -168,6 +182,7 @@ The output file must contain:
 **Why:** Schema-focused descriptions become checklists that agents satisfy mechanically. Outcome-focused descriptions help agents understand why the work matters.
 
 **Tips:**
+
 - Focus on the value delivered ("tests can be written from this")
 - Use concrete examples of good output
 - Explain what makes the output useful to the next agent
@@ -178,6 +193,7 @@ The output file must contain:
 **Goal:** Positive guidance on doing the job well.
 
 **Good:**
+
 ```markdown
 ## Tips
 
@@ -188,6 +204,7 @@ The output file must contain:
 ```
 
 **Bad:**
+
 ```markdown
 ## Rules
 
@@ -201,18 +218,19 @@ The output file must contain:
 
 **Converting constraints to guidance:**
 
-| Constraint (avoid) | Guidance (prefer) |
-|-------------------|-------------------|
-| "DO NOT include out-of-scope issues" | "Scope tightly. Only critique what's in scope." |
-| "NEVER make vague complaints" | "Be specific about location. Make it easy to find." |
-| "You MUST categorize findings" | "Categorize findings so the fixer knows what to prioritize." |
-| "FORBIDDEN from fixing" | "You critique. Leave fixing to the implementer." |
+| Constraint (avoid)                   | Guidance (prefer)                                            |
+| ------------------------------------ | ------------------------------------------------------------ |
+| "DO NOT include out-of-scope issues" | "Scope tightly. Only critique what's in scope."              |
+| "NEVER make vague complaints"        | "Be specific about location. Make it easy to find."          |
+| "You MUST categorize findings"       | "Categorize findings so the fixer knows what to prioritize." |
+| "FORBIDDEN from fixing"              | "You critique. Leave fixing to the implementer."             |
 
 ### If You're Stuck
 
 **Goal:** Give the agent a hierarchy of responses when blocked.
 
 **Good:**
+
 ```markdown
 ## If You're Stuck
 
@@ -224,6 +242,7 @@ The output file must contain:
 ```
 
 **Bad:**
+
 ```markdown
 ## If You're Stuck
 
@@ -245,6 +264,7 @@ Every handoff answers three questions:
 3. **Recommendation** - Specific next step with reasoning
 
 **Good:**
+
 ```markdown
 ## Handoff
 
@@ -256,6 +276,7 @@ Every handoff answers three questions:
 ```
 
 **Bad:**
+
 ```markdown
 ## Handoff
 
@@ -273,8 +294,10 @@ Requirements complete. Ready for next step.
 ### Constraint Lists Instead of Guidance
 
 **Problem:**
+
 ```markdown
 ## Rules
+
 - DO NOT modify files outside your scope
 - NEVER guess at behavior
 - You are FORBIDDEN from...
@@ -286,6 +309,7 @@ Requirements complete. Ready for next step.
 ### Multiple Responsibilities
 
 **Problem:**
+
 ```markdown
 You are the **Code Author and Reviewer**.
 
@@ -297,8 +321,10 @@ You write code and then review your own work for quality issues.
 ### Structured Output Requirements
 
 **Problem:**
-```markdown
+
+````markdown
 Your output MUST be valid YAML with the following schema:
+
 ```yaml
 status: VERIFIED | UNVERIFIED
 blockers: []
@@ -307,12 +333,14 @@ findings:
     location: string
     message: string
 ```
+````
 
 **Fix:** Describe outcomes, not schemas. If structure matters, put it in a separate "Format" or "Machine Summary" section, not as the primary success criteria.
 
 ### Missing Graceful Failure
 
 **Problem:**
+
 ```markdown
 ## Behavior
 
@@ -326,6 +354,7 @@ findings:
 ### Theatrical Voice
 
 **Problem:**
+
 ```markdown
 You are a brilliant, meticulous code reviewer with decades of experience. Your keen eye catches issues that lesser reviewers miss. Approach each review with the gravitas it deserves.
 ```
@@ -388,6 +417,7 @@ A critique that explains what's wrong, why it matters, and who should fix it. Sp
 ```
 
 **Why this works:**
+
 - Single clear responsibility (find issues, don't fix)
 - Specific input paths
 - Outcome-focused success criteria
@@ -428,6 +458,7 @@ Write your results to the appropriate files. Make sure everything is correct.
 ```
 
 **Why this fails:**
+
 - Multiple responsibilities (implement, test, review, fix)
 - Theatrical voice ("deep expertise")
 - Constraint-heavy rules instead of guidance

@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -30,7 +31,7 @@ The following Signal-phase questions have been resolved by detailed user guidanc
 #### Category: Technical
 
 - QID: OQ-PLAN-001
-  - Q: Should pack-check boundary rules be implemented in Rust (tools/demoswarm-pack-check) or as shell script checks (scripts/check-*.sh)? [OPEN]
+  - Q: Should pack-check boundary rules be implemented in Rust (tools/demoswarm-pack-check) or as shell script checks (scripts/check-\*.sh)? [OPEN]
   - Suggested default: Rust implementation in pack-check, following the established pattern for structural validation
   - Impact if different: Shell scripts would be faster to implement but harder to maintain; Rust keeps all pack validation in one tool
   - Needs answer by: Flow 3 (Build)
@@ -82,6 +83,7 @@ The following Signal-phase questions have been resolved by detailed user guidanc
   - Linked question: null
 
 ### Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

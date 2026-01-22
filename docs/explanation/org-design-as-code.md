@@ -9,6 +9,7 @@
 The swarm is not prompt engineering. It is organizational architecture encoded as executable specifications.
 
 When we say "PM + IC model," we mean:
+
 - Orchestrator prompts are designed like PM job descriptions
 - Agent prompts are designed like IC role definitions
 - Handoffs work like status updates in a well-run team
@@ -71,14 +72,14 @@ flowchart TB
     W1 --> S2
 ```
 
-| Role | Responsibility | Pattern | Examples |
-|------|---------------|---------|----------|
-| Orchestrators (PMs) | Route, sequence, checkpoint | Read handoffs, decide next step | flow commands |
-| Workers (ICs) | Implement, produce artifacts | Do focused cognitive work | code-implementer, test-author |
-| Critics (ICs) | Find problems, produce worklists | Adversarial review | code-critic, test-critic |
-| Cleanup (ICs) | Compress, summarize, verify state | Context reduction | *-cleanup agents |
-| Gate (ICs) | Make judgment calls, decide | Authority to proceed/bounce | merge-decider, deploy-decider |
-| Skills (tools) | Execute deterministically | Return machine truth | test-runner, auto-linter |
+| Role                | Responsibility                    | Pattern                         | Examples                      |
+| ------------------- | --------------------------------- | ------------------------------- | ----------------------------- |
+| Orchestrators (PMs) | Route, sequence, checkpoint       | Read handoffs, decide next step | flow commands                 |
+| Workers (ICs)       | Implement, produce artifacts      | Do focused cognitive work       | code-implementer, test-author |
+| Critics (ICs)       | Find problems, produce worklists  | Adversarial review              | code-critic, test-critic      |
+| Cleanup (ICs)       | Compress, summarize, verify state | Context reduction               | \*-cleanup agents             |
+| Gate (ICs)          | Make judgment calls, decide       | Authority to proceed/bounce     | merge-decider, deploy-decider |
+| Skills (tools)      | Execute deterministically         | Return machine truth            | test-runner, auto-linter      |
 
 ---
 
@@ -89,6 +90,7 @@ flowchart TB
 From military doctrine: commander sets intent + constraints + acceptance criteria. Units act autonomously within boundaries. System gates boundary crossings.
 
 Applied here:
+
 - Orchestrator sets the task + constraints + success criteria
 - Agent acts autonomously inside the sandbox
 - Gates verify at publish boundaries
@@ -100,6 +102,7 @@ This is not "AI helps you code faster." This is an industrial control loop where
 Critics never fix (conflict of interest). Implementers never commit (git expertise centralized). Gates do not trust previous agents (fresh verification).
 
 This prevents:
+
 - Critic rubber-stamping its own fixes
 - Implementers fighting git instead of coding
 - Accumulated trust replacing verification
@@ -127,6 +130,7 @@ Agents communicate through:
 3. **Natural language** (Claude understands, no parsing needed)
 
 Not through:
+
 - JSON routing schemas
 - Closed enums of next steps
 - Machine-parsed control blocks
@@ -167,11 +171,11 @@ This is not orchestrator logic. It is local optimization within a flow. The orch
 
 ### Why Microloops Work
 
-| Without Microloops | With Microloops |
-|-------------------|-----------------|
+| Without Microloops                               | With Microloops                                          |
+| ------------------------------------------------ | -------------------------------------------------------- |
 | Submit PR, wait for review, get feedback, revise | Iterate until quality threshold before any human sees it |
-| 3-day review cycles | Quality issues caught in minutes |
-| Human attention on mechanical issues | Human attention on genuine decisions |
+| 3-day review cycles                              | Quality issues caught in minutes                         |
+| Human attention on mechanical issues             | Human attention on genuine decisions                     |
 
 Machine iteration is cheap. Human iteration is expensive. The microloop trades tokens for attention.
 
@@ -182,6 +186,7 @@ Machine iteration is cheap. Human iteration is expensive. The microloop trades t
 Traditional workflow systems use directed acyclic graphs with explicit edges.
 
 We use:
+
 - Recommendations (not commands)
 - Understanding (not parsing)
 - Local knowledge (not global routing tables)
@@ -189,11 +194,13 @@ We use:
 ### DAG Limitations
 
 A DAG requires:
+
 - Enumerated states
 - Explicit edge definitions
 - Schema changes for new routes
 
 This creates:
+
 - Brittleness (unexpected states fail)
 - Rigidity (new routes require schema updates)
 - Complexity (routing logic accumulates)
@@ -203,10 +210,12 @@ This creates:
 Agents recommend. Orchestrators understand. Routes emerge from conversation.
 
 **Example:** If `code-implementer` discovers it needs a database migration:
+
 - **DAG approach:** Is there an edge from `code-implementer` to `migration-author`? If not, fail or route to catch-all.
 - **Our approach:** Agent says "I need a migration for the users table. Recommend routing to whoever handles DB changes or creating the migration myself." Orchestrator understands and routes appropriately.
 
 The system is:
+
 - Resilient to unexpected states
 - Adaptable without schema changes
 - Debuggable through natural language
@@ -219,13 +228,13 @@ Traditional software compiles source code into machine instructions.
 
 This pack compiles org design into:
 
-| Org Design Element | Compiled Into |
-|-------------------|---------------|
-| Role definitions | Agent prompts (`.claude/agents/*.md`) |
-| Workflows | Flow commands (`.claude/commands/flow-*.md`) |
-| Policies | Gate logic, critic criteria |
-| Communication norms | Handoff structure |
-| Quality standards | Critic severity levels, verification gates |
+| Org Design Element  | Compiled Into                                |
+| ------------------- | -------------------------------------------- |
+| Role definitions    | Agent prompts (`.claude/agents/*.md`)        |
+| Workflows           | Flow commands (`.claude/commands/flow-*.md`) |
+| Policies            | Gate logic, critic criteria                  |
+| Communication norms | Handoff structure                            |
+| Quality standards   | Critic severity levels, verification gates   |
 
 **The compiler is the pack author.** Reading org design literature and encoding it into prompts is compilation. The prompts are the bytecode.
 
@@ -237,21 +246,24 @@ Three bodies of organizational theory, compiled into executable code.
 
 ### Teal Organization Principles
 
-From Laloux's *Reinventing Organizations*:
+From Laloux's _Reinventing Organizations_:
 
 **Self-management within role:**
+
 - Each agent owns their domain completely
 - No micromanagement from orchestrators
 - Single responsibility enables autonomy
 - The sandbox is the constraint, not per-action permissions
 
 **Whole-person engagement:**
+
 - Agents bring judgment, not just execution
 - Real cognitive work, not template filling
 - Graceful outcomes include honest uncertainty
 - Partial progress with clear reporting is valid
 
 **Evolutionary purpose:**
+
 - Wisdom loop improves the system
 - Templates evolve based on learnings
 - The org gets smarter over time
@@ -261,16 +273,19 @@ From Laloux's *Reinventing Organizations*:
 From the manifesto and its descendants:
 
 **Short feedback loops:**
+
 - Microloops iterate quickly (write, critique, fix, verify)
 - Critics catch issues fast (per-AC, not per-feature)
 - Fix-forward maintains momentum
 
 **Working software over documentation:**
+
 - Receipts capture what happened, not what was planned
 - Evidence over claims
 - The diff is the audit surface; tests are the runtime truth
 
 **Responding to change:**
+
 - Resume from disk state
 - Adapt to what exists
 - Local resolution before escalation
@@ -280,12 +295,14 @@ From the manifesto and its descendants:
 From contemporary tech org design:
 
 **PM as context-holder:**
+
 - Orchestrator maintains intent
 - Routes based on understanding
 - Does not parse, reads
 - Coordinates without micromanaging
 
 **IC as expert:**
+
 - Deep work in narrow domain
 - Honest reporting
 - Recommends next steps

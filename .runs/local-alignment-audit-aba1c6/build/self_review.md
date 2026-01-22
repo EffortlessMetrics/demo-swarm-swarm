@@ -12,19 +12,21 @@ blockers: []
 missing_required: []
 
 concerns:
-  - walkthrough.md not updated (optional per impact map, time-gated per ADR)
-  - Specific test counts (102) not documented to avoid future drift (intentional design decision)
+
+- walkthrough.md not updated (optional per impact map, time-gated per ADR)
+- Specific test counts (102) not documented to avoid future drift (intentional design decision)
 
 sources:
-  - .runs/local-alignment-audit-aba1c6/build/doc_critique.md
-  - .runs/local-alignment-audit-aba1c6/build/doc_updates.md
-  - .runs/local-alignment-audit-aba1c6/build/ac_status.json
-  - .runs/local-alignment-audit-aba1c6/build/lint_report.md
-  - .runs/local-alignment-audit-aba1c6/build/test_execution.md
-  - .runs/local-alignment-audit-aba1c6/build/mutation_report.md (NOOP)
-  - .runs/local-alignment-audit-aba1c6/build/fuzz_report.md (NOOP)
-  - .runs/local-alignment-audit-aba1c6/build/flakiness_report.md (NOOP)
-  - .runs/local-alignment-audit-aba1c6/plan/ac_matrix.md
+
+- .runs/local-alignment-audit-aba1c6/build/doc_critique.md
+- .runs/local-alignment-audit-aba1c6/build/doc_updates.md
+- .runs/local-alignment-audit-aba1c6/build/ac_status.json
+- .runs/local-alignment-audit-aba1c6/build/lint_report.md
+- .runs/local-alignment-audit-aba1c6/build/test_execution.md
+- .runs/local-alignment-audit-aba1c6/build/mutation_report.md (NOOP)
+- .runs/local-alignment-audit-aba1c6/build/fuzz_report.md (NOOP)
+- .runs/local-alignment-audit-aba1c6/build/flakiness_report.md (NOOP)
+- .runs/local-alignment-audit-aba1c6/plan/ac_matrix.md
 
 ## Canonical Bindings
 
@@ -39,8 +41,8 @@ NOOP - Documentation-only work; mutation testing not applicable per hardening st
 
 ## Critic Verdicts (Read-only)
 
-| Critic | Status | Notes |
-|--------|--------|-------|
+| Critic     | Status   | Notes                                                                     |
+| ---------- | -------- | ------------------------------------------------------------------------- |
 | doc-critic | VERIFIED | see `doc_critique.md`; documentation-only build equivalent of code-critic |
 
 ## Mismatch Check
@@ -87,33 +89,33 @@ Rationale: This documentation-only build implementing ADR OPT-003 (Layered Appro
 
 ## Requirements Coverage (from existing review)
 
-| Requirement | Status | Notes |
-|-------------|--------|-------|
-| REQ-001 (Flow count) | SATISFIED | All docs updated to "seven flows" |
-| REQ-002 (Flow overlap) | SATISFIED | Variant table added to architecture.md |
-| REQ-003 (Flow 7 purpose) | SATISFIED | Second-cycle semantics documented |
-| REQ-004 (CLAUDE.md table) | SATISFIED | Already correct, verified |
-| REQ-005 (Test counts) | SATISFIED | Receipt-derived principle documented |
+| Requirement                | Status    | Notes                                        |
+| -------------------------- | --------- | -------------------------------------------- |
+| REQ-001 (Flow count)       | SATISFIED | All docs updated to "seven flows"            |
+| REQ-002 (Flow overlap)     | SATISFIED | Variant table added to architecture.md       |
+| REQ-003 (Flow 7 purpose)   | SATISFIED | Second-cycle semantics documented            |
+| REQ-004 (CLAUDE.md table)  | SATISFIED | Already correct, verified                    |
+| REQ-005 (Test counts)      | SATISFIED | Receipt-derived principle documented         |
 | REQ-006 (Security posture) | SATISFIED | ReDoS immunity and path traversal documented |
-| REQ-007 (Color coding) | SATISFIED | Advisory metadata documented with example |
+| REQ-007 (Color coding)     | SATISFIED | Advisory metadata documented with example    |
 
 ## NFR Coverage (from existing review)
 
-| NFR | Status | Notes |
-|-----|--------|-------|
-| NFR-DOC-001 (Consistency) | SATISFIED | No "six flows" in any public doc |
-| NFR-SEC-001 (Evidence) | SATISFIED | Code references included |
+| NFR                        | Status    | Notes                              |
+| -------------------------- | --------- | ---------------------------------- |
+| NFR-DOC-001 (Consistency)  | SATISFIED | No "six flows" in any public doc   |
+| NFR-SEC-001 (Evidence)     | SATISFIED | Code references included           |
 | NFR-TRACE-001 (Pack-check) | SATISFIED | Passes with advisory warnings only |
 
 ## Risk Assessment (from existing review)
 
-| Risk | Mitigation Applied |
-|------|-------------------|
-| RSK-001 (Pack-check fixtures) | Not triggered - pack-check passes without fixture changes |
-| RSK-002 (Phase 3/4 incomplete) | All phases completed; no deferral needed |
-| RSK-003 (CLAUDE.md conflicts) | N/A - no changes to CLAUDE.md needed |
-| RSK-004 (Test count drift) | Documented principle instead of specific counts |
-| RSK-005 (New variant drift) | Variant table provides reference for future additions |
+| Risk                           | Mitigation Applied                                        |
+| ------------------------------ | --------------------------------------------------------- |
+| RSK-001 (Pack-check fixtures)  | Not triggered - pack-check passes without fixture changes |
+| RSK-002 (Phase 3/4 incomplete) | All phases completed; no deferral needed                  |
+| RSK-003 (CLAUDE.md conflicts)  | N/A - no changes to CLAUDE.md needed                      |
+| RSK-004 (Test count drift)     | Documented principle instead of specific counts           |
+| RSK-005 (New variant drift)    | Variant table provides reference for future additions     |
 
 ## Observations
 

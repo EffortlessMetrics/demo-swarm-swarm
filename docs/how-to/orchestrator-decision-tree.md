@@ -41,35 +41,35 @@ Agent returns handoff
 
 Most "blocked" is just routing. Classify before acting:
 
-| Condition | TRUE HALT? | Action |
-|-----------|------------|--------|
-| Mechanical failure (IO/permissions/tooling) | Yes | Fix environment first |
-| Non-derivable decision (human must choose) | Yes | Surface at flow boundary |
-| Unsafe boundary (secrets detected) | Yes | Route to secrets-sanitizer |
-| **Anything else** | **No** | **Route to appropriate agent** |
+| Condition                                   | TRUE HALT? | Action                         |
+| ------------------------------------------- | ---------- | ------------------------------ |
+| Mechanical failure (IO/permissions/tooling) | Yes        | Fix environment first          |
+| Non-derivable decision (human must choose)  | Yes        | Surface at flow boundary       |
+| Unsafe boundary (secrets detected)          | Yes        | Route to secrets-sanitizer     |
+| **Anything else**                           | **No**     | **Route to appropriate agent** |
 
 ### Translation Table: "Blocked" to "Route"
 
-| Agent Says | Route To |
-|------------|----------|
-| "Blocked on lint errors" | auto-linter |
-| "Blocked on test failures" | fixer or code-implementer |
-| "Blocked on missing import" | code-implementer |
-| "Blocked on design conflict" | design-optioneer |
-| "Blocked on unclear spec" | clarifier |
-| "Blocked on coverage" | test-author |
+| Agent Says                   | Route To                  |
+| ---------------------------- | ------------------------- |
+| "Blocked on lint errors"     | auto-linter               |
+| "Blocked on test failures"   | fixer or code-implementer |
+| "Blocked on missing import"  | code-implementer          |
+| "Blocked on design conflict" | design-optioneer          |
+| "Blocked on unclear spec"    | clarifier                 |
+| "Blocked on coverage"        | test-author               |
 
 ---
 
 ## Test Failure Decision Tree
 
-| Failure Location | Route To | Reason |
-|-----------------|----------|--------|
-| NEW tests fail | code-implementer | Code needs to pass the test |
-| EXISTING tests fail (regression) | code-implementer | New code broke existing behavior |
-| Test syntax/import errors | test-author | Test itself needs repair |
-| Intermittent (flaky) | flakiness-detector | Classify before routing |
-| Timeout | fixer | May be infrastructure issue |
+| Failure Location                 | Route To           | Reason                           |
+| -------------------------------- | ------------------ | -------------------------------- |
+| NEW tests fail                   | code-implementer   | Code needs to pass the test      |
+| EXISTING tests fail (regression) | code-implementer   | New code broke existing behavior |
+| Test syntax/import errors        | test-author        | Test itself needs repair         |
+| Intermittent (flaky)             | flakiness-detector | Classify before routing          |
+| Timeout                          | fixer              | May be infrastructure issue      |
 
 ---
 
@@ -91,13 +91,13 @@ Critic returns findings
 
 ### Microloop Exit Conditions
 
-| Critic Says | Action |
-|-------------|--------|
-| "Work is complete" | Exit loop, next station |
-| "Mechanical failure" | Stop - fix environment |
-| "Route to [agent]" | Follow recommendation |
-| "Recommend iteration" | Rerun writer |
-| "Won't help further" | Exit loop, blockers recorded |
+| Critic Says           | Action                       |
+| --------------------- | ---------------------------- |
+| "Work is complete"    | Exit loop, next station      |
+| "Mechanical failure"  | Stop - fix environment       |
+| "Route to [agent]"    | Follow recommendation        |
+| "Recommend iteration" | Rerun writer                 |
+| "Won't help further"  | Exit loop, blockers recorded |
 
 ---
 
@@ -105,18 +105,18 @@ Critic returns findings
 
 ### Flow 1: Signal
 
-| Situation | Route |
-|-----------|-------|
-| Requirements unclear | clarifier |
+| Situation                      | Route               |
+| ------------------------------ | ------------------- |
+| Requirements unclear           | clarifier           |
 | BDD doesn't match requirements | requirements-author |
-| Scope too large | scope-assessor |
+| Scope too large                | scope-assessor      |
 
 ### Flow 2: Plan
 
-| Situation | Route |
-|-----------|-------|
-| Multiple valid designs | design-optioneer |
-| ADR conflicts with code | impact-analyzer |
+| Situation                  | Route                            |
+| -------------------------- | -------------------------------- |
+| Multiple valid designs     | design-optioneer                 |
+| ADR conflicts with code    | impact-analyzer                  |
 | Contract doesn't match ADR | interface-designer or adr-author |
 
 ### Flow 3: Build (Most Complex)
@@ -133,43 +133,43 @@ flowchart LR
     FIX -->|test| TA
 ```
 
-| Situation | Route |
-|-----------|-------|
-| Tests fail after implementation | code-implementer |
-| Tests themselves broken | test-author |
-| Code critic finds MAJOR | code-implementer (one pass) |
-| ADR interpretation question | design-optioneer (local resolution) |
-| Post-green polish needed | code-implementer (one pass max) |
-| Mutation survivors | test-author or fixer |
-| Standards violations | fixer |
+| Situation                       | Route                               |
+| ------------------------------- | ----------------------------------- |
+| Tests fail after implementation | code-implementer                    |
+| Tests themselves broken         | test-author                         |
+| Code critic finds MAJOR         | code-implementer (one pass)         |
+| ADR interpretation question     | design-optioneer (local resolution) |
+| Post-green polish needed        | code-implementer (one pass max)     |
+| Mutation survivors              | test-author or fixer                |
+| Standards violations            | fixer                               |
 
 **AC termination:** test-executor Green AND orchestrator agrees nothing critical remains.
 
 ### Flow 4: Review
 
-| Worklist Type | Route To |
-|---------------|----------|
-| TESTS | test-author |
-| CORRECTNESS | code-implementer |
-| STYLE | fixer |
-| DOCS | doc-writer |
+| Worklist Type | Route To         |
+| ------------- | ---------------- |
+| TESTS         | test-author      |
+| CORRECTNESS   | code-implementer |
+| STYLE         | fixer            |
+| DOCS          | doc-writer       |
 
 ### Flow 5: Gate
 
-| Finding | Route |
-|---------|-------|
-| Contract violations | Bounce to Build |
-| Security issues | Bounded fix-forward |
+| Finding                  | Route               |
+| ------------------------ | ------------------- |
+| Contract violations      | Bounce to Build     |
+| Security issues          | Bounded fix-forward |
 | Coverage below threshold | Bounded fix-forward |
-| All pass | merge-decider |
+| All pass                 | merge-decider       |
 
 ### Flow 6: Deploy
 
-| Situation | Route |
-|-----------|-------|
-| Gate said MERGE | repo-operator |
+| Situation        | Route          |
+| ---------------- | -------------- |
+| Gate said MERGE  | repo-operator  |
 | Gate said BOUNCE | Document, skip |
-| Smoke fails | deploy-decider |
+| Smoke fails      | deploy-decider |
 
 ### Flow 7: Wisdom
 
@@ -191,27 +191,27 @@ Before declaring halt, all must be true:
 
 ## Common Anti-Patterns
 
-| Wrong | Right |
-|-------|-------|
-| "BLOCKED: Code quality low" | Route to code-critic then code-implementer |
-| "BLOCKED: Need human decision" | Make assumption, document, proceed |
-| "BLOCKED: Missing upstream schema" | Call design-optioneer for local fix |
-| "BLOCKED: Tests failing" | Route to code-implementer or test-author |
+| Wrong                              | Right                                      |
+| ---------------------------------- | ------------------------------------------ |
+| "BLOCKED: Code quality low"        | Route to code-critic then code-implementer |
+| "BLOCKED: Need human decision"     | Make assumption, document, proceed         |
+| "BLOCKED: Missing upstream schema" | Call design-optioneer for local fix        |
+| "BLOCKED: Tests failing"           | Route to code-implementer or test-author   |
 
 ---
 
 ## Quick Routing Table
 
-| From Agent | On Success | On Issues |
-|------------|------------|-----------|
-| code-implementer | code-critic | code-critic |
-| code-critic | test-executor | code-implementer |
-| test-author | test-critic | test-critic |
-| test-critic | code-implementer | test-author |
-| test-executor | next station | code-implementer or test-author |
-| doc-writer | doc-critic | doc-critic |
-| doc-critic | self-reviewer | doc-writer |
-| secrets-sanitizer | repo-operator | code-implementer |
+| From Agent        | On Success       | On Issues                       |
+| ----------------- | ---------------- | ------------------------------- |
+| code-implementer  | code-critic      | code-critic                     |
+| code-critic       | test-executor    | code-implementer                |
+| test-author       | test-critic      | test-critic                     |
+| test-critic       | code-implementer | test-author                     |
+| test-executor     | next station     | code-implementer or test-author |
+| doc-writer        | doc-critic       | doc-critic                      |
+| doc-critic        | self-reviewer    | doc-writer                      |
+| secrets-sanitizer | repo-operator    | code-implementer                |
 
 ---
 

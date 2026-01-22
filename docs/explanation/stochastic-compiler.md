@@ -13,6 +13,7 @@ An LLM is not a chatbot. It's a **stochastic compiler**.
 - **Process:** Non-deterministic, tweakable, iterative
 
 Like a traditional compiler, but:
+
 - Probabilistic (same input may produce different output)
 - Refinable (you can adjust the output through iteration)
 - Fallible (output may be wrong and needs verification)
@@ -30,6 +31,7 @@ Source (C) --> Compiler (gcc) --> Binary (x86)
 ```
 
 Properties:
+
 - **Deterministic:** Same input always produces same output
 - **Correct by construction:** If it compiles, syntax is valid
 - **No refinement:** Output is what it is
@@ -43,6 +45,7 @@ Spec (BDD) --> Compiler (Swarm) --> Implementation (TS)
 ```
 
 Properties:
+
 - **Probabilistic:** Same input may vary
 - **Possibly wrong:** Must verify
 - **Refinable:** Iterate until correct
@@ -60,12 +63,14 @@ Spec --> Generate --> Verify --> Critique --> Refine --> Verify --> ... --> Ship
 ```
 
 Each iteration:
+
 1. **Generate:** Produce candidate implementation
 2. **Verify:** Run tests, check constraints
 3. **Critique:** Find issues, suggest fixes
 4. **Refine:** Apply fixes, regenerate
 
 Continue until:
+
 - Verification passes
 - Critics run out of issues
 - Evidence threshold met
@@ -79,11 +84,13 @@ This is the fundamental difference from traditional compilation. You don't expec
 ### Embrace Non-Determinism
 
 The same spec might produce:
+
 - Different variable names
 - Different helper functions
 - Different implementation strategies
 
 This is fine. What matters is:
+
 - Does it pass the tests?
 - Does it meet the spec?
 - Is it maintainable?
@@ -93,6 +100,7 @@ Implementation diversity is a feature, not a bug. Multiple valid solutions exist
 ### Plan for Failure
 
 Every generation might be wrong:
+
 - Hallucinated imports
 - Incorrect API usage
 - Missing edge cases
@@ -103,12 +111,12 @@ That's why verification is mandatory, not optional. The compiler is not trusted.
 
 If the first attempt is wrong, regenerate. Tokens are cheap. The refinement loop catches errors that would otherwise reach humans.
 
-| Resource | Cost |
-|----------|------|
-| Token generation | Cheap (fractions of a cent) |
-| Machine verification | Cheap (seconds) |
-| Human review of bad code | Expensive (hours) |
-| Bug in production | Very expensive |
+| Resource                 | Cost                        |
+| ------------------------ | --------------------------- |
+| Token generation         | Cheap (fractions of a cent) |
+| Machine verification     | Cheap (seconds)             |
+| Human review of bad code | Expensive (hours)           |
+| Bug in production        | Very expensive              |
 
 Spend machine cycles to save human cycles. That's the trade.
 
@@ -121,6 +129,7 @@ The swarm implements a complete compilation pipeline:
 ### Stage 1: Frontend (Signal)
 
 Parse the input:
+
 - Problem statement
 - Requirements (REQ/NFR markers)
 - BDD scenarios
@@ -132,6 +141,7 @@ The frontend catches ambiguity early. Vague requirements fail here, not in imple
 ### Stage 2: Middle-End (Plan)
 
 Optimize and design:
+
 - Architecture decisions (ADR)
 - API contracts
 - Work breakdown
@@ -143,6 +153,7 @@ The middle-end makes structural decisions. How will components interact? What pa
 ### Stage 3: Backend (Build)
 
 Generate code:
+
 - Implementation
 - Tests
 - Documentation
@@ -154,6 +165,7 @@ The backend is where generation happens. But generation alone is not enough.
 ### Stage 4: Linker (Gate)
 
 Combine and verify:
+
 - Run tests
 - Check contracts
 - Verify evidence
@@ -172,11 +184,11 @@ Unlike traditional compilers, you can tune stochastic compilers:
 
 Adjust how the compiler interprets specs:
 
-| Adjustment | Effect |
-|------------|--------|
-| More explicit examples | More consistent output |
-| Clearer constraints | Fewer hallucinations |
-| Better context | More accurate generation |
+| Adjustment             | Effect                   |
+| ---------------------- | ------------------------ |
+| More explicit examples | More consistent output   |
+| Clearer constraints    | Fewer hallucinations     |
+| Better context         | More accurate generation |
 
 The prompt is your compiler flags. `-O3` for optimization becomes "ensure minimal allocations" in your context.
 
@@ -184,9 +196,9 @@ The prompt is your compiler flags. `-O3` for optimization becomes "ensure minima
 
 Control randomness:
 
-| Setting | Effect |
-|---------|--------|
-| Lower temperature | More deterministic, less creative |
+| Setting            | Effect                              |
+| ------------------ | ----------------------------------- |
+| Lower temperature  | More deterministic, less creative   |
 | Higher temperature | More varied, potentially more novel |
 
 For implementation tasks, lower is usually better. For design exploration, higher can help.
@@ -195,10 +207,10 @@ For implementation tasks, lower is usually better. For design exploration, highe
 
 Control refinement:
 
-| Budget | Trade-off |
-|--------|-----------|
-| More iterations | Higher quality, diminishing returns |
-| Fewer iterations | Faster, possibly rougher |
+| Budget           | Trade-off                           |
+| ---------------- | ----------------------------------- |
+| More iterations  | Higher quality, diminishing returns |
+| Fewer iterations | Faster, possibly rougher            |
 
 The default cadence (write, critique, write, critique) balances speed and quality.
 
@@ -206,10 +218,10 @@ The default cadence (write, critique, write, critique) balances speed and qualit
 
 Control the quality bar:
 
-| Critic | Effect |
-|--------|--------|
-| Stricter critics | Fewer issues escape, more iterations |
-| Lighter critics | Faster iteration, more issues may pass |
+| Critic           | Effect                                 |
+| ---------------- | -------------------------------------- |
+| Stricter critics | Fewer issues escape, more iterations   |
+| Lighter critics  | Faster iteration, more issues may pass |
 
 Tune based on risk. Security-critical code gets stricter critics. Formatting changes get lighter critics.
 
@@ -221,12 +233,12 @@ Traditional compilers guarantee syntactic correctness. Stochastic compilers guar
 
 So verification is mandatory:
 
-| Verification Type | What It Proves |
-|-------------------|----------------|
-| Tests | Behavior matches expectations |
-| Critics | Code meets quality standards |
-| Mutation testing | Tests actually verify behavior |
-| Evidence | Claims about verification are true |
+| Verification Type | What It Proves                     |
+| ----------------- | ---------------------------------- |
+| Tests             | Behavior matches expectations      |
+| Critics           | Code meets quality standards       |
+| Mutation testing  | Tests actually verify behavior     |
+| Evidence          | Claims about verification are true |
 
 **No verification = no trust.**
 
@@ -241,6 +253,7 @@ The compiler output is a candidate until verified. Verification is what transfor
 You don't read x86 to understand C code. You don't read generated TypeScript to understand a BDD spec.
 
 Read:
+
 - The spec (what you intended)
 - The evidence (what was verified)
 - The hotspots (where to spot-check)
@@ -250,6 +263,7 @@ The implementation is the binary. The spec is the source. Focus on source.
 ### Treat Output as Provisional
 
 Generated code is a candidate, not a finished product. It becomes trusted only after:
+
 - Tests pass
 - Critics approve
 - Gates clear
@@ -301,17 +315,18 @@ Trust emerges from the process, not the model.
 - Human reviews evidence
 
 The human role shifts from:
+
 - Reviewing generated code (expensive, error-prone)
 - To: Writing good specs and reviewing evidence (high-leverage, focused)
 
 ### What This Means in Practice
 
-| Old Approach | New Approach |
-|--------------|--------------|
+| Old Approach                     | New Approach                           |
+| -------------------------------- | -------------------------------------- |
 | Read 500 lines of generated code | Read 5-line spec, check evidence table |
-| Hope to spot bugs by reading | Run tests to prove absence of bugs |
-| Trust because you reviewed | Trust because evidence exists |
-| Slow, exhausting, incomplete | Fast, sustainable, thorough |
+| Hope to spot bugs by reading     | Run tests to prove absence of bugs     |
+| Trust because you reviewed       | Trust because evidence exists          |
+| Slow, exhausting, incomplete     | Fast, sustainable, thorough            |
 
 ---
 
@@ -320,6 +335,7 @@ The human role shifts from:
 ### When Things Go Wrong
 
 **Compiler error in C:**
+
 ```
 error: undeclared identifier 'foo'
     |
@@ -330,6 +346,7 @@ error: undeclared identifier 'foo'
 You don't debug the x86 output. You fix the C source.
 
 **Verification failure in swarm:**
+
 ```
 Test failed: login_with_valid_credentials
 Expected: JWT token returned
@@ -337,6 +354,7 @@ Actual: 401 Unauthorized
 ```
 
 You don't debug the generated TypeScript. You check:
+
 1. Is the spec correct?
 2. Is the test correct?
 3. Does the implementation need regeneration?
@@ -366,11 +384,13 @@ Wrong output is not failure. Wrong output with no iteration path is failure.
 Good compiler input produces good compiler output.
 
 **Bad spec:**
+
 ```
 Make the login work better.
 ```
 
 **Good spec:**
+
 ```
 REQ-001: Login endpoint accepts email/password, returns JWT with 24h expiry
 REQ-002: Invalid credentials return 401 with error message
@@ -393,11 +413,13 @@ Failures are information. They narrow the search space.
 ### Knowing When to Stop
 
 Stop when:
+
 - All tests pass
 - Critics have no major findings
 - Evidence threshold is met
 
 Don't stop because:
+
 - "It looks right" (verification beats intuition)
 - "I'm tired of iterating" (machine doesn't tire)
 - "It's probably fine" (probably is not evidence)
@@ -409,6 +431,7 @@ Don't stop because:
 > The LLM is a compiler. A stochastic, fallible, tweakable compiler. Treat it like one.
 
 This means:
+
 - **Accept non-determinism** — Different runs may differ
 - **Require verification** — Compilation doesn't imply correctness
 - **Embrace iteration** — Refinement is the normal path

@@ -29,16 +29,20 @@ You verify that the implemented API surface matches the Plan's declared contract
 ## Inputs (best-effort)
 
 Preferred contract source (Plan):
+
 - `.runs/<run-id>/plan/api_contracts.yaml`
 
 Fallback contract sources (Plan):
+
 - `.runs/<run-id>/plan/interface_spec.md`
 - `.runs/<run-id>/plan/schema.md` (data shapes/invariants; supplemental)
 
 Implementation pointers (Build):
+
 - `.runs/<run-id>/build/impl_changes_summary.md` (starting point; not the only place you may read)
 
 Helpful context (optional):
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/signal/requirements.md`
 
@@ -62,17 +66,20 @@ If contract files are missing, this is **UNVERIFIED**, not mechanical failure.
 ### Step 0: Preflight (mechanical)
 
 Verify you can read the relevant `.runs/<run-id>/` inputs and write:
+
 - `.runs/<run-id>/gate/contract_compliance.md`
 
 If you cannot read/write due to IO/perms/tooling failure:
+
 - Note the mechanical failure and write as much of the report as you can. In your handoff, explain the issue and recommend fixing the environment.
 
 ### Step 1: Resolve contract source
 
 Contract source selection:
-1) If `.runs/<run-id>/plan/api_contracts.yaml` exists: use as source of truth.
-2) Else if `.runs/<run-id>/plan/interface_spec.md` exists: use as source of truth (lower fidelity).
-3) Else contract source is MISSING:
+
+1. If `.runs/<run-id>/plan/api_contracts.yaml` exists: use as source of truth.
+2. Else if `.runs/<run-id>/plan/interface_spec.md` exists: use as source of truth (lower fidelity).
+3. Else contract source is MISSING:
    - Status is UNVERIFIED
    - Recommend **interface-designer** to create contracts
    - Still enumerate observed endpoints from implementation to give Plan something concrete to work from.
@@ -80,31 +87,36 @@ Contract source selection:
 ### Step 2: Extract declared API surface (prefer contract inventory)
 
 If `api_contracts.yaml` contains contract inventory markers (preferred, stable):
+
 - `# CONTRACT_INVENTORY_V1`
 - repeated `# ENDPOINT: <METHOD> <PATH>`
-Use those markers as the declared endpoint list.
+  Use those markers as the declared endpoint list.
 
 If inventory markers are absent:
+
 - Do best-effort extraction from OpenAPI `paths:`:
   - enumerate `<path>` keys under `paths:`
   - enumerate HTTP methods under each path
-Record a concern: "contract inventory markers missing; endpoint extraction best-effort".
+    Record a concern: "contract inventory markers missing; endpoint extraction best-effort".
 
 For each declared endpoint, capture:
+
 - method + path
 - expected status codes (if reasonably extractable)
 - schema names referenced (if reasonably extractable)
-If schema extraction is too ambiguous, leave schema fields `unknown` and record a concern (don't guess).
+  If schema extraction is too ambiguous, leave schema fields `unknown` and record a concern (don't guess).
 
 ### Step 3: Identify implemented API surface (bounded discovery)
 
 Start from `.runs/<run-id>/build/impl_changes_summary.md`:
+
 - Prefer its `## Inventory (machine countable)` lines if present, especially:
   - `IMPL_FILE_CHANGED:` and `IMPL_FILE_ADDED:`
   - `IMPL_CONTRACT_TOUCHED:` (if used)
 - Use these as the initial search surface.
 
 Then:
+
 - Locate route/handler definitions and schema/type definitions by following the routing framework patterns you observe **in the repo**.
 - You may expand beyond changed files only when routing is centralized (router registry files), and you must record expanded files in `sources:`.
 
@@ -119,6 +131,7 @@ For each declared endpoint, determine a result:
 - **UNKNOWN**: could not verify reliably (dynamic routing, missing evidence, unclear schema). UNKNOWN is a reason for UNVERIFIED unless it's clearly non-critical.
 
 Check, best-effort:
+
 - method/path existence
 - auth requirement changes (if visible)
 - required/optional parameter semantics (if visible)
@@ -126,6 +139,7 @@ Check, best-effort:
 - error shape conventions (if contract defines one)
 
 Also check:
+
 - **Undocumented additions**: endpoints in implementation that look intentional but are absent from the contract.
 
 ### Step 5: Decide routing
@@ -173,15 +187,18 @@ Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 ## Findings
 
 ### CRITICAL
+
 - <METHOD> <PATH>: <what broke>
   - Evidence (contract): <file + pointer>
   - Evidence (impl): <file + pointer>
 
 ### MAJOR
+
 - <METHOD> <PATH>: <what drifted>
   - Evidence: ...
 
 ### MINOR
+
 - <METHOD> <PATH>: <safe drift / polish>
   - Evidence: ...
 
@@ -192,6 +209,7 @@ Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
   - Why it looks intended/accidental: <1-2 bullets>
 
 ## Sources Consulted
+
 - <repo-relative paths actually read>
 ```
 
@@ -200,13 +218,16 @@ Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 After writing the report, provide a natural language summary with endpoint counts and your recommendation.
 
 **Example (compliant):**
+
 > Verified 8 endpoints against api_contracts.yaml. All methods, status codes, and response shapes match. Route to **merge-decider**.
 
 **Example (violations):**
+
 > Checked 8 endpoints. Found 2 CRITICAL violations: POST /auth/login returns 200 instead of 201; GET /users/{id} missing 404 handler. Route to **code-implementer** to fix implementation.
 
 **Example (contract missing):**
-> Implementation has 3 undocumented endpoints (/admin/*) that look intentional. Route to **interface-designer** to update contracts.
+
+> Implementation has 3 undocumented endpoints (/admin/\*) that look intentional. Route to **interface-designer** to update contracts.
 
 If contracts are missing entirely, document what you can verify and route to interface-designer. Partial verification with documented gaps is a valid outcome.
 

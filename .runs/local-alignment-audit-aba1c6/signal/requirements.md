@@ -1,6 +1,7 @@
 # Requirements
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,13 +13,15 @@ blockers: []
 missing_required: []
 
 concerns:
-  - OQ-SIG-001 (Six-Flow vs Seven-Flow) remains open; requirements assume Seven-Flow is canonical per CLAUDE.md L13
-  - OQ-SIG-004 (path traversal exploitability) deferred to threat assessment; documented as known limitation per ASM-4
-  - Test count story (OQ-SIG-006) assumes 102 is the current correct count; if different counts exist elsewhere, they are stale
+
+- OQ-SIG-001 (Six-Flow vs Seven-Flow) remains open; requirements assume Seven-Flow is canonical per CLAUDE.md L13
+- OQ-SIG-004 (path traversal exploitability) deferred to threat assessment; documented as known limitation per ASM-4
+- Test count story (OQ-SIG-006) assumes 102 is the current correct count; if different counts exist elsewhere, they are stale
 
 ## Functional Requirements
 
 ### REQ-001: Update Flow Count References in Public Documentation
+
 The system shall update all public-facing documentation to reference "seven flows" instead of "six flows."
 
 Priority: HIGH
@@ -31,6 +34,7 @@ Traceability: problem_statement.md (L54), github_research.md (L122-129), OQ-SIG-
 - AC-5: No remaining occurrences of "six flows" appear in public documentation (README.md, DEMO_RUN.md, docs/explanation/architecture.md).
 
 ### REQ-002: Document Flow Overlap Semantics
+
 The system shall document the multi-path flow design explaining when to use each flow variant command.
 
 Priority: HIGH
@@ -43,6 +47,7 @@ Traceability: problem_statement.md (L55-56), github_research.md (L135-138), OQ-S
 - AC-5: Flow overlap documentation is placed in a discoverable location (README.md or docs/explanation/architecture.md).
 
 ### REQ-003: Document Flow 7 Purpose and Usage
+
 The system shall add documentation for /flow-7-wisdom explaining its purpose, when to invoke it, and how it differs from /flow-6-wisdom.
 
 Priority: HIGH
@@ -54,6 +59,7 @@ Traceability: problem_statement.md (L56), github_research.md (L68, L172), OQ-SIG
 - AC-4: Usage guidance specifies when users should invoke /flow-7-wisdom vs /flow-6-wisdom.
 
 ### REQ-004: Update CLAUDE.md Flow Table
+
 The system shall update the CLAUDE.md flow table to reflect the seven-flow model with all variant commands.
 
 Priority: HIGH
@@ -65,6 +71,7 @@ Traceability: problem_statement.md (L60), github_research.md (L147-157)
 - AC-4: If variants are listed inline, each variant has a brief description of its use case.
 
 ### REQ-005: Correct Test Count Documentation
+
 The system shall update test coverage documentation to reflect actual test execution results.
 
 Priority: MEDIUM
@@ -76,6 +83,7 @@ Traceability: problem_statement.md (L57), issue_normalized.md (L72-73), OQ-SIG-0
 - AC-4: Test count claims include the source artifact (e.g., "per test_output.log line 109").
 
 ### REQ-006: Update Security Posture Documentation
+
 The system shall update security documentation to accurately reflect the implementation posture.
 
 Priority: MEDIUM
@@ -87,6 +95,7 @@ Traceability: problem_statement.md (L58), issue_normalized.md (L88-90)
 - AC-4: Security claims reference code evidence (e.g., "secrets.rs uses Rust regex crate, line 14").
 
 ### REQ-007: Clarify Agent Color Coding Purpose
+
 The system shall clarify that agent color coding in frontmatter is functional metadata, not documentation-only.
 
 Priority: LOW
@@ -100,11 +109,13 @@ Traceability: problem_statement.md (L59), issue_normalized.md (L75-83), OQ-SIG-0
 ## Non-Functional Requirements
 
 ### Domain Notes
+
 - DOC: Documentation consistency and maintainability
 - SEC: Security and privacy
 - TRACE: Traceability and test verification
 
 ### NFR-DOC-001: Documentation Consistency
+
 The system shall maintain consistent flow count references across all public documentation.
 
 Priority: HIGH
@@ -114,6 +125,7 @@ Traceability: problem_statement.md (L54), concern in Machine Summary
 - MET-2: All public documentation files agree on flow count (seven flows). Verified in: Gate via cross-file consistency check.
 
 ### NFR-SEC-001: Security Claims Evidence
+
 The system shall ensure all security claims in documentation have corresponding code evidence.
 
 Priority: HIGH
@@ -123,6 +135,7 @@ Traceability: problem_statement.md (L43), issue_normalized.md (L88-90)
 - MET-2: Security claims are testable or verifiable by code inspection. Verified in: Gate.
 
 ### NFR-TRACE-001: Pack-Check Test Continuity
+
 The system shall ensure pack-check tests continue to pass after documentation changes.
 
 Priority: HIGH
@@ -132,6 +145,7 @@ Traceability: problem_statement.md (L61)
 - MET-2: wisdom.rs checks in pack-check continue to pass. Verified in: Gate.
 
 ## Assumptions Made
+
 - **ASM-001**: The seven-flow model in CLAUDE.md L13 is authoritative, and "six flow" references elsewhere are stale. (why: CLAUDE.md is described as "repo-level policy + shared contracts" and explicitly lists "7 flows: Signal -> Plan -> Build -> Review -> Gate -> Deploy -> Wisdom")
   - Impact if wrong: Would need to reconcile by removing Flow 7 or redefining what "flow" means (unlikely given flow-7-wisdom.md exists and is functional)
 
@@ -148,6 +162,7 @@ Traceability: problem_statement.md (L61)
   - Impact if wrong: Could downgrade to "cosmetic documentation" category
 
 ## Questions for Humans
+
 - Q: What is the intended purpose of /flow-7-wisdom and when should users invoke it vs /flow-6-wisdom? Suggested default: Flow 7 is a second-cycle wisdom extraction for multi-iteration runs. Impact if different: If same purpose as /flow-6-wisdom, one should be deprecated; if distinct but undocumented, documentation must explain when to use each. (Linked: OQ-SIG-002)
 
 - Q: Should the documentation present the multi-path design as "7 flows with variant entry points" or "6 main flows with 4 alternate paths"? Suggested default: Present as "7 flows" matching CLAUDE.md, with a subsection explaining the variant pattern. Impact if different: If 6 flows, documentation update is simpler (just explain variants); if 7 flows, public docs must enumerate Flow 7 distinctly. (Linked: OQ-SIG-001)

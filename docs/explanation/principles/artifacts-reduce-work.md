@@ -15,6 +15,7 @@ Every artifact should reduce future work for someone: the next agent, a reviewer
 ### Artifact Bloat Drowns Signal
 
 When every step produces artifacts "because the process says so," the result is noise:
+
 - Important findings get lost in templates
 - Reviewers skim instead of read
 - Disk fills with unread compliance logs
@@ -24,6 +25,7 @@ The PR cockpit should be scannable in 30 seconds. That is impossible when buried
 ### Artifacts Are Part of the Product
 
 The system produces trust, not code. Artifacts are how trust is communicated:
+
 - Receipts prove what happened
 - ADRs explain why decisions were made
 - Critiques identify what was found
@@ -34,12 +36,12 @@ If an artifact does not contribute to trust, it does not contribute to the produ
 
 Someone will read these artifacts:
 
-| Reader | What They Need |
-|--------|----------------|
-| **Next agent** | Context to continue work |
-| **Reviewer** | Evidence to make merge decision |
-| **Future developer** | Reasoning behind decisions |
-| **Auditor** | Proof that process was followed |
+| Reader               | What They Need                  |
+| -------------------- | ------------------------------- |
+| **Next agent**       | Context to continue work        |
+| **Reviewer**         | Evidence to make merge decision |
+| **Future developer** | Reasoning behind decisions      |
+| **Auditor**          | Proof that process was followed |
 
 Write for them, not for a compliance checkbox.
 
@@ -64,11 +66,13 @@ If an artifact does not help the next agent, it is probably not needed.
 Reviewers scan the PR cockpit to decide: merge or not merge.
 
 Useful for reviewers:
+
 - `merge_decision.md` — summary with evidence pointers
 - `build_receipt.json` — mechanical counts and quality gates
 - Hotspot list — where to spot-check
 
 Not useful for reviewers:
+
 - Raw logs nobody will read
 - Process compliance timestamps
 - Intermediate state dumps
@@ -78,11 +82,13 @@ Not useful for reviewers:
 Months later, someone asks: "Why did we build it this way?"
 
 Useful for future developers:
+
 - `adr.md` — explains the design decision and trade-offs
 - `requirements.md` — explains what problem we were solving
 - Comments in code — explain non-obvious choices
 
 Not useful for future developers:
+
 - `process_step_completed.json` — no reasoning, just timestamps
 
 ---
@@ -95,13 +101,16 @@ Not useful for future developers:
 # Build Receipt
 
 ## Summary
+
 Implemented OAuth2 login per REQ-001. 23 tests pass.
 
 ## Quality Events
+
 - Code critic: 1 minor (naming convention in auth module)
 - Test critic: Good coverage
 
 ## Evidence Pointers
+
 - impl_changes_summary.md — what changed
 - test_execution.md — test results
 - code_critique.md — review findings
@@ -115,12 +124,15 @@ This reduces work: the reviewer knows what happened without digging.
 # ADR-005: Session Timeout Policy
 
 ## Context
+
 We need to balance security (shorter sessions) against UX (fewer re-logins).
 
 ## Decision
+
 15-minute timeout with sliding window.
 
 ## Consequences
+
 - Users re-authenticate if idle 15+ minutes
 - Session extends on activity
 - Complies with security policy SEC-003
@@ -162,11 +174,13 @@ This is routing data dressed as an artifact. If routing happens via prose handof
 # Gate Decision
 
 ## Checks Passed
+
 - Lint: 0 issues (auto-linter ran)
 - Tests: 47 passed, 0 failed
 - Security: Clean scan
 
 ## Decision
+
 PASS — all quality gates met. Ready for merge review.
 ```
 
@@ -178,12 +192,15 @@ Same information, but readable. A human can understand and audit.
 
 ```markdown
 ## Findings
+
 [None]
 
 ## Blockers
+
 [None]
 
 ## Recommendation
+
 Proceed.
 ```
 
@@ -244,13 +261,13 @@ If you cannot answer these questions, the artifact might not be needed.
 
 ## Summary
 
-| Artifact Type | Purpose | Future Reader |
-|---------------|---------|---------------|
-| Receipts | Summarize evidence | Reviewer, auditor |
-| ADRs | Explain decisions | Future developer |
-| Critiques | Identify issues | Implementer, reviewer |
-| Change summaries | Describe what changed | Next agent, reviewer |
-| Process compliance logs | (None) | (None — avoid creating) |
+| Artifact Type           | Purpose               | Future Reader           |
+| ----------------------- | --------------------- | ----------------------- |
+| Receipts                | Summarize evidence    | Reviewer, auditor       |
+| ADRs                    | Explain decisions     | Future developer        |
+| Critiques               | Identify issues       | Implementer, reviewer   |
+| Change summaries        | Describe what changed | Next agent, reviewer    |
+| Process compliance logs | (None)                | (None — avoid creating) |
 
 **The rule:** Artifacts reduce work for real readers. If no one will read it, do not create it.
 

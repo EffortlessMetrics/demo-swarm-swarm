@@ -25,13 +25,15 @@ Write exactly one file: `.runs/<run-id>/build/subtask_context_manifest.json`
 ## Inputs (best-effort)
 
 Primary (in priority order):
+
 - `.runs/<run-id>/plan/subtasks.yaml` (machine canonical—authoritative source of subtask scope)
 - Subtask selector (parameter): `subtask_id` (e.g., `ST-001`) or a short subtask label
 - `.runs/<run-id>/plan/work_plan.md` (human view—fallback if subtasks.yaml is missing)
 - `.runs/<run-id>/plan/adr.md` (design intent)
-- `.runs/<run-id>/signal/requirements.md` (REQ-* / NFR-*)
+- `.runs/<run-id>/signal/requirements.md` (REQ-_ / NFR-_)
 
 Helpful if present:
+
 - `demo-swarm.config.json` (preferred source of repo layout conventions)
 - `.runs/<run-id>/plan/test_plan.md`
 - `.runs/<run-id>/plan/ac_matrix.md` (AC-driven build contract; maps ACs to test types + impl hints)
@@ -63,7 +65,7 @@ schema_version: subtasks_v1
 subtasks:
   - id: ST-001
     title: "<short>"
-    status: TODO   # TODO | DOING | DONE
+    status: TODO # TODO | DOING | DONE
     depends_on: []
     req_ids: ["REQ-001"]
     nfr_ids: ["NFR-SEC-001"]
@@ -110,6 +112,7 @@ subtasks:
 **Keep it small and high-signal.** Workers can expand; you provide a starting point.
 
 ### Spec Anchors (include when present)
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/work_plan.md`
 - `.runs/<run-id>/signal/requirements.md`
@@ -118,15 +121,19 @@ subtasks:
 - Relevant `.runs/<run-id>/signal/features/*.feature`
 
 ### Code Files
+
 Start with `touches[]` patterns from the subtask. Expand with search if needed:
+
 - Symbols/keywords from subtask title and acceptance criteria
 - REQ/NFR IDs
 - Endpoint names and schema entities from contracts
 
 ### Tests
+
 Use `tests[]` guidance from the subtask. Locate matching feature files and test files. Cross-check test_plan.md if present.
 
 ### Docs
+
 Include docs explicitly referenced by ADR or contracts. Otherwise leave empty.
 
 ## Pattern Semantics
@@ -134,6 +141,7 @@ Include docs explicitly referenced by ADR or contracts. Otherwise leave empty.
 `touches` entries are repo-root-relative globs unless prefixed with `re:` (regex).
 
 Examples:
+
 - `src/auth/*.rs` - glob
 - `**/user_*.py` - recursive glob
 - `re:src/.*_handler\.ts` - regex
@@ -207,36 +215,42 @@ If a pattern matches zero files, record it under `unresolved_patterns[]` and con
 ```
 
 **Tips:**
+
 - Keep `paths.*` lists small (5-20 files, not 200)
 - Every path should have a `rationale[]` entry
 - Set `generated_at` to null if you cannot obtain a timestamp mechanically
 
 ## How Workers Use This
 
-| Field | Purpose |
-|-------|---------|
-| `paths.code` | High-signal code files for the subtask |
-| `paths.tests` | Existing test files |
-| `paths.docs` | Documentation that may need updating |
-| `paths.allow_new_files_under` | Suggested locations for new files |
+| Field                         | Purpose                                |
+| ----------------------------- | -------------------------------------- |
+| `paths.code`                  | High-signal code files for the subtask |
+| `paths.tests`                 | Existing test files                    |
+| `paths.docs`                  | Documentation that may need updating   |
+| `paths.allow_new_files_under` | Suggested locations for new files      |
 
 **Workers can go beyond this manifest.** If they need files not listed here, they search and read them directly. The manifest is a head start, not a boundary.
 
 ## Handoff Examples
 
 **Success:**
+
 > "Loaded context for ST-001 (user authentication). Found 5 spec files, 8 code files (src/auth/), 12 test files. Subtask resolved from subtasks.yaml. All patterns matched. Ready for code-implementer."
 
 **Partial:**
+
 > "Loaded context for ST-002 but 2 of 5 touch patterns unresolved (no files matching **/session_*.ts). Resolved 3 code files, 5 test files. Implementer may need to explore further."
 
 **Explain patterns, not just counts:**
+
 > "Found session-related code split across 3 locations: middleware (validation), handlers (lifecycle), utils (encoding). This matches the ADR intent (separation of concerns). Login flow chains: login.ts -> session.ts -> verify.ts."
 
 **Selection ambiguous:**
+
 > "No subtask_id provided and subtasks.yaml missing. Fell back to prose parsing of work_plan.md. Selected first subtask but resolution is weak. Recommend work-planner regenerate subtasks.yaml."
 
 **Mechanical failure:**
+
 > "Cannot write subtask_context_manifest.json due to permissions. Fix file system access and rerun."
 
 ## Handoff Targets

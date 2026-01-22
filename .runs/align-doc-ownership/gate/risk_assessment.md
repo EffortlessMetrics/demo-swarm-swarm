@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: BOUNCE
@@ -8,22 +9,25 @@ route_to_flow: 3
 route_to_agent: fixer
 
 blockers:
-  - MECH-001: Rust formatting violations must be fixed before merge (9 files need `cargo fmt`)
+
+- MECH-001: Rust formatting violations must be fixed before merge (9 files need `cargo fmt`)
 
 missing_required: []
 
 concerns:
-  - receipt_audit status is UNVERIFIED due to self_reviewer status; non-blocking for this doc/tooling run
-  - mutation_score is null; acceptable per test_plan which declares coverage N/A for documentation run
-  - cargo audit could not complete due to CVSS 4.0 parsing issue (external tooling limitation, not project issue)
+
+- receipt_audit status is UNVERIFIED due to self_reviewer status; non-blocking for this doc/tooling run
+- mutation_score is null; acceptable per test_plan which declares coverage N/A for documentation run
+- cargo audit could not complete due to CVSS 4.0 parsing issue (external tooling limitation, not project issue)
 
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 2
-  low: 3
+critical: 0
+high: 0
+medium: 2
+low: 3
 
 ## Context
+
 - flow: gate
 - run_id: align-doc-ownership
 - inputs_used:
@@ -39,20 +43,21 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | OPS | MEDIUM | CLOSED | Merge conflicts across parallel subtasks due to overlapping file touches | pack-maintainers |
-| RSK-002 | OPS | MEDIUM | CLOSED | ST-004 scope concentration may cause timeline imbalance | pack-maintainers |
-| RSK-003 | OPS | MEDIUM | MITIGATED | pack-check rule additions may produce false positives | pack-maintainers |
-| RSK-004 | OPS | LOW | CLOSED | Validation run dependency blocks completion until flows 1-4 pass | pack-maintainers |
-| RSK-005 | PERFORMANCE | LOW | MITIGATED | pack-check runtime may increase with new boundary checks | pack-maintainers |
-| RSK-006 | SECURITY | LOW | MITIGATED | No code execution changes; secrets-sanitizer gate preserved | pack-maintainers |
-| RSK-007 | COMPLIANCE | LOW | MITIGATED | No regulatory impact; internal tooling only | pack-maintainers |
-| RSK-008 | OPS | MEDIUM | OPEN | Rust formatting violations require mechanical fix before merge | pack-maintainers |
+| ID      | Category    | Severity | Status    | Summary                                                                  | Owner            |
+| ------- | ----------- | -------- | --------- | ------------------------------------------------------------------------ | ---------------- |
+| RSK-001 | OPS         | MEDIUM   | CLOSED    | Merge conflicts across parallel subtasks due to overlapping file touches | pack-maintainers |
+| RSK-002 | OPS         | MEDIUM   | CLOSED    | ST-004 scope concentration may cause timeline imbalance                  | pack-maintainers |
+| RSK-003 | OPS         | MEDIUM   | MITIGATED | pack-check rule additions may produce false positives                    | pack-maintainers |
+| RSK-004 | OPS         | LOW      | CLOSED    | Validation run dependency blocks completion until flows 1-4 pass         | pack-maintainers |
+| RSK-005 | PERFORMANCE | LOW      | MITIGATED | pack-check runtime may increase with new boundary checks                 | pack-maintainers |
+| RSK-006 | SECURITY    | LOW      | MITIGATED | No code execution changes; secrets-sanitizer gate preserved              | pack-maintainers |
+| RSK-007 | COMPLIANCE  | LOW      | MITIGATED | No regulatory impact; internal tooling only                              | pack-maintainers |
+| RSK-008 | OPS         | MEDIUM   | OPEN      | Rust formatting violations require mechanical fix before merge           | pack-maintainers |
 
 ## Risk Details
 
 ### RSK-001: Merge conflicts across parallel subtasks
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: CLOSED
@@ -69,6 +74,7 @@ severity_summary:
   - Closed; no further action
 
 ### RSK-002: ST-004 scope concentration
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: CLOSED
@@ -85,6 +91,7 @@ severity_summary:
   - Closed; scope was appropriate
 
 ### RSK-003: pack-check rule false positives
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: MITIGATED
@@ -105,6 +112,7 @@ severity_summary:
   - Monitor for false positives in future runs; adjust patterns if needed
 
 ### RSK-004: Validation run blocks completion
+
 - Category: OPS
 - Severity: LOW
 - Status: CLOSED
@@ -121,6 +129,7 @@ severity_summary:
   - Closed; gate phase reached successfully
 
 ### RSK-005: pack-check runtime increase
+
 - Category: PERFORMANCE
 - Severity: LOW
 - Status: MITIGATED
@@ -138,6 +147,7 @@ severity_summary:
   - Mitigated; performance impact is negligible
 
 ### RSK-006: No security regression
+
 - Category: SECURITY
 - Severity: LOW
 - Status: MITIGATED
@@ -156,6 +166,7 @@ severity_summary:
   - No action required; proceed
 
 ### RSK-007: No compliance impact
+
 - Category: COMPLIANCE
 - Severity: LOW
 - Status: MITIGATED
@@ -172,6 +183,7 @@ severity_summary:
   - No action required; proceed
 
 ### RSK-008: Rust formatting violations require mechanical fix
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: OPEN
@@ -190,11 +202,13 @@ severity_summary:
   - BOUNCE to Flow 3 fixer agent; apply formatting and re-gate
 
 ## Deltas Since Prior (if any)
+
 - NEW: [RSK-008]
 - CHANGED: [RSK-001 (OPEN->CLOSED), RSK-002 (OPEN->CLOSED), RSK-003 (OPEN->MITIGATED), RSK-004 (OPEN->CLOSED), RSK-005 (OPEN->MITIGATED)]
 - CLOSED: [RSK-001, RSK-002, RSK-004]
 
 ## Recommended Next
+
 - Apply mechanical fix MECH-001: run `cargo fmt` on pack-check Rust files (9 files)
 - Return to Gate for verification after formatting fix
 - Once formatting passes, proceed to merge decision

@@ -14,11 +14,13 @@ Find issues in API contracts and schemas that would block implementation or caus
 ## What You'll Need
 
 **Primary inputs:**
+
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/schema.md`
 - `.runs/<run-id>/plan/migrations/*.sql` (if DB changes planned)
 
 **Supporting context:**
+
 - `.runs/<run-id>/plan/adr.md`
 - `.runs/<run-id>/plan/test_plan.md`
 - `.runs/<run-id>/signal/requirements.md`
@@ -76,11 +78,13 @@ Contracts should connect to requirements and tests:
 Write findings that explain what's missing and how to fix it.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] Error model incomplete
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] CC-MAJ-001: POST /users endpoint missing error response schema. Contracts define success case (201) but no error cases (400, 409, 500). Fix: add error response schemas using shared ErrorResponse shape. Route to interface-designer.
 ```
@@ -97,22 +101,28 @@ Write findings that explain what's missing and how to fix it.
 # Contract Critique for <run-id>
 
 ## Summary
+
 - <3-5 bullets on overall state>
 
 ## Critical Issues
+
 - [CRITICAL] CC-CRIT-001: <issue> - <evidence pointer>. Fix: <what to change>.
 
 ## Major Issues
+
 - [MAJOR] CC-MAJ-001: <issue> - <evidence pointer>. Fix: <what to change>.
 
 ## Minor Issues
+
 - [MINOR] CC-MIN-001: <issue>
 
 ## Traceability Gaps
+
 - REQ-003 not referenced in contract surface
 - NFR-SEC-001 has no auth model defined
 
 ## Strengths
+
 - <what's solid and shouldn't be churned>
 
 ## Handoff
@@ -146,6 +156,7 @@ Write findings that explain what's missing and how to fix it.
 After writing your critique, summarize what you found:
 
 **When contracts are complete:**
+
 > **What I found:** Validated api_contracts.yaml against requirements. All 5 endpoints have request/response schemas, consistent error model using ErrorResponse shape, and auth requirements documented.
 >
 > **What's left:** Nothing blocking - contracts ready for implementation.
@@ -153,6 +164,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to Build.
 
 **When issues need fixing:**
+
 > **What I found:** Found 3 CRITICAL issues: missing error schemas for POST /users and DELETE /sessions, no pagination spec for GET /items (returns unbounded list).
 >
 > **What's left:** 3 critical contract gaps need addressing.
@@ -160,6 +172,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run interface-designer to complete error schemas and add pagination. One pass should resolve these.
 
 **When blocked:**
+
 > **What I found:** api_contracts.yaml is missing or unparseable.
 >
 > **What's left:** Need valid contract specification.

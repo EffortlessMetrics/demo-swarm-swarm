@@ -37,6 +37,7 @@ bash .claude/scripts/pack-check.sh
 This runs comprehensive validation: agent structure, frontmatter, flow commands, machine summaries, and more.
 
 **Additional targeted scripts** (for specific checks):
+
 ```bash
 python scripts/lint_frontmatter.py       # Frontmatter validation only
 python scripts/check_portable_claude.py  # Portability check only
@@ -62,16 +63,16 @@ python scripts/check_portable_claude.py  # Portability check only
 
 ### Color ↔ role family mapping
 
-| Color | Role Family |
-|-------|-------------|
-| yellow | shaping |
-| purple | spec/design |
-| green | implementation |
-| red | critic |
-| blue | verification |
-| orange | analytics |
-| pink | reporter |
-| cyan | infra |
+| Color  | Role Family    |
+| ------ | -------------- |
+| yellow | shaping        |
+| purple | spec/design    |
+| green  | implementation |
+| red    | critic         |
+| blue   | verification   |
+| orange | analytics      |
+| pink   | reporter       |
+| cyan   | infra          |
 
 ### Adding or editing commands
 

@@ -1,6 +1,7 @@
 # Test Execution Report
 
 ## Machine Summary
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
@@ -9,24 +10,26 @@ blockers: []
 missing_required: []
 concerns: []
 test_summary:
-  mode: verify
-  ac_id: null
-  ac_filter_applied: null
-  command: cargo run --manifest-path tools/demoswarm-pack-check/Cargo.toml -- --no-color
-  exit_code: 0
-  passed: 53
-  failed: 0
-  skipped: 0
-  xfailed: 0
-  xpassed: 0
-  duration_seconds: 0
+mode: verify
+ac_id: null
+ac_filter_applied: null
+command: cargo run --manifest-path tools/demoswarm-pack-check/Cargo.toml -- --no-color
+exit_code: 0
+passed: 53
+failed: 0
+skipped: 0
+xfailed: 0
+xpassed: 0
+duration_seconds: 0
 
 ## Inputs Used
+
 - `tools/demoswarm-pack-check/Cargo.toml`
 - `.claude/` directory structure (agents, skills, flows)
 - `CLAUDE.md`
 
 ## Execution
+
 - tool: cargo run (pack-check)
 - mode: verify
 - ac_id: null
@@ -36,11 +39,13 @@ test_summary:
 - duration: 0.59 seconds
 
 ## Canonical Summary (tool-bound)
+
 Pack contents: Agents: 73, Commands: 8, Skills: 7. Passed with 2 warning(s).
 
 ## Test Summary (Canonical): passed=53 failed=0 skipped=0 xfailed=0 xpassed=0
 
 ## Failures (if any)
+
 None — all checks passed.
 
 ## Notes
@@ -85,7 +90,7 @@ The pack-check validation framework executed 53 distinct checks covering:
    - All mention route_to_flow field
 
 5. **Deprecated Concept Checks**
-   - No old FR-* taxonomy found
+   - No old FR-\* taxonomy found
    - No old @FR- tags found
    - No references to Flow Studio, harness.py, run-cleanup, profiles/, profile.yaml, orchestrator.py, or swarm_runtime
 
@@ -114,7 +119,7 @@ The pack-check validation framework executed 53 distinct checks covering:
     - All agents using recommended_action document: PROCEED | RERUN | BOUNCE | FIX_ENV
 
 12. **Gate and Flow-Specific Contracts**
-    - No domain drift in recommended_action (no BOUNCE_BUILD, BOUNCE_PLAN, RERUN_FLOW_*)
+    - No domain drift in recommended*action (no BOUNCE_BUILD, BOUNCE_PLAN, RERUN_FLOW*\*)
     - All critics/verifiers have route_to_agent and route_to_flow fields
     - gh-issue-manager and gh-reporter enforce two gates (safe_to_publish + proceed_to_github_ops)
     - checkpoint_mode: local_only contract documented in repo-operator and referenced across 7 flows
@@ -127,7 +132,7 @@ The pack-check validation framework executed 53 distinct checks covering:
 
 14. **Typed NFR ID Contract**
     - No bare NFR-### patterns (all NFRs are typed, e.g., NFR-PERF-001)
-    - No deprecated NFR-SCALE-* patterns
+    - No deprecated NFR-SCALE-\* patterns
 
 15. **Subtask Bridge Contract**
     - work-planner.md documents subtasks.yaml output
@@ -162,17 +167,18 @@ The pack-check validation framework executed 53 distinct checks covering:
 
 21. **OpenQ QID Patterns**
     - All OpenQ QIDs use valid format (OQ-<FLOW>-<NNN>)
-    - Found 9 non-canonical OpenQ flow codes (OQ-PLAN-* should be OQ-PLAN-*) — advisory only, does not block
+    - Found 9 non-canonical OpenQ flow codes (OQ-PLAN-_ should be OQ-PLAN-_) — advisory only, does not block
 
 ### Warnings (Non-Critical)
 
 1. **flow-7-wisdom.md present** — Flow 7 (Wisdom) command documentation is now available and validated. The wisdom-cleanup agent correctly references REG marker pattern for regression detection.
 
-2. **Non-canonical OpenQ flow codes** — 9 instances of OQ-PLAN-* found in open_questions.md files; pack-check recommends OQ-PLAN-* for consistency with flow code abbreviations (SIG, PLN, BLD, REV, GT, DPL, WIS). This is advisory only and does not impact validation.
+2. **Non-canonical OpenQ flow codes** — 9 instances of OQ-PLAN-_ found in open_questions.md files; pack-check recommends OQ-PLAN-_ for consistency with flow code abbreviations (SIG, PLN, BLD, REV, GT, DPL, WIS). This is advisory only and does not impact validation.
 
 ## Control-Plane Routing
 
 ### Recommended Action: PROCEED
+
 - Status is VERIFIED; no blockers identified
 - All 53 structural and contract checks passed
 - Pack documentation (CLAUDE.md) correctly reflects Seven-Flow model
@@ -180,5 +186,6 @@ The pack-check validation framework executed 53 distinct checks covering:
 - Two non-critical warnings do not impact pack functionality
 
 ### Next Steps
+
 - Proceed to Flow cleanup and secrets sanitization
 - Non-canonical OpenQ QID pattern can be addressed in a follow-up maintenance pass if desired

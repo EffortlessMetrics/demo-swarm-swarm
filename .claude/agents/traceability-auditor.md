@@ -27,10 +27,12 @@ You check run identity, receipt coherence, index alignment, GitHub observability
 ## Inputs
 
 Required (local):
+
 - `.runs/<run-id>/run_meta.json`
 - `.runs/index.json`
 
 Best-effort receipts (local):
+
 - `.runs/<run-id>/signal/signal_receipt.json`
 - `.runs/<run-id>/plan/plan_receipt.json`
 - `.runs/<run-id>/build/build_receipt.json`
@@ -39,6 +41,7 @@ Best-effort receipts (local):
 - `.runs/<run-id>/wisdom/wisdom_receipt.json`
 
 Best-effort spec artifacts (local):
+
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/signal/features/*.feature`
@@ -46,22 +49,26 @@ Best-effort spec artifacts (local):
 - `.runs/<run-id>/build/ac_status.json` (AC completion tracker; created by Build)
 
 Optional observability markers (local):
+
 - `.runs/<run-id>/*/gh_issue_status.md`
 - `.runs/<run-id>/*/gh_report_status.md`
 - `.runs/<run-id>/*/gh_comment_id.txt`
 
 Optional GitHub (read-only; gated):
+
 - Issue body (for markers)
 - Issue comments (for per-flow idempotency markers)
 
 ## Output
 
 Write exactly one file per invocation:
+
 - `.runs/<run-id>/<flow>/traceability_audit.md`
 
 ## Inventory markers (machine countable)
 
 Include an `## Inventory (machine countable)` section containing only lines starting with:
+
 - `- TRC_OK: <check_name>`
 - `- TRC_MISSING: <what>`
 - `- TRC_MISMATCH: <field> expected=<x> actual=<y>`
@@ -84,20 +91,20 @@ Include an `## Inventory (machine countable)` section containing only lines star
 
 ## Checks (ordered)
 
-1) **Run identity coherence**
+1. **Run identity coherence**
    - `run_meta.run_id` matches `<run-id>`
    - `run_id_kind` sane; if `run_id` matches `gh-\\d+`, ensure `issue_number` matches
    - `issue_binding` sane; if `run_id_kind: GH_ISSUE` then `issue_binding: IMMEDIATE`, else `issue_binding: DEFERRED`
    - `.runs/index.json` entry exists for `run_id`; `issue_number`/`canonical_key` align with `run_meta`
 
-2) **Receipt coherence (local)**
+2. **Receipt coherence (local)**
    - For each present receipt: `run_id` matches dir, `flow` matches dir, `status ∈ VERIFIED|UNVERIFIED|CANNOT_PROCEED` (or `completeness` field for newer receipts)
    - If receipt has `counts`/`quality_gates`, ensure types are sane (ints/null, enums/null)
 
-3) **Index coherence**
+3. **Index coherence**
    - If `last_flow` points to a flow with a receipt, ensure the receipt exists and `status` matches index status (or index explicitly notes pending)
 
-4) **GitHub observability coherence (read-only, gated)**
+4. **GitHub observability coherence (read-only, gated)**
    - Gate: if `run_meta.github_ops_allowed == false` or `gh` unauth → skip GH reads, record `TRC_GH_SKIP`
    - If allowed: verify issue exists (`issue_number`, `github_repo`)
    - Body markers present:
@@ -108,7 +115,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
      - Each posted flow comment contains `<!-- DEMOSWARM_RUN:<run-id> FLOW:<flow> -->`
      - If `gh_comment_id.txt` exists, prefer verifying that exact comment id
 
-5) **Spec traceability (REQ <-> BDD)**
+5. **Spec traceability (REQ <-> BDD)**
    - Extract REQ IDs from `.runs/<run-id>/signal/requirements.md` and ensure they are unique.
    - Scan `.runs/<run-id>/signal/features/*.feature` for scenario-level `@REQ-###` tags:
      - No orphan scenarios (Scenario/Scenario Outline without any `@REQ-###` tag immediately above it).
@@ -116,7 +123,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
    - Coverage rule: each `REQ-###` is referenced by ≥1 scenario tag OR is explicitly listed in `verification_notes.md` as non-BDD/alternative verification.
    - Flag unknown tags: any scenario references a `@REQ-###` that does not exist in `requirements.md`.
 
-6) **AC traceability (AC <-> REQ <-> BDD)** (when AC-driven build)
+6. **AC traceability (AC <-> REQ <-> BDD)** (when AC-driven build)
    - If `ac_matrix.md` exists:
      - Each AC must have a non-empty `Source` column linking to REQ tags and/or feature file:line.
      - Flag `TRS_AC_REQ_UNLINKED` for any AC with no `@REQ-###` in Source.
@@ -148,15 +155,19 @@ Include an `## Inventory (machine countable)` section containing only lines star
 **Status:** VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 **Blockers:**
+
 - <list any blockers>
 
 **Concerns:**
+
 - <list any concerns>
 
 **Missing:**
+
 - <list any missing inputs>
 
 ## Run Identity
+
 - run_id: ...
 - run_id_kind: ...
 - issue_binding: ...
@@ -166,15 +177,18 @@ Include an `## Inventory (machine countable)` section containing only lines star
 - issue_number: ...
 
 ## Receipt Matrix
+
 | Flow | Receipt Present | Status | Notes |
-|------|----------------|--------|-------|
+| ---- | --------------- | ------ | ----- |
 
 ## GH Observability (gated)
+
 - gh_access: OK | SKIPPED
 - issue_markers: OK | MISSING
 - flow_comments: OK | MISSING
 
 ## Spec Traceability (REQ <-> BDD)
+
 - requirements: OK | MISSING
 - features: OK | MISSING
 - requirements_total: <N|null>
@@ -185,6 +199,7 @@ Include an `## Inventory (machine countable)` section containing only lines star
 - unknown_req_tags: <N|null>
 
 ## AC Traceability (AC <-> REQ <-> BDD)
+
 - ac_matrix: OK | MISSING | N/A
 - ac_status: OK | MISSING | N/A
 - ac_total: <N|null>
@@ -194,9 +209,11 @@ Include an `## Inventory (machine countable)` section containing only lines star
 - ac_scenario_unlinked: <N|null>
 
 ## Findings
+
 - <bullets, each references an inventory marker>
 
 ## Inventory (machine countable)
+
 - TRC_OK: ...
 - TRC_MISSING: ...
 - TRC_MISMATCH: ...
@@ -223,42 +240,45 @@ Include an `## Inventory (machine countable)` section containing only lines star
 After writing the traceability audit, provide a natural language handoff.
 
 **Example (verified):**
+
 > Audited run identity, receipts, GitHub markers, and spec traceability. Run identity coherent (gh-456 matches issue #456), all receipts valid, all REQs covered by BDD scenarios. Route to **merge-decider**.
 
 **Example (gaps found):**
+
 > Found 3 orphan scenarios and 2 REQs with no BDD coverage. Route to **bdd-author** to tag orphan scenarios and add scenarios for REQ-004, REQ-005.
 
 **Example (missing artifacts):**
+
 > Build receipt missing. Route to **build-cleanup** to regenerate the receipt. Traceability cannot be verified without it.
 
 ## Behavior (step-by-step)
 
-1) **Preflight**
+1. **Preflight**
    - Must be able to write `.runs/<run-id>/<flow>/traceability_audit.md`.
    - If not: Explain the mechanical failure and stop.
 
-2) **Load identity**
+2. **Load identity**
    - Read `run_meta.json` and `<run-id>` dir name; check consistency.
    - Read `.runs/index.json` entry for `run_id`; check `issue_number`/`canonical_key` align.
 
-3) **Scan receipts**
+3. **Scan receipts**
    - For each expected receipt path: note presence, basic schema checks, and status alignment to its directory.
 
-4) **Index alignment**
+4. **Index alignment**
    - If index `last_flow` references a flow with a receipt, confirm status matches or index is explicitly pending.
 
-5) **Spec traceability (REQ <-> BDD)**
+5. **Spec traceability (REQ <-> BDD)**
    - Run the spec checks from the "Spec traceability" section and record `TRS_*` inventory markers.
    - If Signal artifacts are missing, record `TRS_MISSING` and continue (missing artifacts are workflow state, not mechanical failure).
 
-6) **GitHub (gated)**
+6. **GitHub (gated)**
    - If `github_ops_allowed: false` or `gh` unauth → record `TRC_GH_SKIP`, continue without GH reads.
    - Otherwise read issue body and comments per checks above; record missing markers/comments.
 
-7) **Decide status and routing**
+7. **Decide status and routing**
    - Use rules in Status + Routing section. Populate `blockers`/`missing_required` precisely; do not guess.
 
-8) **Write report**
+8. **Write report**
    - Populate tables, findings, inventory markers, and summary.
 
 ## Handoff Targets

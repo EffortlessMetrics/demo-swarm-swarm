@@ -21,6 +21,7 @@ Agents exist for exactly two reasons:
 ### 1. Work Needs Doing
 
 Some tasks require focused effort:
+
 - **code-implementer**: Write the code that satisfies the AC
 - **test-author**: Write tests that verify the implementation
 - **fixer**: Apply targeted fixes from review feedback
@@ -30,6 +31,7 @@ These are **workers**. They do implementation work.
 ### 2. Context Needs Compressing
 
 Long conversations accumulate context. Spawning a new agent compresses that context into a focused task:
+
 - **cleanup agents**: Summarize a flow's work into receipts
 - **critics**: Distill a codebase into "what's wrong and where"
 - **gate agents**: Compress evidence into a decision
@@ -55,6 +57,7 @@ This separation ensures focus and enables clean handoffs.
 Agent prompts describe **what to do**, not what not to do.
 
 **Anti-pattern:**
+
 ```
 Do NOT modify files outside your scope.
 Do NOT commit code.
@@ -63,6 +66,7 @@ Never skip the validation step.
 ```
 
 **Correct pattern:**
+
 ```
 Your job is to implement the AC.
 You can read any file you need.
@@ -81,6 +85,7 @@ A report saying "I completed 2/5 ACs, blocked on missing schema" is a VERIFIED s
 A report saying "All 5 ACs complete (assuming schema exists)" is a HIGH-RISK failure. Hidden uncertainty causes downstream failures.
 
 `PARTIAL` is a win when:
+
 - Real progress was made
 - What's done and what's blocked are documented
 - The codebase is in a runnable state
@@ -90,12 +95,14 @@ A report saying "All 5 ACs complete (assuming schema exists)" is a HIGH-RISK fai
 Agents do **thinking**, not mechanical copying.
 
 **Real work:**
+
 - Investigating a codebase to understand patterns
 - Deciding how to structure an implementation
 - Evaluating whether code satisfies requirements
 - Synthesizing feedback into actionable fixes
 
 **Mechanical work (use skills instead):**
+
 - Running test commands
 - Formatting code
 - Extracting counts from files
@@ -124,12 +131,14 @@ Recommendation: <specific next step with reasoning>
 The orchestrator routes on your recommendation. If you don't make one, you're forcing the PM to do your job.
 
 **Good recommendation:**
+
 ```
 Recommendation: Route to code-critic. Implementation is complete and tests pass.
 The code needs quality review before it can be merged.
 ```
 
 **Bad recommendation:**
+
 ```
 Recommendation: Not sure what to do next.
 ```
@@ -144,53 +153,53 @@ Recommendation: Not sure what to do next.
 
 Do implementation work. Create or modify artifacts.
 
-| Agent | Responsibility |
-|-------|----------------|
-| code-implementer | Write code that satisfies ACs |
-| test-author | Write tests that verify implementation |
-| fixer | Apply targeted fixes from review feedback |
-| requirements-author | Write requirements from signal |
-| design-optioneer | Propose design options and trade-offs |
+| Agent               | Responsibility                            |
+| ------------------- | ----------------------------------------- |
+| code-implementer    | Write code that satisfies ACs             |
+| test-author         | Write tests that verify implementation    |
+| fixer               | Apply targeted fixes from review feedback |
+| requirements-author | Write requirements from signal            |
+| design-optioneer    | Propose design options and trade-offs     |
 
 ### Critics
 
 Review and find issues. Never fix—they report to workers.
 
-| Agent | Responsibility |
-|-------|----------------|
-| code-critic | Review code for quality and correctness |
-| test-critic | Review tests for coverage and validity |
-| requirements-critic | Review requirements for completeness |
+| Agent               | Responsibility                          |
+| ------------------- | --------------------------------------- |
+| code-critic         | Review code for quality and correctness |
+| test-critic         | Review tests for coverage and validity  |
+| requirements-critic | Review requirements for completeness    |
 
 ### Cleanup
 
 Compress context and summarize flows.
 
-| Agent | Responsibility |
-|-------|----------------|
+| Agent          | Responsibility                     |
+| -------------- | ---------------------------------- |
 | signal-cleanup | Summarize Signal flow into receipt |
-| plan-cleanup | Summarize Plan flow into receipt |
-| build-cleanup | Summarize Build flow into receipt |
-| gate-cleanup | Summarize Gate flow into receipt |
+| plan-cleanup   | Summarize Plan flow into receipt   |
+| build-cleanup  | Summarize Build flow into receipt  |
+| gate-cleanup   | Summarize Gate flow into receipt   |
 
 ### Gate
 
 Make decisions based on evidence.
 
-| Agent | Responsibility |
-|-------|----------------|
-| merge-decider | Decide whether to merge based on evidence |
-| deploy-decider | Decide whether to deploy |
-| secrets-sanitizer | Decide whether safe to publish |
+| Agent             | Responsibility                            |
+| ----------------- | ----------------------------------------- |
+| merge-decider     | Decide whether to merge based on evidence |
+| deploy-decider    | Decide whether to deploy                  |
+| secrets-sanitizer | Decide whether safe to publish            |
 
 ### Support
 
 Infrastructure and context operations.
 
-| Agent | Responsibility |
-|-------|----------------|
-| run-prep | Initialize run directories and state |
-| repo-operator | Execute git operations |
+| Agent          | Responsibility                        |
+| -------------- | ------------------------------------- |
+| run-prep       | Initialize run directories and state  |
+| repo-operator  | Execute git operations                |
 | context-loader | Accelerate agent startup with context |
 
 ---
@@ -214,6 +223,7 @@ If the conversation is getting long and the orchestrator needs a summary to cont
 ### 4. Is It Mechanical?
 
 If the task is deterministic and requires no judgment, use a skill:
+
 - **test-runner**: Run tests and capture output
 - **auto-linter**: Format and lint code
 - **runs-derive**: Extract counts and data from artifacts
@@ -234,11 +244,13 @@ This pack treats agents as senior engineers who can investigate, reason, and mak
 ## Agents Are Smart, Config Is Dumb
 
 **Config contains only mechanics:**
+
 - What command to run (`npm test`)
 - Where files live (`src/`, `tests/`)
 - Environment details (`github`, `windows-wsl2`)
 
 **Policies stay in agent prompts:**
+
 - Coverage thresholds
 - Quality gates
 - Review requirements
@@ -254,23 +266,27 @@ This pack treats agents as senior engineers who can investigate, reason, and mak
 ### Roles + Guardrails (Not Permissions + Handcuffs)
 
 **The anti-pattern (handcuffs):**
+
 - Allowlists that restrict which files an agent can touch
 - Manifests that define "permitted" file paths
 - "Stop and ask permission" protocols for reading context
 - Denylists that forbid certain operations
 
 **The correct pattern (roles + guardrails):**
+
 - **Role focus:** "Your mission is to write tests for this AC"
 - **Autonomy:** "You can read any file you need. You can edit files to make code testable."
 - **Detective guardrails:** Critics evaluate afterward — quality, correctness, whether it solves the problem
 
 **Why this matters:**
+
 - Allowlists assume the planner is omniscient — they're not
 - "Stop and ask" creates token-burning loops for basic exploration
 - Agents are intelligent — they can determine what they need by searching and reading
 - Critics evaluate quality afterward — does it work? does it solve the problem?
 
 **Practical implications:**
+
 - `context-loader` is an **accelerator** (optional starting point), not a gate
 - Workers can explore beyond the manifest if they need more context
 - Critics evaluate quality and whether the implementation solves the problem
@@ -282,6 +298,7 @@ This pack treats agents as senior engineers who can investigate, reason, and mak
 **If an agent can't derive an answer, it investigates first, then defaults, then escalates.**
 
 The escalation ladder (in order):
+
 1. **Investigate locally:** Search code, tests, configs, prior runs, existing docs
 2. **Investigate remotely (if allowed):** GitHub issues/PRs, web search, library docs
 3. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
@@ -299,6 +316,7 @@ The escalation ladder (in order):
 ### Early Detection Over Late Gates
 
 Problems should be caught where the fix is cheapest:
+
 - **Per-AC**: Catch reward hacking during the microloop (before next AC starts)
 - **Per-checkpoint**: Catch CI failures during feedback harvest (before flow ends)
 - **Per-flow**: Catch format/lint issues in standards-enforcer (before Gate)
@@ -309,11 +327,13 @@ Gate is a **verification checkpoint**, not a quality filter. If Gate is catching
 ### Fix-Forward Within Flows
 
 Small issues should be fixed where they're found:
+
 - Formatting drift: `standards-enforcer` fixes it, doesn't BOUNCE
 - Missing imports: `code-implementer` adds them on the next pass
 - Stale comments: `fixer` removes them during review worklist
 
 **BOUNCE only when:**
+
 - The fix requires design changes (BOUNCE to Plan)
 - The fix spans multiple ACs beyond current scope (BOUNCE to Build start)
 - The fix requires human judgment (BOUNCE with `reason: NEEDS_HUMAN_REVIEW`)
@@ -321,6 +341,7 @@ Small issues should be fixed where they're found:
 ### Intelligent Summarization
 
 When summarizing for reports or routing:
+
 - Explain what the issue IS, not just where it is
 - Provide your assessment of validity (is this a real issue or bot noise?)
 - Route to the agent best suited to fix it
@@ -331,6 +352,7 @@ When summarizing for reports or routing:
 ### Intelligent Conflict Resolution
 
 When conflicts arise (git, semantic, or otherwise):
+
 - **Try to resolve first** - Read both sides, understand intent, merge if possible
 - **Only escalate when ambiguous** - When you genuinely cannot determine the right resolution
 - **Provide context when escalating** - Explain what you tried and why you couldn't resolve it
@@ -352,6 +374,7 @@ If a researcher sees a typo in the README, they should fix it and move on.
 Agents under pressure to complete a task will **guess** to finish. The fix is giving them **multiple successful exits**.
 
 **`PARTIAL` is a successful completion** when:
+
 - State is written to disk (`.runs/<run-id>/...`)
 - Next steps are documented
 - Work is checkpointed so the flow can be rerun cleanly
@@ -363,6 +386,7 @@ A `PARTIAL` exit is not failure. It's a save point.
 Agents are rewarded for **accurate reporting**, not completion theater.
 
 **This is a VERIFIED success:**
+
 ```yaml
 status: UNVERIFIED
 work_status: PARTIAL
@@ -372,6 +396,7 @@ evidence: "Tests pass for AC-1, AC-2. AC-3 requires DB changes."
 ```
 
 **This is a HIGH-RISK failure (even though it says "complete"):**
+
 ```yaml
 status: VERIFIED
 work_status: COMPLETED
@@ -386,6 +411,7 @@ The first report tells the orchestrator exactly what happened and what to do nex
 ### Write Early, Write Often
 
 Flows are **naturally re-runnable**. Re-running a flow is not "failure recovery"—it's routine:
+
 - Double-check work
 - Tighten schema alignment
 - Clean up artifacts
@@ -396,6 +422,7 @@ Flows are **naturally re-runnable**. Re-running a flow is not "failure recovery"
 ### Forensic Truth: Diff + Test Results
 
 We trust **git diffs and test results** as forensic evidence.
+
 - The diff is the best audit surface for what changed
 - Tests are the runtime truth for what works
 - Critics do forensic analysis of both
@@ -412,7 +439,7 @@ We intentionally avoid hardcoding model tiers into the pack.
 - **Some operator/librarian agents:** may default to `haiku` for fast search
 - **Only force a heavier model** when the task truly needs it (rare)
 
-**Naming rule:** Use model *names* only (Haiku, Sonnet, Opus). No version numbers—they become stale.
+**Naming rule:** Use model _names_ only (Haiku, Sonnet, Opus). No version numbers—they become stale.
 
 ---
 

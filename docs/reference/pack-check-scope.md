@@ -31,7 +31,7 @@ Pack-check validates that the pack is correctly configured and will not fail at 
 - GH agents enforce two gates (`safe_to_publish`, `proceed_to_github_ops`)
 - repo-operator has Repo Operator Result section
 - No banned patterns (removed/deprecated concepts)
-- No old taxonomy (FR-* instead of REQ-*)
+- No old taxonomy (`FR-_` instead of `REQ-_`)
 
 ### Ownership Boundaries
 
@@ -95,6 +95,7 @@ Pack-check answers: **"Will this pack execute without crashing?"**
 Pack-check does NOT answer: **"Is this pack good?"**
 
 Quality comes from:
+
 - Critics (code-critic, test-critic, design-critic, etc.)
 - Gates (verification, evidence)
 - Human review
@@ -106,6 +107,7 @@ Pack-check just makes sure the machinery works.
 ## Warning vs Blocking
 
 **Blocking errors** (pack-check fails):
+
 - Missing required files (CLAUDE.md, flow commands, agents, skills)
 - Broken file references
 - Missing frontmatter `name:` field
@@ -113,6 +115,7 @@ Pack-check just makes sure the machinery works.
 - Banned patterns in pack files
 
 **Warnings** (pack-check passes with notes):
+
 - Missing optional sections in CLAUDE.md
 - Missing customize-pack command (optional but recommended)
 - Flow boundary violations (demoswarm.sh in flow commands)
@@ -125,6 +128,7 @@ Warnings inform; they do not block.
 ## What This Prevents
 
 This scope statement prevents pack-check from becoming:
+
 - A style police
 - A process enforcer
 - A template validator
@@ -170,6 +174,7 @@ Everything else. Specifically:
 ### The cost of false FAILs
 
 A blocking error that fires incorrectly:
+
 - Stops legitimate work
 - Trains maintainers to work around pack-check
 - Erodes trust in the validation system
@@ -212,6 +217,7 @@ Hypothetical drift doesn't justify checks. Wait for the actual failure, then add
 ### 4. Avoid parsing prose
 
 Natural language changes. Checks that parse prose become:
+
 - Brittle (break on rewording)
 - Frustrating (block legitimate edits)
 - Circumvented (maintainers learn the magic words)
@@ -265,38 +271,38 @@ bash .claude/scripts/pack-check.sh --strict
 
 These checks are implemented in `tools/demoswarm-pack-check/`:
 
-| ID | Check | Type | Description |
-|----|-------|------|-------------|
-| 1 | Required agents | blocking | Core agent files present |
-| 2 | Flow commands | blocking | All 6 flow commands present |
-| 4 | Cleanup receipts | blocking | Cleanup agents reference receipts + index.json |
-| 6 | Agent frontmatter | blocking | Names match filenames, no duplicates |
-| 7 | Old taxonomy | blocking | No FR-* patterns (use REQ-*) |
-| 8 | Banned patterns | blocking | No deprecated/removed concepts |
-| 9 | Required skills | blocking | All 7 skill directories present |
-| 10 | CLAUDE.md | blocking | Core config file with required sections |
-| 14 | RUN_BASE alias | blocking | No RUN_BASE (use explicit paths) |
-| 15 | Customizer | warning | customize-pack command + pack-customizer agent |
-| 17 | gh-reporter output | blocking | Safe Output Contract section present |
-| 18 | repo-operator Result | blocking | Repo Operator Result block with required fields |
-| 19 | GH agents gates | blocking | Both publish gates enforced |
-| 23 | Typed NFR | blocking | No bare NFR-### (use NFR-DOMAIN-###) |
-| 30 | Flow-specific actions | blocking | No domain verdict keywords in actions |
-| 32 | CANNOT_PROCEED | blocking | Invariant documented correctly |
-| 38 | ensure_branch op | blocking | No operation: ensure_branch in flows |
-| 39 | Raw git | blocking | No raw git commands in flow commands |
-| 40 | CLAUDE.md substitution | blocking | No "See CLAUDE.md > ..." patterns |
-| 42 | Issue drafts | blocking | Standardize on feedback_actions.md |
-| 45 | Cleanup shim | blocking | Cleanup agents use demoswarm.sh |
-| 46 | Skill ownership | blocking | Restricted commands only in allowed agents |
-| 47 | Shim line continuation | blocking | No line-wrap bypass of shim |
-| 48 | Direct demoswarm | blocking | Must use bash shim, not direct invocation |
-| 49 | Skills section | blocking | Agents using demoswarm.sh have ## Skills |
-| 50 | GH body hygiene | blocking | Heredoc pattern, no forbidden patterns |
-| 52 | Flow boundary | warning | No demoswarm.sh or skill CLI in flow commands |
-| 53 | OpenQ prefix | warning | Canonical flow codes in QIDs |
-| 54 | Critics handoff | blocking | Critics have ## Handoff section |
-| 55 | Clear job section | blocking | Agents document their role |
+| ID  | Check                  | Type     | Description                                     |
+| --- | ---------------------- | -------- | ----------------------------------------------- |
+| 1   | Required agents        | blocking | Core agent files present                        |
+| 2   | Flow commands          | blocking | All 6 flow commands present                     |
+| 4   | Cleanup receipts       | blocking | Cleanup agents reference receipts + index.json  |
+| 6   | Agent frontmatter      | blocking | Names match filenames, no duplicates            |
+| 7   | Old taxonomy           | blocking | No `FR-_` patterns (use `REQ-_`)                |
+| 8   | Banned patterns        | blocking | No deprecated/removed concepts                  |
+| 9   | Required skills        | blocking | All 7 skill directories present                 |
+| 10  | CLAUDE.md              | blocking | Core config file with required sections         |
+| 14  | RUN_BASE alias         | blocking | No RUN_BASE (use explicit paths)                |
+| 15  | Customizer             | warning  | customize-pack command + pack-customizer agent  |
+| 17  | gh-reporter output     | blocking | Safe Output Contract section present            |
+| 18  | repo-operator Result   | blocking | Repo Operator Result block with required fields |
+| 19  | GH agents gates        | blocking | Both publish gates enforced                     |
+| 23  | Typed NFR              | blocking | No bare NFR-### (use NFR-DOMAIN-###)            |
+| 30  | Flow-specific actions  | blocking | No domain verdict keywords in actions           |
+| 32  | CANNOT_PROCEED         | blocking | Invariant documented correctly                  |
+| 38  | ensure_branch op       | blocking | No operation: ensure_branch in flows            |
+| 39  | Raw git                | blocking | No raw git commands in flow commands            |
+| 40  | CLAUDE.md substitution | blocking | No "See CLAUDE.md > ..." patterns               |
+| 42  | Issue drafts           | blocking | Standardize on feedback_actions.md              |
+| 45  | Cleanup shim           | blocking | Cleanup agents use demoswarm.sh                 |
+| 46  | Skill ownership        | blocking | Restricted commands only in allowed agents      |
+| 47  | Shim line continuation | blocking | No line-wrap bypass of shim                     |
+| 48  | Direct demoswarm       | blocking | Must use bash shim, not direct invocation       |
+| 49  | Skills section         | blocking | Agents using demoswarm.sh have ## Skills        |
+| 50  | GH body hygiene        | blocking | Heredoc pattern, no forbidden patterns          |
+| 52  | Flow boundary          | warning  | No demoswarm.sh or skill CLI in flow commands   |
+| 53  | OpenQ prefix           | warning  | Canonical flow codes in QIDs                    |
+| 54  | Critics handoff        | blocking | Critics have ## Handoff section                 |
+| 55  | Clear job section      | blocking | Agents document their role                      |
 
 ---
 

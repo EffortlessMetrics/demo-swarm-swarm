@@ -22,13 +22,14 @@ The difference: 5 minutes vs 45 minutes. The outcome: identical.
 
 Bounded fix-forward is a **constrained repair lane** within Flow 5 (Gate) that handles mechanical drift without bouncing to earlier flows.
 
-| Term | Definition |
-|------|------------|
-| **Fix-forward** | Repair issues in the current flow rather than bouncing to a previous flow |
-| **Bounded** | Strictly limited scope: no new features, no logic changes, deterministic fixes only |
-| **Mechanical** | Issues that can be fixed by tools without human judgment |
+| Term            | Definition                                                                          |
+| --------------- | ----------------------------------------------------------------------------------- |
+| **Fix-forward** | Repair issues in the current flow rather than bouncing to a previous flow           |
+| **Bounded**     | Strictly limited scope: no new features, no logic changes, deterministic fixes only |
+| **Mechanical**  | Issues that can be fixed by tools without human judgment                            |
 
 The pattern separates two concerns:
+
 1. **Diagnosis** (gate-fixer): Identify what is wrong and whether it qualifies for fix-forward
 2. **Execution** (fix-forward-runner): Apply the prescribed fixes exactly as specified
 
@@ -42,32 +43,32 @@ A fix qualifies for the bounded fix-forward lane only when it meets all three cr
 
 The fix does not alter program behavior. Tests that passed before will pass after. No logic is modified.
 
-| Bounded | Not Bounded |
-|---------|-------------|
-| Whitespace and indentation | Fix a failing test |
-| Import sorting | Add missing error handling |
-| Trailing newline | Change algorithm |
-| Spelling in comments | Fix a race condition |
+| Bounded                    | Not Bounded                |
+| -------------------------- | -------------------------- |
+| Whitespace and indentation | Fix a failing test         |
+| Import sorting             | Add missing error handling |
+| Trailing newline           | Change algorithm           |
+| Spelling in comments       | Fix a race condition       |
 
 ### 2. Deterministic Execution
 
 The fix can be automated by standard tools with predictable results. Running the same command twice produces identical output.
 
-| Bounded | Not Bounded |
-|---------|-------------|
-| `prettier --write .` | "Make this code cleaner" |
+| Bounded              | Not Bounded                |
+| -------------------- | -------------------------- |
+| `prettier --write .` | "Make this code cleaner"   |
 | `isort --apply src/` | "Reorganize these modules" |
-| `cargo fmt` | "Refactor for performance" |
+| `cargo fmt`          | "Refactor for performance" |
 
 ### 3. No Judgment Required
 
 The fix does not require understanding business requirements, making trade-offs, or choosing between alternatives.
 
-| Bounded | Not Bounded |
-|---------|-------------|
-| Linter-fixable warnings | "Should this be async?" |
-| Lockfile regeneration | "Which dependency version?" |
-| Doc typo correction | "Is this the right API design?" |
+| Bounded                 | Not Bounded                     |
+| ----------------------- | ------------------------------- |
+| Linter-fixable warnings | "Should this be async?"         |
+| Lockfile regeneration   | "Which dependency version?"     |
+| Doc typo correction     | "Is this the right API design?" |
 
 ---
 
@@ -78,6 +79,7 @@ The fix does not require understanding business requirements, making trade-offs,
 A full Build rerun resets context. The LLM may make different choices. "The same code" might not be the same.
 
 Bounded fix-forward:
+
 - Runs specific commands
 - Touches specific files
 - Preserves everything else
@@ -97,6 +99,7 @@ If the formatter touches a file outside the declared scope, the runner fails. Th
 ### Audit Trail
 
 Every step is recorded in `fix_forward_report.md`:
+
 - Exact commands run
 - Exit codes and durations
 - Files touched
@@ -109,6 +112,7 @@ The audit trail shows exactly what happened. A full rerun would bury the formatt
 Observation window: if the same issues persist across two reseal passes (no new signal / no net improvement), this lane isn't converging—route out. Gate proceeds to merge-decider with the issues documented. The lane stops; the flow continues.
 
 This prevents:
+
 - Infinite loops where formatters fight
 - Tools that generate different output on each run
 - Chasing formatting drift forever
@@ -125,14 +129,18 @@ Gate-fixer reads Gate artifacts and classifies issues:
 
 ```markdown
 ## Mechanical Fixes
+
 ### MECH-001: Trailing whitespace
+
 - **Evidence:** security_scan.md line 42
 - **Files/Paths:** src/auth.py, src/session.py
 - **Category:** FORMAT
 - **Why mechanical:** Formatter can fix
 
 ## Non-Mechanical Findings
+
 ### NONMECH-001: Missing input validation
+
 - **Evidence:** contract_compliance.md
 - **Likely Target:** Flow 3 (Build)
 - **Why not mechanical:** Requires logic change
@@ -175,16 +183,17 @@ The runner never diagnoses. It never invents commands. It executes what gate-fix
 
 ### The Separation Matters
 
-| Concern | Gate-Fixer | Fix-Forward-Runner |
-|---------|------------|-------------------|
-| Read evidence | Yes | No |
-| Classify issues | Yes | No |
-| Generate commands | Yes | No |
-| Execute commands | No | Yes |
-| Enforce scope | No | Yes |
-| Write audit report | No | Yes |
+| Concern            | Gate-Fixer | Fix-Forward-Runner |
+| ------------------ | ---------- | ------------------ |
+| Read evidence      | Yes        | No                 |
+| Classify issues    | Yes        | No                 |
+| Generate commands  | Yes        | No                 |
+| Execute commands   | No         | Yes                |
+| Enforce scope      | No         | Yes                |
+| Write audit report | No         | Yes                |
 
 This separation ensures:
+
 - One agent decides what to fix
 - Another agent executes and verifies
 - Neither can unilaterally expand scope
@@ -228,6 +237,7 @@ This separation ensures:
 **Finding:** `isort` reports unsorted imports in 5 files.
 
 **Plan:**
+
 ```yaml
 fix_forward_eligible: true
 apply_steps:
@@ -247,6 +257,7 @@ change_scope:
 **Finding:** Pre-commit hook would fail on trailing whitespace.
 
 **Plan:**
+
 ```yaml
 fix_forward_eligible: true
 apply_steps:
@@ -305,6 +316,7 @@ Continue with Gate (merge-decider)
 ```
 
 The reseal ensures:
+
 - Build receipt is updated to reflect the new state
 - Gate artifacts reflect reality
 - The merge decision is based on current code

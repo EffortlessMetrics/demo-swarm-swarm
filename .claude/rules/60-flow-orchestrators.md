@@ -14,6 +14,7 @@ globs:
 Flow commands (`.claude/commands/flow-*.md`) are **PM/orchestrators**.
 
 They:
+
 - Translate intent into a sequence of narrow agent tasks
 - Keep flows moving (fix-forward, not stop-and-wait)
 - Read handoffs and route based on understanding
@@ -30,10 +31,10 @@ Orchestrators **do not do the work**. They scope it, sequence it, route it.
 
 The orchestrator reads handoffs and decides. No parsing. No structured routing blocks. Claude understands language.
 
-| How It Works | How It Doesn't Work |
-|--------------|---------------------|
+| How It Works                                                           | How It Doesn't Work                               |
+| ---------------------------------------------------------------------- | ------------------------------------------------- |
 | Agent says "recommend routing to fixer" → orchestrator routes to fixer | Parse `{ "next_agent": "fixer" }` from JSON block |
-| Agent explains reasoning → orchestrator makes informed decision | Follow rigid routing rules regardless of context |
+| Agent explains reasoning → orchestrator makes informed decision        | Follow rigid routing rules regardless of context  |
 
 The communication channel is natural language throughout.
 
@@ -52,6 +53,7 @@ Problem detected → Route to specialist → Get result → Continue
 ```
 
 Not:
+
 ```
 Problem detected → Stop → Wait for human → Resume
 ```
@@ -59,6 +61,7 @@ Problem detected → Stop → Wait for human → Resume
 ### When to Actually Stop
 
 True halt is rare:
+
 - Mechanical failure (tooling broken, permissions missing)
 - Non-derivable decision (human must choose business direction)
 - Unsafe boundary (secrets detected, must remediate)
@@ -72,24 +75,31 @@ Even then, scope the halt narrowly. Other work may continue.
 At the end of each flow, provide:
 
 ### Progress Update
+
 What was done in this flow. Summary, not dump.
 
 ### Findings Summary
+
 Key results, evidence pointers, quality events.
 
 ### Assumptions + Open Questions
+
 What was assumed and why. What needs human input.
 
 ### Decision Requests
+
 If human input is needed, ask clearly:
+
 - What decision is needed
 - What options exist
 - What you recommend and why
 
 ### Next-Flow Preview
+
 What the next flow will do. What it needs.
 
 ### Artifact Links
+
 Pointers to receipts, evidence, cockpit surfaces.
 
 ---
@@ -100,13 +110,13 @@ The PR description is what most reviewers will read. Treat it as the cockpit dis
 
 ### Prefer Outputs That Make Review Fast
 
-| Good | Bad |
-|------|-----|
-| Short summary tables | Long prose paragraphs |
-| Mermaid diagrams (where helpful) | ASCII art |
-| Links to evidence artifacts | Inline raw output |
-| Hotspot pointers | Comprehensive file lists |
-| Explicit "not measured" | Silent gaps |
+| Good                             | Bad                      |
+| -------------------------------- | ------------------------ |
+| Short summary tables             | Long prose paragraphs    |
+| Mermaid diagrams (where helpful) | ASCII art                |
+| Links to evidence artifacts      | Inline raw output        |
+| Hotspot pointers                 | Comprehensive file lists |
+| Explicit "not measured"          | Silent gaps              |
 
 ### Compression Is Kindness
 
@@ -125,6 +135,7 @@ Encounter uncertainty → Record assumption → Proceed → Ask at boundary
 ```
 
 Not:
+
 ```
 Encounter uncertainty → Stop → Ask user → Wait → Resume
 ```
@@ -139,9 +150,9 @@ Humans are asked at flow boundaries, with context, with options, with recommenda
 
 A flow ends with one of two statuses:
 
-| Status | When | What It Means |
-|--------|------|---------------|
-| **VERIFIED** | Evidence says done | Panel green, evidence fresh, blockers empty |
+| Status         | When                    | What It Means                                |
+| -------------- | ----------------------- | -------------------------------------------- |
+| **VERIFIED**   | Evidence says done      | Panel green, evidence fresh, blockers empty  |
 | **UNVERIFIED** | External constraint hit | Artifacts written, state captured, resumable |
 
 Everything else is "keep grinding."
@@ -149,6 +160,7 @@ Everything else is "keep grinding."
 ### No Early Exit
 
 Orchestrators do not accept "DONE" prose as completion. Completion requires:
+
 - **Evidence panel green** (all required sensors pass), OR
 - **External constraint** forces checkpoint (complete UNVERIFIED with honest state)
 
@@ -165,6 +177,7 @@ Author → Critic → Fixer → Verifier → [if not converged] → repeat
 ```
 
 For each station:
+
 1. Run the producer (author, implementer, etc.)
 2. Run the critic (attacks the output)
 3. If critic finds issues → run fixer → run verifier
@@ -174,9 +187,9 @@ For each station:
 
 When fixing an issue, **re-review at least once** to confirm stability. "Two passes" is a minimum observation window, not a maximum retry count.
 
-| Good | Bad |
-|------|-----|
-| Fix → re-review → stable → proceed | Fix → assume stable → proceed |
+| Good                                 | Bad                                 |
+| ------------------------------------ | ----------------------------------- |
+| Fix → re-review → stable → proceed   | Fix → assume stable → proceed       |
 | Critic found nothing twice → proceed | Critic found nothing once → proceed |
 
 If re-review finds the same issue, you're not stable. Route to a different approach or escalate.
@@ -193,12 +206,12 @@ If re-review finds the same issue, you're not stable. Route to a different appro
 
 The orchestrator's job is to keep things moving. When progress stalls, route to unstick. That's orchestration.
 
-| Wrong | Right |
-|-------|-------|
-| "3 tries, moving on" | "3 tries, running again" |
-| "Stagnation detected, stopping" | "Stagnation detected, routing to different agent" |
-| "Max iterations, proceeding as done" | "Still not converged, change approach" |
-| "Timeout, assuming success" | "External constraint hit, checkpointing UNVERIFIED" |
+| Wrong                                | Right                                               |
+| ------------------------------------ | --------------------------------------------------- |
+| "3 tries, moving on"                 | "3 tries, running again"                            |
+| "Stagnation detected, stopping"      | "Stagnation detected, routing to different agent"   |
+| "Max iterations, proceeding as done" | "Still not converged, change approach"              |
+| "Timeout, assuming success"          | "External constraint hit, checkpointing UNVERIFIED" |
 
 ### "Clean" Means Panel Clean
 
@@ -224,10 +237,12 @@ When an external constraint forces UNVERIFIED completion, document:
 **Detail:** <what specifically: tokens exhausted, tooling broken, decision needed>
 
 **Current state:**
+
 - <what's done>
 - <what's not done>
 
 **Evidence (if any):**
+
 - <artifact path>: <what it shows>
 
 **Recommended next step:** <what to do when constraint clears>
@@ -244,6 +259,7 @@ This makes the flow resumable. External constraints are checkpoints, not failure
 **Law 7: Local Resolution First**
 
 Before bouncing to a previous flow:
+
 - Try 2-3 targeted specialist calls
 - Route to design-optioneer, adr-author, or impact-analyzer
 - Re-plan locally

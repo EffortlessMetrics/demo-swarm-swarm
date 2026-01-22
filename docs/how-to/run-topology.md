@@ -69,10 +69,10 @@ cp -r /path/to/demo-swarm/.claude .
 
 The pack uses this branch convention:
 
-| Branch | Purpose |
-|--------|---------|
-| `main` | Swarm mainline (what Flow 6 merges into) |
-| `run/<run-id>` | Per-run working branch |
+| Branch         | Purpose                                  |
+| -------------- | ---------------------------------------- |
+| `main`         | Swarm mainline (what Flow 6 merges into) |
+| `run/<run-id>` | Per-run working branch                   |
 
 ### How it works
 
@@ -86,17 +86,18 @@ The pack uses this branch convention:
 
 Every flow commits to preserve the audit trail:
 
-| Flow | What gets committed |
-|------|---------------------|
-| 1 (Signal) | `.runs/<run-id>/signal/` + index + meta |
-| 2 (Plan) | `.runs/<run-id>/plan/` + index + meta |
-| 3 (Build) | `.runs/<run-id>/build/` + staged code/tests + index + meta |
+| Flow       | What gets committed                                         |
+| ---------- | ----------------------------------------------------------- |
+| 1 (Signal) | `.runs/<run-id>/signal/` + index + meta                     |
+| 2 (Plan)   | `.runs/<run-id>/plan/` + index + meta                       |
+| 3 (Build)  | `.runs/<run-id>/build/` + staged code/tests + index + meta  |
 | 4 (Review) | `.runs/<run-id>/review/` + staged code/tests + index + meta |
-| 5 (Gate) | `.runs/<run-id>/gate/` + index + meta |
-| 6 (Deploy) | `.runs/<run-id>/deploy/` + merge to main + tags |
-| 7 (Wisdom) | `.runs/<run-id>/wisdom/` + index + meta |
+| 5 (Gate)   | `.runs/<run-id>/gate/` + index + meta                       |
+| 6 (Deploy) | `.runs/<run-id>/deploy/` + merge to main + tags             |
+| 7 (Wisdom) | `.runs/<run-id>/wisdom/` + index + meta                     |
 
 Flow 3 has two commit types:
+
 - Checkpoint commit (audit artifacts only)
 - Build commit (code + tests)
 
@@ -107,6 +108,7 @@ Flow 3 has two commit types:
 The `.runs/` directory is committed by default. Do not gitignore it.
 
 Size discipline:
+
 - Summaries over raw dumps
 - No pasting full issue bodies into artifacts
 - Keep artifacts "reviewable diff" sized

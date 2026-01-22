@@ -1,9 +1,11 @@
 # Merge Decision
 
 ## Verdict
+
 BOUNCE
 
 ## Evidence Summary
+
 - Receipt audit: **FAIL** - (receipt_audit.md Machine Summary: status=UNVERIFIED, blockers=2 CRITICAL: 126-test inflation 42.8%, 14.17% coverage gap)
 - Contract compliance: **PASS** - (contract_compliance.md Machine Summary: status=VERIFIED, 8/8 endpoints OK, 0 violations)
 - Security scan: **PASS** - (security_scan.md Machine Summary: status=VERIFIED, 0 findings, cargo-audit not run but manual review substituted)
@@ -12,13 +14,14 @@ BOUNCE
 - Risk assessment: **FAIL** - (risk_assessment.md Machine Summary: status=UNVERIFIED, 2 CRITICAL open risks: RSK-014, RSK-015)
 
 ## Requirements Readiness
-| Item | Outcome | Notes |
-|------|---------|------|
-| Priority classification | UNKNOWN | requirements.md does not contain explicit MUST/SHOULD markers; no priority annotations found |
-| Verification signal | MISSING | build_receipt.json inaccessible (permission denied); cannot extract REQ->status verification map |
-| MUST requirements | UNKNOWN | Cannot determine - no priority markers in requirements.md; REQ-001 through REQ-006 listed without MUST/SHOULD |
-| SHOULD requirements | UNKNOWN | Cannot determine - same as above |
-| Metrics / binding | UNBOUND | Receipt claims (420 tests, 89.29% coverage) do not match canonical artifact (294 tests, 75.12% coverage); data integrity failure |
+
+| Item                    | Outcome | Notes                                                                                                                            |
+| ----------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Priority classification | UNKNOWN | requirements.md does not contain explicit MUST/SHOULD markers; no priority annotations found                                     |
+| Verification signal     | MISSING | build_receipt.json inaccessible (permission denied); cannot extract REQ->status verification map                                 |
+| MUST requirements       | UNKNOWN | Cannot determine - no priority markers in requirements.md; REQ-001 through REQ-006 listed without MUST/SHOULD                    |
+| SHOULD requirements     | UNKNOWN | Cannot determine - same as above                                                                                                 |
+| Metrics / binding       | UNBOUND | Receipt claims (420 tests, 89.29% coverage) do not match canonical artifact (294 tests, 75.12% coverage); data integrity failure |
 
 ## Decision Rationale
 
@@ -35,6 +38,7 @@ The gate evidence presents a clear BOUNCE verdict based on multiple independent 
 5. **No Fix-Forward Report**: No fix_forward_report.md exists, confirming fix-forward lane was not executed (correctly, since it was ineligible).
 
 ## If BOUNCE
+
 - **Target flow**: 3 (Build)
 - **Issues to address**:
   1. Re-run full test suite (unit + integration) with coverage instrumentation
@@ -46,12 +50,14 @@ The gate evidence presents a clear BOUNCE verdict based on multiple independent 
   7. Address branch coverage measurement (70% threshold unverifiable - all artifacts show null)
 
 ## Next Steps
+
 - Build-cleanup agent to regenerate build_receipt.json with correct data from canonical artifacts
 - Test-author agent to add coverage tests if 80% threshold must be met
 - Re-run Gate after Build reseal completes with consistent evidence
 - Verify receipt cross-references match artifact facts before sealing
 
 ## Machine Summary
+
 verdict: BOUNCE
 reason: FIX_REQUIRED
 status: UNVERIFIED
@@ -59,14 +65,15 @@ recommended_action: BOUNCE
 route_to_flow: 3
 route_to_agent: null
 blockers:
-  - "Receipt fabrication: 420 tests claimed vs 294 actual (42.8% inflation); 89.29% coverage claimed vs 75.12% actual (14.17% gap)"
-  - "Coverage threshold not met: 75.12% actual < 80% required per test_plan.md"
-  - "Policy violations: POL-003 (counts not mechanical), POL-004 (quality_gates not from Machine Summaries), POL-015 (quality_gates misrepresent artifact state)"
-missing_required:
-  - "Updated test_execution.md with authoritative test counts matching receipt"
-  - "Coverage evidence reconciliation (receipt must match canonical artifact)"
-  - "Branch coverage metrics (70% threshold unverifiable)"
-concerns:
-  - "Reseal operation (commit bacacfe) updated receipt without updating test_execution.md - audit trail gap"
-  - "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
-  - "cargo-audit could not run due to CVSS 4.0 incompatibility"
+
+- "Receipt fabrication: 420 tests claimed vs 294 actual (42.8% inflation); 89.29% coverage claimed vs 75.12% actual (14.17% gap)"
+- "Coverage threshold not met: 75.12% actual < 80% required per test_plan.md"
+- "Policy violations: POL-003 (counts not mechanical), POL-004 (quality_gates not from Machine Summaries), POL-015 (quality_gates misrepresent artifact state)"
+  missing_required:
+- "Updated test_execution.md with authoritative test counts matching receipt"
+- "Coverage evidence reconciliation (receipt must match canonical artifact)"
+- "Branch coverage metrics (70% threshold unverifiable)"
+  concerns:
+- "Reseal operation (commit bacacfe) updated receipt without updating test_execution.md - audit trail gap"
+- "Index metadata lags gate (iterations 7 vs 6, status VERIFIED vs UNVERIFIED)"
+- "cargo-audit could not run due to CVSS 4.0 incompatibility"

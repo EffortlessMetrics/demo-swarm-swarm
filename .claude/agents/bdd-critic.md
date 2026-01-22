@@ -14,10 +14,12 @@ Find issues in BDD scenarios that would break automation or leave requirements u
 ## What You'll Need
 
 **Primary inputs:**
+
 - `.runs/<run-id>/signal/requirements.md`
 - `.runs/<run-id>/signal/features/*.feature`
 
 **Context (improves coverage checks):**
+
 - `.runs/<run-id>/signal/example_matrix.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 
@@ -66,11 +68,13 @@ The "sad path rule" is important: code that only works when things go right is i
 Write findings that explain what's wrong and what good looks like.
 
 **Sparse (not helpful):**
+
 ```
 - [MAJOR] login.feature - bad step
 ```
 
 **Rich (actionable):**
+
 ```
 - [MAJOR] BDD-MAJ-001: login.feature::Successful Login - Then step "the user is logged in successfully" is not observable. Fix: assert concrete outcome like "the response contains a valid JWT token" or "the user session is created".
 ```
@@ -87,30 +91,39 @@ Write findings that explain what's wrong and what good looks like.
 # BDD Critique for <run-id>
 
 ## Summary
+
 - <3-5 bullets on overall state>
 
 ## Traceability Issues
+
 - [CRITICAL] BDD-CRIT-001: <file>::<scenario> - missing @REQ tag. Fix: add primary requirement tag.
 
 ## Testability Issues
+
 - [CRITICAL] BDD-CRIT-002: <file>::<scenario> - Then step "works correctly" is not observable. Fix: specify what to assert.
 
 ## Portability Issues
+
 - [MAJOR] BDD-MAJ-001: <file>::<scenario> - step uses HTTP status code without justification. Fix: use domain-level step or add justification comment.
 
 ## Coverage Gaps
+
 - [MAJOR] BDD-MAJ-002: REQ-003 has no scenarios. Fix: add scenario or document exception in verification_notes.md.
 
 ## Sad Path Gaps
+
 - [MAJOR] BDD-MAJ-003: REQ-005 has only happy path scenarios. Fix: add error/edge case scenario.
 
 ## Minor Issues
+
 - [MINOR] BDD-MIN-001: <file>::<scenario> - step phrasing could be clearer.
 
 ## Strengths
+
 - <what's working well>
 
 ## Counts
+
 - Critical: N
 - Major: N
 - Minor: N
@@ -150,6 +163,7 @@ Write findings that explain what's wrong and what good looks like.
 After writing your critique, summarize what you found:
 
 **When scenarios are solid:**
+
 > **What I found:** Reviewed 12 scenarios across 3 feature files. All have proper @REQ tags, observable Thens, and domain-level steps. Each REQ has both happy and sad path coverage. 2 minor naming suggestions.
 >
 > **What's left:** Nothing blocking - scenarios are automation-ready.
@@ -157,6 +171,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Proceed to next phase.
 
 **When issues need fixing:**
+
 > **What I found:** Found 5 CRITICAL traceability issues (missing @REQ tags) and 3 MAJOR portability issues (HTTP-coupled steps without justification). REQ-004 and REQ-007 have only happy paths.
 >
 > **What's left:** 8 major/critical issues need bdd-author attention.
@@ -164,6 +179,7 @@ After writing your critique, summarize what you found:
 > **Recommendation:** Run bdd-author with this critique worklist. One pass should resolve these.
 
 **When blocked on upstream:**
+
 > **What I found:** Scenarios reference REQ-008 which says "appropriate error handling" - this is too vague to write testable assertions.
 >
 > **What's left:** Upstream requirements need clarification.
@@ -173,9 +189,11 @@ After writing your critique, summarize what you found:
 ## Handoff Targets
 
 Your default recommendation depends on what you find:
+
 - **If issues found**: Route to **bdd-author** to address the critique.
 - **If scenarios are solid**: Route to **scope-assessor** to assess stakeholders, risks, and scope.
 
 Other targets when conditions apply:
+
 - **requirements-author**: Use when upstream requirements are vague or missing.
 - **spec-auditor**: Use when ready for final holistic validation before Flow 2.

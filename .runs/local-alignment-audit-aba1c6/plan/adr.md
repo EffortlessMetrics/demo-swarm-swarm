@@ -1,9 +1,11 @@
 # ADR: Layered Documentation Alignment for Seven-Flow Model
 
 ## Status
+
 Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
 
 ## Context
+
 - Problem: DemoSwarm pack documentation claims "six flows" across public documentation (README.md, DEMO_RUN.md, architecture.md, CHANGELOG.md) while CLAUDE.md and the implementation define seven flows with ten command files. This drift creates confusion for integrators, leads to conflicting security claims (invalid ReDoS vulnerability, undocumented path traversal limitation), and test count claims (102 passing tests) do not appear in documentation.
 - Constraints:
   - Seven-Flow model is canonical (CLAUDE.md L13 is authoritative)
@@ -18,6 +20,7 @@ Swarm-Proposed (run-scoped; pending human review at Flow 2 boundary)
   - Creating new flows or removing existing command files
 
 ## Decision Drivers (bound, machine-countable)
+
 Each driver MUST include a stable marker line, then a short explanation.
 
 - DRIVER: DR-001 req=[REQ-001,REQ-002,REQ-003,REQ-004] nfr=[NFR-DOC-001] option_ref="OPT-003"
@@ -36,9 +39,11 @@ Each driver MUST include a stable marker line, then a short explanation.
   - Why it matters: Allows incremental merge after Phase 2 if time-constrained, with explicit tracking of Phase 3/4 follow-up for secondary docs and pack-check fixtures.
 
 ## Decision
+
 We choose **OPT-003: Layered Approach - Authoritative First, Generate/Validate Downstream**.
 
 ### What we are doing
+
 - **Phase 1: Authoritative Sources** - Update CLAUDE.md (flow table expansion to 7 flows with variants) and docs/explanation/architecture.md (flow overlap semantics, Flow 7 purpose, security posture, test count)
 - **Phase 2: Primary Public Docs** - Update README.md, DEMO_RUN.md, CHANGELOG.md to reference "seven flows" with validation against Phase 1 content
 - **Phase 3: Secondary Docs (optional, gated on time)** - Update glossary.md, CONTRIBUTING.md, work-without-github.md, walkthrough.md for consistency
@@ -46,12 +51,14 @@ We choose **OPT-003: Layered Approach - Authoritative First, Generate/Validate D
 - Each phase produces a checkpoint commit for granular revert capability
 
 ### What we are NOT doing
+
 - Comprehensive one-pass update of all 14 files (OPT-002 rejected due to coordination overhead)
 - Minimal touch leaving secondary docs inconsistent without tracking (OPT-001 rejected due to NFR-DOC-001 gap)
 - Proactive test fixture changes before verifying pack-check failure
 - Code changes to secrets.rs or flow architecture
 
 ### Requirements & NFR Traceability
+
 - **Satisfied by this decision**
   - REQ-001: All five ACs satisfied in Phases 1-2 (README, DEMO_RUN, architecture.md, CHANGELOG updated to "seven flows")
   - REQ-002: Flow overlap semantics documented in architecture.md (Phase 1) per AC-1 through AC-5
@@ -67,6 +74,7 @@ We choose **OPT-003: Layered Approach - Authoritative First, Generate/Validate D
   - NFR-DOC-001: Primary docs (Phases 1-2) achieve consistency; secondary docs (Phase 3) may remain stale if time-constrained. Explicit follow-up tracking mitigates this gap.
 
 ## Alternatives Considered
+
 - ALT: OPT-001 - Rejected because: Leaves secondary documentation inconsistent with no explicit Phase 3 tracking; NFR-DOC-001 would remain PARTIAL without a clear path to resolution. Time savings (5 files vs 8-14) do not justify the audit gap.
 
 - ALT: OPT-002 - Rejected because: Comprehensive sweep of all 14 files introduces coordination overhead and potential merge conflicts. Test fixture changes (structure.rs) before verifying pack-check failure is premature. NFR-TRACE-001 TRADE_OFF risk is unnecessary when reactive approach (Phase 4) suffices.
@@ -74,6 +82,7 @@ We choose **OPT-003: Layered Approach - Authoritative First, Generate/Validate D
 ## Consequences
 
 ### Positive
+
 - **Clear derivation lineage**: Authoritative sources (CLAUDE.md, architecture.md) updated first; downstream docs derive from them
 - **Incremental merge option**: Phase 2 completion enables merge if time-constrained; Phases 3-4 can be follow-up commits
 - **Pack hierarchy respected**: Aligns with CLAUDE.md statement "repo-level policy + shared contracts" (L5)
@@ -81,11 +90,13 @@ We choose **OPT-003: Layered Approach - Authoritative First, Generate/Validate D
 - **Granular revert capability**: Per-phase commits enable surgical rollback if issues arise
 
 ### Negative
+
 - **Secondary docs may remain stale short-term**: If Phase 3 is deferred, glossary.md, CONTRIBUTING.md, work-without-github.md, walkthrough.md may still say "6 flows"
 - **Manual derivation**: Downstream doc updates are not automated; requires human validation against authoritative sources
 - **Phase 3/4 follow-up tracking burden**: Explicit blockers or follow-up issues needed if phases are deferred
 
 ## Risks and Mitigations
+
 Use stable markers:
 
 - RISK: RSK-001 Pack-check validation may fail on "Six Flows" test fixtures after CLAUDE.md update -> Mitigation: Phase 4 addresses test fixtures reactively; run pack-check after Phase 2 to verify; only update structure.rs if tests fail
@@ -99,6 +110,7 @@ Use stable markers:
 - RISK: RSK-005 Flow variant documentation becomes stale if new variants added -> Mitigation: Add flow variant enumeration to pack-check scope (future enhancement); document derivation source
 
 ## Assumptions Made to Proceed
+
 Use stable markers:
 
 - ASM: ASM-001 CLAUDE.md is the authoritative source for flow architecture (impact if wrong: Would need to update CLAUDE.md to match public docs instead of vice versa; unlikely given CLAUDE.md L5 explicitly claims authority)
@@ -114,6 +126,7 @@ Use stable markers:
 - ASM: ASM-006 Pack-check structure.rs test fixtures use "Six Flows" as string literals, not semantic assertions (impact if wrong: Test fixture updates in Phase 4 may require deeper investigation)
 
 ## Questions / Clarifications Needed
+
 Use stable markers and include suggested defaults:
 
 - Q: OQ-PLAN-001 Should the documentation update be structured as a single atomic PR or partitioned into logical commits per file/topic? Suggested default: Single atomic PR with logical commits per phase. Impact: If single commit preferred, simplifies review but loses granular revert capability.
@@ -123,12 +136,14 @@ Use stable markers and include suggested defaults:
 - Q: OQ-PLAN-003 Should compliance partitioning schema be updated to include ST-007 for Flow 7? Suggested default: Add ST-007 for completeness since Flow 7 is a distinct flow. Impact: If ST-006 covers both, no schema change but may confuse compliance tracing.
 
 ## Next Steps (Flow 2 binding)
+
 - Interface/contracts -> `.runs/local-alignment-audit-aba1c6/plan/api_contracts.yaml` + `.runs/local-alignment-audit-aba1c6/plan/schema.md` (N/A for documentation-only work; no API or schema changes)
 - Observability -> `.runs/local-alignment-audit-aba1c6/plan/observability_spec.md` (N/A for documentation-only work; pack-check validation serves as observability)
 - Tests -> `.runs/local-alignment-audit-aba1c6/plan/test_plan.md` (verification via grep "six flows" returning zero matches; pack-check execution)
 - Work breakdown -> `.runs/local-alignment-audit-aba1c6/plan/work_plan.md` (Phase 1: CLAUDE.md + architecture.md; Phase 2: README + DEMO_RUN + CHANGELOG; Phase 3: secondary docs; Phase 4: pack-check fixtures if needed)
 
 ## Pointers
+
 - Options: `.runs/local-alignment-audit-aba1c6/plan/design_options.md`
 - Requirements: `.runs/local-alignment-audit-aba1c6/signal/requirements.md`
 - Problem statement: `.runs/local-alignment-audit-aba1c6/signal/problem_statement.md`
@@ -138,6 +153,7 @@ Use stable markers and include suggested defaults:
 - Early risks: `.runs/local-alignment-audit-aba1c6/signal/early_risks.md`
 
 ## Inventory (machine countable)
+
 (Only the following prefixed lines; do not rename prefixes)
 
 - ADR_CHOSEN_OPTION: OPT-003

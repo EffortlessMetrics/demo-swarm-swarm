@@ -17,6 +17,7 @@ This is not arbitrary. The seven flows emerge from the natural structure of soft
 ### 1. Natural Boundaries
 
 Each flow ends at a natural checkpoint:
+
 - Work is complete for that phase
 - Artifacts are coherent and useful
 - Human feedback makes sense here
@@ -28,21 +29,22 @@ Each flow ends at a natural checkpoint:
 
 Each flow has one primary job:
 
-| Flow | Concern |
-|------|---------|
+| Flow   | Concern                |
+| ------ | ---------------------- |
 | Signal | Understand the problem |
-| Plan | Design the solution |
-| Build | Implement the solution |
-| Review | Address feedback |
-| Gate | Decide to merge |
-| Deploy | Ship to production |
-| Wisdom | Learn from the run |
+| Plan   | Design the solution    |
+| Build  | Implement the solution |
+| Review | Address feedback       |
+| Gate   | Decide to merge        |
+| Deploy | Ship to production     |
+| Wisdom | Learn from the run     |
 
 **Test:** If describing the flow requires "and," consider splitting it.
 
 ### 3. Human Touchpoints
 
 Flow boundaries are where humans naturally want to:
+
 - Check progress ("What did we build?")
 - Provide feedback ("This requirement is wrong")
 - Make decisions ("Should we ship this?")
@@ -59,6 +61,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** You cannot build what you do not understand.
 
 **What it produces:**
+
 - Problem statement (what are we solving?)
 - Requirements (what must be true?)
 - BDD scenarios (how do we test it?)
@@ -75,6 +78,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** Architecture decisions before code prevent expensive pivots.
 
 **What it produces:**
+
 - ADR (how will we build it?)
 - Contracts (what are the interfaces?)
 - Work breakdown (what are the pieces?)
@@ -90,6 +94,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** Implementation is the core work.
 
 **What it produces:**
+
 - Code that satisfies acceptance criteria
 - Tests that verify behavior
 - Documentation that explains
@@ -106,6 +111,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** External feedback catches what self-review misses.
 
 **What it produces:**
+
 - Feedback harvested from CI, bots, and humans
 - Issues addressed systematically
 - PR polished for merge
@@ -122,6 +128,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** Someone must decide: ship or not.
 
 **What it produces:**
+
 - Merge decision (go/no-go with reasoning)
 - Evidence synthesis (what supports the decision)
 - Fix-forward for mechanical issues (when warranted)
@@ -137,6 +144,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** Merged code is not shipped code.
 
 **What it produces:**
+
 - Deployment verification (did it reach production?)
 - Release notes (what shipped?)
 - Monitoring confirmation (is it healthy?)
@@ -152,6 +160,7 @@ Flow boundaries are where humans naturally want to:
 **Why it exists:** Continuous improvement requires reflection.
 
 **What it produces:**
+
 - Learnings extracted from the run
 - Templates improved based on friction
 - Patterns documented for future work
@@ -169,6 +178,7 @@ Flow boundaries are where humans naturally want to:
 **What you would get:** Requirements and design blur together.
 
 **What breaks:**
+
 - Plans based on incomplete understanding
 - Requirements that bake in design assumptions
 - Harder to challenge either in isolation
@@ -181,6 +191,7 @@ Flow boundaries are where humans naturally want to:
 **What you would get:** Self-review bias.
 
 **What breaks:**
+
 - Builders miss their own mistakes (they know what they meant)
 - Feedback becomes defensive (challenging my work)
 - No clean handoff point for external eyes
@@ -192,6 +203,7 @@ Flow boundaries are where humans naturally want to:
 **What you would get:** The person addressing feedback also decides to ship.
 
 **What breaks:**
+
 - Pressure to declare "done" after fixing things
 - No independent judgment on readiness
 - "I fixed everything" becomes "therefore we ship"
@@ -203,6 +215,7 @@ Flow boundaries are where humans naturally want to:
 **What you would get:** Merge decision and production deployment blur.
 
 **What breaks:**
+
 - No pause point between "approved" and "shipped"
 - Cannot easily roll back the decision
 - Production issues conflated with gate issues
@@ -241,15 +254,15 @@ Flow boundaries are where humans naturally want to:
 
 ## The Flow Boundaries
 
-| After Flow | Human Checkpoint | Key Question |
-|------------|------------------|--------------|
-| Signal | Requirements review | "Is this the right problem?" |
-| Plan | Design review | "Is this a good approach?" |
-| Build | Self-review complete | "Is it ready for external eyes?" |
-| Review | Feedback addressed | "Is it ready for merge decision?" |
-| Gate | Merge decision | "Does this ship?" |
-| Deploy | Deployment verified | "Is it working in production?" |
-| Wisdom | Run retrospective | "What did we learn?" |
+| After Flow | Human Checkpoint     | Key Question                      |
+| ---------- | -------------------- | --------------------------------- |
+| Signal     | Requirements review  | "Is this the right problem?"      |
+| Plan       | Design review        | "Is this a good approach?"        |
+| Build      | Self-review complete | "Is it ready for external eyes?"  |
+| Review     | Feedback addressed   | "Is it ready for merge decision?" |
+| Gate       | Merge decision       | "Does this ship?"                 |
+| Deploy     | Deployment verified  | "Is it working in production?"    |
+| Wisdom     | Run retrospective    | "What did we learn?"              |
 
 Each boundary answers a question. If the answer is unclear, the work is not ready to cross.
 
@@ -281,11 +294,13 @@ The rhythm is not invented. It is observed. Every software project follows this 
 **Seven flows because that's where the natural boundaries are.**
 
 Fewer would blur concerns:
+
 - Understanding mixed with designing
 - Building mixed with reviewing
 - Deciding mixed with shipping
 
 More would add overhead:
+
 - Handoffs where iteration should flow
 - Gates where speed matters
 - Coordination where focus is needed

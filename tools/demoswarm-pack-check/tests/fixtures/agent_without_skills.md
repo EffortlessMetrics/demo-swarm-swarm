@@ -13,5 +13,6 @@ bash .claude/scripts/demoswarm.sh ms get --file summary.md --section "Machine Su
 ## Notes
 
 This agent violates the pack contract because:
+
 1. It uses the shim script (see code block above)
 2. It does NOT have a skill documentation heading

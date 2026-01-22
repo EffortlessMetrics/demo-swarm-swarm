@@ -21,11 +21,11 @@ Compress the Plan flow into a meaningful summary. You're reading what was design
 
 Before you can proceed, verify these exist:
 
-| Required | Path | What It Contains |
-|----------|------|------------------|
-| Run directory | `.runs/<run-id>/plan/` | The plan flow artifact directory |
-| Write access | `.runs/<run-id>/plan/plan_receipt.json` | Must be writable for receipt output |
-| Index file | `.runs/index.json` | Must exist for status updates |
+| Required      | Path                                    | What It Contains                    |
+| ------------- | --------------------------------------- | ----------------------------------- |
+| Run directory | `.runs/<run-id>/plan/`                  | The plan flow artifact directory    |
+| Write access  | `.runs/<run-id>/plan/plan_receipt.json` | Must be writable for receipt output |
+| Index file    | `.runs/index.json`                      | Must exist for status updates       |
 
 **CANNOT_PROCEED semantics:** If you cannot proceed, you must name the missing required input(s) explicitly:
 
@@ -34,13 +34,14 @@ Before you can proceed, verify these exist:
 - **Missing index:** "CANNOT_PROCEED: `.runs/index.json` does not exist. Initialize the runs index before cleanup."
 - **Tool failure:** "CANNOT_PROCEED: `runs-index` skill failed with error: <error>. Fix the tooling issue before retrying."
 
-These are mechanical failures. Missing *artifacts* (like `adr.md` or `work_plan.md`) are not CANNOT_PROCEED -- they result in partial/incomplete status with documented gaps.
+These are mechanical failures. Missing _artifacts_ (like `adr.md` or `work_plan.md`) are not CANNOT_PROCEED -- they result in partial/incomplete status with documented gaps.
 
 ## What to Review
 
 Read these artifacts and understand what they tell you:
 
 **Design Options (`design_options.md`)**
+
 - What options were considered?
 - Were tradeoffs analyzed?
 - Is there a recommended default?
@@ -48,10 +49,12 @@ Read these artifacts and understand what they tell you:
 - Look for `CONFIDENCE:` marker for recommendation confidence
 
 **Option Critique (`option_critique.md`)**
+
 - Did the critic find issues with the options?
 - Are options distinct enough? Risks identified?
 
 **ADR (`adr.md`)**
+
 - Was a decision made? Which option was chosen and why?
 - Are the decision drivers clear?
 - Is the rationale documented?
@@ -59,18 +62,22 @@ Read these artifacts and understand what they tell you:
 - Count `DRIVER:` or `ADR_DRIVER:` markers to get the total number of drivers
 
 **Design Validation (`design_validation.md`)**
+
 - Did the design critic validate the ADR?
 - Are there concerns about the chosen approach?
 
 **Work Plan (`work_plan.md`)**
+
 - Were implementation tasks defined?
 - Is the work broken down into actionable subtasks?
 
 **Contracts (`api_contracts.yaml`, `contract_critique.md`)**
+
 - Were API contracts defined?
 - Did the contract critic find issues?
 
 **Test Plan (`test_plan.md`, `ac_matrix.md`)**
+
 - Is there a testing strategy?
 - Are acceptance criteria defined?
 
@@ -81,6 +88,7 @@ The Decision Spine captures the chain of evidence from options to decision. Extr
 ### From `design_options.md`
 
 Look for these markers in the Inventory or Machine Summary section:
+
 - `SUGGESTED_DEFAULT: OPT-XXX` — The recommended default option
 - `CONFIDENCE: High|Medium|Low` — Confidence level of recommendation
 
@@ -89,10 +97,12 @@ If markers are missing, derive from prose (look for "Recommended:" or similar).
 ### From `adr.md`
 
 Look for these markers in the Inventory section:
+
 - `ADR_CHOSEN_OPTION: OPT-XXX` — The chosen option ID
 - `DRIVER: DR-XXX` or `ADR_DRIVER: DR-XXX` — Decision drivers (count all)
 
 **Counting drivers:**
+
 ```bash
 bash .claude/scripts/demoswarm.sh derive count-markers --pattern "^- (DRIVER|ADR_DRIVER):" --file .runs/<run-id>/plan/adr.md
 ```
@@ -100,6 +110,7 @@ bash .claude/scripts/demoswarm.sh derive count-markers --pattern "^- (DRIVER|ADR
 ### Decision Spine Status
 
 Set `decision_spine.status` based on:
+
 - **VERIFIED**: `ADR_CHOSEN_OPTION` marker exists AND at least one `DRIVER:` marker exists
 - **UNVERIFIED**: ADR exists but markers are missing or malformed
 - **null**: No ADR exists
@@ -109,12 +120,14 @@ Set `decision_spine.status` based on:
 Write `.runs/<run-id>/plan/plan_receipt.json` that tells the story.
 
 The receipt should answer:
+
 - What design decision was made and why?
 - Were the options properly analyzed and critiqued?
 - Is there a clear implementation plan?
 - Is this ready for Build, or does it need more work?
 
 **Assessing completion:**
+
 - **Complete**: ADR exists with chosen option AND required critics passed AND work plan exists
 - **Partial**: Missing required artifacts OR critics found critical issues OR decision not made
 - **Cannot proceed**: Can't read/write files (mechanical failure)
@@ -175,9 +188,15 @@ The receipt should answer:
   "concerns": [],
 
   "key_artifacts": [
-    "design_options.md", "option_critique.md", "adr.md",
-    "design_validation.md", "work_plan.md", "test_plan.md",
-    "ac_matrix.md", "api_contracts.yaml", "contract_critique.md"
+    "design_options.md",
+    "option_critique.md",
+    "adr.md",
+    "design_validation.md",
+    "work_plan.md",
+    "test_plan.md",
+    "ac_matrix.md",
+    "api_contracts.yaml",
+    "contract_critique.md"
   ],
 
   "evidence_sha": "<current HEAD>",
@@ -187,13 +206,13 @@ The receipt should answer:
 
 ### Decision Spine Field Descriptions
 
-| Field | Source | How to Extract |
-|-------|--------|----------------|
-| `decision_spine.status` | Derived | VERIFIED if ADR has markers, UNVERIFIED if ADR exists but lacks markers, null if no ADR |
-| `design_options.suggested_default` | `design_options.md` | Look for `SUGGESTED_DEFAULT:` marker or derive from "Recommended" prose |
-| `design_options.confidence` | `design_options.md` | Look for `CONFIDENCE:` marker |
-| `adr.chosen_option` | `adr.md` | Extract from `ADR_CHOSEN_OPTION:` marker |
-| `adr.drivers_total` | `adr.md` | Count `DRIVER:` and `ADR_DRIVER:` markers |
+| Field                              | Source              | How to Extract                                                                          |
+| ---------------------------------- | ------------------- | --------------------------------------------------------------------------------------- |
+| `decision_spine.status`            | Derived             | VERIFIED if ADR has markers, UNVERIFIED if ADR exists but lacks markers, null if no ADR |
+| `design_options.suggested_default` | `design_options.md` | Look for `SUGGESTED_DEFAULT:` marker or derive from "Recommended" prose                 |
+| `design_options.confidence`        | `design_options.md` | Look for `CONFIDENCE:` marker                                                           |
+| `adr.chosen_option`                | `adr.md`            | Extract from `ADR_CHOSEN_OPTION:` marker                                                |
+| `adr.drivers_total`                | `adr.md`            | Count `DRIVER:` and `ADR_DRIVER:` markers                                               |
 
 ## Updating the Index
 
@@ -213,6 +232,7 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 **Cleanup Report (`.runs/<run-id>/plan/cleanup_report.md`):**
 
 Write a human-readable summary including:
+
 - The design decision that was made and the key drivers
 - Decision spine status: which option was chosen (from `ADR_CHOSEN_OPTION:`) and how many drivers support it
 - What the critics found (or that they passed)
@@ -220,18 +240,20 @@ Write a human-readable summary including:
 - Whether this is ready for Build
 
 Include a Decision Spine summary section:
+
 ```markdown
 ## Decision Spine
 
-| Artifact | Status | Key Value |
-|----------|--------|-----------|
+| Artifact          | Status   | Key Value                            |
+| ----------------- | -------- | ------------------------------------ |
 | design_options.md | VERIFIED | Suggested: OPT-002 (High confidence) |
-| adr.md | VERIFIED | Chosen: OPT-002, 5 drivers |
+| adr.md            | VERIFIED | Chosen: OPT-002, 5 drivers           |
 ```
 
 **GitHub Report (`.runs/<run-id>/plan/github_report.md`):**
 
 Pre-compose for GitHub posting with idempotency marker:
+
 ```markdown
 <!-- DEMOSWARM_RUN:<run-id> FLOW:plan -->
 ```
@@ -263,6 +285,7 @@ After writing the receipt and reports, explain what you found and recommend next
 "Summarized Plan flow. ADR exists (ADR_CHOSEN_OPTION: OPT-002, 3 drivers) but design_validation found 2 major concerns about scalability. Route back to design-optioneer to revise options or adr-author to update decision with mitigations."
 
 Your handoff should include:
+
 - Decision Spine status (VERIFIED/UNVERIFIED/null) with extracted marker values
 - What design decision was made (if any) - cite the `ADR_CHOSEN_OPTION` value
 - How many drivers support the decision - count of `DRIVER:` markers

@@ -10,41 +10,181 @@
     "not_applicable": 0
   },
   "acceptance_criteria": {
-    "AC-001-001": {"status": "PASSED", "description": "README.md references seven flows", "evidence": "L67 says The seven flows"},
-    "AC-001-002": {"status": "PASSED", "description": "DEMO_RUN.md references seven flows", "evidence": "L14 says seven flows"},
-    "AC-001-003": {"status": "PASSED", "description": "architecture.md references seven flows", "evidence": "L11, L62"},
-    "AC-001-004": {"status": "PASSED", "description": "CHANGELOG.md annotated", "evidence": "L24 says 7 flow commands"},
-    "AC-001-005": {"status": "PASSED", "description": "No six flows in public docs", "evidence": "grep returns 0"},
-    "AC-002-001": {"status": "PASSED", "description": "flow-4-gate vs flow-4-review documented", "evidence": "architecture.md L76-87"},
-    "AC-002-002": {"status": "PASSED", "description": "flow-5-gate vs flow-5-deploy documented", "evidence": "architecture.md L83"},
-    "AC-002-003": {"status": "PASSED", "description": "flow-6-deploy vs flow-6-wisdom documented", "evidence": "architecture.md L84-85"},
-    "AC-002-004": {"status": "PASSED", "description": "Flow variant guidance with examples", "evidence": "architecture.md L82"},
-    "AC-002-005": {"status": "PASSED", "description": "Flow overlap section exists", "evidence": "architecture.md L76-87"},
-    "AC-003-001": {"status": "PASSED", "description": "Flow 7 in enumeration", "evidence": "architecture.md L72, README.md L76"},
-    "AC-003-002": {"status": "PASSED", "description": "Flow 7 purpose documented", "evidence": "architecture.md L89-97"},
-    "AC-003-003": {"status": "PASSED", "description": "Flow 7 vs Flow 6 difference explained", "evidence": "architecture.md L96"},
-    "AC-003-004": {"status": "PASSED", "description": "Pre-condition verified", "evidence": "Gap addressed"},
-    "AC-004-001": {"status": "PASSED", "description": "CLAUDE.md lists 7 flows", "evidence": "pack-check validates"},
-    "AC-004-002": {"status": "PASSED", "description": "CLAUDE.md includes variants", "evidence": "L193-196"},
-    "AC-004-003": {"status": "PASSED", "description": "CLAUDE.md numbering consistent", "evidence": "L13 and L188-196"},
-    "AC-005-001": {"status": "PASSED", "description": "Test counts receipt-derived", "evidence": "architecture.md L162-165"},
-    "AC-005-002": {"status": "PASSED", "description": "Test counts from artifacts", "evidence": "architecture.md L164"},
-    "AC-005-003": {"status": "PASSED", "description": "No conflicting claims", "evidence": "Counts derive from receipts"},
-    "AC-005-004": {"status": "PASSED", "description": "Source reference present", "evidence": "architecture.md L163"},
-    "AC-005-005": {"status": "PASSED", "description": "Pre-condition verified", "evidence": "Gap addressed"},
-    "AC-006-001": {"status": "PASSED", "description": "ReDoS immunity documented", "evidence": "architecture.md L150"},
-    "AC-006-002": {"status": "PASSED", "description": "Path traversal limitation documented", "evidence": "architecture.md L155-157"},
-    "AC-006-003": {"status": "PASSED", "description": "No ReDoS vulnerability claim", "evidence": "grep returns 0"},
-    "AC-006-004": {"status": "PASSED", "description": "Code evidence referenced", "evidence": "architecture.md L152"},
-    "AC-006-005": {"status": "PASSED", "description": "Claims verifiable", "evidence": "secrets.rs path provided"},
-    "AC-007-001": {"status": "PASSED", "description": "Color field acknowledged", "evidence": "architecture.md L174-183"},
-    "AC-007-002": {"status": "PASSED", "description": "Color is advisory", "evidence": "architecture.md L184"},
-    "AC-007-003": {"status": "PASSED", "description": "Consumer specified", "evidence": "tooling visualization"},
-    "AC-007-004": {"status": "PASSED", "description": "Example has color field", "evidence": "architecture.md L176-182"},
-    "AC-007-005": {"status": "PASSED", "description": "No correction needed", "evidence": "Correctly documented"},
-    "AC-NFR-DOC-001": {"status": "PASSED", "description": "No six flows in docs", "evidence": "grep returns 0"},
-    "AC-NFR-SEC-001": {"status": "PASSED", "description": "Security has code refs", "evidence": "architecture.md L152"},
-    "AC-NFR-TRACE-001": {"status": "PASSED", "description": "pack-check passes", "evidence": "exits 0"}
+    "AC-001-001": {
+      "status": "PASSED",
+      "description": "README.md references seven flows",
+      "evidence": "L67 says The seven flows"
+    },
+    "AC-001-002": {
+      "status": "PASSED",
+      "description": "DEMO_RUN.md references seven flows",
+      "evidence": "L14 says seven flows"
+    },
+    "AC-001-003": {
+      "status": "PASSED",
+      "description": "architecture.md references seven flows",
+      "evidence": "L11, L62"
+    },
+    "AC-001-004": {
+      "status": "PASSED",
+      "description": "CHANGELOG.md annotated",
+      "evidence": "L24 says 7 flow commands"
+    },
+    "AC-001-005": {
+      "status": "PASSED",
+      "description": "No six flows in public docs",
+      "evidence": "grep returns 0"
+    },
+    "AC-002-001": {
+      "status": "PASSED",
+      "description": "flow-4-gate vs flow-4-review documented",
+      "evidence": "architecture.md L76-87"
+    },
+    "AC-002-002": {
+      "status": "PASSED",
+      "description": "flow-5-gate vs flow-5-deploy documented",
+      "evidence": "architecture.md L83"
+    },
+    "AC-002-003": {
+      "status": "PASSED",
+      "description": "flow-6-deploy vs flow-6-wisdom documented",
+      "evidence": "architecture.md L84-85"
+    },
+    "AC-002-004": {
+      "status": "PASSED",
+      "description": "Flow variant guidance with examples",
+      "evidence": "architecture.md L82"
+    },
+    "AC-002-005": {
+      "status": "PASSED",
+      "description": "Flow overlap section exists",
+      "evidence": "architecture.md L76-87"
+    },
+    "AC-003-001": {
+      "status": "PASSED",
+      "description": "Flow 7 in enumeration",
+      "evidence": "architecture.md L72, README.md L76"
+    },
+    "AC-003-002": {
+      "status": "PASSED",
+      "description": "Flow 7 purpose documented",
+      "evidence": "architecture.md L89-97"
+    },
+    "AC-003-003": {
+      "status": "PASSED",
+      "description": "Flow 7 vs Flow 6 difference explained",
+      "evidence": "architecture.md L96"
+    },
+    "AC-003-004": {
+      "status": "PASSED",
+      "description": "Pre-condition verified",
+      "evidence": "Gap addressed"
+    },
+    "AC-004-001": {
+      "status": "PASSED",
+      "description": "CLAUDE.md lists 7 flows",
+      "evidence": "pack-check validates"
+    },
+    "AC-004-002": {
+      "status": "PASSED",
+      "description": "CLAUDE.md includes variants",
+      "evidence": "L193-196"
+    },
+    "AC-004-003": {
+      "status": "PASSED",
+      "description": "CLAUDE.md numbering consistent",
+      "evidence": "L13 and L188-196"
+    },
+    "AC-005-001": {
+      "status": "PASSED",
+      "description": "Test counts receipt-derived",
+      "evidence": "architecture.md L162-165"
+    },
+    "AC-005-002": {
+      "status": "PASSED",
+      "description": "Test counts from artifacts",
+      "evidence": "architecture.md L164"
+    },
+    "AC-005-003": {
+      "status": "PASSED",
+      "description": "No conflicting claims",
+      "evidence": "Counts derive from receipts"
+    },
+    "AC-005-004": {
+      "status": "PASSED",
+      "description": "Source reference present",
+      "evidence": "architecture.md L163"
+    },
+    "AC-005-005": {
+      "status": "PASSED",
+      "description": "Pre-condition verified",
+      "evidence": "Gap addressed"
+    },
+    "AC-006-001": {
+      "status": "PASSED",
+      "description": "ReDoS immunity documented",
+      "evidence": "architecture.md L150"
+    },
+    "AC-006-002": {
+      "status": "PASSED",
+      "description": "Path traversal limitation documented",
+      "evidence": "architecture.md L155-157"
+    },
+    "AC-006-003": {
+      "status": "PASSED",
+      "description": "No ReDoS vulnerability claim",
+      "evidence": "grep returns 0"
+    },
+    "AC-006-004": {
+      "status": "PASSED",
+      "description": "Code evidence referenced",
+      "evidence": "architecture.md L152"
+    },
+    "AC-006-005": {
+      "status": "PASSED",
+      "description": "Claims verifiable",
+      "evidence": "secrets.rs path provided"
+    },
+    "AC-007-001": {
+      "status": "PASSED",
+      "description": "Color field acknowledged",
+      "evidence": "architecture.md L174-183"
+    },
+    "AC-007-002": {
+      "status": "PASSED",
+      "description": "Color is advisory",
+      "evidence": "architecture.md L184"
+    },
+    "AC-007-003": {
+      "status": "PASSED",
+      "description": "Consumer specified",
+      "evidence": "tooling visualization"
+    },
+    "AC-007-004": {
+      "status": "PASSED",
+      "description": "Example has color field",
+      "evidence": "architecture.md L176-182"
+    },
+    "AC-007-005": {
+      "status": "PASSED",
+      "description": "No correction needed",
+      "evidence": "Correctly documented"
+    },
+    "AC-NFR-DOC-001": {
+      "status": "PASSED",
+      "description": "No six flows in docs",
+      "evidence": "grep returns 0"
+    },
+    "AC-NFR-SEC-001": {
+      "status": "PASSED",
+      "description": "Security has code refs",
+      "evidence": "architecture.md L152"
+    },
+    "AC-NFR-TRACE-001": {
+      "status": "PASSED",
+      "description": "pack-check passes",
+      "evidence": "exits 0"
+    }
   },
   "subtask_status": {
     "ST-001": "DONE",

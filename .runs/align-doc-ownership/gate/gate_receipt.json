@@ -10,9 +10,7 @@
 
   "missing_required": [],
   "missing_optional": [],
-  "blockers": [
-    "MECH-001: Rust formatting violations (9 files need cargo fmt)"
-  ],
+  "blockers": ["MECH-001: Rust formatting violations (9 files need cargo fmt)"],
   "concerns": [
     "receipt_audit status UNVERIFIED (self_reviewer) - non-blocking for documentation run",
     "mutation_score null - explicitly N/A per test plan",

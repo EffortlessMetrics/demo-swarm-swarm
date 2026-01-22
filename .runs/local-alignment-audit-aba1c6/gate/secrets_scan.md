@@ -10,9 +10,9 @@
 
 ## Findings (redacted)
 
-| # | Type | File | Line | Action |
-|---|------|------|------|--------|
-| (none) | - | - | - | No secrets detected |
+| #      | Type | File | Line | Action              |
+| ------ | ---- | ---- | ---- | ------------------- |
+| (none) | -    | -    | -    | No secrets detected |
 
 ## Actions Taken
 
@@ -48,23 +48,24 @@
 
 ## Files Scanned
 
-| File | Size | Result |
-|------|------|--------|
-| .runs/local-alignment-audit-aba1c6/gate/flow_plan.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/receipt_audit.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/coverage_audit.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/contract_compliance.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/security_scan.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/gate_fix_summary.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/risk_assessment.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/policy_analysis.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/traceability_audit.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/merge_decision.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/gate_receipt.json | json | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/cleanup_report.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/gate/github_report.md | text | CLEAN |
-| .runs/local-alignment-audit-aba1c6/run_meta.json | json | CLEAN |
-| .runs/index.json | json | CLEAN |
+| File                                                           | Size | Result |
+| -------------------------------------------------------------- | ---- | ------ |
+| .runs/local-alignment-audit-aba1c6/gate/flow_plan.md           | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/receipt_audit.md       | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/coverage_audit.md      | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/contract_compliance.md | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/security_scan.md       | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/gate_fix_summary.md    | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/risk_assessment.md     | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/policy_analysis.md     | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/traceability_audit.md  | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/merge_decision.md      | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/gate_receipt.json      | json | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/cleanup_report.md      | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/gate/github_report.md       | text | CLEAN  |
+| .runs/local-alignment-audit-aba1c6/run_meta.json               | json | CLEAN  |
+| .runs/index.json                                               | json | CLEAN  |
 
 ---
+
 _Scanned by secrets-sanitizer at 2025-12-20T15:45:00Z_

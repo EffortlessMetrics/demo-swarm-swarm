@@ -13,16 +13,18 @@ blockers: []
 missing_required: []
 
 concerns:
-  - RSK-001 (path traversal in secrets.rs) deferred to future security hardening run (not addressed in this documentation-only run)
-  - cargo audit failed due to external tooling limitation (CVSS 4.0 parser) - does not affect pack security posture
+
+- RSK-001 (path traversal in secrets.rs) deferred to future security hardening run (not addressed in this documentation-only run)
+- cargo audit failed due to external tooling limitation (CVSS 4.0 parser) - does not affect pack security posture
 
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 2
-  low: 3
+critical: 0
+high: 0
+medium: 2
+low: 3
 
 ## Context
+
 - flow: gate
 - run_id: local-alignment-audit-aba1c6
 - inputs_used:
@@ -39,17 +41,18 @@ severity_summary:
 
 ## Risk Register
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | SECURITY | MEDIUM | ACCEPTED | Path traversal in secrets.rs deferred - not in scope for documentation run | security |
-| RSK-002 | SECURITY | LOW | CLOSED | ReDoS misconception corrected - Rust regex is immune (documentation updated) | documentation |
-| RSK-003 | COMPLIANCE | LOW | CLOSED | pack-check now validates seven-flow model - contract compliance verified | tooling |
-| RSK-004 | DOCUMENTATION | LOW | CLOSED | All public docs now reference "seven flows" consistently | documentation |
-| RSK-005 | OPS | MEDIUM | MITIGATED | Flow 7 documented; rollback is straightforward git revert | ops |
+| ID      | Category      | Severity | Status    | Summary                                                                      | Owner         |
+| ------- | ------------- | -------- | --------- | ---------------------------------------------------------------------------- | ------------- |
+| RSK-001 | SECURITY      | MEDIUM   | ACCEPTED  | Path traversal in secrets.rs deferred - not in scope for documentation run   | security      |
+| RSK-002 | SECURITY      | LOW      | CLOSED    | ReDoS misconception corrected - Rust regex is immune (documentation updated) | documentation |
+| RSK-003 | COMPLIANCE    | LOW      | CLOSED    | pack-check now validates seven-flow model - contract compliance verified     | tooling       |
+| RSK-004 | DOCUMENTATION | LOW      | CLOSED    | All public docs now reference "seven flows" consistently                     | documentation |
+| RSK-005 | OPS           | MEDIUM   | MITIGATED | Flow 7 documented; rollback is straightforward git revert                    | ops           |
 
 ## Risk Details
 
 ### RSK-001: Path Traversal in secrets.rs (Deferred)
+
 - Category: SECURITY
 - Severity: MEDIUM
 - Status: ACCEPTED
@@ -71,6 +74,7 @@ severity_summary:
   - PROCEED with merge; track as separate security hardening run
 
 ### RSK-002: ReDoS Misconception (Corrected)
+
 - Category: SECURITY
 - Severity: LOW
 - Status: CLOSED
@@ -89,6 +93,7 @@ severity_summary:
   - CLOSED; no further action required
 
 ### RSK-003: Pack-Check Drift (Resolved)
+
 - Category: COMPLIANCE
 - Severity: LOW
 - Status: CLOSED
@@ -111,6 +116,7 @@ severity_summary:
   - CLOSED; pack-check and documentation now aligned
 
 ### RSK-004: Stale Flow Count Claims (Resolved)
+
 - Category: DOCUMENTATION
 - Severity: LOW
 - Status: CLOSED
@@ -131,6 +137,7 @@ severity_summary:
   - CLOSED; documentation alignment complete
 
 ### RSK-005: Flow 7 Undocumented (Mitigated)
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: MITIGATED
@@ -196,14 +203,15 @@ severity_summary:
 ---
 
 ## Risk Analyst Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
 route_to_agent: null
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 2
-  low: 3
+critical: 0
+high: 0
+medium: 2
+low: 3
 blockers: []
 missing_required: []

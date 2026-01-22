@@ -13,6 +13,7 @@ You do **not** change code. You do **not** fix tests. You do **not** post to Git
 ## Output
 
 Write exactly one file per invocation:
+
 - `.runs/<run-id>/wisdom/regression_report.md`
 
 Do **not** append into other artifacts.
@@ -26,6 +27,7 @@ Do **not** append into other artifacts.
 ## Routing Guidance
 
 Use natural language in your handoff to communicate next steps:
+
 - No actionable regressions found → recommend proceeding
 - Code regressions with clear ownership → recommend code-implementer or fixer to address
 - Test failures requiring test changes → recommend test-author
@@ -36,13 +38,16 @@ Use natural language in your handoff to communicate next steps:
 ## Inputs (best-effort)
 
 Always try to read:
+
 - `.runs/<run-id>/run_meta.json`
 
 Prefer canonical test outcomes:
+
 - `.runs/<run-id>/build/test_critique.md` (contains **Pytest Summary (Canonical)** + parsed counts)
 - `.runs/<run-id>/build/build_receipt.json` (if present)
 
 Useful context (non-canonical):
+
 - `.runs/<run-id>/build/test_changes_summary.md` (what changed; expected failures)
 - `.runs/<run-id>/build/code_critique.md` (implementation gaps; likely root cause)
 - `.runs/<run-id>/gate/coverage_audit.md` (threshold-based coverage results, if present)
@@ -51,6 +56,7 @@ Useful context (non-canonical):
 - `.runs/<run-id>/deploy/deploy_receipt.json` (if present)
 
 External sources (best-effort):
+
 - `git log`, `git blame` (if repo is a git working tree)
 - `gh` CLI for issue search/correlation (if authenticated)
 
@@ -59,41 +65,49 @@ Track missing inputs/tools in `missing_required` but keep going.
 ## Definitions (be explicit)
 
 A "regression" requires one of:
+
 - A baseline artifact you can cite (prior receipt/report/CI reference), or
 - A **delta claim** you can support (e.g., coverage fell from X→Y with both values sourced).
 
 If you cannot establish a baseline, report:
+
 - **current failures**
 - **suspected regressions**
-…and set overall status to `UNVERIFIED` if that uncertainty changes actionability.
+  …and set overall status to `UNVERIFIED` if that uncertainty changes actionability.
 
 ## Behavior
 
 ### 1) Preflight writeability
+
 - You must be able to write `.runs/<run-id>/wisdom/regression_report.md`.
 - If not writable due to IO/permissions, explain the mechanical failure and stop.
 
 ### 2) Establish context
+
 - Determine whether this run is tied to a GitHub issue (`run_meta.json.issue_number`) and note it.
 - Note available inputs used (paths).
 
 ### 3) Canonical test outcome extraction (no guessing)
+
 Prefer extracting from `test_critique.md`:
 
 - Read the **Pytest Summary (Canonical)** line verbatim.
 - Prefer counts from `test_critique.md` Machine Summary `coverage_summary` (it is already bound to pytest).
 
 If `test_critique.md` is missing:
+
 - Fall back to `build_receipt.json` if it contains test counts.
 - Otherwise, report "unknown" counts and keep status `UNVERIFIED`.
 
 ### 4) Identify failures / flakiness / instability
+
 - Failures: any failing tests, erroring suites, or critical xfails that represent core behavior.
 - Flakiness: evidence of non-determinism (e.g., "rerun passed", "intermittent", marked flaky) from available artifacts.
 
 Do not invent flakiness. If you cannot prove it, label it "suspected" and keep status `UNVERIFIED`.
 
 ### 5) Coverage signals (best-effort, threshold-aware)
+
 - If `gate/coverage_audit.md` exists, treat it as the threshold verdict source.
 - If detailed coverage numbers exist (coverage report), include them.
 - If baseline numbers exist, compute deltas; otherwise report "current".
@@ -101,18 +115,22 @@ Do not invent flakiness. If you cannot prove it, label it "suspected" and keep s
 Do not assume repo layout or coverage tool. If you can't find a coverage source, record as missing.
 
 ### 6) Issue correlation (best-effort)
+
 If `gh` is available:
+
 - If `issue_number` known: pull that issue and search for keywords (test name/module).
 - Otherwise: search issues for failing test names/modules (title/body search).
-Record correlations with confidence: HIGH/MEDIUM/LOW.
+  Record correlations with confidence: HIGH/MEDIUM/LOW.
 
 If `gh` unavailable: add `tool: gh (unauthenticated/unavailable)` to `missing_required`.
 
 ### 7) Blame analysis (best-effort)
+
 If `git` is available:
+
 - For each failing test (or implicated file), run `git blame` on the most relevant lines.
-- Prefer blaming the *assertion line* (test) and the *nearest implementation line* (if identifiable).
-Record:
+- Prefer blaming the _assertion line_ (test) and the _nearest implementation line_ (if identifiable).
+  Record:
 - blamed SHA
 - author
 - date
@@ -121,17 +139,21 @@ Record:
 If `git` unavailable: add `tool: git (unavailable/not a repo)` to `missing_required`.
 
 ### 8) Produce a Regression Register (stable IDs)
+
 - Every regression gets a unique `REG-NNN`.
 - Use these IDs in both the table and the section headings.
 - Severity must be one of: CRITICAL | MAJOR | MINOR.
 
 Severity guidance:
+
 - CRITICAL: breaks mainline build/deploy confidence; core REQ behavior failing; security regression; coverage breach on critical path.
 - MAJOR: meaningful quality/coverage drop; non-core failing tests; widespread flakiness.
 - MINOR: low-impact failures or noisy findings.
 
 ### 9) Determine routing recommendation
+
 Use natural language to communicate next steps:
+
 - If mechanical failure: Explain what's broken and needs fixing
 - If CRITICAL regressions with clear owner: Recommend code-implementer or test-author to address
 - If regressions imply spec/design changes: Recommend routing to Flow 1 (requirements) or Flow 2 (design)
@@ -145,24 +167,28 @@ Use natural language to communicate next steps:
 
 ## Summary
 
-| Metric | Value |
-|--------|-------|
-| Regressions found | <int> |
-| Critical | <int> |
-| Major | <int> |
-| Minor | <int> |
+| Metric             | Value              |
+| ------------------ | ------------------ |
+| Regressions found  | <int>              |
+| Critical           | <int>              |
+| Major              | <int>              |
+| Minor              | <int>              |
 | Baseline available | yes / no / unknown |
 
 **Blockers:**
+
 - <must change to resolve CRITICAL/MAJOR regressions>
 
 **Missing:**
+
 - <path or tool>
 
 **Concerns:**
+
 - <non-gating issues>
 
 ## Context
+
 - flow: wisdom
 - run_id: <run-id>
 - issue_number: <N | null>
@@ -170,29 +196,31 @@ Use natural language to communicate next steps:
   - <path>
 
 ## Canonical Test Summary
+
 - pytest_summary: "<paste the exact Pytest Summary (Canonical) line if available>"
 - source: <path or "missing">
 
 ## Test Analysis
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Total Tests | <int|null> | <path> |
-| Passed | <int|null> | <path> |
-| Failed | <int|null> | <path> |
-| XFailed | <int|null> | <path> |
-| Skipped | <int|null> | <path> |
-| Flaky | <int|null> | <path or "unknown"> |
+| Metric      | Value | Source |
+| ----------- | ----- | ------ | ------------------- |
+| Total Tests | <int  | null>  | <path>              |
+| Passed      | <int  | null>  | <path>              |
+| Failed      | <int  | null>  | <path>              |
+| XFailed     | <int  | null>  | <path>              |
+| Skipped     | <int  | null>  | <path>              |
+| Flaky       | <int  | null>  | <path or "unknown"> |
 
 ## Regression Register
 
-| ID | Severity | Test/Area | Summary | Blamed Commit | Related Issue |
-|----|----------|-----------|---------|---------------|---------------|
-| REG-001 | MAJOR | <test name or module> | <one-line> | <sha or null> | <#N or null> |
+| ID      | Severity | Test/Area             | Summary    | Blamed Commit | Related Issue |
+| ------- | -------- | --------------------- | ---------- | ------------- | ------------- |
+| REG-001 | MAJOR    | <test name or module> | <one-line> | <sha or null> | <#N or null>  |
 
 ## Regression Details
 
 ### REG-001: <short title>
+
 - Severity: CRITICAL | MAJOR | MINOR
 - Area: <test path::name or module>
 - What changed: <delta if known; else "unknown">
@@ -209,36 +237,37 @@ Use natural language to communicate next steps:
 
 ## Coverage Signals
 
-| Source | Finding | Notes |
-|--------|---------|------|
+| Source                 | Finding           | Notes                   |
+| ---------------------- | ----------------- | ----------------------- |
 | gate/coverage_audit.md | PASS/FAIL/UNKNOWN | <thresholds if present> |
 
 ## Issue Correlation
 
-| Issue | Related Regression | Confidence | Notes |
-|-------|-------------------|------------|-------|
-| #45 | REG-001 | HIGH | keyword match: <...> |
+| Issue | Related Regression | Confidence | Notes                |
+| ----- | ------------------ | ---------- | -------------------- |
+| #45   | REG-001            | HIGH       | keyword match: <...> |
 
 ## Blame Summary
 
-| Commit | Author | Date | Files | Related Regressions |
-|--------|--------|------|-------|---------------------|
-| abc1234 | alice | 2025-12-11 | 3 | REG-001 |
+| Commit  | Author | Date       | Files | Related Regressions |
+| ------- | ------ | ---------- | ----- | ------------------- |
+| abc1234 | alice  | 2025-12-11 | 3     | REG-001             |
 
 ## Recommended Next
+
 - <1-5 bullets explaining what should happen next>
 ```
 
 ## Counting rules
 
-* `severity_summary.*` must equal the number of rows in the register with that severity.
-* `regressions_found` must equal the number of `REG-NNN` entries you created.
-* Do not estimate. Count what you wrote.
+- `severity_summary.*` must equal the number of rows in the register with that severity.
+- `regressions_found` must equal the number of `REG-NNN` entries you created.
+- Do not estimate. Count what you wrote.
 
 ## Stable marker contract
 
-* Each regression must have exactly one `REG-NNN` ID.
-* Each detail section heading must start with `### REG-NNN:`.
+- Each regression must have exactly one `REG-NNN` ID.
+- Each detail section heading must start with `### REG-NNN:`.
 
 ## Handoff Guidelines
 

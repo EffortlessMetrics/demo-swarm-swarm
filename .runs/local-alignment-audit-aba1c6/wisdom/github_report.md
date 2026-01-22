@@ -10,36 +10,38 @@
 
 ## Run Summary
 
-| Flow | Status | Key Outcome |
-|------|--------|-------------|
-| Signal | VERIFIED | 7 REQs, 6 OQs, 5 assumptions |
-| Plan | VERIFIED | OPT-003 chosen (phased ADR approach) |
-| Build | CANNOT_PROCEED | 53 pack-check assertions passed; permissions artifact in receipt write |
-| Review | VERIFIED | 30 feedback items, 29 resolved |
-| Gate | VERIFIED | Verdict: **MERGE** (35/35 ACs complete) |
-| Deploy | VERIFIED | Verdict: NOT_DEPLOYED (branch protection not enabled) |
+| Flow   | Status         | Key Outcome                                                            |
+| ------ | -------------- | ---------------------------------------------------------------------- |
+| Signal | VERIFIED       | 7 REQs, 6 OQs, 5 assumptions                                           |
+| Plan   | VERIFIED       | OPT-003 chosen (phased ADR approach)                                   |
+| Build  | CANNOT_PROCEED | 53 pack-check assertions passed; permissions artifact in receipt write |
+| Review | VERIFIED       | 30 feedback items, 29 resolved                                         |
+| Gate   | VERIFIED       | Verdict: **MERGE** (35/35 ACs complete)                                |
+| Deploy | VERIFIED       | Verdict: NOT_DEPLOYED (branch protection not enabled)                  |
 
 ---
 
 ## Learnings Extracted
 
-| Category | Count | Examples |
-|----------|-------|----------|
-| Learning Sections | 3 | Requirements, Design, Build |
-| Feedback Actions | 4 | Issue drafts for hardening, tooling, governance, closure |
-| Suggestions | 6 | Template improvements, automation opportunities |
-| Pack Observations | 6 | Permission resilience, markdown templates, automation gaps |
-| Regressions | 0 | Documentation-only run; no code regressions |
+| Category          | Count | Examples                                                   |
+| ----------------- | ----- | ---------------------------------------------------------- |
+| Learning Sections | 3     | Requirements, Design, Build                                |
+| Feedback Actions  | 4     | Issue drafts for hardening, tooling, governance, closure   |
+| Suggestions       | 6     | Template improvements, automation opportunities            |
+| Pack Observations | 6     | Permission resilience, markdown templates, automation gaps |
+| Regressions       | 0     | Documentation-only run; no code regressions                |
 
 ### Key Insights
 
 **What Worked:**
+
 - Layered approach (OPT-003) reduced coordination overhead and prevented conflicting edits
 - Open questions register (6 tracked) enabled fast-path decision-making with documented defaults
 - Requirements linked to acceptance criteria (35/35 ACs satisfied) enabled mechanical verification
 - Pack-check validation (53/53 assertions) provided structural confidence
 
 **What Didn't:**
+
 - "Seven flows vs ten command files" ambiguity caused bot reviewer confusion (FB-003, FB-004, FB-005)
 - No automation for deriving downstream docs from authoritative sources (CLAUDE.md)
 - Open questions remain OPEN even when evidence resolves them (e.g., OQ-SIG-001)
@@ -50,6 +52,7 @@
 ## Deliverables
 
 ### Documentation
+
 - ✅ [learnings.md](./learnings.md) — Structured analysis of signal, plan, build flows with recommendations
 - ✅ [feedback_actions.md](./feedback_actions.md) — 4 issue drafts + 6 suggestions for future work
 - ✅ [regression_report.md](./regression_report.md) — Test summary; 0 regressions found
@@ -59,6 +62,7 @@
 - ✅ [risk_assessment.md](./risk_assessment.md) — Predicted vs actual risk analysis
 
 ### Mechanics
+
 - ✅ [wisdom_receipt.json](./wisdom_receipt.json) — Final receipt (counts, flow summaries, outcomes)
 - ✅ [cleanup_report.md](./cleanup_report.md) — Evidence of mechanical derivation and artifact verification
 
@@ -90,6 +94,7 @@ Organizational constraint: Branch protection not enabled on main branch. Merge o
 ## Issue Closure
 
 Issue #1 ("DemoSwarm Documentation-Code Alignment Audit") is ready for closure:
+
 - ✅ PR #2 merged to main
 - ✅ All requirements implemented
 - ✅ All acceptance criteria satisfied

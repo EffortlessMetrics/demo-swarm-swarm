@@ -3,6 +3,7 @@
 This is an append-only register. New items are added in "Update" blocks. Resolutions are appended as `- A:` lines.
 
 ## Stable Marker Contract
+
 - Questions: `^- QID:` then `- Q:`
 - Assumptions: `^- Assumption:`
 - Resolutions: `^- A:`
@@ -92,6 +93,7 @@ This is an append-only register. New items are added in "Update" blocks. Resolut
 (none yet)
 
 ### Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

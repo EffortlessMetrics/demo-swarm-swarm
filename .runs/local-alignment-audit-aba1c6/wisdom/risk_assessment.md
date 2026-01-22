@@ -1,6 +1,7 @@
 # Risk Assessment
 
 ## Machine Summary
+
 status: VERIFIED
 
 recommended_action: PROCEED
@@ -12,17 +13,19 @@ blockers: []
 missing_required: []
 
 concerns:
-  - RSK-001 (path traversal in secrets.rs) remains ACCEPTED/DEFERRED; no exploitation occurred but not remediated
-  - Build directory permission failure was a surprise operational issue not predicted in early_risks.md
-  - Branch protection governance constraint caused NOT_DEPLOYED verdict despite successful merge
+
+- RSK-001 (path traversal in secrets.rs) remains ACCEPTED/DEFERRED; no exploitation occurred but not remediated
+- Build directory permission failure was a surprise operational issue not predicted in early_risks.md
+- Branch protection governance constraint caused NOT_DEPLOYED verdict despite successful merge
 
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 1
-  low: 4
+critical: 0
+high: 0
+medium: 1
+low: 4
 
 ## Context
+
 - flow: wisdom
 - run_id: local-alignment-audit-aba1c6
 - inputs_used:
@@ -42,26 +45,26 @@ severity_summary:
 
 ## Predicted vs Actual Risk Comparison
 
-| Risk ID | Prediction (Signal) | Actual Outcome | Accuracy |
-|---------|---------------------|----------------|----------|
-| RSK-001 | MEDIUM - Path traversal in secrets.rs | ACCEPTED/DEFERRED - No exploitation, deferred to future run | CORRECT - Risk exists but impact was correctly assessed as LOW given documentation-only scope |
-| RSK-002 | LOW - ReDoS misconception | CLOSED - Corrected in documentation; Rust regex is immune | CORRECT - Was a false positive; no actual vulnerability |
-| RSK-003 | MEDIUM - Pack-check drift | CLOSED - Seven-flow model validated; pack-check passed | CORRECT - Risk was real but mitigated by documentation alignment |
-| RSK-004 | MEDIUM - Stale flow count claims | CLOSED - All public docs updated to "seven flows" | CORRECT - Risk fully materialized and was addressed |
-| RSK-005 | LOW - Flow overlap semantics undocumented | CLOSED (merged with RSK-006) - Documented in architecture.md | CORRECT - Risk existed and was addressed |
-| RSK-006 | MEDIUM - Flow 7 undocumented | MITIGATED - Flow 7 now documented in public docs | CORRECT - Risk fully materialized and was addressed |
-| RSK-007 | LOW - Agent color coding unclear | CLOSED - Determined to be advisory per OQ-SIG-005 | CORRECT - Correctly assessed as low-impact |
+| Risk ID | Prediction (Signal)                       | Actual Outcome                                               | Accuracy                                                                                      |
+| ------- | ----------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| RSK-001 | MEDIUM - Path traversal in secrets.rs     | ACCEPTED/DEFERRED - No exploitation, deferred to future run  | CORRECT - Risk exists but impact was correctly assessed as LOW given documentation-only scope |
+| RSK-002 | LOW - ReDoS misconception                 | CLOSED - Corrected in documentation; Rust regex is immune    | CORRECT - Was a false positive; no actual vulnerability                                       |
+| RSK-003 | MEDIUM - Pack-check drift                 | CLOSED - Seven-flow model validated; pack-check passed       | CORRECT - Risk was real but mitigated by documentation alignment                              |
+| RSK-004 | MEDIUM - Stale flow count claims          | CLOSED - All public docs updated to "seven flows"            | CORRECT - Risk fully materialized and was addressed                                           |
+| RSK-005 | LOW - Flow overlap semantics undocumented | CLOSED (merged with RSK-006) - Documented in architecture.md | CORRECT - Risk existed and was addressed                                                      |
+| RSK-006 | MEDIUM - Flow 7 undocumented              | MITIGATED - Flow 7 now documented in public docs             | CORRECT - Risk fully materialized and was addressed                                           |
+| RSK-007 | LOW - Agent color coding unclear          | CLOSED - Determined to be advisory per OQ-SIG-005            | CORRECT - Correctly assessed as low-impact                                                    |
 
 ### Prediction Accuracy Summary
 
-| Metric | Value |
-|--------|-------|
-| Total Risks Predicted | 7 |
-| Predictions Correct | 7 (100%) |
-| Risks That Materialized | 5 (RSK-003, RSK-004, RSK-005, RSK-006, RSK-007) |
-| Risks That Did Not Materialize | 1 (RSK-001 - path traversal not exploited) |
-| False Positives Correctly Identified | 1 (RSK-002 - ReDoS misconception) |
-| Surprise Risks (Not Predicted) | 3 |
+| Metric                               | Value                                           |
+| ------------------------------------ | ----------------------------------------------- |
+| Total Risks Predicted                | 7                                               |
+| Predictions Correct                  | 7 (100%)                                        |
+| Risks That Materialized              | 5 (RSK-003, RSK-004, RSK-005, RSK-006, RSK-007) |
+| Risks That Did Not Materialize       | 1 (RSK-001 - path traversal not exploited)      |
+| False Positives Correctly Identified | 1 (RSK-002 - ReDoS misconception)               |
+| Surprise Risks (Not Predicted)       | 3                                               |
 
 ---
 
@@ -90,6 +93,7 @@ severity_summary:
 ## Surprise Risks (Not Predicted)
 
 ### SRP-001: Build Directory Permission Failure (MATERIALIZED)
+
 - Category: OPS
 - Severity: LOW
 - Status: MITIGATED
@@ -109,6 +113,7 @@ severity_summary:
   - Add git-based fallback to receipt reading when directory permissions fail
 
 ### SRP-002: Branch Protection Governance Constraint (MATERIALIZED)
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: ACCEPTED
@@ -128,6 +133,7 @@ severity_summary:
   - Document governance requirements before starting runs
 
 ### SRP-003: Bot Reviewer Confusion on Command vs Flow Count (MATERIALIZED)
+
 - Category: DOCUMENTATION
 - Severity: LOW
 - Status: CLOSED
@@ -148,22 +154,23 @@ severity_summary:
 
 ## Risk Register (Final State)
 
-| ID | Category | Severity | Status | Summary | Owner |
-|----|----------|----------|--------|---------|-------|
-| RSK-001 | SECURITY | MEDIUM | ACCEPTED | Path traversal in secrets.rs deferred to future security hardening run | security |
-| RSK-002 | SECURITY | LOW | CLOSED | ReDoS misconception corrected - Rust regex is immune | documentation |
-| RSK-003 | COMPLIANCE | LOW | CLOSED | Pack-check validates seven-flow model; contract compliance verified | tooling |
-| RSK-004 | DOCUMENTATION | LOW | CLOSED | All public docs reference "seven flows" consistently | documentation |
-| RSK-005 | OPS | LOW | CLOSED | Flow 7 documented; merged with RSK-006 | documentation |
-| SRP-001 | OPS | LOW | MITIGATED | Build directory permission failure; git fallback used | ops |
-| SRP-002 | OPS | MEDIUM | ACCEPTED | Branch protection governance constraint; NOT_DEPLOYED verdict | governance |
-| SRP-003 | DOCUMENTATION | LOW | CLOSED | Command vs flow count phrasing clarified in review | documentation |
+| ID      | Category      | Severity | Status    | Summary                                                                | Owner         |
+| ------- | ------------- | -------- | --------- | ---------------------------------------------------------------------- | ------------- |
+| RSK-001 | SECURITY      | MEDIUM   | ACCEPTED  | Path traversal in secrets.rs deferred to future security hardening run | security      |
+| RSK-002 | SECURITY      | LOW      | CLOSED    | ReDoS misconception corrected - Rust regex is immune                   | documentation |
+| RSK-003 | COMPLIANCE    | LOW      | CLOSED    | Pack-check validates seven-flow model; contract compliance verified    | tooling       |
+| RSK-004 | DOCUMENTATION | LOW      | CLOSED    | All public docs reference "seven flows" consistently                   | documentation |
+| RSK-005 | OPS           | LOW      | CLOSED    | Flow 7 documented; merged with RSK-006                                 | documentation |
+| SRP-001 | OPS           | LOW      | MITIGATED | Build directory permission failure; git fallback used                  | ops           |
+| SRP-002 | OPS           | MEDIUM   | ACCEPTED  | Branch protection governance constraint; NOT_DEPLOYED verdict          | governance    |
+| SRP-003 | DOCUMENTATION | LOW      | CLOSED    | Command vs flow count phrasing clarified in review                     | documentation |
 
 ---
 
 ## Risk Details
 
 ### RSK-001: Path Traversal in secrets.rs (ACCEPTED)
+
 - Category: SECURITY
 - Severity: MEDIUM
 - Status: ACCEPTED
@@ -182,6 +189,7 @@ severity_summary:
   - Track separately; do not block Wisdom flow completion
 
 ### RSK-002: ReDoS Misconception (CLOSED)
+
 - Category: SECURITY
 - Severity: LOW
 - Status: CLOSED
@@ -197,6 +205,7 @@ severity_summary:
   - **Prediction Accuracy: CORRECT** - False positive correctly identified at Signal phase
 
 ### RSK-003: Pack-Check Drift (CLOSED)
+
 - Category: COMPLIANCE
 - Severity: LOW (reduced from MEDIUM)
 - Status: CLOSED
@@ -212,6 +221,7 @@ severity_summary:
   - **Prediction Accuracy: CORRECT** - Risk was real but mitigated as predicted
 
 ### RSK-004: Stale Flow Count Claims (CLOSED)
+
 - Category: DOCUMENTATION
 - Severity: LOW (reduced from MEDIUM)
 - Status: CLOSED
@@ -226,6 +236,7 @@ severity_summary:
   - **Prediction Accuracy: CORRECT** - Risk fully materialized and addressed
 
 ### RSK-005/RSK-006: Flow 7 Undocumented (CLOSED)
+
 - Category: OPS
 - Severity: LOW (reduced from MEDIUM)
 - Status: CLOSED
@@ -241,6 +252,7 @@ severity_summary:
   - **Prediction Accuracy: CORRECT** - Risk materialized and addressed
 
 ### SRP-001: Build Directory Permission Failure (MITIGATED)
+
 - Category: OPS
 - Severity: LOW
 - Status: MITIGATED
@@ -260,6 +272,7 @@ severity_summary:
   - Consider atomic write pattern for receipts
 
 ### SRP-002: Branch Protection Governance Constraint (ACCEPTED)
+
 - Category: OPS
 - Severity: MEDIUM
 - Status: ACCEPTED
@@ -279,6 +292,7 @@ severity_summary:
   - Accept NOT_DEPLOYED as governance-accurate for current repo state
 
 ### SRP-003: Command vs Flow Count Confusion (CLOSED)
+
 - Category: DOCUMENTATION
 - Severity: LOW
 - Status: CLOSED
@@ -340,12 +354,12 @@ severity_summary:
 
 ### Evidence for Recommendations
 
-| Recommendation | Source Evidence |
-|----------------|-----------------|
-| Pre-flight governance audit | `learnings.md` ACTION items, `deploy/deployment_decision.md` |
-| Permission pre-check | `regression_report.md` missing_required, `learnings.md` PACK_OBS |
-| Bot reviewer friction | `learnings.md` Surprises section, `review/pr_feedback.md` |
-| Question resolution | `learnings.md` Recommendations section |
+| Recommendation              | Source Evidence                                                  |
+| --------------------------- | ---------------------------------------------------------------- |
+| Pre-flight governance audit | `learnings.md` ACTION items, `deploy/deployment_decision.md`     |
+| Permission pre-check        | `regression_report.md` missing_required, `learnings.md` PACK_OBS |
+| Bot reviewer friction       | `learnings.md` Surprises section, `review/pr_feedback.md`        |
+| Question resolution         | `learnings.md` Recommendations section                           |
 
 ---
 
@@ -368,14 +382,15 @@ severity_summary:
 ---
 
 ## Risk Analyst Result
+
 status: VERIFIED
 recommended_action: PROCEED
 route_to_flow: null
 route_to_agent: null
 severity_summary:
-  critical: 0
-  high: 0
-  medium: 1
-  low: 4
+critical: 0
+high: 0
+medium: 1
+low: 4
 blockers: []
 missing_required: []

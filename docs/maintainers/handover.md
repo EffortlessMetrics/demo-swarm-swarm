@@ -47,12 +47,12 @@ When changing a contract:
 
 Common drift patterns:
 
-| Symptom | Likely cause |
-|---------|--------------|
-| pack-check fails on enum | Agent uses non-canonical status value |
-| pack-check fails on heading | Casing mismatch (e.g., "Block" vs "block") |
-| Missing Machine Summary | Critic/verifier doesn't emit required block |
-| Routing doesn't work | Agent handoff missing clear recommendation or next step |
+| Symptom                     | Likely cause                                            |
+| --------------------------- | ------------------------------------------------------- |
+| pack-check fails on enum    | Agent uses non-canonical status value                   |
+| pack-check fails on heading | Casing mismatch (e.g., "Block" vs "block")              |
+| Missing Machine Summary     | Critic/verifier doesn't emit required block             |
+| Routing doesn't work        | Agent handoff missing clear recommendation or next step |
 
 ---
 
@@ -71,10 +71,10 @@ These verify: velocity in Work Plane, guardrails only at Publish Plane boundary.
 
 ## Key Resources
 
-| What | Where |
-|------|-------|
-| Pack reference | [CLAUDE.md](../../CLAUDE.md) |
-| Architecture | [architecture.md](../explanation/architecture.md) |
+| What            | Where                                                                     |
+| --------------- | ------------------------------------------------------------------------- |
+| Pack reference  | [CLAUDE.md](../../CLAUDE.md)                                              |
+| Architecture    | [architecture.md](../explanation/architecture.md)                         |
 | Doc conventions | [documentation-conventions.md](../reference/documentation-conventions.md) |
-| Release process | [release-checklist.md](release-checklist.md) |
-| Validation | [validation-run.md](../tutorials/validation-run.md) |
+| Release process | [release-checklist.md](release-checklist.md)                              |
+| Validation      | [validation-run.md](../tutorials/validation-run.md)                       |

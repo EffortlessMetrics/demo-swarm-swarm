@@ -3,11 +3,13 @@
 ## Search Inputs
 
 **Derived from run_meta.json:**
+
 - `run_id`: align-doc-ownership
 - `task_title`: Normalize language and ownership boundaries across DemoSwarm pack
 - No linked GitHub issue (this is an internal alignment project)
 
 **Search terms used:**
+
 - "documentation alignment"
 - "doc drift"
 - "pack consistency"
@@ -19,6 +21,7 @@
 - "cleanup"
 
 **Scope:**
+
 - Primary: EffortlessMetrics/demo-swarm-staging (origin)
 - Secondary: EffortlessMetrics/demo-swarm-dev (upstream)
 
@@ -26,13 +29,13 @@
 
 ## Access & Limitations
 
-| Aspect | Status |
-|--------|--------|
-| GitHub CLI (`gh`) | Available and authenticated |
-| Repository | EffortlessMetrics/demo-swarm-staging |
-| Upstream | EffortlessMetrics/demo-swarm-dev |
-| Search capability | Full (issues, PRs, commits) |
-| Rate limits | No issues encountered |
+| Aspect            | Status                               |
+| ----------------- | ------------------------------------ |
+| GitHub CLI (`gh`) | Available and authenticated          |
+| Repository        | EffortlessMetrics/demo-swarm-staging |
+| Upstream          | EffortlessMetrics/demo-swarm-dev     |
+| Search capability | Full (issues, PRs, commits)          |
+| Rate limits       | No issues encountered                |
 
 **Note:** The staging repo has no issues or PRs directly. All issue/PR activity is on the upstream dev repo.
 
@@ -40,9 +43,9 @@
 
 ## Related Issues
 
-| # | Title | State | Relevance |
-|---|-------|-------|-----------|
-| (none in staging repo) | - | - | - |
+| #                      | Title | State | Relevance |
+| ---------------------- | ----- | ----- | --------- |
+| (none in staging repo) | -     | -     | -         |
 
 **Upstream repo (demo-swarm-dev) issues:**
 
@@ -52,27 +55,30 @@ No issues directly addressing "doc ownership" or "language normalization" were f
 
 ## Related PRs
 
-| # | Title | State | Relevance |
-|---|-------|-------|-----------|
-| 48 | docs: v2.3.2 polish, evaluation guides, and repo organization | MERGED | High |
-| 35 | docs: align UX manifest docs with implementation | MERGED | Medium |
-| 16 | docs(runbooks): align template with example structure | MERGED | Medium |
-| 25 | docs: normalize links and add proof-of-life to UX handover | MERGED | Low |
+| #   | Title                                                         | State  | Relevance |
+| --- | ------------------------------------------------------------- | ------ | --------- |
+| 48  | docs: v2.3.2 polish, evaluation guides, and repo organization | MERGED | High      |
+| 35  | docs: align UX manifest docs with implementation              | MERGED | Medium    |
+| 16  | docs(runbooks): align template with example structure         | MERGED | Medium    |
+| 25  | docs: normalize links and add proof-of-life to UX handover    | MERGED | Low       |
 
 ### PR Details
 
 **PR #48 (High relevance):**
+
 - Moved 25+ legacy docs to `docs/archive/`
 - Added evaluation checklist, support docs, release notes
 - Established pattern: archive stale docs rather than delete
 - Precedent: reorganization is acceptable when it improves discoverability
 
 **PR #35 (Medium relevance):**
+
 - Aligned UX manifest docs with implementation
 - Pattern: docs should match implementation state
 - Precedent: updating docs to reflect actual vs aspirational state
 
 **PR #16 (Medium relevance):**
+
 - Aligned runbook template with example structure
 - Pattern: templates should match real examples
 - Precedent: DRY principle applies to doc structure
@@ -114,34 +120,38 @@ From commit history and PR patterns:
 ## Prior Art Pointers (Local Codebase)
 
 ### Flow Commands (`.claude/commands/*.md`)
+
 - 7 flow command files
 - Currently orchestration-level (agent lists, station descriptions)
 - Minimal skill invocation detail in flow commands (good alignment)
 
 ### Agent Docs (`.claude/agents/*.md`)
+
 - 55 agent files
 - Heavy operational detail in cleanup agents (build-cleanup, deploy-cleanup, etc.)
 - Extensive `demoswarm.sh` invocation examples embedded
 - Pattern: agents own operational/invocation specifics
 
 ### Skill Docs (`.claude/skills/*/SKILL.md`)
+
 - 7 skill files
 - Own CLI flag and contract truth
 - Detailed command reference with examples
 - Pattern: skills are single source of truth for CLI behavior
 
 ### CLAUDE.md
+
 - High-level overview + policy
 - Skills table is summary-level (command | purpose)
 - Does not duplicate CLI flag details from skills
 
 ### Potential Overlaps/Inconsistencies Identified:
 
-| Location | Content Type | Potential Issue |
-|----------|--------------|-----------------|
-| Agent cleanup docs | CLI invocation examples | May duplicate skill docs |
-| CLAUDE.md Skills section | Command table | Could drift from skill docs |
-| Agent docs | Status definitions | Already standardized (commit 963eb64) |
+| Location                 | Content Type            | Potential Issue                       |
+| ------------------------ | ----------------------- | ------------------------------------- |
+| Agent cleanup docs       | CLI invocation examples | May duplicate skill docs              |
+| CLAUDE.md Skills section | Command table           | Could drift from skill docs           |
+| Agent docs               | Status definitions      | Already standardized (commit 963eb64) |
 
 ---
 
@@ -209,15 +219,16 @@ From commit history and PR patterns:
 - PR: #35 relevance=Medium state=merged
 - PR: #16 relevance=Medium state=merged
 - PR: #25 relevance=Low state=merged
-- CODE_REF: .claude/commands/*.md note=7 flow command files (orchestration level)
-- CODE_REF: .claude/agents/*.md note=55 agent files (operational detail)
-- CODE_REF: .claude/skills/*/SKILL.md note=7 skill files (CLI truth)
+- CODE_REF: .claude/commands/\*.md note=7 flow command files (orchestration level)
+- CODE_REF: .claude/agents/\*.md note=55 agent files (operational detail)
+- CODE_REF: .claude/skills/\*/SKILL.md note=7 skill files (CLI truth)
 - CODE_REF: CLAUDE.md note=entry point + policy
 - CODE_REF: docs/CUSTOMIZATION.md note=customization guidance
 
 ---
 
 ## Machine Summary
+
 ```yaml
 status: VERIFIED
 recommended_action: PROCEED

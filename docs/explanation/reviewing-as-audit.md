@@ -7,6 +7,7 @@
 ## The Old Model
 
 Traditional code review:
+
 - Read the diff line by line
 - Hold the whole change in your head
 - Check for bugs, style, logic errors
@@ -19,6 +20,7 @@ This scales with change size. A 100-line change takes 10 minutes. A 10,000-line 
 ## The New Model
 
 Evidence-based review:
+
 - Read the cockpit (PR description, evidence panel)
 - Verify evidence is fresh and attributable
 - Spot-check 3-8 hotspots based on risk
@@ -33,6 +35,7 @@ This scales with evidence quality, not change size.
 ### 1. Evidence Sufficiency
 
 For each major claim, ask:
+
 - **Is there evidence?** (pointer to artifact, not just assertion)
 - **Is the evidence fresh?** (SHA matches HEAD)
 - **Is the evidence attributable?** (can trace back to tool output)
@@ -42,22 +45,22 @@ For each major claim, ask:
 
 You can't read everything. So you read what matters:
 
-| Risk Signal | What to Spot-Check |
-|-------------|-------------------|
-| Security-sensitive paths | Auth, crypto, user input handling |
-| High complexity delta | Files with significant cyclomatic complexity increase |
-| Churn hotspots | Files that have caused problems before |
-| Public API changes | Contract-breaking modifications |
-| Critic-flagged issues | Items marked MAJOR or CRITICAL in critiques |
+| Risk Signal              | What to Spot-Check                                    |
+| ------------------------ | ----------------------------------------------------- |
+| Security-sensitive paths | Auth, crypto, user input handling                     |
+| High complexity delta    | Files with significant cyclomatic complexity increase |
+| Churn hotspots           | Files that have caused problems before                |
+| Public API changes       | Contract-breaking modifications                       |
+| Critic-flagged issues    | Items marked MAJOR or CRITICAL in critiques           |
 
 ### 3. Freshness Discipline
 
-| Status | Action |
-|--------|--------|
-| FRESH | Trust the evidence |
-| ACCEPTABLE_STALE | Trust with awareness |
-| STALE | Request re-verification |
-| UNKNOWN | Request verification |
+| Status           | Action                  |
+| ---------------- | ----------------------- |
+| FRESH            | Trust the evidence      |
+| ACCEPTABLE_STALE | Trust with awareness    |
+| STALE            | Request re-verification |
+| UNKNOWN          | Request verification    |
 
 Stale evidence is not worthless, but it's not current proof either.
 
@@ -65,14 +68,14 @@ Stale evidence is not worthless, but it's not current proof either.
 
 The quality panel shows multiple sensors:
 
-| Surface | Question It Answers |
-|---------|---------------------|
-| Intent fidelity | Did we build what we meant to build? |
+| Surface            | Question It Answers                              |
+| ------------------ | ------------------------------------------------ |
+| Intent fidelity    | Did we build what we meant to build?             |
 | Verification depth | Are the tests meaningful? (mutation score helps) |
-| Maintainability | Is the code worse or better than before? |
-| Safety | Are boundaries respected? |
-| Operability | Will this work in production? |
-| Explainability | Can I understand what happened? |
+| Maintainability    | Is the code worse or better than before?         |
+| Safety             | Are boundaries respected?                        |
+| Operability        | Will this work in production?                    |
+| Explainability     | Can I understand what happened?                  |
 
 A single green checkmark can be gamed. A multi-sensor panel is much harder to fake.
 
@@ -131,6 +134,7 @@ A single green checkmark can be gamed. A multi-sensor panel is much harder to fa
 You are a **cockpit pilot**, not a proofreader.
 
 Your instruments (evidence panel, receipts, critiques) tell you the state of the system. Your job is:
+
 1. Verify the instruments are reading correctly (fresh, attributable)
 2. Interpret what they mean together (panel synthesis)
 3. Spot-check where risk is high (hotspots)

@@ -12,20 +12,24 @@ You do not write tests. You produce an executable **test plan contract** that Fl
 ## Inputs (repo-root-relative)
 
 Required:
+
 - `.runs/<run-id>/signal/features/*.feature`
 - `.runs/<run-id>/signal/requirements.md`
 
 Strongly recommended (use if present):
+
 - `.runs/<run-id>/signal/example_matrix.md`
 - `.runs/<run-id>/signal/verification_notes.md`
 - `.runs/<run-id>/plan/impact_map.json`
 - `.runs/<run-id>/plan/observability_spec.md`
 
 Contract-binding (mandatory when present):
+
 - `.runs/<run-id>/plan/api_contracts.yaml`
 - `.runs/<run-id>/plan/schema.md`
 
 Optional:
+
 - `.runs/<run-id>/signal/early_risks.md`
 - `.runs/<run-id>/signal/risk_assessment.md`
 - `.runs/<run-id>/signal/open_questions.md` (to avoid inventing details)
@@ -54,6 +58,7 @@ Optional:
   - If a scenario lacks a scenario-level `@REQ-###` tag → record as an issue (this is a Flow 1 fix, not yours).
 
 If there are zero feature files or zero scenarios:
+
 - Proceed best-effort (write a plan skeleton), mark it as partial, and recommend bdd-author address the missing scenarios.
 
 ### Step 2: Map scenarios to test types
@@ -75,6 +80,7 @@ For each scenario, assign one or more of:
 The API contract is the truth; ACs are the verification instructions for that truth.
 
 For every endpoint defined in `api_contracts.yaml`:
+
 1. **Generate explicit ACs** covering:
    - Positive case (200/201 success)
    - Negative cases (4xx/5xx error shapes)
@@ -87,6 +93,7 @@ For every endpoint defined in `api_contracts.yaml`:
    - Error shapes → Unit tests (error handling logic)
 
 **Example:** If `api_contracts.yaml` defines `POST /api/sessions` returning 201/401/422:
+
 - AC-xxx: POST /api/sessions returns 201 with valid credentials
 - AC-xxx: POST /api/sessions returns 401 with invalid credentials
 - AC-xxx: POST /api/sessions returns 422 with malformed request
@@ -108,6 +115,7 @@ If risk artifacts are missing, still assign priorities using conservative defaul
 Add a thresholds section that Flow 5 can audit. Use stable marker format so coverage-enforcer can parse mechanically.
 
 **Stable markers (required):**
+
 ```
 - COVERAGE_LINE_REQUIRED: 80
 - COVERAGE_BRANCH_REQUIRED: 70
@@ -115,6 +123,7 @@ Add a thresholds section that Flow 5 can audit. Use stable marker format so cove
 ```
 
 Defaults (customize per repo):
+
 - line: 80%
 - branch: 70%
 - critical_path: 90% for P0 modules/endpoints
@@ -122,10 +131,12 @@ Defaults (customize per repo):
 Also specify "how measured" (tooling-agnostic; e.g., "use project's coverage tool; parse summary from test-runner output").
 
 If coverage thresholds cannot be set (e.g., no testing infrastructure), use:
+
 ```
 - COVERAGE_LINE_REQUIRED: null
 - COVERAGE_BRANCH_REQUIRED: null
 ```
+
 and add a concern explaining why.
 
 ### Step 4b: Mutation testing requirements (optional but explicit)
@@ -133,26 +144,31 @@ and add a concern explaining why.
 Decide whether mutation testing is **required**, **recommended**, or **not applicable** for this change:
 
 **Required** when:
+
 - P0 security/auth/payment code is modified
 - Core business logic with high consequence of silent regression
 - ADR explicitly mandates mutation hardening
 
 **Recommended** when:
+
 - Moderate-risk code with complex conditionals
 - Areas with historical regression patterns
 
 **Not applicable** when:
+
 - Pure config/infra changes
 - UI-only changes with no business logic
 - Scaffolding/boilerplate
 
 If mutation testing is required or recommended, specify:
+
 - `mutation_required: true | false`
 - `mutation_threshold: <int | null>` (minimum mutation score %; null = no threshold, just run)
 - `mutation_scope: [<module or path patterns>]` (which files/modules to target)
 - `mutation_tool_hint: <tool-name | null>` (e.g., `cargo-mutants`, `mutmut`, `stryker`; null = auto-detect)
 
 The mutator agent reads these fields to determine behavior:
+
 - If `mutation_required: true` and tool unavailable → mutator escalates
 - If `mutation_required: false` and tool unavailable → mutator proceeds with concern
 - If `mutation_threshold` is set → mutator compares score against it
@@ -162,16 +178,19 @@ The mutator agent reads these fields to determine behavior:
 When state transitions are planned (check `schema.md` for **State Transition Infrastructure** and `.runs/<run-id>/plan/migrations/`), assess whether test fixtures need updating:
 
 **Scan for existing test data:**
+
 - `**/fixtures/**`, `**/seeds/**`, `**/test_data/**`
 - `**/factories/**` (factory-based test data)
 - `**/*.seed.sql`, `**/*.fixtures.json`, `**/*.factory.ts`
 
 **If schema changes affect test data:**
+
 - New required columns → existing fixtures may fail constraint validation
 - Renamed/removed columns → existing fixtures reference stale fields
 - New relationships → seed data may need related records
 
 **Add to test plan:**
+
 - If fixtures likely need updates, include a "Update Test Fixtures" task in the Recommended Next section.
 - Add it to the AC matrix as a pre-implementation AC (e.g., `AC-000: Update fixtures for new schema`).
 - Document which fixture files are likely affected.
@@ -199,19 +218,23 @@ Write the plan using this structure (includes the Scenario → Test Type Matrix 
 - **Concerns**: <list or "none">
 
 ## Scope
+
 - What this plan covers (and what it explicitly does not)
 
 ## Coverage Thresholds
 
 Stable markers (required for coverage-enforcer to parse mechanically):
+
 - COVERAGE_LINE_REQUIRED: <int>
 - COVERAGE_BRANCH_REQUIRED: <int>
 - COVERAGE_CRITICAL_PATH: <module or path pattern for P0 coverage>
 
 Additional notes:
+
 - measurement_notes: <how coverage is obtained>
 
 ## Mutation Testing
+
 - mutation_required: true | false
 - mutation_threshold: <int | null>
 - mutation_scope:
@@ -220,25 +243,31 @@ Additional notes:
 - rationale: <why required/not required>
 
 ## Scenario → Test Type Matrix
+
 | REQ | Feature File | Scenario | Priority | Unit | Integration | Contract | E2E | Fuzz | Perf/Obs | Notes |
-|-----|--------------|----------|----------|------|-------------|----------|-----|------|----------|-------|
+| --- | ------------ | -------- | -------- | ---- | ----------- | -------- | --- | ---- | -------- | ----- |
 
 ## Requirement Coverage Summary
+
 | Requirement | Scenarios | Priority | Required Test Types | Notes |
-|-------------|-----------|----------|---------------------|-------|
+| ----------- | --------- | -------- | ------------------- | ----- |
 
 ## Contract Test Plan (if api_contracts.yaml exists)
+
 - Which endpoints/status codes/error shapes must be asserted
 - Backwards-compat expectations (if any)
 
 ## Non-Behavioral Verification (from verification_notes.md)
+
 - Performance / security / compliance checks that are not BDD-expressible
 - When they run (Build vs Gate vs Deploy)
 
 ## Gaps and Questions
+
 - Q: <question>. Suggested default: <default>. Impact: <impact>.
 
 ## Recommended Next
+
 - What Flow 3 should implement first (ordered list)
 ```
 
@@ -261,11 +290,11 @@ Write `ac_matrix.md` using this structure:
 
 ## AC Inventory
 
-| AC-ID | Source | Description | Priority | Test Types | Impl Hints | Verification |
-|-------|--------|-------------|----------|------------|------------|--------------|
-| AC-001 | @REQ-001, login.feature:12 | User can log in with valid credentials | P0 | Unit, Integration | Auth module | Login succeeds, token issued |
-| AC-002 | @REQ-002, login.feature:25 | Invalid credentials rejected | P0 | Unit | Auth module | 401 returned, no token |
-| ... | | | | | | |
+| AC-ID  | Source                     | Description                            | Priority | Test Types        | Impl Hints  | Verification                 |
+| ------ | -------------------------- | -------------------------------------- | -------- | ----------------- | ----------- | ---------------------------- |
+| AC-001 | @REQ-001, login.feature:12 | User can log in with valid credentials | P0       | Unit, Integration | Auth module | Login succeeds, token issued |
+| AC-002 | @REQ-002, login.feature:25 | Invalid credentials rejected           | P0       | Unit              | Auth module | 401 returned, no token       |
+| ...    |                            |                                        |          |                   |             |                              |
 
 ## Column Definitions
 
@@ -280,6 +309,7 @@ Write `ac_matrix.md` using this structure:
 ## Implementation Order
 
 Recommended sequence for Flow 3 (respects dependencies):
+
 1. AC-001 (foundational)
 2. AC-002 (depends on AC-001)
 3. ...
@@ -294,17 +324,20 @@ Recommended sequence for Flow 3 (respects dependencies):
 ### Step 6: Assess completion
 
 Your test plan is **complete** when:
+
 - Scenarios exist and are mapped to test types
 - Coverage thresholds are defined
 - AC matrix covers all scenarios/requirements
 - No material blockers remain
 
 Your test plan is **partial** when:
+
 - Scenarios are missing or tagging is broken
 - Key inputs missing (features, requirements)
 - Mapping requires unresolved answers
 
 You **cannot proceed** when:
+
 - Mechanical failure (cannot read/write required files, permission errors, tooling missing)
 
 ## Handoff Guidelines
@@ -321,6 +354,7 @@ After writing the test plan and AC matrix, explain what you did and recommend ne
 "Requirements.md is missing or incomplete. Test planning needs clear REQ/NFR identifiers to map to test types. requirements-author should complete the requirements first."
 
 Your handoff should include:
+
 - What you accomplished (scenarios mapped, thresholds set, ACs defined)
 - What gaps remain (if any)
 - Which agent should work next and why

@@ -24,15 +24,16 @@ Everything local:
 
 GitHub operations are gated by `gh` availability:
 
-| Operation | Behavior without `gh` |
-|-----------|----------------------|
-| Issue creation | SKIPPED |
-| Status board updates | SKIPPED |
-| Flow comments | SKIPPED |
-| PR creation | SKIPPED |
-| Merge (Flow 5) | SKIPPED |
+| Operation            | Behavior without `gh` |
+| -------------------- | --------------------- |
+| Issue creation       | SKIPPED               |
+| Status board updates | SKIPPED               |
+| Flow comments        | SKIPPED               |
+| PR creation          | SKIPPED               |
+| Merge (Flow 5)       | SKIPPED               |
 
 Evidence of skipped operations is recorded in:
+
 - `gh_issue_status.md`
 - `gh_report_status.md`
 
@@ -62,6 +63,7 @@ Same commands, same behavior:
 ```
 
 You'll see messages like:
+
 - "GitHub CLI not available, skipping issue operations"
 - "GitHub operations skipped (auth not configured)"
 
@@ -71,17 +73,19 @@ You'll see messages like:
 
 Flow 5 has two operation types:
 
-| Type | Without GitHub |
-|------|----------------|
+| Type                     | Without GitHub            |
+| ------------------------ | ------------------------- |
 | Release ops (merge, tag) | SKIPPED — handle manually |
-| Reporting ops | SKIPPED — handle manually |
+| Reporting ops            | SKIPPED — handle manually |
 
 The flow still:
+
 - Writes deployment artifacts
 - Computes deploy_receipt.json
 - Records what would have happened
 
 Manual steps for production:
+
 1. Review Gate verdict (must be MERGE)
 2. Manually merge the run branch
 3. Manually create tags/releases if needed

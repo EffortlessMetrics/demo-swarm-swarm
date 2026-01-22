@@ -67,6 +67,7 @@ coverage_summary:
 ## Traceability Gaps
 
 None. All REQ-001 through REQ-007 and NFR-MAINT-001, NFR-TEST-001, NFR-REGR-001 have explicit coverage in:
+
 - ADR: Decision section binds each REQ/NFR to chosen option
 - api_contracts.yaml: `traceability_matrix` section maps REQs to contracts
 - test_plan.md: `Scenario to Test Type Matrix` covers all requirements

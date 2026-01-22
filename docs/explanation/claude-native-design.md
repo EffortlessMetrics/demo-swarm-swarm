@@ -13,12 +13,14 @@ This document explains the fundamental principles that make this swarm pack effe
 The central metaphor: **the orchestrator is a project manager coordinating a team of well-trained junior engineers.**
 
 The PM:
+
 - Knows the overall goal and the order of steps
 - Assigns work to the right people
 - Routes on status updates (not by doing the work themselves)
 - Makes decisions when workers disagree or get stuck
 
 The juniors:
+
 - Have deep expertise in their specific area
 - Investigate problems before asking for help
 - Report what they did, what they found, and what they recommend
@@ -31,6 +33,7 @@ This metaphor shapes everything. When you design an agent, ask: "How would a sen
 Claude is a language model, not a JSON parser. Its strength is understanding intent and context from natural language.
 
 **The anti-pattern:**
+
 ```yaml
 action: PROCEED
 next_agent: code-implementer
@@ -38,6 +41,7 @@ reason_code: REQ_COMPLETE
 ```
 
 **The Claude-native pattern:**
+
 ```markdown
 **What I did:** Reviewed the requirements against the acceptance criteria.
 Found all five requirements are testable and unambiguous.
@@ -54,6 +58,7 @@ The second version gives Claude the context it needs. A PM reading the first ver
 The pack uses prose handoffs between agents, not structured data exchanges.
 
 Why:
+
 - **Claude is good at understanding prose.** It can infer routing from "run the implementer next" as easily as from `next_agent: code-implementer`.
 - **Prose captures nuance.** "The timeout logic is wrong, but it's a minor fix that code-implementer can handle" is richer than `severity: MINOR, agent: code-implementer`.
 - **Humans can audit it.** When something goes wrong, you read a story, not decode a schema.
@@ -71,11 +76,13 @@ Agents exist for exactly two reasons: **to do work** or **to compress context**.
 The primary reason to spawn an agent is that work needs doing.
 
 A fresh agent context gives you:
+
 - Clean token budget (no accumulated context bloat)
 - Focused attention (single responsibility)
 - Cheaper execution (sub-agents are cheaper than orchestrator tokens)
 
 Examples:
+
 - `code-implementer`: Writes the implementation
 - `test-author`: Writes tests
 - `code-critic`: Reviews code quality
@@ -86,6 +93,7 @@ Examples:
 Some agents exist primarily to digest heavy inputs and emit light outputs.
 
 Raw reality is often too heavy to carry through a flow:
+
 - Test logs: 10K+ lines
 - GitHub API responses: 100KB+ of JSON
 - Git diffs: Hundreds of changed lines
@@ -137,6 +145,7 @@ The handoff answers three questions:
 3. **What do you recommend?** Specific next step with reasoning.
 
 **Example:**
+
 ```markdown
 ## Handoff
 
@@ -152,6 +161,7 @@ in open_questions.md for the human reviewer.
 ```
 
 The orchestrator reads this and knows:
+
 - Three requirements are done
 - Two are blocked (with specific reasons)
 - Next step is test execution
@@ -162,6 +172,7 @@ The orchestrator reads this and knows:
 The orchestrator assigns work using natural language, not configuration objects.
 
 **The anti-pattern:**
+
 ```yaml
 agent: code-implementer
 config:
@@ -172,6 +183,7 @@ config:
 ```
 
 **The Claude-native pattern:**
+
 ```markdown
 Implement REQ-001, REQ-002, and REQ-003 from the requirements document.
 The ADR specifies JWT-based authentication with 15-minute session timeout.
@@ -185,6 +197,7 @@ The second version tells the agent what to accomplish and provides context. The 
 Agent prompts emphasize **what to do**, not **what not to do**.
 
 **The anti-pattern:**
+
 ```
 DO NOT:
 - Modify files outside the manifest
@@ -195,6 +208,7 @@ DO NOT:
 ```
 
 **The Claude-native pattern:**
+
 ```
 Your goal is to implement the acceptance criteria with full test coverage.
 
@@ -237,11 +251,13 @@ Every handoff answers:
 Even when uncertain, take a stance.
 
 **Weak:**
+
 ```
 I'm not sure what to do next. The tests pass but there might be issues.
 ```
 
 **Strong:**
+
 ```
 Tests pass. Code-critic should review for maintainability before we proceed.
 The session logic is complex enough that a second set of eyes would help.
@@ -258,6 +274,7 @@ A handoff that says "I completed 2/5 ACs, blocked on missing schema" is a verifi
 A handoff that says "All 5 ACs complete (assuming schema exists)" is a high-risk failure. It hides uncertainty behind false completion.
 
 **PARTIAL is a win.** If you:
+
 - Made real progress
 - Documented what's done and what's blocked
 - Left the codebase in a runnable state
@@ -279,6 +296,7 @@ If you're debugging a failure in 3 months, would this artifact help you understa
 ### Good Artifacts Explain the Why
 
 **Stubby artifact (bad):**
+
 ```markdown
 # Requirements Critique
 
@@ -287,6 +305,7 @@ Issues: 0
 ```
 
 **Substantive artifact (good):**
+
 ```markdown
 # Requirements Critique
 
@@ -315,6 +334,7 @@ Passed.
 This artifact has no substance. It doesn't explain what was checked, what was found, or why it passed. A human reviewer learns nothing. A future agent gets no context.
 
 If an artifact would be this stubby, either:
+
 1. **Make it substantive.** Explain what you checked and why it passed.
 2. **Don't produce it.** Let the handoff convey the status.
 
@@ -360,11 +380,13 @@ Only CANNOT_PROCEED is a failure, and only because it indicates environmental pr
 Agents do thinking, not copying.
 
 **Mechanical work (avoid):**
+
 ```
 Read the test file. Count the test functions. Write the count to a file.
 ```
 
 **Cognitive work (prefer):**
+
 ```
 Analyze the test strategy. Does it cover the risk surface of the implementation?
 Are there gaps where untested code could fail? What's your assessment?
@@ -459,6 +481,7 @@ When Flow 3 (Build) starts, it reads Flow 1 and Flow 2 outputs from disk. It doe
 Agents don't need "resume mode" flags. They check disk state and determine what's left.
 
 When an agent starts:
+
 1. Check if its tracking artifact exists (e.g., `ac_status.json`)
 2. If yes: read it, determine what's PENDING, continue from there
 3. If no: initialize fresh
@@ -483,14 +506,14 @@ No special recovery logic needed. The disk is the truth.
 
 The pack replaces patterns from traditional automation harnesses. These patterns don't fit Claude Code.
 
-| Old Pattern | Problem | Claude-Native Alternative |
-|-------------|---------|---------------------------|
+| Old Pattern                | Problem                                         | Claude-Native Alternative          |
+| -------------------------- | ----------------------------------------------- | ---------------------------------- |
 | Structured command objects | Claude understands prose; parsing adds overhead | Natural language task descriptions |
-| Allowlists/denylists | Assumes omniscient planning; limits exploration | Role focus + critic guardrails |
-| Mode flags | Agents should determine mode from disk state | Every call is implicit resume |
-| Routing tables in YAML | Claude can route from prose recommendations | Handoffs with natural language |
-| Hardcoded file paths | Brittle; assumes static structure | Agent discovers paths from context |
-| Permission prompts | Token waste; friction cascade | Default-allow work, gate publish |
+| Allowlists/denylists       | Assumes omniscient planning; limits exploration | Role focus + critic guardrails     |
+| Mode flags                 | Agents should determine mode from disk state    | Every call is implicit resume      |
+| Routing tables in YAML     | Claude can route from prose recommendations     | Handoffs with natural language     |
+| Hardcoded file paths       | Brittle; assumes static structure               | Agent discovers paths from context |
+| Permission prompts         | Token waste; friction cascade                   | Default-allow work, gate publish   |
 
 ### Specific Anti-Patterns
 

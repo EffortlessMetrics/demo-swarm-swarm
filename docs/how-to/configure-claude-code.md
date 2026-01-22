@@ -9,12 +9,14 @@
 Before configuring Claude Code:
 
 1. **Claude Code CLI installed**
+
    ```bash
    # Verify installation
    claude --version
    ```
 
 2. **Repository cloned**
+
    ```bash
    git clone <your-repo-url>
    cd <your-repo>
@@ -35,6 +37,7 @@ Before configuring Claude Code:
 Claude Code has a permissions system that controls what operations Claude can perform without asking for approval. By default, Claude asks permission for file reads, writes, and command execution.
 
 For DemoSwarm, we configure Claude to bypass these prompts. Claude can:
+
 - Read and write files freely
 - Run commands without approval
 - Execute multi-step operations autonomously
@@ -44,6 +47,7 @@ For DemoSwarm, we configure Claude to bypass these prompts. Claude can:
 **The sandbox is the boundary, not the prompt.**
 
 We don't constrain Claude's moment-to-moment actions. Instead:
+
 - The repository is the sandbox
 - Gates engage at publish boundaries (commit, push, GitHub post)
 - Claude has freedom to explore, implement, and iterate within that sandbox
@@ -53,6 +57,7 @@ This is exactly how you'd treat a trusted new hire: "Here's your dev environment
 ### The Alternative (and Why It Fails)
 
 Approval-per-action systems:
+
 - Interrupt flow constantly
 - Reduce Claude to a suggestion engine
 - Make iteration expensive
@@ -127,6 +132,7 @@ Create or edit `.claude/settings.json`:
 ```
 
 This configuration:
+
 - **Allows** normal development operations without prompts
 - **Asks** before destructive or publishing operations (push, publish, reset)
 - **Denies** access to sensitive credential files
@@ -162,12 +168,7 @@ If you just want to get started quickly:
 {
   "permissions": {
     "defaultMode": "bypassPermissions",
-    "allow": [
-      "Bash",
-      "Read",
-      "Write",
-      "Edit"
-    ]
+    "allow": ["Bash", "Read", "Write", "Edit"]
   }
 }
 ```
@@ -189,6 +190,7 @@ When working on architecturally significant features, you can use Opus for deepe
 ### Agent-Level Allocation
 
 The pack handles model allocation internally:
+
 - **Cleanup agents** — Lighter models for mechanical tasks (counting, extraction)
 - **Creative agents** — Inherit from session default for implementation and critique
 
@@ -224,6 +226,7 @@ If this creates artifacts under `.runs/test-feature/signal/`, your setup is work
 ### Verify Permissions
 
 In Claude Code, try:
+
 - Reading a file (should work without prompt)
 - Writing a file (should work without prompt)
 - Running a test command (should work without prompt)
@@ -234,14 +237,14 @@ If you're getting permission prompts, check your `settings.json` configuration.
 
 ## Common Issues
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Permission prompts appearing | `permissions.allow` not configured | Add operations to `allow` list in `settings.json` |
-| Flows failing to spawn agents | Task operations not allowed | Add `Task` to allow list if using subtask patterns |
-| Git operations failing | No git config | Run `git config user.name` and `git config user.email` |
-| `gh` commands failing | GitHub CLI not authenticated | Run `gh auth login` |
-| Pack commands not found | Not in Claude Code session | Open Claude Code in the repo directory |
-| Settings not taking effect | Wrong settings file location | Check `.claude/settings.json` is at repo root |
+| Issue                         | Cause                              | Fix                                                    |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------------ |
+| Permission prompts appearing  | `permissions.allow` not configured | Add operations to `allow` list in `settings.json`      |
+| Flows failing to spawn agents | Task operations not allowed        | Add `Task` to allow list if using subtask patterns     |
+| Git operations failing        | No git config                      | Run `git config user.name` and `git config user.email` |
+| `gh` commands failing         | GitHub CLI not authenticated       | Run `gh auth login`                                    |
+| Pack commands not found       | Not in Claude Code session         | Open Claude Code in the repo directory                 |
+| Settings not taking effect    | Wrong settings file location       | Check `.claude/settings.json` is at repo root          |
 
 ---
 
@@ -250,6 +253,7 @@ If you're getting permission prompts, check your `settings.json` configuration.
 ### This Configuration Is for Development Sandboxes
 
 The permissive configuration is designed for isolated development environments where:
+
 - No production credentials exist
 - No production systems are accessible
 - Git push is the only way to affect the outside world
@@ -265,6 +269,7 @@ The permissive configuration is designed for isolated development environments w
 ### Your CI/CD Has Its Own Gates
 
 This configuration applies to local development. Your CI/CD pipeline should have:
+
 - Its own secrets scanning
 - Its own test requirements
 - Its own approval workflows

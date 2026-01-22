@@ -39,12 +39,12 @@ Natural language, not parsed fields. The orchestrator reads prose and routes on 
 
 How do we know it worked?
 
-| Evidence Type | Examples |
-|---------------|----------|
-| Tests | Unit tests pass, integration tests pass |
-| Artifacts | Receipt written, summary produced |
-| Checks | Lint passes, policy passes |
-| Diff | Code changes match intent |
+| Evidence Type | Examples                                |
+| ------------- | --------------------------------------- |
+| Tests         | Unit tests pass, integration tests pass |
+| Artifacts     | Receipt written, summary produced       |
+| Checks        | Lint passes, policy passes              |
+| Diff          | Code changes match intent               |
 
 If there is no way to verify success, the change is not observable and may not be doing anything.
 
@@ -53,6 +53,7 @@ If there is no way to verify success, the change is not observable and may not b
 PARTIAL is a valid exit. Honest partial reports are successful outcomes.
 
 Define what the agent should do when it cannot complete:
+
 - Document what was done
 - Explain what blocked further progress
 - Recommend next steps
@@ -61,16 +62,17 @@ Hiding uncertainty is the actual failure mode.
 
 ### 6. Does this add handcuffs or add inspection?
 
-| Approach | Effect |
-|----------|--------|
-| **Handcuffs** | Restrict what agents can do. Slow velocity. Create workarounds. |
-| **Inspection** | Verify afterward. Catch issues. Allow iteration. |
+| Approach       | Effect                                                          |
+| -------------- | --------------------------------------------------------------- |
+| **Handcuffs**  | Restrict what agents can do. Slow velocity. Create workarounds. |
+| **Inspection** | Verify afterward. Catch issues. Allow iteration.                |
 
 Prefer inspection over prevention. Gates engage at publish boundaries, not during internal iteration.
 
 ### 7. Does this reduce reviewer attention?
 
 Human review time is the real bottleneck. Every change should:
+
 - Reduce what reviewers must check, OR
 - Make their checks faster, OR
 - Catch issues before they reach review
@@ -129,15 +131,15 @@ Skills exist for work that requires no reasoning. If judgment is needed, use an 
 
 ## Anti-Patterns to Avoid
 
-| Anti-Pattern | Why It Fails | What to Do Instead |
-|--------------|--------------|-------------------|
-| **God agent** | Too many responsibilities. Hard to debug. Brittle. | Split into focused agents with single responsibilities |
-| **Parsed routing** | Fragile. Encourages gaming structured fields. | Route on prose. Orchestrators read and understand. |
-| **Approval-per-action** | Kills velocity. Creates token-burning loops. | Gate at publish boundaries only |
-| **Schema-first output** | Mechanical compliance. Misses actual quality. | Outcome-first success criteria |
-| **Constraint lists** | "DO NOT" prompts teach bad behavior. Hard to follow. | Positive guidance. Describe what TO DO. |
-| **Kitchen sink agent** | Does everything shallowly. No accountability. | Single responsibility, done deeply |
-| **"While you're there..."** | Couples unrelated work. Muddies ownership. | Separate agents for separate jobs |
+| Anti-Pattern                | Why It Fails                                         | What to Do Instead                                     |
+| --------------------------- | ---------------------------------------------------- | ------------------------------------------------------ |
+| **God agent**               | Too many responsibilities. Hard to debug. Brittle.   | Split into focused agents with single responsibilities |
+| **Parsed routing**          | Fragile. Encourages gaming structured fields.        | Route on prose. Orchestrators read and understand.     |
+| **Approval-per-action**     | Kills velocity. Creates token-burning loops.         | Gate at publish boundaries only                        |
+| **Schema-first output**     | Mechanical compliance. Misses actual quality.        | Outcome-first success criteria                         |
+| **Constraint lists**        | "DO NOT" prompts teach bad behavior. Hard to follow. | Positive guidance. Describe what TO DO.                |
+| **Kitchen sink agent**      | Does everything shallowly. No accountability.        | Single responsibility, done deeply                     |
+| **"While you're there..."** | Couples unrelated work. Muddies ownership.           | Separate agents for separate jobs                      |
 
 ---
 
@@ -159,16 +161,19 @@ Reject changes that:
 Good changes pass these checks:
 
 **For agents:**
+
 - Can you describe the job in one sentence?
 - Would you trust a well-trained junior to do this with these instructions?
 - Is there a clear way to verify it worked?
 
 **For flows:**
+
 - Is there a meaningful phase boundary here, or is this just adding steps?
 - Does the cleanup agent have something real to measure?
 - Can the flow recover gracefully from partial completion?
 
 **For skills:**
+
 - Is this truly mechanical, or does it require judgment?
 - Could an agent do this inline, or does it need isolation?
 - Is the output stable and predictable?

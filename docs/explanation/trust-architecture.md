@@ -12,11 +12,11 @@ Trust isn't granted by policy. Trust is earned by architecture.
 
 **High trust comes FROM high verification, not from restrictions.**
 
-| Phrase | Meaning | Result |
-|--------|---------|--------|
-| "Trust but verify" | Trust first, check later | Gaps when verification skipped |
-| "Verify then trust" | No action until proven | Too slow, too cautious |
-| **"Trust AND verify"** | High autonomy + high verification | Fast AND safe |
+| Phrase                 | Meaning                           | Result                         |
+| ---------------------- | --------------------------------- | ------------------------------ |
+| "Trust but verify"     | Trust first, check later          | Gaps when verification skipped |
+| "Verify then trust"    | No action until proven            | Too slow, too cautious         |
+| **"Trust AND verify"** | High autonomy + high verification | Fast AND safe                  |
 
 The system gives agents high trust (autonomy, no babysitting) BECAUSE it has high verification (tests, critics, gates). These aren't in tension—they're mutually reinforcing.
 
@@ -24,10 +24,10 @@ Traditional AI safety asks: "How do we prevent the AI from doing dangerous thing
 
 AgOps asks: "How do we verify that what the AI did is correct?"
 
-| Approach | Mechanism | Result |
-|----------|-----------|--------|
-| **Traditional** | Permissions, restrictions, approval dialogs | Slow iteration, false confidence, friction |
-| **AgOps** | Work freely, verify thoroughly, gate at boundaries | Fast iteration, real evidence, clean boundaries |
+| Approach        | Mechanism                                          | Result                                          |
+| --------------- | -------------------------------------------------- | ----------------------------------------------- |
+| **Traditional** | Permissions, restrictions, approval dialogs        | Slow iteration, false confidence, friction      |
+| **AgOps**       | Work freely, verify thoroughly, gate at boundaries | Fast iteration, real evidence, clean boundaries |
 
 The traditional approach tries to prevent bad outcomes by constraining actions. AgOps achieves safe outcomes by verifying results. The difference is fundamental: one is about control, the other is about evidence.
 
@@ -41,13 +41,13 @@ Every claim must be backed. Every output must be verified. Every boundary must b
 
 ### What Earns Trust
 
-| Layer | What It Proves | Trust Gained |
-|-------|---------------|--------------|
-| Tests pass | Code behaves as specified | Functional trust |
-| Critics approve | No obvious issues found | Quality trust |
-| Mutation score high | Tests actually test the code | Verification trust |
-| Evidence complete | Claims are backed by pointers | Audit trust |
-| Gates clear | Boundaries are respected | Safety trust |
+| Layer               | What It Proves                | Trust Gained       |
+| ------------------- | ----------------------------- | ------------------ |
+| Tests pass          | Code behaves as specified     | Functional trust   |
+| Critics approve     | No obvious issues found       | Quality trust      |
+| Mutation score high | Tests actually test the code  | Verification trust |
+| Evidence complete   | Claims are backed by pointers | Audit trust        |
+| Gates clear         | Boundaries are respected      | Safety trust       |
 
 Each layer adds confidence. Missing any layer leaves a gap.
 
@@ -94,13 +94,13 @@ Permission theater creates the appearance of oversight without the substance of 
 
 The risks that matter in AI-assisted development:
 
-| Real Risk | Permission Theater | Verification Architecture |
-|-----------|-------------------|--------------------------|
-| Secrets in commits | "May I commit?" (useless) | Scan staged changes for secrets |
-| Wrong code in production | "May I write code?" (useless) | Tests prove behavior |
-| Incorrect claims believed | "May I claim X?" (useless) | Evidence backs every claim |
-| Scope creep unnoticed | "May I edit this file?" (useless) | Critics verify alignment |
-| Test weakening | "May I delete tests?" (useless) | Guards detect test deletion |
+| Real Risk                 | Permission Theater                | Verification Architecture       |
+| ------------------------- | --------------------------------- | ------------------------------- |
+| Secrets in commits        | "May I commit?" (useless)         | Scan staged changes for secrets |
+| Wrong code in production  | "May I write code?" (useless)     | Tests prove behavior            |
+| Incorrect claims believed | "May I claim X?" (useless)        | Evidence backs every claim      |
+| Scope creep unnoticed     | "May I edit this file?" (useless) | Critics verify alignment        |
+| Test weakening            | "May I delete tests?" (useless)   | Guards detect test deletion     |
 
 Permission dialogs don't address these risks. They can't. The question "May I do X?" doesn't have enough information to determine safety. The question "Did the result of X satisfy constraints Y?" does.
 
@@ -193,12 +193,12 @@ This seems counterintuitive. If you trust the agent, why verify so much?
 
 The answer: you don't trust the agent. You trust the architecture. The agent is a stochastic system that sometimes makes mistakes. The architecture catches those mistakes before they matter.
 
-| Configuration | Outcome |
-|---------------|---------|
-| High autonomy, low verification | Recklessness — mistakes escape |
-| Low autonomy, low verification | Bureaucracy — everything is slow |
-| Low autonomy, high verification | Redundant — verification catches what permissions already blocked |
-| **High autonomy, high verification** | **The sweet spot — fast iteration with real safety** |
+| Configuration                        | Outcome                                                           |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| High autonomy, low verification      | Recklessness — mistakes escape                                    |
+| Low autonomy, low verification       | Bureaucracy — everything is slow                                  |
+| Low autonomy, high verification      | Redundant — verification catches what permissions already blocked |
+| **High autonomy, high verification** | **The sweet spot — fast iteration with real safety**              |
 
 You can't have high autonomy with low verification—that's hoping nothing goes wrong.
 
@@ -212,12 +212,12 @@ High trust = high autonomy + high verification + clear boundaries.
 
 The fundamental choice: do you achieve safety through control or through verification?
 
-| Approach | Autonomy | Verification | Result |
-|----------|----------|--------------|--------|
-| Low trust, high control | Low | Low | Slow and still risky |
-| Low trust, high verification | Low | High | Slow but safe |
-| High trust, low verification | High | Low | Fast but dangerous |
-| **High trust, high verification** | **High** | **High** | **Fast and safe** |
+| Approach                          | Autonomy | Verification | Result               |
+| --------------------------------- | -------- | ------------ | -------------------- |
+| Low trust, high control           | Low      | Low          | Slow and still risky |
+| Low trust, high verification      | Low      | High         | Slow but safe        |
+| High trust, low verification      | High     | Low          | Fast but dangerous   |
+| **High trust, high verification** | **High** | **High**     | **Fast and safe**    |
 
 The goal is the bottom-right quadrant. Get there by:
 
@@ -245,15 +245,15 @@ exit: git only
 
 ### Flow Design (Verification at Each Stage)
 
-| Flow | Verification |
-|------|-------------|
+| Flow   | Verification                    |
+| ------ | ------------------------------- |
 | Signal | Requirements traced to features |
-| Plan | ADR reviewed, contracts defined |
-| Build | Tests pass, critics approve |
-| Review | PR feedback addressed |
-| Gate | All evidence verified |
-| Deploy | Production behavior confirmed |
-| Wisdom | Learnings extracted |
+| Plan   | ADR reviewed, contracts defined |
+| Build  | Tests pass, critics approve     |
+| Review | PR feedback addressed           |
+| Gate   | All evidence verified           |
+| Deploy | Production behavior confirmed   |
+| Wisdom | Learnings extracted             |
 
 ### Gate Agents (Boundary Enforcement)
 

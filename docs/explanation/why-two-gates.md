@@ -7,6 +7,7 @@
 ## The problem
 
 Before posting to GitHub or pushing code:
+
 - Is the content safe to publish? (secrets)
 - Is the repo state correct? (hygiene)
 
@@ -23,11 +24,13 @@ These are **independent concerns**. Both must pass.
 **Field:** `safe_to_publish: true | false`
 
 **What it checks:**
+
 - Publish surface scanned for secrets
 - Sensitive patterns detected/redacted
 - No hardcoded credentials
 
 **Failure mode:**
+
 - Secrets detected
 - Unable to safely redact
 - Upstream fix required
@@ -39,11 +42,13 @@ These are **independent concerns**. Both must pass.
 **Field:** `proceed_to_github_ops: true | false`
 
 **What it checks:**
+
 - Only expected paths in commit
 - No anomalous files outside allowlist
 - Staging/commit operations succeeded
 
 **Failure mode:**
+
 - Unexpected files detected
 - Git operation failed
 - Anomaly in working tree
@@ -98,6 +103,7 @@ ELSE
 ```
 
 Both gates are checked before **any** GitHub operation:
+
 - Issue creation
 - Status board updates
 - Comment posting
@@ -111,6 +117,7 @@ Both gates are checked before **any** GitHub operation:
 ### Separation of concerns
 
 Secrets scanning and repo hygiene are different skills:
+
 - secrets-sanitizer knows about secret patterns
 - repo-operator knows about Git state
 
@@ -119,6 +126,7 @@ Combining them would blur responsibilities.
 ### Independent failures
 
 Each gate can fail independently:
+
 - Secrets issue → fix content
 - Hygiene issue → fix staging/allowlist
 
@@ -127,11 +135,13 @@ Clear separation makes debugging easier.
 ### Different remediation
 
 Secrets issues may require:
+
 - Redaction
 - Upstream code change
 - Environment variable externalization
 
 Hygiene issues may require:
+
 - Removing unexpected files
 - Adjusting allowlist
 - Fixing Git state
@@ -147,12 +157,14 @@ repo-operator checkpoint_mode: local_only
 ```
 
 This:
+
 - Commits locally
 - Never pushes
 - Forces `proceed_to_github_ops: false`
 - Flow completes UNVERIFIED with evidence
 
 Use when:
+
 - Reseal doesn't converge
 - Anomaly is intentional but shouldn't push
 - Local-only operation is preferred

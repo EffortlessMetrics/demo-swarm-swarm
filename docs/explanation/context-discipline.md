@@ -25,6 +25,7 @@ The relationship isn't linear. Doubling context doesn't halve precision—it can
 ### Noise to Hallucinate From
 
 Every piece of context is a potential source of confusion:
+
 - Old requirements that were superseded
 - Similar but different code patterns
 - Tangential discussions that feel relevant
@@ -35,6 +36,7 @@ LLMs don't distinguish between "important context" and "background noise." They 
 ### Long Conversations Drift
 
 Conversations accumulate baggage:
+
 ```
 Turn 1: "Add OAuth login"
 Turn 10: "...so we're using OAuth with Google and GitHub..."
@@ -47,6 +49,7 @@ Intent gets confused. Details accrete that were never requested. By turn 30, the
 ### Cross-Contamination
 
 When agents see multiple unrelated tasks in the same context:
+
 - Patterns from Task A leak into Task B
 - Naming conventions get confused
 - Architectural decisions from one feature affect another
@@ -73,6 +76,7 @@ RIGHT:
 ```
 
 This is the "sealed stations" pattern from [ai-physics.md](ai-physics.md). Each agent:
+
 1. Reads from disk (fresh start)
 2. Does work
 3. Writes to disk
@@ -81,6 +85,7 @@ This is the "sealed stations" pattern from [ai-physics.md](ai-physics.md). Each 
 The next agent has no memory of the previous agent's conversation. It only sees what was written to disk.
 
 **Every call is implicitly a resume:**
+
 - Check what exists
 - Update what's missing
 - Report what changed
@@ -90,6 +95,7 @@ If an agent crashes or times out, the next invocation picks up from the last che
 ### 2. Targeted Hydration
 
 **Instead of "here's the whole repo":**
+
 - Load only what's needed for the current task
 - Prefer narrow manifests over broad context
 - Explain expansion when more is needed (not ask permission)
@@ -99,6 +105,7 @@ Think of it as **handing a junior dev 3 files and a mission, not the whole codeb
 A senior engineer giving a task to a junior doesn't say "here's our 500-file monorepo, figure out what you need." They say "here's the auth module, the user model, and the test file—add email verification."
 
 The context-loader pattern:
+
 1. **Curator identifies the minimal file set** (typically 3-5 files)
 2. **Worker receives only the manifest + required artifacts**
 3. **Worker has no memory of previous steps**
@@ -110,11 +117,13 @@ The worker can expand beyond the manifest if genuinely needed—but they start f
 **Avoid accumulating drift across many turns.**
 
 Long conversations are toxic to precision:
+
 - Early context gets diluted by later turns
 - Corrections and clarifications pile up
 - The agent "remembers" things from 50 turns ago that weren't said
 
 The remedy:
+
 - **Checkpoint to disk frequently** (after each meaningful unit of work)
 - **New station = fresh start from artifacts**
 - **Treat thread death as a feature**, not a failure
@@ -136,6 +145,7 @@ The goal is **focus**, not **restriction**.
 ### What This Is Not
 
 This is not about creating:
+
 - Allowlists of permitted files
 - Permission systems for reading context
 - Approval workflows for accessing information
@@ -167,6 +177,7 @@ Critics evaluate quality afterward. That's the guardrail—not preventative rest
 ### Hallucination Drops
 
 With less noise in context, there's less material to confuse the model:
+
 - Fewer irrelevant patterns to blend in
 - Fewer superseded requirements to resurrect
 - Fewer tangential discussions to misinterpret
@@ -176,6 +187,7 @@ The agent sees what it needs and nothing else. Precision increases.
 ### Agents Behave Consistently
 
 When every invocation starts from the same artifacts:
+
 - Same inputs produce same outputs
 - Behavior doesn't drift based on conversation history
 - Testing and debugging become tractable
@@ -185,6 +197,7 @@ You can rerun a flow and expect similar results because the inputs are stable.
 ### Resumption Works
 
 State on disk means:
+
 - Agent crashes don't lose progress
 - Timeout recovery is automatic
 - Partial work is preserved
@@ -195,6 +208,7 @@ The conversation can die, but the work survives.
 ### Context Budget Stays Healthy
 
 By not stuffing context with "might be useful" material:
+
 - More room for the actual task
 - Better attention on what matters
 - Faster response times

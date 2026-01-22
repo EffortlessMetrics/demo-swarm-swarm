@@ -44,17 +44,17 @@ All commands follow the scalar stdout contract:
 
 ## Commands
 
-| Command | Python equivalent |
-|---------|-------------------|
-| `count pattern` | `runs_count_pattern` |
-| `count bdd` | `runs_count_bdd_scenarios` |
-| `ms get` | `runs_extract_machine_field` |
-| `yaml get` | `runs_extract_yaml_block_field` |
-| `yaml count-items` | `runs_count_yaml_block_items` |
-| `inv get` | `runs_extract_inventory_marker` |
-| `line get` | `runs_extract_line_value` |
-| `receipts count` | `runs_count_existing_receipts` |
-| `receipt get` | `runs_read_receipt_field` |
-| `openapi count-paths` | `runs_count_openapi_paths` |
-| `index upsert-status` | `runs_index_upsert_status` |
-| `time now` | `runs_iso_now` |
+| Command               | Python equivalent               |
+| --------------------- | ------------------------------- |
+| `count pattern`       | `runs_count_pattern`            |
+| `count bdd`           | `runs_count_bdd_scenarios`      |
+| `ms get`              | `runs_extract_machine_field`    |
+| `yaml get`            | `runs_extract_yaml_block_field` |
+| `yaml count-items`    | `runs_count_yaml_block_items`   |
+| `inv get`             | `runs_extract_inventory_marker` |
+| `line get`            | `runs_extract_line_value`       |
+| `receipts count`      | `runs_count_existing_receipts`  |
+| `receipt get`         | `runs_read_receipt_field`       |
+| `openapi count-paths` | `runs_count_openapi_paths`      |
+| `index upsert-status` | `runs_index_upsert_status`      |
+| `time now`            | `runs_iso_now`                  |

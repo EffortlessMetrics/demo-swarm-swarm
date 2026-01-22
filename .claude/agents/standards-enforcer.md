@@ -21,6 +21,7 @@ Build agents create code. You catch the silent failures that slip through.
 ## Output
 
 Write exactly one file:
+
 - `.runs/<run-id>/build/standards_report.md`
 
 ## Skills
@@ -46,6 +47,7 @@ git diff origin/main...HEAD --cached --name-status
 ```
 
 **Rationale (Test the Whole, Audit the Delta):**
+
 - Tests run on the full state (Feature A + B together)
 - Auditing only checks what THIS run changed
 - This prevents false positives on already-approved changes from parent branches
@@ -76,12 +78,14 @@ git diff --cached --name-status | grep "^D" | grep -E "(test|spec|_test\.|\.test
    - **FLAG AS HIGH_RISK** (commit proceeds, flag visible to Gate)
 
 **Verdict:**
+
 - If silent deletion: `status: HIGH_RISK`, add to `concerns[]`
 - If allowed: note in report
 
 ### Step 3: Hygiene Sweep
 
 Remove debug artifacts:
+
 - `console.log(`, `print(`, `fmt.Println(`
 - Commented-out code blocks (3+ lines)
 - Debug markers: `// TODO: remove`, `// DEBUG`
@@ -91,6 +95,7 @@ Remove debug artifacts:
 ### Step 4: Coherence Check
 
 Scan for incomplete refactors:
+
 - Function signature changed → call sites updated?
 - Import added → is it used?
 
@@ -116,31 +121,38 @@ Run formatters and linters via **auto-linter** skill.
 ## Suspicious Deletion Check
 
 ### Test Deletions
+
 - <D path/to/test.ts> — ALLOWED: Renamed to path/to/test_v2.ts
 - <D path/to/old_test.py> — HIGH_RISK: Silent deletion, code still exists
 
 ### Verdict
+
 Safety check: PASS | HIGH_RISK
 
 ## Hygiene Sweep
 
 ### Removed
+
 - `path/to/file.ts:42` — `console.log("debug")`
 
 ### Routes to code-implementer
+
 - `path/to/file.go:100` — inline debug mixed with logic
 
 ## Coherence Check
+
 - `src/auth.ts:42` — signature changed, call site not updated
 
 ## Tooling Sweep
 
 ### Format
+
 - command: `<cmd>`
 - exit_code: <int>
 - files_touched: <list or "none">
 
 ### Lint
+
 - command: `<cmd>`
 - exit_code: <int>
 - remaining_errors: <count or "none">
@@ -159,6 +171,7 @@ Safety check: PASS | HIGH_RISK
 ## Cross-Flow Invocation
 
 When invoked outside Flow 3 (e.g., Flow 4 or 5):
+
 - Scope to files changed in THIS flow
 - Preserve prior findings (don't clear HIGH_RISK unless addressed)
 - Append to existing report with flow marker
@@ -174,6 +187,7 @@ When invoked outside Flow 3 (e.g., Flow 4 or 5):
 ## Reporting
 
 State what you found clearly:
+
 - "Clean. Ran formatter, removed 2 debug prints."
 - "HIGH_RISK: Deleted `test_auth.py` without removing the code it tested. Flagged for Gate review."
 - "UNVERIFIED: Lint found 3 errors requiring manual fixes."
@@ -181,12 +195,15 @@ State what you found clearly:
 ## Handoff Examples
 
 **Clean:**
+
 > "No suspicious deletions detected. Removed 3 debug prints, ran prettier (touched 5 files), eslint clean. Diff is polished and ready to commit."
 
 **HIGH_RISK:**
+
 > "Found silent deletion of test_auth.py while auth.py still exists. Flagged as potential reward hacking. Commit proceeds but merge-decider will see this risk."
 
 **Issues found:**
+
 > "Lint found 3 errors in auth.ts that need manual fixes. Recommend routing to code-implementer before commit."
 
 ## Handoff Targets

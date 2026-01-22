@@ -40,6 +40,7 @@
 - **Next Flow**: `/flow-7-wisdom` (post-deployment analysis)
 
 ### Verification Checklist
+
 - [x] `.runs/local-alignment-audit-aba1c6/deploy/deployment_decision.md` - Verdict correct (NOT_DEPLOYED due to org constraint)
 - [x] `.runs/local-alignment-audit-aba1c6/deploy/verification_report.md` - All smoke checks STABLE
 - [x] PR #2 merged successfully

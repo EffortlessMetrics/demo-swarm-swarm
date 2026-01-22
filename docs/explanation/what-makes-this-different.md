@@ -14,6 +14,7 @@ This document explicitly names those assumptions and explains what we do instead
 
 **What you might expect:**
 Agents output YAML or JSON blocks that get parsed by an orchestrator to determine the next step:
+
 ```yaml
 status: UNVERIFIED
 recommended_action: RERUN
@@ -22,6 +23,7 @@ route_to_agent: code-implementer
 
 **What we actually do:**
 Agents write prose handoffs. The orchestrator (Claude) reads and understands them:
+
 ```markdown
 ## Handoff
 
@@ -64,6 +66,7 @@ Claude doesn't need enum values to understand "the tests pass and we should ship
 
 **What you might expect:**
 Agent prompts should have extensive "Do NOT" and "NEVER" sections to prevent bad behavior:
+
 ```
 DO NOT:
 - Modify files outside the manifest
@@ -74,6 +77,7 @@ DO NOT:
 
 **What we actually do:**
 Positive prompting—tell agents what TO do and how to do it well. Trust them to be capable.
+
 ```
 Your goal is to implement the acceptance criteria with full test coverage.
 
@@ -149,6 +153,7 @@ Artifacts like receipts and decisions are structured data for downstream process
 Artifacts are for humans. They should be worth reading, explain reasoning, and be useful months later.
 
 **Stubby artifact (bad):**
+
 ```markdown
 # Requirements Critique
 
@@ -157,6 +162,7 @@ Issues: 0
 ```
 
 **Substantive artifact (good):**
+
 ```markdown
 # Requirements Critique
 
@@ -225,6 +231,7 @@ When uncertain, agents should stop and request clarification. "I'm not sure whic
 Research-first autonomy. Agents investigate, derive from context, apply safe defaults, and only escalate when truly blocked.
 
 The escalation ladder:
+
 1. **Investigate locally:** Search code, tests, configs for the answer
 2. **Derive from evidence:** Use patterns in the codebase to infer correct behavior
 3. **Default if safe:** Choose a reversible default, document it, continue
@@ -266,21 +273,21 @@ If you're fighting the pack's patterns, you might be applying old-model assumpti
 
 ## Summary Table
 
-| Old Assumption | What We Do Instead | Key Benefit |
-|----------------|-------------------|-------------|
-| Structured routing blocks | Prose handoffs | Claude understands; humans can audit |
-| Receipts for routing | Receipts for audit only | Separation of concerns |
-| Status enums | Natural language outcomes | Handles edge cases |
-| Constraint lists | Positive prompting | Capable behavior, not defensive |
-| Rigid schemas | Minimal structure | Honest reporting, flexibility |
-| Comprehensive agents | Single responsibility | Depth over breadth |
-| Failure is bad | Graceful outcomes | Honest partial reports |
-| Artifacts for machines | Artifacts for humans | Worth reading in 3 months |
-| Dumb orchestrator | Claude as PM | Judgment and adaptation |
-| Agents as functions | Agents as actors | Value from judgment |
-| Allowlists | Role focus + critics | Exploration without scope creep |
-| Stop and ask | Research-first autonomy | Fewer interruptions |
-| Comprehensive gates | Gates verify, don't discover | Fix where it's cheapest |
+| Old Assumption            | What We Do Instead           | Key Benefit                          |
+| ------------------------- | ---------------------------- | ------------------------------------ |
+| Structured routing blocks | Prose handoffs               | Claude understands; humans can audit |
+| Receipts for routing      | Receipts for audit only      | Separation of concerns               |
+| Status enums              | Natural language outcomes    | Handles edge cases                   |
+| Constraint lists          | Positive prompting           | Capable behavior, not defensive      |
+| Rigid schemas             | Minimal structure            | Honest reporting, flexibility        |
+| Comprehensive agents      | Single responsibility        | Depth over breadth                   |
+| Failure is bad            | Graceful outcomes            | Honest partial reports               |
+| Artifacts for machines    | Artifacts for humans         | Worth reading in 3 months            |
+| Dumb orchestrator         | Claude as PM                 | Judgment and adaptation              |
+| Agents as functions       | Agents as actors             | Value from judgment                  |
+| Allowlists                | Role focus + critics         | Exploration without scope creep      |
+| Stop and ask              | Research-first autonomy      | Fewer interruptions                  |
+| Comprehensive gates       | Gates verify, don't discover | Fix where it's cheapest              |
 
 ---
 

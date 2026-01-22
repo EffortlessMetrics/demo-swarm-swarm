@@ -9,10 +9,10 @@ route_to_agent: null
 blockers: []
 missing_required: []
 counts:
-  killed: null
-  survived: null
-  errors: null
-  timeouts: null
+killed: null
+survived: null
+errors: null
+timeouts: null
 budget_seconds: null
 duration_seconds: 0
 mutation_command: null
@@ -34,12 +34,14 @@ mutation_command: null
 ## Rationale
 
 Mutation testing measures the effectiveness of test coverage for application code. Since this build:
+
 1. Contains only documentation updates (no code changes)
 2. Has no new application code to mutate
 3. Has no executable targets or runtime logic to test
 4. Includes minimal Rust test fixture updates (only if pack-check fails, which is reactive)
 
 ...mutation testing cannot provide meaningful coverage metrics. The appropriate quality gates for this build are:
+
 - pack-check validation (structural compliance)
 - grep verification (documentation consistency)
 - Manual review of documentation accuracy

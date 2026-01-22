@@ -28,9 +28,11 @@ You verify coverage evidence against thresholds and "critical path" expectations
 ## Inputs (best-effort)
 
 Plan (policy source of truth):
+
 - `.runs/<run-id>/plan/test_plan.md`
 
 Build (evidence pointers):
+
 - `.runs/<run-id>/build/build_receipt.json` (optional; context only)
 - `.runs/<run-id>/build/impl_changes_summary.md` (optional; changed-surface focus)
 - A test execution summary artifact if present (do not assume exact name):
@@ -39,6 +41,7 @@ Build (evidence pointers):
   - any `.runs/<run-id>/build/*test*.md` artifact that clearly contains coverage output
 
 Coverage reports (if present / referenced):
+
 - Any report paths explicitly referenced by the test summary artifact.
 - Best-effort discovery (bounded; see below) for common filenames:
   - `coverage.xml`, `cobertura.xml`, `jacoco.xml`
@@ -71,35 +74,40 @@ Missing inputs are **UNVERIFIED**, not mechanical failure, unless you cannot rea
 ### Step 0: Preflight (mechanical)
 
 Verify you can:
+
 - read `.runs/<run-id>/plan/test_plan.md` if it exists
 - write `.runs/<run-id>/gate/coverage_audit.md`
 
 If you cannot write the output due to IO/perms/tooling:
+
 - Note the mechanical failure and stop after writing whatever you can. In your handoff, explain the issue and recommend fixing the environment.
 
 ### Step 1: Extract thresholds from Plan (prefer markers; else best-effort)
 
 Preferred (if present): stable marker lines in `test_plan.md`:
+
 - `- COVERAGE_LINE_REQUIRED: <percent>`
 - `- COVERAGE_BRANCH_REQUIRED: <percent>`
 - `- COVERAGE_CRITICAL_PATH: <description or list>`
 
 If markers are absent:
+
 - best-effort extract numeric thresholds from a "Coverage" or "Threshold" section using conservative parsing.
 - If ambiguous or not present, set required values to `null` and set `thresholds_status: MISSING` with a MAJOR concern.
 
 Record:
+
 - `line_required` (number or null)
 - `branch_required` (number or null)
 - `critical_path_expectations` (present/absent + short pointer)
 
 ### Step 2: Locate coverage results (bounded, evidence-first)
 
-1) If a test summary artifact exists under `.runs/<run-id>/build/`, use it first:
+1. If a test summary artifact exists under `.runs/<run-id>/build/`, use it first:
    - extract any explicit "line % / branch %" numbers
    - extract any referenced report paths
 
-2) If no explicit report paths are referenced, do best-effort discovery:
+2. If no explicit report paths are referenced, do best-effort discovery:
    - search for common filenames listed above
    - keep discovery bounded (e.g., stop after 20 candidates)
    - record exactly what you searched for and what you found
@@ -116,6 +124,7 @@ Do not scan the entire repo indiscriminately; keep discovery targeted and docume
 Do **not** calculate coverage from raw counts unless the artifact itself presents it as a percentage. If only raw counters exist without a percent, set `null` and explain.
 
 Record:
+
 - `line_actual` (number or null)
 - `branch_actual` (number or null)
 - `evidence_sources[]` (paths actually used)
@@ -123,6 +132,7 @@ Record:
 ### Step 4: Changed-surface focus (advisory unless Plan makes it gating)
 
 If `impl_changes_summary.md` exists:
+
 - list changed files/modules (from its inventory markers if present)
 - attempt to find any per-file/per-module coverage figures in the available evidence
 - if unavailable, say so plainly (do not infer)
@@ -130,6 +140,7 @@ If `impl_changes_summary.md` exists:
 ### Step 5: Critical-path coverage (only if Plan defines it)
 
 If Plan declares critical-path coverage expectations:
+
 - Verify whether evidence can support it (e.g., per-module report, package-level summary, tagged test suite).
 - If Plan expects critical-path coverage but provides no measurement method AND evidence can't support it:
   - UNVERIFIED (MAJOR)
@@ -177,26 +188,30 @@ Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 
 ## Coverage Evidence Found
 
-* <file> — <what it reports> (pointer)
+- <file> — <what it reports> (pointer)
 
 ## Critical Path Coverage
 
-* If defined: explain whether it is verifiable with evidence.
-* If unverifiable: state what artifact would make it verifiable.
+- If defined: explain whether it is verifiable with evidence.
+- If unverifiable: state what artifact would make it verifiable.
 
 ## Findings
 
 ### CRITICAL
-* <description with evidence pointer>
+
+- <description with evidence pointer>
 
 ### MAJOR
-* <description with evidence pointer>
+
+- <description with evidence pointer>
 
 ### MINOR
-* <description with evidence pointer>
+
+- <description with evidence pointer>
 
 ## Sources Consulted
-* <repo-relative paths actually read>
+
+- <repo-relative paths actually read>
 ```
 
 ## Handoff
@@ -204,15 +219,19 @@ Status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 After writing the report, provide a natural language summary with coverage numbers and your recommendation.
 
 **Example (thresholds met):**
+
 > Verified coverage: line 85% (required 80%), branch 72% (required 70%). All thresholds met. Route to **merge-decider**.
 
 **Example (thresholds unmet):**
+
 > Coverage check: line 65% is below required 80%. Route to **test-author** to add tests for core modules (auth, billing).
 
 **Example (thresholds undefined):**
+
 > Found coverage data (line 75%, branch 60%) but test_plan.md defines no thresholds. Route to **test-strategist** to define coverage policy.
 
 **Example (evidence missing):**
+
 > No coverage report found in build artifacts. Route to **merge-decider** with UNVERIFIED status to weigh this gap against other evidence.
 
 ## Handoff Targets (reference)
