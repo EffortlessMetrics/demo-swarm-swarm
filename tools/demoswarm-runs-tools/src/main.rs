@@ -11,6 +11,7 @@ use clap::Parser;
 
 mod commands;
 mod output;
+mod walk;
 
 use commands::{Cli, Command};
 use output::print_null;
@@ -49,7 +50,8 @@ fn main() -> ExitCode {
         Err(e) => {
             eprintln!("{e}");
             print_null();
-            exit_code_for_mode()
+            // On parse error, use env var only (can't access flag)
+            exit_code_for_mode(None)
         }
     }
 }
@@ -88,18 +90,20 @@ fn run_with_args(args: &[String]) -> ExitCode {
         Err(e) => {
             eprintln!("{e}");
             print_null();
-            exit_code_for_mode()
+            // On parse error, use env var only (can't access flag)
+            exit_code_for_mode(None)
         }
     }
 }
 
 fn run_cli(cli: Cli) -> ExitCode {
+    let strict_flag = cli.strict;
     match execute_command(cli.command) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("Error: {e:#}");
             print_null();
-            exit_code_for_mode()
+            exit_code_for_mode(Some(strict_flag))
         }
     }
 }
@@ -121,15 +125,24 @@ fn execute_command(cmd: Command) -> anyhow::Result<()> {
     }
 }
 
-fn exit_code_for_mode() -> ExitCode {
-    if strict_mode() {
+/// Determine exit code based on strict mode.
+/// `flag_override` takes precedence over DEMOSWARM_STRICT env var when `Some(true)`.
+fn exit_code_for_mode(flag_override: Option<bool>) -> ExitCode {
+    if is_strict_mode(flag_override) {
         ExitCode::from(2)
     } else {
         ExitCode::SUCCESS
     }
 }
 
-fn strict_mode() -> bool {
+/// Check if strict mode is enabled.
+/// `flag_override` (from --strict CLI flag) takes precedence over env var.
+fn is_strict_mode(flag_override: Option<bool>) -> bool {
+    // CLI flag takes precedence when explicitly set to true
+    if flag_override == Some(true) {
+        return true;
+    }
+    // Fall back to env var
     matches!(env::var("DEMOSWARM_STRICT"), Ok(val) if {
         let lower = val.to_ascii_lowercase();
         lower == "1" || lower == "true" || lower == "yes"

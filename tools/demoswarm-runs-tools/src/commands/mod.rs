@@ -21,6 +21,11 @@ pub mod yaml;
 #[command(name = "demoswarm")]
 #[command(version, about, long_about = None)]
 pub struct Cli {
+    /// Enable strict mode: return exit code 2 on errors instead of 0.
+    /// Takes precedence over DEMOSWARM_STRICT environment variable.
+    #[arg(long, global = true)]
+    pub strict: bool,
+
     #[command(subcommand)]
     pub command: Command,
 }

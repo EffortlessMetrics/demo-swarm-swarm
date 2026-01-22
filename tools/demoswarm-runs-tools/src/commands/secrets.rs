@@ -5,20 +5,20 @@
 //! - `redact` modifies files in-place, prints only status
 
 use std::fs;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::Result;
-use clap::builder::PossibleValuesParser;
+use anyhow::{Context, Result};
 use clap::{Args, Subcommand};
 use regex::Regex;
-use serde_json::{Value, json};
-use tempfile::NamedTempFile;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 
+use super::common::write_json_atomic;
 use crate::output::print_scalar;
+use crate::walk::{walk_dir_excluding_verbose, SkippedItem};
 
-/// Secret detection patterns. Each tuple is (regex, type-name).
-const PATTERNS: &[(&str, &str)] = &[
+/// Built-in secret detection patterns. Each tuple is (regex, type-name).
+const BUILTIN_PATTERNS: &[(&str, &str)] = &[
     (r"gh[pousr]_[A-Za-z0-9_]{36,}", "github-token"),
     (r"AKIA[0-9A-Z]{16}", "aws-access-key"),
     (r"sk_live_[0-9a-zA-Z]{24,}", "stripe-key"),
@@ -28,6 +28,32 @@ const PATTERNS: &[(&str, &str)] = &[
         "jwt-token",
     ),
 ];
+
+/// A secret pattern definition for configuration files.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PatternDef {
+    /// The regex pattern to match
+    pub pattern: String,
+    /// The type name for this secret (e.g., "github-token")
+    #[serde(rename = "type")]
+    pub type_name: String,
+}
+
+/// Configuration file format for custom patterns.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PatternsConfig {
+    /// List of custom secret patterns
+    pub patterns: Vec<PatternDef>,
+}
+
+/// A compiled pattern ready for scanning.
+#[derive(Debug)]
+struct CompiledPattern {
+    regex: Regex,
+    type_name: String,
+    #[allow(dead_code)]
+    pattern_str: String,
+}
 
 #[derive(Args, Debug)]
 pub struct SecretsCommand {
@@ -53,6 +79,15 @@ pub struct SecretsScan {
     /// Output file for JSON findings
     #[arg(long)]
     pub output: String,
+
+    /// Path to a JSON or YAML file with additional patterns.
+    /// Patterns are merged with built-in patterns (built-in first, config second).
+    #[arg(long)]
+    pub patterns_file: Option<String>,
+
+    /// Log skipped paths with reasons to stderr
+    #[arg(short, long)]
+    pub verbose: bool,
 }
 
 #[derive(Args, Debug)]
@@ -61,9 +96,15 @@ pub struct SecretsRedact {
     #[arg(long)]
     pub file: String,
 
-    /// Type of secret to redact
-    #[arg(long, value_parser = PossibleValuesParser::new(["github-token", "aws-access-key", "stripe-key", "jwt-token", "private-key"]))]
+    /// Type of secret to redact.
+    /// Use a built-in type or a custom type defined in patterns file.
+    #[arg(long)]
     pub r#type: String,
+
+    /// Path to a JSON or YAML file with additional patterns.
+    /// Required when redacting custom secret types not in built-in list.
+    #[arg(long)]
+    pub patterns_file: Option<String>,
 }
 
 pub fn run(cmd: SecretsCommand) -> Result<()> {
@@ -73,12 +114,102 @@ pub fn run(cmd: SecretsCommand) -> Result<()> {
     }
 }
 
+/// Load patterns from a JSON or YAML configuration file.
+/// Returns an error if the file cannot be read or parsed, or if any regex is invalid.
+fn load_patterns_from_file(path: &Path) -> Result<Vec<PatternDef>> {
+    let content = fs::read_to_string(path)
+        .with_context(|| format!("Failed to read patterns file: {}", path.display()))?;
+
+    let config: PatternsConfig = if path
+        .extension()
+        .is_some_and(|ext| ext == "yaml" || ext == "yml")
+    {
+        serde_yaml::from_str(&content)
+            .with_context(|| format!("Failed to parse YAML patterns file: {}", path.display()))?
+    } else {
+        // Default to JSON
+        serde_json::from_str(&content)
+            .with_context(|| format!("Failed to parse JSON patterns file: {}", path.display()))?
+    };
+
+    // Validate all regexes at load time
+    for (i, pat) in config.patterns.iter().enumerate() {
+        Regex::new(&pat.pattern).with_context(|| {
+            format!(
+                "Invalid regex in patterns file at index {}: pattern='{}', type='{}'",
+                i, pat.pattern, pat.type_name
+            )
+        })?;
+    }
+
+    Ok(config.patterns)
+}
+
+/// Compile patterns into ready-to-use regex objects.
+/// Merges built-in patterns with config patterns (built-in first, config second).
+fn compile_patterns(patterns_file: Option<&str>) -> Result<Vec<CompiledPattern>> {
+    let mut compiled = Vec::new();
+
+    // Add built-in patterns first
+    for (pat, typ) in BUILTIN_PATTERNS {
+        if let Ok(re) = Regex::new(pat) {
+            compiled.push(CompiledPattern {
+                regex: re,
+                type_name: typ.to_string(),
+                pattern_str: pat.to_string(),
+            });
+        }
+    }
+
+    // Add config patterns second (if provided)
+    if let Some(path_str) = patterns_file {
+        let path = Path::new(path_str);
+        let custom_patterns = load_patterns_from_file(path)?;
+
+        for pat in custom_patterns {
+            // Regex already validated in load_patterns_from_file
+            let re = Regex::new(&pat.pattern).expect("regex already validated");
+            compiled.push(CompiledPattern {
+                regex: re,
+                type_name: pat.type_name,
+                pattern_str: pat.pattern,
+            });
+        }
+    }
+
+    Ok(compiled)
+}
+
+/// Find the pattern string for a given type name.
+fn find_pattern_for_type(type_name: &str, patterns_file: Option<&str>) -> Result<Option<String>> {
+    // Check built-in patterns first
+    for (pat, typ) in BUILTIN_PATTERNS {
+        if *typ == type_name {
+            return Ok(Some(pat.to_string()));
+        }
+    }
+
+    // Check custom patterns if file provided
+    if let Some(path_str) = patterns_file {
+        let path = Path::new(path_str);
+        let custom_patterns = load_patterns_from_file(path)?;
+        for pat in custom_patterns {
+            if pat.type_name == type_name {
+                return Ok(Some(pat.pattern));
+            }
+        }
+    }
+
+    Ok(None)
+}
+
 fn scan(args: &SecretsScan) -> Result<()> {
     let root = Path::new(&args.path);
     let out_path = Path::new(&args.output);
+    let verbose = args.verbose;
 
     if !root.exists() {
-        let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [] });
+        let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
         write_json_atomic(out_path, &v).map_err(|e| {
             eprintln!(
                 "Warning: failed to write secrets findings JSON ({}): {e:#}",
@@ -90,28 +221,54 @@ fn scan(args: &SecretsScan) -> Result<()> {
         return Ok(());
     }
 
-    // Precompile regexes
-    let compiled: Vec<(Regex, &str)> = PATTERNS
-        .iter()
-        .filter_map(|(pat, typ)| Regex::new(pat).ok().map(|r| (r, *typ)))
-        .collect();
+    // Compile patterns (built-in + custom if provided)
+    let compiled = match compile_patterns(args.patterns_file.as_deref()) {
+        Ok(c) => c,
+        Err(e) => {
+            // Pattern loading/validation failed - report error in output
+            let v = json!({
+                "status": "PATTERN_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATTERN_ERROR");
+            return Ok(());
+        }
+    };
 
     let mut findings: Vec<Value> = Vec::new();
+    let mut skipped: Vec<SkippedItem> = Vec::new();
 
-    if root.is_file() {
-        scan_one_file(root, &compiled, &mut findings);
-    } else if root.is_dir() {
-        for f in iter_files(root) {
-            scan_one_file(&f, &compiled, &mut findings);
-        }
+    // Use shared walker with exclusions and verbose mode for security scanning
+    let mut walker = walk_dir_excluding_verbose(root, EXCLUDED_DIRS, verbose);
+
+    // Collect files from walker
+    let files: Vec<_> = walker.by_ref().collect();
+
+    // Get skipped items from directory walking
+    skipped.extend(walker.take_skipped_items());
+
+    // Scan each file
+    for f in files {
+        scan_one_file(&f, &compiled, &mut findings, &mut skipped, verbose);
     }
+
+    let skipped_count = skipped.len();
 
     let status = if findings.is_empty() {
         "CLEAN"
     } else {
         "SECRETS_FOUND"
     };
-    let v = json!({ "status": status, "findings": findings });
+    let v = json!({ "status": status, "findings": findings, "skipped_count": skipped_count });
     write_json_atomic(out_path, &v).map_err(|e| {
         eprintln!(
             "Warning: failed to write secrets findings JSON ({}): {e:#}",
@@ -126,56 +283,43 @@ fn scan(args: &SecretsScan) -> Result<()> {
 /// Directory names to exclude from scanning (deterministic fixed list).
 const EXCLUDED_DIRS: &[&str] = &[".git", "target", "node_modules", ".demoswarm"];
 
-/// Walk a directory recursively (no symlink following; best-effort)
-fn iter_files(root: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
-    let mut stack = vec![root.to_path_buf()];
-
-    while let Some(dir) = stack.pop() {
-        let rd = match fs::read_dir(&dir) {
-            Ok(r) => r,
-            Err(_) => continue,
-        };
-        for ent in rd.flatten() {
-            let p = ent.path();
-            if p.is_dir() {
-                // Skip excluded directories
-                if let Some(name) = p.file_name().and_then(|n| n.to_str())
-                    && EXCLUDED_DIRS.contains(&name)
-                {
-                    continue;
-                }
-                stack.push(p);
-            } else if p.is_file() {
-                out.push(p);
-            }
-        }
-    }
-
-    out
-}
-
-fn scan_one_file(path: &Path, patterns: &[(Regex, &str)], findings: &mut Vec<Value>) {
+fn scan_one_file(
+    path: &Path,
+    patterns: &[CompiledPattern],
+    findings: &mut Vec<Value>,
+    skipped: &mut Vec<SkippedItem>,
+    verbose: bool,
+) {
     let bytes = match fs::read(path) {
         Ok(b) => b,
-        Err(_) => return,
+        Err(e) => {
+            let reason = format!("failed to read file: {}", e);
+            if verbose {
+                eprintln!("Warning: skipped {}: {}", path.display(), reason);
+            }
+            skipped.push(SkippedItem {
+                path: path.to_path_buf(),
+                reason,
+            });
+            return;
+        }
     };
 
     // Lossy read; we never emit matched content
     let content = String::from_utf8_lossy(&bytes);
     let lines: Vec<&str> = content.lines().collect();
 
-    for (re, typ) in patterns {
+    for pat in patterns {
         let mut line_nums: Vec<String> = Vec::new();
         for (i, line) in lines.iter().enumerate() {
-            if re.is_match(line) {
+            if pat.regex.is_match(line) {
                 line_nums.push((i + 1).to_string());
             }
         }
         if !line_nums.is_empty() {
             findings.push(json!({
                 "file": path.to_string_lossy(),
-                "type": typ,
+                "type": pat.type_name,
                 "lines": line_nums.join(",")
             }));
         }
@@ -198,21 +342,31 @@ fn redact(args: &SecretsRedact) -> Result<()> {
     };
     let s = String::from_utf8_lossy(&bytes).to_string();
 
-    let redacted = match args.r#type.as_str() {
-        "github-token" => redact_regex(
-            &s,
-            r"gh[pousr]_[A-Za-z0-9_]{36,}",
-            "[REDACTED:github-token]",
-        ),
-        "aws-access-key" => redact_regex(&s, r"AKIA[0-9A-Z]{16}", "[REDACTED:aws-access-key]"),
-        "stripe-key" => redact_regex(&s, r"sk_live_[0-9a-zA-Z]{24,}", "[REDACTED:stripe-key]"),
-        "jwt-token" => redact_regex(
-            &s,
-            r"eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*",
-            "[REDACTED:jwt-token]",
-        ),
-        "private-key" => redact_private_key_blocks(&s),
-        _ => s, // Should not happen due to value_parser
+    // Find the pattern for the requested type
+    let pattern_opt = match find_pattern_for_type(&args.r#type, args.patterns_file.as_deref()) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Error loading patterns: {e:#}");
+            print_scalar("null");
+            return Ok(());
+        }
+    };
+
+    let redacted = match pattern_opt {
+        Some(pattern) => {
+            let replacement = format!("[REDACTED:{}]", args.r#type);
+            if args.r#type == "private-key" {
+                // Special handling for private key blocks
+                redact_private_key_blocks(&s)
+            } else {
+                redact_regex(&s, &pattern, &replacement)
+            }
+        }
+        None => {
+            eprintln!("Unknown secret type: {}", args.r#type);
+            print_scalar("null");
+            return Ok(());
+        }
     };
 
     if fs::write(path, redacted).is_err() {
@@ -255,26 +409,4 @@ fn redact_private_key_blocks(content: &str) -> String {
     let mut joined = out.join("\n");
     joined.push('\n');
     joined
-}
-
-fn write_json_atomic(path: &Path, v: &Value) -> Result<()> {
-    if let Some(parent) = path.parent()
-        && !parent.as_os_str().is_empty()
-    {
-        fs::create_dir_all(parent)?;
-    }
-
-    // Create a temporary file in the same directory as the target
-    // This ensures they're on the same filesystem for atomic rename
-    let parent_dir = path.parent().unwrap_or_else(|| Path::new("."));
-    let mut tmp = NamedTempFile::new_in(parent_dir)?;
-
-    // Write the JSON content to the temporary file
-    tmp.write_all(format!("{}\n", serde_json::to_string_pretty(v)?).as_bytes())?;
-
-    // Persist the temporary file to the target path
-    // This is an atomic operation that replaces the target if it exists
-    tmp.persist(path)?;
-
-    Ok(())
 }

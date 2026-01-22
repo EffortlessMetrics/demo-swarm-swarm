@@ -7,6 +7,7 @@ use anyhow::Result;
 use clap::{Args, Subcommand};
 use serde_json::{Value, json};
 
+use super::common::write_json_atomic;
 use crate::output::{print_null, print_ok, print_scalar};
 
 #[derive(Args, Debug)]
@@ -131,15 +132,8 @@ fn upsert_status(
         });
     }
 
-    // Atomic write
-    let tmp_path = format!("{}.tmp", index_path);
-    let json_str = serde_json::to_string_pretty(&index)?;
-    if fs::write(&tmp_path, format!("{json_str}\n")).is_err() {
-        print_null();
-        return Ok(());
-    }
-    if fs::rename(&tmp_path, path).is_err() {
-        let _ = fs::remove_file(&tmp_path);
+    // Atomic write using shared utility
+    if write_json_atomic(path, &index).is_err() {
         print_null();
         return Ok(());
     }
