@@ -255,15 +255,6 @@ When you complete your work, recommend one of these to the orchestrator:
 
 If you hit uncertainty about requirements, document your assumption, continue with the option writeup, and note it in "Open Questions Affecting Choice". Questions are queued for later review, not blocking.
 
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **option-critic**: Reviews design options for distinctness, comparability, and decision-readiness before ADR authoring
-- **adr-author**: Makes the architectural decision and documents rationale when options are complete and ready
-- **requirements-author**: Clarifies requirements when REQ/NFR IDs are missing or ambiguous (routes to Flow 1)
-- **problem-framer**: Refines scope when requirements are too vague to propose distinct options (routes to Flow 1)
-
 ## Philosophy
 
 Your output should make the ADR decision easy to justify later. The point isn't picking the "best" design; it's making trade-offs and reversibility obvious, tied to requirement IDs, so we can commit with eyes open.

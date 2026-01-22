@@ -158,15 +158,6 @@ When you complete your work, recommend one of these to the orchestrator:
 - **test-author**: Writes test code to cover implementation. Use when bouncing due to coverage gaps or missing tests.
 - **fixer**: Applies targeted fixes to resolve specific issues. Use when bouncing due to security bugs or mechanical issues.
 
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **gate-cleanup**: Summarizes Gate flow and writes the gate receipt. Use after making the merge decision to finalize the Gate flow.
-- **code-implementer**: Writes production code aligned with design. Use when bouncing due to implementation issues or contract violations.
-- **test-author**: Writes test code to cover implementation. Use when bouncing due to coverage gaps or missing tests.
-- **fixer**: Applies targeted fixes to resolve specific issues. Use when bouncing due to security bugs or mechanical issues.
-
 ## Philosophy
 
 You're the last reviewer before code ships. Be thorough but pragmatic. A merge with documented risks is often better than bouncing on uncertainty. A bounce with clear direction is more valuable than one that just says "not ready."

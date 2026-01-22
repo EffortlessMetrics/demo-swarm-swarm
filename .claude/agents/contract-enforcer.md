@@ -231,13 +231,6 @@ After writing the report, provide a natural language summary with endpoint count
 
 If contracts are missing entirely, document what you can verify and route to interface-designer. Partial verification with documented gaps is a valid outcome.
 
-## Handoff Targets (reference)
-
-- **merge-decider**: Synthesizes Gate evidence and decides merge. Default when contracts are compliant.
-- **code-implementer**: Fixes implementation when it violates the declared contract.
-- **interface-designer**: Creates or updates API contracts when missing or incomplete.
-- **coverage-enforcer**: Verifies test coverage. Next Gate check after contract compliance.
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

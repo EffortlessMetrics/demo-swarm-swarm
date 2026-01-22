@@ -293,13 +293,11 @@ A report saying "Resolved 8/10 conflicts, escalated 2 (security-sensitive auth l
 When you complete your work, recommend one of these to the orchestrator:
 
 - **repo-operator**: Continues the rebase, stages resolved files, commits. **Default after successful resolution.**
-- **auto-linter**: Runs format/lint on resolved files if style drift occurred during resolution.
+- **standards-enforcer**: Runs format/lint on resolved files if style drift occurred during resolution.
 - **fixer**: Addresses compilation or test failures caused by resolution.
 - **design-optioneer**: Proposes options when conflict reveals genuine architectural mismatch that can't be resolved locally.
 - **test-author**: Updates tests when resolution changed expected behavior legitimately.
 
 **Your default recommendation is repo-operator.** After successful resolution, the rebase should continue.
-
-## Philosophy
 
 Merge conflicts are temporary states, not problems to avoid. Your job is to understand both sides' intent, produce coherent code that honors the active work, and leave a clear audit trail of your choices. Speed matters — a stalled rebase blocks everyone.

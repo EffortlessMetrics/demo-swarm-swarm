@@ -167,14 +167,6 @@ Honest partial work is fine. If you couldn't verify governance but made a decisi
 When you complete your work, recommend one of these to the orchestrator:
 
 - **deploy-cleanup**: Summarizes the Deploy flow and writes the receipt; default next step after making a decision
-- **repo-operator**: Executes git operations (merge, tag, release); use when decision is to deploy and git actions are needed before cleanup
-- **secrets-sanitizer**: Scans for secrets before publish; use before any GitHub posting or pushing
-
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **deploy-cleanup**: Summarizes the Deploy flow and writes the receipt; use when deployment decision is made and ready to close the flow
 - **repo-operator**: Executes git operations (merge, tag, release); use when decision is to deploy and git actions are needed
 - **merge-decider**: Re-evaluates the gate decision; use when you need to bounce back to Gate due to missing or unclear verdict
 - **secrets-sanitizer**: Scans for secrets before publish; use before any GitHub posting or pushing

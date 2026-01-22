@@ -309,7 +309,7 @@ For mechanical counting, preserve these exact line prefixes:
 
 Do not vary these prefixes.
 
-## Handoff
+## Handoff Examples
 
 When you're done, tell the orchestrator what happened:
 

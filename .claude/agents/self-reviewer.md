@@ -183,13 +183,6 @@ After writing the self review, report back with a natural language summary.
 
 > Test-critic is UNVERIFIED due to missing coverage for REQ-003. Route to **test-author** to add the missing tests.
 
-## Handoff Targets (reference)
-
-- **build-cleanup**: Seals the Build receipt. Default when artifacts are consistent and ready for Gate.
-- **test-executor**: Regenerates test results when canonical summaries mismatch.
-- **code-implementer**: Fixes implementation issues when critics flagged code changes needed.
-- **test-author**: Addresses test coverage gaps when test-critic reported missing coverage.
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

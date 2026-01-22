@@ -137,6 +137,69 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+**PR Brief Update (`.runs/<run-id>/review/pr_brief.md`):**
+
+Read the existing PR Brief from `.runs/<run-id>/build/pr_brief.md` and update it with review information. If the build PR brief doesn't exist, create a new one from scratch.
+
+Updates to make:
+1. Add review feedback summary to "Quality events"
+2. Update "Proof" table with review status
+3. Add review-specific hotspots if new issues were found
+
+```markdown
+<!-- PR_BRIEF_START -->
+## PR Brief
+
+### What changed
+
+- <preserve from build brief>
+- <add any changes made during review>
+
+### Why
+
+<preserve from build brief>
+
+### Review map (hotspots)
+
+- <preserve from build brief>
+- <add any new hotspots from review feedback>
+
+### Quality events
+
+- **Interface lock:** <preserve from build>
+- **Boundaries / coupling:** <preserve from build>
+- **Verification depth:** <preserve from build>
+- **Security airbag:** <preserve from build>
+- **Review feedback:** <X> items received, <Y> resolved, <Z> pending (<critical count> critical)
+
+### Proof (measured vs not measured)
+
+| Surface         | Status   | Evidence                                      | Notes                        |
+| --------------- | -------- | --------------------------------------------- | ---------------------------- |
+| Correctness     | measured | `.runs/<run-id>/build/test_execution.md`      | <X> tests pass               |
+| Verification    | partial  | -                                             | mutation not run             |
+| Boundaries      | clean    | `.runs/<run-id>/plan/api_contracts.yaml`      | no API/schema changes        |
+| Maintainability | noted    | `.runs/<run-id>/build/code_critique.md`       | <N> hotspots identified      |
+| Explanation     | partial  | -                                             | updated brief (Flow 4)       |
+| Review          | measured | `.runs/<run-id>/review/review_receipt.json`   | <X>/<Y> items resolved       |
+
+**Not measured:** <explicit list>
+
+### Reproduce
+
+```bash
+# Run tests
+<test command from project>
+```
+
+<!-- PR_BRIEF_END -->
+```
+
+**Derive content from artifacts:**
+- Review feedback summary from `pr_feedback.md` and `review_worklist.md`
+- Resolution status from `review_actions.md`
+- Preserve existing content from build brief where unchanged
+
 **Cleanup Report (`.runs/<run-id>/review/cleanup_report.md`):**
 
 Write a human-readable summary including:

@@ -158,12 +158,6 @@ After writing the summary, report back with what you found and your recommendati
 
 ## Handoff Targets
 
-- **fix-forward-runner**: Executes the fix-forward plan. Use when fix-forward is eligible.
-- **merge-decider**: Synthesizes Gate evidence. Use when no fix-forward is needed or plan is ineligible.
-- **code-implementer**: Writes production code. Use when non-mechanical issues require implementation changes.
-
-## Handoff Targets
-
 When you complete your work, recommend one of these to the orchestrator:
 
 - **fix-forward-runner**: Executes the FIX_FORWARD_PLAN_V1 block. Use when fix-forward is eligible and mechanical fixes can be applied.
