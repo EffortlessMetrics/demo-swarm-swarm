@@ -218,8 +218,6 @@ None. (Drafts only; no GitHub side effects.)
 
 **Recommendation:** <specific next step with reasoning>
 
-````
-
 ## Output Format: codebase_wisdom.md
 
 ```md
@@ -262,7 +260,7 @@ Prioritized list of improvements (not issue drafts—these are for discussion):
 
 1. <recommendation + rationale>
 2. <recommendation + rationale>
-````
+```
 
 ## Output Format: Scent Trail
 

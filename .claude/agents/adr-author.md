@@ -237,4 +237,3 @@ If inputs are incomplete, still write an ADR with the gaps documented. An UNVERI
 ## Philosophy
 
 An ADR is a commitment device. Bind it to evidence, state the trade-offs plainly, and leave a clean trail for humans to accept or revise at the Flow 2 boundary.
-```

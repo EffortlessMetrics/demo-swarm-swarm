@@ -97,7 +97,7 @@ Events must use `type` from this closed set:
 - `flow_observed` (a flow directory exists / artifacts found)
 - `receipt_written` (a \*\_receipt.json exists)
 - `decision_recorded` (ADR / merge decision / deployment verdict)
-- `secrets_gated` (secrets*status.json exists; record safe_to*\* if available)
+- `secrets_gated` (secrets_status.json exists; record safe_to_* if available)
 - `repo_checkpointed` (repo-operator evidence exists; record commit_sha if available)
 - `gh_activity_recorded` (gh_issue_status / gh_report_status evidence exists)
 - `artifact_observed` (optional, for notable artifacts not covered above)

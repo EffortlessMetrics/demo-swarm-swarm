@@ -234,16 +234,6 @@ Other targets when conditions apply:
 - **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
 - **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
 
-## Handoff Targets
-
-Your default recommendation is **spec-auditor**. After scope assessment, the spec needs holistic validation before Flow 2.
-
-Other targets when conditions apply:
-
-- **requirements-author**: Use when requirements are missing and scope cannot be accurately assessed.
-- **bdd-author**: Use when scenarios are missing and coverage cannot be assessed.
-- **signal-cleanup**: Use only after spec-auditor has passed (skip-audit is not the default path).
-
 ## Philosophy
 
 Early scope isn't precision; it's **preventing surprise**. Your outputs should be usable by:

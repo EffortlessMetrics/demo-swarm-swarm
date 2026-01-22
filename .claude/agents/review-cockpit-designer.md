@@ -135,11 +135,8 @@ graph LR
     B --> C[Auth Service]
     C --> D[(Database)]
 ```
-````
 
 _New auth flow added in this PR_
-
-```
 
 ## Design Principles
 
@@ -201,4 +198,3 @@ After designing the cockpit, tell the orchestrator what you created.
 ## Philosophy
 
 The cockpit is a UI. Design it like one. Reviewers are busy; respect their time. The goal is: can someone approve or request changes in 5 minutes without reading every line of the diff?
-```

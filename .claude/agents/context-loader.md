@@ -239,7 +239,7 @@ If a pattern matches zero files, record it under `unresolved_patterns[]` and con
 
 **Partial:**
 
-> "Loaded context for ST-002 but 2 of 5 touch patterns unresolved (no files matching \*_/session\__.ts). Resolved 3 code files, 5 test files. Implementer may need to explore further."
+> "Loaded context for ST-002 but 2 of 5 touch patterns unresolved (no files matching **/session_*.ts). Resolved 3 code files, 5 test files. Implementer may need to explore further."
 
 **Explain patterns, not just counts:**
 

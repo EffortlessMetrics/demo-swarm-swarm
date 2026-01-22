@@ -198,7 +198,6 @@ subtasks:
     observability: []
     estimate: M
 ```
-````
 
 ### Field semantics
 

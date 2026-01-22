@@ -298,7 +298,6 @@ Issues by severity:
     /* ignore */
   }
   ```
-````
 
 - Impact: Silent failures, impossible to debug
 - Recommendation: Log error, rethrow or handle appropriately
