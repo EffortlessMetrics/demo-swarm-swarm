@@ -11,6 +11,7 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | See agent capabilities and handoffs | [Agent Matrix](agent-matrix.md) |
 | See agent routing patterns per flow | [Agent Handoff Graph](agent-handoff-graph.md) |
 | Understand agent dependencies | [Agent Data Flows](agent-data-flows.md) |
+| Review agent do's and don'ts | [Agent Patterns](agent-patterns.md) |
 | Compare all 7 flows side-by-side | [Flow Comparison](flow-comparison.md) |
 | Check a control-plane schema | [Contracts](contracts.md) |
 | Look up a data schema | [Schemas](schemas.md) |
@@ -18,6 +19,7 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Count something mechanically | [Stable Markers](stable-markers.md) |
 | Use the CLI | [DemoSwarm CLI](demoswarm-cli.md) |
 | Run pack validation | [pack-check](pack-check.md) |
+| Understand pack-check scope | [pack-check Scope](pack-check-scope.md) |
 | Navigate the repo | [Repo Map](repo-map.md) |
 | Understand model tiers | [Model Allocation](model-allocation.md) |
 | Understand evidence hierarchy | [Trust Model](trust-model.md) |
@@ -29,3 +31,4 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Track system health over time | [Calibration Signals](calibration-signals.md) |
 | Prevent trust decay and gaming | [Calibration](calibration.md) |
 | Write documentation | [Documentation Conventions](documentation-conventions.md) |
+| Apply visual style guidelines | [Visual Style](visual-style.md) |
