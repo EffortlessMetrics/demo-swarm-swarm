@@ -110,7 +110,7 @@ Tutorial lists these files in Flow 1 signal directory (lines 146-149):
 - Demo goal (demoswarm version CLI subcommand) is self-referential and deterministic
 - Agent names in each flow are all verified to exist
 - Artifact outputs match reality (e.g., Flow 1 shows signal/, Flow 2 shows plan/, etc.)
-- Feature verification command shown is syntactically correct
+- Feature verification command shown is syntactically correct.
 
 **No issues found.**
 

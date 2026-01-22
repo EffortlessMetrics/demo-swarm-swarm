@@ -108,7 +108,7 @@ See [Role Families](#role-families) above for color → role mappings.
 These are the six constraints that make stochastic generation safe. See [the-physics.md](../explanation/the-physics.md) for full explanations.
 
 ### Mechanical Truth (Physics 1)
-Trust tool outputs over agent narratives. Exit codes and counts are what actually happened; agent claims are interpretation. When sources conflict, trust flows downward through the [Truth Hierarchy](#truth-hierarchy).
+Trust tool outputs over agent narratives. Exit codes and counts are what actually happened; agent claims are interpretation. When sources conflict, follow the [Truth Hierarchy](#truth-hierarchy) (see Key Concepts below for the full 5-layer model).
 
 ### Schema Gravity (Physics 2)
 The flow structure itself pulls outputs into alignment. Running through flows naturally shapes outputs toward schema alignment because each step has expectations that constrain the next. Existing codebase patterns, conventions, and structure act as a mold that shapes what gets generated.

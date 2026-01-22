@@ -1,5 +1,8 @@
 # Documentation Critique: docs/how-to/ Guides
 
+**Date:** 2026-01-21
+**Commit:** `123d964` (feat/documentation-critiques-v2.2)
+
 ## Inputs Used
 - All 21 how-to guides in `docs/how-to/`
 - Flow command definitions in `.claude/commands/flow-*.md`

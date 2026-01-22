@@ -9,9 +9,11 @@
 - `docs/tutorials/validation-run.md`
 - `CONTRIBUTING.md`
 - `docs/how-to/maintain-the-pack.md`
-- `tools/demoswarm-pack-check/Cargo.toml` (version: 1.0.1)
-- `tools/demoswarm-runs-tools/Cargo.toml` (version: 1.0.1)
-- `CHANGELOG.md` (v1.0.1 - 2025-12-13)
+- `tools/demoswarm-pack-check/Cargo.toml` (version: 2.2.0)
+- `tools/demoswarm-runs-tools/Cargo.toml` (version: 2.2.0)
+- `CHANGELOG.md` (v2.2.0 - 2026-01-12)
+
+> **Note:** This audit was originally conducted against v1.0.1. Versions have since been updated to v2.2.0.
 
 ---
 
@@ -131,9 +133,9 @@
 1. **Version Alignment [VERIFIED]**
    - Claims: Pack, pack-check, demoswarm CLI, and CHANGELOG must all match
    - Reality check:
-     - CHANGELOG.md: v1.0.1 ✓
-     - tools/demoswarm-pack-check/Cargo.toml: version = "1.0.1" ✓
-     - tools/demoswarm-runs-tools/Cargo.toml: version = "1.0.1" ✓
+     - CHANGELOG.md: v2.2.0 ✓
+     - tools/demoswarm-pack-check/Cargo.toml: version = "2.2.0" ✓
+     - tools/demoswarm-runs-tools/Cargo.toml: version = "2.2.0" ✓
    - All in sync, no action needed
 
 2. **Validation Instructions [VERIFIED]**
@@ -273,7 +275,7 @@ Based on CHANGELOG.md v1.0.1:
 
 **What I found:**
 
-Maintenance documentation is comprehensive and accurate for day-to-day operations (validation, release process, handover). Version alignment is correct (all v1.0.1). However, two critical issues were discovered:
+Maintenance documentation is comprehensive and accurate for day-to-day operations (validation, release process, handover). Version alignment is correct (all v2.2.0). However, two critical issues were discovered:
 
 1. **CONTRIBUTING.md contains outdated references** to Python validation scripts (`lint_frontmatter.py`, `check_portable_claude.py`) that no longer exist. These should be removed and replaced with bash .claude/scripts/pack-check.sh references.
 

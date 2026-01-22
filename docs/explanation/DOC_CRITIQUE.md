@@ -75,6 +75,7 @@ docs/explanation/principles/truth-flows-downward.md (See Also section):
 ## Concepts Verified as Accurate
 
 ### Completion States ✓
+
 - `VERIFIED` (evidence panel green, evidence fresh, blockers empty) — **Accurate**
 - `UNVERIFIED` (checkpointed, artifacts written, resumable) — **Accurate**
 - `CANNOT_PROCEED` (mechanical failure only) — **Accurate**
@@ -87,6 +88,7 @@ All consistent across:
 - `docs/explanation/operating-model.md`
 
 ### Authority/Difficulty Distinction ✓
+
 - `DEFAULTED` (agent can handle with research + safe defaults) — **Accurate**
 - `NEEDS_HUMAN` (requires organizational authority) — **Accurate**
 - Escalation ladder (5 steps from local investigation to escalation) — **Accurate**
@@ -97,6 +99,7 @@ All consistent across:
 - `docs/explanation/agent-philosophy.md` (except noted terminology inconsistency)
 
 ### Flow Structure ✓
+
 - Seven flows (Signal, Plan, Build, Review, Gate, Deploy, Wisdom) — **Accurate**
 - Out-of-order execution allowed with UNVERIFIED markers — **Accurate**
 - Flow boundaries as natural checkpoints — **Accurate**

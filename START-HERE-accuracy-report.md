@@ -10,7 +10,7 @@ START-HERE.md is a high-quality getting-started guide with **one significant ina
 ## Files Reviewed
 
 **Primary inputs:**
-- `/c/Code/Swarm/unlinked/demo-swarm-swarm/docs/START-HERE.md`
+- `docs/START-HERE.md`
 
 **Context files:**
 - `CLAUDE.md` (repo policy)

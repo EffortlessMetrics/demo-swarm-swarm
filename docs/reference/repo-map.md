@@ -107,7 +107,7 @@ docs/
 |-- README.md                    # Docs index (intent router)
 |-- START-HERE.md                # New user starting point
 |
-|-- tutorials/                   # Learning-oriented (4 files)
+|-- tutorials/                   # Learning-oriented (5 files)
 |   |-- README.md                # Tutorials index
 |   |-- first-swarm-run.md       # First swarm run guide
 |   |-- quickstart.md            # Quick start (includes offline mode)
@@ -138,7 +138,7 @@ docs/
 |   |-- working-with-microloops.md # Microloop patterns
 |   `-- working-with-receipts.md # Receipt patterns
 |
-|-- reference/                   # Information-oriented (28 files)
+|-- reference/                   # Information-oriented (27 files)
 |   |-- README.md                # Reference index
 |   |-- agent-data-flows.md      # Agent data flows
 |   |-- agent-handoff-graph.md   # Agent handoff graph
@@ -167,7 +167,7 @@ docs/
 |   |-- trust-model.md           # Trust model
 |   `-- visual-style.md          # Visual style guide
 |
-|-- explanation/                 # Understanding-oriented (53 files)
+|-- explanation/                 # Understanding-oriented (52 files)
 |   |-- README.md                # Explanation index
 |   |-- adversarial-loops.md     # Adversarial loops
 |   |-- agent-philosophy.md      # Agent philosophy

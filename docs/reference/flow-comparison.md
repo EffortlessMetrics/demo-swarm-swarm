@@ -134,6 +134,7 @@ For authoritative agent lists per flow, see the individual flow command files in
 
 | Artifact | Producer | Purpose |
 |----------|----------|---------|
+| `flow_plan.md` | orchestrator | Execution state and phase tracking |
 | `wisdom_receipt.json` | wisdom-cleanup | Final run receipt |
 | `artifact_audit.md` | artifact-auditor | Structural sanity check of all flows |
 | `solution_analysis.md` | solution-analyst | Requirement/implementation alignment |
@@ -150,6 +151,13 @@ For authoritative agent lists per flow, see the individual flow command files in
 | `pack_improvements.md` | feedback-applier | Suggested diffs to pack/agent prompts |
 | `codebase_wisdom.md` | feedback-applier | Structural insights for humans |
 | `risk_assessment.md` | risk-analyst | Risk perspective (predicted vs actual) |
+| `cleanup_report.md` | wisdom-cleanup | Cleanup status and evidence |
+| `secrets_scan.md` | secrets-sanitizer | Secrets scan results |
+| `secrets_status.json` | secrets-sanitizer | Safe-to-publish status |
+| `git_status.md` | repo-operator | Git state documentation |
+| `gh_issue_status.md` | gh-issue-manager | Issue sync status |
+| `gh_report_status.md` | gh-reporter | GitHub report posting status |
+| `github_report.md` | gh-reporter | Issue comment content |
 
 ---
 
