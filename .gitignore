@@ -34,3 +34,4 @@ test_output*.log
 .runs/**/gh_comment_id.txt
 .runs/**/gh_issue_status.md
 .runs/**/gh_report_status.md
+.runs/issue_updates/
