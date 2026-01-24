@@ -150,7 +150,7 @@ If `run_meta.github_ops_allowed == false` (e.g., repo mismatch):
 **Accessibility & UX Guidelines:**
 
 - **Navigation:** Add `**Jump to**: [Section](#section)` links at the top.
-- **Visual Status:** Use emojis + text for status (✅ PASS, ⚠️ WARN, ❌ FAIL).
+- **Visual Status:** Use emojis + text for status (✅ VERIFIED, ⚠️ PARTIAL, ❌ FAIL).
 - **Scanning:** Use tables for structured data.
 
 Include the idempotency marker near the top (applies to all modes):
@@ -280,7 +280,11 @@ If you cannot find a value safely, emit `null` and add a concern.
 
 Prefer reporting:
 
-- Status: Use visual indicator (e.g., `✅ VERIFIED` if machine summary is passed, `⚠️ PARTIAL` if caveats exist).
+- Status: Derive a status value, then present it with a visual indicator:
+  - Prefer the receipt's machine summary status if present.
+  - Else use the receipt's top-level `status` field.
+  - Else treat status as `null` and add a concern about missing status.
+  - Example labels: `✅ VERIFIED` if fully passed, `⚠️ PARTIAL` if caveats exist, `❌ FAIL` if not passed.
 - Requirements counts:
   - `counts.requirements` (preferred) OR `counts.functional_requirements` (legacy)
   - `counts.nfrs` (preferred) OR `counts.non_functional_requirements` (legacy)
@@ -300,10 +304,10 @@ Reference key artifacts (paths only):
 
 **Jump to**: [Tests](#tests-summary) | [Mutation](#mutation-score) | [Concerns](#concerns)
 
-Prefer reporting from `build_receipt.json` using visual indicators:
+Prefer reporting from `build_receipt.json` using visual indicators (copy values from receipt, add indicator):
 
-- Tests summary (e.g., `✅ 45 passed, 0 failed` or `❌ 2 failed`)
-- Mutation score (e.g., `✅ 100%` or `⚠️ 78%`)
+- Tests summary from receipt (e.g., `✅ 45 passed, 0 failed`, `❌ 2 failed`, or `⚠️ 43 passed, 0 failed, 2 skipped`)
+- Mutation score from receipt (e.g., `✅ 100%`, `⚠️ 78%`, or `❌ 35%`)
 - Requirements/REQ status map if present (REQ-### → status)
 - Critic outcomes (test/code critiques)
 

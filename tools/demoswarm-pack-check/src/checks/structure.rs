@@ -1,6 +1,6 @@
 //! Structure checks: required files exist, no duplicates.
 //!
-//! Checks: 1, 2, 6, 9, 10, 15
+//! Checks: 1, 2, 6, 9, 10, 11, 15
 
 use std::collections::HashMap;
 
@@ -189,8 +189,12 @@ fn check_agent_skills_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Resu
         let rel = cx.ctx.rel(agent_file);
 
         if content.contains("demoswarm.sh") {
-            // Check for the header (tolerant of leading/trailing whitespace around ## Skills)
-            let has_skills = content.lines().any(|l| l.trim().starts_with("## Skills"));
+            // Check for the exact "## Skills" header (tolerant of leading/trailing whitespace)
+            // Use stricter matching to avoid false positives like "## Skillset"
+            let has_skills = content.lines().any(|l| {
+                let trimmed = l.trim();
+                trimmed == "## Skills" || trimmed.starts_with("## Skills ")
+            });
 
             if has_skills {
                 rep.pass(format!("{rel} uses demoswarm.sh and has Skills section"));

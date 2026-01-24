@@ -26,8 +26,8 @@ Applied to `.claude/agents/gh-reporter.md`:
 
 ## Consistency with Existing Patterns
 
-This change applies the same patterns documented in `2026-01-cockpit-ux.md`:
+This change applies and extends the patterns documented in `2026-01-cockpit-ux.md`:
 - ✅ = positive/passing state
-- ⚠️ = warning/partial state
+- ⚠️ = warning/partial state (extension of the cockpit-ux status palette, which uses ⚪ for neutral/skipped/N/A)
 - ❌ = negative/failing state
 - Navigation links for keyboard accessibility
