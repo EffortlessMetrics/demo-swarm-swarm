@@ -1,6 +1,6 @@
 //! Structure checks: required files exist, no duplicates.
 //!
-//! Checks: 1, 2, 6, 9, 10, 15
+//! Checks: 1, 2, 6, 9, 10, 11, 15
 
 use std::collections::HashMap;
 
@@ -35,6 +35,11 @@ pub fn checks() -> Vec<CheckSpec> {
             id: 10,
             title: "Checking CLAUDE.md...",
             run: check_claude_md,
+        },
+        CheckSpec {
+            id: 11,
+            title: "Checking agent skills sections...",
+            run: check_agent_skills_section,
         },
         CheckSpec {
             id: 15,
@@ -174,6 +179,30 @@ fn check_customizer(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
         rep.warn("pack-customizer agent MISSING (optional but recommended)");
     }
 
+    Ok(())
+}
+
+/// Check 11: Agents using demoswarm.sh must have a ## Skills section.
+fn check_agent_skills_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
+    for agent_file in &cx.inv.agent_md_files {
+        let content = cx.ctx.read_utf8(agent_file)?;
+        let rel = cx.ctx.rel(agent_file);
+
+        if content.contains("demoswarm.sh") {
+            // Check for the exact "## Skills" header (tolerant of leading/trailing whitespace)
+            // Use stricter matching to avoid false positives like "## Skillset"
+            let has_skills = content.lines().any(|l| {
+                let trimmed = l.trim();
+                trimmed == "## Skills" || trimmed.starts_with("## Skills ")
+            });
+
+            if has_skills {
+                rep.pass(format!("{rel} uses demoswarm.sh and has Skills section"));
+            } else {
+                rep.fail(format!("{rel} uses demoswarm.sh but MISSING '## Skills' section"));
+            }
+        }
+    }
     Ok(())
 }
 

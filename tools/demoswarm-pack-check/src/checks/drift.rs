@@ -77,11 +77,6 @@ pub fn checks() -> Vec<CheckSpec> {
             run: check_direct_demoswarm_invocation,
         },
         CheckSpec {
-            id: 49,
-            title: "Checking agents using demoswarm.sh have ## Skills section...",
-            run: check_skills_section_required,
-        },
-        CheckSpec {
             id: 50,
             title: "Checking GH agents use heredoc (not --body-file) and no forbidden patterns...",
             run: check_gh_body_hygiene,
@@ -562,37 +557,6 @@ fn check_direct_demoswarm_invocation(cx: &CheckCtx, rep: &mut Reporter) -> anyho
         rep.indent_lines(format_line_matches(cx, violations).into_iter().take(5));
     } else {
         rep.pass("No direct demoswarm invocations (all use shim)");
-    }
-
-    Ok(())
-}
-
-/// Check 49: Agents using demoswarm.sh must have a ## Skills section.
-///
-/// Improves discoverability by ensuring agents document which skills they use.
-fn check_skills_section_required(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
-    let mut missing_skills_section = Vec::new();
-
-    for agent_file in &cx.inv.agent_md_files {
-        let content = match cx.ctx.read_utf8(agent_file) {
-            Ok(c) => c,
-            Err(_) => continue,
-        };
-
-        // Check if file uses demoswarm.sh
-        if content.contains("demoswarm.sh") {
-            // Check if it has a ## Skills section
-            if !content.contains("## Skills") && !content.contains("## Skill") {
-                missing_skills_section.push(cx.ctx.rel(agent_file));
-            }
-        }
-    }
-
-    if !missing_skills_section.is_empty() {
-        rep.fail("Agents using demoswarm.sh must have a ## Skills section:");
-        rep.indent_lines(missing_skills_section.into_iter().take(10));
-    } else {
-        rep.pass("All agents using demoswarm.sh have ## Skills section");
     }
 
     Ok(())
