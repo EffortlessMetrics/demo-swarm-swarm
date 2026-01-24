@@ -43,9 +43,10 @@ This file will be used as the PR description body.
 
 ### Navigation (accessibility)
 
-Add jump links at the top for keyboard/screen reader users:
+Add jump links at the top for keyboard/screen reader users. Include an anchor `top` for "Back to Top" links.
 
 ```markdown
+<a id="top"></a>
 **Jump to**: [Summary](#summary) | [Evidence](#evidence-panel) | [Hotspots](#hotspots) | [Recommendation](#recommendation)
 ```
 
@@ -58,7 +59,7 @@ Ensure anchor links match the actual section headers.
 
 **What**: <one sentence describing the change>
 **Why**: <link to REQ or issue>
-**Risk**: LOW | MEDIUM | HIGH
+**Risk**: 🟢 LOW | 🟡 MEDIUM | 🔴 HIGH
 
 ### Quick Stats
 | Metric | Value |
@@ -67,6 +68,8 @@ Ensure anchor links match the actual section headers.
 | Lines +/- | +Y / -Z |
 | Tests | A passed, B failed |
 | Coverage | X% |
+
+[↑ Back to Top](#top)
 ```
 
 ### Evidence Panel (1 minute to scan)
@@ -83,6 +86,8 @@ Ensure anchor links match the actual section headers.
 | Security | ✅ PASS | [security_scan.md](link) |
 
 **Freshness**: ✅ SHA matches HEAD (FRESH)
+
+[↑ Back to Top](#top)
 ```
 
 ### Hotspots (where to focus review)
@@ -100,6 +105,8 @@ Review these 3-5 files for spot-checking:
 - Highest complexity delta
 - Security-sensitive paths
 - Most lines changed
+
+[↑ Back to Top](#top)
 ```
 
 ### What's Not Measured
@@ -110,6 +117,8 @@ Review these 3-5 files for spot-checking:
 - **Mutation testing**: Skipped (low-risk change, no critical paths)
 - **Performance testing**: N/A (no NFR-PERF requirements)
 - **Load testing**: Deferred to staging
+
+[↑ Back to Top](#top)
 ```
 
 ### Decision Section
@@ -125,6 +134,8 @@ Review these 3-5 files for spot-checking:
 
 **Open Questions**:
 - None blocking merge
+
+[↑ Back to Top](#top)
 ```
 
 ### Architecture Diagram (when helpful)
@@ -141,6 +152,8 @@ graph LR
 
 *New auth flow added in this PR*
 ```
+
+[↑ Back to Top](#top)
 
 ## Design Principles
 
