@@ -524,3 +524,19 @@ pub const OPENQ_FLOW_CODES: &[&str] = &[
     "DEPLOY", // Deploy (Flow 6)
     "WISDOM", // Wisdom (Flow 7)
 ];
+
+/// Test utilities: cached regex compilation for performance.
+///
+/// Regex compilation is expensive (~5-10ms per call). Tests that repeatedly
+/// call `Regexes::compile()` waste time. This module provides a cached instance.
+#[cfg(test)]
+pub mod test_utils {
+    use super::Regexes;
+    use once_cell::sync::Lazy;
+
+    /// Cached compiled regexes for test use.
+    ///
+    /// This is compiled once on first access and reused across all tests.
+    pub static REGEXES: Lazy<Regexes> =
+        Lazy::new(|| Regexes::compile().expect("Failed to compile regexes"));
+}

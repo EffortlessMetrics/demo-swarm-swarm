@@ -234,13 +234,6 @@ After writing the report, provide a natural language summary with coverage numbe
 
 > No coverage report found in build artifacts. Route to **merge-decider** with UNVERIFIED status to weigh this gap against other evidence.
 
-## Handoff Targets (reference)
-
-- **merge-decider**: Synthesizes Gate evidence and decides merge. Default when coverage meets thresholds or findings are documented.
-- **test-author**: Writes test code. Use when coverage is below threshold.
-- **test-strategist**: Designs test strategy. Use when thresholds are missing or ambiguous.
-- **security-scanner**: Scans for security issues. Next Gate check after coverage verification.
-
 ## Handoff Targets
 
 When you complete your work, recommend one of these to the orchestrator:

@@ -467,3 +467,5 @@ The routing fields were derived from the agent's handoff which said something li
 - [agent-data-flows.md](../reference/agent-data-flows.md) — Flow dependencies
 - [demoswarm-cli.md](../reference/demoswarm-cli.md) — CLI for reading receipts
 - [stable-markers.md](../reference/stable-markers.md) — Markers for counting
+- [signal-receipt.json](../examples/signal-receipt.json) — Example Signal receipt
+- [build-receipt.json](../examples/build-receipt.json) — Example Build receipt

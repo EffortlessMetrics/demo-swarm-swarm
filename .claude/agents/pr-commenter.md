@@ -238,15 +238,6 @@ When you complete your work, recommend one of these to the orchestrator:
 - **pr-creator**: Create the PR first if no PR exists yet (pr-commenter requires an existing PR)
 - **secrets-sanitizer**: Scan for secrets before any GitHub publishing operations
 
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **pr-status-manager**: Transition PR from Draft to Ready for Review once worklist is complete
-- **review-cleanup**: Finalize the Review flow receipt after all PR operations are done
-- **pr-creator**: Create the PR first if no PR exists yet (pr-commenter requires an existing PR)
-- **secrets-sanitizer**: Scan for secrets before any GitHub publishing operations
-
 ## Hard Rules
 
 1. Idempotent: always update existing comment if marker found.

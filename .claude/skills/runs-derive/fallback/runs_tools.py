@@ -347,15 +347,61 @@ def cmd_receipts_count(args: argparse.Namespace) -> None:
         print_result(None)
 
 
+def try_git_show(path: str) -> Optional[str]:
+    """Try to read file content via git show HEAD:<path>."""
+    import subprocess
+
+    # Normalize path separators to forward slashes for git
+    git_path = path.replace("\\", "/")
+
+    try:
+        result = subprocess.run(
+            ["git", "show", f"HEAD:{git_path}"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode == 0:
+            return result.stdout
+    except Exception:
+        # Best-effort git fallback: if git is unavailable or errors, behave as if
+        # the file is missing and let the caller handle None.
+        pass
+    return None
+
+
+def discover_receipt_content(path: str) -> tuple[Optional[str], str]:
+    """Discover receipt content using file-first, git-fallback protocol.
+
+    Returns (content, method) where method is 'direct_read', 'git_show', or 'missing'.
+    """
+    # Try direct file read first
+    if file_exists(path):
+        content = read_file(path)
+        if content is not None:
+            return (content, "direct_read")
+
+    # Try git fallback
+    content = try_git_show(path)
+    if content is not None:
+        return (content, "git_show")
+
+    return (None, "missing")
+
+
 def cmd_receipt_get(args: argparse.Namespace) -> None:
-    """Read a field from a receipt JSON file."""
-    if not file_exists(args.file):
+    """Read a field from a receipt JSON file with git fallback."""
+    content, method = discover_receipt_content(args.file)
+
+    # Log discovery method to stderr for structured output
+    print(f"discovery_method: {method}", file=sys.stderr)
+
+    if content is None:
         print_result(None)
         return
 
     try:
-        with open(args.file, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        data = json.loads(content)
         value = data.get(args.key)
         print_result(value)
     except Exception:

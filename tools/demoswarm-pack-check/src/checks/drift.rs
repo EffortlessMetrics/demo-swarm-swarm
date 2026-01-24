@@ -1006,13 +1006,14 @@ mod tests {
     mod format_line_matches_tests {
         use super::*;
         use crate::checks::CheckCtx;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::util::LineMatch;
         use tempfile::TempDir;
 
-        fn setup_test_ctx() -> (TempDir, Ctx, Inventory, Regexes, Contracts) {
+        fn setup_test_ctx() -> (TempDir, Ctx, Inventory, Contracts) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             std::fs::create_dir_all(claude_dir.join("agents")).unwrap();
@@ -1021,19 +1022,18 @@ mod tests {
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
             let c = Contracts::default();
 
-            (temp, ctx, inv, re, c)
+            (temp, ctx, inv, c)
         }
 
         #[test]
         fn test_format_line_matches_empty_input() {
-            let (_temp, ctx, inv, re, c) = setup_test_ctx();
+            let (_temp, ctx, inv, c) = setup_test_ctx();
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1044,11 +1044,11 @@ mod tests {
 
         #[test]
         fn test_format_line_matches_single_match() {
-            let (temp, ctx, inv, re, c) = setup_test_ctx();
+            let (temp, ctx, inv, c) = setup_test_ctx();
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1067,11 +1067,11 @@ mod tests {
 
         #[test]
         fn test_format_line_matches_trims_trailing_whitespace() {
-            let (temp, ctx, inv, re, c) = setup_test_ctx();
+            let (temp, ctx, inv, c) = setup_test_ctx();
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1090,11 +1090,11 @@ mod tests {
 
         #[test]
         fn test_format_line_matches_multiple_matches() {
-            let (temp, ctx, inv, re, c) = setup_test_ctx();
+            let (temp, ctx, inv, c) = setup_test_ctx();
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1133,7 +1133,8 @@ mod tests {
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1141,7 +1142,7 @@ mod tests {
 
         fn setup_test_env_with_cleanup_agent(
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -1157,16 +1158,16 @@ mod tests {
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_cleanup_agent_with_allowed_demoswarm_shim() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_cleanup_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_cleanup_agent(
                 r#"---
 name: test-cleanup
 ---
@@ -1182,7 +1183,7 @@ bash .claude/scripts/demoswarm.sh count --file test.txt
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1194,7 +1195,7 @@ bash .claude/scripts/demoswarm.sh count --file test.txt
 
         #[test]
         fn test_cleanup_agent_with_do_not_context_allowed() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_cleanup_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_cleanup_agent(
                 r#"---
 name: test-cleanup
 ---
@@ -1210,7 +1211,7 @@ Instead use demoswarm.sh
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1222,7 +1223,7 @@ Instead use demoswarm.sh
 
         #[test]
         fn test_cleanup_agent_empty_line_resets_context() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_cleanup_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_cleanup_agent(
                 r#"---
 name: test-cleanup
 ---
@@ -1237,7 +1238,7 @@ grep -c pattern file.txt
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1249,7 +1250,7 @@ grep -c pattern file.txt
 
         #[test]
         fn test_cleanup_agent_with_runs_reference_allowed() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_cleanup_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_cleanup_agent(
                 r#"---
 name: test-cleanup
 ---
@@ -1262,7 +1263,7 @@ Use runs_ helper functions for derivation.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1281,7 +1282,8 @@ Use runs_ helper functions for derivation.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1290,7 +1292,7 @@ Use runs_ helper functions for derivation.
         fn setup_test_env_with_agent(
             agent_name: &str,
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -1306,16 +1308,16 @@ Use runs_ helper functions for derivation.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_skill_ownership_index_allowed_for_cleanup() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "signal-cleanup",
                 r#"---
 name: signal-cleanup
@@ -1329,7 +1331,7 @@ Use demoswarm.sh index upsert-status to update the index.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1341,7 +1343,7 @@ Use demoswarm.sh index upsert-status to update the index.
 
         #[test]
         fn test_skill_ownership_index_violation_for_unauthorized_agent() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "code-implementer",
                 r#"---
 name: code-implementer
@@ -1355,7 +1357,7 @@ Use demoswarm.sh index upsert-status to update the index.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1367,7 +1369,7 @@ Use demoswarm.sh index upsert-status to update the index.
 
         #[test]
         fn test_skill_ownership_secrets_allowed_for_sanitizer() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "secrets-sanitizer",
                 r#"---
 name: secrets-sanitizer
@@ -1382,7 +1384,7 @@ Use demoswarm.sh secrets redact to remove them.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1394,7 +1396,7 @@ Use demoswarm.sh secrets redact to remove them.
 
         #[test]
         fn test_skill_ownership_secrets_violation_for_other_agent() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "test-author",
                 r#"---
 name: test-author
@@ -1408,7 +1410,7 @@ Use demoswarm.sh secrets scan to check for secrets.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1420,7 +1422,7 @@ Use demoswarm.sh secrets scan to check for secrets.
 
         #[test]
         fn test_skill_ownership_openq_allowed_for_clarifier() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "clarifier",
                 r#"---
 name: clarifier
@@ -1435,7 +1437,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1447,7 +1449,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_skill_ownership_openq_violation_for_other_agent() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 "requirements-author",
                 r#"---
 name: requirements-author
@@ -1461,7 +1463,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1488,14 +1490,14 @@ Use demoswarm.sh openq append to add questions.
             // On Windows, we'll just test with empty dir
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let mut rep = Reporter::new(OutputFormat::Json, false, false);
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1514,7 +1516,8 @@ Use demoswarm.sh openq append to add questions.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1522,7 +1525,7 @@ Use demoswarm.sh openq append to add questions.
 
         fn setup_test_env_with_runs(
             open_questions_content: Option<&str>,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -1541,11 +1544,11 @@ Use demoswarm.sh openq append to add questions.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
@@ -1559,14 +1562,14 @@ Use demoswarm.sh openq append to add questions.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let mut rep = Reporter::new(OutputFormat::Json, false, false);
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1579,7 +1582,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_valid_canonical_codes() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-SIG-001 - What is the scope?
@@ -1595,7 +1598,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1607,7 +1610,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_signal() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-SIGNAL-001 - What is the scope?
@@ -1617,7 +1620,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1629,7 +1632,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_pln() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-PLN-001 - How to implement?
@@ -1639,7 +1642,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1651,7 +1654,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_bld() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-BLD-001 - Which tests?
@@ -1661,7 +1664,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1673,7 +1676,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_gat() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-GAT-001 - Gate criteria?
@@ -1683,7 +1686,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1695,7 +1698,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_dep() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-DEP-001 - Deploy target?
@@ -1705,7 +1708,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1717,7 +1720,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_non_canonical_flow_code_wis() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-WIS-001 - Lessons learned?
@@ -1727,7 +1730,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1739,7 +1742,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_unknown_uppercase_code() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-UNKNOWN-001 - What is this?
@@ -1749,7 +1752,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1761,7 +1764,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_invalid_numeric_suffix_single_digit() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-SIG-1 - Single digit?
@@ -1771,7 +1774,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1783,7 +1786,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_invalid_numeric_suffix_two_digits() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-SIG-12 - Two digits?
@@ -1793,7 +1796,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1805,7 +1808,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_invalid_numeric_suffix_four_digits() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-SIG-1234 - Four digits?
@@ -1815,7 +1818,7 @@ Use demoswarm.sh openq append to add questions.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1827,7 +1830,7 @@ Use demoswarm.sh openq append to add questions.
 
         #[test]
         fn test_openq_validation_multiple_qids_on_same_line_all_canonical() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 See also OQ-SIG-001 and OQ-PLAN-002 for related context.
@@ -1837,7 +1840,7 @@ See also OQ-SIG-001 and OQ-PLAN-002 for related context.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1849,7 +1852,7 @@ See also OQ-SIG-001 and OQ-PLAN-002 for related context.
 
         #[test]
         fn test_openq_validation_multiple_qids_on_same_line_mixed() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 See also OQ-SIG-001 and OQ-PLN-002 for related context.
@@ -1859,7 +1862,7 @@ See also OQ-SIG-001 and OQ-PLN-002 for related context.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1871,12 +1874,12 @@ See also OQ-SIG-001 and OQ-PLN-002 for related context.
 
         #[test]
         fn test_openq_validation_empty_open_questions_file() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(""));
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(""));
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1888,7 +1891,7 @@ See also OQ-SIG-001 and OQ-PLN-002 for related context.
 
         #[test]
         fn test_openq_validation_no_qid_lines() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 No questions yet.
@@ -1898,7 +1901,7 @@ No questions yet.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1910,7 +1913,7 @@ No questions yet.
 
         #[test]
         fn test_openq_validation_deduplicates_violations() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_runs(Some(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_runs(Some(
                 r#"# Open Questions
 
 - QID: OQ-PLN-001 - First
@@ -1921,7 +1924,7 @@ No questions yet.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1940,7 +1943,8 @@ No questions yet.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1948,7 +1952,7 @@ No questions yet.
 
         fn setup_test_env_with_flow_command(
             flow_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -1964,16 +1968,16 @@ No questions yet.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_flow_boundary_clean_flow_command() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_flow_command(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_flow_command(
                 r#"---
 name: flow-1-signal
 ---
@@ -1987,7 +1991,7 @@ Delegate to requirements-author agent.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -1999,7 +2003,7 @@ Delegate to requirements-author agent.
 
         #[test]
         fn test_flow_boundary_demoswarm_shim_violation() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_flow_command(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_flow_command(
                 r#"---
 name: flow-1-signal
 ---
@@ -2012,7 +2016,7 @@ Run bash .claude/scripts/demoswarm.sh count --file test.txt
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2024,7 +2028,7 @@ Run bash .claude/scripts/demoswarm.sh count --file test.txt
 
         #[test]
         fn test_flow_boundary_subcommand_violation() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_flow_command(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_flow_command(
                 r#"---
 name: flow-1-signal
 ---
@@ -2037,7 +2041,7 @@ Run `count pattern` to get the number.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2058,14 +2062,14 @@ Run `count pattern` to get the number.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let mut rep = Reporter::new(OutputFormat::Json, false, false);
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2084,7 +2088,8 @@ Run `count pattern` to get the number.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2093,7 +2098,7 @@ Run `count pattern` to get the number.
         fn setup_test_env_with_gh_agent(
             agent_name: &str,
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -2109,16 +2114,16 @@ Run `count pattern` to get the number.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_gh_body_hygiene_clean_agent() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_gh_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_gh_agent(
                 "gh-reporter",
                 r#"---
 name: gh-reporter
@@ -2138,7 +2143,7 @@ EOF
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2150,7 +2155,7 @@ EOF
 
         #[test]
         fn test_gh_body_hygiene_forbidden_pattern_in_code_block_ok() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_gh_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_gh_agent(
                 "gh-reporter",
                 r#"---
 name: gh-reporter
@@ -2170,7 +2175,7 @@ But actually use -f body="$(cat <<'EOF'..."
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2181,7 +2186,7 @@ But actually use -f body="$(cat <<'EOF'..."
 
         #[test]
         fn test_gh_body_hygiene_do_not_context_allowed() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_gh_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_gh_agent(
                 "gh-reporter",
                 r#"---
 name: gh-reporter
@@ -2200,7 +2205,7 @@ EOF
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2221,14 +2226,14 @@ EOF
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let mut rep = Reporter::new(OutputFormat::Json, false, false);
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2247,7 +2252,8 @@ EOF
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2255,7 +2261,7 @@ EOF
 
         fn setup_test_env_with_agent(
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -2271,16 +2277,16 @@ EOF
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_shim_continuation_clean() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2293,7 +2299,7 @@ Use demoswarm.sh count --file test.txt
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2305,7 +2311,7 @@ Use demoswarm.sh count --file test.txt
 
         #[test]
         fn test_shim_continuation_violation() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2319,7 +2325,7 @@ bash .claude/scripts/demoswarm.sh \
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2340,14 +2346,14 @@ bash .claude/scripts/demoswarm.sh \
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let mut rep = Reporter::new(OutputFormat::Json, false, false);
 
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2366,7 +2372,8 @@ bash .claude/scripts/demoswarm.sh \
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2374,7 +2381,7 @@ bash .claude/scripts/demoswarm.sh \
 
         fn setup_test_env_with_agent(
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -2390,16 +2397,16 @@ bash .claude/scripts/demoswarm.sh \
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_direct_invocation_via_shim_ok() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2412,7 +2419,7 @@ Use bash .claude/scripts/demoswarm.sh count --file test.txt
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2424,7 +2431,7 @@ Use bash .claude/scripts/demoswarm.sh count --file test.txt
 
         #[test]
         fn test_direct_invocation_violation() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2437,7 +2444,7 @@ Run demoswarm count --file test.txt directly.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2449,7 +2456,7 @@ Run demoswarm count --file test.txt directly.
 
         #[test]
         fn test_direct_invocation_ms_subcommand() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2462,7 +2469,7 @@ Run demoswarm ms get --file test.txt directly.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2481,7 +2488,8 @@ Run demoswarm ms get --file test.txt directly.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2489,7 +2497,7 @@ Run demoswarm ms get --file test.txt directly.
 
         fn setup_test_env_with_agent(
             agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Regexes, Contracts, Reporter) {
+        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
             let temp = TempDir::new().unwrap();
             let claude_dir = temp.path().join(".claude");
             let agents_dir = claude_dir.join("agents");
@@ -2505,16 +2513,16 @@ Run demoswarm ms get --file test.txt directly.
 
             let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
             let inv = Inventory::from_ctx(&ctx).unwrap();
-            let re = Regexes::compile().unwrap();
+            // Regexes cached via REGEXES static
             let c = Contracts::default();
             let rep = Reporter::new(OutputFormat::Json, false, false);
 
-            (temp, ctx, inv, re, c, rep)
+            (temp, ctx, inv, c, rep)
         }
 
         #[test]
         fn test_skills_section_present() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2531,7 +2539,7 @@ Uses the runs-derive skill.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2543,7 +2551,7 @@ Uses the runs-derive skill.
 
         #[test]
         fn test_skills_section_missing() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2556,7 +2564,7 @@ Uses demoswarm.sh for operations.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2568,7 +2576,7 @@ Uses demoswarm.sh for operations.
 
         #[test]
         fn test_skills_section_not_required_without_demoswarm() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2581,7 +2589,7 @@ Does not use demoswarm.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 
@@ -2593,7 +2601,7 @@ Does not use demoswarm.
 
         #[test]
         fn test_skills_section_singular_form_accepted() {
-            let (_temp, ctx, inv, re, c, mut rep) = setup_test_env_with_agent(
+            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
                 r#"---
 name: test-agent
 ---
@@ -2610,7 +2618,7 @@ Uses the runs-derive skill.
             let cx = CheckCtx {
                 ctx: &ctx,
                 inv: &inv,
-                re: &re,
+                re: &REGEXES,
                 c: &c,
             };
 

@@ -130,6 +130,87 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+**PR Brief Finalization (`.runs/<run-id>/gate/pr_brief.md`):**
+
+Read the existing PR Brief from `.runs/<run-id>/review/pr_brief.md` (or `.runs/<run-id>/build/pr_brief.md` if review was skipped) and finalize it with gate verification results.
+
+This is the **final authoritative PR Brief** that will be posted to the PR description.
+
+Updates to make:
+1. Update "Proof" table with gate verification results
+2. Add merge verdict to quality events
+3. Mark "Explanation" surface as complete
+4. Add final evidence freshness (evidence_sha)
+
+```markdown
+<!-- PR_BRIEF_START -->
+## PR Brief
+
+### What changed
+
+- <preserve from previous brief>
+
+### Why
+
+<preserve from previous brief>
+
+### Review map (hotspots)
+
+- <preserve from previous brief>
+- <add any gate-identified hotspots (e.g., security findings)>
+
+### Quality events
+
+- **Interface lock:** <from contract_compliance.md: compliant | N violations>
+- **Boundaries / coupling:** <preserve from previous>
+- **Verification depth:** <from coverage_audit.md: line% / branch%>
+- **Security airbag:** <from security_scan.md: none | N findings>
+- **Review feedback:** <preserve from review brief if exists>
+- **Gate verdict:** <MERGE | BOUNCE> (<reason>)
+
+### Proof (measured vs not measured)
+
+| Surface         | Status   | Evidence                                      | Notes                        |
+| --------------- | -------- | --------------------------------------------- | ---------------------------- |
+| Correctness     | measured | `.runs/<run-id>/build/test_execution.md`      | <X> tests pass               |
+| Verification    | <status> | `.runs/<run-id>/gate/coverage_audit.md`       | <line%> line / <branch%> branch |
+| Boundaries      | measured | `.runs/<run-id>/gate/contract_compliance.md`  | <compliant | N violations>   |
+| Maintainability | noted    | `.runs/<run-id>/build/code_critique.md`       | <N> hotspots identified      |
+| Security        | measured | `.runs/<run-id>/gate/security_scan.md`        | <none | N findings>          |
+| Explanation     | complete | `.runs/<run-id>/gate/pr_brief.md`             | final brief (Flow 5)         |
+
+**Gate:** <MERGE | BOUNCE> (evidence: `.runs/<run-id>/gate/gate_receipt.json`)
+
+**Not measured:** <explicit list - be specific about what was skipped and why>
+
+**Evidence freshness:** SHA `<evidence_sha>` captured at `<generated_at>`
+
+### Reproduce
+
+```bash
+# Run gate verification
+<gate command from project, e.g., just gate or ./scripts/gate.sh>
+```
+
+<!-- PR_BRIEF_END -->
+```
+
+**Derive content from artifacts:**
+- Gate verdict from `merge_decision.md`
+- Contract compliance from `contract_compliance.md`
+- Security findings from `security_scan.md`
+- Coverage from `coverage_audit.md`
+- Receipt audit from `receipt_audit.md`
+- Preserve prior content where unchanged
+
+**Status determination for surfaces:**
+- `measured`: Automated verification ran and produced evidence
+- `partial`: Some aspects measured, others not
+- `estimated`: Derived from patterns, not verified
+- `noted`: Human observation, not automated
+- `clean`: No changes in this surface
+- `unknown`: Not measured, no estimate available
+
 **Cleanup Report (`.runs/<run-id>/gate/cleanup_report.md`):**
 
 Write a human-readable summary including:

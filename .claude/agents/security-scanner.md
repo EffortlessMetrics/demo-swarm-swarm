@@ -187,15 +187,6 @@ When you complete your work, recommend one of these to the orchestrator:
 - **secrets-sanitizer**: Scans for secrets before publish operations. Use when suspected secrets are found that need redaction.
 - **traceability-auditor**: Verifies run coherence and spec traceability. Use as the next Gate check after security scan.
 
-## Handoff Targets
-
-When you complete your work, recommend one of these to the orchestrator:
-
-- **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when scan is clean or findings are documented.
-- **code-implementer**: Writes production code aligned with design. Use when security vulnerabilities need remediation in code.
-- **secrets-sanitizer**: Scans for secrets before publish operations. Use when suspected secrets are found that need redaction.
-- **traceability-auditor**: Verifies run coherence and spec traceability. Use as the next Gate check after security scan.
-
 ## Philosophy
 
 Security is "evidence-first." If you can't cite file:line and explain the risk, you don't have a finding—you have a hunch. When the scan surface is incomplete, say so clearly and force a conservative decision via `UNVERIFIED` + explicit blockers/concerns.

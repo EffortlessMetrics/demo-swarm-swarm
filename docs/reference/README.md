@@ -18,6 +18,7 @@ Look up facts, schemas, and commands. `CLAUDE.md` is the canonical source for co
 | Understand run identity + state | [Run State](run-state.md) |
 | Count something mechanically | [Stable Markers](stable-markers.md) |
 | Use the CLI | [DemoSwarm CLI](demoswarm-cli.md) |
+| Find a skill | [Skills Index](skills-index.md) |
 | Run pack validation | [pack-check](pack-check.md) |
 | Understand pack-check scope | [pack-check Scope](pack-check-scope.md) |
 | Navigate the repo | [Repo Map](repo-map.md) |

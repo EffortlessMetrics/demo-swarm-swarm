@@ -14,7 +14,8 @@ Your job is to **establish the run directory** so downstream agents have a stabl
 1. **Derive or confirm the run-id** from inputs (explicit ID, issue reference, branch name, or fallback)
 2. **Create directories** for the current flow
 3. **Merge run_meta.json** preserving upstream identity fields
-4. **Update index.json** with the run entry
+4. **Check branch protection** (advisory, non-blocking)
+5. **Update index.json** with the run entry
 
 Preserve identity/trust fields from upstream: `run_id_kind`, `issue_binding`, `github_ops_allowed`, `github_repo`, `issue_number`, and aliases/canonical keys.
 
@@ -36,7 +37,8 @@ Directories:
 
 Files:
 
-- `.runs/<run-id>/run_meta.json` (create or merge)
+- `.runs/<run-id>/run_meta.json` (create or merge, includes `branch_protection_verified`)
+- `.runs/<run-id>/branch_protection_check.md` (advisory check result)
 - `.runs/index.json` (upsert entry)
 
 ## Graceful Outcomes
@@ -50,6 +52,81 @@ Files:
 ## Preflight Check
 
 Before creating directories, verify you can write to `.runs/`. If IO fails, report the issue and stop.
+
+## Branch Protection Check
+
+After creating directories and merging run_meta.json, perform an **advisory** branch protection check. This is non-blocking; proceed regardless of result.
+
+### Why Check Early
+
+Branch protection status affects whether the PR will be gatable. Discovering protection issues early saves work if the branch is unprotected or misconfigured.
+
+### How to Check
+
+1. **Identify the target branch.** Use the default branch (typically `main` or `master`), or the target branch if known from context.
+
+2. **Query GitHub API** (requires `github_ops_allowed: true` and valid repo):
+
+```bash
+gh api repos/{owner}/{repo}/branches/{branch}/protection
+```
+
+3. **Parse the response:**
+
+- **200 with `required_status_checks`:** Branch is protected with CI gates. Extract check names.
+- **200 without `required_status_checks`:** Branch is "protected" but merges aren't gated on checks.
+- **404:** Ambiguous. Could mean "branch not protected" OR "permission denied" (user lacks admin access). Treat as **UNVERIFIABLE** unless you have a separate positive signal confirming the branch exists and is accessible.
+- **401/403:** Permission denied. Log as "unverifiable."
+- **Network/API error:** Log as "unverifiable" with error details.
+
+4. **Write summary** to `.runs/<run-id>/branch_protection_check.md`:
+
+```markdown
+# Branch Protection Check
+
+**Branch:** {branch}
+**Checked at:** {ISO8601 timestamp}
+
+## Status
+
+{One of: PROTECTED | UNPROTECTED | UNVERIFIABLE}
+
+## Details
+
+- Required status checks: {list or "none configured"}
+- Require pull request reviews: {yes/no/unknown}
+- Enforce admins: {yes/no/unknown}
+
+## Notes
+
+{Any relevant context: permission issues, API errors, etc.}
+```
+
+5. **Update run_meta.json** by adding:
+
+```json
+{
+  "branch_protection_verified": true | false,
+  "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE",
+  "branch_protection_checked_at": "<ISO8601>"
+}
+```
+
+Where:
+- `branch_protection_verified: true` = Successfully queried and confirmed protection status
+- `branch_protection_verified: false` = Could not verify (permissions, network, `github_ops_allowed: false`, ambiguous 404)
+- `branch_protection_status` = The actual status when verified ("PROTECTED" or "UNPROTECTED"), or "UNVERIFIABLE" when not
+
+### Graceful Fallback
+
+If the check cannot complete:
+
+- **`github_ops_allowed: false`:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "GitHub operations disabled."
+- **No `github_repo` in run_meta:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "No GitHub repo configured."
+- **401/403/404 from API:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "Permission denied - admin access required to view branch protection."
+- **Network/other error:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, include error details.
+
+**Never block the flow.** This is advisory information for later flows (especially Gate and Deploy).
 
 ## Deriving the Run ID
 
@@ -128,7 +205,11 @@ Create or update `.runs/<run-id>/run_meta.json`:
 
   "supersedes": null,
   "related_runs": [],
-  "base_ref": "<branch-name | null>"
+  "base_ref": "<branch-name | null>",
+
+  "branch_protection_verified": true | false,
+  "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE | null",
+  "branch_protection_checked_at": "<ISO8601 | null>"
 }
 ```
 
@@ -181,15 +262,19 @@ Note which flow directories are missing under `.runs/<run-id>/`. This is advisor
 
 **Success (clean resolution):**
 
-> "Established run infrastructure for feat-auth flow plan. Created directories and merged run_meta.json. Resolved #456 -> feat-auth via index lookup. Ready for domain work."
+> "Established run infrastructure for feat-auth flow plan. Created directories and merged run_meta.json. Resolved #456 -> feat-auth via index lookup. Branch protection: PROTECTED (CI required). Ready for domain work."
 
 **Success (with notes):**
 
-> "Established run infrastructure for gh-123 flow build. Reusing existing run (iteration 3). Missing upstream flows: [signal] (out-of-order execution). Proceeding with documented gaps."
+> "Established run infrastructure for gh-123 flow build. Reusing existing run (iteration 3). Missing upstream flows: [signal] (out-of-order execution). Branch protection: UNVERIFIABLE (permission denied). Proceeding with documented gaps."
+
+**Success (branch unprotected):**
+
+> "Established run infrastructure for feat-api flow plan. Branch protection: UNPROTECTED (no required checks configured). Note: PR may not be gatable without branch protection. Proceeding."
 
 **Partial (fallback used):**
 
-> "Established run infrastructure for run-plan-v2. Identity resolution used fallback (no explicit run-id, branch, or issue reference). Verify this is the intended run before proceeding."
+> "Established run infrastructure for run-plan-v2. Identity resolution used fallback (no explicit run-id, branch, or issue reference). Branch protection: UNVERIFIABLE (no GitHub repo configured). Verify this is the intended run before proceeding."
 
 **Blocked:**
 

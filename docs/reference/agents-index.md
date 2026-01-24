@@ -129,7 +129,7 @@ Analysis, learning, and operational insights.
 | `fuzz-triager` | Run configured fuzzing (opt-in) and triage crashes into repro/worklist → `build/fuzz_report.md` | 3 |
 | `impact-analyzer` | Map blast radius of the change → `impact_map.json` | 2, 3 |
 | `learning-synthesizer` | Extract actionable lessons from run artifacts → `wisdom/learnings.md` | 7 |
-| `mutation-auditor` | Run bounded mutation testing and produce actionable survivor worklist → `build/mutation_report.md` | 3 |
+| `mutation-auditor` | Run bounded mutation testing and produce actionable survivor worklist → `build/mutation_report.md`. See [Mutation Testing Guide](../how-to/mutation-testing-guide.md) | 3 |
 | `policy-analyst` | Map policy requirements to evidence in the current change → `policy_analysis.md` | 2, 5 |
 | `pr-feedback-harvester` | Read all PR feedback sources (CodeRabbit, GitHub Actions, Dependabot, review comments) → `pr_feedback.md` | 3, 4 |
 | `regression-analyst` | Analyze regressions (tests, coverage, stability) with blame + issue correlation → `wisdom/regression_report.md` | 7 |

@@ -473,3 +473,4 @@ Before assigning work to agents:
 - [working-with-microloops.md](working-with-microloops.md) — Writer/critic iteration
 - [single-responsibility.md](../explanation/principles/single-responsibility.md) — Why one job per agent
 - [architecture.md](../explanation/architecture.md) — System design patterns
+- [work-plan.md](../examples/work-plan.md) — Example work plan with task markers

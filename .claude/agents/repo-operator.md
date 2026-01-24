@@ -304,8 +304,6 @@ Always write `.runs/<run-id>/deploy/deployment_log.md` with decision, status, SH
 - Head: <sha>
 ```
 
-## Philosophy
-
 **Make git operations boringly safe.** Stage narrowly, commit deterministically, preserve audit trails, report what happened.
 
 ## Handoff Examples

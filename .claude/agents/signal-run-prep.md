@@ -14,8 +14,9 @@ Your job is to **establish the run directory** so downstream agents have a stabl
 1. **Derive or confirm the run-id** from inputs (GH Issue Result, explicit ID, ticket reference, branch name, or fallback)
 2. **Create directories** for signal flow
 3. **Write run_meta.json** merging upstream identity fields
-4. **Update index.json** with the run entry
-5. **Create stubs** for signal artifacts (optional placeholders)
+4. **Check branch protection** (advisory, non-blocking)
+5. **Update index.json** with the run entry
+6. **Create stubs** for signal artifacts (optional placeholders)
 
 ## Inputs
 
@@ -35,7 +36,8 @@ Directories:
 
 Files:
 
-- `.runs/<run-id>/run_meta.json` (create or merge)
+- `.runs/<run-id>/run_meta.json` (create or merge, includes `branch_protection_verified`)
+- `.runs/<run-id>/branch_protection_check.md` (advisory check result)
 - `.runs/index.json` (upsert entry)
 
 Optional stubs (create if missing):
@@ -51,6 +53,81 @@ Optional stubs (create if missing):
 **Partial:** Infrastructure established, but identity resolution used a fallback or has a mismatch. Document and proceed.
 
 **Blocked:** Cannot create or write required paths due to IO/permissions. Report what's broken.
+
+## Branch Protection Check
+
+After creating directories and writing run_meta.json, perform an **advisory** branch protection check. This is non-blocking; proceed regardless of result.
+
+### Why Check Early
+
+Branch protection status affects whether the eventual PR will be gatable. Surfacing this early in Flow 1 allows teams to address governance gaps before investing in implementation work.
+
+### How to Check
+
+1. **Identify the target branch.** Use the default branch (typically `main` or `master`).
+
+2. **Query GitHub API** (requires `github_ops_allowed: true` and valid repo):
+
+```bash
+gh api repos/{owner}/{repo}/branches/{branch}/protection
+```
+
+3. **Parse the response:**
+
+- **200 with `required_status_checks`:** Branch is protected with CI gates.
+- **200 without `required_status_checks`:** Branch is "protected" but merges aren't gated on checks.
+- **404:** Ambiguous. Could mean "branch not protected" OR "permission denied". Treat as **UNVERIFIABLE** unless you have a separate positive signal.
+- **401/403:** Permission denied. Log as "unverifiable."
+- **Network/API error:** Log as "unverifiable" with error details.
+
+4. **Write summary** to `.runs/<run-id>/branch_protection_check.md`:
+
+```markdown
+# Branch Protection Check
+
+**Branch:** {branch}
+**Checked at:** {ISO8601 timestamp}
+
+## Status
+
+{One of: PROTECTED | UNPROTECTED | UNVERIFIABLE}
+
+## Details
+
+- Required status checks: {list or "none configured"}
+- Require pull request reviews: {yes/no/unknown}
+- Enforce admins: {yes/no/unknown}
+
+## Notes
+
+{Any relevant context: permission issues, API errors, etc.}
+```
+
+5. **Update run_meta.json** by adding:
+
+```json
+{
+  "branch_protection_verified": true | false,
+  "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE",
+  "branch_protection_checked_at": "<ISO8601>"
+}
+```
+
+Where:
+- `branch_protection_verified: true` = Successfully queried and confirmed protection status
+- `branch_protection_verified: false` = Could not verify (permissions, network, `github_ops_allowed: false`, ambiguous 404)
+- `branch_protection_status` = The actual status when verified, or "UNVERIFIABLE" when not
+
+### Graceful Fallback
+
+If the check cannot complete:
+
+- **`github_ops_allowed: false`:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "GitHub operations disabled."
+- **No `github_repo`:** Skip check, set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "No GitHub repo configured."
+- **401/403/404 from API:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, note "Permission denied."
+- **Network/other error:** Set `branch_protection_verified: false`, `branch_protection_status: "UNVERIFIABLE"`, include error details.
+
+**Never block the flow.** This is advisory information for later flows.
 
 ## Deriving the Run ID
 
@@ -133,7 +210,11 @@ Create or update `.runs/<run-id>/run_meta.json`:
 
   "supersedes": null,
   "related_runs": [],
-  "base_ref": "<branch-name | null>"
+  "base_ref": "<branch-name | null>",
+
+  "branch_protection_verified": true | false,
+  "branch_protection_status": "PROTECTED | UNPROTECTED | UNVERIFIABLE | null",
+  "branch_protection_checked_at": "<ISO8601 | null>"
 }
 ```
 
@@ -212,15 +293,19 @@ Create these only if missing (domain agents will overwrite):
 
 **New run from issue:**
 
-> "Established run infrastructure for gh-456. Created .runs/gh-456/signal/ with stub artifacts. Run identity bound to issue immediately. Ready for signal normalizer."
+> "Established run infrastructure for gh-456. Created .runs/gh-456/signal/ with stub artifacts. Run identity bound to issue immediately. Branch protection: PROTECTED (CI required). Ready for signal normalizer."
 
 **Reusing existing run:**
 
-> "Reattached to existing run feat-auth (iteration 2). Updated timestamps. No identity conflicts. Ready for signal normalizer."
+> "Reattached to existing run feat-auth (iteration 2). Updated timestamps. No identity conflicts. Branch protection: UNVERIFIABLE (permission denied). Ready for signal normalizer."
 
 **Partial (fallback used):**
 
-> "Established run infrastructure using fallback (no issue, branch, or explicit ID). Created run-signal-v1. Verify this is the intended run before proceeding."
+> "Established run infrastructure using fallback (no issue, branch, or explicit ID). Created run-signal-v1. Branch protection: UNVERIFIABLE (no GitHub repo configured). Verify this is the intended run before proceeding."
+
+**Branch unprotected:**
+
+> "Established run infrastructure for gh-789. Branch protection: UNPROTECTED (no required checks configured). Note: eventual PR may not be gatable. Proceeding with signal authoring."
 
 **Blocked:**
 

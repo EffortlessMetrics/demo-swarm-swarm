@@ -166,6 +166,66 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+**PR Brief (`.runs/<run-id>/build/pr_brief.md`):**
+
+Generate the initial PR Brief using this template (see `docs/reference/pr-review-interface.md`):
+
+```markdown
+<!-- PR_BRIEF_START -->
+## PR Brief
+
+### What changed
+
+- <1-3 bullets: user-visible or contract-visible changes from impl_changes_summary.md>
+
+### Why
+
+<1 short paragraph: goal + constraints + approach from requirements.md and adr.md>
+
+### Review map (hotspots)
+
+- `path/to/core_change` - <why it matters>
+- `path/to/contract_or_schema` - <interface surface>
+- `path/to/tests/*` - <verification surface>
+
+### Quality events
+
+- **Interface lock:** <no API/schema drift | breaking + version bump>
+- **Boundaries / coupling:** <new module boundary | deps unchanged>
+- **Verification depth:** <test summary from test_execution.md>
+- **Security airbag:** <secrets/vulns/unsafe drift: none | details>
+
+### Proof (measured vs not measured)
+
+| Surface         | Status   | Evidence                                    | Notes                     |
+| --------------- | -------- | ------------------------------------------- | ------------------------- |
+| Correctness     | measured | `.runs/<run-id>/build/test_execution.md`    | <X> tests pass            |
+| Verification    | partial  | -                                           | mutation not run          |
+| Boundaries      | clean    | `.runs/<run-id>/plan/api_contracts.yaml`    | no API/schema changes     |
+| Maintainability | noted    | `.runs/<run-id>/build/code_critique.md`     | <N> hotspots identified   |
+| Explanation     | partial  | -                                           | initial brief (Flow 3)    |
+
+**Not measured:** <explicit list - e.g., mutation testing, fuzz testing>
+
+### Reproduce
+
+```bash
+# Run tests
+<test command from project>
+```
+
+<!-- PR_BRIEF_END -->
+```
+
+**Freshness indicators:** Include `evidence_sha` from the receipt to indicate when evidence was captured.
+
+**Derive content from artifacts:**
+- "What changed" from `impl_changes_summary.md`
+- "Why" from upstream `requirements.md` and `adr.md`
+- "Hotspots" from changed files in `impl_changes_summary.md` and `code_critique.md`
+- "Quality events" from test results, critic outputs, dependency changes
+- "Proof" table from actual artifacts that exist
+
 **Cleanup Report (`.runs/<run-id>/build/cleanup_report.md`):**
 
 Write a human-readable summary including:

@@ -181,7 +181,7 @@ Use stable markers and include suggested defaults:
 - ADR_ASM: ASM-001
 - ADR_Q: <short tag or first words>
 
-## Handoff Guidelines
+## Handoff
 
 **What I did:** <1-2 sentence summary of what decision was made and how it was bound to evidence>
 
@@ -201,7 +201,7 @@ Use stable markers and include suggested defaults:
 - Keep inventory lines short to avoid wrapping.
 - Inventory is for receipts/counts; the real content is in the sections above.
 
-## Handoff Guidelines
+## Handoff Examples
 
 After writing the ADR file, provide a natural language summary covering:
 

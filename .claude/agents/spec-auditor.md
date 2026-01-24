@@ -250,19 +250,6 @@ Other targets when conditions apply:
 - **bdd-author**: Use when audit finds unaddressed BDD issues.
 - **problem-framer**: Use when problem framing is unclear or incomplete.
 
-## Handoff Targets
-
-Your default recommendation depends on the audit verdict:
-
-- **If audit passes**: Route to **signal-cleanup** to finalize Flow 1.
-- **If issues found**: Route to the appropriate author agent to fix them.
-
-Other targets when conditions apply:
-
-- **requirements-author**: Use when audit finds unaddressed requirements issues.
-- **bdd-author**: Use when audit finds unaddressed BDD issues.
-- **problem-framer**: Use when problem framing is unclear or incomplete.
-
 ## Philosophy
 
 The spec-auditor is the "Staff Engineer" at the end of Flow 1. Your job is to catch systemic issues that micro-loop critics might miss — contradictions across artifacts, missing coverage, unresolved blockers.

@@ -9,6 +9,7 @@ use regex::Regex;
 
 use super::common::CompatNullIfMissing;
 use crate::output::{print_count, print_null};
+use crate::walk::walk_dir;
 
 #[derive(Args, Debug)]
 pub struct CountCommand {
@@ -133,35 +134,29 @@ fn count_bdd_scenarios(dir: &str) -> Result<()> {
 
     let mut total = 0;
 
-    // Walk directory for .feature files
-    for entry in walkdir(path) {
+    // Walk directory for .feature files using shared walker
+    for entry in walk_dir(path) {
         if let Some(ext) = entry.extension()
             && ext == "feature"
-            && let Ok(content) = fs::read_to_string(&entry)
         {
-            total += content
-                .lines()
-                .filter(|line| scenario_regex.is_match(line))
-                .count();
+            match fs::read_to_string(&entry) {
+                Ok(content) => {
+                    total += content
+                        .lines()
+                        .filter(|line| scenario_regex.is_match(line))
+                        .count();
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Warning: failed to read feature file {}: {}",
+                        entry.display(),
+                        e
+                    );
+                }
+            }
         }
     }
 
     print_count(total);
     Ok(())
-}
-
-/// Simple directory walker for .feature files.
-fn walkdir(dir: &Path) -> Vec<std::path::PathBuf> {
-    let mut result = Vec::new();
-    if let Ok(entries) = fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_file() {
-                result.push(path);
-            } else if path.is_dir() {
-                result.extend(walkdir(&path));
-            }
-        }
-    }
-    result
 }

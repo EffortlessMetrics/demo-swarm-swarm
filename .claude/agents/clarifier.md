@@ -66,10 +66,6 @@ Also read (for dedupe/context only):
 
 - `.runs/<run-id>/*/open_questions.md` (if they exist)
 
-## Output
-
-- `.runs/<run-id>/<flow>/open_questions.md` (per rules above)
-
 ## What to Look For
 
 Prioritize questions that would change design, scope, or tests:

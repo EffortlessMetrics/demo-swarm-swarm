@@ -150,18 +150,12 @@ After completing your audit, provide a clear summary of what you found.
 
 ## Handoff Targets
 
-- **merge-decider**: Synthesizes Gate evidence. Use when receipt is valid and complete.
-- **build-cleanup**: Regenerates build receipt. Use when receipt is missing, unparseable, or has placeholder leakage.
-- **review-cleanup**: Completes Review flow. Use when review has pending critical items.
-- **contract-enforcer**: Verifies API contracts. Use after receipt validation to check contract compliance.
-
-## Handoff Targets
-
 When you complete your work, recommend one of these to the orchestrator:
 
-- **contract-enforcer**: Verifies API implementation matches Plan contracts. Use after receipt is validated to check contract compliance.
 - **merge-decider**: Synthesizes Gate evidence and decides whether to merge. Use when receipt is valid and all Gate checks are complete.
+- **contract-enforcer**: Verifies API implementation matches Plan contracts. Use after receipt is validated to check contract compliance.
 - **build-cleanup**: Regenerates build receipt and seals the Build flow. Use when receipt is missing, unparseable, or has placeholder leakage.
+- **review-cleanup**: Completes Review flow. Use when review has pending critical items.
 - **gate-cleanup**: Summarizes Gate flow and writes the gate receipt. Use after merge decision is made to finalize the Gate flow.
 
 ## Philosophy

@@ -378,7 +378,7 @@ fn check_agents_clear_job(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::contracts::Regexes;
+    use crate::contracts::test_utils::REGEXES;
 
     // -------------------------------------------------------------------------
     // Machine Summary status enum validation (Check 28)
@@ -387,7 +387,7 @@ mod tests {
     /// Valid canonical status line is matched correctly.
     #[test]
     fn test_canon_status_regex_matches_valid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Valid canonical status line
         let valid = "status: VERIFIED | UNVERIFIED | CANNOT_PROCEED";
@@ -407,7 +407,7 @@ mod tests {
     /// Invalid status lines are not matched by the canonical regex.
     #[test]
     fn test_canon_status_regex_rejects_invalid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Missing CANNOT_PROCEED
         let missing_value = "status: VERIFIED | UNVERIFIED";
@@ -441,7 +441,7 @@ mod tests {
     /// Test that BLOCKED status is correctly detected as legacy.
     #[test]
     fn test_blocked_status_regex_detects_legacy() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Legacy BLOCKED (should be CANNOT_PROCEED)
         let blocked_line = "status: BLOCKED";
@@ -472,7 +472,7 @@ mod tests {
     /// Valid canonical recommended_action line is matched correctly.
     #[test]
     fn test_canon_action_regex_matches_valid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         let valid = "recommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
         assert!(
@@ -491,7 +491,7 @@ mod tests {
     /// Invalid recommended_action lines are rejected.
     #[test]
     fn test_canon_action_regex_rejects_invalid() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Missing FIX_ENV
         let missing = "recommended_action: PROCEED | RERUN | BOUNCE";
@@ -518,7 +518,7 @@ mod tests {
     /// Test recommended_action presence check (separate from canonical check).
     #[test]
     fn test_recommended_action_present_regex() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Any recommended_action line
         let present = "recommended_action: PROCEED";
@@ -549,7 +549,7 @@ mod tests {
     /// Route fields are detected correctly.
     #[test]
     fn test_route_fields_regexes() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // route_to_agent
         let with_agent = "route_to_agent: clarifier";
@@ -763,7 +763,7 @@ mod tests {
     /// Status value with trailing text should not match canonical pattern.
     #[test]
     fn test_canon_status_rejects_trailing_text() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Extra text after the enum
         let with_trailing = "status: VERIFIED | UNVERIFIED | CANNOT_PROCEED # comment";
@@ -776,7 +776,7 @@ mod tests {
     /// Status line missing pipe separators should not match.
     #[test]
     fn test_canon_status_rejects_missing_separators() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Missing pipes
         let no_pipes = "status: VERIFIED UNVERIFIED CANNOT_PROCEED";
@@ -796,7 +796,7 @@ mod tests {
     /// Status value alone (not the enum line) should not match.
     #[test]
     fn test_canon_status_rejects_actual_value() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Actual status value, not the enum definition
         let actual_value = "status: VERIFIED";
@@ -879,7 +879,7 @@ mod tests {
         assert!(numeric.contains("status:"));
 
         // The canonical regex should reject non-enum values
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
         assert!(!re.canon_status.is_match(numeric));
     }
 
@@ -903,7 +903,7 @@ mod tests {
     /// Test blocked_status regex edge cases.
     #[test]
     fn test_blocked_status_regex_edge_cases() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Test BLOCKED followed by non-underscore character
         let blocked_with_space = "status: BLOCKED ";
@@ -930,7 +930,7 @@ mod tests {
     /// Test canon_status with different whitespace variations.
     #[test]
     fn test_canon_status_whitespace_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Tab-indented
         let with_tabs = "\tstatus: VERIFIED | UNVERIFIED | CANNOT_PROCEED";
@@ -957,7 +957,7 @@ mod tests {
     /// Test canon_action with different whitespace variations.
     #[test]
     fn test_canon_action_whitespace_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // Tab-indented
         let with_tabs = "\trecommended_action: PROCEED | RERUN | BOUNCE | FIX_ENV";
@@ -977,7 +977,7 @@ mod tests {
     /// Test route_to_agent regex variations.
     #[test]
     fn test_route_to_agent_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // With specific agent name
         let with_name = "route_to_agent: code-implementer";
@@ -999,7 +999,7 @@ mod tests {
     /// Test route_to_flow regex variations.
     #[test]
     fn test_route_to_flow_variations() {
-        let re = Regexes::compile().expect("Failed to compile regexes");
+        let re = &*REGEXES;
 
         // With each flow number
         for i in 1..=6 {
@@ -1230,7 +1230,8 @@ concerns: []
     mod integration {
         use super::*;
         use crate::cli::OutputFormat;
-        use crate::contracts::{Contracts, Regexes};
+        use crate::contracts::test_utils::REGEXES;
+        use crate::contracts::Contracts;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1242,7 +1243,6 @@ concerns: []
             _temp_dir: TempDir,
             ctx: Ctx,
             inv: Inventory,
-            re: Regexes,
             c: Contracts,
         }
 
@@ -1277,14 +1277,12 @@ concerns: []
                 // Build Ctx and Inventory
                 let ctx = Ctx::discover(Some(root.to_path_buf()))?;
                 let inv = Inventory::from_ctx(&ctx)?;
-                let re = Regexes::compile()?;
                 let c = Contracts::default();
 
                 Ok(Self {
                     _temp_dir: temp_dir,
                     ctx,
                     inv,
-                    re,
                     c,
                 })
             }
@@ -1294,7 +1292,7 @@ concerns: []
                 CheckCtx {
                     ctx: &self.ctx,
                     inv: &self.inv,
-                    re: &self.re,
+                    re: &REGEXES,
                     c: &self.c,
                 }
             }

@@ -18,8 +18,11 @@ Task-oriented: pick the guide that matches the job you need to do.
 | [Working with Microloops](working-with-microloops.md)       | Understand and use writer↔critic patterns      | Effective adversarial iteration                    |
 | [Orchestrator Decision Tree](orchestrator-decision-tree.md) | Decide routing as a flow orchestrator          | Agent routing decisions                            |
 | [Working with Receipts](working-with-receipts.md)           | Read and interpret flow receipts               | Understanding flow outputs and routing             |
+| [Invoke Skills](invoke-skills.md)                           | Use skills correctly via the demoswarm shim    | Skill invocation patterns and contracts            |
+| [Mutation Testing Guide](mutation-testing-guide.md)         | Configure and interpret mutation testing       | Validated test effectiveness via mutation score    |
 | [Handle Open Questions](handle-open-questions.md)           | Resolve uncertainty without stopping flows     | DEFAULTED and NEEDS_HUMAN protocols                |
 | [Review a Swarm PR](review-a-swarm-pr.md)                   | Decide yes/no on swarm-generated PRs           | Bounded review procedure with hotspot selection    |
+| [Handling CI Failures](handling-ci-failures.md)             | Fix CI failures in your PR                     | Diagnosis and fix/bounce decision tree             |
 | [Troubleshoot](troubleshoot.md)                             | Debug pack runs                                | Checklists for common failures and reseal loops    |
 | [Failure Recovery](failure-recovery.md)                     | Recover from failed runs                       | Nuclear delete/restart procedures                  |
 | [Team Operations](team-operations.md)                       | Coordinate multi-person swarm usage            | Collision avoidance + handoff procedures           |
