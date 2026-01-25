@@ -138,12 +138,12 @@ Haiku distills context; Sonnet/Opus implements with that context.
 | `code-critic` | Review implementation vs REQ/NFR + ADR + contracts |
 | `test-author` | Write/update tests from BDD scenarios + test plan |
 | `test-critic` | Review tests vs BDD + REQ/NFR + test plan |
-| `test-executor` | Execute test suite, write verification report |
-| `standards-enforcer` | Run formatters/linters, remove debug artifacts |
+| `test-executor` | Execute test suite (via test-runner), write verification report (no fixes) |
+| `standards-enforcer` | Enforce pack standards (no silent test deletions), run formatters/linters |
 | `fixer` | Apply targeted fixes from critics/mutation |
 | `merge-reconciler` | Resolve merge conflicts so code compiles and tests pass |
 | `doc-writer` | Update documentation to match implementation |
-| `doc-critic` | Review documentation freshness |
+| `doc-critic` | Review documentation freshness and verification instructions |
 | `mutation-auditor` | Run bounded mutation testing, produce worklist |
 | `flakiness-detector` | Re-run failures, classify deterministic vs flaky |
 | `fuzz-triager` | Run configured fuzzing, triage crashes |

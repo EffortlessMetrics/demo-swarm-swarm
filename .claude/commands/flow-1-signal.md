@@ -606,8 +606,8 @@ Run this template for: tests, code, docs, requirements, BDD, options, contracts,
 - [ ] risk-analyst
 - [ ] spec-auditor (integrative audit; may bounce for fixes)
 - [ ] signal-cleanup
-- [ ] secrets-sanitizer
-- [ ] repo-operator (checkpoint)
+- [ ] secrets-sanitizer (capture Gate Result block)
+- [ ] repo-operator (checkpoint; gated on Gate Result)
 - [ ] gh-issue-manager (skip when `github_ops_allowed: false`; full when `safe_to_publish` + `proceed_to_github_ops` + `publish_surface: PUSHED`; restricted updates otherwise when gh auth is available)
 - [ ] gh-reporter (skip when `github_ops_allowed: false`; full only when publish gates are clear and artifacts pushed; restricted handoff otherwise)
 
