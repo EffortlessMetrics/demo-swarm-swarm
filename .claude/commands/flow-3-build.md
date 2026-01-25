@@ -402,7 +402,7 @@ All of these except CANNOT_PROCEED are valid outcomes. An honest PARTIAL is bett
 - [ ] fuzz-triager (if configured)
 - [ ] fixer (if critiques/mutation have worklist)
 - [ ] doc-writer ↔ doc-critic microloop
-- [ ] self-reviewer
+- [ ] self-reviewer (reseal build-cleanup if modifications needed)
 - [ ] pr-feedback-harvester (flow boundary check)
 - [ ] build-cleanup (writes ac_status.json + build_receipt.json)
 - [ ] repo-operator (stage intended changes)

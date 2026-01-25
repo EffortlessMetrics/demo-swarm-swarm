@@ -460,7 +460,7 @@ SEAL           review-cleanup → secrets-sanitizer → repo-operator → gh-iss
 - [ ] pr-creator (create Draft PR if needed)
 - [ ] pr-feedback-harvester
 - [ ] review-worklist-writer
-- [ ] worklist loop (unbounded: resolve items until completion/context/unrecoverable)
+- [ ] worklist loop (unbounded; see "Exit conditions" in Phase 2)
 - [ ] pr-commenter (post/update PR summary comment)
 - [ ] pr-status-manager (flip Draft to Ready if review complete)
 - [ ] review-cleanup
