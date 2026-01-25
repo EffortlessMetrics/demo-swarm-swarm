@@ -186,13 +186,6 @@ After scanning, report back with a natural language summary. The `secrets_status
 
 > Couldn't complete scan: secrets-tools skill not available. Fix the tooling issue and retry.
 
-### Handoff Targets
-
-- **repo-operator**: Proceed with commit/push (when safe_to_publish: true)
-- **code-implementer**: Fix hardcoded secrets in code when auto-redaction is not safe
-- **cleanup agents**: Continue flow cleanup after artifacts are sanitized
-
-**Default recommendation:** If clean or fixed, recommend repo-operator. If blocked with fixable issues, recommend code-implementer with specific guidance. Blocking is the last resort.
 
 ## Handoff Targets
 
