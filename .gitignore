@@ -37,3 +37,4 @@ test_output*.log
 .runs/issue_updates/
 
 .runs/pr_takeover/
+.runs/pr_glass_cockpit/
