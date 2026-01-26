@@ -23,6 +23,7 @@ fn secrets_scan_finds_token_in_nested_dir() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir
     cmd.args([
         "secrets",
         "scan",
@@ -55,6 +56,7 @@ fn secrets_scan_handles_relative_paths_via_canonicalize() {
     let funny_path = tmp_dir.path().join(".").join("secret.txt");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -101,6 +103,7 @@ fn secrets_scan_with_json_patterns_file() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir
     cmd.args([
         "secrets",
         "scan",
@@ -150,6 +153,7 @@ fn secrets_scan_with_yaml_patterns_file() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir
     cmd.args([
         "secrets",
         "scan",
@@ -202,6 +206,7 @@ fn secrets_scan_invalid_regex_returns_pattern_error() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir
     cmd.args([
         "secrets",
         "scan",
@@ -260,6 +265,7 @@ fn secrets_scan_merges_builtin_and_custom_patterns() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir
     cmd.args([
         "secrets",
         "scan",
@@ -317,6 +323,7 @@ fn secrets_redact_with_custom_pattern() {
     fs::write(&patterns_file, patterns_content).expect("write patterns file");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path()); // Set CWD to temp dir so absolute paths are valid
     cmd.args([
         "secrets",
         "redact",
@@ -385,21 +392,19 @@ fn secrets_scan_rejects_relative_path_traversal() {
 
 #[test]
 fn secrets_scan_allows_absolute_paths() {
-    // Absolute paths are allowed - they represent explicit user intent, not traversal attacks.
-    // This is the legitimate use case for scanning external directories.
+    // Absolute paths are allowed IF they are within the repository (CWD).
+    // Absolute paths outside the repo are now blocked for security consistency.
     let tmp_dir = Builder::new()
         .prefix("secrets_absolute_test")
         .tempdir()
         .expect("temp dir");
 
-    // Create a separate directory to scan (simulates scanning a temp dir)
-    let scan_dir = Builder::new()
-        .prefix("secrets_scan_target")
-        .tempdir()
-        .expect("scan target dir");
+    // Create a subdirectory for scanning
+    let scan_dir = tmp_dir.path().join("scan_target");
+    fs::create_dir(&scan_dir).expect("mkdir");
 
     // Create a file with a secret
-    let secret_file = scan_dir.path().join("secret.txt");
+    let secret_file = scan_dir.join("secret.txt");
     fs::write(&secret_file, "ghp_123456789012345678901234567890123456").expect("write file");
 
     let output_file = tmp_dir.path().join("findings.json");
@@ -410,9 +415,9 @@ fn secrets_scan_allows_absolute_paths() {
         "secrets",
         "scan",
         "--path",
-        scan_dir.path().to_str().expect("path utf8"), // Absolute path - allowed
+        scan_dir.to_str().expect("path utf8"), // Absolute path inside CWD - allowed
         "--output",
-        output_file.to_str().expect("out utf8"), // Absolute output - allowed
+        output_file.to_str().expect("out utf8"), // Absolute output inside CWD - allowed
     ]);
 
     cmd.assert().success();
@@ -420,13 +425,53 @@ fn secrets_scan_allows_absolute_paths() {
     let content = fs::read_to_string(&output_file).expect("read output");
     assert!(
         content.contains("SECRETS_FOUND"),
-        "Expected SECRETS_FOUND with absolute path, got: {}",
+        "Expected SECRETS_FOUND with valid absolute path, got: {}",
         content
     );
     assert!(
         content.contains("github-token"),
         "Expected github-token in output: {}",
         content
+    );
+}
+
+#[test]
+fn secrets_scan_blocks_absolute_paths_outside_repo() {
+    // Test that absolute paths pointing outside the repo are blocked
+    let tmp_dir = Builder::new()
+        .prefix("secrets_absolute_outside_test")
+        .tempdir()
+        .expect("temp dir");
+
+    // Create a separate directory outside CWD
+    let outside_dir = Builder::new()
+        .prefix("outside_target")
+        .tempdir()
+        .expect("outside dir");
+    
+    let outside_file = outside_dir.path().join("secret.txt");
+    fs::write(&outside_file, "ghp_123456789012345678901234567890123456").expect("write file");
+
+    let output_file = tmp_dir.path().join("findings.json");
+
+    let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
+    cmd.args([
+        "secrets",
+        "scan",
+        "--path",
+        outside_file.to_str().expect("path utf8"), // Absolute path outside CWD - blocked
+        "--output",
+        output_file.to_str().expect("out utf8"),
+    ]);
+
+    let output = cmd.assert().success();
+    let stdout = String::from_utf8_lossy(&output.get_output().stdout);
+
+    assert!(
+        stdout.contains("PATH_BOUNDARY_ERROR"),
+        "Expected PATH_BOUNDARY_ERROR for absolute path outside repo, got: {}",
+        stdout
     );
 }
 

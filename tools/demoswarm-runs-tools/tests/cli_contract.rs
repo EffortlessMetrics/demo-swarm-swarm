@@ -273,6 +273,7 @@ fn secrets_scan_with_patterns_file_json() {
     let output_path = tmp_dir.path().join("output.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -314,6 +315,7 @@ fn secrets_scan_with_patterns_file_yaml() {
     let output_path = tmp_dir.path().join("output.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -356,6 +358,7 @@ fn secrets_scan_invalid_patterns_file_regex() {
     let output_path = tmp_dir.path().join("output.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -387,6 +390,7 @@ fn secrets_scan_missing_patterns_file() {
     let output_path = tmp_dir.path().join("output.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -414,6 +418,7 @@ fn secrets_scan_output_in_new_subdirectory() {
     // Do NOT create output_subdir (simulating new run dir)
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -458,6 +463,7 @@ fn secrets_scan_merges_builtin_and_custom_patterns() {
     let output_path = tmp_dir.path().join("output.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -498,6 +504,7 @@ fn secrets_redact_custom_type_with_patterns_file() {
     fs::write(&secret_file, "Secret: custom_key_abcd12345678").expect("write file");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "redact",
@@ -526,6 +533,7 @@ fn secrets_redact_unknown_type_without_patterns_file() {
     fs::write(&secret_file, "some content").expect("write file");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "redact",
@@ -554,6 +562,7 @@ fn secrets_redact_builtin_type_still_works() {
     .expect("write file");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "redact",
@@ -1113,6 +1122,7 @@ fn secrets_scan_clean_file_reports_clean() {
     fs::write(&scan_file, "This is clean content with no secrets.").expect("write scan file");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -1144,6 +1154,7 @@ fn secrets_scan_detects_github_token() {
     .expect("write");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -1172,6 +1183,7 @@ fn secrets_scan_detects_aws_key() {
     fs::write(&scan_file, "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE").expect("write");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -1193,6 +1205,7 @@ fn secrets_scan_missing_path_reports_missing() {
     let output_file = tmp_dir.path().join("findings.json");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -1223,6 +1236,7 @@ fn secrets_scan_directory_recursive() {
     .expect("write secret");
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp_dir.path());
     cmd.args([
         "secrets",
         "scan",
@@ -1248,6 +1262,7 @@ fn secrets_redact_github_token() {
     let file_path = tmp.path().to_str().expect("path utf8").to_string();
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp.path().parent().unwrap());
     cmd.args([
         "secrets",
         "redact",
@@ -1298,6 +1313,7 @@ More content"#
     let file_path = tmp.path().to_str().expect("path utf8").to_string();
 
     let mut cmd = demoswarm();
+    cmd.current_dir(tmp.path().parent().unwrap());
     cmd.args([
         "secrets",
         "redact",

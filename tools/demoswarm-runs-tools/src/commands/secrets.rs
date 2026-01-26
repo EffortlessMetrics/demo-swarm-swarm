@@ -362,19 +362,40 @@ fn validate_path_boundary(path: &str) -> Result<PathBuf> {
         .canonicalize()
         .with_context(|| format!("Failed to canonicalize path: {}", path))?;
 
-    // If the path is absolute (not relative), allow it.
-    // Absolute paths are explicit - if someone provides /etc/passwd directly,
-    // that's their intent, not a traversal attack.
-    if input_path.is_absolute() {
-        return Ok(canonical);
-    }
-
-    // For relative paths, check if they escape the CWD
-    // This catches attacks like "../../../etc/passwd"
+    // Get CWD
     let cwd = env::current_dir().context("Failed to get current working directory")?;
     let cwd_canonical = cwd
         .canonicalize()
         .context("Failed to canonicalize working directory")?;
+
+    // If path is absolute, check if it's within CWD (security: prevent absolute path bypass)
+    // We used to allow absolute paths as "explicit intent", but that allows reading /etc/passwd
+    if input_path.is_absolute() {
+        if !input_path.exists() {
+             // For missing absolute paths, we can't canonicalize them directly to check boundary
+             // But since we require existence for scan paths (checked later or via error), 
+             // we can just fail here or check parent. 
+             // Actually, for scan(), the path must exist.
+             // But validate_path_boundary is called before existence check sometimes?
+             // No, scan() calls it. 
+             // If it doesn't exist, canonicalize fails.
+             // So we try to canonicalize.
+             let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+             if canonical.starts_with(&cwd_canonical) {
+                 return Ok(canonical);
+             }
+             bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+        }
+        
+        let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+        if canonical.starts_with(&cwd_canonical) {
+            return Ok(canonical);
+        }
+         bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+    }
+
+    // For relative paths, check if they escape the CWD
+    // This catches attacks like "../../../etc/passwd"
 
     // Check if the canonical path is under CWD
     if canonical.starts_with(&cwd_canonical) {
@@ -399,40 +420,57 @@ fn validate_path_boundary(path: &str) -> Result<PathBuf> {
 fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
     let input_path = Path::new(path);
 
-    // If path is absolute, allow it (explicit intent, not traversal)
-    if input_path.is_absolute() {
-        return Ok(input_path.to_path_buf());
-    }
-
     // For relative paths, check boundary
     let cwd = env::current_dir().context("Failed to get current working directory")?;
     let cwd_canonical = cwd
         .canonicalize()
         .context("Failed to canonicalize working directory")?;
 
-    // We verify the path by resolving it component by component.
-    // For existing components, we canonicalize and ensure they stay within CWD.
-    // For new components, we explicitly forbid '..' to prevent traversal.
-    let mut probe = cwd_canonical.clone();
+    let mut probe = if input_path.is_absolute() {
+        PathBuf::new()
+    } else {
+        cwd_canonical.clone()
+    };
+    
     let mut rest = PathBuf::new();
     let mut parsing_existing = true;
 
     for component in input_path.components() {
         if parsing_existing {
             match component {
+                std::path::Component::Prefix(prefix) => {
+                    probe.push(prefix.as_os_str());
+                }
+                std::path::Component::RootDir => {
+                    probe.push(std::path::Component::RootDir.as_os_str());
+                }
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    let next_probe = probe.join("..");
+                    // Resolve ".." via canonicalize to handle symlinks correctly
+                    if next_probe.symlink_metadata().is_ok() {
+                        probe = next_probe.canonicalize().context("Failed to canonicalize ..")?;
+                        // For relative paths, prevent escaping CWD during traversal
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
+                            bail!("Relative output path traverses outside repository boundary");
+                        }
+                    } else {
+                        // ".." failed to resolve? Stop parsing existing.
+                        parsing_existing = false;
+                        bail!("Output path contains '..' in non-existent portion or invalid traversal.");
+                    }
+                }
                 std::path::Component::Normal(c) => {
-                    // Try appending component
                     let next_probe = probe.join(c);
                     // Check if it exists (use symlink_metadata to catch broken symlinks too)
                     if next_probe.symlink_metadata().is_ok() {
-                        // It exists. If it's a symlink, resolve it to ensure we track the real path.
-                        // Note: canonicalize() resolves all symlinks in the path.
+                        // It exists. Resolve it.
                         probe = next_probe.canonicalize().with_context(|| {
                             format!("Failed to canonicalize path component: {:?}", c)
                         })?;
 
-                        // Verify we haven't escaped CWD
-                        if !probe.starts_with(&cwd_canonical) {
+                        // For relative paths, prevent escaping CWD
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
                             bail!(
                                 "Path resolves outside repository boundary: {}",
                                 probe.display()
@@ -441,20 +479,14 @@ fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
                     } else {
                         // Component doesn't exist. This is the start of the new path.
                         parsing_existing = false;
+                        
+                        // Verify we are currently inside CWD before appending new components
+                        if !probe.starts_with(&cwd_canonical) {
+                            bail!("Output path resolves outside repository boundary: {}", probe.display());
+                        }
                         rest.push(c);
                     }
                 }
-                std::path::Component::CurDir => {}
-                std::path::Component::ParentDir => {
-                    if !probe.pop() {
-                        bail!("Path traverses above root");
-                    }
-                    // Verify we haven't escaped CWD (e.g. popped above it)
-                    if !probe.starts_with(&cwd_canonical) {
-                        bail!("Relative output path traverses outside repository boundary");
-                    }
-                }
-                _ => {}
             }
         } else {
             // Parsing non-existent tail
@@ -467,6 +499,11 @@ fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
                 _ => {}
             }
         }
+    }
+
+    // Final check
+    if !probe.starts_with(&cwd_canonical) {
+        bail!("Output path resolves outside repository boundary");
     }
 
     Ok(probe.join(rest))
