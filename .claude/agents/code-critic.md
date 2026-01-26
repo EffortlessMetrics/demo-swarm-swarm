@@ -163,6 +163,8 @@ Write findings that explain the violation and its impact.
 - 🔴 Critical: N, 🟠 Major: N, 🟡 Minor: N
 - REQs in scope: N, with impl: N, with tests: N
 
+[↑ Back to Top](#top)
+
 ## Handoff
 
 **What I found:** <summary of critique findings>
@@ -170,6 +172,8 @@ Write findings that explain the violation and its impact.
 **What's left:** <issues to fix or "nothing - implementation is solid">
 
 **Recommendation:** <specific next step>
+
+[↑ Back to Top](#top)
 ```
 
 ## Tips
