@@ -101,14 +101,21 @@ Write findings that explain what's wrong and how to fix it.
 ```markdown
 # Test Critique
 
+<a id="top"></a>
+**Jump to**: [Summary](#test-runner-summary) | [Failures](#failing-tests) | [REQ Coverage](#coverage-table-req-to-tests) | [BDD Coverage](#bdd-scenario-coverage) | [Quality](#test-quality-issues) | [Counts](#counts)
+
 ## Test Runner Summary
 
 <paste the summary line from test-runner>
+
+[↑ Back to Top](#top)
 
 ## Failing Tests
 
 - tests/path::test_name - <reason if known>
 - (or "None")
+
+[↑ Back to Top](#top)
 
 ## Coverage Table (REQ to tests)
 
@@ -117,6 +124,8 @@ Write findings that explain what's wrong and how to fix it.
 | REQ-001 | `tests/auth.test.ts::test_login` | PASS   |                   |
 | REQ-002 | [NO TESTS FOUND]                 | N/A    | Blocked on AC-002 |
 
+[↑ Back to Top](#top)
+
 ## BDD Scenario Coverage
 
 | Scenario            | Test(s)                          | Status |
@@ -124,11 +133,15 @@ Write findings that explain what's wrong and how to fix it.
 | Successful Login    | `tests/auth.test.ts::test_login` | PASS   |
 | Invalid Credentials | [NO TEST FOUND]                  | N/A    |
 
+[↑ Back to Top](#top)
+
 ## Test Quality Issues
 
 - [CRITICAL] <test> - <issue> - <fix>
 - [MAJOR] <test> - <issue> - <fix>
 - [MINOR] <test> - <issue>
+
+[↑ Back to Top](#top)
 
 ## Counts
 
@@ -137,6 +150,8 @@ Write findings that explain what's wrong and how to fix it.
 - REQs: N total, N with tests
 - Tests: N passed, N failed
 
+[↑ Back to Top](#top)
+
 ## Handoff
 
 **What I found:** <summary of test state>
@@ -144,6 +159,8 @@ Write findings that explain what's wrong and how to fix it.
 **What's left:** <issues to fix or "nothing - tests are solid">
 
 **Recommendation:** <specific next step>
+
+[↑ Back to Top](#top)
 ```
 
 ## Tips
