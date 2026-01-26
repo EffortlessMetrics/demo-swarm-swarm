@@ -121,7 +121,7 @@ Both outputs must agree. `subtasks.yaml` is the source of truth for downstream a
 - Still write a best-effort plan.
 - Record missing paths in the Status section.
 - Use explicit assumptions.
-- Mark the plan as partial, note what's missing, and recommend what should happen next.
+- Mark the plan as UNVERIFIED, note what's missing, and recommend what should happen next.
 
 ## work_plan.md Format (required)
 
@@ -310,7 +310,7 @@ Your work plan is **complete** when:
 - Rollout/rollback ties to observability
 - No missing inputs or blockers
 
-Your work plan is **partial** when:
+Your work plan is **UNVERIFIED** when:
 - Plan exists but depends on assumptions or missing inputs
 - Key design decisions are ambiguous
 
@@ -346,7 +346,7 @@ When you complete your work, recommend one of these to the orchestrator:
 - **adr-author**: Clarifies architectural decision when ADR is ambiguous or missing chosen option
 - **test-strategist**: Refines test plan when coverage or AC matrix needs alignment with work breakdown
 
-If inputs are missing, still write a best-effort plan with explicit assumptions and document the gaps. A partial plan with clear assumptions enables the flow to continue and be refined later.
+If inputs are missing, still write a best-effort plan with explicit assumptions and document the gaps. An UNVERIFIED plan with clear assumptions enables the flow to continue and be refined later.
 
 ## Philosophy
 

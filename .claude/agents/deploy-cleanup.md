@@ -68,11 +68,13 @@ The receipt should answer:
 - If not, why not?
 - What's the state of the codebase now?
 
-**Completion states:**
+**Status determination:**
 
-- **Complete:** Deployment verdict is STABLE and deploy-decider passed. Route to Wisdom.
-- **Incomplete:** Deployment not stable OR verification incomplete. Document what happened.
-- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
+- `VERIFIED`: Deployment verdict is STABLE and deploy-decider passed. Route to Wisdom.
+- `UNVERIFIED`: Deployment not stable OR verification incomplete. Document what happened.
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure).
+
+**Note:** Deploy flow does not use `PARTIAL` status. Deploy is a bounded flow with clear completion criteria. Use `UNVERIFIED` for any incomplete state.
 
 ## Receipt Schema
 
@@ -80,6 +82,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "deploy",
+  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
   "summary": "<1-2 sentence description of deployment outcome>",
 
   "deployment_verdict": "STABLE | NOT_DEPLOYED | BLOCKED_BY_GATE",
@@ -154,7 +157,7 @@ If verification artifacts are missing:
 - Note that post-deployment checks weren't run
 - Still write a receipt with what you know
 
-Honest partial work is fine. A receipt that says "deployment decision was never made" is still useful for the audit trail.
+**UNVERIFIED is a valid outcome.** A receipt that says "deployment decision was never made" is still useful for the audit trail.
 
 ## Handoff
 

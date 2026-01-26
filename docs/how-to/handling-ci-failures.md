@@ -14,10 +14,11 @@ When CI fails, start here:
 
 | Failure Type | Where to Look | Likely Fix |
 |--------------|---------------|------------|
-| `lint` job failed | GitHub Actions > lint | Run auto-linter skill |
+| `lint` job failed | GitHub Actions > lint | Fix frontmatter or forbidden patterns |
 | `pack-check` job failed | GitHub Actions > pack-check | Fix pack structure issues |
 | `demoswarm-smoke` job failed | GitHub Actions > demoswarm-smoke | Fix CLI or Rust tooling |
-| `tooling-tests` job failed | GitHub Actions > tooling-tests | Fix Rust tests |
+| `runs-tools-tests` job failed | GitHub Actions > runs-tools-tests | Fix Rust tests |
+| `cargo-audit` job failed | GitHub Actions > cargo-audit | Update vulnerable dependencies |
 | `doc-drift` job failed | GitHub Actions > doc-drift | Update stale doc references |
 | CodeRabbit comment | PR comments | Address feedback per type |
 
@@ -25,13 +26,14 @@ When CI fails, start here:
 
 ## Understanding GitHub Actions Jobs
 
-The pack CI runs five jobs defined in `.github/workflows/pack.yml`:
+The pack CI runs six jobs defined in `.github/workflows/pack.yml`:
 
 ### 1. `lint` Job
 
 **What it checks:**
 - **Portable .claude shape** (`check_portable_claude.py`): Ensures `.claude/` contains no harness-specific references (Flow Studio, localhost:5000, etc.)
 - **Frontmatter validation** (`lint_frontmatter.py`): Verifies agents have `name:` and `description:`, commands have `description:`, skills have `SKILL.md` with required fields
+- **Agent prompt validation** (`validate_agent_prompts.py`): Validates agent structure, detects duplicate sections, verifies handoff targets exist, checks skill invocations
 
 **Common failures:**
 
@@ -41,6 +43,10 @@ The pack CI runs five jobs defined in `.github/workflows/pack.yml`:
 | "missing 'name:' in frontmatter" | Agent file missing required YAML field | Add `name:` to frontmatter |
 | "missing 'description:' in frontmatter" | Agent/command/skill missing description | Add `description:` to frontmatter |
 | "missing SKILL.md" | Skill directory without required file | Create `SKILL.md` with name and description |
+| "missing required section 'Handoff Targets'" | Agent missing required section | Add `## Handoff Targets` section |
+| "duplicate section '## Output'" | Agent has repeated `##` header | Remove duplicate section header |
+| "references non-existent agent" | Handoff target doesn't exist | Fix reference or create the missing agent |
+| "references non-existent skill" | Skill invocation references missing skill | Fix reference or create the missing skill |
 
 **How to fix locally:**
 
@@ -50,6 +56,9 @@ python scripts/check_portable_claude.py
 
 # Check frontmatter
 python scripts/lint_frontmatter.py
+
+# Validate agent prompts
+python scripts/validate_agent_prompts.py
 ```
 
 ### 2. `pack-check` Job
@@ -103,10 +112,10 @@ bash .claude/scripts/demoswarm.sh time now
 bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 ```
 
-### 4. `tooling-tests` Job
+### 4. `runs-tools-tests` Job
 
 **What it checks:**
-- Rust unit tests for the CLI tooling crate
+- Rust unit tests for the CLI tooling crate (`tools/demoswarm-runs-tools/`)
 
 **Common failures:**
 
@@ -121,7 +130,41 @@ bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
 ```
 
-### 5. `doc-drift` Job
+### 5. `cargo-audit` Job
+
+**What it checks:**
+- Security vulnerabilities (CVEs) in Rust dependencies for both tools:
+  - `tools/demoswarm-pack-check/`
+  - `tools/demoswarm-runs-tools/`
+
+**Common failures:**
+
+| Error | Cause | Fix |
+|-------|-------|-----|
+| "RUSTSEC-YYYY-NNNN" | Known vulnerability in dependency | Update the affected crate |
+| "Crate X has N vulnerabilities" | Multiple CVEs in one dependency | Update to patched version |
+| "unmaintained crate" | Dependency no longer maintained | Consider replacing or accept risk |
+
+**How to fix locally:**
+
+```bash
+# Check for vulnerabilities
+cargo audit --manifest-path tools/demoswarm-pack-check/Cargo.toml
+cargo audit --manifest-path tools/demoswarm-runs-tools/Cargo.toml
+
+# Update a specific dependency
+cargo update -p <crate-name>
+
+# Update all dependencies
+cargo update
+```
+
+**Note:** If a vulnerability exists but no patch is available, you may need to:
+1. Wait for upstream fix
+2. Pin to a specific version with known-safe behavior
+3. Replace the dependency with an alternative
+
+### 6. `doc-drift` Job
 
 **What it checks:**
 - Stale skill name references (legacy monolith skill was split into `runs-derive`, `runs-index`, `openq-tools`, `secrets-tools`)
@@ -203,7 +246,7 @@ python scripts/lint_frontmatter.py
 
 ### Pattern 2: Test Failures
 
-**Symptom:** `tooling-tests` job fails.
+**Symptom:** `runs-tools-tests` job fails.
 
 **Resolution:**
 
@@ -365,10 +408,11 @@ change_scope:
 
 | CI Job | Common Fix | Command |
 |--------|------------|---------|
-| lint | Fix frontmatter, remove harness refs | `python scripts/lint_frontmatter.py` |
+| lint | Fix frontmatter, remove harness refs, fix agent structure | `python scripts/lint_frontmatter.py && python scripts/validate_agent_prompts.py` |
 | pack-check | Fix pack structure | `bash .claude/scripts/pack-check.sh` |
-| demoswarm-smoke | Fix CLI/Rust code | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
-| tooling-tests | Fix Rust tests | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
+| demoswarm-smoke | Fix CLI/Rust code | `bash .claude/scripts/demoswarm.sh time now` |
+| runs-tools-tests | Fix Rust tests | `cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml` |
+| cargo-audit | Update vulnerable deps | `cargo audit && cargo update -p <crate>` |
 | doc-drift | Update stale references | `bash scripts/check-doc-drift.sh` |
 
 ---

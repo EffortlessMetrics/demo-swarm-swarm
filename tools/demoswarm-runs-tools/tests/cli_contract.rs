@@ -1,4 +1,4 @@
-use assert_cmd::{cargo::cargo_bin_cmd, Command};
+use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use predicates::str::contains;
 use std::fs;
 use std::io::Write;
@@ -131,9 +131,7 @@ fn receipt_get_missing_key_returns_null() {
         "nonexistent_key",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 #[test]
@@ -152,9 +150,7 @@ fn receipt_get_invalid_json_returns_null() {
         "status",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 // ============================================================================
@@ -175,20 +171,14 @@ fn strict_flag_shown_in_help() {
     cmd.args(["--help"]);
 
     // Help output goes to stderr in clap for this CLI
-    cmd.assert()
-        .success()
-        .stderr(contains("--strict"));
+    cmd.assert().success().stderr(contains("--strict"));
 }
 
 #[test]
 fn strict_flag_accepted_before_subcommand() {
     // Verify --strict is recognized as a valid flag
     let mut cmd = demoswarm();
-    cmd.args([
-        "--strict",
-        "time",
-        "now",
-    ]);
+    cmd.args(["--strict", "time", "now"]);
 
     // Should succeed (time now always works) - verifies flag is accepted
     cmd.assert().success();
@@ -198,11 +188,7 @@ fn strict_flag_accepted_before_subcommand() {
 fn strict_flag_accepted_after_subcommand() {
     // Verify --strict works as a global flag after subcommand
     let mut cmd = demoswarm();
-    cmd.args([
-        "time",
-        "--strict",
-        "now",
-    ]);
+    cmd.args(["time", "--strict", "now"]);
 
     // Should succeed - verifies global flag positioning works
     cmd.assert().success();
@@ -214,9 +200,7 @@ fn strict_env_var_causes_exit_code_2_on_parse_error() {
     let mut cmd = demoswarm_with_env("DEMOSWARM_STRICT", "1");
     cmd.args(["invalid-subcommand"]);
 
-    cmd.assert()
-        .code(2)
-        .stdout("null\n");
+    cmd.assert().code(2).stdout("null\n");
 }
 
 #[test]
@@ -224,9 +208,7 @@ fn strict_env_var_true_causes_exit_code_2_on_parse_error() {
     let mut cmd = demoswarm_with_env("DEMOSWARM_STRICT", "true");
     cmd.args(["invalid-subcommand"]);
 
-    cmd.assert()
-        .code(2)
-        .stdout("null\n");
+    cmd.assert().code(2).stdout("null\n");
 }
 
 #[test]
@@ -234,9 +216,7 @@ fn strict_env_var_yes_causes_exit_code_2_on_parse_error() {
     let mut cmd = demoswarm_with_env("DEMOSWARM_STRICT", "yes");
     cmd.args(["invalid-subcommand"]);
 
-    cmd.assert()
-        .code(2)
-        .stdout("null\n");
+    cmd.assert().code(2).stdout("null\n");
 }
 
 #[test]
@@ -244,9 +224,7 @@ fn without_strict_returns_exit_code_0_on_parse_error() {
     let mut cmd = demoswarm();
     cmd.args(["invalid-subcommand"]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 #[test]
@@ -264,9 +242,7 @@ fn soft_failure_returns_null_with_exit_0_regardless_of_strict() {
         "status",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("null\n");
+    cmd.assert().success().stdout("null\n");
 }
 
 // ============================================================================
@@ -279,11 +255,15 @@ fn secrets_scan_with_patterns_file_json() {
 
     // Create a patterns file
     let patterns_path = tmp_dir.path().join("patterns.json");
-    fs::write(&patterns_path, r#"{
+    fs::write(
+        &patterns_path,
+        r#"{
         "patterns": [
             {"pattern": "custom_secret_[0-9]{6}", "type": "custom-secret"}
         ]
-    }"#).expect("write patterns");
+    }"#,
+    )
+    .expect("write patterns");
 
     // Create a file with a custom secret
     let secret_file = tmp_dir.path().join("test.txt");
@@ -304,9 +284,7 @@ fn secrets_scan_with_patterns_file_json() {
         patterns_path.to_str().expect("patterns path"),
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("SECRETS_FOUND\n");
+    cmd.assert().success().stdout("SECRETS_FOUND\n");
 
     // Verify the output JSON contains the custom secret type
     let output_content = fs::read_to_string(&output_path).expect("read output");
@@ -319,10 +297,14 @@ fn secrets_scan_with_patterns_file_yaml() {
 
     // Create a YAML patterns file
     let patterns_path = tmp_dir.path().join("patterns.yaml");
-    fs::write(&patterns_path, r#"patterns:
+    fs::write(
+        &patterns_path,
+        r#"patterns:
   - pattern: "yaml_token_[A-Za-z0-9]{10}"
     type: yaml-custom-token
-"#).expect("write patterns");
+"#,
+    )
+    .expect("write patterns");
 
     // Create a file with a custom secret
     let secret_file = tmp_dir.path().join("test.txt");
@@ -343,9 +325,7 @@ fn secrets_scan_with_patterns_file_yaml() {
         patterns_path.to_str().expect("patterns path"),
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("SECRETS_FOUND\n");
+    cmd.assert().success().stdout("SECRETS_FOUND\n");
 
     // Verify the output JSON contains the custom secret type
     let output_content = fs::read_to_string(&output_path).expect("read output");
@@ -358,11 +338,15 @@ fn secrets_scan_invalid_patterns_file_regex() {
 
     // Create a patterns file with invalid regex
     let patterns_path = tmp_dir.path().join("patterns.json");
-    fs::write(&patterns_path, r#"{
+    fs::write(
+        &patterns_path,
+        r#"{
         "patterns": [
             {"pattern": "[invalid(regex", "type": "bad-pattern"}
         ]
-    }"#).expect("write patterns");
+    }"#,
+    )
+    .expect("write patterns");
 
     // Create a file to scan
     let secret_file = tmp_dir.path().join("test.txt");
@@ -383,9 +367,7 @@ fn secrets_scan_invalid_patterns_file_regex() {
         patterns_path.to_str().expect("patterns path"),
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("PATTERN_ERROR\n");
+    cmd.assert().success().stdout("PATTERN_ERROR\n");
 
     // Verify the output JSON contains the error
     let output_content = fs::read_to_string(&output_path).expect("read output");
@@ -416,9 +398,7 @@ fn secrets_scan_missing_patterns_file() {
         "/nonexistent/patterns.json",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("PATTERN_ERROR\n");
+    cmd.assert().success().stdout("PATTERN_ERROR\n");
 }
 
 #[test]
@@ -427,15 +407,23 @@ fn secrets_scan_merges_builtin_and_custom_patterns() {
 
     // Create a patterns file with a custom pattern
     let patterns_path = tmp_dir.path().join("patterns.json");
-    fs::write(&patterns_path, r#"{
+    fs::write(
+        &patterns_path,
+        r#"{
         "patterns": [
             {"pattern": "custom_api_[0-9]{8}", "type": "custom-api-key"}
         ]
-    }"#).expect("write patterns");
+    }"#,
+    )
+    .expect("write patterns");
 
     // Create a file with both a built-in secret and a custom secret
     let secret_file = tmp_dir.path().join("test.txt");
-    fs::write(&secret_file, "GitHub: ghp_abcdefghijklmnopqrstuvwxyz1234567890\nCustom: custom_api_12345678").expect("write file");
+    fs::write(
+        &secret_file,
+        "GitHub: ghp_abcdefghijklmnopqrstuvwxyz1234567890\nCustom: custom_api_12345678",
+    )
+    .expect("write file");
 
     // Output file
     let output_path = tmp_dir.path().join("output.json");
@@ -452,9 +440,7 @@ fn secrets_scan_merges_builtin_and_custom_patterns() {
         patterns_path.to_str().expect("patterns path"),
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("SECRETS_FOUND\n");
+    cmd.assert().success().stdout("SECRETS_FOUND\n");
 
     // Verify the output JSON contains both secret types
     let output_content = fs::read_to_string(&output_path).expect("read output");
@@ -468,11 +454,15 @@ fn secrets_redact_custom_type_with_patterns_file() {
 
     // Create a patterns file
     let patterns_path = tmp_dir.path().join("patterns.json");
-    fs::write(&patterns_path, r#"{
+    fs::write(
+        &patterns_path,
+        r#"{
         "patterns": [
             {"pattern": "custom_key_[A-Za-z0-9]{12}", "type": "custom-key"}
         ]
-    }"#).expect("write patterns");
+    }"#,
+    )
+    .expect("write patterns");
 
     // Create a file with a custom secret
     let secret_file = tmp_dir.path().join("test.txt");
@@ -490,9 +480,7 @@ fn secrets_redact_custom_type_with_patterns_file() {
         patterns_path.to_str().expect("patterns path"),
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("ok\n");
+    cmd.assert().success().stdout("ok\n");
 
     // Verify the file was redacted
     let content = fs::read_to_string(&secret_file).expect("read file");
@@ -530,7 +518,11 @@ fn secrets_redact_builtin_type_still_works() {
 
     // Create a file with a GitHub token
     let secret_file = tmp_dir.path().join("test.txt");
-    fs::write(&secret_file, "Token: ghp_abcdefghijklmnopqrstuvwxyz12345678900").expect("write file");
+    fs::write(
+        &secret_file,
+        "Token: ghp_abcdefghijklmnopqrstuvwxyz12345678900",
+    )
+    .expect("write file");
 
     let mut cmd = demoswarm();
     cmd.args([
@@ -542,9 +534,7 @@ fn secrets_redact_builtin_type_still_works() {
         "github-token",
     ]);
 
-    cmd.assert()
-        .success()
-        .stdout("ok\n");
+    cmd.assert().success().stdout("ok\n");
 
     // Verify the file was redacted
     let content = fs::read_to_string(&secret_file).expect("read file");
@@ -828,12 +818,7 @@ fn receipts_count_counts_existing_receipts() {
 #[test]
 fn receipts_count_missing_dir_returns_null() {
     let mut cmd = demoswarm();
-    cmd.args([
-        "receipts",
-        "count",
-        "--run-dir",
-        "./__nonexistent_run_dir",
-    ]);
+    cmd.args(["receipts", "count", "--run-dir", "./__nonexistent_run_dir"]);
 
     cmd.assert().success().stdout("null\n");
 }
@@ -1228,11 +1213,7 @@ fn secrets_scan_directory_recursive() {
 #[test]
 fn secrets_redact_github_token() {
     let mut tmp = NamedTempFile::new().expect("temp file");
-    writeln!(
-        tmp,
-        "token = ghp_1234567890abcdef1234567890abcdef123456"
-    )
-    .expect("write");
+    writeln!(tmp, "token = ghp_1234567890abcdef1234567890abcdef123456").expect("write");
     tmp.flush().expect("flush");
 
     let file_path = tmp.path().to_str().expect("path utf8").to_string();
@@ -1563,4 +1544,560 @@ fn count_bdd_empty_dir_returns_zero() {
     ]);
 
     cmd.assert().success().stdout("0\n");
+}
+
+// =============================================================================
+// count pattern - Additional tests
+// =============================================================================
+
+#[test]
+fn count_pattern_counts_matching_lines() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"IMPL_FILE_CHANGED: src/main.rs
+IMPL_FILE_CHANGED: src/lib.rs
+Some other line
+IMPL_FILE_CHANGED: tests/test.rs
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "count",
+        "pattern",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--regex",
+        "^IMPL_FILE_CHANGED:",
+    ]);
+
+    cmd.assert().success().stdout("3\n");
+}
+
+#[test]
+fn count_pattern_missing_file_returns_null() {
+    let mut cmd = demoswarm();
+    cmd.args([
+        "count",
+        "pattern",
+        "--file",
+        "./__nonexistent_file.md",
+        "--regex",
+        "^TEST",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn count_pattern_uses_fallback_regex_when_primary_is_zero() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"REQ-001: First requirement
+REQ-002: Second requirement
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "count",
+        "pattern",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--regex",
+        "^IMPL_FILE_CHANGED:", // Won't match
+        "--fallback-regex",
+        "^REQ-", // Will match
+    ]);
+
+    cmd.assert().success().stdout("2\n");
+}
+
+#[test]
+fn count_pattern_returns_zero_when_no_matches() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(tmp, "some content without markers").expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "count",
+        "pattern",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--regex",
+        "^MARKER:",
+    ]);
+
+    cmd.assert().success().stdout("0\n");
+}
+
+// =============================================================================
+// line get - Extract value from a line with a known prefix
+// =============================================================================
+
+#[test]
+fn line_get_extracts_value() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"# Report
+
+Mutation Score: 85.2%
+Coverage: 92%
+Other line: value
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--prefix",
+        "Mutation Score:",
+    ]);
+
+    cmd.assert().success().stdout("85.2%\n");
+}
+
+#[test]
+fn line_get_missing_file_returns_null() {
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        "./__nonexistent_file.md",
+        "--prefix",
+        "Status:",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn line_get_missing_prefix_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(tmp, "Status: VERIFIED\nCount: 42").expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--prefix",
+        "Nonexistent:",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn line_get_empty_value_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(tmp, "Status:\nCount: 42").expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--prefix",
+        "Status:",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn line_get_extracts_first_matching_line() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"Status: FIRST
+Status: SECOND
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--prefix",
+        "Status:",
+    ]);
+
+    cmd.assert().success().stdout("FIRST\n");
+}
+
+#[test]
+fn line_get_preserves_entire_value_with_spaces() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(tmp, "Description: This is a long description with spaces").expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "line",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--prefix",
+        "Description:",
+    ]);
+
+    cmd.assert()
+        .success()
+        .stdout("This is a long description with spaces\n");
+}
+
+// =============================================================================
+// ms get - Machine Summary extraction - Additional tests
+// =============================================================================
+
+#[test]
+fn ms_get_extracts_field_from_section() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"# Document
+
+## Machine Summary
+
+status: VERIFIED
+run_id: test-001
+test_count: 42
+
+## Another Section
+
+Other content here.
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "status",
+    ]);
+
+    cmd.assert().success().stdout("VERIFIED\n");
+}
+
+#[test]
+fn ms_get_missing_section_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"# Document
+
+## Different Section
+
+status: VERIFIED
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "status",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn ms_get_missing_key_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"## Machine Summary
+
+status: VERIFIED
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "nonexistent_key",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn ms_get_returns_first_word_only() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"## Machine Summary
+
+status: VERIFIED with additional info
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "status",
+    ]);
+
+    cmd.assert().success().stdout("VERIFIED\n");
+}
+
+#[test]
+fn ms_get_template_leak_guard_returns_null_for_pipe() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"## Machine Summary
+
+status: | template value
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "status",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn ms_get_template_leak_guard_returns_null_for_angle_bracket() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"## Machine Summary
+
+status: <placeholder>
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "ms",
+        "get",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--section",
+        "## Machine Summary",
+        "--key",
+        "status",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+// =============================================================================
+// yaml count-items - Count items matching pattern in YAML block
+// =============================================================================
+
+#[test]
+fn yaml_count_items_counts_matching_lines() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"# Document
+
+```yaml
+items:
+  - REQ-001: First requirement
+  - REQ-002: Second requirement
+  - NFR-001: Non-functional requirement
+  - REQ-003: Third requirement
+```
+"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--item-regex",
+        "REQ-[0-9]+",
+    ]);
+
+    cmd.assert().success().stdout("3\n");
+}
+
+#[test]
+fn yaml_count_items_missing_file_returns_null() {
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        "./__nonexistent_file.md",
+        "--item-regex",
+        "REQ-",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn yaml_count_items_no_yaml_block_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(tmp, "# Document\n\nNo YAML block here.").expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--item-regex",
+        "REQ-",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn yaml_count_items_invalid_regex_returns_null() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"```yaml
+items:
+  - item1
+```"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--item-regex",
+        "[invalid(regex",
+    ]);
+
+    cmd.assert().success().stdout("null\n");
+}
+
+#[test]
+fn yaml_count_items_returns_zero_when_no_matches() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"```yaml
+items:
+  - item1
+  - item2
+```"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--item-regex",
+        "NONEXISTENT",
+    ]);
+
+    cmd.assert().success().stdout("0\n");
+}
+
+#[test]
+fn yaml_count_items_handles_posix_character_class() {
+    let mut tmp = NamedTempFile::new().expect("temp file");
+    writeln!(
+        tmp,
+        r#"```yaml
+items:
+  - first item
+  - second item
+```"#
+    )
+    .expect("write");
+    tmp.flush().expect("flush temp file");
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "yaml",
+        "count-items",
+        "--file",
+        tmp.path().to_str().expect("path utf8"),
+        "--item-regex",
+        "^\\s*-\\s+",
+    ]);
+
+    // Both "  - first item" and "  - second item" lines match
+    cmd.assert().success().stdout("2\n");
 }

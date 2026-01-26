@@ -79,14 +79,19 @@ The receipt should answer:
 - Are there critical items still pending?
 - Is this ready for Gate, or does more work remain?
 
-**Completion states:**
+**Status determination:**
 
-- **Complete:** All critical/major items resolved, worklist complete. Ready for Gate.
-- **Partial:** Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
-- **Incomplete:** Missing worklist OR critical items pending OR no progress made. Document what's missing.
-- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
+- `VERIFIED`: All critical/major items resolved, worklist complete. Ready for Gate.
+- `PARTIAL`: Some items resolved but work remains. This is a context checkpoint, not failure. Rerun to continue.
+- `UNVERIFIED`: Missing worklist OR critical items pending OR no progress made. Document what's missing.
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure).
 
-**PARTIAL is a feature:** Flow 4 has unbounded loops. When context is exhausted mid-worklist, PARTIAL means "real progress made, more to do, rerun to continue."
+**PARTIAL vs UNVERIFIED:** Flow 4 (Review) is the only flow that uses `PARTIAL`. This status is reserved for unbounded iteration loops where real progress was made but more iterations are needed. Use `UNVERIFIED` when:
+- The worklist is missing entirely
+- Critical items remain unaddressed
+- No progress was made in this iteration
+
+**PARTIAL is a feature:** When context is exhausted mid-worklist, PARTIAL means "real progress made, more to do, rerun to continue." The next iteration picks up where this one left off.
 
 ## Receipt Schema
 
@@ -94,6 +99,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "review",
+  "status": "VERIFIED | PARTIAL | UNVERIFIED | CANNOT_PROCEED",
   "summary": "<1-2 sentence description of review progress>",
 
   "feedback": {
@@ -231,9 +237,9 @@ _Review complete:_
 
 > "Summarized Review flow. Received 8 feedback items (1 critical, 3 major, 4 minor). Resolved 6/8 items including the critical one. 2 minor items deferred. Route to **secrets-sanitizer** then **gate-cleanup** to proceed to Flow 5."
 
-_Work remains (partial):_
+_Work remains (PARTIAL):_
 
-> "Summarized Review flow. 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
+> "Summarized Review flow (PARTIAL). 3 critical items still pending: security concern in auth flow, missing input validation, race condition in cache. Route to **review-worklist-writer** to continue draining worklist. This is checkpointing, not failure."
 
 _Blocked on environment:_
 
@@ -245,5 +251,5 @@ When you complete your work, recommend one of these to the orchestrator:
 
 - **secrets-sanitizer**: Scan artifacts for secrets before committing and pushing review artifacts
 - **gate-cleanup**: Begin Flow 5 (Gate) verification when review is complete and PROCEED is recommended
-- **review-worklist-writer**: Continue draining worklist items when review is incomplete (RERUN recommended)
+- **review-worklist-writer**: Continue draining worklist items when status is PARTIAL (rerun to continue)
 - **repo-operator**: Commit and push review artifacts after cleanup is complete

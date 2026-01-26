@@ -3,6 +3,28 @@ set -euo pipefail
 
 # Doc drift guard - prevents stale references from creeping into docs
 # Run from repo root: bash scripts/check-doc-drift.sh
+#
+# Platform compatibility:
+#   - macOS: Works with bash 3.2+ (default system bash)
+#   - Linux: Works with bash 4.0+
+#   - Windows: Works with Git Bash / MSYS2
+#
+# Note: This script uses bash-specific features (arrays, [[ ]]) that are
+# compatible with bash 3.2+ but not POSIX sh.
+
+# -----------------------------------------------------------------------------
+# Bash version check
+# -----------------------------------------------------------------------------
+check_bash_version() {
+  local major="${BASH_VERSINFO[0]:-0}"
+  local minor="${BASH_VERSINFO[1]:-0}"
+
+  if [[ "$major" -lt 3 ]] || { [[ "$major" -eq 3 ]] && [[ "$minor" -lt 2 ]]; }; then
+    echo "Warning: bash $BASH_VERSION detected. This script requires bash 3.2+." >&2
+    echo "         Some features may not work correctly." >&2
+  fi
+}
+check_bash_version
 
 ERRORS=0
 

@@ -28,7 +28,11 @@ jobs:
         run: python scripts/validate_agent_prompts.py
 
   pack-check:
-    runs-on: ubuntu-latest
+    # Windows CI catches platform-specific path handling and bash compatibility issues
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +40,14 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tools/demoswarm-pack-check
+
       - name: Run pack self-check
+        shell: bash
         run: bash .claude/scripts/pack-check.sh --no-color
 
   demoswarm-smoke:
@@ -48,6 +59,12 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tools/demoswarm-runs-tools
+
       - name: Install demoswarm CLI
         run: cargo install --path tools/demoswarm-runs-tools --root .demoswarm
 
@@ -58,6 +75,50 @@ jobs:
         run: bash .claude/scripts/demoswarm.sh count pattern --file CLAUDE.md --regex '^#'
 
   runs-tools-tests:
+    # Rust tests run on both platforms to catch cross-platform issues
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tools/demoswarm-runs-tools
+
+      - name: Run runs-tools tests
+        run: cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
+
+  pack-check-tests:
+    # Rust tests run on both platforms to catch cross-platform issues
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tools/demoswarm-pack-check
+
+      - name: Run pack-check tests
+        run: cargo test --manifest-path tools/demoswarm-pack-check/Cargo.toml
+
+  cargo-audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,8 +127,21 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Run runs-tools tests
-        run: cargo test --manifest-path tools/demoswarm-runs-tools/Cargo.toml
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            tools/demoswarm-pack-check
+            tools/demoswarm-runs-tools
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit@0.22.0
+
+      - name: Audit demoswarm-pack-check
+        run: cargo audit --manifest-path tools/demoswarm-pack-check/Cargo.toml
+
+      - name: Audit demoswarm-runs-tools
+        run: cargo audit --manifest-path tools/demoswarm-runs-tools/Cargo.toml
 
   doc-drift:
     runs-on: ubuntu-latest

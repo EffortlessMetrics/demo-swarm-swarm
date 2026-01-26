@@ -243,15 +243,34 @@ Orchestrator
 
 ## The Seven Flows
 
-| Flow      | Input                    | Output                   | Purpose                |
-| --------- | ------------------------ | ------------------------ | ---------------------- |
-| 1. Signal | Raw request              | Requirements, BDD, risks | Shape the work         |
-| 2. Plan   | Signal outputs           | ADR, contracts, plans    | Design the solution    |
-| 3. Build  | Plan outputs             | Code, tests, reviews     | Implement with tests   |
-| 4. Review | Build outputs + Draft PR | PR feedback, worklist    | Harvest PR feedback    |
-| 5. Gate   | Review outputs           | Merge decision           | Pre-merge verification |
-| 6. Deploy | Gate outputs             | Verification, deployment | Release to mainline    |
-| 7. Wisdom | All outputs              | Learnings, regressions   | Close feedback loops   |
+**7 logical flows exposed via 8 slash commands** (7 flow commands + `/customize-pack`).
+
+The flows represent the logical SDLC stages. Each flow has one primary command:
+
+| Flow      | Slash Command      | Input                    | Output                   | Purpose                |
+| --------- | ------------------ | ------------------------ | ------------------------ | ---------------------- |
+| 1. Signal | `/flow-1-signal`   | Raw request              | Requirements, BDD, risks | Shape the work         |
+| 2. Plan   | `/flow-2-plan`     | Signal outputs           | ADR, contracts, plans    | Design the solution    |
+| 3. Build  | `/flow-3-build`    | Plan outputs             | Code, tests, reviews     | Implement with tests   |
+| 4. Review | `/flow-4-review`   | Build outputs + Draft PR | PR feedback, worklist    | Harvest PR feedback    |
+| 5. Gate   | `/flow-5-gate`     | Review outputs           | Merge decision           | Pre-merge verification |
+| 6. Deploy | `/flow-6-deploy`   | Gate outputs             | Verification, deployment | Release to mainline    |
+| 7. Wisdom | `/flow-7-wisdom`   | All outputs              | Learnings, regressions   | Close feedback loops   |
+
+Additionally, `/customize-pack` provides interactive configuration for adapting the pack to your stack.
+
+### Flows vs Commands vs Skills
+
+| Concept | Count | What It Is | How to Invoke |
+| ------- | ----- | ---------- | ------------- |
+| **Flow** | 7 | Logical SDLC stage (Signal through Wisdom) | Via its slash command |
+| **Command** | 8 | Slash command file in `.claude/commands/` | `/flow-N-name` or `/customize-pack` |
+| **Skill** | 7 | Mechanical tool (test-runner, auto-linter, etc.) | `/skill-name` or via agent |
+
+**When to use each:**
+- **Flows** are your primary interface. Run `/flow-1-signal` to start, then proceed through the flows in order.
+- **Skills** are typically invoked by agents during flows, but you can call them directly for specific tasks (e.g., `/test-runner` to run tests, `/auto-linter` to format code).
+- **/customize-pack** is a one-time setup command to configure the pack for your project.
 
 ### Flow 3: Build (The Construction Site)
 

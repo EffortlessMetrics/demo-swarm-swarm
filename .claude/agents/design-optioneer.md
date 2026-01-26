@@ -63,7 +63,7 @@ Your options are **complete** when:
 - Comparison matrix with REQ/NFR coverage counts
 - Non-binding recommendation with rationale
 
-Your options are **partial** when:
+Your options are **UNVERIFIED** when:
 
 - Options written but inputs missing or key sections incomplete
 - Cannot map to REQ/NFR IDs due to missing requirements
@@ -154,7 +154,7 @@ After the Comparison Matrix and Suggested Default sections, include this machine
 
 ```yaml
 ## Machine Summary
-status: VERIFIED | UNVERIFIED | PARTIAL
+status: VERIFIED | UNVERIFIED | CANNOT_PROCEED
 options_count: <int>
 reqs_enumerated: <int or null>
 nfrs_enumerated: <int or null>
@@ -170,8 +170,8 @@ observations:
 **Status values:**
 
 - `VERIFIED`: 2-3 distinct options with full structure, all enumerated REQ/NFR IDs mapped, comparison matrix complete
-- `PARTIAL`: Options written but key sections incomplete or requirements unavailable for mapping
-- `UNVERIFIED`: Cannot produce valid options due to missing inputs or constraints
+- `UNVERIFIED`: Options written but key sections incomplete or requirements unavailable for mapping
+- `CANNOT_PROCEED`: Cannot produce valid options due to mechanical failure (IO/permissions)
 
 **Observations field:** Capture cross-cutting insights that don't fit in the options themselves - patterns noticed, friction encountered, things the ADR author or future runs should know. These are harvested by `learning-synthesizer` for Wisdom extraction.
 

@@ -4,18 +4,19 @@
 //! - `scan` writes findings (file/line/type only) to JSON
 //! - `redact` modifies files in-place, prints only status
 
+use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{Args, Subcommand};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use super::common::write_json_atomic;
 use crate::output::print_scalar;
-use crate::walk::{walk_dir_excluding_verbose, SkippedItem};
+use crate::walk::{SkippedItem, walk_dir_excluding_verbose};
 
 /// Built-in secret detection patterns. Each tuple is (regex, type-name).
 const BUILTIN_PATTERNS: &[(&str, &str)] = &[
@@ -204,13 +205,23 @@ fn find_pattern_for_type(type_name: &str, patterns_file: Option<&str>) -> Result
 }
 
 fn scan(args: &SecretsScan) -> Result<()> {
-    let root = Path::new(&args.path);
-    let out_path = Path::new(&args.output);
     let verbose = args.verbose;
 
-    if !root.exists() {
+    // Validate output path first (before any scanning)
+    let out_path = match validate_output_path_boundary(&args.output) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    // Special case: scan path doesn't exist yet - write SCAN_PATH_MISSING
+    let root_raw = Path::new(&args.path);
+    if !root_raw.exists() {
         let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
-        write_json_atomic(out_path, &v).map_err(|e| {
+        write_json_atomic(&out_path, &v).map_err(|e| {
             eprintln!(
                 "Warning: failed to write secrets findings JSON ({}): {e:#}",
                 out_path.display()
@@ -220,6 +231,29 @@ fn scan(args: &SecretsScan) -> Result<()> {
         print_scalar("SCAN_PATH_MISSING");
         return Ok(());
     }
+
+    // Validate scan path is within repository boundary (security: prevents path traversal)
+    let root = match validate_path_boundary(&args.path) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
 
     // Compile patterns (built-in + custom if provided)
     let compiled = match compile_patterns(args.patterns_file.as_deref()) {
@@ -232,7 +266,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
                 "findings": [],
                 "skipped_count": 0
             });
-            write_json_atomic(out_path, &v).map_err(|write_e| {
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
                 eprintln!(
                     "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
                     out_path.display()
@@ -248,7 +282,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
     let mut skipped: Vec<SkippedItem> = Vec::new();
 
     // Use shared walker with exclusions and verbose mode for security scanning
-    let mut walker = walk_dir_excluding_verbose(root, EXCLUDED_DIRS, verbose);
+    let mut walker = walk_dir_excluding_verbose(&root, EXCLUDED_DIRS, verbose);
 
     // Stream files directly instead of collecting (reduces memory usage)
     for f in walker.by_ref() {
@@ -266,7 +300,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
         "SECRETS_FOUND"
     };
     let v = json!({ "status": status, "findings": findings, "skipped_count": skipped_count });
-    write_json_atomic(out_path, &v).map_err(|e| {
+    write_json_atomic(&out_path, &v).map_err(|e| {
         eprintln!(
             "Warning: failed to write secrets findings JSON ({}): {e:#}",
             out_path.display()
@@ -279,6 +313,132 @@ fn scan(args: &SecretsScan) -> Result<()> {
 
 /// Directory names to exclude from scanning (deterministic fixed list).
 const EXCLUDED_DIRS: &[&str] = &[".git", "target", "node_modules", ".demoswarm"];
+
+/// Validate and canonicalize a path, preventing path traversal attacks.
+///
+/// Security: This function prevents path traversal attacks by detecting when
+/// relative paths with ".." components would escape the current working directory.
+///
+/// The validation strategy:
+/// 1. Absolute paths are allowed (explicit, not traversal attacks)
+/// 2. Relative paths are checked for ".." traversal that escapes CWD
+/// 3. Paths that canonicalize to somewhere outside CWD when they started
+///    with relative components are blocked
+///
+/// This allows legitimate use cases (temp directories, absolute paths) while
+/// blocking the attack vector of crafted relative paths like "../../../etc/passwd".
+fn validate_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
+
+    // Canonicalize the input path first
+    let canonical = input_path
+        .canonicalize()
+        .with_context(|| format!("Failed to canonicalize path: {}", path))?;
+
+    // If the path is absolute (not relative), allow it.
+    // Absolute paths are explicit - if someone provides /etc/passwd directly,
+    // that's their intent, not a traversal attack.
+    if input_path.is_absolute() {
+        return Ok(canonical);
+    }
+
+    // For relative paths, check if they escape the CWD
+    // This catches attacks like "../../../etc/passwd"
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    // Check if the canonical path is under CWD
+    if canonical.starts_with(&cwd_canonical) {
+        return Ok(canonical);
+    }
+
+    // Relative path escapes CWD - this is the attack pattern
+    bail!(
+        "Relative path '{}' resolves to '{}' which is outside the repository boundary '{}'. \
+         Use an absolute path if you need to access files outside the working directory.",
+        path,
+        canonical.display(),
+        cwd_canonical.display()
+    )
+}
+
+/// Validate path boundary for output files - allows creating new files.
+///
+/// Security: For output paths that don't exist yet, we validate the parent directory.
+/// Like validate_path_boundary, this allows absolute paths but blocks relative
+/// path traversal attacks.
+fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
+
+    // If path is absolute, allow it (explicit intent, not traversal)
+    if input_path.is_absolute() {
+        // If path exists, canonicalize it
+        if input_path.exists() {
+            return input_path
+                .canonicalize()
+                .with_context(|| format!("Failed to canonicalize path: {}", path));
+        }
+
+        // For non-existent absolute paths, validate parent exists and return intended path
+        let parent = input_path.parent().unwrap_or(Path::new("."));
+        if !parent.exists() {
+            bail!("Output path parent '{}' does not exist", parent.display());
+        }
+        let parent_canonical = parent
+            .canonicalize()
+            .with_context(|| format!("Failed to canonicalize parent: {}", parent.display()))?;
+        let filename = input_path.file_name().unwrap_or_default();
+        return Ok(parent_canonical.join(filename));
+    }
+
+    // For relative paths, check boundary
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    // If path exists, canonicalize and check
+    if input_path.exists() {
+        let canonical = input_path
+            .canonicalize()
+            .with_context(|| format!("Failed to canonicalize path: {}", path))?;
+
+        if canonical.starts_with(&cwd_canonical) {
+            return Ok(canonical);
+        }
+
+        bail!(
+            "Relative output path '{}' resolves outside the repository boundary",
+            path
+        );
+    }
+
+    // For non-existent relative paths, validate the parent directory
+    let parent = input_path.parent().unwrap_or(Path::new("."));
+    let parent_canonical = if parent.as_os_str().is_empty() || parent == Path::new(".") {
+        cwd_canonical.clone()
+    } else {
+        parent.canonicalize().with_context(|| {
+            format!(
+                "Output path parent '{}' does not exist or is inaccessible",
+                parent.display()
+            )
+        })?
+    };
+
+    if parent_canonical.starts_with(&cwd_canonical) {
+        // Return the intended output path (parent + filename)
+        let filename = input_path.file_name().unwrap_or_default();
+        return Ok(parent_canonical.join(filename));
+    }
+
+    bail!(
+        "Relative output path '{}' would be created outside the repository boundary",
+        path
+    )
+}
 
 fn scan_one_file(
     path: &Path,
@@ -324,13 +484,23 @@ fn scan_one_file(
 }
 
 fn redact(args: &SecretsRedact) -> Result<()> {
-    let path = Path::new(&args.file);
-    if !path.is_file() {
+    let path_raw = Path::new(&args.file);
+    if !path_raw.is_file() {
         print_scalar("FILE_NOT_FOUND");
         return Ok(());
     }
 
-    let bytes = match fs::read(path) {
+    // Validate file path is within repository boundary (security: prevents path traversal)
+    let path = match validate_path_boundary(&args.file) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    let bytes = match fs::read(&path) {
         Ok(b) => b,
         Err(_) => {
             print_scalar("null");

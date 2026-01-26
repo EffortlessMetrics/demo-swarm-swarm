@@ -1,0 +1,9 @@
+{
+  "acs": {
+    "AC-1": { "impl_status": "done", "updated_at": "2026-01-25T11:38:15Z", "description": "run-prep checks branch protection status" },
+    "AC-2": { "impl_status": "done", "updated_at": "2026-01-25T11:38:15Z", "description": "Result stored in run_meta.json" },
+    "AC-3": { "impl_status": "done", "updated_at": "2026-01-25T11:38:15Z", "description": "Summary written to run directory" },
+    "AC-4": { "impl_status": "done", "updated_at": "2026-01-25T11:38:15Z", "description": "Graceful fallback on permission denied" },
+    "AC-5": { "impl_status": "done", "updated_at": "2026-01-25T11:38:15Z", "description": "Non-blocking (runs proceed regardless)" }
+  }
+}

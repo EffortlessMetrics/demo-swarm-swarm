@@ -78,7 +78,7 @@ See: [pr-quality-scorecard.md](pr-quality-scorecard.md) for the full quality sur
 
 ## Open Question
 
-Open questions track uncertainty during a run. The schema has two variants based on status.
+Open questions track uncertainty during a run. The schema has two variants based on status, plus resolution tracking fields.
 
 ```yaml
 qid: OQ-<FLOW>-NNN
@@ -100,6 +100,13 @@ why_agent_cannot_decide: string  # Must be about AUTHORITY, not difficulty
 options: [list of choices with trade-offs]
 escalated_by: agent + flow
 needs: who has authority (role, not person)
+
+# Resolution tracking (appended when question is resolved):
+resolution_status: OPEN | RESOLVED | DEFERRED
+answer: string (the - A: field content)
+resolved_in: artifact reference (e.g., "requirements.md (REQ-003)")
+resolution_sha: git commit SHA or null
+validated_by: agent or critic that confirmed resolution
 ```
 
 ### Key Principle

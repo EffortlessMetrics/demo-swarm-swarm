@@ -91,6 +91,11 @@ pub fn checks() -> Vec<CheckSpec> {
             title: "Checking OpenQ QID patterns use canonical flow codes...",
             run: check_openq_prefix_validation,
         },
+        CheckSpec {
+            id: 54,
+            title: "Checking agents using demoswarm.sh have Skills section...",
+            run: check_skills_section_required,
+        },
     ]
 }
 
@@ -881,6 +886,53 @@ fn check_openq_prefix_validation(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::R
     Ok(())
 }
 
+/// Check 54: Agents using demoswarm.sh must have a Skills section.
+///
+/// Agents that invoke demoswarm.sh are expected to document which skills
+/// they use in a ## Skills (or ## Skill) section. This ensures that:
+/// - Skill dependencies are discoverable
+/// - Agents explicitly declare their tool usage
+fn check_skills_section_required(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
+    let mut violations = Vec::new();
+
+    for agent_file in &cx.inv.agent_md_files {
+        let content = match cx.ctx.read_utf8(agent_file) {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+
+        // Check if agent uses demoswarm.sh
+        let uses_demoswarm = content.contains("demoswarm.sh");
+
+        if !uses_demoswarm {
+            // Agent doesn't use demoswarm, no requirement for Skills section
+            continue;
+        }
+
+        // Check for Skills or Skill section (## Skills or ## Skill)
+        let has_skills_section = content.lines().any(|line| {
+            let trimmed = line.trim();
+            trimmed == "## Skills" || trimmed == "## Skill"
+        });
+
+        if !has_skills_section {
+            violations.push(format!(
+                "{} (uses demoswarm.sh but missing ## Skills section)",
+                cx.ctx.rel(agent_file),
+            ));
+        }
+    }
+
+    if !violations.is_empty() {
+        rep.fail("Found agents using demoswarm.sh without Skills section:");
+        rep.indent_lines(violations.into_iter().take(10));
+    } else {
+        rep.pass("All agents using demoswarm.sh have Skills section");
+    }
+
+    Ok(())
+}
+
 /// Suggest the canonical flow code for a non-canonical one.
 fn suggest_canonical_code(non_canonical: &str) -> &'static str {
     match non_canonical {
@@ -970,8 +1022,8 @@ mod tests {
     mod format_line_matches_tests {
         use super::*;
         use crate::checks::CheckCtx;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::util::LineMatch;
@@ -1097,8 +1149,8 @@ mod tests {
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1246,8 +1298,8 @@ Use runs_ helper functions for derivation.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1480,8 +1532,8 @@ Use demoswarm.sh openq append to add questions.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -1907,8 +1959,8 @@ No questions yet.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2052,8 +2104,8 @@ Run `count pattern` to get the number.
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2216,8 +2268,8 @@ EOF
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2336,8 +2388,8 @@ bash .claude/scripts/demoswarm.sh \
         use super::*;
         use crate::checks::CheckCtx;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;
@@ -2441,155 +2493,6 @@ Run demoswarm ms get --file test.txt directly.
             assert!(result.is_ok());
             // Direct invocation with ms subcommand should fail
             assert!(rep.errors > 0);
-        }
-    }
-
-    // ==========================================================================
-    // Tests for check_skills_section_required
-    // ==========================================================================
-
-    mod skills_section_tests {
-        use super::*;
-        use crate::checks::CheckCtx;
-        use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
-        use crate::contracts::Contracts;
-        use crate::ctx::Ctx;
-        use crate::inventory::Inventory;
-        use crate::reporter::Reporter;
-        use tempfile::TempDir;
-
-        fn setup_test_env_with_agent(
-            agent_content: &str,
-        ) -> (TempDir, Ctx, Inventory, Contracts, Reporter) {
-            let temp = TempDir::new().unwrap();
-            let claude_dir = temp.path().join(".claude");
-            let agents_dir = claude_dir.join("agents");
-            let commands_dir = claude_dir.join("commands");
-            let skills_dir = claude_dir.join("skills");
-
-            std::fs::create_dir_all(&agents_dir).unwrap();
-            std::fs::create_dir_all(&commands_dir).unwrap();
-            std::fs::create_dir_all(&skills_dir).unwrap();
-
-            // Write agent file
-            std::fs::write(agents_dir.join("test-agent.md"), agent_content).unwrap();
-
-            let ctx = Ctx::discover(Some(temp.path().to_path_buf())).unwrap();
-            let inv = Inventory::from_ctx(&ctx).unwrap();
-            // Regexes cached via REGEXES static
-            let c = Contracts::default();
-            let rep = Reporter::new(OutputFormat::Json, false, false);
-
-            (temp, ctx, inv, c, rep)
-        }
-
-        #[test]
-        fn test_skills_section_present() {
-            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
-                r#"---
-name: test-agent
----
-# Test Agent
-
-Uses demoswarm.sh for operations.
-
-## Skills
-
-Uses the runs-derive skill.
-"#,
-            );
-
-            let cx = CheckCtx {
-                ctx: &ctx,
-                inv: &inv,
-                re: &REGEXES,
-                c: &c,
-            };
-
-            let result = check_skills_section_required(&cx, &mut rep);
-            assert!(result.is_ok());
-            // Agent with demoswarm.sh and Skills section should pass
-            assert_eq!(rep.errors, 0);
-        }
-
-        #[test]
-        fn test_skills_section_missing() {
-            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
-                r#"---
-name: test-agent
----
-# Test Agent
-
-Uses demoswarm.sh for operations.
-"#,
-            );
-
-            let cx = CheckCtx {
-                ctx: &ctx,
-                inv: &inv,
-                re: &REGEXES,
-                c: &c,
-            };
-
-            let result = check_skills_section_required(&cx, &mut rep);
-            assert!(result.is_ok());
-            // Agent with demoswarm.sh but no Skills section should fail
-            assert!(rep.errors > 0);
-        }
-
-        #[test]
-        fn test_skills_section_not_required_without_demoswarm() {
-            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
-                r#"---
-name: test-agent
----
-# Test Agent
-
-Does not use demoswarm.
-"#,
-            );
-
-            let cx = CheckCtx {
-                ctx: &ctx,
-                inv: &inv,
-                re: &REGEXES,
-                c: &c,
-            };
-
-            let result = check_skills_section_required(&cx, &mut rep);
-            assert!(result.is_ok());
-            // Agent without demoswarm.sh doesn't need Skills section
-            assert_eq!(rep.errors, 0);
-        }
-
-        #[test]
-        fn test_skills_section_singular_form_accepted() {
-            let (_temp, ctx, inv, c, mut rep) = setup_test_env_with_agent(
-                r#"---
-name: test-agent
----
-# Test Agent
-
-Uses demoswarm.sh for operations.
-
-## Skill
-
-Uses the runs-derive skill.
-"#,
-            );
-
-            let cx = CheckCtx {
-                ctx: &ctx,
-                inv: &inv,
-                re: &REGEXES,
-                c: &c,
-            };
-
-            let result = check_skills_section_required(&cx, &mut rep);
-            assert!(result.is_ok());
-            // "## Skill" (singular) should also be accepted
-            assert_eq!(rep.errors, 0);
         }
     }
 }

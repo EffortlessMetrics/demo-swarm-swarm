@@ -126,11 +126,13 @@ The receipt should answer:
 - Is there a clear implementation plan?
 - Is this ready for Build, or does it need more work?
 
-**Assessing completion:**
+**Status determination:**
 
-- **Complete**: ADR exists with chosen option AND required critics passed AND work plan exists
-- **Partial**: Missing required artifacts OR critics found critical issues OR decision not made
-- **Cannot proceed**: Can't read/write files (mechanical failure)
+- `VERIFIED`: ADR exists with chosen option AND required critics passed AND work plan exists
+- `UNVERIFIED`: Missing required artifacts OR critics found critical issues OR decision not made
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure)
+
+**Note:** Plan flow does not use `PARTIAL` status. Plan is a bounded flow with clear completion criteria. Use `UNVERIFIED` for any incomplete state.
 
 ## Receipt Schema
 
@@ -228,6 +230,12 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 ```
 
 ## Writing Reports
+
+Follow markdown formatting rules carefully to pass linting:
+- Always have a blank line before AND after headings
+- Always have a blank line before AND after tables
+- Always have a blank line before AND after code blocks
+- Wrap URLs in angle brackets or use Markdown links
 
 **Cleanup Report (`.runs/<run-id>/plan/cleanup_report.md`):**
 

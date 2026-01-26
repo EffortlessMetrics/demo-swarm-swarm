@@ -1230,8 +1230,8 @@ concerns: []
     mod integration {
         use super::*;
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;

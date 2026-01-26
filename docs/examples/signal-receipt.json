@@ -16,7 +16,25 @@
     "functional_requirements": 5,
     "non_functional_requirements": 3,
     "bdd_scenarios": 12,
-    "open_questions": 2,
+    "open_questions": {
+      "total": 4,
+      "resolved": 2,
+      "unresolved": 2,
+      "resolutions": [
+        {
+          "qid": "OQ-SIG-001",
+          "resolved_in": "requirements.md (REQ-003)",
+          "resolution_sha": "abc123def",
+          "validated_by": "requirements_critique"
+        },
+        {
+          "qid": "OQ-PLAN-005",
+          "resolved_in": "features/session_timeout.feature",
+          "resolution_sha": "def456abc",
+          "validated_by": "bdd_critique"
+        }
+      ]
+    },
     "risks": {
       "critical": 0,
       "high": 1,

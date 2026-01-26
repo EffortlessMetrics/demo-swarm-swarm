@@ -80,6 +80,60 @@ Category: `SECURITY | COMPLIANCE | DATA | PERFORMANCE | OPS`
 
 `<FLOW>` values: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM
 
+### Resolution markers
+
+**Consumer:** `signal-cleanup`, `*-cleanup` agents
+
+Questions can be resolved by appending resolution entries. Resolution status is tracked via these markers:
+
+| Marker            | Pattern             | Example                                |
+| ----------------- | ------------------- | -------------------------------------- |
+| Resolution answer | `^- A:`             | `- A: JWT adopted per ADR-005`         |
+| Resolved status   | `[RESOLVED]`        | `- Q: Auth method? [RESOLVED]`         |
+| Open status       | `[OPEN]`            | `- Q: Auth method? [OPEN]`             |
+| Deferred status   | `[DEFERRED]`        | `- Q: Performance tuning? [DEFERRED]`  |
+
+**Resolution block format:**
+
+When a question is resolved, append these fields:
+
+```markdown
+- QID: OQ-SIG-001
+  - Q: Should authentication use JWT or session cookies? [RESOLVED]
+  - Suggested default: Use JWT for stateless authentication
+  - Impact if different: Session cookies require server-side state management
+  - Added: 2025-12-12T10:30:00Z
+  - A: JWT approach adopted per security requirements
+  - Resolved in: requirements.md (REQ-003)
+  - Resolution SHA: abc123def
+  - Validated by: requirements_critique
+```
+
+**Resolution field semantics:**
+
+| Field            | Description                                           | Example                        |
+| ---------------- | ----------------------------------------------------- | ------------------------------ |
+| `- A:`           | The answer/decision made                              | `JWT approach adopted`         |
+| `Resolved in:`   | Artifact where resolution is documented               | `requirements.md (REQ-003)`    |
+| `Resolution SHA:`| Git commit where resolution occurred (if known)       | `abc123def` or `null`          |
+| `Validated by:`  | What validated the resolution                         | `requirements_critique`        |
+
+**Counting resolved questions:**
+
+```bash
+# Count resolved questions (with - A: lines)
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '^- A:' \
+  --null-if-missing
+
+# Count questions with [RESOLVED] status
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '\[RESOLVED\]' \
+  --null-if-missing
+```
+
 ---
 
 ## Inventory markers (Plan artifacts)
