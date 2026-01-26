@@ -57,6 +57,12 @@ When running in Flow 3 (Build) microloops, configure the underlying tool to **st
 
 Note in the report whether fail-fast was applied.
 
+## Accessibility & UX Guidelines
+
+- **Navigation:** Add `**Jump to**: [Section](#section)` links at the top.
+- **Visual Status:** Use emojis + text for status (✅ PASS, ❌ FAIL, ⚠️ PARTIAL).
+- **Scanning:** Use tables or list summaries for structured data.
+
 ## Inputs (best-effort)
 
 Prefer:
@@ -139,6 +145,9 @@ Write exactly this structure:
 ```markdown
 # Test Execution Report
 
+<a id="top"></a>
+**Jump to**: [Handoff](#handoff) | [Execution](#execution) | [Test Summary](#test-summary) | [Failures](#failures-if-any) | [Notes](#notes)
+
 ## Handoff
 
 **What I did:** Executed <mode> tests. Result: <passed>/<failed>/<skipped> (exit code: <N>).
@@ -149,6 +158,8 @@ Write exactly this structure:
 
 **Reasoning:** <1-2 sentences explaining test outcome>
 
+[↑ Back to Top](#top)
+
 ## Execution
 
 - mode: verify | verify_ac
@@ -157,17 +168,27 @@ Write exactly this structure:
 - exit_code: <int|null>
 - duration: <value or "unknown">
 
+[↑ Back to Top](#top)
+
 ## Test Summary
 
-passed=<int|null> failed=<int|null> skipped=<int|null>
+✅ Passed: <int|null> | ❌ Failed: <int|null> | ⚠️ Skipped: <int|null>
+
+(Canonical: passed=<int|null> failed=<int|null> skipped=<int|null>)
+
+[↑ Back to Top](#top)
 
 ## Failures (if any)
 
 - <short list of failing tests/modules if available; else a short excerpt>
 
+[↑ Back to Top](#top)
+
 ## Notes
 
 - <tight, actionable notes>
+
+[↑ Back to Top](#top)
 ```
 
 ### Counting rules
