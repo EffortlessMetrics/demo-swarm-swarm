@@ -199,7 +199,9 @@ fn check_agent_skills_section(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Resu
             if has_skills {
                 rep.pass(format!("{rel} uses demoswarm.sh and has Skills section"));
             } else {
-                rep.fail(format!("{rel} uses demoswarm.sh but MISSING '## Skills' section"));
+                rep.fail(format!(
+                    "{rel} uses demoswarm.sh but MISSING '## Skills' section"
+                ));
             }
         }
     }
@@ -609,8 +611,8 @@ name: different-name
     /// Helper: run structure checks and collect diagnostics.
     fn run_structure_checks(repo_root: &std::path::Path) -> (usize, usize, Vec<String>) {
         use crate::cli::OutputFormat;
-        use crate::contracts::test_utils::REGEXES;
         use crate::contracts::Contracts;
+        use crate::contracts::test_utils::REGEXES;
         use crate::ctx::Ctx;
         use crate::inventory::Inventory;
         use crate::reporter::Reporter;

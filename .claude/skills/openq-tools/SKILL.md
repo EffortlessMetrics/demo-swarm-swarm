@@ -118,6 +118,77 @@ Appended entries follow this format:
 
 ---
 
+## Resolution Format
+
+When a question is resolved, the original entry is updated (status changed) and resolution fields are appended. Resolution tracking enables cleanup agents to count resolved vs unresolved questions.
+
+### Resolution Fields
+
+| Field              | Description                                     | Example                      |
+| ------------------ | ----------------------------------------------- | ---------------------------- |
+| `- A:`             | The answer/decision made                        | `JWT approach adopted`       |
+| `Resolved in:`     | Artifact where resolution is documented         | `requirements.md (REQ-003)`  |
+| `Resolution SHA:`  | Git commit where resolution occurred            | `abc123def` or `null`        |
+| `Validated by:`    | Agent/critic that validated the resolution      | `requirements_critique`      |
+
+### Resolved Entry Example
+
+```markdown
+- QID: OQ-SIG-001
+  - Q: Should authentication use JWT or session cookies? [RESOLVED]
+  - Suggested default: Use JWT for stateless authentication
+  - Impact if different: Session cookies require server-side state management
+  - Added: 2025-12-12T10:30:00Z
+  - A: JWT approach adopted per security requirements
+  - Resolved in: requirements.md (REQ-003)
+  - Resolution SHA: abc123def
+  - Validated by: requirements_critique
+```
+
+### Status Values
+
+| Status       | Marker       | Meaning                                        |
+| ------------ | ------------ | ---------------------------------------------- |
+| Open         | `[OPEN]`     | Question awaiting resolution                   |
+| Resolved     | `[RESOLVED]` | Question answered with evidence                |
+| Deferred     | `[DEFERRED]` | Valid question, not needed for current flow    |
+
+### Resolution Criteria
+
+A question is considered **resolved** when any of these conditions are met:
+
+1. **Explicit answer**: The question has a `- A:` line with an answer
+2. **Status change**: Question text changed from `[OPEN]` to `[RESOLVED]`
+3. **Requirement linkage**: A requirement explicitly addresses the question (QID referenced in requirements.md)
+
+### Counting Resolutions
+
+Cleanup agents use these patterns for mechanical counting:
+
+```bash
+# Count total questions
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '^- QID: OQ-[A-Z]+-[0-9]{3}' \
+  --null-if-missing
+
+# Count resolved questions (with - A: lines)
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '^- A:' \
+  --null-if-missing
+
+# Count questions with [RESOLVED] status
+bash .claude/scripts/demoswarm.sh count pattern \
+  --file ".runs/<run-id>/signal/open_questions.md" \
+  --regex '\[RESOLVED\]' \
+  --null-if-missing
+```
+
+**Note:** Resolution count may differ from `- A:` count if questions are resolved via requirement linkage rather than explicit answers.
+
+---
+
 ## For Agent Authors
 
 In clarifier or when questions arise:

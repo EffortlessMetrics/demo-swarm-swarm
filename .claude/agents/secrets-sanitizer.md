@@ -86,7 +86,13 @@ For each finding, decide:
 
 ## Writing Your Report
 
-Write two files:
+Write two files. Follow markdown formatting rules carefully to pass linting:
+
+**Markdown formatting rules:**
+- Always have a blank line before AND after headings
+- Always have a blank line before AND after tables
+- Always have a blank line before AND after code blocks
+- Wrap URLs in angle brackets (`<https://...>`) or use Markdown links (`[text](url)`)
 
 ### `secrets_scan.md` (human-readable)
 

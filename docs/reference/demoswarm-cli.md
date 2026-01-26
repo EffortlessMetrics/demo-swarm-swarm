@@ -45,7 +45,7 @@ All commands communicate errors via stdout values, not exit codes:
 | `SECRETS_FOUND` | Secrets scan: secrets detected |
 | `ok` | Write operation succeeded |
 | `SKIPPED_MISSING_INDEX` | Index file does not exist |
-| `SKIPPED_RUN_NOT_FOUND` | Run ID not found in index |
+| `PATTERN_ERROR` | Secrets scan: invalid regex in patterns file |
 | `FILE_NOT_FOUND` | File does not exist (redact command) |
 | `SCAN_PATH_MISSING` | Scan path does not exist |
 
@@ -60,7 +60,6 @@ All commands communicate errors via stdout values, not exit codes:
 | Key not found | `null` | Verify key name matches exactly (case-sensitive) |
 | Template leak detected | `null` | Value contains `\|` or `<` characters (unfilled template) |
 | JSON parse error | `null` | Receipt file may be malformed JSON |
-| Run not in index | `SKIPPED_RUN_NOT_FOUND` | Add run to index first, or check run_id spelling |
 
 ### Debugging Tips
 
@@ -112,6 +111,18 @@ The shim resolves in order:
 | Python           | `.claude/skills/*/bin/` | Legacy fallback              |
 
 ## Command Reference
+
+### Global Options
+
+All commands accept the following global option:
+
+| Flag       | Description                                                              |
+| ---------- | ------------------------------------------------------------------------ |
+| `--strict` | Enable strict mode: return exit code 2 on errors instead of 0            |
+
+The `--strict` flag can be placed anywhere on the command line and takes precedence over the `DEMOSWARM_STRICT` environment variable.
+
+---
 
 ### count pattern
 
@@ -434,6 +445,15 @@ bash .claude/scripts/demoswarm.sh receipt get --file <path> --key <name> [--null
 
 **Stdout:** `null` | string
 
+**Semantics:**
+
+- Uses discovery protocol: tries direct file read first, then `git show HEAD:<path>` fallback
+- File missing AND git fallback fails -> `null`
+- JSON parse error -> `null`
+- Key not found -> `null`
+- Returns only scalar values (strings, numbers, booleans); arrays/objects return `null`
+- Logs discovery method to stderr (`discovery_method: direct_read` or `discovery_method: git_show`)
+
 **Example:**
 
 ```bash
@@ -441,6 +461,7 @@ bash .claude/scripts/demoswarm.sh receipt get \
   --file ".runs/feat-auth/gate/gate_receipt.json" \
   --key "merge_verdict"
 # stdout: MERGE (or null)
+# stderr: discovery_method: direct_read
 ```
 
 ---
@@ -501,15 +522,16 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 | `--last-flow <flow>` | Yes      | signal, plan, build, gate, deploy, or wisdom |
 | `--updated-at <iso>` | No       | ISO8601 timestamp (defaults to now)          |
 
-**Stdout:** `ok` | `SKIPPED_MISSING_INDEX` | `SKIPPED_RUN_NOT_FOUND`
+**Stdout:** `ok` | `SKIPPED_MISSING_INDEX` | `null`
 
 **Semantics:**
 
 - Index missing -> print `SKIPPED_MISSING_INDEX`, exit 0
-- Updates only: `status`, `last_flow`, `updated_at`
-- Preserves all other fields
+- If run_id exists: updates `status`, `last_flow`, `updated_at` (preserves all other fields)
+- If run_id does not exist: creates new entry with provided values
 - Keeps `runs[]` sorted by `run_id`
 - Atomic write (temp file + rename)
+- JSON parse error -> `null`
 
 **Example:**
 
@@ -641,17 +663,19 @@ Scan for secrets (locations only, never content).
 **Usage:**
 
 ```bash
-bash .claude/scripts/demoswarm.sh secrets scan --path <path> --output <path>
+bash .claude/scripts/demoswarm.sh secrets scan --path <path> --output <path> [--patterns-file <path>] [-v|--verbose]
 ```
 
 **Arguments:**
 
-| Flag              | Required | Description                 |
-| ----------------- | -------- | --------------------------- |
-| `--path <path>`   | Yes      | File or directory to scan   |
-| `--output <path>` | Yes      | Path to write JSON findings |
+| Flag                     | Required | Description                                            |
+| ------------------------ | -------- | ------------------------------------------------------ |
+| `--path <path>`          | Yes      | File or directory to scan                              |
+| `--output <path>`        | Yes      | Path to write JSON findings                            |
+| `--patterns-file <path>` | No       | JSON/YAML file with additional secret patterns         |
+| `-v`, `--verbose`        | No       | Log skipped paths with reasons to stderr               |
 
-**Stdout:** `CLEAN` | `SECRETS_FOUND` | `SCAN_PATH_MISSING`
+**Stdout:** `CLEAN` | `SECRETS_FOUND` | `SCAN_PATH_MISSING` | `PATTERN_ERROR`
 
 **Semantics:**
 
@@ -660,6 +684,40 @@ bash .claude/scripts/demoswarm.sh secrets scan --path <path> --output <path>
 - Stdout returns only the status signal
 - Automatically excludes: `.git`, `target`, `node_modules`, `.demoswarm` directories
 - Never prints secret content (only file locations and types)
+- Custom patterns from `--patterns-file` are merged with built-in patterns (built-in first)
+- If `--patterns-file` contains invalid regex, returns `PATTERN_ERROR`
+
+**Built-in patterns:**
+
+| Type             | Pattern matches                            |
+| ---------------- | ------------------------------------------ |
+| `github-token`   | GitHub tokens (ghp_*, gho_*, ghu_*, etc.)  |
+| `aws-access-key` | AWS access key IDs (AKIA*)                 |
+| `stripe-key`     | Stripe API keys (sk_live_*, sk_test_*)     |
+| `private-key`    | PEM private key blocks                     |
+| `jwt-token`      | JSON Web Tokens (eyJ*)                     |
+
+**Custom patterns file format (JSON):**
+
+```json
+{
+  "patterns": [
+    { "pattern": "my-secret-[a-z0-9]+", "type": "my-custom-secret" }
+  ]
+}
+```
+
+**Output JSON format:**
+
+```json
+{
+  "status": "CLEAN|SECRETS_FOUND|SCAN_PATH_MISSING|PATTERN_ERROR",
+  "findings": [
+    { "file": "path/to/file", "type": "github-token", "lines": "5,12" }
+  ],
+  "skipped_count": 0
+}
+```
 
 **Example:**
 
@@ -680,26 +738,28 @@ Redact a specific secret type in a file (in-place).
 **Usage:**
 
 ```bash
-bash .claude/scripts/demoswarm.sh secrets redact --file <path> --type <type>
+bash .claude/scripts/demoswarm.sh secrets redact --file <path> --type <type> [--patterns-file <path>]
 ```
 
 **Arguments:**
 
-| Flag            | Required | Description                 |
-| --------------- | -------- | --------------------------- |
-| `--file <path>` | Yes      | File to redact secrets from |
-| `--type <type>` | Yes      | Type of secret to redact    |
+| Flag                     | Required | Description                                              |
+| ------------------------ | -------- | -------------------------------------------------------- |
+| `--file <path>`          | Yes      | File to redact secrets from                              |
+| `--type <type>`          | Yes      | Type of secret to redact                                 |
+| `--patterns-file <path>` | No       | JSON/YAML file with additional patterns (for custom types) |
 
-**Valid `--type` values:**
+**Valid `--type` values (built-in):**
 
 | Type             | Description                                          |
 | ---------------- | ---------------------------------------------------- |
-| `github-token`   | GitHub personal access tokens (ghp*\*, gho*\*, etc.) |
-| `aws-access-key` | AWS access key IDs (AKIA\*)                          |
-<!-- markdownlint-disable-next-line MD060 -->
-| `stripe-key`     | Stripe API keys (`sk_live_`, `sk_test_`)            |
-| `jwt-token`      | JSON Web Tokens (eyJ\*)                              |
-| `private-key`    | Private key blocks (-----BEGIN \* PRIVATE KEY-----)  |
+| `github-token`   | GitHub personal access tokens (ghp_*, gho_*, etc.)   |
+| `aws-access-key` | AWS access key IDs (AKIA*)                           |
+| `stripe-key`     | Stripe API keys (sk_live_*, sk_test_*)               |
+| `jwt-token`      | JSON Web Tokens (eyJ*)                               |
+| `private-key`    | Private key blocks (-----BEGIN * PRIVATE KEY-----)   |
+
+Custom types can be used when providing a `--patterns-file` that defines the type.
 
 **Stdout:** `ok` | `FILE_NOT_FOUND` | `null`
 
@@ -709,7 +769,8 @@ bash .claude/scripts/demoswarm.sh secrets redact --file <path> --type <type>
 - Replaces secret content with `[REDACTED:<type>]` placeholder
 - Returns `ok` on successful redaction
 - Returns `FILE_NOT_FOUND` if file does not exist
-- Returns `null` on other errors
+- Returns `null` on other errors (unknown type, pattern file errors)
+- For `private-key` type, uses line-based block replacement (BEGIN to END)
 
 **Example:**
 
@@ -719,6 +780,16 @@ bash .claude/scripts/demoswarm.sh secrets redact \
   --type "github-token"
 # stdout: ok
 # File now contains [REDACTED:github-token] where tokens were
+```
+
+**Example with custom pattern:**
+
+```bash
+bash .claude/scripts/demoswarm.sh secrets redact \
+  --file ".runs/feat-auth/build/config.md" \
+  --type "my-custom-secret" \
+  --patterns-file ".claude/config/secret-patterns.json"
+# stdout: ok
 ```
 
 ---

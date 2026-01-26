@@ -44,6 +44,16 @@ A flow command (`.claude/commands/flow-*.md`) that acts as PM. Orchestrators tra
 
 See [60-flow-orchestrators.md](../../.claude/rules/60-flow-orchestrators.md) for orchestrator behavior.
 
+### Command
+A slash command file in `.claude/commands/`. The pack has **8 commands**: 7 flow commands (`/flow-1-signal` through `/flow-7-wisdom`) plus `/customize-pack` for pack configuration. Commands are distinct from skills (mechanical tools) and flows (logical stages).
+
+**Counts clarified:**
+- **7 flows**: Logical SDLC stages (Signal, Plan, Build, Review, Gate, Deploy, Wisdom)
+- **8 commands**: Slash command files that invoke flows or utilities
+- **7 skills**: Mechanical tools (test-runner, auto-linter, policy-runner, runs-derive, runs-index, openq-tools, secrets-tools)
+
+See [CLAUDE.md](../../CLAUDE.md#the-seven-flows) for the flow-to-command mapping.
+
 ---
 
 ## Agent Taxonomy

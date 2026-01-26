@@ -4,18 +4,19 @@
 //! - `scan` writes findings (file/line/type only) to JSON
 //! - `redact` modifies files in-place, prints only status
 
+use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{Args, Subcommand};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 use super::common::write_json_atomic;
 use crate::output::print_scalar;
-use crate::walk::{walk_dir_excluding_verbose, SkippedItem};
+use crate::walk::{SkippedItem, walk_dir_excluding_verbose};
 
 /// Built-in secret detection patterns. Each tuple is (regex, type-name).
 const BUILTIN_PATTERNS: &[(&str, &str)] = &[
@@ -204,22 +205,82 @@ fn find_pattern_for_type(type_name: &str, patterns_file: Option<&str>) -> Result
 }
 
 fn scan(args: &SecretsScan) -> Result<()> {
-    let root = Path::new(&args.path);
-    let out_path = Path::new(&args.output);
     let verbose = args.verbose;
 
-    if !root.exists() {
-        let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
-        write_json_atomic(out_path, &v).map_err(|e| {
-            eprintln!(
-                "Warning: failed to write secrets findings JSON ({}): {e:#}",
-                out_path.display()
-            );
-            e
-        })?;
-        print_scalar("SCAN_PATH_MISSING");
-        return Ok(());
+    // Validate output path first (before any scanning)
+    let out_path = match validate_output_path_boundary(&args.output) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    // Validate patterns file if provided (security: prevents path traversal)
+    if let Some(pf) = &args.patterns_file {
+        if let Err(e) = validate_path_boundary(pf) {
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
     }
+
+    // Validate scan path is within repository boundary (security: prevents path traversal)
+    // Note: We deliberately let validate_path_boundary handle existence check to avoid TOCTOU races
+    let root = match validate_path_boundary(&args.path) {
+        Ok(p) => p,
+        Err(e) => {
+            // Check if it's a "not found" error vs a boundary error
+            // canonicalize() returns NotFound if file missing
+            let is_not_found = e.root_cause().downcast_ref::<std::io::Error>()
+                .map(|io_e| io_e.kind() == std::io::ErrorKind::NotFound)
+                .unwrap_or(false);
+
+            if is_not_found {
+                 let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
+                 write_json_atomic(&out_path, &v).map_err(|write_e| {
+                     eprintln!(
+                         "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
+                         out_path.display()
+                     );
+                     write_e
+                 })?;
+                 print_scalar("SCAN_PATH_MISSING");
+                 return Ok(());
+            }
+
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
 
     // Compile patterns (built-in + custom if provided)
     let compiled = match compile_patterns(args.patterns_file.as_deref()) {
@@ -232,7 +293,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
                 "findings": [],
                 "skipped_count": 0
             });
-            write_json_atomic(out_path, &v).map_err(|write_e| {
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
                 eprintln!(
                     "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
                     out_path.display()
@@ -248,7 +309,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
     let mut skipped: Vec<SkippedItem> = Vec::new();
 
     // Use shared walker with exclusions and verbose mode for security scanning
-    let mut walker = walk_dir_excluding_verbose(root, EXCLUDED_DIRS, verbose);
+    let mut walker = walk_dir_excluding_verbose(&root, EXCLUDED_DIRS, verbose);
 
     // Stream files directly instead of collecting (reduces memory usage)
     for f in walker.by_ref() {
@@ -266,7 +327,7 @@ fn scan(args: &SecretsScan) -> Result<()> {
         "SECRETS_FOUND"
     };
     let v = json!({ "status": status, "findings": findings, "skipped_count": skipped_count });
-    write_json_atomic(out_path, &v).map_err(|e| {
+    write_json_atomic(&out_path, &v).map_err(|e| {
         eprintln!(
             "Warning: failed to write secrets findings JSON ({}): {e:#}",
             out_path.display()
@@ -279,6 +340,174 @@ fn scan(args: &SecretsScan) -> Result<()> {
 
 /// Directory names to exclude from scanning (deterministic fixed list).
 const EXCLUDED_DIRS: &[&str] = &[".git", "target", "node_modules", ".demoswarm"];
+
+/// Validate and canonicalize a path, preventing path traversal attacks.
+///
+/// Security: This function prevents path traversal attacks by detecting when
+/// relative paths with ".." components would escape the current working directory.
+///
+/// The validation strategy:
+/// 1. Absolute paths are allowed (explicit, not traversal attacks)
+/// 2. Relative paths are checked for ".." traversal that escapes CWD
+/// 3. Paths that canonicalize to somewhere outside CWD when they started
+///    with relative components are blocked
+///
+/// This allows legitimate use cases (temp directories, absolute paths) while
+/// blocking the attack vector of crafted relative paths like "../../../etc/passwd".
+fn validate_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
+
+    // Canonicalize the input path first
+    let canonical = input_path
+        .canonicalize()
+        .with_context(|| format!("Failed to canonicalize path: {}", path))?;
+
+    // Get CWD
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    // If path is absolute, check if it's within CWD (security: prevent absolute path bypass)
+    // We used to allow absolute paths as "explicit intent", but that allows reading /etc/passwd
+    if input_path.is_absolute() {
+        if !input_path.exists() {
+             // For missing absolute paths, we can't canonicalize them directly to check boundary
+             // But since we require existence for scan paths (checked later or via error), 
+             // we can just fail here or check parent. 
+             // Actually, for scan(), the path must exist.
+             // But validate_path_boundary is called before existence check sometimes?
+             // No, scan() calls it. 
+             // If it doesn't exist, canonicalize fails.
+             // So we try to canonicalize.
+             let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+             if canonical.starts_with(&cwd_canonical) {
+                 return Ok(canonical);
+             }
+             bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+        }
+        
+        let canonical = input_path.canonicalize().with_context(|| format!("Failed to canonicalize path: {}", path))?;
+        if canonical.starts_with(&cwd_canonical) {
+            return Ok(canonical);
+        }
+         bail!("Absolute path '{}' resolves outside the repository boundary '{}'.", path, cwd_canonical.display());
+    }
+
+    // For relative paths, check if they escape the CWD
+    // This catches attacks like "../../../etc/passwd"
+
+    // Check if the canonical path is under CWD
+    if canonical.starts_with(&cwd_canonical) {
+        return Ok(canonical);
+    }
+
+    // Relative path escapes CWD - this is the attack pattern
+    bail!(
+        "Relative path '{}' resolves to '{}' which is outside the repository boundary '{}'. \
+         Use an absolute path if you need to access files outside the working directory.",
+        path,
+        canonical.display(),
+        cwd_canonical.display()
+    )
+}
+
+/// Validate path boundary for output files - allows creating new files.
+///
+/// Security: For output paths that don't exist yet, we validate the parent directory.
+/// Like validate_path_boundary, this allows absolute paths but blocks relative
+/// path traversal attacks.
+fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
+    let input_path = Path::new(path);
+
+    // For relative paths, check boundary
+    let cwd = env::current_dir().context("Failed to get current working directory")?;
+    let cwd_canonical = cwd
+        .canonicalize()
+        .context("Failed to canonicalize working directory")?;
+
+    let mut probe = if input_path.is_absolute() {
+        PathBuf::new()
+    } else {
+        cwd_canonical.clone()
+    };
+    
+    let mut rest = PathBuf::new();
+    let mut parsing_existing = true;
+
+    for component in input_path.components() {
+        if parsing_existing {
+            match component {
+                std::path::Component::Prefix(prefix) => {
+                    probe.push(prefix.as_os_str());
+                }
+                std::path::Component::RootDir => {
+                    probe.push(std::path::Component::RootDir.as_os_str());
+                }
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    let next_probe = probe.join("..");
+                    // Resolve ".." via canonicalize to handle symlinks correctly
+                    if next_probe.symlink_metadata().is_ok() {
+                        probe = next_probe.canonicalize().context("Failed to canonicalize ..")?;
+                        // For relative paths, prevent escaping CWD during traversal
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
+                            bail!("Relative output path traverses outside repository boundary");
+                        }
+                    } else {
+                        // ".." failed to resolve? Stop parsing existing.
+                        parsing_existing = false;
+                        bail!("Output path contains '..' in non-existent portion or invalid traversal.");
+                    }
+                }
+                std::path::Component::Normal(c) => {
+                    let next_probe = probe.join(c);
+                    // Check if it exists (use symlink_metadata to catch broken symlinks too)
+                    if next_probe.symlink_metadata().is_ok() {
+                        // It exists. Resolve it.
+                        probe = next_probe.canonicalize().with_context(|| {
+                            format!("Failed to canonicalize path component: {:?}", c)
+                        })?;
+
+                        // For relative paths, prevent escaping CWD
+                        if !input_path.is_absolute() && !probe.starts_with(&cwd_canonical) {
+                            bail!(
+                                "Path resolves outside repository boundary: {}",
+                                probe.display()
+                            );
+                        }
+                    } else {
+                        // Component doesn't exist. This is the start of the new path.
+                        parsing_existing = false;
+                        
+                        // Verify we are currently inside CWD before appending new components
+                        if !probe.starts_with(&cwd_canonical) {
+                            bail!("Output path resolves outside repository boundary: {}", probe.display());
+                        }
+                        rest.push(c);
+                    }
+                }
+            }
+        } else {
+            // Parsing non-existent tail
+            match component {
+                std::path::Component::Normal(c) => rest.push(c),
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    bail!("Output path contains '..' in non-existent portion. Create parent directories first to use relative paths.");
+                }
+                _ => {}
+            }
+        }
+    }
+
+    // Final check
+    if !probe.starts_with(&cwd_canonical) {
+        bail!("Output path resolves outside repository boundary");
+    }
+
+    Ok(probe.join(rest))
+}
 
 fn scan_one_file(
     path: &Path,
@@ -324,13 +553,23 @@ fn scan_one_file(
 }
 
 fn redact(args: &SecretsRedact) -> Result<()> {
-    let path = Path::new(&args.file);
-    if !path.is_file() {
+    let path_raw = Path::new(&args.file);
+    if !path_raw.is_file() {
         print_scalar("FILE_NOT_FOUND");
         return Ok(());
     }
 
-    let bytes = match fs::read(path) {
+    // Validate file path is within repository boundary (security: prevents path traversal)
+    let path = match validate_path_boundary(&args.file) {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Security error: {e:#}");
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
+    };
+
+    let bytes = match fs::read(&path) {
         Ok(b) => b,
         Err(_) => {
             print_scalar("null");

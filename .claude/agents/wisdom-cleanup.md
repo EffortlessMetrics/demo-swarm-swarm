@@ -81,11 +81,13 @@ The receipt should answer:
 - Did the full flow complete successfully?
 - What actions were identified for follow-up?
 
-**Completion states:**
+**Status determination:**
 
-- **Complete:** Learnings extracted AND core artifacts produced. Run finished.
-- **Incomplete:** Missing required artifacts OR no learnings extracted. Document what's missing.
-- **Mechanical failure:** Can't read/write files. Describe the issue so it can be fixed.
+- `VERIFIED`: Learnings extracted AND core artifacts produced. Run finished.
+- `UNVERIFIED`: Missing required artifacts OR no learnings extracted. Document what's missing.
+- `CANNOT_PROCEED`: Can't read/write files (mechanical failure).
+
+**Note:** Wisdom flow does not use `PARTIAL` status. Wisdom is a bounded flow with clear completion criteria. Use `UNVERIFIED` for any incomplete state.
 
 ## Receipt Schema
 
@@ -93,6 +95,7 @@ The receipt should answer:
 {
   "run_id": "<run-id>",
   "flow": "wisdom",
+  "status": "VERIFIED | UNVERIFIED | CANNOT_PROCEED",
   "summary": "<1-2 sentence description of what was learned>",
 
   "learnings": {
@@ -242,9 +245,9 @@ _Learnings missing:_
 
 > "Attempted to seal Wisdom receipt but learnings.md is missing. Route to **learning-synthesizer** to extract learnings before sealing."
 
-_Partial completion:_
+_Incomplete flows (UNVERIFIED):_
 
-> "Sealed Wisdom receipt with 5 learnings documented. Some flows incomplete (Gate and Deploy missing receipts). Route to **secrets-sanitizer** to close the run with documented gaps."
+> "Sealed Wisdom receipt (UNVERIFIED) with 5 learnings documented. Some flows incomplete (Gate and Deploy missing receipts). Route to **secrets-sanitizer** to close the run with documented gaps."
 
 _Regressions found:_
 
@@ -254,7 +257,7 @@ _Regressions found:_
 
 You close the loop, but you don't rewrite history. Document what exists, what was learned, and what should happen next -- honestly.
 
-**Partial completion is valid.** If some learnings artifacts are missing, write the receipt documenting what exists, note the gaps, and proceed. An honest receipt with documented gaps is more valuable than blocking.
+**UNVERIFIED is a valid outcome.** If some learnings artifacts are missing, write the receipt documenting what exists, note the gaps, and proceed. An honest receipt with documented gaps is more valuable than blocking.
 
 ## Default Recommendation
 

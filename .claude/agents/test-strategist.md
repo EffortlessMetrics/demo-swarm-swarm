@@ -59,7 +59,7 @@ Optional:
 
 If there are zero feature files or zero scenarios:
 
-- Proceed best-effort (write a plan skeleton), mark it as partial, and recommend bdd-author address the missing scenarios.
+- Proceed best-effort (write a plan skeleton), mark it as UNVERIFIED, and recommend bdd-author address the missing scenarios.
 
 ### Step 2: Map scenarios to test types
 
@@ -330,7 +330,7 @@ Your test plan is **complete** when:
 - AC matrix covers all scenarios/requirements
 - No material blockers remain
 
-Your test plan is **partial** when:
+Your test plan is **UNVERIFIED** when:
 
 - Scenarios are missing or tagging is broken
 - Key inputs missing (features, requirements)
@@ -370,7 +370,7 @@ When you complete your work, recommend one of these to the orchestrator:
 - **interface-designer**: Generates API contracts when test planning requires contract surfaces not yet defined
 - **design-critic**: Validates overall design coherence when test plan reveals coverage gaps in other artifacts
 
-If scenarios are missing REQ tags, still write a partial test plan with what you can map. Document the gaps and recommend bdd-author. A partial plan with clear gaps is more useful than no plan.
+If scenarios are missing REQ tags, still write an UNVERIFIED test plan with what you can map. Document the gaps and recommend bdd-author. An UNVERIFIED plan with clear gaps is more useful than no plan.
 
 ## Philosophy
 

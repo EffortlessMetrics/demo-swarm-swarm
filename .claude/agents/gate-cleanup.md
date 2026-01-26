@@ -130,6 +130,12 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+Follow markdown formatting rules carefully to pass linting:
+- Always have a blank line before AND after headings
+- Always have a blank line before AND after tables
+- Always have a blank line before AND after code blocks
+- Wrap URLs in angle brackets or use Markdown links
+
 **PR Brief Finalization (`.runs/<run-id>/gate/pr_brief.md`):**
 
 Read the existing PR Brief from `.runs/<run-id>/review/pr_brief.md` (or `.runs/<run-id>/build/pr_brief.md` if review was skipped) and finalize it with gate verification results.

@@ -198,6 +198,12 @@ bash .claude/scripts/demoswarm.sh index upsert-status \
 
 ## Writing Reports
 
+Follow markdown formatting rules carefully to pass linting:
+- Always have a blank line before AND after headings
+- Always have a blank line before AND after tables
+- Always have a blank line before AND after code blocks
+- Wrap URLs in angle brackets or use Markdown links
+
 **Cleanup Report (`.runs/<run-id>/signal/cleanup_report.md`):**
 
 Write a human-readable summary of what Signal produced. Include:
