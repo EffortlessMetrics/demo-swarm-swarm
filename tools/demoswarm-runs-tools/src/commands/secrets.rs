@@ -217,25 +217,52 @@ fn scan(args: &SecretsScan) -> Result<()> {
         }
     };
 
-    // Special case: scan path doesn't exist yet - write SCAN_PATH_MISSING
-    let root_raw = Path::new(&args.path);
-    if !root_raw.exists() {
-        let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
-        write_json_atomic(&out_path, &v).map_err(|e| {
-            eprintln!(
-                "Warning: failed to write secrets findings JSON ({}): {e:#}",
-                out_path.display()
-            );
-            e
-        })?;
-        print_scalar("SCAN_PATH_MISSING");
-        return Ok(());
+    // Validate patterns file if provided (security: prevents path traversal)
+    if let Some(pf) = &args.patterns_file {
+        if let Err(e) = validate_path_boundary(pf) {
+            eprintln!("Security error: {e:#}");
+            let v = json!({
+                "status": "PATH_BOUNDARY_ERROR",
+                "error": format!("{e:#}"),
+                "findings": [],
+                "skipped_count": 0
+            });
+            write_json_atomic(&out_path, &v).map_err(|write_e| {
+                eprintln!(
+                    "Warning: failed to write error JSON ({}): {write_e:#}",
+                    out_path.display()
+                );
+                write_e
+            })?;
+            print_scalar("PATH_BOUNDARY_ERROR");
+            return Ok(());
+        }
     }
 
     // Validate scan path is within repository boundary (security: prevents path traversal)
+    // Note: We deliberately let validate_path_boundary handle existence check to avoid TOCTOU races
     let root = match validate_path_boundary(&args.path) {
         Ok(p) => p,
         Err(e) => {
+            // Check if it's a "not found" error vs a boundary error
+            // canonicalize() returns NotFound if file missing
+            let is_not_found = e.root_cause().downcast_ref::<std::io::Error>()
+                .map(|io_e| io_e.kind() == std::io::ErrorKind::NotFound)
+                .unwrap_or(false);
+
+            if is_not_found {
+                 let v = json!({ "status": "SCAN_PATH_MISSING", "findings": [], "skipped_count": 0 });
+                 write_json_atomic(&out_path, &v).map_err(|write_e| {
+                     eprintln!(
+                         "Warning: failed to write secrets findings JSON ({}): {write_e:#}",
+                         out_path.display()
+                     );
+                     write_e
+                 })?;
+                 print_scalar("SCAN_PATH_MISSING");
+                 return Ok(());
+            }
+
             eprintln!("Security error: {e:#}");
             let v = json!({
                 "status": "PATH_BOUNDARY_ERROR",
@@ -374,23 +401,7 @@ fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
 
     // If path is absolute, allow it (explicit intent, not traversal)
     if input_path.is_absolute() {
-        // If path exists, canonicalize it
-        if input_path.exists() {
-            return input_path
-                .canonicalize()
-                .with_context(|| format!("Failed to canonicalize path: {}", path));
-        }
-
-        // For non-existent absolute paths, validate parent exists and return intended path
-        let parent = input_path.parent().unwrap_or(Path::new("."));
-        if !parent.exists() {
-            bail!("Output path parent '{}' does not exist", parent.display());
-        }
-        let parent_canonical = parent
-            .canonicalize()
-            .with_context(|| format!("Failed to canonicalize parent: {}", parent.display()))?;
-        let filename = input_path.file_name().unwrap_or_default();
-        return Ok(parent_canonical.join(filename));
+        return Ok(input_path.to_path_buf());
     }
 
     // For relative paths, check boundary
@@ -399,45 +410,66 @@ fn validate_output_path_boundary(path: &str) -> Result<PathBuf> {
         .canonicalize()
         .context("Failed to canonicalize working directory")?;
 
-    // If path exists, canonicalize and check
-    if input_path.exists() {
-        let canonical = input_path
-            .canonicalize()
-            .with_context(|| format!("Failed to canonicalize path: {}", path))?;
+    // We verify the path by resolving it component by component.
+    // For existing components, we canonicalize and ensure they stay within CWD.
+    // For new components, we explicitly forbid '..' to prevent traversal.
+    let mut probe = cwd_canonical.clone();
+    let mut rest = PathBuf::new();
+    let mut parsing_existing = true;
 
-        if canonical.starts_with(&cwd_canonical) {
-            return Ok(canonical);
+    for component in input_path.components() {
+        if parsing_existing {
+            match component {
+                std::path::Component::Normal(c) => {
+                    // Try appending component
+                    let next_probe = probe.join(c);
+                    // Check if it exists (use symlink_metadata to catch broken symlinks too)
+                    if next_probe.symlink_metadata().is_ok() {
+                        // It exists. If it's a symlink, resolve it to ensure we track the real path.
+                        // Note: canonicalize() resolves all symlinks in the path.
+                        probe = next_probe.canonicalize().with_context(|| {
+                            format!("Failed to canonicalize path component: {:?}", c)
+                        })?;
+
+                        // Verify we haven't escaped CWD
+                        if !probe.starts_with(&cwd_canonical) {
+                            bail!(
+                                "Path resolves outside repository boundary: {}",
+                                probe.display()
+                            );
+                        }
+                    } else {
+                        // Component doesn't exist. This is the start of the new path.
+                        parsing_existing = false;
+                        rest.push(c);
+                    }
+                }
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    if !probe.pop() {
+                        bail!("Path traverses above root");
+                    }
+                    // Verify we haven't escaped CWD (e.g. popped above it)
+                    if !probe.starts_with(&cwd_canonical) {
+                        bail!("Relative output path traverses outside repository boundary");
+                    }
+                }
+                _ => {}
+            }
+        } else {
+            // Parsing non-existent tail
+            match component {
+                std::path::Component::Normal(c) => rest.push(c),
+                std::path::Component::CurDir => {}
+                std::path::Component::ParentDir => {
+                    bail!("Output path contains '..' in non-existent portion. Create parent directories first to use relative paths.");
+                }
+                _ => {}
+            }
         }
-
-        bail!(
-            "Relative output path '{}' resolves outside the repository boundary",
-            path
-        );
     }
 
-    // For non-existent relative paths, validate the parent directory
-    let parent = input_path.parent().unwrap_or(Path::new("."));
-    let parent_canonical = if parent.as_os_str().is_empty() || parent == Path::new(".") {
-        cwd_canonical.clone()
-    } else {
-        parent.canonicalize().with_context(|| {
-            format!(
-                "Output path parent '{}' does not exist or is inaccessible",
-                parent.display()
-            )
-        })?
-    };
-
-    if parent_canonical.starts_with(&cwd_canonical) {
-        // Return the intended output path (parent + filename)
-        let filename = input_path.file_name().unwrap_or_default();
-        return Ok(parent_canonical.join(filename));
-    }
-
-    bail!(
-        "Relative output path '{}' would be created outside the repository boundary",
-        path
-    )
+    Ok(probe.join(rest))
 }
 
 fn scan_one_file(

@@ -398,7 +398,36 @@ fn secrets_scan_missing_patterns_file() {
         "/nonexistent/patterns.json",
     ]);
 
-    cmd.assert().success().stdout("PATTERN_ERROR\n");
+    cmd.assert().success().stdout("PATH_BOUNDARY_ERROR\n");
+}
+
+#[test]
+fn secrets_scan_output_in_new_subdirectory() {
+    let tmp_dir = TempDir::new().expect("temp dir");
+    let secret_file = tmp_dir.path().join("test.txt");
+    fs::write(&secret_file, "clean content").expect("write file");
+
+    // Output in a new subdirectory
+    let output_subdir = tmp_dir.path().join("new_subdir");
+    let output_path = output_subdir.join("output.json");
+    
+    // Do NOT create output_subdir (simulating new run dir)
+
+    let mut cmd = demoswarm();
+    cmd.args([
+        "secrets",
+        "scan",
+        "--path",
+        secret_file.to_str().expect("path"),
+        "--output",
+        output_path.to_str().expect("output path"),
+    ]);
+
+    cmd.assert().success().stdout("CLEAN\n");
+    
+    // Verify output file exists
+    assert!(output_path.exists());
+    assert!(output_subdir.exists());
 }
 
 #[test]
