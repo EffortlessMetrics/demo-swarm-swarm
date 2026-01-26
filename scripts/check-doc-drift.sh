@@ -40,6 +40,7 @@ if grep -rn "\bruns-tools\b" . \
   --exclude-dir="node_modules" \
   --exclude-dir="tools/demoswarm-runs-tools" | \
   grep -v "demoswarm-runs-tools" | \
+  grep -v "runs-tools-tests" | \
   grep -v "Cargo.toml" | \
   grep -v "Cargo.lock" > /dev/null 2>&1; then
   echo "FAILED"
