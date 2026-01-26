@@ -97,14 +97,17 @@ Write findings that explain the violation and its impact.
 
 ### Severity Levels
 
-- **CRITICAL:** Security issues, missing core REQ implementation, contract violations that break clients
-- **MAJOR:** ADR drift, partial contract violations, missing edge cases that could cause failures
-- **MINOR:** Style issues, observability gaps, code organization
+- **🔴 CRITICAL:** Security issues, missing core REQ implementation, contract violations that break clients
+- **🟠 MAJOR:** ADR drift, partial contract violations, missing edge cases that could cause failures
+- **🟡 MINOR:** Style issues, observability gaps, code organization
 
 ### Critique Structure
 
 ```markdown
 # Code Critique
+
+<a id="top"></a>
+**Jump to**: [Scope](#scope) | [Coverage](#coverage-table-req-to-impl-to-tests) | [ADR](#adr-alignment) | [Contract](#contract-compliance) | [Security](#security--safety) | [Edge Cases](#edge-cases) | [Counts](#counts)
 
 ## Scope
 
@@ -116,37 +119,51 @@ Write findings that explain the violation and its impact.
 
 - REQ-004 - not in subtask manifest
 
+[↑ Back to Top](#top)
+
 ## Coverage Table (REQ to impl to tests)
 
 | REQ     | Implementation         | Tests                   | Notes   |
 | ------- | ---------------------- | ----------------------- | ------- |
-| REQ-001 | `src/auth/login.ts:23` | `tests/auth.test.ts:45` | OK      |
-| REQ-002 | [NO IMPL]              | N/A                     | Missing |
+| REQ-001 | `src/auth/login.ts:23` | `tests/auth.test.ts:45` | ✅ OK      |
+| REQ-002 | [NO IMPL]              | N/A                     | 🔴 Missing |
+
+[↑ Back to Top](#top)
 
 ## ADR Alignment
 
-- [CRITICAL] <path:line> - <constraint violated> - <impact> - <who should fix>
-- (or "No violations found")
+- 🔴 [CRITICAL] <path:line> - <constraint violated> - <impact> - <who should fix>
+- (or "✅ No violations found")
+
+[↑ Back to Top](#top)
 
 ## Contract Compliance
 
-- [MAJOR] <path:line> - <contract mismatch> - <impact>
-- (or "No violations found")
+- 🟠 [MAJOR] <path:line> - <contract mismatch> - <impact>
+- (or "✅ No violations found")
+
+[↑ Back to Top](#top)
 
 ## Security / Safety
 
-- [CRITICAL] <path:line> - <security issue> - <impact>
-- (or "No hazards found")
+- 🔴 [CRITICAL] <path:line> - <security issue> - <impact>
+- (or "✅ No hazards found")
+
+[↑ Back to Top](#top)
 
 ## Edge Cases
 
-- [MAJOR] Missing handling for <edge case>
-- (or "Key cases covered")
+- 🟠 [MAJOR] Missing handling for <edge case>
+- (or "✅ Key cases covered")
+
+[↑ Back to Top](#top)
 
 ## Counts
 
-- Critical: N, Major: N, Minor: N
+- 🔴 Critical: N, 🟠 Major: N, 🟡 Minor: N
 - REQs in scope: N, with impl: N, with tests: N
+
+[↑ Back to Top](#top)
 
 ## Handoff
 
@@ -155,6 +172,8 @@ Write findings that explain the violation and its impact.
 **What's left:** <issues to fix or "nothing - implementation is solid">
 
 **Recommendation:** <specific next step>
+
+[↑ Back to Top](#top)
 ```
 
 ## Tips
