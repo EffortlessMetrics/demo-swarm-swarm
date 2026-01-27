@@ -445,7 +445,7 @@ comment_id: <id or null>
 **Recommendation:** <specific next step with reasoning>
 ```
 
-## Handoff
+## Handoff Guidelines
 
 After writing outputs, provide a natural language handoff to the orchestrator.
 
