@@ -347,9 +347,14 @@ mod openq_prefix_validation {
     fn test_valid_openq_fixture_has_canonical_codes() {
         let content = read_fixture("open_questions_valid.md");
 
-        // Should contain canonical flow codes
+        // Should contain canonical flow codes (full words, per contracts.rs)
         let canonical_codes = [
-            "OQ-SIG-", "OQ-PLN-", "OQ-BLD-", "OQ-GAT-", "OQ-DEP-", "OQ-WIS-",
+            "OQ-SIG-",    // Signal uses SIG (abbreviation)
+            "OQ-PLAN-",   // Plan uses PLAN (full word)
+            "OQ-BUILD-",  // Build uses BUILD (full word)
+            "OQ-GATE-",   // Gate uses GATE (full word)
+            "OQ-DEPLOY-", // Deploy uses DEPLOY (full word)
+            "OQ-WISDOM-", // Wisdom uses WISDOM (full word)
         ];
         for code in canonical_codes {
             assert!(
@@ -359,14 +364,14 @@ mod openq_prefix_validation {
             );
         }
 
-        // Should NOT contain non-canonical codes
+        // Should NOT contain non-canonical abbreviated codes
         assert!(
-            !content.contains("OQ-PLAN-"),
-            "Should not have PLAN (use PLN)"
+            !content.contains("OQ-PLN-"),
+            "Should not have PLN (use PLAN)"
         );
         assert!(
-            !content.contains("OQ-BUILD-"),
-            "Should not have BUILD (use BLD)"
+            !content.contains("OQ-BLD-"),
+            "Should not have BLD (use BUILD)"
         );
     }
 
@@ -375,26 +380,26 @@ mod openq_prefix_validation {
     fn test_invalid_openq_fixture_has_non_canonical_codes() {
         let content = read_fixture("open_questions_invalid.md");
 
-        // Should contain non-canonical codes
+        // Should contain non-canonical abbreviated codes
         assert!(
-            content.contains("OQ-PLAN-"),
-            "Invalid fixture should have PLAN"
+            content.contains("OQ-PLN-"),
+            "Invalid fixture should have PLN (abbreviated)"
         );
         assert!(
-            content.contains("OQ-BUILD-"),
-            "Invalid fixture should have BUILD"
+            content.contains("OQ-BLD-"),
+            "Invalid fixture should have BLD (abbreviated)"
         );
         assert!(
-            content.contains("OQ-GATE-"),
-            "Invalid fixture should have GATE"
+            content.contains("OQ-GAT-"),
+            "Invalid fixture should have GAT (abbreviated)"
         );
         assert!(
-            content.contains("OQ-DEPLOY-"),
-            "Invalid fixture should have DEPLOY"
+            content.contains("OQ-DEP-"),
+            "Invalid fixture should have DEP (abbreviated)"
         );
         assert!(
-            content.contains("OQ-WISDOM-"),
-            "Invalid fixture should have WISDOM"
+            content.contains("OQ-WIS-"),
+            "Invalid fixture should have WIS (abbreviated)"
         );
     }
 
@@ -403,7 +408,7 @@ mod openq_prefix_validation {
     fn test_bad_padding_fixture_has_invalid_suffixes() {
         let content = read_fixture("open_questions_bad_padding.md");
 
-        // Should contain invalid padding patterns
+        // Should contain invalid padding patterns (using canonical flow codes)
         assert!(
             content.contains("OQ-SIG-1\n")
                 || content.contains("OQ-SIG-1 ")
@@ -411,11 +416,11 @@ mod openq_prefix_validation {
             "Should have single-digit suffix"
         );
         assert!(
-            content.contains("OQ-PLN-12") || content.contains("OQ-PLN-12"),
+            content.contains("OQ-PLAN-12"),
             "Should have two-digit suffix"
         );
         assert!(
-            content.contains("OQ-BLD-1234"),
+            content.contains("OQ-BUILD-1234"),
             "Should have four-digit suffix"
         );
     }
@@ -425,28 +430,28 @@ mod openq_prefix_validation {
     fn test_mixed_openq_fixture_structure() {
         let content = read_fixture("open_questions_mixed.md");
 
-        // Valid QIDs
+        // Valid QIDs (using canonical flow codes with proper padding)
         assert!(
             content.contains("OQ-SIG-001"),
             "Should have valid OQ-SIG-001"
         );
         assert!(
-            content.contains("OQ-BLD-003"),
-            "Should have valid OQ-BLD-003"
+            content.contains("OQ-PLAN-002"),
+            "Should have valid OQ-PLAN-002"
         );
         assert!(
-            content.contains("OQ-GAT-999"),
-            "Should have valid OQ-GAT-999"
+            content.contains("OQ-GATE-999"),
+            "Should have valid OQ-GATE-999"
         );
 
         // Invalid QIDs
         assert!(
-            content.contains("OQ-PLAN-002"),
-            "Should have invalid PLAN code"
+            content.contains("OQ-BLD-003"),
+            "Should have invalid BLD code (abbreviated, non-canonical)"
         );
         assert!(
-            content.contains("OQ-BLD-3\n") || content.contains("- QID: OQ-BLD-3"),
-            "Should have invalid padding OQ-BLD-3"
+            content.contains("OQ-BUILD-3\n") || content.contains("- QID: OQ-BUILD-3"),
+            "Should have invalid padding OQ-BUILD-3"
         );
     }
 
@@ -456,25 +461,25 @@ mod openq_prefix_validation {
     // Behavior:
     // 1. Scans .runs/**/open_questions.md files
     // 2. Extracts QID patterns matching OQ-<CODE>-<NNN>
-    // 3. Validates <CODE> is one of: SIG, PLN, BLD, GAT, DEP, WIS
+    // 3. Validates <CODE> is one of: SIG, PLAN, BUILD, REVIEW, GATE, DEPLOY, WISDOM
     // 4. Validates <NNN> is exactly 3 digits (zero-padded)
     // ==========================================================================
 
     /// REQ-003: Check 53 detects non-canonical flow codes.
-    /// Verifies that QIDs with non-canonical flow codes (PLAN instead of PLN) are flagged.
+    /// Verifies that QIDs with non-canonical flow codes (PLN instead of PLAN) are flagged.
     #[test]
     fn test_check_53_detects_non_canonical_flow_code() {
-        // Verify the invalid fixture contains non-canonical codes
+        // Verify the invalid fixture contains non-canonical (abbreviated) codes
         let invalid_content = read_fixture("open_questions_invalid.md");
 
-        // Should contain non-canonical codes like PLAN, BUILD, etc.
+        // Should contain non-canonical abbreviated codes like PLN, BLD, etc.
         assert!(
-            invalid_content.contains("OQ-PLAN-"),
-            "Invalid fixture should have PLAN"
+            invalid_content.contains("OQ-PLN-"),
+            "Invalid fixture should have PLN (abbreviated)"
         );
         assert!(
-            invalid_content.contains("OQ-BUILD-"),
-            "Invalid fixture should have BUILD"
+            invalid_content.contains("OQ-BLD-"),
+            "Invalid fixture should have BLD (abbreviated)"
         );
 
         // Run pack-check on actual repo and verify check 53 runs
@@ -506,11 +511,11 @@ mod openq_prefix_validation {
         // Verify the bad padding fixture has invalid suffixes
         let bad_padding_content = read_fixture("open_questions_bad_padding.md");
 
-        // Should have examples of bad padding
+        // Should have examples of bad padding (using canonical flow codes)
         assert!(
             bad_padding_content.contains("OQ-SIG-1")
-                || bad_padding_content.contains("OQ-PLN-12")
-                || bad_padding_content.contains("OQ-BLD-1234"),
+                || bad_padding_content.contains("OQ-PLAN-12")
+                || bad_padding_content.contains("OQ-BUILD-1234"),
             "Bad padding fixture should have non-3-digit suffixes"
         );
 
@@ -546,9 +551,14 @@ mod openq_prefix_validation {
         // Verify the valid fixture has correct QID format
         let valid_content = read_fixture("open_questions_valid.md");
 
-        // Should contain canonical flow codes
+        // Should contain canonical flow codes (full words, per contracts.rs)
         let canonical_codes = [
-            "OQ-SIG-", "OQ-PLN-", "OQ-BLD-", "OQ-GAT-", "OQ-DEP-", "OQ-WIS-",
+            "OQ-SIG-",    // Signal uses SIG (abbreviation)
+            "OQ-PLAN-",   // Plan uses PLAN (full word)
+            "OQ-BUILD-",  // Build uses BUILD (full word)
+            "OQ-GATE-",   // Gate uses GATE (full word)
+            "OQ-DEPLOY-", // Deploy uses DEPLOY (full word)
+            "OQ-WISDOM-", // Wisdom uses WISDOM (full word)
         ];
         for code in canonical_codes {
             assert!(
@@ -558,14 +568,14 @@ mod openq_prefix_validation {
             );
         }
 
-        // Should NOT contain non-canonical codes
+        // Should NOT contain non-canonical abbreviated codes
         assert!(
-            !valid_content.contains("OQ-PLAN-"),
-            "Valid fixture should NOT have PLAN"
+            !valid_content.contains("OQ-PLN-"),
+            "Valid fixture should NOT have PLN (use PLAN)"
         );
         assert!(
-            !valid_content.contains("OQ-BUILD-"),
-            "Valid fixture should NOT have BUILD"
+            !valid_content.contains("OQ-BLD-"),
+            "Valid fixture should NOT have BLD (use BUILD)"
         );
 
         // Run pack-check on actual repo
