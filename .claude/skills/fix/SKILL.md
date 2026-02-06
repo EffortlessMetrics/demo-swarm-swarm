@@ -1,6 +1,6 @@
 # Fix Skill
 
-Bug fix workflow with verification. In the flow model, fixer handles critic-identified issues; this skill handles open-ended debugging.
+Bug fix workflow with verification. In the flow model, fixer handles critic-identified issues; this skill is for ad-hoc bugfixes outside flows (for investigation-first work, use `/debug`).
 
 ## Input
 Specify one of:

@@ -39,7 +39,6 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 
 ## Rules
 - Never use `--no-verify`
-- Never amend unless explicitly requested
 - Never force push
 - Never push, create PRs, or amend unless explicitly asked
 - If tests fail, stop and report - do not commit

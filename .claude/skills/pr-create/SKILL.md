@@ -1,6 +1,6 @@
 # PR Create Skill
 
-Create a pull request with forensic evidence. For full SDLC PRs with evidence panels, use `/flow-3-build` instead.
+Create a pull request with forensic evidence. For full SDLC work, start with `/flow-1-signal` (then `/flow-2-plan` → `/flow-3-build`).
 
 ## Pre-PR Verification
 ```bash
