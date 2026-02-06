@@ -1,6 +1,6 @@
 # Review Skill
 
-Code review with evidence-based feedback.
+Code review with evidence-based feedback. Produces a recommendation, not a verdict; does not fix issues or merge. In the flow model, code-critic handles this; this skill is for ad-hoc review.
 
 ## Review Checklist
 

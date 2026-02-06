@@ -21,6 +21,7 @@ pub mod headings {
 pub struct Contracts {
     pub required_agents: &'static [&'static str],
     pub required_skills: &'static [&'static str],
+    pub workflow_skills: &'static [&'static str],
     pub cleanup_agents: &'static [(&'static str, &'static str)],
     pub critics: &'static [&'static str],
     pub critic_and_verifier_agents: &'static [&'static str],
@@ -54,6 +55,7 @@ impl Default for Contracts {
         Self {
             required_agents: REQUIRED_AGENTS,
             required_skills: REQUIRED_SKILLS,
+            workflow_skills: WORKFLOW_SKILLS,
             cleanup_agents: CLEANUP_AGENTS,
             critics: CRITICS,
             critic_and_verifier_agents: CRITIC_AND_VERIFIER_AGENTS,
@@ -359,6 +361,24 @@ pub const REQUIRED_SKILLS: &[&str] = &[
     "runs-index",
     "openq-tools",
     "secrets-tools",
+];
+
+/// Workflow skills (must exist in `.claude/skills/<name>/SKILL.md`).
+/// Structured methodology guides invoked as slash commands.
+pub const WORKFLOW_SKILLS: &[&str] = &[
+    "commit",
+    "pr-create",
+    "pr-prep",
+    "explore",
+    "debug",
+    "refactor",
+    "review",
+    "fix",
+    "feature",
+    "forensic",
+    "spec-exec",
+    "docs",
+    "changelog",
 ];
 
 /// Cleanup agents with their expected receipt filenames.

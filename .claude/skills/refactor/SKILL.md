@@ -69,6 +69,7 @@ git diff --stat
 ```
 
 ## Rules
+- Improving the mold improves all future generation
 - Small steps, test after each
 - Never change behavior while refactoring
 - Never refactor and add features simultaneously

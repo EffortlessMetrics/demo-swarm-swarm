@@ -146,13 +146,18 @@ See: [docs/explanation/reviewing-as-audit.md](docs/explanation/reviewing-as-audi
 **Counts clarified:**
 - **7 flows**: The logical SDLC stages (Signal through Wisdom)
 - **8 commands**: 7 flow commands + `/customize-pack` for pack configuration
-- **7 skills**: Mechanical tools invoked by agents (test-runner, auto-linter, etc.)
+- **7 tool skills**: Mechanical tools invoked by agents (test-runner, auto-linter, etc.)
+- **13 workflow skills**: Structured methodology guides (commit, debug, explore, etc.)
 
 Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVERIFIED outcomes when upstream artifacts are missing.
 
 ---
 
 ## Skills
+
+### Tool Skills
+
+Deterministic helpers invoked by agents during flows. No judgment, no decisions — just mechanical execution.
 
 | Skill | Purpose |
 |-------|---------|
@@ -163,6 +168,26 @@ Out-of-order is allowed: proceed best-effort, document assumptions, expect UNVER
 | `runs-index` | Write .runs/index.json updates |
 | `openq-tools` | Open questions register (QID generation) |
 | `secrets-tools` | Secrets scanning/redaction for publish gates |
+
+### Workflow Skills
+
+Structured methodology guides invoked as slash commands for ad-hoc developer workflows outside the flow model.
+
+| Skill | Purpose |
+|-------|---------|
+| `commit` | Create commits with forensic evidence |
+| `pr-create` | Create pull requests with evidence |
+| `pr-prep` | Check branch readiness for PR submission |
+| `explore` | Systematically explore a codebase |
+| `debug` | Systematic debugging workflow |
+| `refactor` | Safe refactoring with verification |
+| `review` | Code review with evidence-based feedback |
+| `fix` | Bug fix workflow with verification |
+| `feature` | Feature implementation workflow |
+| `forensic` | Evidence-first execution discipline |
+| `spec-exec` | Execute a specification completely |
+| `docs` | Documentation using Diataxis framework |
+| `changelog` | Generate changelog from git history |
 
 ---
 

@@ -19,7 +19,7 @@ The spec defines WHAT. Your job is HOW.
 4. **No gold-plating** - don't add unrequested features
 
 ### Verification Required
-After each implementation unit:
+After each implementation unit, verify via exit codes and test output, not assumptions:
 1. Run tests
 2. Verify lint
 3. Check build

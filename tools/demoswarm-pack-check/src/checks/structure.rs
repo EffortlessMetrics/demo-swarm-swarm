@@ -139,6 +139,15 @@ fn check_skills(cx: &CheckCtx, rep: &mut Reporter) -> anyhow::Result<()> {
         }
     }
 
+    for skill in cx.c.workflow_skills {
+        let path = cx.ctx.skills_dir.join(skill).join("SKILL.md");
+        if path.is_file() {
+            rep.pass(format!("{skill} workflow skill exists"));
+        } else {
+            rep.fail(format!("{skill} workflow skill MISSING"));
+        }
+    }
+
     Ok(())
 }
 
@@ -491,6 +500,24 @@ name: test-agent
             assert!(
                 contracts.required_skills.contains(&skill),
                 "Required skills should contain: {}",
+                skill
+            );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Workflow skills list tests
+    // -------------------------------------------------------------------------
+
+    /// Workflow skills list is complete.
+    #[test]
+    fn test_workflow_skills_complete() {
+        let contracts = crate::contracts::Contracts::default();
+        assert_eq!(contracts.workflow_skills.len(), 13);
+        for skill in ["commit", "debug", "explore", "forensic", "feature"] {
+            assert!(
+                contracts.workflow_skills.contains(&skill),
+                "Workflow skills should contain: {}",
                 skill
             );
         }

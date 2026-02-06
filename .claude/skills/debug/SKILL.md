@@ -15,7 +15,7 @@ If can't reproduce: stop and clarify with user.
 ## Phase 2: Isolate
 Narrow down the problem:
 ```
-1. Identify the failing component/function
+1. Identify the failing component/function (use Grep to search for error messages)
 2. Find the smallest reproduction case
 3. Add logging/instrumentation if needed
 4. Trace execution to failure point
@@ -33,7 +33,7 @@ Understand root cause:
 ## Phase 4: Fix
 Apply minimal fix:
 ```
-1. Change only what's necessary
+1. Change only what's necessary (use Edit for targeted changes)
 2. Don't refactor while fixing
 3. Add a test that fails without fix
 4. Verify test passes with fix
@@ -68,6 +68,7 @@ Confirm fix is complete:
 ```
 
 ## Rules
+- Ground every assumption in tool output
 - Never guess - verify each assumption
 - One fix at a time
 - Test before and after

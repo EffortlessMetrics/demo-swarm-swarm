@@ -7,6 +7,7 @@ Evidence-first execution. Trust receipts, not prose.
 - Git diffs don't hallucinate
 - If it isn't logged, it didn't happen
 - Measure the bolt, don't ask the intern
+- These principles underpin the flow model's evidence panel — claims require pointers
 
 ## Required Evidence
 For any implementation task, produce:
@@ -45,8 +46,8 @@ Risks: <what>
 3. Report the exit code
 4. Only then interpret
 
-## Anti-Patterns (never do these)
-- "Tests should pass" → Run them and show output
+## Anti-Patterns
+- "Tests should pass" → Run them, show output and exit code
 - "This looks correct" → Prove it with a command
 - "I've implemented X" → Show the diff and verification
 - "It works" → Show the evidence
@@ -62,7 +63,7 @@ Every response ends with:
 | Lint | ✓/✗ | warnings |
 
 ### Commands Run
-<list with exit codes>
+<list with exit codes — every command must show its exit code>
 
 ### Unknowns
 <what wasn't verified>

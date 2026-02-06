@@ -1,6 +1,6 @@
 # PR Prep Skill
 
-Prepare a branch for pull request submission.
+Prepare a branch for pull request submission. Reports readiness; does not create the PR or fix issues.
 
 ## Checklist
 Run through and report status:
@@ -37,11 +37,11 @@ Report a prep summary:
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| Commits | ✓/✗ | count, any need squashing? |
+| Commits | ✓/✗ | count, squash candidates |
 | Tests | ✓/✗ | pass/fail count |
 | Lint | ✓/✗ | warning count |
-| Docs | ✓/✗ | any updates needed? |
-| Debug code | ✓/✗ | any found? |
+| Docs | ✓/✗ | updates needed |
+| Debug code | ✓/✗ | artifacts found |
 
 ## If Issues Found
 List each issue and whether to:

@@ -6,14 +6,14 @@ Systematically explore a codebase to answer questions or understand structure.
 
 ### Structure Mode
 Map the codebase architecture:
-1. Find entry points (main, index, app)
+1. Find entry points (main, index, app) — use Glob for file discovery
 2. Identify major modules/packages
 3. Trace dependency flow
 4. Document key abstractions
 
 ### Search Mode
 Find specific functionality:
-1. Start with grep for keywords
+1. Start with Grep for keyword search
 2. Follow imports/references
 3. Map call chains
 4. Identify all touch points
@@ -21,7 +21,7 @@ Find specific functionality:
 ### Trace Mode
 Follow a specific flow:
 1. Start at entry point
-2. Step through execution path
+2. Step through execution path — use Read for content inspection
 3. Document each layer touched
 4. Note data transformations
 
@@ -46,7 +46,7 @@ Follow a specific flow:
 ```
 
 ## Rules
+- Never modify code during exploration
 - Use sub-agents (Task tool) for parallel exploration
 - Read files before making claims about them
 - Note assumptions explicitly
-- Don't modify code during exploration

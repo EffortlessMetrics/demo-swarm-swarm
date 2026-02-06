@@ -4,7 +4,7 @@ Documentation work using the Diataxis framework.
 
 ## Diataxis Framework
 
-Organize documentation into four categories:
+Organize documentation into four categories. This repo's own `docs/` follows Diataxis.
 
 | Type | Purpose | User Need |
 |------|---------|-----------|
@@ -81,6 +81,7 @@ When auditing existing docs:
 ```
 
 ## Rules
+- Does not write code; writes documentation about code
 - Link stability over file organization
 - One category per document
 - Cross-reference between categories

@@ -1,6 +1,6 @@
 # Commit Skill
 
-Create a commit with forensic evidence.
+Create a commit with forensic evidence. In the flow model, repo-operator owns git; this skill is for direct invocation outside flows.
 
 ## Pre-Commit Verification
 Before committing, run and report:
@@ -41,4 +41,5 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 - Never use `--no-verify`
 - Never amend unless explicitly requested
 - Never force push
+- Never push, create PRs, or amend unless explicitly asked
 - If tests fail, stop and report - do not commit

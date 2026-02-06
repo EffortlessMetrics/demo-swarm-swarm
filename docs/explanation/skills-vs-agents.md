@@ -195,6 +195,10 @@ Skill returns "PASS" or "FAIL" as a verdict.
 
 ## Skills in This Pack
 
+### Tool Skills
+
+Deterministic helpers invoked by agents during flows.
+
 | Skill         | Purpose                   |
 | ------------- | ------------------------- |
 | test-runner   | Run tests, capture output |
@@ -204,6 +208,26 @@ Skill returns "PASS" or "FAIL" as a verdict.
 | runs-index    | Update index.json         |
 | openq-tools   | Open questions register   |
 | secrets-tools | Secrets scanning          |
+
+### Workflow Skills
+
+Structured methodology guides invoked as slash commands for ad-hoc work outside flows.
+
+| Skill     | Purpose                              |
+| --------- | ------------------------------------ |
+| commit    | Create commits with forensic evidence |
+| pr-create | Create pull requests with evidence   |
+| pr-prep   | Check branch readiness for PR        |
+| explore   | Systematically explore a codebase    |
+| debug     | Systematic debugging workflow        |
+| refactor  | Safe refactoring with verification   |
+| review    | Code review with evidence-based feedback |
+| fix       | Bug fix workflow with verification   |
+| feature   | Feature implementation workflow      |
+| forensic  | Evidence-first execution discipline  |
+| spec-exec | Execute a specification completely   |
+| docs      | Documentation using Diataxis framework |
+| changelog | Generate changelog from git history  |
 
 ## Agents Using Skills
 

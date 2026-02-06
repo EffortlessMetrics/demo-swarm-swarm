@@ -1,6 +1,6 @@
 # PR Create Skill
 
-Create a pull request with forensic evidence.
+Create a pull request with forensic evidence. For full SDLC PRs with evidence panels, use `/flow-3-build` instead.
 
 ## Pre-PR Verification
 ```bash
@@ -45,7 +45,7 @@ git diff --stat main..HEAD
 6. Report PR URL
 
 ## Rules
-- Never create PR with failing tests
+- Never create a PR with failing tests or without a test plan
 - Always include test plan
 - Always acknowledge unknowns
 - Push branch before creating PR if needed

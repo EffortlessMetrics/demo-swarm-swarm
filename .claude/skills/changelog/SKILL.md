@@ -83,6 +83,8 @@ When available, link to:
 ```
 
 ## Rules
+- Does not bump versions, create tags, or release
+- Conventional commit format aligns with the `/commit` skill
 - User-facing language, not developer jargon
 - One line per logical change (merge related commits)
 - Always include reference links when available

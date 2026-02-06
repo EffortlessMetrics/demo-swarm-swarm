@@ -75,7 +75,8 @@ For each step:
 ```
 
 ## Rules
-- Test as you go, not at the end
+- For significant features, prefer `/flow-1-signal` through the full SDLC
+- Write tests alongside each implementation step, not at the end
 - Don't gold-plate - implement what's specified
 - Note but don't implement adjacent features
 - Document limitations explicitly

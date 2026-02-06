@@ -1,6 +1,6 @@
 # Fix Skill
 
-Bug fix workflow with verification.
+Bug fix workflow with verification. In the flow model, fixer handles critic-identified issues; this skill handles open-ended debugging.
 
 ## Input
 Specify one of:
@@ -74,7 +74,6 @@ Specify one of:
 ```
 
 ## Rules
-- One bug, one fix
+- One bug, one fix. Never expand scope. Never refactor while fixing.
 - Always add a regression test
-- Don't expand scope
 - Note but don't fix adjacent issues
