@@ -48,6 +48,11 @@ pub struct Contracts {
     pub skill_cli_subcommands: &'static [&'static str],
     // OpenQ prefix validation (check 53)
     pub openq_flow_codes: &'static [&'static str],
+    // Receipt schema validation (checks 56-59)
+    #[allow(dead_code)]
+    pub flow_names: &'static [&'static str],
+    pub receipt_statuses: &'static [&'static str],
+    pub receipt_actions: &'static [&'static str],
 }
 
 impl Default for Contracts {
@@ -75,6 +80,9 @@ impl Default for Contracts {
             gh_body_forbidden_patterns: GH_BODY_FORBIDDEN_PATTERNS,
             skill_cli_subcommands: SKILL_CLI_SUBCOMMANDS,
             openq_flow_codes: OPENQ_FLOW_CODES,
+            flow_names: FLOW_NAMES,
+            receipt_statuses: RECEIPT_STATUSES,
+            receipt_actions: RECEIPT_ACTIONS,
         }
     }
 }
@@ -543,6 +551,21 @@ pub const OPENQ_FLOW_CODES: &[&str] = &[
     "GATE",   // Gate (Flow 5)
     "DEPLOY", // Deploy (Flow 6)
     "WISDOM", // Wisdom (Flow 7)
+];
+
+/// Canonical flow names (receipt directory names).
+pub const FLOW_NAMES: &[&str] = &[
+    "signal", "plan", "build", "review", "gate", "deploy", "wisdom",
+];
+
+/// Canonical receipt status values.
+pub const RECEIPT_STATUSES: &[&str] = &[
+    "VERIFIED", "UNVERIFIED", "CANNOT_PROCEED", "PARTIAL",
+];
+
+/// Canonical recommended_action values.
+pub const RECEIPT_ACTIONS: &[&str] = &[
+    "PROCEED", "RERUN", "BOUNCE", "FIX_ENV",
 ];
 
 /// Test utilities: cached regex compilation for performance.

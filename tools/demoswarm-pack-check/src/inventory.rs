@@ -9,6 +9,19 @@ use walkdir::WalkDir;
 
 use crate::ctx::Ctx;
 
+/// A discovered receipt file under `.runs/`.
+#[derive(Debug)]
+pub struct ReceiptFile {
+    pub path: PathBuf,
+    /// Run directory name (e.g., "feat-auth"). Used in diagnostics and tests.
+    #[allow(dead_code)]
+    pub run_id: String,
+    pub flow: String,
+    /// Receipt filename (e.g., "signal_receipt.json"). Used in diagnostics and tests.
+    #[allow(dead_code)]
+    pub filename: String,
+}
+
 /// Precomputed file lists for the pack.
 #[derive(Debug)]
 pub struct Inventory {
@@ -29,6 +42,9 @@ pub struct Inventory {
 
     /// Command files indexed by stem (e.g., "flow-1-signal" -> path).
     pub commands_by_stem: HashMap<String, PathBuf>,
+
+    /// All `*_receipt.json` files under `.runs/`.
+    pub receipt_files: Vec<ReceiptFile>,
 }
 
 impl Inventory {
@@ -55,6 +71,9 @@ impl Inventory {
         let agents_by_stem = build_stem_index(&agent_md_files);
         let commands_by_stem = build_stem_index(&command_md_files);
 
+        // Discover receipt files under .runs/
+        let receipt_files = discover_receipts(&ctx.repo_root);
+
         Ok(Self {
             agent_md_files,
             command_md_files,
@@ -62,6 +81,7 @@ impl Inventory {
             skill_md_files,
             agents_by_stem,
             commands_by_stem,
+            receipt_files,
         })
     }
 
@@ -105,5 +125,58 @@ fn list_skill_files(skills_dir: &std::path::Path) -> Vec<PathBuf> {
         }
     }
     out.sort();
+    out
+}
+
+/// Discover `*_receipt.json` files under `.runs/<run-id>/<flow>/`.
+fn discover_receipts(repo_root: &std::path::Path) -> Vec<ReceiptFile> {
+    let runs_dir = repo_root.join(".runs");
+    if !runs_dir.is_dir() {
+        return Vec::new();
+    }
+
+    let mut out = Vec::new();
+
+    for entry in WalkDir::new(&runs_dir).follow_links(false).min_depth(3).max_depth(3) {
+        let Ok(entry) = entry else { continue };
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let filename = match path.file_name().and_then(|n| n.to_str()) {
+            Some(n) if n.ends_with("_receipt.json") => n.to_string(),
+            _ => continue,
+        };
+
+        // Path structure: .runs/<run-id>/<flow>/<filename>
+        // parent = .runs/<run-id>/<flow>
+        // grandparent = .runs/<run-id>
+        let flow_dir = match path.parent() {
+            Some(p) => p,
+            None => continue,
+        };
+        let run_dir = match flow_dir.parent() {
+            Some(p) => p,
+            None => continue,
+        };
+
+        let flow = match flow_dir.file_name().and_then(|n| n.to_str()) {
+            Some(n) => n.to_string(),
+            None => continue,
+        };
+        let run_id = match run_dir.file_name().and_then(|n| n.to_str()) {
+            Some(n) => n.to_string(),
+            None => continue,
+        };
+
+        out.push(ReceiptFile {
+            path: path.to_path_buf(),
+            run_id,
+            flow,
+            filename,
+        });
+    }
+
+    out.sort_by(|a, b| a.path.cmp(&b.path));
     out
 }

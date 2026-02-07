@@ -8,6 +8,7 @@ mod control_plane;
 mod drift;
 mod flow;
 mod structure;
+mod receipts;
 mod wisdom;
 
 use super::contracts::{Contracts, Regexes};
@@ -33,7 +34,7 @@ pub struct CheckSpec {
     pub run: CheckFn,
 }
 
-/// Returns all checks in numeric order (1..53).
+/// Returns all checks in numeric order (1..59).
 pub fn all() -> Vec<CheckSpec> {
     let mut checks = Vec::new();
 
@@ -51,6 +52,9 @@ pub fn all() -> Vec<CheckSpec> {
 
     // Wisdom checks (24, 36, 41)
     checks.extend(wisdom::checks());
+
+    // Receipt checks (56, 57, 58, 59)
+    checks.extend(receipts::checks());
 
     // Sort by ID to ensure consistent ordering
     checks.sort_by_key(|c| c.id);

@@ -60,6 +60,7 @@ pub fn run(cli: Cli) -> anyhow::Result<ExitCode> {
         agents: inv.agent_md_files.len(),
         commands: inv.command_md_files.len(),
         skills: inv.skill_md_files.len(),
+        receipts: inv.receipt_files.len(),
     };
 
     if cli.format == OutputFormat::Text {
@@ -263,10 +264,12 @@ mod tests {
             agents: inv.agent_md_files.len(),
             commands: inv.command_md_files.len(),
             skills: inv.skill_md_files.len(),
+            receipts: inv.receipt_files.len(),
         };
 
         assert_eq!(counts.agents, 2);
         assert_eq!(counts.commands, 1);
         assert_eq!(counts.skills, 1);
+        assert_eq!(counts.receipts, 0);
     }
 }

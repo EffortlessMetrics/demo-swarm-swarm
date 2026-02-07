@@ -25,6 +25,7 @@ pub struct PackCounts {
     pub agents: usize,
     pub commands: usize,
     pub skills: usize,
+    pub receipts: usize,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -138,6 +139,7 @@ impl Reporter {
         println!("  Agents:   {}", counts.agents);
         println!("  Commands: {}", counts.commands);
         println!("  Skills:   {}", counts.skills);
+        println!("  Receipts: {}", counts.receipts);
         println!();
     }
 
@@ -317,12 +319,14 @@ mod tests {
             agents: 10,
             commands: 5,
             skills: 3,
+            receipts: 2,
         };
 
         let cloned = counts.clone();
         assert_eq!(counts.agents, cloned.agents);
         assert_eq!(counts.commands, cloned.commands);
         assert_eq!(counts.skills, cloned.skills);
+        assert_eq!(counts.receipts, cloned.receipts);
 
         let _ = format!("{:?}", counts);
 
@@ -330,6 +334,7 @@ mod tests {
         assert!(json.contains("\"agents\":10"));
         assert!(json.contains("\"commands\":5"));
         assert!(json.contains("\"skills\":3"));
+        assert!(json.contains("\"receipts\":2"));
     }
 
     // -------------------------------------------------------------------------
@@ -347,6 +352,7 @@ mod tests {
                 agents: 1,
                 commands: 2,
                 skills: 3,
+                receipts: 0,
             },
             diagnostics: vec![Diagnostic {
                 level: Level::Fail,
@@ -499,6 +505,7 @@ mod tests {
             agents: 10,
             commands: 5,
             skills: 3,
+            receipts: 0,
         };
         rep.print_counts(&counts); // Should not panic
     }
@@ -514,6 +521,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -529,6 +537,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -544,6 +553,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -560,6 +570,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -579,6 +590,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let _ = rep.finish("/test/repo", counts);
     }
@@ -594,6 +606,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -609,6 +622,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -624,6 +638,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
@@ -639,6 +654,7 @@ mod tests {
             agents: 1,
             commands: 2,
             skills: 3,
+            receipts: 0,
         };
         let result = rep.finish("/test/repo", counts);
         assert!(result.is_ok());
