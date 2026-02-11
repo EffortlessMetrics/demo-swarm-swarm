@@ -1,0 +1,9 @@
+# .github/CODEOWNERS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Repo settings-as-code control plane
+# Require CODEOWNERS review for settings changes.
+/.github/settings.yml @EffortlessSteven
+
+# Core pack definitions
+/.claude/ @EffortlessSteven

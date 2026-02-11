@@ -1,0 +1,17 @@
+# .github/settings.yml
+# This file is synced to GitHub via the Probot Settings app.
+# It is the single source of truth for repository metadata.
+# See: https://github.com/repository-settings/app
+
+repository:
+  description: "DemoSwarm template for Claude Code: governed SDLC flows producing review-ready PRs with evidence and receipts."
+  homepage: "https://effortlesssteven.com/demoswarm/"
+  topics: demoswarm, claude-code, ai-agents, agentic-workflows, sdlc, code-review, receipts, audit-trail
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: true
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  delete_branch_on_merge: true

@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Run the relevant tests for the current change and summarize results. Use in Flow 3 (Build) and optionally in Flow 4 (Gate).
+description: Run the relevant tests for the current change and summarize results. Use in Flow 3 (Build) and optionally in Flow 5 (Gate).
 allowed-tools: Bash, Read, Write
 ---
 
