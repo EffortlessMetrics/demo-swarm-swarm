@@ -81,14 +81,17 @@ Write findings that explain what's wrong and what good looks like.
 
 ### Severity Levels
 
-- **CRITICAL:** Breaks automation or traceability - missing REQ tags, unobservable assertions, scenarios that can't run
-- **MAJOR:** Causes rework - interface-coupled steps without justification, missing coverage, only happy paths for a REQ
-- **MINOR:** Polish - naming conventions, organization, step phrasing improvements
+- **🔴 CRITICAL:** Breaks automation or traceability - missing REQ tags, unobservable assertions, scenarios that can't run
+- **🟠 MAJOR:** Causes rework - interface-coupled steps without justification, missing coverage, only happy paths for a REQ
+- **🟡 MINOR:** Polish - naming conventions, organization, step phrasing improvements
 
 ### Critique Structure
 
 ```markdown
 # BDD Critique for <run-id>
+
+<a id="top"></a>
+**Jump to**: [Summary](#summary) | [Traceability](#traceability-issues) | [Testability](#testability-issues) | [Portability](#portability-issues) | [Coverage](#coverage-gaps) | [Sad Path](#sad-path-gaps) | [Minor](#minor-issues) | [Strengths](#strengths) | [Counts](#counts)
 
 ## Summary
 
@@ -96,31 +99,45 @@ Write findings that explain what's wrong and what good looks like.
 
 ## Traceability Issues
 
-- [CRITICAL] BDD-CRIT-001: <file>::<scenario> - missing @REQ tag. Fix: add primary requirement tag.
+- 🔴 [CRITICAL] BDD-CRIT-001: <file>::<scenario> - missing @REQ tag. Fix: add primary requirement tag.
+
+[↑ Back to Top](#top)
 
 ## Testability Issues
 
-- [CRITICAL] BDD-CRIT-002: <file>::<scenario> - Then step "works correctly" is not observable. Fix: specify what to assert.
+- 🔴 [CRITICAL] BDD-CRIT-002: <file>::<scenario> - Then step "works correctly" is not observable. Fix: specify what to assert.
+
+[↑ Back to Top](#top)
 
 ## Portability Issues
 
-- [MAJOR] BDD-MAJ-001: <file>::<scenario> - step uses HTTP status code without justification. Fix: use domain-level step or add justification comment.
+- 🟠 [MAJOR] BDD-MAJ-001: <file>::<scenario> - step uses HTTP status code without justification. Fix: use domain-level step or add justification comment.
+
+[↑ Back to Top](#top)
 
 ## Coverage Gaps
 
-- [MAJOR] BDD-MAJ-002: REQ-003 has no scenarios. Fix: add scenario or document exception in verification_notes.md.
+- 🟠 [MAJOR] BDD-MAJ-002: REQ-003 has no scenarios. Fix: add scenario or document exception in verification_notes.md.
+
+[↑ Back to Top](#top)
 
 ## Sad Path Gaps
 
-- [MAJOR] BDD-MAJ-003: REQ-005 has only happy path scenarios. Fix: add error/edge case scenario.
+- 🟠 [MAJOR] BDD-MAJ-003: REQ-005 has only happy path scenarios. Fix: add error/edge case scenario.
+
+[↑ Back to Top](#top)
 
 ## Minor Issues
 
-- [MINOR] BDD-MIN-001: <file>::<scenario> - step phrasing could be clearer.
+- 🟡 [MINOR] BDD-MIN-001: <file>::<scenario> - step phrasing could be clearer.
+
+[↑ Back to Top](#top)
 
 ## Strengths
 
 - <what's working well>
+
+[↑ Back to Top](#top)
 
 ## Counts
 
@@ -131,6 +148,8 @@ Write findings that explain what's wrong and what good looks like.
 - Requirements covered: N (or "unknown")
 - Scenarios total: N (or "unknown")
 
+[↑ Back to Top](#top)
+
 ## Handoff
 
 **What I found:** <summary of findings>
@@ -138,6 +157,8 @@ Write findings that explain what's wrong and what good looks like.
 **What's left:** <issues to address or "nothing - scenarios are solid">
 
 **Recommendation:** <specific next step>
+
+[↑ Back to Top](#top)
 ```
 
 ## Tips
