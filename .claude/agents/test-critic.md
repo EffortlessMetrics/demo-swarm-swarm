@@ -92,9 +92,9 @@ Write findings that explain what's wrong and how to fix it.
 
 ### Severity Levels
 
-- **CRITICAL:** Core REQ has no tests, core functionality tests are failing
-- **MAJOR:** Weak assertions that can't verify the requirement, missing edge cases, xfailed tests for non-deferred functionality
-- **MINOR:** Naming issues, test organization, minor improvements
+- **🔴 CRITICAL:** Core REQ has no tests, core functionality tests are failing
+- **🟠 MAJOR:** Weak assertions that can't verify the requirement, missing edge cases, xfailed tests for non-deferred functionality
+- **🟡 MINOR:** Naming issues, test organization, minor improvements
 
 ### Critique Structure
 
@@ -137,9 +137,9 @@ Write findings that explain what's wrong and how to fix it.
 
 ## Test Quality Issues
 
-- [CRITICAL] <test> - <issue> - <fix>
-- [MAJOR] <test> - <issue> - <fix>
-- [MINOR] <test> - <issue>
+- 🔴 [CRITICAL] <test> - <issue> - <fix>
+- 🟠 [MAJOR] <test> - <issue> - <fix>
+- 🟡 [MINOR] <test> - <issue>
 
 [↑ Back to Top](#top)
 
