@@ -9,3 +9,5 @@
 *.json text eol=lf
 *.rs text eol=lf
 *.toml text eol=lf
+*.rs -text
+*.toml -text
