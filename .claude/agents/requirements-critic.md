@@ -82,14 +82,17 @@ Write findings that explain the problem and how to fix it.
 
 ### Severity Levels
 
-- **CRITICAL:** Untestable requirement, contradictory requirements, duplicate IDs, secret material present
-- **MAJOR:** Vague criteria, ambiguous behavior-changing language, missing AC/MET markers, untyped NFR
-- **MINOR:** Naming, organization, non-sequential IDs, small clarifications
+- 🔴 **CRITICAL:** Untestable requirement, contradictory requirements, duplicate IDs, secret material present
+- 🟠 **MAJOR:** Vague criteria, ambiguous behavior-changing language, missing AC/MET markers, untyped NFR
+- 🟡 **MINOR:** Naming, organization, non-sequential IDs, small clarifications
 
 ### Critique Structure
 
 ```markdown
 # Requirements Critique
+
+<a id="top"></a>
+**Jump to**: [Issue Summary](#issue-summary) | [Coverage](#coverage-summary) | [Issues](#issues) | [Strengths](#strengths) | [Handoff](#handoff)
 
 ## Issue Summary
 
@@ -98,6 +101,8 @@ Write findings that explain the problem and how to fix it.
 | Critical | <int> |
 | Major    | <int> |
 | Minor    | <int> |
+
+[↑ Back to Top](#top)
 
 ## Coverage Summary
 
@@ -114,36 +119,42 @@ Write findings that explain the problem and how to fix it.
 | Assumptions           | <N or null>              |
 | Questions             | <N or null>              |
 
+[↑ Back to Top](#top)
+
 ## Issues
 
 ### Testability
 
-- [CRITICAL] REQ-001: <issue and how to fix>
-- [MAJOR] REQ-002: Missing AC markers (paragraph-style criteria not atomized)
+- 🔴 [CRITICAL] REQ-001: <issue and how to fix>
+- 🟠 [MAJOR] REQ-002: Missing AC markers (paragraph-style criteria not atomized)
 
 ### NFR Measurement
 
-- [MAJOR] NFR-PERF-001: Missing MET markers (no verification method specified)
+- 🟠 [MAJOR] NFR-PERF-001: Missing MET markers (no verification method specified)
 
 ### Consistency
 
-- [CRITICAL] <contradiction and what needs resolving>
+- 🔴 [CRITICAL] <contradiction and what needs resolving>
 
 ### Completeness
 
-- [MAJOR] <missing coverage and what to add>
+- 🟠 [MAJOR] <missing coverage and what to add>
 
 ### NFR Format Issues
 
-- [MAJOR] NFR-###: Untyped NFR ID - add domain prefix (SEC/PERF/REL/OPS/COMP)
+- 🟠 [MAJOR] NFR-###: Untyped NFR ID - add domain prefix (SEC/PERF/REL/OPS/COMP)
 
 ### Assumptions/Questions Format
 
-- [MINOR] ASM-1: Missing "Impact if wrong:" subitem
+- 🟡 [MINOR] ASM-1: Missing "Impact if wrong:" subitem
+
+[↑ Back to Top](#top)
 
 ## Strengths
 
 - <what was done well>
+
+[↑ Back to Top](#top)
 
 ## Handoff
 
@@ -152,6 +163,8 @@ Write findings that explain the problem and how to fix it.
 **What's left:** <issues requiring attention or "nothing - requirements are solid">
 
 **Recommendation:** <specific next step>
+
+[↑ Back to Top](#top)
 ```
 
 ## Tips
