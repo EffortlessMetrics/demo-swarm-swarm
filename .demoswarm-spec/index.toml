@@ -1,0 +1,16 @@
+schema_version = "1.0"
+
+repo = "demoswarm"
+namespace = ".demoswarm-spec"
+
+[conventions]
+proposal_prefix = "DS-PROP"
+spec_prefix = "DS-SPEC"
+adr_prefix = "DS-ADR"
+lane_prefix = "DS-LANE"
+
+[external_namespaces]
+codex = ".codex"
+speckit = ".spec"
+claude = ".claude"
+jules = ".jules"
