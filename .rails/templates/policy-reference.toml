@@ -1,0 +1,8 @@
+schema_version = "1.0"
+
+id = "<policy-reference-id>"
+name = "<Policy reference name>"
+owner = "<owner>"
+source = "<path-to-live-policy-ledger>"
+summary = "Reference to live enforcement policy without duplication."
+review_cadence = "monthly"
