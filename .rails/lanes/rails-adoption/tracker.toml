@@ -1,0 +1,29 @@
+schema_version = "1.0"
+
+id = "rails-adoption"
+name = "Rails adoption"
+status = "active"
+owner = "docs-and-governance"
+
+objective = """
+Adopt the durable `.rails/` framework footprint with indexed artifacts and focused sequencing.
+"""
+
+end_state = [
+  "Framework footprint exists under .rails/.",
+  "Initial proposal/spec/ADR are indexed and linked.",
+  "Human-facing docs describe ownership boundaries.",
+]
+
+[[work_item]]
+id = "rails-adoption-bootstrap"
+status = "ready"
+proposal = "DSWARM-PROP-0001"
+spec = "DSWARM-SPEC-0001"
+adr = "DSWARM-ADR-0001"
+implementation_plan = ".rails/lanes/rails-adoption/implementation-plan.md"
+blocks = []
+blocked_by = []
+proof = [
+  "git diff --check",
+]
