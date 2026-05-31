@@ -27,6 +27,9 @@ jobs:
       - name: Validate agent prompts
         run: python scripts/validate_agent_prompts.py
 
+      - name: Check self-hosted runner routing
+        run: bash scripts/check-no-bare-self-hosted.sh
+
   pack-check:
     # Windows CI catches platform-specific path handling and bash compatibility issues
     strategy:
