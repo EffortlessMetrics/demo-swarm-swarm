@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:demoswarm:schema:receipt:2",
+  "title": "DemoSwarm flow receipt v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "flow",
+    "completion",
+    "verification",
+    "generated_at",
+    "summary",
+    "missing_required",
+    "blockers",
+    "concerns",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": { "const": "2.0" },
+    "run_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,79}$" },
+    "flow": {
+      "enum": ["signal", "plan", "build", "review", "gate", "deploy", "wisdom"]
+    },
+    "completion": { "enum": ["COMPLETE", "PARTIAL", "CANNOT_PROCEED"] },
+    "verification": { "enum": ["VERIFIED", "UNVERIFIED"] },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "summary": { "type": "string", "minLength": 1 },
+    "repository_state": {
+      "type": "object",
+      "properties": {
+        "head_sha": { "type": ["string", "null"] },
+        "base_sha": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "missing_required": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "concerns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["number", "integer", "string", "boolean", "null"]
+      }
+    },
+    "outcome": { "type": "object" },
+    "extensions": { "type": "object" }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": ["kind", "observed_at"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "tool": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "version": { "type": ["string", "null"] },
+            "result": { "type": ["string", "null"] }
+          },
+          "additionalProperties": true
+        },
+        "extensions": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "verification": { "const": "VERIFIED" } } },
+      "then": { "properties": { "missing_required": { "maxItems": 0 } } }
+    },
+    {
+      "if": { "properties": { "completion": { "const": "CANNOT_PROCEED" } } },
+      "then": { "properties": { "blockers": { "minItems": 1 } } }
+    },
+    {
+      "not": {
+        "anyOf": [
+          { "required": ["recommended_action"] },
+          { "required": ["route_to_agent"] },
+          { "required": ["route_to_flow"] }
+        ]
+      }
+    }
+  ],
+  "additionalProperties": true
+}

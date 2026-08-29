@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:demoswarm:schema:receipt:gate:2",
+  "title": "DemoSwarm gate receipt v2",
+  "allOf": [
+    { "$ref": "urn:demoswarm:schema:receipt:2" },
+    {
+      "type": "object",
+      "properties": { "flow": { "const": "gate" } }
+    }
+  ]
+}
