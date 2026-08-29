@@ -1,0 +1,19 @@
+schema_version = 1
+id = "plan"
+ordinal = 2
+title = "Plan"
+job = "Choose an implementable design and turn it into bounded work with explicit contracts and dependencies."
+required_inputs = ["accepted-signal-or-explicit-task"]
+optional_inputs = ["existing-architecture", "provider-context", "prior-wisdom"]
+outputs = ["decision-record", "interfaces", "work-plan", "risks", "receipt"]
+completion_rules = [
+  "A chosen design and rejected alternatives are distinguishable.",
+  "Work items have bounded ownership, dependencies, and acceptance evidence.",
+  "The final receipt reflects the sealed plan state."
+]
+verification_expectations = [
+  "A critic tests the chosen design against requirements and strongest alternatives.",
+  "Unknown interfaces or dependencies remain explicit.",
+  "Decision identity is stable across artifacts."
+]
+out_of_order = "allowed-with-documented-assumptions"

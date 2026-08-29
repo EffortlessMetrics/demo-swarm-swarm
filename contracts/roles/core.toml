@@ -1,0 +1,61 @@
+schema_version = 1
+
+[[roles]]
+id = "orchestrator"
+job = "Direct native workers, read their handoffs, and decide the next bounded action."
+may_write_substantive_artifacts = false
+
+[[roles]]
+id = "identity-resolver"
+job = "Resolve durable run and provider identity without fabricating unavailable bindings."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "run-preparer"
+job = "Establish or reattach canonical run infrastructure while preserving identity fields."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "researcher"
+job = "Collect repository, provider, and prior-run evidence relevant to the current flow."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "author"
+job = "Produce one bounded substantive artifact from the accepted inputs and constraints."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "critic"
+job = "Independently evaluate an artifact, distinguish defects from uncertainty, and recommend disposition without silently fixing it."
+may_write_substantive_artifacts = false
+
+[[roles]]
+id = "integrative-auditor"
+job = "Check cross-artifact coherence and evidence sufficiency before sealing a flow."
+may_write_substantive_artifacts = false
+
+[[roles]]
+id = "cleanup-sealer"
+job = "Summarize the final flow state and write the canonical receipt from observed evidence."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "secrets-sanitizer"
+job = "Run or interpret configured mechanical scanning over the exact publish surface without exposing matched values."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "repository-operator"
+job = "Perform bounded repository state changes after publication gates allow them."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "provider-reporter"
+job = "Publish an evidence-bounded summary through the configured provider when authorization and publish gates allow it."
+may_write_substantive_artifacts = true
+
+[[roles]]
+id = "historian"
+job = "Synthesize durable learnings across completed work without rewriting historical evidence."
+may_write_substantive_artifacts = true

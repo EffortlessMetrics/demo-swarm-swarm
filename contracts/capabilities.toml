@@ -1,0 +1,46 @@
+schema_version = 1
+maturity = ["native", "preview", "experimental", "unsupported", "unknown"]
+
+[[capabilities]]
+id = "reusable_skills"
+description = "Host can install and invoke reusable workflow or skill content."
+
+[[capabilities]]
+id = "specialist_agent_delegation"
+description = "Host can delegate bounded work to named specialist agents or equivalent workers."
+
+[[capabilities]]
+id = "parallel_delegation"
+description = "Host can run independent delegated work concurrently."
+
+[[capabilities]]
+id = "persistent_project_instructions"
+description = "Host can load durable project-owned instruction context."
+
+[[capabilities]]
+id = "native_package_lifecycle"
+description = "Host provides documented install, update, listing, and removal semantics."
+
+[[capabilities]]
+id = "hooks"
+description = "Host can register lifecycle or tool hooks through a documented native surface."
+
+[[capabilities]]
+id = "external_connectors"
+description = "Host can use repository/provider or other external tool integrations."
+
+[[capabilities]]
+id = "background_execution"
+description = "Host can execute durable or resumable work outside one foreground turn."
+
+[[capabilities]]
+id = "project_scope"
+description = "Integration can be installed for one project without changing unrelated projects."
+
+[[capabilities]]
+id = "user_scope"
+description = "Integration can be installed once for a user with safe shared ownership semantics."
+
+[[capabilities]]
+id = "local_source"
+description = "Host can load an adapter from a local development source."

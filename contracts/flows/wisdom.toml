@@ -1,0 +1,19 @@
+schema_version = 1
+id = "wisdom"
+ordinal = 7
+title = "Wisdom"
+job = "Synthesize durable learnings from the run without rewriting or overstating the historical record."
+required_inputs = ["run-evidence"]
+optional_inputs = ["production-feedback", "prior-wisdom", "provider-context"]
+outputs = ["learnings", "regression-risks", "scent-trail", "receipt"]
+completion_rules = [
+  "Learnings distinguish observed patterns from recommendations.",
+  "Historical artifacts remain unchanged.",
+  "Run completion state and remaining gaps are explicit."
+]
+verification_expectations = [
+  "Claims trace to run artifacts or are labeled inference.",
+  "One anomalous run is not generalized without evidence.",
+  "The final receipt closes or accurately leaves the run incomplete."
+]
+out_of_order = "allowed-when-source-evidence-is-explicit"
