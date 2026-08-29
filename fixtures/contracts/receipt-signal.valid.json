@@ -1,0 +1,28 @@
+{
+  "schema_version": "2.0",
+  "run_id": "gh-122",
+  "flow": "signal",
+  "completion": "COMPLETE",
+  "verification": "VERIFIED",
+  "generated_at": "2026-08-29T06:20:00Z",
+  "summary": "Signal produced reviewed requirements, scenarios, risks, and explicit open questions.",
+  "repository_state": {
+    "head_sha": "545c0f50ad9d344b07d3a71d5cce61b0fd173697"
+  },
+  "missing_required": [],
+  "blockers": [],
+  "concerns": [],
+  "evidence": [
+    {
+      "kind": "requirements",
+      "path": ".runs/gh-122/signal/requirements.md",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "observed_at": "2026-08-29T06:19:30Z"
+    }
+  ],
+  "metrics": {
+    "requirements": 8,
+    "scenarios": 12,
+    "unresolved_questions": 2
+  }
+}
