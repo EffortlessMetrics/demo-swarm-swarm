@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "run_id": "gh-122",
+  "flow": "signal",
+  "completion": "COMPLETE",
+  "verification": "VERIFIED",
+  "generated_at": "2026-08-29T06:20:00Z",
+  "summary": "Invalid because required evidence is missing while verification claims VERIFIED.",
+  "missing_required": ["requirements.md"],
+  "blockers": [],
+  "concerns": [],
+  "evidence": []
+}

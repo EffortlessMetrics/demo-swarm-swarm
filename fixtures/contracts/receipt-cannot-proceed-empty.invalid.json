@@ -1,0 +1,13 @@
+{
+  "schema_version": "2.0",
+  "run_id": "gh-122",
+  "flow": "build",
+  "completion": "CANNOT_PROCEED",
+  "verification": "UNVERIFIED",
+  "generated_at": "2026-08-29T06:20:00Z",
+  "summary": "Invalid because CANNOT_PROCEED has no concrete blocker.",
+  "missing_required": [],
+  "blockers": [],
+  "concerns": [],
+  "evidence": []
+}

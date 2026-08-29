@@ -1,0 +1,19 @@
+schema_version = 1
+id = "build"
+ordinal = 3
+title = "Build"
+job = "Implement bounded work, verify it through project-native tools, and produce a review-ready change."
+required_inputs = ["accepted-work-item-or-explicit-task"]
+optional_inputs = ["plan-contracts", "provider-context", "prior-wisdom"]
+outputs = ["implementation", "tests", "tool-evidence", "review-brief", "receipt"]
+completion_rules = [
+  "The requested implementation state is explicit.",
+  "Known verification gaps and failures are not hidden.",
+  "The final receipt reflects the final tested repository state."
+]
+verification_expectations = [
+  "Configured test, lint, format, policy, and security tools are invoked where applicable.",
+  "Critics inspect code and test sufficiency independently.",
+  "Unexecuted checks remain unverified."
+]
+out_of_order = "allowed-with-documented-assumptions"

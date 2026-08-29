@@ -1,0 +1,19 @@
+schema_version = 1
+id = "deploy"
+ordinal = 6
+title = "Deploy"
+job = "Authorize and observe the external delivery action while keeping deployment and governance evidence distinct."
+required_inputs = ["accepted-deploy-target"]
+optional_inputs = ["gate-receipt", "provider-state", "deployment-observability"]
+outputs = ["deployment-verdict", "observation-evidence", "receipt"]
+completion_rules = [
+  "External action requires explicit authorization.",
+  "Deployment action and post-deploy stability are reported separately.",
+  "Unavailable provider evidence remains unverified."
+]
+verification_expectations = [
+  "The deployed identity is tied to repository evidence.",
+  "Provider and branch-governance state are checked where accessible.",
+  "Observation claims cite mechanical evidence."
+]
+out_of_order = "allowed-only-with-explicit-authorization-and-gaps"

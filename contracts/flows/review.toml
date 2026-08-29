@@ -1,0 +1,19 @@
+schema_version = 1
+id = "review"
+ordinal = 4
+title = "Review"
+job = "Turn review feedback into a bounded worklist, apply accepted fixes, and verify what remains."
+required_inputs = ["change-under-review"]
+optional_inputs = ["provider-feedback", "build-receipt", "prior-wisdom"]
+outputs = ["feedback-inventory", "worklist", "review-actions", "receipt"]
+completion_rules = [
+  "Feedback disposition and remaining work are explicit.",
+  "A partial checkpoint is valid when real progress is evidenced.",
+  "Resolved claims are cross-checked against repository evidence."
+]
+verification_expectations = [
+  "Critical and major findings are resolved or remain blockers.",
+  "Worklist state agrees with applied changes.",
+  "The final receipt separates partial completion from verification."
+]
+out_of_order = "allowed-with-documented-assumptions"

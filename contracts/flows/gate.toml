@@ -1,0 +1,19 @@
+schema_version = 1
+id = "gate"
+ordinal = 5
+title = "Gate"
+job = "Decide whether the current change is safe and sufficiently evidenced to merge."
+required_inputs = ["change-under-gate"]
+optional_inputs = ["signal-receipt", "plan-receipt", "build-receipt", "review-receipt"]
+outputs = ["merge-verdict", "evidence-gaps", "receipt"]
+completion_rules = [
+  "The merge verdict and its evidence basis are explicit.",
+  "Blocking gaps are concrete and reproducible.",
+  "Any modified artifacts are resealed before the final verdict."
+]
+verification_expectations = [
+  "Evidence is checked against current repository state.",
+  "Required project and provider gates are distinguished.",
+  "Missing proof cannot be treated as a pass."
+]
+out_of_order = "allowed-but-normally-unverified"

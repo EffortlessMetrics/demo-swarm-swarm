@@ -1,0 +1,136 @@
+schema_version = 1
+id = "demoswarm"
+version = "3.0.0-alpha.1"
+min_manager_version = "0.1.0-alpha.1"
+
+[contracts]
+config = 1
+run = 1
+receipt = 2
+capabilities = 1
+
+[integrity]
+file_manifest = "sha256sums.txt"
+bundle_format = "tar.zst"
+
+[[flows]]
+id = "signal"
+ordinal = 1
+contract = "contracts/flows/signal.toml"
+receipt_schema = "schemas/receipt-signal-v2.schema.json"
+
+[[flows]]
+id = "plan"
+ordinal = 2
+contract = "contracts/flows/plan.toml"
+receipt_schema = "schemas/receipt-plan-v2.schema.json"
+
+[[flows]]
+id = "build"
+ordinal = 3
+contract = "contracts/flows/build.toml"
+receipt_schema = "schemas/receipt-build-v2.schema.json"
+
+[[flows]]
+id = "review"
+ordinal = 4
+contract = "contracts/flows/review.toml"
+receipt_schema = "schemas/receipt-review-v2.schema.json"
+
+[[flows]]
+id = "gate"
+ordinal = 5
+contract = "contracts/flows/gate.toml"
+receipt_schema = "schemas/receipt-gate-v2.schema.json"
+
+[[flows]]
+id = "deploy"
+ordinal = 6
+contract = "contracts/flows/deploy.toml"
+receipt_schema = "schemas/receipt-deploy-v2.schema.json"
+
+[[flows]]
+id = "wisdom"
+ordinal = 7
+contract = "contracts/flows/wisdom.toml"
+receipt_schema = "schemas/receipt-wisdom-v2.schema.json"
+
+[[adapters]]
+id = "claude-code"
+version = "3.0.0-alpha.1"
+support = "preview"
+path = "adapters/claude-code"
+install_modes = ["native", "local", "bundle"]
+
+[adapters.capabilities]
+reusable_skills = "native"
+specialist_agent_delegation = "native"
+parallel_delegation = "preview"
+persistent_project_instructions = "native"
+native_package_lifecycle = "native"
+hooks = "native"
+external_connectors = "native"
+background_execution = "preview"
+project_scope = "native"
+user_scope = "native"
+local_source = "native"
+
+[[adapters]]
+id = "codex"
+version = "3.0.0-alpha.1"
+support = "experimental"
+path = "adapters/codex"
+install_modes = ["native", "managed-files", "local", "bundle"]
+
+[adapters.capabilities]
+reusable_skills = "native"
+specialist_agent_delegation = "unknown"
+parallel_delegation = "unknown"
+persistent_project_instructions = "native"
+native_package_lifecycle = "preview"
+hooks = "unknown"
+external_connectors = "native"
+background_execution = "unknown"
+project_scope = "native"
+user_scope = "preview"
+local_source = "native"
+
+[[adapters]]
+id = "gemini-cli"
+version = "3.0.0-alpha.1"
+support = "experimental"
+path = "adapters/gemini-cli"
+install_modes = ["native", "managed-files", "local", "bundle"]
+
+[adapters.capabilities]
+reusable_skills = "native"
+specialist_agent_delegation = "preview"
+parallel_delegation = "preview"
+persistent_project_instructions = "native"
+native_package_lifecycle = "native"
+hooks = "native"
+external_connectors = "native"
+background_execution = "preview"
+project_scope = "native"
+user_scope = "native"
+local_source = "native"
+
+[[adapters]]
+id = "openclaw"
+version = "3.0.0-alpha.1"
+support = "experimental"
+path = "adapters/openclaw"
+install_modes = ["local", "bundle"]
+
+[adapters.capabilities]
+reusable_skills = "unknown"
+specialist_agent_delegation = "native"
+parallel_delegation = "native"
+persistent_project_instructions = "unknown"
+native_package_lifecycle = "unknown"
+hooks = "unknown"
+external_connectors = "native"
+background_execution = "native"
+project_scope = "unknown"
+user_scope = "unknown"
+local_source = "native"

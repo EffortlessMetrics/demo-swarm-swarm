@@ -1,0 +1,19 @@
+schema_version = 1
+id = "signal"
+ordinal = 1
+title = "Signal"
+job = "Turn a messy signal into testable requirements, scenarios, risks, and explicit open questions."
+required_inputs = ["raw-signal"]
+optional_inputs = ["provider-context", "prior-wisdom", "repository-context"]
+outputs = ["requirements", "scenarios", "risks", "open-questions", "receipt"]
+completion_rules = [
+  "Required problem and requirement artifacts exist or missing requirements are explicit.",
+  "Critical review findings are resolved or carried as blockers.",
+  "The final receipt reflects the sealed artifact state."
+]
+verification_expectations = [
+  "Requirements and scenarios are inspected by independent critic roles.",
+  "Counts cite observable markers or remain unknown.",
+  "Publication safety is mechanically checked when publishing is requested."
+]
+out_of_order = "allowed-with-documented-gaps"

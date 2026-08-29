@@ -1,0 +1,32 @@
+schema_version = 1
+pack = "3.0.0-alpha.1"
+
+[repository]
+provider = "github"
+default_branch = "main"
+
+[commands.test]
+program = "cargo"
+args = ["test", "--workspace", "--all-targets"]
+
+[commands.lint]
+program = "cargo"
+args = ["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]
+
+[security.secrets]
+provider = "gitleaks"
+required_for_publish = true
+
+[security.secrets.command]
+program = "gitleaks"
+args = ["detect", "--no-banner", "--redact"]
+
+[platforms.claude-code]
+enabled = true
+scope = "project"
+mode = "native"
+
+[platforms.codex]
+enabled = true
+scope = "project"
+mode = "managed-files"
