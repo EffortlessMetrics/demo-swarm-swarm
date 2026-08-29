@@ -18,6 +18,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install v3 contract validator
+        run: python -m pip install --disable-pip-version-check jsonschema==4.26.0
+
+      - name: Validate v3 contracts and fixtures
+        run: python scripts/validate_v3_contracts.py
+
       - name: Check portable .claude repo shape
         run: python scripts/check_portable_claude.py
 
